@@ -1,3 +1,6 @@
 [submodule "NiChart_Website"]
 	path = NiChart_Website
 	url = https://github.com/CBICA/NiChart_Website
+[submodule "NiChart_DLMUSE"]
+	path = NiChart_DLMUSE
+	url = https://github.com/CBICA/NiChart_DLMUSE
