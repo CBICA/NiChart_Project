@@ -4,3 +4,9 @@
 [submodule "NiChart_DLMUSE"]
 	path = NiChart_DLMUSE
 	url = https://github.com/CBICA/NiChart_DLMUSE
+[submodule "NiChart_Tissue_Segmentation"]
+	path = NiChart_Tissue_Segmentation
+	url = https://github.com/CBICA/NiChart_Tissue_Segmentation
+[submodule "spare_score"]
+	path = spare_score
+	url = https://github.com/CBICA/spare_score
