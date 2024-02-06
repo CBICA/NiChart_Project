@@ -10,3 +10,6 @@
 [submodule "spare_score"]
 	path = spare_score
 	url = https://github.com/CBICA/spare_score
+[submodule "NiChart_Project_Resources"]
+	path = NiChart_Project_Resources
+	url = https://github.com/CBICA/NiChart_Project_Resources
