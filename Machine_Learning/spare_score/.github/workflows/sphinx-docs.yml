@@ -1,0 +1,56 @@
+name: Docs
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+  workflow_dispatch:
+
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: '3.8'
+      - name: Install dependencies
+        run: |
+          pip install -e .
+          pip install sphinx sphinx_rtd_theme sphinx-tabs
+      - name: Sphinx build
+        run: |
+          cd docs/
+          sphinx-apidoc -o ./source ../spare_scores
+          sphinx-build source _build
+          cd ..
+      - name: Upload pages artifact
+        uses: actions/upload-pages-artifact@v1
+        
+        with:
+          path: docs/_build
+          retention-days: 90
+  
+  deploy-docs:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    needs: build-docs
+    
+    permissions:
+      pages: write
+      id-token: write
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.output.page_url }}
+      
+    concurrency: 
+      group: "pages"
+      cancel-in-progress: true
+    
+    runs-on: ubuntu-latest
+    steps:
+     - name: Deploy artifact to GitHub Pages
+       id: deployment
+       uses: actions/deploy-pages@v1
+         

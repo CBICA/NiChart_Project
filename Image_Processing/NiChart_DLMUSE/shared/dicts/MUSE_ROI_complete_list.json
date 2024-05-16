@@ -1,0 +1,1568 @@
+{
+    "702": {
+        "ID": "702",
+        "Name": "ICV",
+        "Full_Name": "Intra Cranial Volume",
+        "Consisting_of_ROIS": "1, 4, 11, 23, 30, 31, 32, 35, 36, 37, 38, 39, 40, 41, 46, 47, 48, 49, 50, 51, 52, 55, 56, 57, 58, 59, 60, 61, 62, 71, 72, 73, 75, 76, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 128, 129, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207"
+    },
+    "701": {
+        "ID": "701",
+        "Name": "TOTALBRAIN",
+        "Full_Name": "Total Brain Volume",
+        "Consisting_of_ROIS": "4, 11, 23, 30, 31, 32, 35, 36, 37, 38, 39, 40, 41, 47, 48, 49, 50, 51, 52, 55, 56, 57, 58, 59, 60, 61, 62, 71, 72, 73, 75, 76, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 128, 129, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207"
+    },
+    "600": {
+        "ID": "600",
+        "Name": "CSF",
+        "Full_Name": "Cerebrospinal Fluid",
+        "Consisting_of_ROIS": "600"
+    },
+    "601": {
+        "ID": "601",
+        "Name": "GM",
+        "Full_Name": "Gray Matter",
+        "Consisting_of_ROIS": "23, 30, 31, 32, 36, 37, 38, 39, 47, 48, 55, 56, 57, 58, 59, 60, 71, 72, 73, 75, 76, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 128, 129, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207"
+    },
+    "604": {
+        "ID": "604",
+        "Name": "WM",
+        "Full_Name": "White Matter",
+        "Consisting_of_ROIS": "40, 41, 61, 62, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95"
+    },
+    "606": {
+        "ID": "606",
+        "Name": "GM_L",
+        "Full_Name": "Gray Matter Left",
+        "Consisting_of_ROIS": "30, 32, 37, 39, 48, 56, 58, 60, 75, 101, 103, 105, 107, 109, 113, 115, 117, 119, 121, 123, 125, 129, 133, 135, 137, 139, 141, 143, 145, 147, 149, 151, 153, 155, 157, 161, 163, 165, 167, 169, 171, 173, 175, 177, 179, 181, 183, 185, 187, 191, 193, 195, 197, 199, 201, 203, 205, 207"
+    },
+    "607": {
+        "ID": "607",
+        "Name": "WM_L",
+        "Full_Name": "White Matter Left",
+        "Consisting_of_ROIS": "41, 62, 82, 84, 86, 88, 90, 92, 94"
+    },
+    "613": {
+        "ID": "613",
+        "Name": "GM_R",
+        "Full_Name": "Gray Matter Right",
+        "Consisting_of_ROIS": "23, 31, 36, 38, 47, 55, 57, 59, 76, 100, 102, 104, 106, 108, 112, 114, 116, 118, 120, 122, 124, 128, 132, 134, 136, 138, 140, 142, 144, 146, 148, 150, 152, 154, 156, 160, 162, 164, 166, 168, 170, 172, 174, 176, 178, 180, 182, 184, 186, 190, 192, 194, 196, 198, 200, 202, 204, 206"
+    },
+    "614": {
+        "ID": "614",
+        "Name": "WM_R",
+        "Full_Name": "White Matter Right",
+        "Consisting_of_ROIS": "40, 61, 81, 83, 85, 87, 89, 91, 93"
+    },
+    "501": {
+        "ID": "501",
+        "Name": "CORPUS_CALLOSUM",
+        "Full_Name": "Corpus Callosum",
+        "Consisting_of_ROIS": "95"
+    },
+    "502": {
+        "ID": "502",
+        "Name": "CEREBELLUM",
+        "Full_Name": "Cerebellum",
+        "Consisting_of_ROIS": "38, 39, 40, 41, 71, 72, 73"
+    },
+    "503": {
+        "ID": "503",
+        "Name": "DEEP_WM_GM",
+        "Full_Name": "Deep White Matter Gray Matter",
+        "Consisting_of_ROIS": "23, 30, 31, 32, 36, 37, 47, 48, 55, 56, 57, 58, 59, 60, 75, 76, 89, 90, 91, 92, 93, 94"
+    },
+    "504": {
+        "ID": "504",
+        "Name": "FRONTAL",
+        "Full_Name": "Frontal",
+        "Consisting_of_ROIS": "81, 82, 102, 103, 104, 105, 112, 113, 118, 119, 120, 121, 124, 125, 136, 137, 140, 141, 142, 143, 146, 147, 150, 151, 152, 153, 162, 163, 164, 165, 172, 173, 174, 175, 178, 179, 182, 183, 186, 187, 190, 191, 192, 193, 204, 205"
+    },
+    "505": {
+        "ID": "505",
+        "Name": "LIMBIC",
+        "Full_Name": "Limbic",
+        "Consisting_of_ROIS": "100, 101, 116, 117, 138, 139, 166, 167, 170, 171"
+    },
+    "506": {
+        "ID": "506",
+        "Name": "OCCIPITAL",
+        "Full_Name": "Occipital",
+        "Consisting_of_ROIS": "83, 84, 108, 109, 114, 115, 128, 129, 134, 135, 144, 145, 156, 157, 160, 161, 196, 197"
+    },
+    "507": {
+        "ID": "507",
+        "Name": "PARIETAL",
+        "Full_Name": "Parietal",
+        "Consisting_of_ROIS": "85, 86, 106, 107, 148, 149, 168, 169, 176, 177, 194, 195, 198, 199"
+    },
+    "508": {
+        "ID": "508",
+        "Name": "TEMPORAL",
+        "Full_Name": "Temporal",
+        "Consisting_of_ROIS": "87, 88, 122, 123, 132, 133, 154, 155, 180, 181, 184, 185, 200, 201, 202, 203, 206, 207"
+    },
+    "509": {
+        "ID": "509",
+        "Name": "VENTRICLE",
+        "Full_Name": "Ventricle",
+        "Consisting_of_ROIS": "4, 11, 49, 50, 51, 52"
+    },
+    "510": {
+        "ID": "510",
+        "Name": "CEREBELLUM_L",
+        "Full_Name": "Cerebellum Left",
+        "Consisting_of_ROIS": "39, 41"
+    },
+    "511": {
+        "ID": "511",
+        "Name": "DEEP_WM_GM_L",
+        "Full_Name": "Deep White Matter Gray Matter Left",
+        "Consisting_of_ROIS": "30, 32, 37, 48, 56, 58, 60, 75, 90, 92, 94"
+    },
+    "512": {
+        "ID": "512",
+        "Name": "FRONTAL_L",
+        "Full_Name": "Frontal Left",
+        "Consisting_of_ROIS": "82, 103, 105, 113, 119, 121, 125, 137, 141, 143, 147, 151, 153, 163, 165, 173, 175, 179, 183, 187, 191, 193, 205"
+    },
+    "513": {
+        "ID": "513",
+        "Name": "LIMBIC_L",
+        "Full_Name": "Limbic Left",
+        "Consisting_of_ROIS": "101, 117, 139, 167, 171"
+    },
+    "514": {
+        "ID": "514",
+        "Name": "OCCIPITAL_L",
+        "Full_Name": "Occipital Left",
+        "Consisting_of_ROIS": "84, 109, 115, 129, 135, 145, 157, 161, 197"
+    },
+    "515": {
+        "ID": "515",
+        "Name": "PARIETAL_L",
+        "Full_Name": "Parietal Left",
+        "Consisting_of_ROIS": "86, 107, 149, 169, 177, 195, 199"
+    },
+    "516": {
+        "ID": "516",
+        "Name": "TEMPORAL_L",
+        "Full_Name": "Temporal Left",
+        "Consisting_of_ROIS": "88, 123, 133, 155, 181, 185, 201, 203, 207"
+    },
+    "517": {
+        "ID": "517",
+        "Name": "VENTRICLE_L",
+        "Full_Name": "Ventricle Left",
+        "Consisting_of_ROIS": "50, 52"
+    },
+    "518": {
+        "ID": "518",
+        "Name": "CEREBELLUM_R",
+        "Full_Name": "Cerebellum Right",
+        "Consisting_of_ROIS": "38, 40"
+    },
+    "519": {
+        "ID": "519",
+        "Name": "DEEP_WM_GM_R",
+        "Full_Name": "Deep White Matter Gray Matter Right",
+        "Consisting_of_ROIS": "23, 31, 36, 47, 55, 57, 59, 76, 89, 91, 93"
+    },
+    "520": {
+        "ID": "520",
+        "Name": "FRONTAL_R",
+        "Full_Name": "Frontal Right",
+        "Consisting_of_ROIS": "81, 102, 104, 112, 118, 120, 124, 136, 140, 142, 146, 150, 152, 162, 164, 172, 174, 178, 182, 186, 190, 192, 204"
+    },
+    "521": {
+        "ID": "521",
+        "Name": "LIMBIC_R",
+        "Full_Name": "Limbic Right",
+        "Consisting_of_ROIS": "100, 116, 138, 166, 170"
+    },
+    "522": {
+        "ID": "522",
+        "Name": "OCCIPITAL_R",
+        "Full_Name": "Occipital Right",
+        "Consisting_of_ROIS": "83, 108, 114, 128, 134, 144, 156, 160, 196"
+    },
+    "523": {
+        "ID": "523",
+        "Name": "PARIETAL_R",
+        "Full_Name": "Parietal Right",
+        "Consisting_of_ROIS": "85, 106, 148, 168, 176, 194, 198"
+    },
+    "524": {
+        "ID": "524",
+        "Name": "TEMPORAL_R",
+        "Full_Name": "Temporal Right",
+        "Consisting_of_ROIS": "87, 122, 132, 154, 180, 184, 200, 202, 206"
+    },
+    "525": {
+        "ID": "525",
+        "Name": "VENTRICLE_R",
+        "Full_Name": "Ventricle Right",
+        "Consisting_of_ROIS": "49, 51"
+    },
+    "401": {
+        "ID": "401",
+        "Name": "BASAL_GANGLIA",
+        "Full_Name": "Basal Ganglia",
+        "Consisting_of_ROIS": "23, 30, 36, 37, 55, 56, 57, 58"
+    },
+    "402": {
+        "ID": "402",
+        "Name": "DEEP_GM",
+        "Full_Name": "Deep Gray Matter",
+        "Consisting_of_ROIS": "59, 60"
+    },
+    "403": {
+        "ID": "403",
+        "Name": "DEEP_WM",
+        "Full_Name": "Deep White Matter",
+        "Consisting_of_ROIS": "89, 90, 91, 92, 93, 94"
+    },
+    "404": {
+        "ID": "404",
+        "Name": "FRONTAL_GM",
+        "Full_Name": "Frontal Gray Matter",
+        "Consisting_of_ROIS": "102, 103, 104, 105, 112, 113, 118, 119, 120, 121, 124, 125, 136, 137, 140, 141, 142, 143, 146, 147, 150, 151, 152, 153, 162, 163, 164, 165, 172, 173, 174, 175, 178, 179, 182, 183, 186, 187, 190, 191, 192, 193, 204, 205"
+    },
+    "405": {
+        "ID": "405",
+        "Name": "FRONTAL_WM",
+        "Full_Name": "Frontal White Matter",
+        "Consisting_of_ROIS": "81, 82"
+    },
+    "406": {
+        "ID": "406",
+        "Name": "LIMBIC_GM",
+        "Full_Name": "Limbic Gray Matter",
+        "Consisting_of_ROIS": "100, 101, 116, 117, 138, 139, 166, 167, 170, 171"
+    },
+    "407": {
+        "ID": "407",
+        "Name": "OCCIPITAL_GM",
+        "Full_Name": "Occipital Gray Matter",
+        "Consisting_of_ROIS": "108, 109, 114, 115, 128, 129, 134, 135, 144, 145, 156, 157, 160, 161, 196, 197"
+    },
+    "408": {
+        "ID": "408",
+        "Name": "OCCIPITAL_WM",
+        "Full_Name": "Occipital White Matter",
+        "Consisting_of_ROIS": "83, 84"
+    },
+    "409": {
+        "ID": "409",
+        "Name": "PARIETAL_GM",
+        "Full_Name": "Parietal Gray Matter",
+        "Consisting_of_ROIS": "106, 107, 148, 149, 168, 169, 176, 177, 194, 195, 198, 199"
+    },
+    "410": {
+        "ID": "410",
+        "Name": "PARIETAL_WM",
+        "Full_Name": "Parietal White Matter",
+        "Consisting_of_ROIS": "85, 86"
+    },
+    "411": {
+        "ID": "411",
+        "Name": "TEMPORAL_GM",
+        "Full_Name": "Temporal Gray Matter",
+        "Consisting_of_ROIS": "122, 123, 132, 133, 154, 155, 180, 181, 184, 185, 200, 201, 202, 203, 206, 207"
+    },
+    "412": {
+        "ID": "412",
+        "Name": "TEMPORAL_WM",
+        "Full_Name": "Temporal White Matter",
+        "Consisting_of_ROIS": "87, 88"
+    },
+    "413": {
+        "ID": "413",
+        "Name": "BASAL_GANGLIA_L",
+        "Full_Name": "Basal Ganglia Left",
+        "Consisting_of_ROIS": "30, 37, 56, 58"
+    },
+    "414": {
+        "ID": "414",
+        "Name": "DEEP_GM_L",
+        "Full_Name": "Deep Gray Matter Left",
+        "Consisting_of_ROIS": "60"
+    },
+    "415": {
+        "ID": "415",
+        "Name": "DEEP_WM_L",
+        "Full_Name": "Deep White Matter Left",
+        "Consisting_of_ROIS": "90, 92, 94"
+    },
+    "416": {
+        "ID": "416",
+        "Name": "FRONTAL_GM_L",
+        "Full_Name": "Frontal Gray Matter Left",
+        "Consisting_of_ROIS": "103, 105, 113, 119, 121, 125, 137, 141, 143, 147, 151, 153, 163, 165, 173, 175, 179, 183, 187, 191, 193, 205"
+    },
+    "417": {
+        "ID": "417",
+        "Name": "FRONTAL_WM_L",
+        "Full_Name": "Frontal White Matter Left",
+        "Consisting_of_ROIS": "82"
+    },
+    "418": {
+        "ID": "418",
+        "Name": "LIMBIC_GM_L",
+        "Full_Name": "Limbic Gray Matter Left",
+        "Consisting_of_ROIS": "101, 117, 139, 167, 171"
+    },
+    "419": {
+        "ID": "419",
+        "Name": "OCCIPITAL_GM_L",
+        "Full_Name": "Occipital Gray Matter Left",
+        "Consisting_of_ROIS": "109, 115, 129, 135, 145, 157, 161, 197"
+    },
+    "420": {
+        "ID": "420",
+        "Name": "OCCIPITAL_WM_L",
+        "Full_Name": "Occipital White Matter Left",
+        "Consisting_of_ROIS": "84"
+    },
+    "421": {
+        "ID": "421",
+        "Name": "PARIETAL_GM_L",
+        "Full_Name": "Parietal Gray Matter Left",
+        "Consisting_of_ROIS": "107, 149, 169, 177, 195, 199"
+    },
+    "422": {
+        "ID": "422",
+        "Name": "PARIETAL_WM_L",
+        "Full_Name": "Parietal White Matter Left",
+        "Consisting_of_ROIS": "86"
+    },
+    "423": {
+        "ID": "423",
+        "Name": "TEMPORAL_GM_L",
+        "Full_Name": "Temporal Gray Matter Left",
+        "Consisting_of_ROIS": "123, 133, 155, 181, 185, 201, 203, 207"
+    },
+    "424": {
+        "ID": "424",
+        "Name": "TEMPORAL_WM_L",
+        "Full_Name": "Temporal White Matter Left",
+        "Consisting_of_ROIS": "88"
+    },
+    "425": {
+        "ID": "425",
+        "Name": "BASAL_GANGLIA_R",
+        "Full_Name": "Basal Ganglia Right",
+        "Consisting_of_ROIS": "23, 36, 55, 57"
+    },
+    "426": {
+        "ID": "426",
+        "Name": "DEEP_GM_R",
+        "Full_Name": "Deep Gray Matter Right",
+        "Consisting_of_ROIS": "59"
+    },
+    "427": {
+        "ID": "427",
+        "Name": "DEEP_WM_R",
+        "Full_Name": "Deep White Matter Right",
+        "Consisting_of_ROIS": "89, 91, 93"
+    },
+    "428": {
+        "ID": "428",
+        "Name": "FRONTAL_GM_R",
+        "Full_Name": "Frontal Gray Matter Right",
+        "Consisting_of_ROIS": "102, 104, 112, 118, 120, 124, 136, 140, 142, 146, 150, 152, 162, 164, 172, 174, 178, 182, 186, 190, 192, 204"
+    },
+    "429": {
+        "ID": "429",
+        "Name": "FRONTAL_WM_R",
+        "Full_Name": "Frontal White Matter Right",
+        "Consisting_of_ROIS": "81"
+    },
+    "430": {
+        "ID": "430",
+        "Name": "LIMBIC_GM_R",
+        "Full_Name": "Limbic Gray Matter Right",
+        "Consisting_of_ROIS": "100, 116, 138, 166, 170"
+    },
+    "431": {
+        "ID": "431",
+        "Name": "OCCIPITAL_GM_R",
+        "Full_Name": "Occipital Gray Matter Right",
+        "Consisting_of_ROIS": "108, 114, 128, 134, 144, 156, 160, 196"
+    },
+    "432": {
+        "ID": "432",
+        "Name": "OCCIPITAL_WM_R",
+        "Full_Name": "Occipital White Matter Right",
+        "Consisting_of_ROIS": "83"
+    },
+    "433": {
+        "ID": "433",
+        "Name": "PARIETAL_GM_R",
+        "Full_Name": "Parietal Gray Matter Right",
+        "Consisting_of_ROIS": "106, 148, 168, 176, 194, 198"
+    },
+    "434": {
+        "ID": "434",
+        "Name": "PARIETAL_WM_R",
+        "Full_Name": "Parietal White Matter Right",
+        "Consisting_of_ROIS": "85"
+    },
+    "435": {
+        "ID": "435",
+        "Name": "TEMPORAL_GM_R",
+        "Full_Name": "Temporal Gray Matter Right",
+        "Consisting_of_ROIS": "122, 132, 154, 180, 184, 200, 202, 206"
+    },
+    "436": {
+        "ID": "436",
+        "Name": "TEMPORAL_WM_R",
+        "Full_Name": "Temporal White Matter Right",
+        "Consisting_of_ROIS": "87"
+    },
+    "301": {
+        "ID": "301",
+        "Name": "FRONTAL_INFERIOR_GM",
+        "Full_Name": "Frontal Inferior Gray Matter",
+        "Consisting_of_ROIS": "104, 105, 136, 137, 146, 147, 178, 179"
+    },
+    "302": {
+        "ID": "302",
+        "Name": "FRONTAL_INSULAR_GM",
+        "Full_Name": "Frontal Insular Gray Matter",
+        "Consisting_of_ROIS": "102, 103, 172, 173"
+    },
+    "303": {
+        "ID": "303",
+        "Name": "FRONTAL_LATERAL_GM",
+        "Full_Name": "Frontal Lateral Gray Matter",
+        "Consisting_of_ROIS": "120, 121, 142, 143, 162, 163, 164, 165, 182, 183, 190, 191, 204, 205"
+    },
+    "304": {
+        "ID": "304",
+        "Name": "FRONTAL_MEDIAL_GM",
+        "Full_Name": "Frontal Medial Gray Matter",
+        "Consisting_of_ROIS": "124, 125, 140, 141, 150, 151, 152, 153, 186, 187, 192, 193"
+    },
+    "305": {
+        "ID": "305",
+        "Name": "FRONTAL_OPERCULAR_GM",
+        "Full_Name": "Frontal Opercular Gray Matter",
+        "Consisting_of_ROIS": "112, 113, 118, 119, 174, 175"
+    },
+    "306": {
+        "ID": "306",
+        "Name": "LIMBIC_CINGULATE_GM",
+        "Full_Name": "Limbic Cingulate Gray Matter",
+        "Consisting_of_ROIS": "100, 101, 138, 139, 166, 167"
+    },
+    "307": {
+        "ID": "307",
+        "Name": "LIMBIC_MEDIALTEMPORAL_GM",
+        "Full_Name": "Limbic Medial Temporal Gray Matter",
+        "Consisting_of_ROIS": "116, 117, 170, 171"
+    },
+    "308": {
+        "ID": "308",
+        "Name": "OCCIPITAL_INFERIOR_GM",
+        "Full_Name": "Occipital Inferior Gray Matter",
+        "Consisting_of_ROIS": "160, 161"
+    },
+    "309": {
+        "ID": "309",
+        "Name": "OCCIPITAL_LATERAL_GM",
+        "Full_Name": "Occipital Lateral Gray Matter",
+        "Consisting_of_ROIS": "128, 129, 144, 145, 156, 157, 196, 197"
+    },
+    "310": {
+        "ID": "310",
+        "Name": "OCCIPITAL_MEDIAL_GM",
+        "Full_Name": "Occipital Medial Gray Matter",
+        "Consisting_of_ROIS": "108, 109, 114, 115, 134, 135"
+    },
+    "311": {
+        "ID": "311",
+        "Name": "PARIETAL_LATERAL_GM",
+        "Full_Name": "Parietal Lateral Gray Matter",
+        "Consisting_of_ROIS": "106, 107, 176, 177, 194, 195, 198, 199"
+    },
+    "312": {
+        "ID": "312",
+        "Name": "PARIETAL_MEDIAL_GM",
+        "Full_Name": "Parietal Medial Gray Matter",
+        "Consisting_of_ROIS": "148, 149, 168, 169"
+    },
+    "313": {
+        "ID": "313",
+        "Name": "TEMPORAL_INFERIOR_GM",
+        "Full_Name": "Temporal Inferior Gray Matter",
+        "Consisting_of_ROIS": "122, 123"
+    },
+    "314": {
+        "ID": "314",
+        "Name": "TEMPORAL_LATERAL_GM",
+        "Full_Name": "Temporal Lateral Gray Matter",
+        "Consisting_of_ROIS": "132, 133, 154, 155, 200, 201, 202, 203"
+    },
+    "315": {
+        "ID": "315",
+        "Name": "TEMPORAL_SUPRATEMPORAL_GM",
+        "Full_Name": "Temporal Supratemporal Gray Matter",
+        "Consisting_of_ROIS": "180, 181, 184, 185, 206, 207"
+    },
+    "316": {
+        "ID": "316",
+        "Name": "FRONTAL_INFERIOR_GM_L",
+        "Full_Name": "Frontal Inferior Gray Matter Left",
+        "Consisting_of_ROIS": "105, 137, 147, 179"
+    },
+    "317": {
+        "ID": "317",
+        "Name": "FRONTAL_INSULAR_GM_L",
+        "Full_Name": "Frontal Insular Gray Matter Left",
+        "Consisting_of_ROIS": "103, 173"
+    },
+    "318": {
+        "ID": "318",
+        "Name": "FRONTAL_LATERAL_GM_L",
+        "Full_Name": "Frontal Lateral Gray Matter Left",
+        "Consisting_of_ROIS": "121, 143, 163, 165, 183, 191, 205"
+    },
+    "319": {
+        "ID": "319",
+        "Name": "FRONTAL_MEDIAL_GM_L",
+        "Full_Name": "Frontal Medial Gray Matter Left",
+        "Consisting_of_ROIS": "125, 141, 151, 153, 187, 193"
+    },
+    "320": {
+        "ID": "320",
+        "Name": "FRONTAL_OPERCULAR_GM_L",
+        "Full_Name": "Frontal Opercular Gray Matter Left",
+        "Consisting_of_ROIS": "113, 119, 175"
+    },
+    "321": {
+        "ID": "321",
+        "Name": "LIMBIC_CINGULATE_GM_L",
+        "Full_Name": "Limbic Cingulate Gray Matter Left",
+        "Consisting_of_ROIS": "101, 139, 167"
+    },
+    "322": {
+        "ID": "322",
+        "Name": "LIMBIC_MEDIALTEMPORAL_GM_L",
+        "Full_Name": "Limbic Medial Temporal Gray Matter Left",
+        "Consisting_of_ROIS": "117, 171"
+    },
+    "323": {
+        "ID": "323",
+        "Name": "OCCIPITAL_INFERIOR_GM_L",
+        "Full_Name": "Occipital Inferior Gray Matter Left",
+        "Consisting_of_ROIS": "161"
+    },
+    "324": {
+        "ID": "324",
+        "Name": "OCCIPITAL_LATERAL_GM_L",
+        "Full_Name": "Occipital Lateral Gray Matter Left",
+        "Consisting_of_ROIS": "129, 145, 157, 197"
+    },
+    "325": {
+        "ID": "325",
+        "Name": "OCCIPITAL_MEDIAL_GM_L",
+        "Full_Name": "Occipital Medial Gray Matter Left",
+        "Consisting_of_ROIS": "109, 115, 135"
+    },
+    "326": {
+        "ID": "326",
+        "Name": "PARIETAL_LATERAL_GM_L",
+        "Full_Name": "Parietal Lateral Gray Matter Left",
+        "Consisting_of_ROIS": "107, 177, 195, 199"
+    },
+    "327": {
+        "ID": "327",
+        "Name": "PARIETAL_MEDIAL_GM_L",
+        "Full_Name": "Parietal Medial Gray Matter Left",
+        "Consisting_of_ROIS": "149, 169"
+    },
+    "328": {
+        "ID": "328",
+        "Name": "TEMPORAL_INFERIOR_GM_L",
+        "Full_Name": "Temporal Inferior Gray Matter Left",
+        "Consisting_of_ROIS": "123"
+    },
+    "329": {
+        "ID": "329",
+        "Name": "TEMPORAL_LATERAL_GM_L",
+        "Full_Name": "Temporal Lateral Gray Matter Left",
+        "Consisting_of_ROIS": "133, 155, 201, 203"
+    },
+    "330": {
+        "ID": "330",
+        "Name": "TEMPORAL_SUPRATEMPORAL_GM_L",
+        "Full_Name": "Temporal Supratemporal Gray Matter Left",
+        "Consisting_of_ROIS": "181, 185, 207"
+    },
+    "331": {
+        "ID": "331",
+        "Name": "FRONTAL_INFERIOR_GM_R",
+        "Full_Name": "Frontal Inferior Gray Matter Right",
+        "Consisting_of_ROIS": "104, 136, 146, 178"
+    },
+    "332": {
+        "ID": "332",
+        "Name": "FRONTAL_INSULAR_GM_R",
+        "Full_Name": "Frontal Insular Gray Matter Right",
+        "Consisting_of_ROIS": "102, 172"
+    },
+    "333": {
+        "ID": "333",
+        "Name": "FRONTAL_LATERAL_GM_R",
+        "Full_Name": "Frontal Lateral Gray Matter Right",
+        "Consisting_of_ROIS": "120, 142, 162, 164, 182, 190, 204"
+    },
+    "334": {
+        "ID": "334",
+        "Name": "FRONTAL_MEDIAL_GM_R",
+        "Full_Name": "Frontal Medial Gray Matter Right",
+        "Consisting_of_ROIS": "124, 140, 150, 152, 186, 192"
+    },
+    "335": {
+        "ID": "335",
+        "Name": "FRONTAL_OPERCULAR_GM_R",
+        "Full_Name": "Frontal Opercular Gray Matter Right",
+        "Consisting_of_ROIS": "112, 118, 174"
+    },
+    "336": {
+        "ID": "336",
+        "Name": "LIMBIC_CINGULATE_GM_R",
+        "Full_Name": "Limbic Cingulate Gray Matter Right",
+        "Consisting_of_ROIS": "100, 138, 166"
+    },
+    "337": {
+        "ID": "337",
+        "Name": "LIMBIC_MEDIALTEMPORAL_GM_R",
+        "Full_Name": "Limbic Medial Temporal Gray Matter Right",
+        "Consisting_of_ROIS": "116, 170"
+    },
+    "338": {
+        "ID": "338",
+        "Name": "OCCIPITAL_INFERIOR_GM_R",
+        "Full_Name": "Occipital Inferior Gray Matter Right",
+        "Consisting_of_ROIS": "160"
+    },
+    "339": {
+        "ID": "339",
+        "Name": "OCCIPITAL_LATERAL_GM_R",
+        "Full_Name": "Occipital Lateral Gray Matter Right",
+        "Consisting_of_ROIS": "128, 144, 156, 196"
+    },
+    "340": {
+        "ID": "340",
+        "Name": "OCCIPITAL_MEDIAL_GM_R",
+        "Full_Name": "Occipital Medial Gray Matter Right",
+        "Consisting_of_ROIS": "108, 114, 134"
+    },
+    "341": {
+        "ID": "341",
+        "Name": "PARIETAL_LATERAL_GM_R",
+        "Full_Name": "Parietal Lateral Gray Matter Right",
+        "Consisting_of_ROIS": "106, 176, 194, 198"
+    },
+    "342": {
+        "ID": "342",
+        "Name": "PARIETAL_MEDIAL_GM_R",
+        "Full_Name": "Parietal Medial Gray Matter Right",
+        "Consisting_of_ROIS": "148, 168"
+    },
+    "343": {
+        "ID": "343",
+        "Name": "TEMPORAL_INFERIOR_GM_R",
+        "Full_Name": "Temporal Inferior Gray Matter Right",
+        "Consisting_of_ROIS": "122"
+    },
+    "344": {
+        "ID": "344",
+        "Name": "TEMPORAL_LATERAL_GM_R",
+        "Full_Name": "Temporal Lateral Gray Matter Right",
+        "Consisting_of_ROIS": "132, 154, 200, 202"
+    },
+    "345": {
+        "ID": "345",
+        "Name": "TEMPORAL_SUPRATEMPORAL_GM_R",
+        "Full_Name": "Temporal Supratemporal Gray Matter Right",
+        "Consisting_of_ROIS": "180, 184, 206"
+    },
+    "4": {
+        "ID": "4",
+        "Name": "3rd Ventricle",
+        "Full_Name": "Third Ventricle",
+        "Consisting_of_ROIS": "4"
+    },
+    "11": {
+        "ID": "11",
+        "Name": "4th Ventricle",
+        "Full_Name": "Fourth Ventricle",
+        "Consisting_of_ROIS": "11"
+    },
+    "23": {
+        "ID": "23",
+        "Name": "Right Accumbens Area",
+        "Full_Name": "Right Accumbens Area",
+        "Consisting_of_ROIS": "23"
+    },
+    "30": {
+        "ID": "30",
+        "Name": "Left Accumbens Area",
+        "Full_Name": "Left Accumbens Area",
+        "Consisting_of_ROIS": "30"
+    },
+    "31": {
+        "ID": "31",
+        "Name": "Right Amygdala",
+        "Full_Name": "Right Amygdala",
+        "Consisting_of_ROIS": "31"
+    },
+    "32": {
+        "ID": "32",
+        "Name": "Left Amygdala",
+        "Full_Name": "Left Amygdala",
+        "Consisting_of_ROIS": "32"
+    },
+    "35": {
+        "ID": "35",
+        "Name": "Brain Stem",
+        "Full_Name": "Brain Stem",
+        "Consisting_of_ROIS": "35"
+    },
+    "36": {
+        "ID": "36",
+        "Name": "Right Caudate",
+        "Full_Name": "Right Caudate",
+        "Consisting_of_ROIS": "36"
+    },
+    "37": {
+        "ID": "37",
+        "Name": "Left Caudate",
+        "Full_Name": "Left Caudate",
+        "Consisting_of_ROIS": "37"
+    },
+    "38": {
+        "ID": "38",
+        "Name": "Right Cerebellum Exterior",
+        "Full_Name": "Right Cerebellum Exterior",
+        "Consisting_of_ROIS": "38"
+    },
+    "39": {
+        "ID": "39",
+        "Name": "Left Cerebellum Exterior",
+        "Full_Name": "Left Cerebellum Exterior",
+        "Consisting_of_ROIS": "39"
+    },
+    "40": {
+        "ID": "40",
+        "Name": "Right Cerebellum White Matter",
+        "Full_Name": "Right Cerebellum White Matter",
+        "Consisting_of_ROIS": "40"
+    },
+    "41": {
+        "ID": "41",
+        "Name": "Left Cerebellum White Matter",
+        "Full_Name": "Left Cerebellum White Matter",
+        "Consisting_of_ROIS": "41"
+    },
+    "46": {
+        "ID": "46",
+        "Name": "Cerebral Spinal Fluid",
+        "Full_Name": "Cerebral Spinal Fluid",
+        "Consisting_of_ROIS": "46"
+    },
+    "47": {
+        "ID": "47",
+        "Name": "Right Hippocampus",
+        "Full_Name": "Right Hippocampus",
+        "Consisting_of_ROIS": "47"
+    },
+    "48": {
+        "ID": "48",
+        "Name": "Left Hippocampus",
+        "Full_Name": "Left Hippocampus",
+        "Consisting_of_ROIS": "48"
+    },
+    "49": {
+        "ID": "49",
+        "Name": "Right Inf Lat Vent",
+        "Full_Name": "Right Inferior Lateral Ventricle",
+        "Consisting_of_ROIS": "49"
+    },
+    "50": {
+        "ID": "50",
+        "Name": "Left Inf Lat Vent",
+        "Full_Name": "Left Inferior Lateral Ventricle",
+        "Consisting_of_ROIS": "50"
+    },
+    "51": {
+        "ID": "51",
+        "Name": "Right Lateral Ventricle",
+        "Full_Name": "Right Lateral Ventricle",
+        "Consisting_of_ROIS": "51"
+    },
+    "52": {
+        "ID": "52",
+        "Name": "Left Lateral Ventricle",
+        "Full_Name": "Left Lateral Ventricle",
+        "Consisting_of_ROIS": "52"
+    },
+    "55": {
+        "ID": "55",
+        "Name": "Right Pallidum",
+        "Full_Name": "Right Pallidum",
+        "Consisting_of_ROIS": "55"
+    },
+    "56": {
+        "ID": "56",
+        "Name": "Left Pallidum",
+        "Full_Name": "Left Pallidum",
+        "Consisting_of_ROIS": "56"
+    },
+    "57": {
+        "ID": "57",
+        "Name": "Right Putamen",
+        "Full_Name": "Right Putamen",
+        "Consisting_of_ROIS": "57"
+    },
+    "58": {
+        "ID": "58",
+        "Name": "Left Putamen",
+        "Full_Name": "Left Putamen",
+        "Consisting_of_ROIS": "58"
+    },
+    "59": {
+        "ID": "59",
+        "Name": "Right Thalamus Proper",
+        "Full_Name": "Right Thalamus Proper",
+        "Consisting_of_ROIS": "59"
+    },
+    "60": {
+        "ID": "60",
+        "Name": "Left Thalamus Proper",
+        "Full_Name": "Left Thalamus Proper",
+        "Consisting_of_ROIS": "60"
+    },
+    "61": {
+        "ID": "61",
+        "Name": "Right Ventral DC",
+        "Full_Name": "Right Ventral Dorsal Column",
+        "Consisting_of_ROIS": "61"
+    },
+    "62": {
+        "ID": "62",
+        "Name": "Left Ventral DC",
+        "Full_Name": "Left Ventral Dorsal Column",
+        "Consisting_of_ROIS": "62"
+    },
+    "71": {
+        "ID": "71",
+        "Name": "Cerebellar Vermal Lobules I-V",
+        "Full_Name": "Cerebellar Vermal Lobules I-V",
+        "Consisting_of_ROIS": "71"
+    },
+    "72": {
+        "ID": "72",
+        "Name": "Cerebellar Vermal Lobules VI-VII",
+        "Full_Name": "Cerebellar Vermal Lobules VI-VII",
+        "Consisting_of_ROIS": "72"
+    },
+    "73": {
+        "ID": "73",
+        "Name": "Cerebellar Vermal Lobules VIII-X",
+        "Full_Name": "Cerebellar Vermal Lobules VIII-X",
+        "Consisting_of_ROIS": "73"
+    },
+    "75": {
+        "ID": "75",
+        "Name": "Left Basal Forebrain",
+        "Full_Name": "Left Basal Forebrain",
+        "Consisting_of_ROIS": "75"
+    },
+    "76": {
+        "ID": "76",
+        "Name": "Right Basal Forebrain",
+        "Full_Name": "Right Basal Forebrain",
+        "Consisting_of_ROIS": "76"
+    },
+    "81": {
+        "ID": "81",
+        "Name": "frontal lobe WM right",
+        "Full_Name": "Frontal Lobe White Matter Right",
+        "Consisting_of_ROIS": "81"
+    },
+    "82": {
+        "ID": "82",
+        "Name": "frontal lobe WM left",
+        "Full_Name": "Frontal Lobe White Matter Left",
+        "Consisting_of_ROIS": "82"
+    },
+    "83": {
+        "ID": "83",
+        "Name": "occipital lobe WM right",
+        "Full_Name": "Occipital Lobe White Matter Right",
+        "Consisting_of_ROIS": "83"
+    },
+    "84": {
+        "ID": "84",
+        "Name": "occipital lobe WM left",
+        "Full_Name": "Occipital Lobe White Matter Left",
+        "Consisting_of_ROIS": "84"
+    },
+    "85": {
+        "ID": "85",
+        "Name": "parietal lobe WM right",
+        "Full_Name": "Parietal Lobe White Matter Right",
+        "Consisting_of_ROIS": "85"
+    },
+    "86": {
+        "ID": "86",
+        "Name": "parietal lobe WM left",
+        "Full_Name": "Parietal Lobe White Matter Left",
+        "Consisting_of_ROIS": "86"
+    },
+    "87": {
+        "ID": "87",
+        "Name": "temporal lobe WM right",
+        "Full_Name": "Temporal Lobe White Matter Right",
+        "Consisting_of_ROIS": "87"
+    },
+    "88": {
+        "ID": "88",
+        "Name": "temporal lobe WM left",
+        "Full_Name": "Temporal Lobe White Matter Left",
+        "Consisting_of_ROIS": "88"
+    },
+    "89": {
+        "ID": "89",
+        "Name": "fornix right",
+        "Full_Name": "Fornix Right",
+        "Consisting_of_ROIS": "89"
+    },
+    "90": {
+        "ID": "90",
+        "Name": "fornix left",
+        "Full_Name": "Fornix Left",
+        "Consisting_of_ROIS": "90"
+    },
+    "91": {
+        "ID": "91",
+        "Name": "anterior limb of internal capsule right",
+        "Full_Name": "Anterior Limb of Internal Capsule Right",
+        "Consisting_of_ROIS": "91"
+    },
+    "92": {
+        "ID": "92",
+        "Name": "anterior limb of internal capsule left",
+        "Full_Name": "Anterior Limb of Internal Capsule Left",
+        "Consisting_of_ROIS": "92"
+    },
+    "93": {
+        "ID": "93",
+        "Name": "posterior limb of internal capsule inc. cerebral peduncle right",
+        "Full_Name": "Posterior Limb of Internal Capsule including Cerebral Peduncle Right",
+        "Consisting_of_ROIS": "93"
+    },
+    "94": {
+        "ID": "94",
+        "Name": "posterior limb of internal capsule inc. cerebral peduncle left",
+        "Full_Name": "Posterior Limb of Internal Capsule including Cerebral Peduncle Left",
+        "Consisting_of_ROIS": "94"
+    },
+    "95": {
+        "ID": "95",
+        "Name": "corpus callosum",
+        "Full_Name": "Corpus Callosum",
+        "Consisting_of_ROIS": "95"
+    },
+    "100": {
+        "ID": "100",
+        "Name": "Right ACgG  anterior cingulate gyrus",
+        "Full_Name": "Right Anterior Cingulate Gyrus",
+        "Consisting_of_ROIS": "100"
+    },
+    "101": {
+        "ID": "101",
+        "Name": "Left ACgG  anterior cingulate gyrus",
+        "Full_Name": "Left Anterior Cingulate Gyrus",
+        "Consisting_of_ROIS": "101"
+    },
+    "102": {
+        "ID": "102",
+        "Name": "Right AIns  anterior insula",
+        "Full_Name": "Right Anterior Insula",
+        "Consisting_of_ROIS": "102"
+    },
+    "103": {
+        "ID": "103",
+        "Name": "Left AIns  anterior insula",
+        "Full_Name": "Left Anterior Insula",
+        "Consisting_of_ROIS": "103"
+    },
+    "104": {
+        "ID": "104",
+        "Name": "Right AOrG  anterior orbital gyrus",
+        "Full_Name": "Right Anterior Orbital Gyrus",
+        "Consisting_of_ROIS": "104"
+    },
+    "105": {
+        "ID": "105",
+        "Name": "Left AOrG  anterior orbital gyrus",
+        "Full_Name": "Left Anterior Orbital Gyrus",
+        "Consisting_of_ROIS": "105"
+    },
+    "106": {
+        "ID": "106",
+        "Name": "Right AnG   angular gyrus",
+        "Full_Name": "Right Angular Gyrus",
+        "Consisting_of_ROIS": "106"
+    },
+    "107": {
+        "ID": "107",
+        "Name": "Left AnG   angular gyrus",
+        "Full_Name": "Left Angular Gyrus",
+        "Consisting_of_ROIS": "107"
+    },
+    "108": {
+        "ID": "108",
+        "Name": "Right Calc  calcarine cortex",
+        "Full_Name": "Right Calcarine Cortex",
+        "Consisting_of_ROIS": "108"
+    },
+    "109": {
+        "ID": "109",
+        "Name": "Left Calc  calcarine cortex",
+        "Full_Name": "Left Calcarine Cortex",
+        "Consisting_of_ROIS": "109"
+    },
+    "112": {
+        "ID": "112",
+        "Name": "Right CO    central operculum",
+        "Full_Name": "Right Central Operculum",
+        "Consisting_of_ROIS": "112"
+    },
+    "113": {
+        "ID": "113",
+        "Name": "Left CO    central operculum",
+        "Full_Name": "Left Central Operculum",
+        "Consisting_of_ROIS": "113"
+    },
+    "114": {
+        "ID": "114",
+        "Name": "Right Cun   cuneus",
+        "Full_Name": "Right Cuneus",
+        "Consisting_of_ROIS": "114"
+    },
+    "115": {
+        "ID": "115",
+        "Name": "Left Cun   cuneus",
+        "Full_Name": "Left Cuneus",
+        "Consisting_of_ROIS": "115"
+    },
+    "116": {
+        "ID": "116",
+        "Name": "Right Ent   entorhinal area",
+        "Full_Name": "Right Entorhinal Area",
+        "Consisting_of_ROIS": "116"
+    },
+    "117": {
+        "ID": "117",
+        "Name": "Left Ent   entorhinal area",
+        "Full_Name": "Left Entorhinal Area",
+        "Consisting_of_ROIS": "117"
+    },
+    "118": {
+        "ID": "118",
+        "Name": "Right FO    frontal operculum",
+        "Full_Name": "Right Frontal Operculum",
+        "Consisting_of_ROIS": "118"
+    },
+    "119": {
+        "ID": "119",
+        "Name": "Left FO    frontal operculum",
+        "Full_Name": "Left Frontal Operculum",
+        "Consisting_of_ROIS": "119"
+    },
+    "120": {
+        "ID": "120",
+        "Name": "Right FRP   frontal pole",
+        "Full_Name": "Right Frontal Pole",
+        "Consisting_of_ROIS": "120"
+    },
+    "121": {
+        "ID": "121",
+        "Name": "Left FRP   frontal pole",
+        "Full_Name": "Left Frontal Pole",
+        "Consisting_of_ROIS": "121"
+    },
+    "122": {
+        "ID": "122",
+        "Name": "Right FuG   fusiform gyrus",
+        "Full_Name": "Right Fusiform Gyrus",
+        "Consisting_of_ROIS": "122"
+    },
+    "123": {
+        "ID": "123",
+        "Name": "Left FuG   fusiform gyrus",
+        "Full_Name": "Left Fusiform Gyrus",
+        "Consisting_of_ROIS": "123"
+    },
+    "124": {
+        "ID": "124",
+        "Name": "Right GRe   gyrus rectus",
+        "Full_Name": "Right Gyrus Rectus",
+        "Consisting_of_ROIS": "124"
+    },
+    "125": {
+        "ID": "125",
+        "Name": "Left GRe   gyrus rectus",
+        "Full_Name": "Left Gyrus Rectus",
+        "Consisting_of_ROIS": "125"
+    },
+    "128": {
+        "ID": "128",
+        "Name": "Right IOG   inferior occipital gyrus",
+        "Full_Name": "Right Inferior Occipital Gyrus",
+        "Consisting_of_ROIS": "128"
+    },
+    "129": {
+        "ID": "129",
+        "Name": "Left IOG   inferior occipital gyrus",
+        "Full_Name": "Left Inferior Occipital Gyrus",
+        "Consisting_of_ROIS": "129"
+    },
+    "132": {
+        "ID": "132",
+        "Name": "Right ITG   inferior temporal gyrus",
+        "Full_Name": "Right Inferior Temporal Gyrus",
+        "Consisting_of_ROIS": "132"
+    },
+    "133": {
+        "ID": "133",
+        "Name": "Left ITG   inferior temporal gyrus",
+        "Full_Name": "Left Inferior Temporal Gyrus",
+        "Consisting_of_ROIS": "133"
+    },
+    "134": {
+        "ID": "134",
+        "Name": "Right LiG   lingual gyrus",
+        "Full_Name": "Right Lingual Gyrus",
+        "Consisting_of_ROIS": "134"
+    },
+    "135": {
+        "ID": "135",
+        "Name": "Left LiG   lingual gyrus",
+        "Full_Name": "Left Lingual Gyrus",
+        "Consisting_of_ROIS": "135"
+    },
+    "136": {
+        "ID": "136",
+        "Name": "Right LOrG  lateral orbital gyrus",
+        "Full_Name": "Right Lateral Orbital Gyrus",
+        "Consisting_of_ROIS": "136"
+    },
+    "137": {
+        "ID": "137",
+        "Name": "Left LOrG  lateral orbital gyrus",
+        "Full_Name": "Left Lateral Orbital Gyrus",
+        "Consisting_of_ROIS": "137"
+    },
+    "138": {
+        "ID": "138",
+        "Name": "Right MCgG  middle cingulate gyrus",
+        "Full_Name": "Right Middle Cingulate Gyrus",
+        "Consisting_of_ROIS": "138"
+    },
+    "139": {
+        "ID": "139",
+        "Name": "Left MCgG  middle cingulate gyrus",
+        "Full_Name": "Left Middle Cingulate Gyrus",
+        "Consisting_of_ROIS": "139"
+    },
+    "140": {
+        "ID": "140",
+        "Name": "Right MFC   medial frontal cortex",
+        "Full_Name": "Right Medial Frontal Cortex",
+        "Consisting_of_ROIS": "140"
+    },
+    "141": {
+        "ID": "141",
+        "Name": "Left MFC   medial frontal cortex",
+        "Full_Name": "Left Medial Frontal Cortex",
+        "Consisting_of_ROIS": "141"
+    },
+    "142": {
+        "ID": "142",
+        "Name": "Right MFG   middle frontal gyrus",
+        "Full_Name": "Right Middle Frontal Gyrus",
+        "Consisting_of_ROIS": "142"
+    },
+    "143": {
+        "ID": "143",
+        "Name": "Left MFG   middle frontal gyrus",
+        "Full_Name": "Left Middle Frontal Gyrus",
+        "Consisting_of_ROIS": "143"
+    },
+    "144": {
+        "ID": "144",
+        "Name": "Right MOG   middle occipital gyrus",
+        "Full_Name": "Right Middle Occipital Gyrus",
+        "Consisting_of_ROIS": "144"
+    },
+    "145": {
+        "ID": "145",
+        "Name": "Left MOG   middle occipital gyrus",
+        "Full_Name": "Left Middle Occipital Gyrus",
+        "Consisting_of_ROIS": "145"
+    },
+    "146": {
+        "ID": "146",
+        "Name": "Right MOrG  medial orbital gyrus",
+        "Full_Name": "Right Medial Orbital Gyrus",
+        "Consisting_of_ROIS": "146"
+    },
+    "147": {
+        "ID": "147",
+        "Name": "Left MOrG  medial orbital gyrus",
+        "Full_Name": "Left Medial Orbital Gyrus",
+        "Consisting_of_ROIS": "147"
+    },
+    "148": {
+        "ID": "148",
+        "Name": "Right MPoG  postcentral gyrus medial segment",
+        "Full_Name": "Right Postcentral Gyrus Medial Segment",
+        "Consisting_of_ROIS": "148"
+    },
+    "149": {
+        "ID": "149",
+        "Name": "Left MPoG  postcentral gyrus medial segment",
+        "Full_Name": "Left Postcentral Gyrus Medial Segment",
+        "Consisting_of_ROIS": "149"
+    },
+    "150": {
+        "ID": "150",
+        "Name": "Right MPrG  precentral gyrus medial segment",
+        "Full_Name": "Right Precentral Gyrus Medial Segment",
+        "Consisting_of_ROIS": "150"
+    },
+    "151": {
+        "ID": "151",
+        "Name": "Left MPrG  precentral gyrus medial segment",
+        "Full_Name": "Left Precentral Gyrus Medial Segment",
+        "Consisting_of_ROIS": "151"
+    },
+    "152": {
+        "ID": "152",
+        "Name": "Right MSFG  superior frontal gyrus medial segment",
+        "Full_Name": "Right Superior Frontal Gyrus Medial Segment",
+        "Consisting_of_ROIS": "152"
+    },
+    "153": {
+        "ID": "153",
+        "Name": "Left MSFG  superior frontal gyrus medial segment",
+        "Full_Name": "Left Superior Frontal Gyrus Medial Segment",
+        "Consisting_of_ROIS": "153"
+    },
+    "154": {
+        "ID": "154",
+        "Name": "Right MTG   middle temporal gyrus",
+        "Full_Name": "Right Middle Temporal Gyrus",
+        "Consisting_of_ROIS": "154"
+    },
+    "155": {
+        "ID": "155",
+        "Name": "Left MTG   middle temporal gyrus",
+        "Full_Name": "Left Middle Temporal Gyrus",
+        "Consisting_of_ROIS": "155"
+    },
+    "156": {
+        "ID": "156",
+        "Name": "Right OCP   occipital pole",
+        "Full_Name": "Right Occipital Pole",
+        "Consisting_of_ROIS": "156"
+    },
+    "157": {
+        "ID": "157",
+        "Name": "Left OCP   occipital pole",
+        "Full_Name": "Left Occipital Pole",
+        "Consisting_of_ROIS": "157"
+    },
+    "160": {
+        "ID": "160",
+        "Name": "Right OFuG  occipital fusiform gyrus",
+        "Full_Name": "Right Occipital Fusiform Gyrus",
+        "Consisting_of_ROIS": "160"
+    },
+    "161": {
+        "ID": "161",
+        "Name": "Left OFuG  occipital fusiform gyrus",
+        "Full_Name": "Left Occipital Fusiform Gyrus",
+        "Consisting_of_ROIS": "161"
+    },
+    "162": {
+        "ID": "162",
+        "Name": "Right OpIFG opercular part of the inferior frontal gyrus",
+        "Full_Name": "Right Opercular Part of the Inferior Frontal Gyrus",
+        "Consisting_of_ROIS": "162"
+    },
+    "163": {
+        "ID": "163",
+        "Name": "Left OpIFG opercular part of the inferior frontal gyrus",
+        "Full_Name": "Left Opercular Part of the Inferior Frontal Gyrus",
+        "Consisting_of_ROIS": "163"
+    },
+    "164": {
+        "ID": "164",
+        "Name": "Right OrIFG orbital part of the inferior frontal gyrus",
+        "Full_Name": "Right Orbital Part of the Inferior Frontal Gyrus",
+        "Consisting_of_ROIS": "164"
+    },
+    "165": {
+        "ID": "165",
+        "Name": "Left OrIFG orbital part of the inferior frontal gyrus",
+        "Full_Name": "Left Orbital Part of the Inferior Frontal Gyrus",
+        "Consisting_of_ROIS": "165"
+    },
+    "166": {
+        "ID": "166",
+        "Name": "Right PCgG  posterior cingulate gyrus",
+        "Full_Name": "Right Posterior Cingulate Gyrus",
+        "Consisting_of_ROIS": "166"
+    },
+    "167": {
+        "ID": "167",
+        "Name": "Left PCgG  posterior cingulate gyrus",
+        "Full_Name": "Left Posterior Cingulate Gyrus",
+        "Consisting_of_ROIS": "167"
+    },
+    "168": {
+        "ID": "168",
+        "Name": "Right PCu   precuneus",
+        "Full_Name": "Right Precuneus",
+        "Consisting_of_ROIS": "168"
+    },
+    "169": {
+        "ID": "169",
+        "Name": "Left PCu   precuneus",
+        "Full_Name": "Left Precuneus",
+        "Consisting_of_ROIS": "169"
+    },
+    "170": {
+        "ID": "170",
+        "Name": "Right PHG   parahippocampal gyrus",
+        "Full_Name": "Right Parahippocampal Gyrus",
+        "Consisting_of_ROIS": "170"
+    },
+    "171": {
+        "ID": "171",
+        "Name": "Left PHG   parahippocampal gyrus",
+        "Full_Name": "Left Parahippocampal Gyrus",
+        "Consisting_of_ROIS": "171"
+    },
+    "172": {
+        "ID": "172",
+        "Name": "Right PIns  posterior insula",
+        "Full_Name": "Right Posterior Insula",
+        "Consisting_of_ROIS": "172"
+    },
+    "173": {
+        "ID": "173",
+        "Name": "Left PIns  posterior insula",
+        "Full_Name": "Left Posterior Insula",
+        "Consisting_of_ROIS": "173"
+    },
+    "174": {
+        "ID": "174",
+        "Name": "Right PO    parietal operculum",
+        "Full_Name": "Right Parietal Operculum",
+        "Consisting_of_ROIS": "174"
+    },
+    "175": {
+        "ID": "175",
+        "Name": "Left PO    parietal operculum",
+        "Full_Name": "Left Parietal Operculum",
+        "Consisting_of_ROIS": "175"
+    },
+    "176": {
+        "ID": "176",
+        "Name": "Right PoG   postcentral gyrus",
+        "Full_Name": "Right Postcentral Gyrus",
+        "Consisting_of_ROIS": "176"
+    },
+    "177": {
+        "ID": "177",
+        "Name": "Left PoG   postcentral gyrus",
+        "Full_Name": "Left Postcentral Gyrus",
+        "Consisting_of_ROIS": "177"
+    },
+    "178": {
+        "ID": "178",
+        "Name": "Right POrG  posterior orbital gyrus",
+        "Full_Name": "Right Posterior Orbital Gyrus",
+        "Consisting_of_ROIS": "178"
+    },
+    "179": {
+        "ID": "179",
+        "Name": "Left POrG  posterior orbital gyrus",
+        "Full_Name": "Left Posterior Orbital Gyrus",
+        "Consisting_of_ROIS": "179"
+    },
+    "180": {
+        "ID": "180",
+        "Name": "Right PP    planum polare",
+        "Full_Name": "Right Planum Polare",
+        "Consisting_of_ROIS": "180"
+    },
+    "181": {
+        "ID": "181",
+        "Name": "Left PP    planum polare",
+        "Full_Name": "Left Planum Polare",
+        "Consisting_of_ROIS": "181"
+    },
+    "182": {
+        "ID": "182",
+        "Name": "Right PrG   precentral gyrus",
+        "Full_Name": "Right Precentral Gyrus",
+        "Consisting_of_ROIS": "182"
+    },
+    "183": {
+        "ID": "183",
+        "Name": "Left PrG   precentral gyrus",
+        "Full_Name": "Left Precentral Gyrus",
+        "Consisting_of_ROIS": "183"
+    },
+    "184": {
+        "ID": "184",
+        "Name": "Right PT    planum temporale",
+        "Full_Name": "Right Planum Temporale",
+        "Consisting_of_ROIS": "184"
+    },
+    "185": {
+        "ID": "185",
+        "Name": "Left PT    planum temporale",
+        "Full_Name": "Left Planum Temporale",
+        "Consisting_of_ROIS": "185"
+    },
+    "186": {
+        "ID": "186",
+        "Name": "Right SCA   subcallosal area",
+        "Full_Name": "Right Subcallosal Area",
+        "Consisting_of_ROIS": "186"
+    },
+    "187": {
+        "ID": "187",
+        "Name": "Left SCA   subcallosal area",
+        "Full_Name": "Left Subcallosal Area",
+        "Consisting_of_ROIS": "187"
+    },
+    "190": {
+        "ID": "190",
+        "Name": "Right SFG   superior frontal gyrus",
+        "Full_Name": "Right Superior Frontal Gyrus",
+        "Consisting_of_ROIS": "190"
+    },
+    "191": {
+        "ID": "191",
+        "Name": "Left SFG   superior frontal gyrus",
+        "Full_Name": "Left Superior Frontal Gyrus",
+        "Consisting_of_ROIS": "191"
+    },
+    "192": {
+        "ID": "192",
+        "Name": "Right SMC   supplementary motor cortex",
+        "Full_Name": "Right Supplementary Motor Cortex",
+        "Consisting_of_ROIS": "192"
+    },
+    "193": {
+        "ID": "193",
+        "Name": "Left SMC   supplementary motor cortex",
+        "Full_Name": "Left Supplementary Motor Cortex",
+        "Consisting_of_ROIS": "193"
+    },
+    "194": {
+        "ID": "194",
+        "Name": "Right SMG   supramarginal gyrus",
+        "Full_Name": "Right Supramarginal Gyrus",
+        "Consisting_of_ROIS": "194"
+    },
+    "195": {
+        "ID": "195",
+        "Name": "Left SMG   supramarginal gyrus",
+        "Full_Name": "Left Supramarginal Gyrus",
+        "Consisting_of_ROIS": "195"
+    },
+    "196": {
+        "ID": "196",
+        "Name": "Right SOG   superior occipital gyrus",
+        "Full_Name": "Right Superior Occipital Gyrus",
+        "Consisting_of_ROIS": "196"
+    },
+    "197": {
+        "ID": "197",
+        "Name": "Left SOG   superior occipital gyrus",
+        "Full_Name": "Left Superior Occipital Gyrus",
+        "Consisting_of_ROIS": "197"
+    },
+    "198": {
+        "ID": "198",
+        "Name": "Right SPL   superior parietal lobule",
+        "Full_Name": "Right Superior Parietal Lobule",
+        "Consisting_of_ROIS": "198"
+    },
+    "199": {
+        "ID": "199",
+        "Name": "Left SPL   superior parietal lobule",
+        "Full_Name": "Left Superior Parietal Lobule",
+        "Consisting_of_ROIS": "199"
+    },
+    "200": {
+        "ID": "200",
+        "Name": "Right STG   superior temporal gyrus",
+        "Full_Name": "Right Superior Temporal Gyrus",
+        "Consisting_of_ROIS": "200"
+    },
+    "201": {
+        "ID": "201",
+        "Name": "Left STG   superior temporal gyrus",
+        "Full_Name": "Left Superior Temporal Gyrus",
+        "Consisting_of_ROIS": "201"
+    },
+    "202": {
+        "ID": "202",
+        "Name": "Right TMP   temporal pole",
+        "Full_Name": "Right Temporal Pole",
+        "Consisting_of_ROIS": "202"
+    },
+    "203": {
+        "ID": "203",
+        "Name": "Left TMP   temporal pole",
+        "Full_Name": "Left Temporal Pole",
+        "Consisting_of_ROIS": "203"
+    },
+    "204": {
+        "ID": "204",
+        "Name": "Right TrIFG triangular part of the inferior frontal gyrus",
+        "Full_Name": "Right Triangular Part of the Inferior Frontal Gyrus",
+        "Consisting_of_ROIS": "204"
+    },
+    "205": {
+        "ID": "205",
+        "Name": "Left TrIFG triangular part of the inferior frontal gyrus",
+        "Full_Name": "Left Triangular Part of the Inferior Frontal Gyrus",
+        "Consisting_of_ROIS": "205"
+    },
+    "206": {
+        "ID": "206",
+        "Name": "Right TTG   transverse temporal gyrus",
+        "Full_Name": "Right Transverse Temporal Gyrus",
+        "Consisting_of_ROIS": "206"
+    },
+    "207": {
+        "ID": "207",
+        "Name": "Left TTG   transverse temporal gyrus",
+        "Full_Name": "Left Transverse Temporal Gyrus",
+        "Consisting_of_ROIS": "207"
+    }
+}

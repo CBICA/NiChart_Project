@@ -1,0 +1,262 @@
+ID,Name,Full_Name,Consisting_of_ROIS
+702,ICV,Intra Cranial Volume,"1, 4, 11, 23, 30, 31, 32, 35, 36, 37, 38, 39, 40, 41, 46, 47, 48, 49, 50, 51, 52, 55, 56, 57, 58, 59, 60, 61, 62, 71, 72, 73, 75, 76, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 128, 129, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207"
+701,TOTALBRAIN,Total Brain Volume,"4, 11, 23, 30, 31, 32, 35, 36, 37, 38, 39, 40, 41, 47, 48, 49, 50, 51, 52, 55, 56, 57, 58, 59, 60, 61, 62, 71, 72, 73, 75, 76, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 128, 129, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207"
+600,CSF,Cerebrospinal Fluid,600
+601,GM,Gray Matter,"23, 30, 31, 32, 36, 37, 38, 39, 47, 48, 55, 56, 57, 58, 59, 60, 71, 72, 73, 75, 76, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 128, 129, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207"
+604,WM,White Matter,"40, 41, 61, 62, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95"
+606,GM_L,Gray Matter Left,"30, 32, 37, 39, 48, 56, 58, 60, 75, 101, 103, 105, 107, 109, 113, 115, 117, 119, 121, 123, 125, 129, 133, 135, 137, 139, 141, 143, 145, 147, 149, 151, 153, 155, 157, 161, 163, 165, 167, 169, 171, 173, 175, 177, 179, 181, 183, 185, 187, 191, 193, 195, 197, 199, 201, 203, 205, 207"
+607,WM_L,White Matter Left,"41, 62, 82, 84, 86, 88, 90, 92, 94"
+613,GM_R,Gray Matter Right,"23, 31, 36, 38, 47, 55, 57, 59, 76, 100, 102, 104, 106, 108, 112, 114, 116, 118, 120, 122, 124, 128, 132, 134, 136, 138, 140, 142, 144, 146, 148, 150, 152, 154, 156, 160, 162, 164, 166, 168, 170, 172, 174, 176, 178, 180, 182, 184, 186, 190, 192, 194, 196, 198, 200, 202, 204, 206"
+614,WM_R,White Matter Right,"40, 61, 81, 83, 85, 87, 89, 91, 93"
+501,CORPUS_CALLOSUM,Corpus Callosum,95
+502,CEREBELLUM,Cerebellum,"38, 39, 40, 41, 71, 72, 73"
+503,DEEP_WM_GM,Deep White Matter Gray Matter,"23, 30, 31, 32, 36, 37, 47, 48, 55, 56, 57, 58, 59, 60, 75, 76, 89, 90, 91, 92, 93, 94"
+504,FRONTAL,Frontal,"81, 82, 102, 103, 104, 105, 112, 113, 118, 119, 120, 121, 124, 125, 136, 137, 140, 141, 142, 143, 146, 147, 150, 151, 152, 153, 162, 163, 164, 165, 172, 173, 174, 175, 178, 179, 182, 183, 186, 187, 190, 191, 192, 193, 204, 205"
+505,LIMBIC,Limbic,"100, 101, 116, 117, 138, 139, 166, 167, 170, 171"
+506,OCCIPITAL,Occipital,"83, 84, 108, 109, 114, 115, 128, 129, 134, 135, 144, 145, 156, 157, 160, 161, 196, 197"
+507,PARIETAL,Parietal,"85, 86, 106, 107, 148, 149, 168, 169, 176, 177, 194, 195, 198, 199"
+508,TEMPORAL,Temporal,"87, 88, 122, 123, 132, 133, 154, 155, 180, 181, 184, 185, 200, 201, 202, 203, 206, 207"
+509,VENTRICLE,Ventricle,"4, 11, 49, 50, 51, 52"
+510,CEREBELLUM_L,Cerebellum Left,"39, 41"
+511,DEEP_WM_GM_L,Deep White Matter Gray Matter Left,"30, 32, 37, 48, 56, 58, 60, 75, 90, 92, 94"
+512,FRONTAL_L,Frontal Left,"82, 103, 105, 113, 119, 121, 125, 137, 141, 143, 147, 151, 153, 163, 165, 173, 175, 179, 183, 187, 191, 193, 205"
+513,LIMBIC_L,Limbic Left,"101, 117, 139, 167, 171"
+514,OCCIPITAL_L,Occipital Left,"84, 109, 115, 129, 135, 145, 157, 161, 197"
+515,PARIETAL_L,Parietal Left,"86, 107, 149, 169, 177, 195, 199"
+516,TEMPORAL_L,Temporal Left,"88, 123, 133, 155, 181, 185, 201, 203, 207"
+517,VENTRICLE_L,Ventricle Left,"50, 52"
+518,CEREBELLUM_R,Cerebellum Right,"38, 40"
+519,DEEP_WM_GM_R,Deep White Matter Gray Matter Right,"23, 31, 36, 47, 55, 57, 59, 76, 89, 91, 93"
+520,FRONTAL_R,Frontal Right,"81, 102, 104, 112, 118, 120, 124, 136, 140, 142, 146, 150, 152, 162, 164, 172, 174, 178, 182, 186, 190, 192, 204"
+521,LIMBIC_R,Limbic Right,"100, 116, 138, 166, 170"
+522,OCCIPITAL_R,Occipital Right,"83, 108, 114, 128, 134, 144, 156, 160, 196"
+523,PARIETAL_R,Parietal Right,"85, 106, 148, 168, 176, 194, 198"
+524,TEMPORAL_R,Temporal Right,"87, 122, 132, 154, 180, 184, 200, 202, 206"
+525,VENTRICLE_R,Ventricle Right,"49, 51"
+401,BASAL_GANGLIA,Basal Ganglia,"23, 30, 36, 37, 55, 56, 57, 58"
+402,DEEP_GM,Deep Gray Matter,"59, 60"
+403,DEEP_WM,Deep White Matter,"89, 90, 91, 92, 93, 94"
+404,FRONTAL_GM,Frontal Gray Matter,"102, 103, 104, 105, 112, 113, 118, 119, 120, 121, 124, 125, 136, 137, 140, 141, 142, 143, 146, 147, 150, 151, 152, 153, 162, 163, 164, 165, 172, 173, 174, 175, 178, 179, 182, 183, 186, 187, 190, 191, 192, 193, 204, 205"
+405,FRONTAL_WM,Frontal White Matter,"81, 82"
+406,LIMBIC_GM,Limbic Gray Matter,"100, 101, 116, 117, 138, 139, 166, 167, 170, 171"
+407,OCCIPITAL_GM,Occipital Gray Matter,"108, 109, 114, 115, 128, 129, 134, 135, 144, 145, 156, 157, 160, 161, 196, 197"
+408,OCCIPITAL_WM,Occipital White Matter,"83, 84"
+409,PARIETAL_GM,Parietal Gray Matter,"106, 107, 148, 149, 168, 169, 176, 177, 194, 195, 198, 199"
+410,PARIETAL_WM,Parietal White Matter,"85, 86"
+411,TEMPORAL_GM,Temporal Gray Matter,"122, 123, 132, 133, 154, 155, 180, 181, 184, 185, 200, 201, 202, 203, 206, 207"
+412,TEMPORAL_WM,Temporal White Matter,"87, 88"
+413,BASAL_GANGLIA_L,Basal Ganglia Left,"30, 37, 56, 58"
+414,DEEP_GM_L,Deep Gray Matter Left,60
+415,DEEP_WM_L,Deep White Matter Left,"90, 92, 94"
+416,FRONTAL_GM_L,Frontal Gray Matter Left,"103, 105, 113, 119, 121, 125, 137, 141, 143, 147, 151, 153, 163, 165, 173, 175, 179, 183, 187, 191, 193, 205"
+417,FRONTAL_WM_L,Frontal White Matter Left,82
+418,LIMBIC_GM_L,Limbic Gray Matter Left,"101, 117, 139, 167, 171"
+419,OCCIPITAL_GM_L,Occipital Gray Matter Left,"109, 115, 129, 135, 145, 157, 161, 197"
+420,OCCIPITAL_WM_L,Occipital White Matter Left,84
+421,PARIETAL_GM_L,Parietal Gray Matter Left,"107, 149, 169, 177, 195, 199"
+422,PARIETAL_WM_L,Parietal White Matter Left,86
+423,TEMPORAL_GM_L,Temporal Gray Matter Left,"123, 133, 155, 181, 185, 201, 203, 207"
+424,TEMPORAL_WM_L,Temporal White Matter Left,88
+425,BASAL_GANGLIA_R,Basal Ganglia Right,"23, 36, 55, 57"
+426,DEEP_GM_R,Deep Gray Matter Right,59
+427,DEEP_WM_R,Deep White Matter Right,"89, 91, 93"
+428,FRONTAL_GM_R,Frontal Gray Matter Right,"102, 104, 112, 118, 120, 124, 136, 140, 142, 146, 150, 152, 162, 164, 172, 174, 178, 182, 186, 190, 192, 204"
+429,FRONTAL_WM_R,Frontal White Matter Right,81
+430,LIMBIC_GM_R,Limbic Gray Matter Right,"100, 116, 138, 166, 170"
+431,OCCIPITAL_GM_R,Occipital Gray Matter Right,"108, 114, 128, 134, 144, 156, 160, 196"
+432,OCCIPITAL_WM_R,Occipital White Matter Right,83
+433,PARIETAL_GM_R,Parietal Gray Matter Right,"106, 148, 168, 176, 194, 198"
+434,PARIETAL_WM_R,Parietal White Matter Right,85
+435,TEMPORAL_GM_R,Temporal Gray Matter Right,"122, 132, 154, 180, 184, 200, 202, 206"
+436,TEMPORAL_WM_R,Temporal White Matter Right,87
+301,FRONTAL_INFERIOR_GM,Frontal Inferior Gray Matter,"104, 105, 136, 137, 146, 147, 178, 179"
+302,FRONTAL_INSULAR_GM,Frontal Insular Gray Matter,"102, 103, 172, 173"
+303,FRONTAL_LATERAL_GM,Frontal Lateral Gray Matter,"120, 121, 142, 143, 162, 163, 164, 165, 182, 183, 190, 191, 204, 205"
+304,FRONTAL_MEDIAL_GM,Frontal Medial Gray Matter,"124, 125, 140, 141, 150, 151, 152, 153, 186, 187, 192, 193"
+305,FRONTAL_OPERCULAR_GM,Frontal Opercular Gray Matter,"112, 113, 118, 119, 174, 175"
+306,LIMBIC_CINGULATE_GM,Limbic Cingulate Gray Matter,"100, 101, 138, 139, 166, 167"
+307,LIMBIC_MEDIALTEMPORAL_GM,Limbic Medial Temporal Gray Matter,"116, 117, 170, 171"
+308,OCCIPITAL_INFERIOR_GM,Occipital Inferior Gray Matter,"160, 161"
+309,OCCIPITAL_LATERAL_GM,Occipital Lateral Gray Matter,"128, 129, 144, 145, 156, 157, 196, 197"
+310,OCCIPITAL_MEDIAL_GM,Occipital Medial Gray Matter,"108, 109, 114, 115, 134, 135"
+311,PARIETAL_LATERAL_GM,Parietal Lateral Gray Matter,"106, 107, 176, 177, 194, 195, 198, 199"
+312,PARIETAL_MEDIAL_GM,Parietal Medial Gray Matter,"148, 149, 168, 169"
+313,TEMPORAL_INFERIOR_GM,Temporal Inferior Gray Matter,"122, 123"
+314,TEMPORAL_LATERAL_GM,Temporal Lateral Gray Matter,"132, 133, 154, 155, 200, 201, 202, 203"
+315,TEMPORAL_SUPRATEMPORAL_GM,Temporal Supratemporal Gray Matter,"180, 181, 184, 185, 206, 207"
+316,FRONTAL_INFERIOR_GM_L,Frontal Inferior Gray Matter Left,"105, 137, 147, 179"
+317,FRONTAL_INSULAR_GM_L,Frontal Insular Gray Matter Left,"103, 173"
+318,FRONTAL_LATERAL_GM_L,Frontal Lateral Gray Matter Left,"121, 143, 163, 165, 183, 191, 205"
+319,FRONTAL_MEDIAL_GM_L,Frontal Medial Gray Matter Left,"125, 141, 151, 153, 187, 193"
+320,FRONTAL_OPERCULAR_GM_L,Frontal Opercular Gray Matter Left,"113, 119, 175"
+321,LIMBIC_CINGULATE_GM_L,Limbic Cingulate Gray Matter Left,"101, 139, 167"
+322,LIMBIC_MEDIALTEMPORAL_GM_L,Limbic Medial Temporal Gray Matter Left,"117, 171"
+323,OCCIPITAL_INFERIOR_GM_L,Occipital Inferior Gray Matter Left,161
+324,OCCIPITAL_LATERAL_GM_L,Occipital Lateral Gray Matter Left,"129, 145, 157, 197"
+325,OCCIPITAL_MEDIAL_GM_L,Occipital Medial Gray Matter Left,"109, 115, 135"
+326,PARIETAL_LATERAL_GM_L,Parietal Lateral Gray Matter Left,"107, 177, 195, 199"
+327,PARIETAL_MEDIAL_GM_L,Parietal Medial Gray Matter Left,"149, 169"
+328,TEMPORAL_INFERIOR_GM_L,Temporal Inferior Gray Matter Left,123
+329,TEMPORAL_LATERAL_GM_L,Temporal Lateral Gray Matter Left,"133, 155, 201, 203"
+330,TEMPORAL_SUPRATEMPORAL_GM_L,Temporal Supratemporal Gray Matter Left,"181, 185, 207"
+331,FRONTAL_INFERIOR_GM_R,Frontal Inferior Gray Matter Right,"104, 136, 146, 178"
+332,FRONTAL_INSULAR_GM_R,Frontal Insular Gray Matter Right,"102, 172"
+333,FRONTAL_LATERAL_GM_R,Frontal Lateral Gray Matter Right,"120, 142, 162, 164, 182, 190, 204"
+334,FRONTAL_MEDIAL_GM_R,Frontal Medial Gray Matter Right,"124, 140, 150, 152, 186, 192"
+335,FRONTAL_OPERCULAR_GM_R,Frontal Opercular Gray Matter Right,"112, 118, 174"
+336,LIMBIC_CINGULATE_GM_R,Limbic Cingulate Gray Matter Right,"100, 138, 166"
+337,LIMBIC_MEDIALTEMPORAL_GM_R,Limbic Medial Temporal Gray Matter Right,"116, 170"
+338,OCCIPITAL_INFERIOR_GM_R,Occipital Inferior Gray Matter Right,160
+339,OCCIPITAL_LATERAL_GM_R,Occipital Lateral Gray Matter Right,"128, 144, 156, 196"
+340,OCCIPITAL_MEDIAL_GM_R,Occipital Medial Gray Matter Right,"108, 114, 134"
+341,PARIETAL_LATERAL_GM_R,Parietal Lateral Gray Matter Right,"106, 176, 194, 198"
+342,PARIETAL_MEDIAL_GM_R,Parietal Medial Gray Matter Right,"148, 168"
+343,TEMPORAL_INFERIOR_GM_R,Temporal Inferior Gray Matter Right,122
+344,TEMPORAL_LATERAL_GM_R,Temporal Lateral Gray Matter Right,"132, 154, 200, 202"
+345,TEMPORAL_SUPRATEMPORAL_GM_R,Temporal Supratemporal Gray Matter Right,"180, 184, 206"
+4,3rd Ventricle,Third Ventricle,4
+11,4th Ventricle,Fourth Ventricle,11
+23,Right Accumbens Area,Right Accumbens Area,23
+30,Left Accumbens Area,Left Accumbens Area,30
+31,Right Amygdala,Right Amygdala,31
+32,Left Amygdala,Left Amygdala,32
+35,Brain Stem,Brain Stem,35
+36,Right Caudate,Right Caudate,36
+37,Left Caudate,Left Caudate,37
+38,Right Cerebellum Exterior,Right Cerebellum Exterior,38
+39,Left Cerebellum Exterior,Left Cerebellum Exterior,39
+40,Right Cerebellum White Matter,Right Cerebellum White Matter,40
+41,Left Cerebellum White Matter,Left Cerebellum White Matter,41
+46,Cerebral Spinal Fluid,Cerebral Spinal Fluid,46
+47,Right Hippocampus,Right Hippocampus,47
+48,Left Hippocampus,Left Hippocampus,48
+49,Right Inf Lat Vent,Right Inferior Lateral Ventricle,49
+50,Left Inf Lat Vent,Left Inferior Lateral Ventricle,50
+51,Right Lateral Ventricle,Right Lateral Ventricle,51
+52,Left Lateral Ventricle,Left Lateral Ventricle,52
+55,Right Pallidum,Right Pallidum,55
+56,Left Pallidum,Left Pallidum,56
+57,Right Putamen,Right Putamen,57
+58,Left Putamen,Left Putamen,58
+59,Right Thalamus Proper,Right Thalamus Proper,59
+60,Left Thalamus Proper,Left Thalamus Proper,60
+61,Right Ventral DC,Right Ventral Dorsal Column,61
+62,Left Ventral DC,Left Ventral Dorsal Column,62
+71,Cerebellar Vermal Lobules I-V,Cerebellar Vermal Lobules I-V,71
+72,Cerebellar Vermal Lobules VI-VII,Cerebellar Vermal Lobules VI-VII,72
+73,Cerebellar Vermal Lobules VIII-X,Cerebellar Vermal Lobules VIII-X,73
+75,Left Basal Forebrain,Left Basal Forebrain,75
+76,Right Basal Forebrain,Right Basal Forebrain,76
+81,frontal lobe WM right,Frontal Lobe White Matter Right,81
+82,frontal lobe WM left,Frontal Lobe White Matter Left,82
+83,occipital lobe WM right,Occipital Lobe White Matter Right,83
+84,occipital lobe WM left,Occipital Lobe White Matter Left,84
+85,parietal lobe WM right,Parietal Lobe White Matter Right,85
+86,parietal lobe WM left,Parietal Lobe White Matter Left,86
+87,temporal lobe WM right,Temporal Lobe White Matter Right,87
+88,temporal lobe WM left,Temporal Lobe White Matter Left,88
+89,fornix right,Fornix Right,89
+90,fornix left,Fornix Left,90
+91,anterior limb of internal capsule right,Anterior Limb of Internal Capsule Right,91
+92,anterior limb of internal capsule left,Anterior Limb of Internal Capsule Left,92
+93,posterior limb of internal capsule inc. cerebral peduncle right,Posterior Limb of Internal Capsule including Cerebral Peduncle Right,93
+94,posterior limb of internal capsule inc. cerebral peduncle left,Posterior Limb of Internal Capsule including Cerebral Peduncle Left,94
+95,corpus callosum,Corpus Callosum,95
+100,Right ACgG  anterior cingulate gyrus,Right Anterior Cingulate Gyrus,100
+101,Left ACgG  anterior cingulate gyrus,Left Anterior Cingulate Gyrus,101
+102,Right AIns  anterior insula,Right Anterior Insula,102
+103,Left AIns  anterior insula,Left Anterior Insula,103
+104,Right AOrG  anterior orbital gyrus,Right Anterior Orbital Gyrus,104
+105,Left AOrG  anterior orbital gyrus,Left Anterior Orbital Gyrus,105
+106,Right AnG   angular gyrus,Right Angular Gyrus,106
+107,Left AnG   angular gyrus,Left Angular Gyrus,107
+108,Right Calc  calcarine cortex,Right Calcarine Cortex,108
+109,Left Calc  calcarine cortex,Left Calcarine Cortex,109
+112,Right CO    central operculum,Right Central Operculum,112
+113,Left CO    central operculum,Left Central Operculum,113
+114,Right Cun   cuneus,Right Cuneus,114
+115,Left Cun   cuneus,Left Cuneus,115
+116,Right Ent   entorhinal area,Right Entorhinal Area,116
+117,Left Ent   entorhinal area,Left Entorhinal Area,117
+118,Right FO    frontal operculum,Right Frontal Operculum,118
+119,Left FO    frontal operculum,Left Frontal Operculum,119
+120,Right FRP   frontal pole,Right Frontal Pole,120
+121,Left FRP   frontal pole,Left Frontal Pole,121
+122,Right FuG   fusiform gyrus,Right Fusiform Gyrus,122
+123,Left FuG   fusiform gyrus,Left Fusiform Gyrus,123
+124,Right GRe   gyrus rectus,Right Gyrus Rectus,124
+125,Left GRe   gyrus rectus,Left Gyrus Rectus,125
+128,Right IOG   inferior occipital gyrus,Right Inferior Occipital Gyrus,128
+129,Left IOG   inferior occipital gyrus,Left Inferior Occipital Gyrus,129
+132,Right ITG   inferior temporal gyrus,Right Inferior Temporal Gyrus,132
+133,Left ITG   inferior temporal gyrus,Left Inferior Temporal Gyrus,133
+134,Right LiG   lingual gyrus,Right Lingual Gyrus,134
+135,Left LiG   lingual gyrus,Left Lingual Gyrus,135
+136,Right LOrG  lateral orbital gyrus,Right Lateral Orbital Gyrus,136
+137,Left LOrG  lateral orbital gyrus,Left Lateral Orbital Gyrus,137
+138,Right MCgG  middle cingulate gyrus,Right Middle Cingulate Gyrus,138
+139,Left MCgG  middle cingulate gyrus,Left Middle Cingulate Gyrus,139
+140,Right MFC   medial frontal cortex,Right Medial Frontal Cortex,140
+141,Left MFC   medial frontal cortex,Left Medial Frontal Cortex,141
+142,Right MFG   middle frontal gyrus,Right Middle Frontal Gyrus,142
+143,Left MFG   middle frontal gyrus,Left Middle Frontal Gyrus,143
+144,Right MOG   middle occipital gyrus,Right Middle Occipital Gyrus,144
+145,Left MOG   middle occipital gyrus,Left Middle Occipital Gyrus,145
+146,Right MOrG  medial orbital gyrus,Right Medial Orbital Gyrus,146
+147,Left MOrG  medial orbital gyrus,Left Medial Orbital Gyrus,147
+148,Right MPoG  postcentral gyrus medial segment,Right Postcentral Gyrus Medial Segment,148
+149,Left MPoG  postcentral gyrus medial segment,Left Postcentral Gyrus Medial Segment,149
+150,Right MPrG  precentral gyrus medial segment,Right Precentral Gyrus Medial Segment,150
+151,Left MPrG  precentral gyrus medial segment,Left Precentral Gyrus Medial Segment,151
+152,Right MSFG  superior frontal gyrus medial segment,Right Superior Frontal Gyrus Medial Segment,152
+153,Left MSFG  superior frontal gyrus medial segment,Left Superior Frontal Gyrus Medial Segment,153
+154,Right MTG   middle temporal gyrus,Right Middle Temporal Gyrus,154
+155,Left MTG   middle temporal gyrus,Left Middle Temporal Gyrus,155
+156,Right OCP   occipital pole,Right Occipital Pole,156
+157,Left OCP   occipital pole,Left Occipital Pole,157
+160,Right OFuG  occipital fusiform gyrus,Right Occipital Fusiform Gyrus,160
+161,Left OFuG  occipital fusiform gyrus,Left Occipital Fusiform Gyrus,161
+162,Right OpIFG opercular part of the inferior frontal gyrus,Right Opercular Part of the Inferior Frontal Gyrus,162
+163,Left OpIFG opercular part of the inferior frontal gyrus,Left Opercular Part of the Inferior Frontal Gyrus,163
+164,Right OrIFG orbital part of the inferior frontal gyrus,Right Orbital Part of the Inferior Frontal Gyrus,164
+165,Left OrIFG orbital part of the inferior frontal gyrus,Left Orbital Part of the Inferior Frontal Gyrus,165
+166,Right PCgG  posterior cingulate gyrus,Right Posterior Cingulate Gyrus,166
+167,Left PCgG  posterior cingulate gyrus,Left Posterior Cingulate Gyrus,167
+168,Right PCu   precuneus,Right Precuneus,168
+169,Left PCu   precuneus,Left Precuneus,169
+170,Right PHG   parahippocampal gyrus,Right Parahippocampal Gyrus,170
+171,Left PHG   parahippocampal gyrus,Left Parahippocampal Gyrus,171
+172,Right PIns  posterior insula,Right Posterior Insula,172
+173,Left PIns  posterior insula,Left Posterior Insula,173
+174,Right PO    parietal operculum,Right Parietal Operculum,174
+175,Left PO    parietal operculum,Left Parietal Operculum,175
+176,Right PoG   postcentral gyrus,Right Postcentral Gyrus,176
+177,Left PoG   postcentral gyrus,Left Postcentral Gyrus,177
+178,Right POrG  posterior orbital gyrus,Right Posterior Orbital Gyrus,178
+179,Left POrG  posterior orbital gyrus,Left Posterior Orbital Gyrus,179
+180,Right PP    planum polare,Right Planum Polare,180
+181,Left PP    planum polare,Left Planum Polare,181
+182,Right PrG   precentral gyrus,Right Precentral Gyrus,182
+183,Left PrG   precentral gyrus,Left Precentral Gyrus,183
+184,Right PT    planum temporale,Right Planum Temporale,184
+185,Left PT    planum temporale,Left Planum Temporale,185
+186,Right SCA   subcallosal area,Right Subcallosal Area,186
+187,Left SCA   subcallosal area,Left Subcallosal Area,187
+190,Right SFG   superior frontal gyrus,Right Superior Frontal Gyrus,190
+191,Left SFG   superior frontal gyrus,Left Superior Frontal Gyrus,191
+192,Right SMC   supplementary motor cortex,Right Supplementary Motor Cortex,192
+193,Left SMC   supplementary motor cortex,Left Supplementary Motor Cortex,193
+194,Right SMG   supramarginal gyrus,Right Supramarginal Gyrus,194
+195,Left SMG   supramarginal gyrus,Left Supramarginal Gyrus,195
+196,Right SOG   superior occipital gyrus,Right Superior Occipital Gyrus,196
+197,Left SOG   superior occipital gyrus,Left Superior Occipital Gyrus,197
+198,Right SPL   superior parietal lobule,Right Superior Parietal Lobule,198
+199,Left SPL   superior parietal lobule,Left Superior Parietal Lobule,199
+200,Right STG   superior temporal gyrus,Right Superior Temporal Gyrus,200
+201,Left STG   superior temporal gyrus,Left Superior Temporal Gyrus,201
+202,Right TMP   temporal pole,Right Temporal Pole,202
+203,Left TMP   temporal pole,Left Temporal Pole,203
+204,Right TrIFG triangular part of the inferior frontal gyrus,Right Triangular Part of the Inferior Frontal Gyrus,204
+205,Left TrIFG triangular part of the inferior frontal gyrus,Left Triangular Part of the Inferior Frontal Gyrus,205
+206,Right TTG   transverse temporal gyrus,Right Transverse Temporal Gyrus,206
+207,Left TTG   transverse temporal gyrus,Left Transverse Temporal Gyrus,207
