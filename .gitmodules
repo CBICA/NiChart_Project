@@ -40,3 +40,9 @@
 [submodule "Machine_Learning/spare_score"]
 	path = Machine_Learning/spare_score
 	url = https://github.com/CBICA/spare_score
+[submodule "Image_Processing/fMRI/xcp_d"]
+	path = Image_Processing/fMRI/xcp_d
+	url = https://github.com/PennLINC/xcp_d
+[submodule "Harmonization/ComBatFam_Pipeline"]
+	path = Harmonization/ComBatFam_Pipeline
+	url = https://github.com/PennSIVE/ComBatFam_Pipeline
