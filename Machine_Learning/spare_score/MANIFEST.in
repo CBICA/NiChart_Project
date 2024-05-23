@@ -1,2 +1,0 @@
-recursive-include spare_scores.mdl *.pkl.gz
-recursive-include spare_scores.data *.csv
