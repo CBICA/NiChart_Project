@@ -31,3 +31,12 @@
 [submodule "Machine_Learning/GeneSGAN"]
 	path = Machine_Learning/GeneSGAN
 	url = https://github.com/zhijian-yang/GeneSGAN
+[submodule "Image_Processing/sMRI/NiChart_Tissue_Segmentation"]
+	path = Image_Processing/sMRI/NiChart_Tissue_Segmentation
+	url = https://github.com/CBICA/NiChart_Tissue_Segmentation
+[submodule "Image_Processing/sMRI/NiChart_DLMUSE"]
+	path = Image_Processing/sMRI/NiChart_DLMUSE
+	url = https://github.com/CBICA/NiChart_DLMUSE
+[submodule "Machine_Learning/spare_score"]
+	path = Machine_Learning/spare_score
+	url = https://github.com/CBICA/spare_score
