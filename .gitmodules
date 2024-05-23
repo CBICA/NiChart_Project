@@ -1,12 +1,12 @@
 [submodule "NiChart_Website"]
 	path = NiChart_Website
 	url = https://github.com/CBICA/NiChart_Website
-[submodule "NiChart_DLMUSE"]
-	path = NiChart_DLMUSE
-	url = https://github.com/CBICA/NiChart_DLMUSE
-[submodule "NiChart_Tissue_Segmentation"]
-	path = NiChart_Tissue_Segmentation
-	url = https://github.com/CBICA/NiChart_Tissue_Segmentation
+[submodule "Image_Processing/sMRI/NiChart_Tissue_Segmentation"]
+  path = Image_Processing/sMRI/NiChart_Tissue_Segmentation
+  url = https://github.com/username/NiChart_Tissue_Segmentation.git
+[submodule "Image_Processing/sMRI/NiChart_DLMUSE"]
+  path = Image_Processing/sMRI/NiChart_DLMUSE
+  url = https://github.com/username/NiChart_DLMUSE.git
 [submodule "spare_score"]
 	path = spare_score
 	url = https://github.com/CBICA/spare_score
