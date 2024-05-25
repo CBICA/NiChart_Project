@@ -49,3 +49,6 @@
 [submodule "Harmonization/NiChart_Harmonize"]
 	path = Harmonization/NiChart_Harmonize
 	url = https://github.com/CBICA/NiChart_Harmonize
+[submodule "NiChart_Viewer"]
+	path = NiChart_Viewer
+	url = https://github.com/gurayerus/NiChart_Viewer
