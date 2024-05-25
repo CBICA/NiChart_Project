@@ -46,3 +46,6 @@
 [submodule "Harmonization/ComBatFam_Pipeline"]
 	path = Harmonization/ComBatFam_Pipeline
 	url = https://github.com/PennSIVE/ComBatFam_Pipeline
+[submodule "Harmonization/NiChart_Harmonize"]
+	path = Harmonization/NiChart_Harmonize
+	url = https://github.com/CBICA/NiChart_Harmonize
