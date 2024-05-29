@@ -14,9 +14,9 @@ NiChart is a comprehensive framework designed to revolutionize neuroimaging rese
 ## Quick Links
 
 [![NiChart Website](https://img.shields.io/badge/-Website-blue?style=for-the-badge&logo=world&logoColor=white)](https://neuroimagingchart.com/)
-[![Twitter](https://img.shields.io/badge/-Twitter-blue?style=for-the-badge&logo=twitter&logoColor=white)](https://twitter.com/CBICAannounce)
+[![Twitter](https://img.shields.io/badge/-Twitter-blue?style=for-the-badge&logo=twitter&logoColor=white)](https://x.com/NiChart_AIBIL)
 [![AIBIL Research](https://img.shields.io/badge/-Papers-blue?style=for-the-badge&logo=google-scholar&logoColor=white)](https://aibil.med.upenn.edu/research/)
-
+[!][YouTube](https://www.youtube.com/@NiChart-UPenn)
 
 ## Installation Instructions
 
@@ -26,7 +26,7 @@ NiChart is a comprehensive framework designed to revolutionize neuroimaging rese
 ## Example Usage
 
 *For a visual guide, see this GIF:*  
-![Usage GIF](URL_TO_YOUR_GIF)
+![Usage GIF](https://imgur.com/a/qGT7Ey4)
 
 ---
 
