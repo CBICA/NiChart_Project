@@ -1,0 +1,9 @@
+{
+    "python.pythonPath": "/usr/local/miniconda/bin/python",
+    "restructuredtext.confPath": "${workspaceFolder}/docs",
+    "python.testing.pytestEnabled": true,
+    "python.testing.unittestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.pytestArgs": [],
+    "editor.defaultFormatter": "charliermarsh.ruff",
+}

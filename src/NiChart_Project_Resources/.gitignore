@@ -1,0 +1,45 @@
+# Exclude NIfTI imaging files
+*.nii
+*.nii.gz
+
+# Exclude DICOM files
+*.dcm
+
+# Exclude database files
+*.db
+*.sql
+
+# Exclude private keys and certificates
+*.pem
+*.key
+*.cert
+*.crt
+
+# Exclude environment variables and configuration files that may contain sensitive information
+.env
+*.conf
+config.json
+
+# Exclude log files and directories
+*.log
+logs/
+log/
+
+# Exclude temporary files and directories
+*.tmp
+tmp/
+temp/
+
+# Exclude any specific directories that may contain patient data or sensitive information
+data/
+patient_data/
+secrets/
+credentials/
+
+# Exclude OS related stuff
+.DS_Store
+.DS_Store?
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

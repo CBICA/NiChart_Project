@@ -1,0 +1,44 @@
+QWidget{
+    background-color: rgb(235, 235, 245);
+    color: rgb(0, 0, 30)
+}
+
+QComboBox{
+    background-color: rgb(255, 255, 255);
+    color: rgba(0, 0, 0, 200)
+}
+SearchableQComboBox{
+    background-color: rgb(255, 255, 255);
+    color: rgba(0, 0, 0, 200)
+}
+CheckableQComboBox{
+    background-color: rgb(255, 255, 255);
+    color: rgba(0, 0, 0, 200)
+}
+QLineEdit{
+    background-color: rgb(255, 255, 255);
+    color: rgb(0, 0, 0);
+    font-size: 13px
+}
+QLabel{
+    background-color: rgb(240, 240, 255);
+    color: rgb(10, 10, 140)
+}
+QCheckBox{
+    background-color: rgb(240, 240, 255);
+    color: rgb(60, 60, 20)
+}
+QPushButton{
+    background-color: rgb(0, 0, 255);
+    color: rgb(255, 255, 255)
+}
+
+QMenu{
+    background-color: rgb(255, 255, 255);
+    color: rgb(30, 30, 0)
+}
+QMenu:disabled{
+    background-color: rgb(255, 255, 255);
+    color: rgb(130, 130, 100)
+}
+

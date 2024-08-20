@@ -1,0 +1,53 @@
+pnet.Basic package
+==================
+
+Submodules
+----------
+
+pnet.Basic.Brain\_Template module
+---------------------------------
+
+.. automodule:: pnet.Basic.Brain_Template
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pnet.Basic.Cluster\_Computation module
+--------------------------------------
+
+.. automodule:: pnet.Basic.Cluster_Computation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pnet.Basic.Computation\_Environment module
+------------------------------------------
+
+.. automodule:: pnet.Basic.Computation_Environment
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pnet.Basic.Cropping module
+--------------------------
+
+.. automodule:: pnet.Basic.Cropping
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pnet.Basic.Matrix\_Computation module
+-------------------------------------
+
+.. automodule:: pnet.Basic.Matrix_Computation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: pnet.Basic
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,31 @@
+.footer {
+  bottom: 0;
+  left: 0;
+  width: calc(100% - 2rem);
+  background-color: #000000;
+  margin: auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.05);
+  padding: 5px 5px; /* Adjust top and bottom padding as needed */
+}
+
+.footerContent {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.footer p {
+  margin: 1;
+  font-size: 16px; /* Increased font size */
+  color: #fff;
+  padding: 1rem; /* Adjust padding for better visibility */
+}
+
+.cbicaLink {
+  color: #E0E0E0; /* Lighter shade for better readability */
+  text-decoration: underline;
+}
+
+.cbicaLink:hover {
+  text-decoration: underline; /* Adds an underline on hover for better visibility */
+}

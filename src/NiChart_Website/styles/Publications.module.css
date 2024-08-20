@@ -1,0 +1,49 @@
+.container{
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+  justify-content: center; /* This will center the .mainContent horizontally */
+  align-items: start; /* This will align the .mainContent to the start of the container vertically */
+  /* new small viewport height for modern browsers */
+  min-height:100svh;  
+}
+
+
+.mainContent {
+  width: 90%;
+  max-width: 90%;
+  padding: 2rem;
+}
+
+.title {
+  font-size: 2.5rem;
+  color: #333;
+  text-align: left;
+  margin-bottom: 1rem;
+}
+
+.description {
+  font-size: 1rem;
+  text-align: left;
+  margin-bottom: 2rem;
+}
+
+.publicationSection {
+  margin-bottom: 2rem;
+}
+
+.sectionHeader {
+  font-size: 1.8rem;
+  color: #444;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Responsive layout for smaller screens */
+@media (max-width: 768px) {
+  .mainContent {
+    width: 90%;
+  }
+}

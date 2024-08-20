@@ -1,0 +1,63 @@
+.container {
+  display:grid;
+  grid-template-columns:100%;
+  grid-template-rows:auto 1fr auto;
+
+  /* fallback height */
+  min-height:100vh;
+
+  /* new small viewport height for modern browsers */
+  min-height:100svh;
+}
+  
+.portalPage {
+  display:block;
+  padding: 1rem;
+}
+
+@media (min-width:850px) {
+  .portalPage  {
+    display: grid;
+    grid-template-columns: 15% 80%;
+    gap: 3%;
+  }
+}
+
+.modulePage {
+  overflow-y: auto; /* Enable scrolling for main content */
+}
+
+  .heading {
+    margin-bottom: 1rem;
+  }
+  
+  .subheading {
+    margin-bottom: 0.5rem;
+  }
+  
+  .fileUpload {
+    margin-bottom: 2rem;
+  }
+  
+  .jobList {
+    margin-top: 2rem;
+  }
+  
+  .jobItem {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .jobItemStatus {
+    flex-grow: 1;
+  }
+  
+  .jobItemLink {
+    margin-left: 1rem;
+  }
+  
+  .signOutButton {
+    margin-top: 1rem;
+  }
+  

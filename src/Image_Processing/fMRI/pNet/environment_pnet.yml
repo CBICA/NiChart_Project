@@ -1,0 +1,29 @@
+name: pnet
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - h5py
+  - mesalib
+  - nibabel
+  - numpy
+  - pandas
+  - pip
+  - python==3.8.13
+  - pytorch==2.1.0
+  - scikit-image
+  - scikit-learn
+  - scipy
+  - vtk>=9.2=*osmesa*
+  - pip:
+    - ggplot
+    - matplotlib
+    - plotnine
+    - statsmodels
+    - surfplot
+    - tomli
+    - sphinx>=7.0
+    - sphinx_rtd_theme
+    - sphinx-gallery
+    - sphinx-gallery
+    - sphinx_argparse

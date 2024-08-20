@@ -1,0 +1,42 @@
+Package: ComBatFamQC
+Title: Harmonization QC visualization
+Version: 0.0.0.9000
+Author: Zheng Ren
+Maintainer: Zheng Ren <zren1422@gmail.com>
+Description: Prepare data and create an interactive shiny visualization to check for presence of batch effects.
+License: Artistic-2.0
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Imports: 
+    tidyr,
+    dplyr,
+    stringr,
+    tidyverse,
+    ggplot2,
+    DT,
+    shiny,
+    car,
+    broom,
+    pbkrtest,
+    parallel,
+    Rtsne,
+    MDMR,
+    gamlss, 
+    lme4, 
+    mgcv, 
+    bslib,
+    bsicons,
+    shinydashboard,
+    methods,
+    utils,
+    gamlss.dist,
+    ComBatFamily
+Remotes: PennSIVE/ComBatFamily
+Depends: 
+    R (>= 2.10)
+LazyData: true
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

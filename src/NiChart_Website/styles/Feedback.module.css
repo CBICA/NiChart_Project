@@ -1,0 +1,44 @@
+.container {
+    display:grid;
+    grid-template-columns:100%;
+    grid-template-rows:auto 1fr auto;
+  
+    /* fallback height */
+    min-height:100vh;
+  
+    /* new small viewport height for modern browsers */
+    min-height:100svh;
+  }
+
+.feedbackSection {
+  text-align: center;
+  padding: 2rem;
+  background-color: #f5f5f5;
+  margin: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.feedbackSection h1 {
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.feedbackSection p {
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+.feedbackLink {
+  background-color: #4397F8;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.feedbackLink:hover {
+  background-color: #367BCA;
+}

@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pnet.Workflow.Workflow_Func &mdash; pNet 1.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/theme_overrides.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=292eb321"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            pNet
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../auto_examples/index.html">Tutorials and Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pNet</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pnet.Workflow.Workflow_Func</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pnet.Workflow.Workflow_Func</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Yuncong Ma, 2/12/2024</span>
+<span class="c1"># pNet</span>
+<span class="c1"># Provide examples of running the whole workflow of pNet</span>
+
+<span class="c1">#########################################</span>
+<span class="c1"># Packages</span>
+
+<span class="c1"># Module</span>
+<span class="c1"># This script builds the five modules of pNet</span>
+<span class="c1"># Functions for modules of pNet</span>
+<span class="kn">from</span> <span class="nn">Basic.Brain_Template</span> <span class="kn">import</span> <span class="n">Brain_Template</span>
+<span class="kn">from</span> <span class="nn">Module.FN_Computation_torch</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">Module.Quality_Control_torch</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">Basic.Cluster_Computation</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">Report.Web_Report</span> <span class="kn">import</span> <span class="o">*</span>
+
+
+<div class="viewcode-block" id="workflow">
+<a class="viewcode-back" href="../../../pnet.Workflow.html#pnet.Workflow.Workflow_Func.workflow">[docs]</a>
+<span class="k">def</span> <span class="nf">workflow</span><span class="p">(</span><span class="n">dir_pnet_result</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+             <span class="n">file_scan</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+             <span class="n">dataType</span><span class="o">=</span><span class="s1">&#39;Surface&#39;</span><span class="p">,</span> <span class="n">dataFormat</span><span class="o">=</span><span class="s1">&#39;HCP Surface (*.cifti, *.mat)&#39;</span><span class="p">,</span>
+             <span class="n">file_subject_ID</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_subject_folder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_group_ID</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+             <span class="n">file_Brain_Template</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+             <span class="n">templateFormat</span><span class="o">=</span><span class="s1">&#39;HCP&#39;</span><span class="p">,</span>
+             <span class="n">file_surfL</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_surfR</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_maskL</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_maskR</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+             <span class="n">file_mask_vol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_overlayImage</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+             <span class="n">maskValue</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">file_surfL_inflated</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_surfR_inflated</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+             <span class="n">method</span><span class="o">=</span><span class="s1">&#39;SR-NMF&#39;</span><span class="p">,</span>
+             <span class="n">K</span><span class="o">=</span><span class="mi">17</span><span class="p">,</span>
+             <span class="n">init</span><span class="o">=</span><span class="s1">&#39;random&#39;</span><span class="p">,</span>
+             <span class="n">sampleSize</span><span class="o">=</span><span class="s1">&#39;Automatic&#39;</span><span class="p">,</span>
+             <span class="n">nBS</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+             <span class="n">nTPoints</span><span class="o">=</span><span class="mi">99999</span><span class="p">,</span>
+             <span class="n">Combine_Scan</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+             <span class="n">file_gFN</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+             <span class="n">FN_model_parameter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+             <span class="n">Parallel</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">Computation_Mode</span><span class="o">=</span><span class="s1">&#39;CPU_Torch&#39;</span><span class="p">,</span> <span class="n">N_Thread</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+             <span class="n">dataPrecision</span><span class="o">=</span><span class="s1">&#39;double&#39;</span><span class="p">,</span>
+             <span class="n">outputFormat</span><span class="o">=</span><span class="s1">&#39;Both&#39;</span><span class="p">,</span>
+             <span class="n">synchronized_view</span><span class="o">=</span><span class="kc">True</span> <span class="ow">or</span> <span class="nb">bool</span><span class="p">,</span>
+             <span class="n">synchronized_colorbar</span><span class="o">=</span><span class="kc">True</span> <span class="ow">or</span> <span class="nb">bool</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Run the workflow of pNet, including Data Input, FN Computation, Quality Control and Visualization</span>
+<span class="sd">    This function is for running pNet in a single job</span>
+
+<span class="sd">    :param dir_pnet_result: directory of the pNet result folder</span>
+<span class="sd">    :param dataType: &#39;Surface&#39;, &#39;Volume&#39;, &#39;Surface-Volume&#39;</span>
+<span class="sd">    :param dataFormat: &#39;HCP Surface (*.cifti, *.mat)&#39;, &#39;MGH Surface (*.mgh)&#39;, &#39;MGZ Surface (*.mgz)&#39;, &#39;Volume (*.nii, *.nii.gz, *.mat)&#39;, &#39;HCP Surface-Volume (*.cifti)&#39;, &#39;HCP Volume (*.cifti)&#39;</span>
+
+<span class="sd">    :param file_scan: a txt file that stores directories of all fMRI scans</span>
+<span class="sd">    :param file_subject_ID: a txt file that store subject ID information corresponding to fMRI scan in file_scan</span>
+<span class="sd">    :param file_subject_folder: a txt file that store subject folder names corresponding to fMRI scans in file_scan</span>
+<span class="sd">    :param file_group_ID: a txt file that store group information corresponding to fMRI scan in file_scan</span>
+
+<span class="sd">    :param file_Brain_Template: file directory of a brain template file in json format</span>
+<span class="sd">    :param templateFormat: &#39;HCP&#39;, &#39;FreeSurfer&#39;, &#39;3D Matrix&#39;</span>
+<span class="sd">    :param file_surfL: file that stores the surface shape information of the left hemisphere, including vertices and faces</span>
+<span class="sd">    :param file_surfR: file that stores the surface shape information of the right hemisphere, including vertices and faces</span>
+<span class="sd">    :param file_maskL: file that stores the mask information of the left hemisphere, a 1D 0-1 vector</span>
+<span class="sd">    :param file_maskR: file that stores the mask information of the right hemisphere, a 1D 0-1 vector</span>
+<span class="sd">    :param file_surfL_inflated: file that stores the inflated surface shape information of the left hemisphere, including vertices and faces</span>
+<span class="sd">    :param file_surfR_inflated: file that stores the inflated surface shape information of the right hemisphere, including vertices and faces</span>
+<span class="sd">    :param file_mask_vol: file of a mask file for volume-based data type</span>
+<span class="sd">    :param file_overlayImage: file of a background image for visualizing volume-based results</span>
+<span class="sd">    :param maskValue: 0 or 1, 0 means 0s in mask files are useful vertices, otherwise vice versa. maskValue=0 for medial wall in HCP data, and maskValue=1 for brain masks</span>
+
+<span class="sd">    :param method: &#39;SR-NMF&#39; or &#39;GIG-ICA&#39;</span>
+<span class="sd">    :param K: number of FNs</span>
+<span class="sd">    :param Combine_Scan: False or True, whether to combine multiple scans for the same subject</span>
+<span class="sd">    :param file_gFN: None or a directory of a precomputed gFN in .mat format</span>
+
+<span class="sd">    :param FN_model_parameter: advanced parameters for FN models &#39;SR-NMF&#39;, &#39;GIG-ICA&#39;. Default is set to None, otherwise a dict. Details are in setup_SR_NMF and setup_GIG_ICA</span>
+<span class="sd">    :param init: &#39;nndsvda&#39;: NNDSVD with zeros filled with the average of X (better when sparsity is not desired)  #updated on 08/03/2024</span>
+<span class="sd">                 &#39;random&#39;: non-negative random matrices, scaled with: sqrt(X.mean() / n_components)</span>
+<span class="sd">                 &#39;nndsvd&#39;: Nonnegative Double Singular Value Decomposition (NNDSVD) initialization (better for sparseness)</span>
+<span class="sd">                 &#39;nndsvdar&#39; NNDSVD with zeros filled with small random values (generally faster, less accurate alternative to NNDSVDa for when sparsity is not desired)</span>
+
+<span class="sd">    :param Parallel: False or True, whether to enable parallel computation</span>
+<span class="sd">    :param Computation_Mode: &#39;CPU_Numpy&#39;, &#39;CPU_Torch&#39;</span>
+<span class="sd">    :param N_Thread: positive integers, used for parallel computation</span>
+
+<span class="sd">    :param dataPrecision: &#39;double&#39; or &#39;single&#39;</span>
+
+<span class="sd">    :param outputFormat: &#39;MAT&#39;, &#39;Both&#39;, &#39;MAT&#39; is to save results in FN.mat and TC.mat for functional networks and time courses respectively. &#39;Both&#39; is for both matlab format and fMRI input file format</span>
+
+<span class="sd">    :param synchronized_view: True or False, whether to synchronize view centers for volume data between gFNs and pFNs</span>
+<span class="sd">    :param synchronized_colorbar: True or False, whether to synchronize color bar between gFNs and pFNs</span>
+
+<span class="sd">    Yuncong Ma, 2/8/2024</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Check setting</span>
+    <span class="n">check_data_type_format</span><span class="p">(</span><span class="n">dataType</span><span class="p">,</span> <span class="n">dataFormat</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;SR-NMF&#39;</span><span class="p">,</span> <span class="s1">&#39;GIG-ICA&#39;</span><span class="p">}:</span>
+        <span class="n">print_log</span><span class="p">(</span><span class="s2">&quot;Method needs to be either &#39;SR-NMF&#39; or &#39;GIG-ICA&#39;&quot;</span><span class="p">,</span> <span class="n">logFile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="n">file_gFN</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;GIG-ICA&#39;</span><span class="p">:</span>
+        <span class="n">print_log</span><span class="p">(</span><span class="s2">&quot;Group-level FNs are required as input when using GIG-ICA to obtain personalized FNs&quot;</span><span class="p">,</span>
+                  <span class="n">logFile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="c1"># setup all sub-folders in the pNet result folder</span>
+    <span class="n">dir_pnet_dataInput</span><span class="p">,</span> <span class="n">dir_pnet_FNC</span><span class="p">,</span> <span class="n">dir_pnet_gFN</span><span class="p">,</span> <span class="n">dir_pnet_pFN</span><span class="p">,</span> <span class="n">dir_pnet_QC</span><span class="p">,</span> <span class="n">dir_pnet_STAT</span> <span class="o">=</span> <span class="n">setup_result_folder</span><span class="p">(</span><span class="n">dir_pnet_result</span><span class="p">)</span>
+
+    <span class="c1"># ============== Data Input ============== #</span>
+    <span class="c1"># setup dataInput</span>
+    <span class="n">setup_scan_info</span><span class="p">(</span>
+        <span class="n">dir_pnet_dataInput</span><span class="o">=</span><span class="n">dir_pnet_dataInput</span><span class="p">,</span>
+        <span class="n">dataType</span><span class="o">=</span><span class="n">dataType</span><span class="p">,</span> <span class="n">dataFormat</span><span class="o">=</span><span class="n">dataFormat</span><span class="p">,</span>
+        <span class="n">file_scan</span><span class="o">=</span><span class="n">file_scan</span><span class="p">,</span> <span class="n">file_subject_ID</span><span class="o">=</span><span class="n">file_subject_ID</span><span class="p">,</span>
+        <span class="n">file_subject_folder</span><span class="o">=</span><span class="n">file_subject_folder</span><span class="p">,</span> <span class="n">file_group_ID</span><span class="o">=</span><span class="n">file_group_ID</span><span class="p">,</span>
+        <span class="n">Combine_Scan</span><span class="o">=</span><span class="n">Combine_Scan</span>
+    <span class="p">)</span>
+    <span class="c1"># setup brain template</span>
+    <span class="c1"># Volume and surface data types require different inputs to compute the brain template</span>
+    <span class="k">if</span> <span class="n">file_Brain_Template</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s1">&#39;Volume&#39;</span><span class="p">:</span>
+            <span class="n">setup_brain_template</span><span class="p">(</span>
+                <span class="n">dir_pnet_dataInput</span><span class="p">,</span>
+                <span class="n">dataType</span><span class="o">=</span><span class="n">dataType</span><span class="p">,</span>
+                <span class="n">templateFormat</span><span class="o">=</span><span class="n">templateFormat</span><span class="p">,</span>
+                <span class="n">file_mask_vol</span><span class="o">=</span><span class="n">file_mask_vol</span><span class="p">,</span> <span class="n">file_overlayImage</span><span class="o">=</span><span class="n">file_overlayImage</span><span class="p">,</span>
+                <span class="n">maskValue</span><span class="o">=</span><span class="n">maskValue</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s1">&#39;Surface&#39;</span><span class="p">:</span>
+            <span class="n">setup_brain_template</span><span class="p">(</span>
+                <span class="n">dir_pnet_dataInput</span><span class="p">,</span>
+                <span class="n">dataType</span><span class="o">=</span><span class="n">dataType</span><span class="p">,</span>
+                <span class="n">templateFormat</span><span class="o">=</span><span class="n">templateFormat</span><span class="p">,</span>
+                <span class="n">file_surfL</span><span class="o">=</span><span class="n">file_surfL</span><span class="p">,</span> <span class="n">file_surfR</span><span class="o">=</span><span class="n">file_surfR</span><span class="p">,</span>
+                <span class="n">file_maskL</span><span class="o">=</span><span class="n">file_maskL</span><span class="p">,</span> <span class="n">file_maskR</span><span class="o">=</span><span class="n">file_maskR</span><span class="p">,</span>
+                <span class="n">maskValue</span><span class="o">=</span><span class="n">maskValue</span><span class="p">,</span>
+                <span class="n">file_surfL_inflated</span><span class="o">=</span><span class="n">file_surfL_inflated</span><span class="p">,</span> <span class="n">file_surfR_inflated</span><span class="o">=</span><span class="n">file_surfR_inflated</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s1">&#39;Surface-Volume&#39;</span><span class="p">:</span>
+            <span class="n">setup_brain_template</span><span class="p">(</span>
+                <span class="n">dir_pnet_dataInput</span><span class="p">,</span>
+                <span class="n">dataType</span><span class="o">=</span><span class="n">dataType</span><span class="p">,</span>
+                <span class="n">templateFormat</span><span class="o">=</span><span class="n">templateFormat</span><span class="p">,</span>
+                <span class="n">file_surfL</span><span class="o">=</span><span class="n">file_surfL</span><span class="p">,</span> <span class="n">file_surfR</span><span class="o">=</span><span class="n">file_surfR</span><span class="p">,</span>
+                <span class="n">file_maskL</span><span class="o">=</span><span class="n">file_maskL</span><span class="p">,</span> <span class="n">file_maskR</span><span class="o">=</span><span class="n">file_maskR</span><span class="p">,</span>
+                <span class="n">file_mask_vol</span><span class="o">=</span><span class="n">file_mask_vol</span><span class="p">,</span> <span class="n">file_overlayImage</span><span class="o">=</span><span class="n">file_overlayImage</span><span class="p">,</span>
+                <span class="n">maskValue</span><span class="o">=</span><span class="n">maskValue</span><span class="p">,</span>
+                <span class="n">file_surfL_inflated</span><span class="o">=</span><span class="n">file_surfL_inflated</span><span class="p">,</span> <span class="n">file_surfR_inflated</span><span class="o">=</span><span class="n">file_surfR_inflated</span>
+            <span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">setup_brain_template</span><span class="p">(</span><span class="n">dir_pnet_dataInput</span><span class="p">,</span> <span class="n">file_Brain_Template</span><span class="p">)</span>
+    <span class="c1"># ============================================= #</span>
+
+    <span class="c1"># ============== FN Computation ============== #</span>
+    <span class="c1"># setup parameters for FN computation</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;SR-NMF&#39;</span><span class="p">:</span>
+        <span class="n">SR_NMF</span><span class="o">.</span><span class="n">setup_SR_NMF</span><span class="p">(</span>
+                        <span class="n">dir_pnet_result</span><span class="p">,</span>
+                        <span class="n">K</span><span class="o">=</span><span class="n">K</span><span class="p">,</span>
+                        <span class="n">init</span> <span class="o">=</span> <span class="n">init</span><span class="p">,</span>
+                        <span class="n">sampleSize</span><span class="o">=</span><span class="n">sampleSize</span><span class="p">,</span> 
+                        <span class="n">nBS</span><span class="o">=</span><span class="n">nBS</span><span class="p">,</span>
+                        <span class="n">nTPoints</span><span class="o">=</span><span class="n">nTPoints</span><span class="p">,</span>
+                        <span class="n">Combine_Scan</span><span class="o">=</span><span class="n">Combine_Scan</span><span class="p">,</span>
+                        <span class="n">file_gFN</span><span class="o">=</span><span class="n">file_gFN</span><span class="p">,</span>
+                        <span class="n">Parallel</span><span class="o">=</span><span class="n">Parallel</span><span class="p">,</span> <span class="n">Computation_Mode</span><span class="o">=</span><span class="n">Computation_Mode</span><span class="p">,</span> <span class="n">N_Thread</span><span class="o">=</span><span class="n">N_Thread</span><span class="p">,</span>
+                        <span class="n">dataPrecision</span><span class="o">=</span><span class="n">dataPrecision</span><span class="p">,</span>
+                        <span class="n">outputFormat</span><span class="o">=</span><span class="n">outputFormat</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">FN_model_parameter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">SR_NMF</span><span class="o">.</span><span class="n">update_model_parameter</span><span class="p">(</span><span class="n">dir_pnet_result</span><span class="p">,</span> <span class="n">FN_model_parameter</span><span class="o">=</span><span class="n">FN_model_parameter</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;GIG-ICA&#39;</span><span class="p">:</span>
+        <span class="n">GIG_ICA</span><span class="o">.</span><span class="n">setup_GIG_ICA</span><span class="p">(</span>
+            <span class="n">dir_pnet_result</span><span class="p">,</span>
+            <span class="n">K</span><span class="o">=</span><span class="n">K</span><span class="p">,</span>
+            <span class="n">Combine_Scan</span><span class="o">=</span><span class="n">Combine_Scan</span><span class="p">,</span>
+            <span class="n">file_gFN</span><span class="o">=</span><span class="n">file_gFN</span><span class="p">,</span>
+            <span class="n">Parallel</span><span class="o">=</span><span class="n">Parallel</span><span class="p">,</span> <span class="n">Computation_Mode</span><span class="o">=</span><span class="n">Computation_Mode</span><span class="p">,</span> <span class="n">N_Thread</span><span class="o">=</span><span class="n">N_Thread</span><span class="p">,</span>
+            <span class="n">dataPrecision</span><span class="o">=</span><span class="n">dataPrecision</span><span class="p">,</span>
+            <span class="n">outputFormat</span><span class="o">=</span><span class="n">outputFormat</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">FN_model_parameter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">GIG_ICA</span><span class="o">.</span><span class="n">update_model_parameter</span><span class="p">(</span><span class="n">dir_pnet_result</span><span class="p">,</span> <span class="n">FN_model_parameter</span><span class="o">=</span><span class="n">FN_model_parameter</span><span class="p">)</span>
+    <span class="c1"># perform FN computation</span>
+    <span class="k">if</span> <span class="n">Computation_Mode</span> <span class="o">==</span> <span class="s1">&#39;CPU_Numpy&#39;</span><span class="p">:</span>
+        <span class="n">run_FN_Computation</span><span class="p">(</span><span class="n">dir_pnet_result</span><span class="p">)</span>  <span class="c1"># does not support GIG-ICA yet</span>
+    <span class="k">elif</span> <span class="n">Computation_Mode</span> <span class="o">==</span> <span class="s1">&#39;CPU_Torch&#39;</span><span class="p">:</span>
+        <span class="n">run_FN_Computation_torch</span><span class="p">(</span><span class="n">dir_pnet_result</span><span class="p">)</span>
+    <span class="c1"># ============================================= #</span>
+
+    <span class="c1"># ============== Visualization ============== #</span>
+    <span class="n">setup_Visualization</span><span class="p">(</span>
+        <span class="n">dir_pnet_result</span><span class="o">=</span><span class="n">dir_pnet_result</span><span class="p">,</span>
+        <span class="n">synchronized_view</span><span class="o">=</span><span class="n">synchronized_view</span><span class="p">,</span>
+        <span class="n">synchronized_colorbar</span><span class="o">=</span><span class="n">synchronized_colorbar</span>
+    <span class="p">)</span>
+    <span class="c1"># ============================================= #</span>
+
+    <span class="c1"># ============== Quality Control ============== #</span>
+    <span class="c1"># perform quality control</span>
+    <span class="k">if</span> <span class="n">Computation_Mode</span> <span class="o">==</span> <span class="s1">&#39;CPU_Numpy&#39;</span><span class="p">:</span>
+        <span class="n">run_quality_control</span><span class="p">(</span><span class="n">dir_pnet_result</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">Computation_Mode</span> <span class="o">==</span> <span class="s1">&#39;CPU_Torch&#39;</span><span class="p">:</span>
+        <span class="n">run_quality_control_torch</span><span class="p">(</span><span class="n">dir_pnet_result</span><span class="p">)</span>
+    <span class="c1"># ============================================= #</span>
+
+    <span class="c1"># =============== Visualization =============== #</span>
+    <span class="n">setup_Visualization</span><span class="p">(</span><span class="n">dir_pnet_result</span><span class="p">,</span> <span class="n">synchronized_view</span><span class="o">=</span><span class="n">synchronized_view</span><span class="p">,</span> <span class="n">synchronized_colorbar</span><span class="o">=</span><span class="n">synchronized_colorbar</span><span class="p">)</span>
+    <span class="n">run_Visualization</span><span class="p">(</span><span class="n">dir_pnet_result</span><span class="p">)</span>
+    <span class="c1"># ============================================= #</span>
+
+    <span class="c1"># ================= Web Report ================ #</span>
+    <span class="n">run_web_report</span><span class="p">(</span><span class="n">dir_pnet_result</span><span class="p">)</span></div>
+
+    <span class="c1"># ============================================= #</span>
+
+
+<div class="viewcode-block" id="workflow_simple">
+<a class="viewcode-back" href="../../../pnet.Workflow.html#pnet.Workflow.Workflow_Func.workflow_simple">[docs]</a>
+<span class="k">def</span> <span class="nf">workflow_simple</span><span class="p">(</span><span class="n">dir_pnet_result</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                    <span class="n">dataType</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dataFormat</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                    <span class="n">file_scan</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                    <span class="n">file_Brain_Template</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                    <span class="n">method</span><span class="o">=</span><span class="s1">&#39;SR-NMF&#39;</span><span class="p">,</span>
+                    <span class="n">K</span><span class="o">=</span><span class="mi">17</span><span class="p">,</span>
+                    <span class="n">init</span><span class="o">=</span><span class="s1">&#39;random&#39;</span><span class="p">,</span>
+                    <span class="n">sampleSize</span><span class="o">=</span><span class="s1">&#39;Automatic&#39;</span><span class="p">,</span>
+                    <span class="n">nBS</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+                    <span class="n">nTPoints</span><span class="o">=</span><span class="mi">99999</span><span class="p">,</span>
+                    <span class="n">Combine_Scan</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">file_gFN</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Run the workflow of pNet, including Data Input, FN Computation, Quality Control and Visualization</span>
+<span class="sd">    This is a minimal version of run_workflow for fast deployment using a single job</span>
+
+<span class="sd">    :param dir_pnet_result: directory of the pNet result folder</span>
+<span class="sd">    :param dataType: &#39;Surface&#39;, &#39;Volume&#39;</span>
+<span class="sd">    :param dataFormat: &#39;HCP Surface (*.cifti, *.mat)&#39;, &#39;MGH Surface (*.mgh)&#39;, &#39;MGZ Surface (*.mgz)&#39;, &#39;Volume (*.nii, *.nii.gz, *.mat)&#39;, &#39;HCP Surface-Volume (*.cifti)&#39;, &#39;HCP Volume (*.cifti)&#39;</span>
+<span class="sd">    :param file_scan: a txt file that stores directories of all fMRI scans</span>
+<span class="sd">    :param file_Brain_Template: file directory or content of a brain template file in json format</span>
+<span class="sd">    :param method: &#39;SR-NMF&#39; or &#39;GIG-ICA&#39;</span>
+<span class="sd">    :param K: number of FNs</span>
+<span class="sd">    :param Combine_Scan: False or True, whether to combine multiple scans for the same subject</span>
+<span class="sd">    :param file_gFN: directory of a precomputed gFN in .mat format</span>
+
+<span class="sd">    Yuncong Ma, 2/8/2024</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Check setting</span>
+    <span class="n">check_data_type_format</span><span class="p">(</span><span class="n">dataType</span><span class="p">,</span> <span class="n">dataFormat</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;SR-NMF&#39;</span><span class="p">,</span> <span class="s1">&#39;GIG-ICA&#39;</span><span class="p">}:</span>
+        <span class="n">print_log</span><span class="p">(</span><span class="s2">&quot;Method needs to be either &#39;SR-NMF&#39; or &#39;GIG-ICA&#39;&quot;</span><span class="p">,</span> <span class="n">logFile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="n">file_gFN</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;GIG-ICA&#39;</span><span class="p">:</span>
+        <span class="n">print_log</span><span class="p">(</span><span class="s2">&quot;Group-level FNs are required as input when using GIG-ICA to obtain personalized FNs&quot;</span><span class="p">,</span>
+                  <span class="n">logFile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="c1"># setup all sub-folders in the pNet result folder</span>
+    <span class="n">dir_pnet_dataInput</span><span class="p">,</span> <span class="n">dir_pnet_FNC</span><span class="p">,</span> <span class="n">dir_pnet_gFN</span><span class="p">,</span> <span class="n">dir_pnet_pFN</span><span class="p">,</span> <span class="n">dir_pnet_QC</span><span class="p">,</span> <span class="n">dir_pnet_STAT</span> <span class="o">=</span> <span class="n">setup_result_folder</span><span class="p">(</span><span class="n">dir_pnet_result</span><span class="p">)</span>
+
+    <span class="c1"># ============== Data Input ============== #</span>
+    <span class="c1"># setup dataInput</span>
+    <span class="n">setup_scan_info</span><span class="p">(</span>
+        <span class="n">dir_pnet_dataInput</span><span class="o">=</span><span class="n">dir_pnet_dataInput</span><span class="p">,</span>
+        <span class="n">dataType</span><span class="o">=</span><span class="n">dataType</span><span class="p">,</span> <span class="n">dataFormat</span><span class="o">=</span><span class="n">dataFormat</span><span class="p">,</span>
+        <span class="n">file_scan</span><span class="o">=</span><span class="n">file_scan</span><span class="p">,</span>
+        <span class="n">Combine_Scan</span><span class="o">=</span><span class="n">Combine_Scan</span>
+    <span class="p">)</span>
+    <span class="c1"># setup brain template</span>
+    <span class="n">setup_brain_template</span><span class="p">(</span><span class="n">dir_pnet_dataInput</span><span class="p">,</span> <span class="n">file_Brain_Template</span><span class="p">)</span>
+    <span class="c1"># ============================================= #</span>
+
+    <span class="c1"># ============== FN Computation ============== #</span>
+    <span class="c1"># setup parameters for FN computation</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;SR-NMF&#39;</span><span class="p">:</span>
+        <span class="n">SR_NMF</span><span class="o">.</span><span class="n">setup_SR_NMF</span><span class="p">(</span>
+            <span class="n">dir_pnet_result</span><span class="p">,</span>
+            <span class="n">K</span><span class="o">=</span><span class="n">K</span><span class="p">,</span>
+            <span class="n">init</span><span class="o">=</span><span class="n">init</span><span class="p">,</span>
+            <span class="n">sampleSize</span><span class="o">=</span><span class="n">sampleSize</span><span class="p">,</span>
+            <span class="n">nBS</span><span class="o">=</span><span class="n">nBS</span><span class="p">,</span>
+            <span class="n">nTPoints</span><span class="o">=</span><span class="n">nTPoints</span><span class="p">,</span>
+            <span class="n">Combine_Scan</span><span class="o">=</span><span class="n">Combine_Scan</span><span class="p">,</span>
+            <span class="n">file_gFN</span><span class="o">=</span><span class="n">file_gFN</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;GIG-ICA&#39;</span><span class="p">:</span>
+        <span class="n">GIG_ICA</span><span class="o">.</span><span class="n">setup_GIG_ICA</span><span class="p">(</span>
+            <span class="n">dir_pnet_result</span><span class="p">,</span>
+            <span class="n">K</span><span class="o">=</span><span class="n">K</span><span class="p">,</span>
+            <span class="n">Combine_Scan</span><span class="o">=</span><span class="n">Combine_Scan</span><span class="p">,</span>
+            <span class="n">file_gFN</span><span class="o">=</span><span class="n">file_gFN</span>
+        <span class="p">)</span>
+    <span class="c1"># perform FN computation</span>
+    <span class="n">run_FN_Computation_torch</span><span class="p">(</span><span class="n">dir_pnet_result</span><span class="p">)</span>
+    <span class="c1"># ============================================= #</span>
+
+    <span class="c1"># ============== Quality Control ============== #</span>
+    <span class="c1"># perform quality control</span>
+    <span class="n">run_quality_control_torch</span><span class="p">(</span><span class="n">dir_pnet_result</span><span class="p">)</span>
+    <span class="c1"># ============================================= #</span>
+
+    <span class="c1"># =============== Visualization =============== #</span>
+    <span class="n">setup_Visualization</span><span class="p">(</span><span class="n">dir_pnet_result</span><span class="p">)</span>
+    <span class="n">run_Visualization</span><span class="p">(</span><span class="n">dir_pnet_result</span><span class="p">)</span>
+    <span class="c1"># ============================================= #</span>
+
+    <span class="c1"># ================= Web Report ================ #</span>
+    <span class="n">run_web_report</span><span class="p">(</span><span class="n">dir_pnet_result</span><span class="p">)</span></div>
+
+    <span class="c1"># ============================================= #</span>
+
+
+<div class="viewcode-block" id="guide_YN">
+<a class="viewcode-back" href="../../../pnet.Workflow.html#pnet.Workflow.Workflow_Func.guide_YN">[docs]</a>
+<span class="k">def</span> <span class="nf">guide_YN</span><span class="p">(</span><span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="s1">&#39;Y&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    terminal guidance for choosing yes or no</span>
+<span class="sd">    Users can type Y, y, Yes, yes, N, n, No, or no</span>
+
+<span class="sd">    :param prompt: a string for prompt</span>
+<span class="sd">    :param skip: False or True to skip the setting</span>
+<span class="sd">    :param default_value: a default value when skip is enabled</span>
+<span class="sd">    :return: input_YN, &#39;Y&#39; or &#39;N&#39;</span>
+
+<span class="sd">    Yuncong Ma, 10/5/2023</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">input_YN</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">while</span> <span class="n">input_YN</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">prompt</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">[Y/N]&quot;</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">skip</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Enter to use default value </span><span class="si">{</span><span class="n">default_value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+
+        <span class="n">input_YN</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;User Input &gt; &quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">input_YN</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_YN</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">skip</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">input_YN</span> <span class="o">=</span> <span class="n">default_value</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Unknown choice, try again&#39;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">input_YN</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;Yes&#39;</span><span class="p">,</span> <span class="s1">&#39;yes&#39;</span><span class="p">):</span>
+            <span class="n">input_YN</span> <span class="o">=</span> <span class="s1">&#39;Y&#39;</span>
+        <span class="k">elif</span> <span class="n">input_YN</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="s1">&#39;No&#39;</span><span class="p">,</span> <span class="s1">&#39;no&#39;</span><span class="p">):</span>
+            <span class="n">input_YN</span> <span class="o">=</span> <span class="s1">&#39;N&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Unknown choice, try again</span><span class="se">\n</span><span class="s1">User Input &gt; &#39;</span><span class="p">)</span>
+            <span class="n">input_YN</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">input_YN</span></div>
+
+
+
+<div class="viewcode-block" id="guide_dir">
+<a class="viewcode-back" href="../../../pnet.Workflow.html#pnet.Workflow.Workflow_Func.guide_dir">[docs]</a>
+<span class="k">def</span> <span class="nf">guide_dir</span><span class="p">(</span><span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    terminal guidance for getting a directory</span>
+
+<span class="sd">    :param prompt: a string for prompt</span>
+<span class="sd">    :return: input_dir</span>
+
+<span class="sd">    Yuncong Ma, 10/5/2023</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">input_dir</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">while</span> <span class="n">input_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+        <span class="n">input_dir</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;User Input &gt; &quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">input_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Wrong setup, try again</span><span class="se">\n</span><span class="s1">User Input &gt;&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">input_dir</span></div>
+
+
+
+<div class="viewcode-block" id="guide_file">
+<a class="viewcode-back" href="../../../pnet.Workflow.html#pnet.Workflow.Workflow_Func.guide_file">[docs]</a>
+<span class="k">def</span> <span class="nf">guide_file</span><span class="p">(</span><span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">existed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    terminal guidance for setting up an existing or a new file</span>
+
+<span class="sd">    :param prompt: a string for prompt</span>
+<span class="sd">    :param existed: True or False, check the existence of the file if True.</span>
+<span class="sd">    :param extension: None or a str, or a tuple of strings, specifying the file extension</span>
+<span class="sd">    :return: input_file</span>
+
+<span class="sd">    Yuncong Ma, 10/5/2023</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">input_file</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">while</span> <span class="n">input_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;# &quot;</span><span class="o">+</span><span class="n">prompt</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+        <span class="n">input_file</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;User Input &gt; &quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">input_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Wrong setup, try again</span><span class="se">\n</span><span class="s1">User Input &gt;&#39;</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="n">existed</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">input_file</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Cannot find this file, please try again&#39;</span><span class="p">)</span>
+            <span class="n">input_file</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="n">extension</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">extension</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">input_file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">extension</span><span class="p">):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Please provide a file directory with the required extension&#39;</span><span class="p">)</span>
+                    <span class="n">input_file</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">extension</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+                <span class="n">flagMatch</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">extension</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">input_file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+                        <span class="n">flagMatch</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">break</span>
+                <span class="k">if</span> <span class="n">flagMatch</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Please provide a file directory with the required extension&#39;</span><span class="p">)</span>
+                    <span class="n">input_file</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The extension needs to be None, a str, or a tuple of strings&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">input_file</span></div>
+
+
+
+<div class="viewcode-block" id="guide_number">
+<a class="viewcode-back" href="../../../pnet.Workflow.html#pnet.Workflow.Workflow_Func.guide_number">[docs]</a>
+<span class="k">def</span> <span class="nf">guide_number</span><span class="p">(</span><span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;Int&#39;</span><span class="p">,</span> <span class="n">data_range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    terminal guidance for setting up a value</span>
+
+<span class="sd">    :param prompt: a string for prompt</span>
+<span class="sd">    :param data_type: &#39;Int&#39; or &#39;Float&#39;</span>
+<span class="sd">    :param data_range: None or (1, 2)</span>
+<span class="sd">    :param skip: False or True to skip the setting</span>
+<span class="sd">    :param default_value: a default value when skip is enabled</span>
+<span class="sd">    :return: input_value</span>
+
+<span class="sd">    Yuncong Ma, 10/5/2023</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">input_value</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">while</span> <span class="n">input_value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;# &quot;</span><span class="o">+</span><span class="n">prompt</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">skip</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Enter to use default value </span><span class="si">{</span><span class="n">default_value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+
+        <span class="n">input_value</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;User Input &gt; &quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">input_value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">skip</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">input_value</span> <span class="o">=</span> <span class="n">default_value</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Set to the default value </span><span class="si">{</span><span class="n">default_value</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">input_value</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Wrong setup, try again</span><span class="se">\n</span><span class="s1">User Input &gt;&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">input_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">input_value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s1">&#39;Int&#39;</span><span class="p">:</span>
+                <span class="n">input_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">input_value</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s1">&#39;Float&#39;</span><span class="p">:</span>
+                <span class="n">input_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">input_value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">data_range</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">data_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">input_value</span> <span class="o">&lt;=</span> <span class="n">data_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">return</span> <span class="n">input_value</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The value should be within </span><span class="si">{</span><span class="n">data_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1"> and </span><span class="si">{</span><span class="n">data_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">, try again</span><span class="se">\n</span><span class="s1">User Input &gt;&#39;</span><span class="p">)</span>
+                    <span class="n">input_value</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">input_value</span>
+
+    <span class="k">return</span> <span class="n">input_value</span></div>
+
+
+
+<div class="viewcode-block" id="guide_choice">
+<a class="viewcode-back" href="../../../pnet.Workflow.html#pnet.Workflow.Workflow_Func.guide_choice">[docs]</a>
+<span class="k">def</span> <span class="nf">guide_choice</span><span class="p">(</span><span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">list_choice</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Terminal guidance for getting a directory</span>
+<span class="sd">    Use sequence ratio to find the most similar option in the list_choice to the user input</span>
+
+<span class="sd">    :param prompt: a string for prompt</span>
+<span class="sd">    :param list_choice: a list of choices</span>
+<span class="sd">    :param skip: False or True to skip the setting</span>
+<span class="sd">    :param default_value: None or value</span>
+<span class="sd">    :return: choice</span>
+
+<span class="sd">    Yuncong Ma, 10/5/2023</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">choice</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">while</span> <span class="n">choice</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;# &quot;</span><span class="o">+</span><span class="n">prompt</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">list_choice</span><span class="p">)):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;. &quot;</span> <span class="o">+</span> <span class="n">list_choice</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">skip</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Choose by number&quot;</span><span class="p">)</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Choose by number or enter to use default </span><span class="si">{</span><span class="n">default_value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+
+        <span class="n">choice</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;User Input &gt; &quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">choice</span> <span class="ow">in</span> <span class="n">list_choice</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">choice</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">choice</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">choice</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">choice</span><span class="p">))</span>
+                <span class="k">if</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">choice</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_choice</span><span class="p">):</span>
+                    <span class="n">choice</span> <span class="o">=</span> <span class="n">list_choice</span><span class="p">[</span><span class="n">choice</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">choice</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Wrong choice, try again</span><span class="se">\n</span><span class="s1">User Input &gt;&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">skip</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">default_value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">choice</span> <span class="o">=</span> <span class="n">list_choice</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">choice</span> <span class="o">=</span> <span class="n">default_value</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Set to the default value </span><span class="si">{</span><span class="n">default_value</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">choice</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Wrong choice, try again</span><span class="se">\n</span><span class="s1">User Input &gt;&#39;</span><span class="p">)</span>
+                <span class="n">choice</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">choice</span></div>
+
+
+
+<div class="viewcode-block" id="workflow_guide">
+<a class="viewcode-back" href="../../../pnet.Workflow.html#pnet.Workflow.Workflow_Func.workflow_guide">[docs]</a>
+<span class="k">def</span> <span class="nf">workflow_guide</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is a step-by-step guidance for configuring a workflow of pNet in command line</span>
+<span class="sd">    It will generate a Python script to run the desired workflow with comments</span>
+<span class="sd">    Yuncong Ma, 2/5/2024</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;This is a step-by-step guidance for setting up a workflow of pNet&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Setup result folder</span>
+    <span class="n">dir_pnet_result</span> <span class="o">=</span> <span class="n">guide_dir</span><span class="p">(</span><span class="s1">&#39;Set up a directory for storing pNet results:&#39;</span><span class="p">)</span>
+
+    <span class="c1"># ============== Data Input ============== #</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;# ============== Data Input ============== # &#39;</span><span class="p">)</span>
+    <span class="c1"># setup dataInput</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;setup dataInput&#39;</span><span class="p">)</span>
+    <span class="n">dataType</span> <span class="o">=</span> <span class="n">guide_choice</span><span class="p">(</span><span class="s2">&quot;Choose a data type:&quot;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;Surface&#39;</span><span class="p">,</span> <span class="s1">&#39;Volume&#39;</span><span class="p">,</span> <span class="s1">&#39;Surface-Volume&#39;</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s1">&#39;Surface&#39;</span><span class="p">:</span>
+        <span class="n">dataFormat</span> <span class="o">=</span> <span class="n">guide_choice</span><span class="p">(</span><span class="s2">&quot;Choose a data format:&quot;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;HCP Surface (*.cifti, *.mat)&#39;</span><span class="p">,</span> <span class="s1">&#39;MGH Surface (*.mgh)&#39;</span><span class="p">,</span> <span class="s1">&#39;MGZ Surface (*.mgz)&#39;</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s1">&#39;Volume&#39;</span><span class="p">:</span>
+        <span class="n">dataFormat</span> <span class="o">=</span> <span class="s1">&#39;Volume (*.nii, *.nii.gz, *.mat)&#39;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;data format is automatically set to &#39;Volume (*.nii, *.nii.gz, *.mat)&#39;&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># Surface-Volume</span>
+        <span class="n">dataFormat</span> <span class="o">=</span> <span class="s1">&#39;HCP Surface-Volume (*.cifti)&#39;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;data format is automatically set to &#39;HCP Surface-Volume (*.cifti)&#39;&quot;</span><span class="p">)</span>
+    <span class="n">file_scan</span> <span class="o">=</span> <span class="n">guide_file</span><span class="p">(</span><span class="s2">&quot;Provide a txt formatted file containing all fMRI scans:&quot;</span><span class="p">,</span> <span class="n">existed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="s1">&#39;.txt&#39;</span><span class="p">)</span>
+    <span class="n">Choice</span> <span class="o">=</span> <span class="n">guide_YN</span><span class="p">(</span><span class="s2">&quot;Do you have a txt formatted file containing subject ID information for each corresponding scan?&quot;</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="s1">&#39;N&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">Choice</span> <span class="o">==</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span>
+        <span class="n">file_subject_ID</span> <span class="o">=</span> <span class="n">guide_file</span><span class="p">(</span><span class="s2">&quot;Provide a txt formatted file containing subject ID information for each corresponding scan:&quot;</span><span class="p">,</span> <span class="n">existed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="s1">&#39;.txt&#39;</span><span class="p">)</span>
+        <span class="n">Choice</span> <span class="o">=</span> <span class="n">guide_YN</span><span class="p">(</span><span class="s2">&quot;Do you have a txt formatted file containing subject folder information for each corresponding scan?&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">Choice</span> <span class="o">==</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span>
+            <span class="n">file_subject_folder</span> <span class="o">=</span> <span class="n">guide_file</span><span class="p">(</span><span class="s2">&quot;Provide a txt formatted file containing subject folder information for each corresponding scan:&quot;</span><span class="p">,</span> <span class="n">existed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="s1">&#39;.txt&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">file_subject_folder</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">Choice</span> <span class="o">=</span> <span class="n">guide_YN</span><span class="p">(</span><span class="s2">&quot;Do you have a txt formatted file containing group ID for each corresponding scan?&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">Choice</span> <span class="o">==</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span>
+            <span class="n">file_group_ID</span> <span class="o">=</span> <span class="n">guide_file</span><span class="p">(</span><span class="s2">&quot;Provide a txt formatted file containing group ID for each corresponding scan:&quot;</span><span class="p">,</span> <span class="n">existed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="s1">&#39;.txt&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">file_group_ID</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">file_subject_ID</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">file_subject_folder</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">Choice</span> <span class="o">=</span> <span class="n">guide_YN</span><span class="p">(</span><span class="s2">&quot;Do you want to concatenate multiple scans for the same subject?&quot;</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="s1">&#39;N&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">Choice</span> <span class="o">==</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span>
+        <span class="n">Combine_Scan</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">Combine_Scan</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1"># setup brain template</span>
+    <span class="n">file_mask_vol</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">file_overlayImage</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">maskValue</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">file_surfL</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">file_surfR</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">file_maskL</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">file_maskR</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">file_surfL_inflated</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">file_surfR_inflated</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">Choice</span> <span class="o">=</span> <span class="n">guide_YN</span><span class="p">(</span><span class="s2">&quot;Would you like to select a built-in brain template file?&quot;</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="s1">&#39;Y&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">Choice</span> <span class="o">==</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span>
+        <span class="n">file_Brain_Template</span> <span class="o">=</span> <span class="n">guide_choice</span><span class="p">(</span><span class="s2">&quot;Select a built-in brain template:&quot;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;HCP Surface&#39;</span><span class="p">,</span> <span class="s1">&#39;MNI Volume&#39;</span><span class="p">,</span> <span class="s1">&#39;FreeSurfer_fsaverage5&#39;</span><span class="p">,</span> <span class="s1">&#39;HCP Surface-Volume&#39;</span><span class="p">,</span> <span class="s1">&#39;HCP Subcortical Volume&#39;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">file_Brain_Template</span> <span class="o">==</span> <span class="s1">&#39;HCP Surface&#39;</span><span class="p">:</span>
+            <span class="n">file_Brain_Template</span> <span class="o">=</span> <span class="n">Brain_Template</span><span class="o">.</span><span class="n">file_HCP_surf</span>
+        <span class="k">elif</span> <span class="n">file_Brain_Template</span> <span class="o">==</span> <span class="s1">&#39;MNI Volume&#39;</span><span class="p">:</span>
+            <span class="n">file_Brain_Template</span> <span class="o">=</span> <span class="n">Brain_Template</span><span class="o">.</span><span class="n">file_MNI_vol</span>
+        <span class="k">elif</span> <span class="n">file_Brain_Template</span> <span class="o">==</span> <span class="s1">&#39;FreeSurfer_fsaverage5&#39;</span><span class="p">:</span>
+            <span class="n">file_Brain_Template</span> <span class="o">=</span> <span class="n">Brain_Template</span><span class="o">.</span><span class="n">file_FS_surf</span>
+        <span class="k">elif</span> <span class="n">file_Brain_Template</span> <span class="o">==</span> <span class="s1">&#39;HCP Surface-Volume&#39;</span><span class="p">:</span>
+            <span class="n">file_Brain_Template</span> <span class="o">=</span> <span class="n">Brain_Template</span><span class="o">.</span><span class="n">file_HCP_surf_vol</span>
+        <span class="k">elif</span> <span class="n">file_Brain_Template</span> <span class="o">==</span> <span class="s1">&#39;HCP Subcortical Volume&#39;</span><span class="p">:</span>
+            <span class="n">file_Brain_Template</span> <span class="o">=</span> <span class="n">Brain_Template</span><span class="o">.</span><span class="n">file_HCP_vol</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">Choice</span> <span class="o">=</span> <span class="n">guide_YN</span><span class="p">(</span><span class="s2">&quot;Would you like to select a customized brain template file?&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">Choice</span> <span class="o">==</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span>
+            <span class="n">file_Brain_Template</span> <span class="o">=</span> <span class="n">guide_file</span><span class="p">(</span><span class="s2">&quot;Set up the directory of the brain template file in json format:&quot;</span><span class="p">,</span> <span class="n">existed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="s1">&#39;.json&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">file_Brain_Template</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="c1"># Volume and surface data types require different inputs to compute the brain template</span>
+            <span class="k">if</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s1">&#39;Volume&#39;</span><span class="p">:</span>
+                <span class="n">templateFormat</span> <span class="o">=</span> <span class="n">guide_choice</span><span class="p">(</span><span class="s2">&quot;Choose a template format:&quot;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;3D Matrix&#39;</span><span class="p">,</span> <span class="s1">&#39;HCP&#39;</span><span class="p">))</span>
+                <span class="n">file_mask_vol</span> <span class="o">=</span> <span class="n">guide_file</span><span class="p">(</span><span class="s2">&quot;Set up the directory of a brain mask:&quot;</span><span class="p">,</span> <span class="n">existed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;.mat&#39;</span><span class="p">,</span> <span class="s1">&#39;.nii&#39;</span><span class="p">,</span> <span class="s1">&#39;.nii.gz&#39;</span><span class="p">))</span>
+                <span class="n">file_overlayImage</span> <span class="o">=</span> <span class="n">guide_file</span><span class="p">(</span><span class="s2">&quot;Set up the directory of a high resolution T1/T2 image as the overlay background:&quot;</span><span class="p">,</span> <span class="n">existed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;.mat&#39;</span><span class="p">,</span> <span class="s1">&#39;.nii&#39;</span><span class="p">,</span> <span class="s1">&#39;.nii.gz&#39;</span><span class="p">))</span>
+                <span class="n">maskValue</span> <span class="o">=</span> <span class="n">guide_number</span><span class="p">(</span><span class="s2">&quot;What is the value used for labeling useful voxels in the brain mask file?&quot;</span><span class="p">,</span> <span class="s1">&#39;Int&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s1">&#39;Surface&#39;</span><span class="p">:</span>
+                <span class="n">templateFormat</span> <span class="o">=</span> <span class="n">guide_choice</span><span class="p">(</span><span class="s2">&quot;Choose a template format:&quot;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;HCP&#39;</span><span class="p">,</span> <span class="s1">&#39;FreeSurfer&#39;</span><span class="p">))</span>
+                <span class="n">file_surfL</span> <span class="o">=</span> <span class="n">guide_file</span><span class="p">(</span><span class="s2">&quot;Set up the directory of the left hemisphere brain shape file (ex. Conte69.L.inflated.32k_fs_LR.surf.gii):&quot;</span><span class="p">,</span> <span class="n">existed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="s1">&#39;.surf.gii&#39;</span><span class="p">)</span>
+                <span class="n">file_surfR</span> <span class="o">=</span> <span class="n">guide_file</span><span class="p">(</span><span class="s2">&quot;Set up the directory of the left hemisphere brain shape file (ex. Conte69.R.inflated.32k_fs_LR.surf.gii):&quot;</span><span class="p">,</span> <span class="n">existed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="s1">&#39;.surf.gii&#39;</span><span class="p">)</span>
+                <span class="n">Choice</span> <span class="o">=</span> <span class="n">guide_YN</span><span class="p">(</span><span class="s2">&quot;Would you like to load an inflated brain surface shape?&quot;</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="s1">&#39;N&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">Choice</span> <span class="o">==</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span>
+                    <span class="n">file_surfL</span> <span class="o">=</span> <span class="n">guide_file</span><span class="p">(</span><span class="s2">&quot;Set up the directory of the left hemisphere brain shape file (ex. Conte69.L.very_inflated.32k_fs_LR.surf.gii):&quot;</span><span class="p">,</span> <span class="n">existed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="s1">&#39;.surf.gii&#39;</span><span class="p">)</span>
+                    <span class="n">file_surfR</span> <span class="o">=</span> <span class="n">guide_file</span><span class="p">(</span><span class="s2">&quot;Set up the directory of the left hemisphere brain shape file (ex. Conte69.R.very_inflated.32k_fs_LR.surf.gii):&quot;</span><span class="p">,</span> <span class="n">existed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="s1">&#39;.surf.gii&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">file_surfL_inflated</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">file_surfR_inflated</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">file_maskL</span> <span class="o">=</span> <span class="n">guide_file</span><span class="p">(</span><span class="s2">&quot;Set up the directory of the left hemisphere brain mask file (ex. medial_wall.L.32k_fs_LR.func.gii):&quot;</span><span class="p">,</span> <span class="n">existed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="s1">&#39;.surf.gii&#39;</span><span class="p">)</span>
+                <span class="n">file_maskR</span> <span class="o">=</span> <span class="n">guide_file</span><span class="p">(</span><span class="s2">&quot;Set up the directory of the left hemisphere brain mask file (ex. medial_wall.R.32k_fs_LR.func.gii):&quot;</span><span class="p">,</span> <span class="n">existed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="s1">&#39;.surf.gii&#39;</span><span class="p">)</span>
+                <span class="n">maskValue</span> <span class="o">=</span> <span class="n">guide_number</span><span class="p">(</span><span class="s2">&quot;Set up the value used for labeling useful voxels in the brain mask file?&quot;</span><span class="p">,</span> <span class="s1">&#39;Int&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s1">&#39;Surface-Volume&#39;</span><span class="p">:</span>
+                <span class="n">templateFormat</span> <span class="o">=</span> <span class="n">guide_choice</span><span class="p">(</span><span class="s2">&quot;Choose a template format:&quot;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;HCP&#39;</span><span class="p">,</span> <span class="s1">&#39;FreeSurfer&#39;</span><span class="p">))</span>
+                <span class="n">file_surfL</span> <span class="o">=</span> <span class="n">guide_file</span><span class="p">(</span><span class="s2">&quot;Set up the directory of the left hemisphere brain shape file (ex. Conte69.L.inflated.32k_fs_LR.surf.gii):&quot;</span><span class="p">,</span> <span class="n">existed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="s1">&#39;.surf.gii&#39;</span><span class="p">)</span>
+                <span class="n">file_surfR</span> <span class="o">=</span> <span class="n">guide_file</span><span class="p">(</span><span class="s2">&quot;Set up the directory of the left hemisphere brain shape file (ex. Conte69.R.inflated.32k_fs_LR.surf.gii):&quot;</span><span class="p">,</span> <span class="n">existed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="s1">&#39;.surf.gii&#39;</span><span class="p">)</span>
+                <span class="n">Choice</span> <span class="o">=</span> <span class="n">guide_YN</span><span class="p">(</span><span class="s2">&quot;Would you like to load an inflated brain surface shape?&quot;</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="s1">&#39;N&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">Choice</span> <span class="o">==</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span>
+                    <span class="n">file_surfL</span> <span class="o">=</span> <span class="n">guide_file</span><span class="p">(</span><span class="s2">&quot;Set up the directory of the left hemisphere brain shape file (ex. Conte69.L.very_inflated.32k_fs_LR.surf.gii):&quot;</span><span class="p">,</span> <span class="n">existed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="s1">&#39;.surf.gii&#39;</span><span class="p">)</span>
+                    <span class="n">file_surfR</span> <span class="o">=</span> <span class="n">guide_file</span><span class="p">(</span><span class="s2">&quot;Set up the directory of the left hemisphere brain shape file (ex. Conte69.R.very_inflated.32k_fs_LR.surf.gii):&quot;</span><span class="p">,</span> <span class="n">existed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="s1">&#39;.surf.gii&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">file_surfL_inflated</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">file_surfR_inflated</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">file_maskL</span> <span class="o">=</span> <span class="n">guide_file</span><span class="p">(</span><span class="s2">&quot;Set up the directory of the left hemisphere brain mask file (ex. medial_wall.L.32k_fs_LR.func.gii):&quot;</span><span class="p">,</span> <span class="n">existed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="s1">&#39;.surf.gii&#39;</span><span class="p">)</span>
+                <span class="n">file_maskR</span> <span class="o">=</span> <span class="n">guide_file</span><span class="p">(</span><span class="s2">&quot;Set up the directory of the left hemisphere brain mask file (ex. medial_wall.R.32k_fs_LR.func.gii):&quot;</span><span class="p">,</span> <span class="n">existed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="s1">&#39;.surf.gii&#39;</span><span class="p">)</span>
+                <span class="n">file_mask_vol</span> <span class="o">=</span> <span class="n">guide_file</span><span class="p">(</span><span class="s2">&quot;Set up the directory of a brain mask:&quot;</span><span class="p">,</span> <span class="n">existed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;.mat&#39;</span><span class="p">,</span> <span class="s1">&#39;.nii&#39;</span><span class="p">,</span> <span class="s1">&#39;.nii.gz&#39;</span><span class="p">))</span>
+                <span class="n">file_overlayImage</span> <span class="o">=</span> <span class="n">guide_file</span><span class="p">(</span><span class="s2">&quot;Set up the directory of a high resolution T1/T2 image as the overlay background:&quot;</span><span class="p">,</span> <span class="n">existed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;.mat&#39;</span><span class="p">,</span> <span class="s1">&#39;.nii&#39;</span><span class="p">,</span> <span class="s1">&#39;.nii.gz&#39;</span><span class="p">))</span>
+                <span class="n">maskValue</span> <span class="o">=</span> <span class="n">guide_number</span><span class="p">(</span><span class="s2">&quot;Set up the value used for labeling useful voxels in the brain mask file?&quot;</span><span class="p">,</span> <span class="s1">&#39;Int&#39;</span><span class="p">)</span>
+    <span class="c1"># ============================================= #</span>
+
+    <span class="c1"># ============== FN Computation ============== #</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;# ============== FN Computation ============== # &#39;</span><span class="p">)</span>
+    <span class="n">method</span> <span class="o">=</span> <span class="n">guide_choice</span><span class="p">(</span><span class="s2">&quot;Choose the FN model method:&quot;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;SR-NMF&#39;</span><span class="p">,</span> <span class="s1">&#39;GIG-ICA&#39;</span><span class="p">),</span> <span class="n">default_value</span><span class="o">=</span><span class="s1">&#39;SR-NMF&#39;</span><span class="p">)</span>
+    <span class="c1"># setup parameters for FN computation</span>
+    <span class="n">K</span> <span class="o">=</span> <span class="n">guide_number</span><span class="p">(</span><span class="s2">&quot;How many functional networks (default 17)?&quot;</span><span class="p">,</span> <span class="s1">&#39;Int&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1000</span><span class="p">),</span> <span class="n">skip</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="mi">17</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;SR-NMF&#39;</span><span class="p">:</span>
+        <span class="n">Choice</span> <span class="o">=</span> <span class="n">guide_YN</span><span class="p">(</span><span class="s2">&quot;Do you want to load a precomputed group-level functional networks?&quot;</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="s1">&#39;N&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">Choice</span> <span class="o">=</span> <span class="s1">&#39;Y&#39;</span>
+    <span class="k">if</span> <span class="n">Choice</span> <span class="o">==</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span>
+        <span class="n">file_gFN</span> <span class="o">=</span> <span class="n">guide_file</span><span class="p">(</span><span class="s1">&#39;Set up the file directory of the precomputed group-level functional networks in matlab format?&#39;</span><span class="p">,</span> <span class="n">existed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="s1">&#39;.mat&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">file_gFN</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># ============================================= #</span>
+
+    <span class="c1"># Generate a python script for the workflow</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;# ============================ #&#39;</span><span class="p">)</span>
+    <span class="n">file_script</span> <span class="o">=</span> <span class="n">guide_file</span><span class="p">(</span><span class="s2">&quot;Setup a Python file directory (*.py) of this customized workflow:&quot;</span><span class="p">,</span> <span class="n">existed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="s1">&#39;.py&#39;</span><span class="p">)</span>
+
+    <span class="n">file_script</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_script</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;# Customized Python script for pNet workflow, built at &#39;</span> <span class="o">+</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())),</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;# Generated by running python Worflow_guide()&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;# To run this python code, use the terminal command line below&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;# python </span><span class="si">{</span><span class="n">file_script</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1"># Load packages&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;import pNet</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;# setup and run a customized workflow&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">file_Brain_Template</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;pNet.workflow_simple(&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    dir_pnet_result=&#39;</span><span class="si">{</span><span class="n">dir_pnet_result</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    dataType=&#39;</span><span class="si">{</span><span class="n">dataType</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    file_scan=&#39;</span><span class="si">{</span><span class="n">file_scan</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    dataFormat=&#39;</span><span class="si">{</span><span class="n">dataFormat</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    file_Brain_Template=&#39;</span><span class="si">{</span><span class="n">file_Brain_Template</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    method=</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    K=</span><span class="si">{</span><span class="n">K</span><span class="si">}</span><span class="s2">,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Combine_Scan=</span><span class="si">{</span><span class="n">Combine_Scan</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>  <span class="c1"># True or False</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;pNet.workflow(&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    dir_pnet_result=&#39;</span><span class="si">{</span><span class="n">dir_pnet_result</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    dataType=&#39;</span><span class="si">{</span><span class="n">dataType</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    dataFormat=&#39;</span><span class="si">{</span><span class="n">dataFormat</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    file_scan=&#39;</span><span class="si">{</span><span class="n">file_scan</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    file_subject_ID=&#39;</span><span class="si">{</span><span class="n">file_subject_ID</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    file_subject_folder=&#39;</span><span class="si">{</span><span class="n">file_subject_folder</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    file_group_ID=&#39;</span><span class="si">{</span><span class="n">file_group_ID</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">file_Brain_Template</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    file_Brain_Template=&#39;</span><span class="si">{</span><span class="n">file_Brain_Template</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s1">&#39;Surface&#39;</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    templateFormat=&#39;</span><span class="si">{</span><span class="n">templateFormat</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    file_surfL=&#39;</span><span class="si">{</span><span class="n">file_surfL</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    file_surfR=&#39;</span><span class="si">{</span><span class="n">file_surfR</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    file_maskL=&#39;</span><span class="si">{</span><span class="n">file_maskL</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    file_maskR=&#39;</span><span class="si">{</span><span class="n">file_maskR</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">file_surfL_inflated</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    file_surfL_inflated=&#39;</span><span class="si">{</span><span class="n">file_surfL_inflated</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    file_surfR_inflated=&#39;</span><span class="si">{</span><span class="n">file_surfR_inflated</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s1">&#39;Volume&#39;</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    templateFormat=&#39;</span><span class="si">{</span><span class="n">templateFormat</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    file_mask_vol=&#39;</span><span class="si">{</span><span class="n">file_mask_vol</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    file_overlayImage=&#39;</span><span class="si">{</span><span class="n">file_overlayImage</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s1">&#39;Surface-Volume&#39;</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    templateFormat=&#39;</span><span class="si">{</span><span class="n">templateFormat</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    file_surfL=&#39;</span><span class="si">{</span><span class="n">file_surfL</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    file_surfR=&#39;</span><span class="si">{</span><span class="n">file_surfR</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    file_maskL=&#39;</span><span class="si">{</span><span class="n">file_maskL</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    file_maskR=&#39;</span><span class="si">{</span><span class="n">file_maskR</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">file_surfL_inflated</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    file_surfL_inflated=&#39;</span><span class="si">{</span><span class="n">file_surfL_inflated</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    file_surfR_inflated=&#39;</span><span class="si">{</span><span class="n">file_surfR_inflated</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    file_mask_vol=&#39;</span><span class="si">{</span><span class="n">file_mask_vol</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    file_overlayImage=&#39;</span><span class="si">{</span><span class="n">file_overlayImage</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    maskValue=</span><span class="si">{</span><span class="n">maskValue</span><span class="si">}</span><span class="s2">,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    method=</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    K=</span><span class="si">{</span><span class="n">K</span><span class="si">}</span><span class="s2">,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Combine_Scan=</span><span class="si">{</span><span class="n">Combine_Scan</span><span class="si">}</span><span class="s2">,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>  <span class="c1"># True or False</span>
+        <span class="k">if</span> <span class="n">file_gFN</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    file_gFN=&#39;</span><span class="si">{</span><span class="n">file_gFN</span><span class="si">}</span><span class="s2">&#39;,&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+
+    <span class="n">file_script</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Customized workflow script is generated successfully, please open to check the details.&#39;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="workflow_cluster">
+<a class="viewcode-back" href="../../../pnet.Workflow.html#pnet.Workflow.Workflow_Func.workflow_cluster">[docs]</a>
+<span class="k">def</span> <span class="nf">workflow_cluster</span><span class="p">(</span><span class="n">dir_pnet_result</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                     <span class="c1"># data input</span>
+                     <span class="n">file_scan</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                     <span class="n">dataType</span><span class="o">=</span><span class="s1">&#39;Surface&#39;</span><span class="p">,</span> <span class="n">dataFormat</span><span class="o">=</span><span class="s1">&#39;HCP Surface (*.cifti, *.mat)&#39;</span><span class="p">,</span>
+                     <span class="n">file_subject_ID</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_subject_folder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_group_ID</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">file_Brain_Template</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">templateFormat</span><span class="o">=</span><span class="s1">&#39;HCP&#39;</span><span class="p">,</span>
+                     <span class="n">file_surfL</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_surfR</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_maskL</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_maskR</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">file_mask_vol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_overlayImage</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">maskValue</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                     <span class="n">file_surfL_inflated</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_surfR_inflated</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="c1"># FN computation</span>
+                     <span class="n">method</span><span class="o">=</span><span class="s1">&#39;SR-NMF&#39;</span><span class="p">,</span>
+                     <span class="n">K</span><span class="o">=</span><span class="mi">17</span><span class="p">,</span>
+                     <span class="n">init</span><span class="o">=</span><span class="s1">&#39;random&#39;</span><span class="p">,</span>
+                     <span class="n">sampleSize</span><span class="o">=</span><span class="s1">&#39;Automatic&#39;</span><span class="p">,</span>
+                     <span class="n">nBS</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+                     <span class="n">nTPoints</span><span class="o">=</span><span class="mi">99999</span><span class="p">,</span>
+                     <span class="n">Combine_Scan</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                     <span class="n">file_gFN</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">FN_model_parameter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">outputFormat</span><span class="o">=</span><span class="s1">&#39;Both&#39;</span><span class="p">,</span>
+                     <span class="n">Computation_Mode</span><span class="o">=</span><span class="s1">&#39;CPU_Torch&#39;</span><span class="p">,</span>
+                     <span class="n">dataPrecision</span><span class="o">=</span><span class="s1">&#39;double&#39;</span><span class="p">,</span>
+                     <span class="c1"># visualization</span>
+                     <span class="n">synchronized_view</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                     <span class="n">synchronized_colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                     <span class="c1"># Cluster</span>
+                     <span class="n">dir_pnet</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">dir_env</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">dir_python</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">submit_command</span><span class="o">=</span><span class="s1">&#39;qsub -terse -j y&#39;</span><span class="p">,</span>
+                     <span class="n">thread_command</span><span class="o">=</span><span class="s1">&#39;-pe threaded &#39;</span><span class="p">,</span>
+                     <span class="n">memory_command</span><span class="o">=</span><span class="s1">&#39;-l h_vmem=&#39;</span><span class="p">,</span>
+                     <span class="n">log_command</span><span class="o">=</span><span class="s1">&#39;-o &#39;</span><span class="p">,</span>
+                     <span class="n">computation_resource</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">memory_bootstrap</span><span class="o">=</span><span class="s1">&#39;50G&#39;</span><span class="p">,</span> <span class="n">thread_bootstrap</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                                              <span class="n">memory_fusion</span><span class="o">=</span><span class="s1">&#39;10G&#39;</span><span class="p">,</span> <span class="n">thread_fusion</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                                              <span class="n">memory_pFN</span><span class="o">=</span><span class="s1">&#39;10G&#39;</span><span class="p">,</span> <span class="n">thread_pFN</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                              <span class="n">memory_qc</span><span class="o">=</span><span class="s1">&#39;10G&#39;</span><span class="p">,</span> <span class="n">thread_qc</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                              <span class="n">memory_visualization</span><span class="o">=</span><span class="s1">&#39;20G&#39;</span><span class="p">,</span> <span class="n">thread_visualization</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                     <span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Run the workflow of pNet, including Data Input, FN Computation, Quality Control and Visualization</span>
+<span class="sd">    This function is for running pNet using multiple jobs to facilitate computation in a cluster environment</span>
+<span class="sd">    This script can be re-run to restart the desired workflow from where it stops</span>
+
+<span class="sd">    :param dir_pnet_result: directory of the pNet result folder</span>
+<span class="sd">    :param dataType: &#39;Surface&#39;, &#39;Volume&#39;, &#39;Surface-Volume&#39;</span>
+<span class="sd">    :param dataFormat: &#39;HCP Surface (*.cifti, *.mat)&#39;, &#39;MGH Surface (*.mgh)&#39;, &#39;MGZ Surface (*.mgz)&#39;, &#39;Volume (*.nii, *.nii.gz, *.mat)&#39;, &#39;HCP Surface-Volume (*.cifti)&#39;, &#39;HCP Volume (*.cifti)&#39;</span>
+
+<span class="sd">    :param file_scan: a txt file that stores directories of all fMRI scans</span>
+<span class="sd">    :param file_subject_ID: a txt file that store subject ID information corresponding to fMRI scan in file_scan</span>
+<span class="sd">    :param file_subject_folder: a txt file that store subject folder names corresponding to fMRI scans in file_scan</span>
+<span class="sd">    :param file_group_ID: a txt file that store group information corresponding to fMRI scan in file_scan</span>
+
+<span class="sd">    :param file_Brain_Template: file directory of a brain template file in json format</span>
+<span class="sd">    :param templateFormat: &#39;HCP&#39;, &#39;FreeSurfer&#39;, &#39;3D Matrix&#39;</span>
+<span class="sd">    :param file_surfL: file that stores the surface shape information of the left hemisphere, including vertices and faces</span>
+<span class="sd">    :param file_surfR: file that stores the surface shape information of the right hemisphere, including vertices and faces</span>
+<span class="sd">    :param file_maskL: file that stores the mask information of the left hemisphere, a 1D 0-1 vector</span>
+<span class="sd">    :param file_maskR: file that stores the mask information of the right hemisphere, a 1D 0-1 vector</span>
+<span class="sd">    :param file_surfL_inflated: file that stores the inflated surface shape information of the left hemisphere, including vertices and faces</span>
+<span class="sd">    :param file_surfR_inflated: file that stores the inflated surface shape information of the right hemisphere, including vertices and faces</span>
+<span class="sd">    :param file_mask_vol: file of a mask file for volume-based data type</span>
+<span class="sd">    :param file_overlayImage: file of a background image for visualizing volume-based results</span>
+<span class="sd">    :param maskValue: 0 or 1, 0 means 0s in mask files are useful vertices, otherwise vice versa. maskValue=0 for medial wall in HCP data, and maskValue=1 for brain masks</span>
+
+<span class="sd">    :param K: number of FNs</span>
+<span class="sd">    :param Combine_Scan: False or True, whether to combine multiple scans for the same subject</span>
+
+<span class="sd">    :param file_gFN: None or a directory of a precomputed gFN in .mat format</span>
+<span class="sd">    :param method: &#39;SR-NMF&#39; or &#39;GIG-ICA&#39;</span>
+
+<span class="sd">    :param FN_model_parameter: advanced parameters for FN models &#39;SR-NMF&#39;, &#39;GIG-ICA&#39;. Default is set to None, otherwise a dict. Details are in setup_SR_NMF and setup_GIG_ICA</span>
+
+<span class="sd">    :param outputFormat: &#39;MAT&#39;, &#39;Both&#39;, &#39;MAT&#39; is to save results in FN.mat and TC.mat for functional networks and time courses respectively. &#39;Both&#39; is for both matlab format and fMRI input file format</span>
+
+<span class="sd">    :param Computation_Mode: &#39;CPU_Numpy&#39;, &#39;CPU_Torch&#39;</span>
+<span class="sd">    :param dataPrecision: &#39;double&#39; or &#39;single&#39;</span>
+
+<span class="sd">    :param synchronized_view: True or False, whether to synchronize view centers for volume data between gFNs and pFNs</span>
+<span class="sd">    :param synchronized_colorbar: True or False, whether to synchronize color bar between gFNs and pFNs</span>
+
+<span class="sd">    :param dir_pnet: directory of the pNet toolbox</span>
+<span class="sd">    :param dir_env: directory of the desired virtual environment</span>
+<span class="sd">    :param dir_python: absolute directory to the python folder, ex. /Users/YuncongMa/.conda/envs/pnet/bin/python</span>
+<span class="sd">    :param submit_command: command to submit a cluster job</span>
+<span class="sd">    :param thread_command: command to setup number of threads for each job</span>
+<span class="sd">    :param memory_command: command to setup memory allowance for each job</span>
+<span class="sd">    :param log_command: command to specify the logfile</span>
+<span class="sd">    :param computation_resource: a dict to specify the number of threads and memory allowance for jobs in each predefined step</span>
+
+<span class="sd">    Yuncong Ma, 2/12/2024</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Start to run pNet workflow for cluster computation&#39;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Check setting</span>
+    <span class="n">check_data_type_format</span><span class="p">(</span><span class="n">dataType</span><span class="p">,</span> <span class="n">dataFormat</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;SR-NMF&#39;</span><span class="p">,</span> <span class="s1">&#39;GIG-ICA&#39;</span><span class="p">}:</span>
+        <span class="n">print_log</span><span class="p">(</span><span class="s2">&quot;Method needs to be either &#39;SR-NMF&#39; or &#39;GIG-ICA&#39;&quot;</span><span class="p">,</span> <span class="n">logFile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="n">file_gFN</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;GIG-ICA&#39;</span><span class="p">:</span>
+        <span class="n">print_log</span><span class="p">(</span><span class="s2">&quot;Group-level FNs are required as input when using GIG-ICA to obtain personalized FNs&quot;</span><span class="p">,</span>
+                  <span class="n">logFile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="n">dir_pnet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Require a valid setting for dir_pnet&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dir_python</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Require a valid setting for dir_python&#39;</span><span class="p">)</span>
+
+    <span class="c1"># setup all sub-folders in the pNet result folder</span>
+    <span class="n">dir_pnet_dataInput</span><span class="p">,</span> <span class="n">dir_pnet_FNC</span><span class="p">,</span> <span class="n">dir_pnet_gFN</span><span class="p">,</span> <span class="n">dir_pnet_pFN</span><span class="p">,</span> <span class="n">dir_pnet_QC</span><span class="p">,</span> <span class="n">dir_pnet_STAT</span> <span class="o">=</span> <span class="n">setup_result_folder</span><span class="p">(</span><span class="n">dir_pnet_result</span><span class="p">)</span>
+
+    <span class="c1"># added by hm 07/19/2024</span>
+    <span class="c1"># ============== Data Input ============== #</span>
+    <span class="c1"># setup dataInput</span>
+    <span class="n">setup_scan_info</span><span class="p">(</span>
+        <span class="n">dir_pnet_dataInput</span><span class="o">=</span><span class="n">dir_pnet_dataInput</span><span class="p">,</span>
+        <span class="n">dataType</span><span class="o">=</span><span class="n">dataType</span><span class="p">,</span> <span class="n">dataFormat</span><span class="o">=</span><span class="n">dataFormat</span><span class="p">,</span>
+        <span class="n">file_scan</span><span class="o">=</span><span class="n">file_scan</span><span class="p">,</span>
+        <span class="n">Combine_Scan</span><span class="o">=</span><span class="n">Combine_Scan</span>
+    <span class="p">)</span>
+    <span class="c1"># added by hm</span>
+
+    <span class="c1"># Generate a python script for the workflow</span>
+    <span class="c1"># create script folder</span>
+    <span class="n">dir_script</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_pnet_dataInput</span><span class="p">,</span> <span class="s1">&#39;Script&#39;</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">dir_script</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">file_script</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_pnet_dataInput</span><span class="p">,</span> <span class="s1">&#39;Script&#39;</span><span class="p">,</span> <span class="s1">&#39;cluster_job_workflow.py&#39;</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;# Customized Python script for pNet workflow in cluster computation</span><span class="se">\n</span><span class="s1"># Use corresponding bash script to submit the job</span><span class="se">\n</span><span class="s1"># Created on &#39;</span> <span class="o">+</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())),</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;# This Python script can be re-run to restart the workflow from where it stops&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1"># Load packages&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;# setup and run a customized workflow</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;import sys</span><span class="se">\n</span><span class="s1">import os</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;dir_pnet = &#39;</span><span class="si">{</span><span class="n">dir_pnet</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1">#print(f&quot;sys.path.append(os.path.join(dir_pnet, &#39;Python&#39;))&quot;, file=file_script, flush=True)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sys.path.append(dir_pnet)&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="c1">#modified by FY, 07/26/2024</span>
+    <span class="c1">#print(&#39;import pNet\n&#39;, file=file_script, flush=True)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;import pnet</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>    <span class="c1"># mod by hm, 07/19/2024</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"># ============== Parameter ============== #&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;dir_pnet_result = &#39;</span><span class="si">{</span><span class="n">dir_pnet_result</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1"># data input&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;dataType = &#39;</span><span class="si">{</span><span class="n">dataType</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;dataFormat = &#39;</span><span class="si">{</span><span class="n">dataFormat</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file_scan = &#39;</span><span class="si">{</span><span class="n">file_scan</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">file_subject_ID</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file_subject_ID = None&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file_subject_ID = &#39;</span><span class="si">{</span><span class="n">file_subject_ID</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">file_subject_folder</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file_subject_folder = None&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file_subject_folder = &#39;</span><span class="si">{</span><span class="n">file_subject_folder</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">file_group_ID</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file_group_ID = None&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file_group_ID = &#39;</span><span class="si">{</span><span class="n">file_group_ID</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">file_Brain_Template</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file_Brain_Template = &#39;</span><span class="si">{</span><span class="n">file_Brain_Template</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file_Brain_Template = None&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s1">&#39;Surface&#39;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;templateFormat = &#39;</span><span class="si">{</span><span class="n">templateFormat</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file_surfL = &#39;</span><span class="si">{</span><span class="n">file_surfL</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file_surfR = &#39;</span><span class="si">{</span><span class="n">file_surfR</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file_maskL = &#39;</span><span class="si">{</span><span class="n">file_maskL</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file_maskR = &#39;</span><span class="si">{</span><span class="n">file_maskR</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">file_surfL_inflated</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file_surfL_inflated = &#39;</span><span class="si">{</span><span class="n">file_surfL_inflated</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file_surfR_inflated = &#39;</span><span class="si">{</span><span class="n">file_surfR_inflated</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s1">&#39;Volume&#39;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;templateFormat = &#39;</span><span class="si">{</span><span class="n">templateFormat</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file_mask_vol=&#39;</span><span class="si">{</span><span class="n">file_mask_vol</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file_overlayImage = &#39;</span><span class="si">{</span><span class="n">file_overlayImage</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s1">&#39;Surface-Volume&#39;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;templateFormat = &#39;</span><span class="si">{</span><span class="n">templateFormat</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file_surfL = &#39;</span><span class="si">{</span><span class="n">file_surfL</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file_surfR = &#39;</span><span class="si">{</span><span class="n">file_surfR</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file_maskL = &#39;</span><span class="si">{</span><span class="n">file_maskL</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file_maskR = &#39;</span><span class="si">{</span><span class="n">file_maskR</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">file_surfL_inflated</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file_surfL_inflated = &#39;</span><span class="si">{</span><span class="n">file_surfL_inflated</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file_surfR_inflated = &#39;</span><span class="si">{</span><span class="n">file_surfR_inflated</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file_mask_vol = &#39;</span><span class="si">{</span><span class="n">file_mask_vol</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file_overlayImage = &#39;</span><span class="si">{</span><span class="n">file_overlayImage</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;maskValue = </span><span class="si">{</span><span class="n">maskValue</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1"># FN computation&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;method = &#39;</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;K = </span><span class="si">{</span><span class="n">K</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;init= &#39;</span><span class="si">{</span><span class="n">init</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sampleSize = </span><span class="si">{</span><span class="n">sampleSize</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;nBS = </span><span class="si">{</span><span class="n">nBS</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;nTPoints = </span><span class="si">{</span><span class="n">nTPoints</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Combine_Scan = </span><span class="si">{</span><span class="n">Combine_Scan</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>  <span class="c1"># True or False</span>
+    <span class="k">if</span> <span class="n">file_gFN</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file_gFN = None&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file_gFN = &#39;</span><span class="si">{</span><span class="n">file_gFN</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;FN_model_parameter = </span><span class="si">{</span><span class="n">FN_model_parameter</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+
+    <span class="c1"># setup FN models</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;SR-NMF&#39;</span><span class="p">:</span>
+        <span class="n">setting</span> <span class="o">=</span> <span class="n">SR_NMF</span><span class="o">.</span><span class="n">setup_SR_NMF</span><span class="p">(</span>
+                        <span class="n">dir_pnet_result</span><span class="p">,</span>
+                        <span class="n">K</span><span class="o">=</span><span class="n">K</span><span class="p">,</span>
+                        <span class="n">init</span> <span class="o">=</span> <span class="n">init</span><span class="p">,</span>
+                        <span class="n">sampleSize</span><span class="o">=</span><span class="n">sampleSize</span><span class="p">,</span>
+                        <span class="n">nBS</span><span class="o">=</span><span class="n">nBS</span><span class="p">,</span>
+                        <span class="n">nTPoints</span><span class="o">=</span><span class="n">nTPoints</span><span class="p">,</span>
+                        <span class="n">Combine_Scan</span><span class="o">=</span><span class="n">Combine_Scan</span><span class="p">,</span>
+                        <span class="n">file_gFN</span><span class="o">=</span><span class="n">file_gFN</span><span class="p">,</span>
+                        <span class="n">Computation_Mode</span><span class="o">=</span><span class="n">Computation_Mode</span><span class="p">,</span>
+                        <span class="n">dataPrecision</span><span class="o">=</span><span class="n">dataPrecision</span><span class="p">,</span>
+                        <span class="n">outputFormat</span><span class="o">=</span><span class="n">outputFormat</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">FN_model_parameter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">setting</span> <span class="o">=</span> <span class="n">SR_NMF</span><span class="o">.</span><span class="n">update_model_parameter</span><span class="p">(</span><span class="n">dir_pnet_result</span><span class="p">,</span> <span class="n">FN_model_parameter</span><span class="o">=</span><span class="n">FN_model_parameter</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;GIG-ICA&#39;</span><span class="p">:</span>
+        <span class="n">setting</span> <span class="o">=</span> <span class="n">GIG_ICA</span><span class="o">.</span><span class="n">setup_GIG_ICA</span><span class="p">(</span>
+            <span class="n">dir_pnet_result</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">K</span><span class="o">=</span><span class="n">K</span><span class="p">,</span>
+            <span class="n">Combine_Scan</span><span class="o">=</span><span class="n">Combine_Scan</span><span class="p">,</span>
+            <span class="n">file_gFN</span><span class="o">=</span><span class="n">file_gFN</span><span class="p">,</span>
+            <span class="n">Computation_Mode</span><span class="o">=</span><span class="n">Computation_Mode</span><span class="p">,</span>
+            <span class="n">dataPrecision</span><span class="o">=</span><span class="n">dataPrecision</span><span class="p">,</span>
+            <span class="n">outputFormat</span><span class="o">=</span><span class="n">outputFormat</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">FN_model_parameter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">setting</span> <span class="o">=</span> <span class="n">GIG_ICA</span><span class="o">.</span><span class="n">update_model_parameter</span><span class="p">(</span><span class="n">dir_pnet_result</span><span class="p">,</span> <span class="n">FN_model_parameter</span><span class="o">=</span><span class="n">FN_model_parameter</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;SR-NMF&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">file_gFN</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;samplingMethod = &#39;</span><span class="si">{</span><span class="n">setting</span><span class="p">[</span><span class="s1">&#39;Group_FN&#39;</span><span class="p">][</span><span class="s1">&#39;BootStrap&#39;</span><span class="p">][</span><span class="s1">&#39;init&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sampleSize = </span><span class="si">{</span><span class="n">setting</span><span class="p">[</span><span class="s1">&#39;Group_FN&#39;</span><span class="p">][</span><span class="s1">&#39;BootStrap&#39;</span><span class="p">][</span><span class="s1">&#39;sampleSize&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;samplingMethod = &#39;</span><span class="si">{</span><span class="n">setting</span><span class="p">[</span><span class="s1">&#39;Group_FN&#39;</span><span class="p">][</span><span class="s1">&#39;BootStrap&#39;</span><span class="p">][</span><span class="s1">&#39;samplingMethod&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sampleSize = </span><span class="si">{</span><span class="n">setting</span><span class="p">[</span><span class="s1">&#39;Group_FN&#39;</span><span class="p">][</span><span class="s1">&#39;BootStrap&#39;</span><span class="p">][</span><span class="s1">&#39;sampleSize&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;nBS = </span><span class="si">{</span><span class="n">setting</span><span class="p">[</span><span class="s1">&#39;Group_FN&#39;</span><span class="p">][</span><span class="s1">&#39;BootStrap&#39;</span><span class="p">][</span><span class="s1">&#39;nBS&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;nTPoints = </span><span class="si">{</span><span class="n">setting</span><span class="p">[</span><span class="s1">&#39;Group_FN&#39;</span><span class="p">][</span><span class="s1">&#39;BootStrap&#39;</span><span class="p">][</span><span class="s1">&#39;nTPoints&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;init = </span><span class="si">{</span><span class="n">setting</span><span class="p">[</span><span class="s1">&#39;Group_FN&#39;</span><span class="p">][</span><span class="s1">&#39;BootStrap&#39;</span><span class="p">][</span><span class="s1">&#39;init&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+            
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;maxIter = </span><span class="si">{</span><span class="p">(</span><span class="n">setting</span><span class="p">[</span><span class="s1">&#39;Group_FN&#39;</span><span class="p">][</span><span class="s1">&#39;maxIter&#39;</span><span class="p">],</span><span class="w"> </span><span class="n">setting</span><span class="p">[</span><span class="s1">&#39;Personalized_FN&#39;</span><span class="p">][</span><span class="s1">&#39;maxIter&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;minIter = </span><span class="si">{</span><span class="p">(</span><span class="n">setting</span><span class="p">[</span><span class="s1">&#39;Group_FN&#39;</span><span class="p">][</span><span class="s1">&#39;minIter&#39;</span><span class="p">],</span><span class="w"> </span><span class="n">setting</span><span class="p">[</span><span class="s1">&#39;Personalized_FN&#39;</span><span class="p">][</span><span class="s1">&#39;minIter&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;meanFitRatio = </span><span class="si">{</span><span class="n">setting</span><span class="p">[</span><span class="s1">&#39;Personalized_FN&#39;</span><span class="p">][</span><span class="s1">&#39;meanFitRatio&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;error = </span><span class="si">{</span><span class="n">setting</span><span class="p">[</span><span class="s1">&#39;Group_FN&#39;</span><span class="p">][</span><span class="s1">&#39;error&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;normW = </span><span class="si">{</span><span class="n">setting</span><span class="p">[</span><span class="s1">&#39;Group_FN&#39;</span><span class="p">][</span><span class="s1">&#39;normW&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Alpha = </span><span class="si">{</span><span class="n">setting</span><span class="p">[</span><span class="s1">&#39;Group_FN&#39;</span><span class="p">][</span><span class="s1">&#39;Alpha&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Beta = </span><span class="si">{</span><span class="n">setting</span><span class="p">[</span><span class="s1">&#39;Group_FN&#39;</span><span class="p">][</span><span class="s1">&#39;Beta&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;alphaS = </span><span class="si">{</span><span class="n">setting</span><span class="p">[</span><span class="s1">&#39;Group_FN&#39;</span><span class="p">][</span><span class="s1">&#39;alphaS&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;alphaL = </span><span class="si">{</span><span class="n">setting</span><span class="p">[</span><span class="s1">&#39;Group_FN&#39;</span><span class="p">][</span><span class="s1">&#39;alphaL&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;vxI = </span><span class="si">{</span><span class="n">setting</span><span class="p">[</span><span class="s1">&#39;Group_FN&#39;</span><span class="p">][</span><span class="s1">&#39;vxI&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;eta = </span><span class="si">{</span><span class="n">setting</span><span class="p">[</span><span class="s1">&#39;Group_FN&#39;</span><span class="p">][</span><span class="s1">&#39;eta&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ard = </span><span class="si">{</span><span class="n">setting</span><span class="p">[</span><span class="s1">&#39;Group_FN&#39;</span><span class="p">][</span><span class="s1">&#39;ard&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;nRepeat = </span><span class="si">{</span><span class="n">setting</span><span class="p">[</span><span class="s1">&#39;Group_FN&#39;</span><span class="p">][</span><span class="s1">&#39;nRepeat&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;GIG-ICA&#39;</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;maxIter = </span><span class="si">{</span><span class="n">setting</span><span class="p">[</span><span class="s1">&#39;Personalized_FN&#39;</span><span class="p">][</span><span class="s1">&#39;maxIter&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;a = </span><span class="si">{</span><span class="n">setting</span><span class="p">[</span><span class="s1">&#39;Personalized_FN&#39;</span><span class="p">][</span><span class="s1">&#39;a&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ftol = </span><span class="si">{</span><span class="n">setting</span><span class="p">[</span><span class="s1">&#39;Personalized_FN&#39;</span><span class="p">][</span><span class="s1">&#39;ftol&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;error = </span><span class="si">{</span><span class="n">setting</span><span class="p">[</span><span class="s1">&#39;Personalized_FN&#39;</span><span class="p">][</span><span class="s1">&#39;error&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Nemda = </span><span class="si">{</span><span class="n">setting</span><span class="p">[</span><span class="s1">&#39;Personalized_FN&#39;</span><span class="p">][</span><span class="s1">&#39;Nemda&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Computation_Mode = &#39;</span><span class="si">{</span><span class="n">Computation_Mode</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;dataPrecision = &#39;</span><span class="si">{</span><span class="n">dataPrecision</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;outputFormat = &#39;</span><span class="si">{</span><span class="n">outputFormat</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;# visualization&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;synchronized_view = </span><span class="si">{</span><span class="n">synchronized_view</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;synchronized_colorbar = </span><span class="si">{</span><span class="n">synchronized_colorbar</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1"># cluster&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;dir_env = &#39;</span><span class="si">{</span><span class="n">dir_env</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;dir_python = &#39;</span><span class="si">{</span><span class="n">dir_python</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;submit_command = &#39;</span><span class="si">{</span><span class="n">submit_command</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;thread_command = &#39;</span><span class="si">{</span><span class="n">thread_command</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;memory_command = &#39;</span><span class="si">{</span><span class="n">memory_command</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;log_command = &#39;</span><span class="si">{</span><span class="n">log_command</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;computation_resource = </span><span class="si">{</span><span class="n">computation_resource</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+
+    <span class="c1"># main job</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1"># Main job</span><span class="se">\n</span><span class="s1"># The following part is imported from Workflow_Cluster_Template.py&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span>
+
+    <span class="n">file_pnet_workflow_cluster_template</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_pnet</span><span class="p">,</span> <span class="s1">&#39;Workflow&#39;</span><span class="p">,</span> <span class="s1">&#39;Workflow_Cluster_Template.py&#39;</span><span class="p">)</span> <span class="c1">#&#39;Python&#39;, &#39;Workflow&#39;, &#39;Workflow_Cluster_Template.py&#39;)</span>
+    <span class="p">[</span><span class="nb">print</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="n">file</span><span class="o">=</span><span class="n">file_script</span><span class="p">)</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_pnet_workflow_cluster_template</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)]</span>
+
+    <span class="c1"># =============== Cluster</span>
+    <span class="n">setup_cluster</span><span class="p">(</span>
+        <span class="n">dir_pnet</span><span class="o">=</span><span class="n">dir_pnet</span><span class="p">,</span>
+        <span class="n">dir_env</span><span class="o">=</span><span class="n">dir_env</span><span class="p">,</span>
+        <span class="n">dir_pnet_result</span><span class="o">=</span><span class="n">dir_pnet_result</span><span class="p">,</span>
+        <span class="n">dir_python</span><span class="o">=</span><span class="n">dir_python</span><span class="p">,</span>
+        <span class="n">submit_command</span><span class="o">=</span><span class="n">submit_command</span><span class="p">,</span>
+        <span class="n">thread_command</span><span class="o">=</span><span class="n">thread_command</span><span class="p">,</span>
+        <span class="n">memory_command</span><span class="o">=</span><span class="n">memory_command</span><span class="p">,</span>
+        <span class="n">log_command</span><span class="o">=</span><span class="n">log_command</span><span class="p">,</span>
+        <span class="n">computation_resource</span><span class="o">=</span><span class="n">computation_resource</span>
+    <span class="p">)</span>
+
+    <span class="c1"># submit bash job</span>
+    <span class="n">submit_bash_job</span><span class="p">(</span><span class="n">dir_pnet_result</span><span class="o">=</span><span class="n">dir_pnet_result</span><span class="p">,</span>
+                    <span class="n">python_command</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">bashFile</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_script</span><span class="p">,</span> <span class="s1">&#39;cluster_job_workflow.sh&#39;</span><span class="p">),</span>
+                    <span class="n">pythonFile</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_script</span><span class="p">,</span> <span class="s1">&#39;cluster_job_workflow.py&#39;</span><span class="p">),</span>
+                    <span class="n">logFile</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_script</span><span class="p">,</span> <span class="s1">&#39;cluster_job_workflow.log&#39;</span><span class="p">),</span>
+                    <span class="n">memory</span><span class="o">=</span><span class="s1">&#39;10G&#39;</span><span class="p">,</span>
+                    <span class="n">n_thread</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                    <span class="n">create_python_file</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Workflow job is submitted&#39;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, pNet developers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

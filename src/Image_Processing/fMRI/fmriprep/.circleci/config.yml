@@ -1,0 +1,1073 @@
+# reusable anchors
+_machine_defaults: &machine_defaults
+  environment:
+    TZ: "/usr/share/zoneinfo/America/Los_Angeles"
+    SCRATCH: "/scratch"
+  machine:
+    image: default
+    docker_layer_caching: true
+  working_directory: /tmp/src/fmriprep
+  resource_class: large
+
+_python_defaults: &python_defaults
+  docker:
+    - image: cimg/python:3.12
+  working_directory: /tmp/src/fmriprep
+
+_docker_auth: &docker_auth
+  name: Docker authentication
+  command: |
+    if [[ -n $DOCKER_PAT ]]; then
+      echo "$DOCKER_PAT" | docker login -u $DOCKER_USER --password-stdin
+    fi
+
+_setup_docker_registry: &setup_docker_registry
+  name: Set up Docker registry
+  command: |
+    if [[ -f /tmp/images/registry.tar.gz ]]; then
+      echo "Loading saved registry image"
+      docker load < /tmp/images/registry.tar.gz
+    else
+      echo "Pulling registry image from DockerHub"
+      docker pull registry:2
+    fi
+    docker run -d -p 5000:5000 --restart=always --name=registry \
+        -v /tmp/docker:/var/lib/registry registry:2
+
+_pull_from_registry: &pull_from_registry
+  name: Pull and tag image from local registry
+  command: |
+    docker pull localhost:5000/fmriprep
+    docker tag localhost:5000/fmriprep nipreps/fmriprep:latest
+
+_check_skip_job: &check_skip_job
+  name: Check commit message and determine if job should be skipped
+  command: |
+    set +e
+    cd /tmp/src/fmriprep
+    COMMIT_MSG="$(git show -s --format=%s)"
+    DOCBUILD="$(echo ${COMMIT_MSG} | grep -i -E '^docs?(\(\w+\))?:')"
+    SKIP_PYTEST="$(echo ${COMMIT_MSG} | grep -i -E '\[skip[ _]?tests\]')"
+    SKIP_DS005="$(echo ${COMMIT_MSG} | grep -i -E '\[skip[ _]?ds005\]' )"
+    SKIP_DS054="$(echo ${COMMIT_MSG} | grep -i -E '\[skip[ _]?ds054\]' )"
+    SKIP_DS210="$(echo ${COMMIT_MSG} | grep -i -E '\[skip[ _]?ds210\]' )"
+    NO_FASTTRACK="$(echo ${COMMIT_MSG} | grep -i -E '\[no[ _-]?fasttrack\]' )"
+
+    # no skipping if tagged build
+    if [[ -n "$NO_FASTTRACK" ]]; then
+      touch /tmp/.nofasttrack
+      echo "Anatomical fasttrack reusing sMRIPrep's derivatives will not be used."
+    elif [[ -n "$CIRCLETAG" ]]; then
+      exit 0
+    elif [[ -n "$DOCSBUILD" ]]; then  # always try to skip docs builds
+      echo "Only docs build"
+      circleci step halt
+    elif [ -n "$CHECK_PYTEST" -a -n "$SKIP_PYTEST" ]; then
+      echo "Skipping pytest"
+      circleci step halt
+    elif [ -n "$CHECK_DS005" -a -n "$SKIP_DS005" ]; then
+      echo "Skipping DS005"
+      circleci step halt
+    elif [ -n "$CHECK_DS054" -a -n "$SKIP_DS054" ]; then
+      echo "Skipping DS054"
+      circleci step halt
+    elif [ -n "$CHECK_DS210" -a -n "$SKIP_DS210" ]; then
+      echo "Skipping DS210"
+      circleci step halt
+    fi
+    echo "No skip"
+
+_setup_fmriprep_docker: &setup_fmriprep_docker
+  name: Install fMRIPrep's docker wrapper
+  command: |
+    pyenv local 3
+    pip install --upgrade pip
+    pip install --upgrade /tmp/src/fmriprep/wrapper/
+
+_check_outputs: &check_outputs
+  name: Check outputs of fMRIPrep run
+  command: |
+    set +e -x
+    mkdir -p /tmp/${DATASET}/test
+    find /tmp/${DATASET}/${SUBDIR:-fmriprep} \
+      \( -path '*/figures' -o -path '*/log' -o -path '*/sourcedata' \) \
+      -prune -o -name "*" -print | cut -d/ -f 5- | sort > /tmp/${DATASET}/test/outputs.out
+
+    FASTTRACK_OUTPUTS="${DATASET}${VARIANT}_fasttrack_outputs.txt"
+    FULL_OUTPUTS="${DATASET}${VARIANT}_outputs.txt"
+    RET=1
+    if [ ! -f /tmp/.nofasttrack ]; then
+        echo "Checking fasttrack..."
+        sort /tmp/src/fmriprep/.circleci/${FASTTRACK_OUTPUTS} > /tmp/${DATASET}/test/fasttrack.out
+        diff /tmp/${DATASET}/test/{fasttrack,outputs}.out
+        RET=$?
+    fi
+    if [ $RET -ne 0 ]; then
+        echo "Checking full..."
+        sort /tmp/src/fmriprep/.circleci/${FULL_OUTPUTS} > /tmp/${DATASET}/test/full.out
+        diff /tmp/${DATASET}/test/{full,outputs}.out
+        RET=$?
+    fi
+    exit $RET
+
+version: 2.1
+aliases:
+  - &src "/tmp/src/fmriprep"
+orbs:
+  docker: circleci/docker@2.1.4
+
+jobs:
+  build_clean:
+    <<: *machine_defaults
+    environment:
+      DOCKER_BUILDKIT: 1
+    steps:
+      - checkout:
+          path: *src
+      - docker/install-docker-credential-helper
+      - run: *docker_auth
+      - run:
+          name: Build Docker image
+          no_output_timeout: 60m
+          command: |
+            pyenv local 3
+            pip install hatch
+            # Get version, update files
+            THISVERSION=$( hatch version )
+            # Build docker image
+            docker build --rm \
+              --cache-from=nipreps/fmriprep \
+              -t nipreps/fmriprep:latest \
+              --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
+              --build-arg VCS_REF=`git rev-parse --short HEAD` \
+              --build-arg VERSION="$THISVERSION" .
+
+  build:
+    <<: *machine_defaults
+    environment:
+      DOCKER_BUILDKIT: 1
+    steps:
+      - checkout:
+          path: *src
+      - run: *check_skip_job
+      - restore_cache:
+          keys:
+            - build-v2-{{ .Branch }}-{{ .Revision }}
+            - build-v2--{{ .Revision }}
+            - build-v2-{{ .Branch }}-
+            - build-v2-master-
+            - build-v2-
+          paths:
+            - /tmp/docker
+            - /tmp/images
+      - docker/install-docker-credential-helper
+      - run: *docker_auth
+      - run: *setup_docker_registry
+      - run:
+          name: Create named builder
+          command: docker buildx create --use --name=builder --driver=docker-container
+      - run:
+          name: Build Docker image
+          no_output_timeout: 60m
+          command: |
+            pyenv local 3
+            pip install hatch
+            # Get version, update files.
+            THISVERSION=$( hatch version )
+            if [[ ${THISVERSION:0:1} == "0" ]] ; then
+              echo "WARNING: latest git tag could not be found"
+              echo "Please, make sure you fetch all tags from upstream with"
+              echo "the command ``git fetch --tags --verbose`` and push"
+              echo "them to your fork with ``git push origin --tags``"
+            fi
+            # Build docker image
+            docker buildx build --load --builder builder \
+                --cache-from localhost:5000/fmriprep \
+                --cache-from nipreps/fmriprep:latest \
+                -t nipreps/fmriprep:latest \
+                --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
+                --build-arg VCS_REF=`git rev-parse --short HEAD` \
+                --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" .
+      - run:
+          command: docker images
+      - run:
+          name: Check Docker image
+          command: |
+            # Get version, update files.
+            THISVERSION=$( hatch version )
+            BUILT_VERSION=$( docker run --rm nipreps/fmriprep:latest --version )
+            BUILT_VERSION=${BUILT_VERSION%$'\r'}
+            BUILT_VERSION=${BUILT_VERSION#*"fMRIPrep v"}
+            echo "VERSION: \"$THISVERSION\""
+            echo "BUILT: \"$BUILT_VERSION\""
+            set -e
+            test "$BUILT_VERSION" = "$THISVERSION"
+      - run:
+          name: Docker push to local registry
+          no_output_timeout: 40m
+          command: |
+            docker tag nipreps/fmriprep:latest localhost:5000/fmriprep
+            docker push localhost:5000/fmriprep
+      - run:
+          name: Docker registry garbage collection
+          command: |
+            docker exec -it registry /bin/registry garbage-collect --delete-untagged \
+              /etc/docker/registry/config.yml
+
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - src/fmriprep
+      - save_cache:
+         key: build-v2-{{ .Branch }}-{{ .Revision }}
+         paths:
+            - /tmp/docker
+            - /tmp/images
+
+  get_data:
+    <<: *machine_defaults
+    steps:
+      - restore_cache:
+          keys:
+            - data-v0-{{ .Branch }}-{{ .Revision }}
+            - data-v0--{{ .Revision }}
+            - data-v0-{{ .Branch }}-
+            - data-v0-master-
+            - data-v0-
+      - run:
+          name: Get test data from ds000005
+          command: |
+            mkdir -p /tmp/data
+            if [[ ! -d /tmp/data/ds005 ]]; then
+              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
+                -O ds005_downsampled.tar.gz "https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/57f32a429ad5a101f977eb75"
+              tar xvzf ds005_downsampled.tar.gz -C /tmp/data/
+            else
+              echo "Dataset ds000005 was cached"
+            fi
+      - run:
+          name: Get test data from ds000054
+          command: |
+            if [[ ! -d /tmp/data/ds054 ]]; then
+              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
+                -O ds054_downsampled.tar.gz "https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/57f32c22594d9001ef91bf9e"
+              tar xvzf ds054_downsampled.tar.gz -C /tmp/data/
+            else
+              echo "Dataset ds000054 was cached"
+            fi
+      - run:
+          name: Get test data from ds000210
+          command: |
+            if [[ ! -d /tmp/data/ds210 ]]; then
+              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
+                -O ds210_downsampled.tar.gz "https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/5ae9e37b9a64d7000ce66c21"
+              tar xvzf ds210_downsampled.tar.gz -C /tmp/data/
+            else
+              echo "Dataset ds000210 was cached"
+            fi
+      - run:
+          name: Get FreeSurfer derivatives for ds000005
+          command: |
+            if [[ ! -d /tmp/ds005/freesurfer ]]; then
+              mkdir -p /tmp/ds005
+              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
+                -O ds005_derivatives_freesurfer.zip "https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/637bab2c92a98a1c0606e6a0"
+              unzip -d /tmp/ds005 ds005_derivatives_freesurfer.zip
+            else
+              echo "FreeSurfer derivatives of ds000005 were cached"
+            fi
+      - run:
+          name: Get sMRIPrep derivatives for ds000005
+          command: |
+            if [[ ! -d /tmp/ds005/smriprep ]]; then
+              mkdir -p /tmp/ds005
+              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
+                -O ds005_sub-01_smriprep.zip "https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/637cf6505ea438007b0497d3"
+              unzip -d /tmp/ds005 ds005_sub-01_smriprep.zip
+            else
+              echo "sMRIPrep derivatives of ds000005 were cached"
+            fi
+      - run:
+          name: Get sMRIPrep derivatives for ds000054
+          command: |
+            if [[ ! -d /tmp/ds054/smriprep ]]; then
+              mkdir -p /tmp/ds054
+              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
+                -O ds054_sub-100185_smriprep.zip "https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/637bae8a0ab44b10ed6c43b6"
+              unzip -d /tmp/ds054 ds054_sub-100185_smriprep.zip
+            else
+              echo "sMRIPrep derivatives of ds000054 were cached"
+            fi
+      - run:
+          name: Get sMRIPrep derivatives for ds000210
+          command: |
+            if [[ ! -d /tmp/ds210/smriprep ]]; then
+              mkdir -p /tmp/ds210
+              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
+                -O ds210_sub-02_smriprep.zip "https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/637bae7e4e8c3c20843b4b53"
+              unzip -d /tmp/ds210 ds210_sub-02_smriprep.zip
+            else
+              echo "sMRIPrep derivatives of ds000210 were cached"
+            fi
+      - save_cache:
+         key: data-v0-{{ .Branch }}-{{ .Revision }}
+         paths:
+            - /tmp/data
+            - /tmp/ds005/freesurfer
+            - /tmp/ds005/smriprep
+            - /tmp/ds054/smriprep
+            - /tmp/ds210/smriprep
+      - run:
+          name: Store FreeSurfer license file
+          command: |
+            mkdir -p /tmp/fslicense
+            cd /tmp/fslicense
+            echo "cHJpbnRmICJrcnp5c3p0b2YuZ29yZ29sZXdza2lAZ21haWwuY29tXG41MTcyXG4gKkN2dW12RVYzelRmZ1xuRlM1Si8yYzFhZ2c0RVxuIiA+IGxpY2Vuc2UudHh0Cg==" | base64 -d | sh
+      - run:
+          name: Create Nipype config files
+          command: |
+            mkdir -p /tmp/ds005 /tmp/ds054 /tmp/ds210
+            printf "[execution]\nstop_on_first_crash = true\n" > /tmp/ds005/nipype.cfg
+            echo "poll_sleep_duration = 0.01" >> /tmp/ds005/nipype.cfg
+            echo "hash_method = content" >> /tmp/ds005/nipype.cfg
+            cp /tmp/ds005/nipype.cfg /tmp/ds054/nipype.cfg
+            cp /tmp/ds005/nipype.cfg /tmp/ds210/nipype.cfg
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - fslicense
+            - ds005/nipype.cfg
+            - ds054/nipype.cfg
+            - ds210/nipype.cfg
+
+  test_pytest:
+    <<: *machine_defaults
+    environment:
+      CHECK_PYTEST: true
+    steps:
+      - checkout:
+          path: *src
+      - run: *check_skip_job
+      - attach_workspace:
+          at: /tmp
+      - restore_cache:
+          keys:
+            - build-v2-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - /tmp/docker
+            - /tmp/images
+      - restore_cache:
+          keys:
+            - data-v0-{{ .Branch }}-{{ .Revision }}
+      - docker/install-docker-credential-helper
+      - run: *docker_auth
+      - run: *setup_docker_registry
+      - run: *pull_from_registry
+      - run:
+          name: Run fMRIPrep tests
+          no_output_timeout: 2h
+          command: |
+            docker run -ti --rm=false \
+              -e TEST_READONLY_FILESYSTEM=1 -v $HOME:/home/readonly:ro \
+              --entrypoint="pytest" nipreps/fmriprep:latest \
+              --pyargs fmriprep -svx --doctest-modules
+
+      - run:
+          name: Build fmriprep-docker wheel
+          command: |
+            pyenv local 3
+            pip install --upgrade pip build
+            python -m build wrapper/
+      - run:
+          name: Install and test fmriprep-docker (Python 3)
+          command: |
+            echo -n "Python version: "
+            python --version
+            pip install --upgrade wrapper/
+            pip install wrapper/dist/*.whl
+            which fmriprep-docker
+            fmriprep-docker -i nipreps/fmriprep:latest --help
+            fmriprep-docker -i nipreps/fmriprep:latest --version
+      - run:
+          name: Install and test fmriprep-docker (Python 2)
+          command: |
+            pyenv local 2.7
+            echo -n "Python version: "
+            python --version
+            pip install --upgrade "pip<21"
+            pip install wrapper/dist/*.whl
+            which fmriprep-docker
+            fmriprep-docker -i nipreps/fmriprep:latest --help
+            fmriprep-docker -i nipreps/fmriprep:latest --version
+      - store_artifacts:
+          path: /tmp/data/reports
+
+  ds005:
+    <<: *machine_defaults
+    working_directory: /tmp/ds005
+    environment:
+      FS_LICENSE: /tmp/fslicense/license.txt
+      DATASET: ds005
+      CHECK_DS005: 1
+      MIGAS_OPTOUT: 1
+    steps:
+      - checkout:
+          path: *src
+      - run: *check_skip_job
+      - attach_workspace:
+          at: /tmp
+      - restore_cache:
+          keys:
+            - build-v2-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - /tmp/docker
+            - /tmp/images
+      - restore_cache:
+          keys:
+            - data-v0-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - ds005-anat-v0-{{ .Branch }}-{{ .Revision }}
+            - ds005-anat-v0--{{ .Revision }}
+            - ds005-anat-v0-{{ .Branch }}-
+            - ds005-anat-v0-master-
+            - ds005-anat-v0-
+      - docker/install-docker-credential-helper
+      - run: *docker_auth
+      - run: *setup_docker_registry
+      - run: *pull_from_registry
+      - run: *setup_fmriprep_docker
+      - run:
+          name: Run anatomical workflow on ds005
+          no_output_timeout: 2h
+          command: |
+            mkdir -p /tmp/${DATASET}/work /tmp/${DATASET}/fmriprep
+            if [ -f /tmp/.nofasttrack ]; then
+                fmriprep-docker -i nipreps/fmriprep:latest \
+                    -e FMRIPREP_DEV 1 --user $(id -u):$(id -g) \
+                    --network none \
+                    --config $PWD/nipype.cfg -w /tmp/${DATASET}/work \
+                    /tmp/data/${DATASET} /tmp/${DATASET}/fmriprep participant \
+                    --fs-subjects-dir /tmp/${DATASET}/freesurfer \
+                    --skull-strip-template OASIS30ANTs:res-1 \
+                    --output-spaces MNI152NLin2009cAsym MNI152NLin6Asym \
+                    --sloppy --write-graph --mem-mb 14336 \
+                    --nthreads 4 --anat-only -vv
+            fi
+      - run:
+          name: Clean-up after anatomical run
+          command: |
+            rm -rf /tmp/${DATASET}/work/fmriprep_*_wf/fsdir*
+            rm -rf /tmp/${DATASET}/work/reportlets
+            rm -rf /tmp/${DATASET}/fmriprep
+      - save_cache:
+         key: ds005-anat-v0-{{ .Branch }}-{{ .Revision }}
+         paths:
+            - /tmp/ds005/work
+      - run:
+          name: Attempt run without PE metadata (should fail)
+          no_output_timeout: 2h
+          command: |
+            echo "TODO"
+      - run:
+          name: Run full fMRIPrep on ds005 (LegacyMultiProc plugin)
+          no_output_timeout: 2h
+          command: |
+            FASTRACK_ARG="--derivatives anat=/tmp/${DATASET}/smriprep"
+            if [ -f /tmp/.nofasttrack ]; then
+                FASTRACK_ARG=""
+            fi
+
+            # Inject pretend metadata
+            json_sidecar=/tmp/data/${DATASET}/task-mixedgamblestask_bold.json
+            awk 'NR==1{print; print "    \"TotalReadoutTime\": 0.05,"} NR!=1' ${json_sidecar} > tmp && mv tmp ${json_sidecar}
+            awk 'NR==1{print; print "    \"PhaseEncodingDirection\": \"j\","} NR!=1' ${json_sidecar} > tmp && mv tmp ${json_sidecar}
+
+            fmriprep-docker -i nipreps/fmriprep:latest \
+                -e FMRIPREP_DEV 1 --user $(id -u):$(id -g) \
+                --network none \
+                --config $PWD/nipype.cfg -w /tmp/${DATASET}/work \
+                /tmp/data/${DATASET} /tmp/${DATASET}/fmriprep participant \
+                --fs-subjects-dir /tmp/${DATASET}/freesurfer \
+                ${FASTRACK_ARG} \
+                --sloppy --write-graph --mem-mb 14336 \
+                --skull-strip-template OASIS30ANTs:res-1 \
+                --output-spaces fsaverage5 fsnative \
+                --use-plugin /tmp/src/fmriprep/.circleci/legacy.yml \
+                --nthreads 4 -vv
+      - store_artifacts:
+          path: /tmp/ds005/fmriprep
+          destination: full-run
+      - run:
+          name: Copy intermediate results for re-runs
+          command: |
+            mkdir -p /tmp/${DATASET}/fmriprep-partial
+            sudo cp -a /tmp/${DATASET}/work /tmp/${DATASET}/work_partial
+            sudo cp -a /tmp/${DATASET}/work /tmp/${DATASET}/work_bids
+            # Nipype sometimes fails to pick up when the base directory changes
+            # This is a cheap workflow, so let's not fuss
+            sudo rm -rf /tmp/${DATASET}/work /tmp/${DATASET}/work_bids/fmriprep_*_wf/single_subject_01_wf/anat_preproc_wf/surface_recon_wf/gifti_surface_wf || true
+      - run: *check_outputs
+      - run:
+          name: Re-run fMRIPrep on single run of task data
+          no_output_timeout: 2h
+          command: |
+            rm /tmp/data/${DATASET}/sub-01/func/*_run-01_*
+            FASTRACK_ARG="--derivatives anat=/tmp/${DATASET}/smriprep"
+            if [ -f /tmp/.nofasttrack ]; then
+                FASTRACK_ARG=""
+            fi
+            fmriprep-docker -i nipreps/fmriprep:latest \
+                -e FMRIPREP_DEV 1 --user $(id -u):$(id -g) \
+                --network none \
+                --config $PWD/nipype.cfg -w /tmp/${DATASET}/work_partial \
+                /tmp/data/${DATASET} /tmp/${DATASET}/fmriprep-partial participant \
+                --fs-subjects-dir /tmp/${DATASET}/freesurfer \
+                ${FASTRACK_ARG} \
+                --sloppy --write-graph --use-syn-sdc --mem-mb 14336 \
+                --output-spaces MNI152NLin2009cAsym fsaverage5 fsnative MNI152NLin6Asym anat \
+                --nthreads 4 --cifti-output --project-goodvoxels -vv
+      - store_artifacts:
+          path: /tmp/ds005/fmriprep-partial
+          destination: partial-run
+      - run:
+          <<: *check_outputs
+          environment:
+            VARIANT: '_partial'
+            SUBDIR: 'fmriprep-partial'
+      - run:
+          name: Re-run fMRIPrep on single run of task data, without T1w in BIDS
+          no_output_timeout: 2h
+          command: |
+            rm -Rf /tmp/data/${DATASET}/sub-01/anat
+            FASTRACK_ARG="--derivatives anat=/tmp/${DATASET}/smriprep"
+            fmriprep-docker -i nipreps/fmriprep:latest \
+                -e FMRIPREP_DEV 1 --user $(id -u):$(id -g) \
+                --network none \
+                --config $PWD/nipype.cfg -w /tmp/${DATASET}/work_partial \
+                /tmp/data/${DATASET} /tmp/${DATASET}/fmriprep-partial-noT1w participant \
+                --fs-subjects-dir /tmp/${DATASET}/freesurfer \
+                ${FASTRACK_ARG} \
+                --sloppy --write-graph --mem-mb 14336 \
+                --level minimal --nthreads 4 -vv
+      - run:
+          name: Clean working directory
+          when: on_success
+          command: |
+            sudo chown $(id -un):$(id -gn) -R /tmp/${DATASET}
+            sudo rm -rf /tmp/${DATASET}/work
+            sudo rm -rf /tmp/${DATASET}/work_partial
+      - run:
+          name: Clean working directory
+          when: on_fail
+          command: |
+            sudo chown $(id -un):$(id -gn) -R /tmp/${DATASET}
+            find /tmp/${DATASET}/work \( -name "*.nii.gz" -or -name "*.nii" -or -name "*.gii" -or -name "*.h5" \) \
+                -exec sh -c 'rm -f {}; touch {}' \;
+            find /tmp/${DATASET}/work_partial \( -name "*.nii.gz" -or -name "*.nii" -or -name "*.gii" -or -name "*.h5" \) \
+                -exec sh -c 'rm -f {}; touch {}' \;
+      - store_artifacts:
+          path: /tmp/ds005/work
+
+  ds054:
+    <<: *machine_defaults
+    working_directory: /tmp/ds054
+    environment:
+      FS_LICENSE: /tmp/fslicense/license.txt
+      DATASET: ds054
+      CHECK_DS054: 1
+      MIGAS_OPTOUT: 1
+    steps:
+      - checkout:
+          path: *src
+      - run: *check_skip_job
+      - attach_workspace:
+          at: /tmp
+      - restore_cache:
+          keys:
+            - build-v2-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - /tmp/docker
+            - /tmp/images
+      - restore_cache:
+          keys:
+            - data-v0-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - ds054-anat-v0-{{ .Branch }}-{{ .Revision }}
+            - ds054-anat-v0--{{ .Revision }}
+            - ds054-anat-v0-{{ .Branch }}-
+            - ds054-anat-v0-master-
+            - ds054-anat-v0-
+      - docker/install-docker-credential-helper
+      - run: *docker_auth
+      - run: *setup_docker_registry
+      - run: *pull_from_registry
+      - run: *setup_fmriprep_docker
+      - run:
+          name: Run anatomical workflow on ds054
+          no_output_timeout: 2h
+          command: |
+            mkdir -p /tmp/${DATASET}/work /tmp/${DATASET}/fmriprep
+            if [ -f /tmp/.nofasttrack ]; then
+                fmriprep-docker -i nipreps/fmriprep:latest \
+                    -e FMRIPREP_DEV 1 --user $(id -u):$(id -g) \
+                    --config $PWD/nipype.cfg -w /tmp/${DATASET}/work \
+                    /tmp/data/${DATASET} /tmp/${DATASET}/fmriprep participant \
+                    --fs-no-reconall --sloppy --write-graph \
+                    --output-spaces MNI152NLin2009cAsym \
+                    --mem-mb 14336 --nthreads 4 --anat-only -vv
+            fi
+      - run:
+          name: Clean-up after anatomical run
+          command: |
+            rm -rf /tmp/${DATASET}/work/fmriprep_*_wf/fsdir*
+            rm -rf /tmp/${DATASET}/work/reportlets
+            rm -rf /tmp/${DATASET}/fmriprep
+      - save_cache:
+         key: ds054-anat-v0-{{ .Branch }}-{{ .Revision }}
+         paths:
+            - /tmp/ds054/work
+
+      - run:
+          name: Run full fMRIPrep on ds054
+          no_output_timeout: 2h
+          command: |
+            FASTRACK_ARG="--derivatives anat=/tmp/${DATASET}/smriprep"
+            if [ -f /tmp/.nofasttrack ]; then
+                FASTRACK_ARG=""
+            fi
+            fmriprep-docker -i nipreps/fmriprep:latest \
+                -e FMRIPREP_DEV 1 --user $(id -u):$(id -g) \
+                --config $PWD/nipype.cfg -w /tmp/${DATASET}/work \
+                /tmp/data/${DATASET} /tmp/${DATASET}/fmriprep participant \
+                ${FASTRACK_ARG} \
+                --fs-no-reconall --sloppy \
+                --output-spaces MNI152NLin2009cAsym:res-2 anat func \
+                --mem-mb 14336 --nthreads 4 -vv --debug compcor
+      - run: *check_outputs
+      - run:
+          name: Clean working directory
+          when: on_success
+          command: |
+            sudo chown $(id -un):$(id -gn) -R /tmp/${DATASET}
+            sudo rm -rf /tmp/${DATASET}/work
+      - run:
+          name: Clean working directory
+          when: on_fail
+          command: |
+            sudo chown $(id -un):$(id -gn) -R /tmp/${DATASET}
+            find /tmp/${DATASET}/work \( -name "*.nii.gz" -or -name "*.nii" -or -name "*.gii" -or -name "*.h5" \) \
+                -exec sh -c 'rm -f {}; touch {}' \;
+      - store_artifacts:
+          path: /tmp/ds054
+
+  ds210:
+    <<: *machine_defaults
+    working_directory: /tmp/ds210
+    environment:
+      FS_LICENSE: /tmp/fslicense/license.txt
+      DATASET: ds210
+      CHECK_DS210: 1
+    steps:
+      - checkout:
+          path: *src
+      - run: *check_skip_job
+      - attach_workspace:
+          at: /tmp
+      - restore_cache:
+          keys:
+            - build-v2-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - /tmp/docker
+            - /tmp/images
+      - restore_cache:
+          keys:
+            - data-v0-{{ .Branch }}-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - ds210-anat-v1-{{ .Branch }}-{{ .Revision }}
+            - ds210-anat-v1--{{ .Revision }}
+            - ds210-anat-v1-{{ .Branch }}-
+            - ds210-anat-v1-master-
+            - ds210-anat-v1-
+      - docker/install-docker-credential-helper
+      - run: *docker_auth
+      - run: *setup_docker_registry
+      - run: *pull_from_registry
+      - run: *setup_fmriprep_docker
+      - run:
+          name: Run anatomical workflow on ds000210
+          no_output_timeout: 2h
+          command: |
+            mkdir -p /tmp/${DATASET}/work /tmp/${DATASET}/fmriprep
+            if [ -f /tmp/.nofasttrack ]; then
+                fmriprep-docker -i nipreps/fmriprep:latest \
+                    -e FMRIPREP_DEV 1 --user $(id -u):$(id -g) \
+                    --config $PWD/nipype.cfg -w /tmp/${DATASET}/work \
+                    /tmp/data/${DATASET} /tmp/${DATASET}/fmriprep participant \
+                    --fs-no-reconall --sloppy --write-graph \
+                    --output-spaces MNI152NLin2009cAsym \
+                    --mem-mb 14336 --nthreads 4 --anat-only -vv --notrack
+            fi
+      - run:
+          name: Clean-up after anatomical run
+          command: |
+            rm -rf /tmp/${DATASET}/work/fmriprep_*_wf/fsdir*
+            rm -rf /tmp/${DATASET}/work/reportlets
+            rm -rf /tmp/${DATASET}/fmriprep
+      - save_cache:
+         key: ds210-anat-v1-{{ .Branch }}-{{ .Revision }}
+         paths:
+            - /tmp/ds210/work
+
+      - run:
+          name: Attempt run without PE metadata (should fail)
+          no_output_timeout: 2h
+          command: |
+            echo "TODO"
+
+      - run:
+          name: Run full fMRIPrep on ds000210
+          no_output_timeout: 2h
+          command: |
+            FASTRACK_ARG="--derivatives anat=/tmp/${DATASET}/smriprep"
+            if [ -f /tmp/.nofasttrack ]; then
+                FASTRACK_ARG=""
+            fi
+
+            # Inject pretend metadata for SDCFlows not to crash
+            # TODO / open question - do all echos need the metadata?
+            chmod +w /tmp/data/${DATASET}
+            echo '{"PhaseEncodingDirection": "j", "TotalReadoutTime": 0.058}' >> /tmp/data/${DATASET}/task-cuedSGT_bold.json
+            chmod -R -w /tmp/data/${DATASET}
+
+            fmriprep-docker -i nipreps/fmriprep:latest \
+                -e FMRIPREP_DEV 1 --user $(id -u):$(id -g) \
+                --config $PWD/nipype.cfg -w /tmp/${DATASET}/work \
+                /tmp/data/${DATASET} /tmp/${DATASET}/fmriprep participant \
+                ${FASTRACK_ARG} \
+                --me-output-echos \
+                --fs-no-reconall --use-syn-sdc --ignore slicetiming \
+                --dummy-scans 1 --sloppy --write-graph \
+                --output-spaces MNI152NLin2009cAsym \
+                --mem-mb 14336 --nthreads 4 -vv
+      - run: *check_outputs
+      - run:
+          name: Clean working directory
+          when: on_success
+          command: |
+            sudo chown $(id -un):$(id -gn) -R /tmp/${DATASET}
+            sudo rm -rf /tmp/${DATASET}/work
+      - run:
+          name: Clean working directory
+          when: on_fail
+          command: |
+            sudo chown $(id -un):$(id -gn) -R /tmp/${DATASET}
+            find /tmp/${DATASET}/work \( -name "*.nii.gz" -or -name "*.nii" -or -name "*.gii" -or -name "*.h5" \) \
+                -exec sh -c 'rm -f {}; touch {}' \;
+      - store_artifacts:
+          path: /tmp/ds210
+
+  deploy_docker_patches:
+    <<: *machine_defaults
+    working_directory: *src
+    steps:
+      - run:
+          name: Check whether image should be deployed to Docker Hub
+          command: |
+            if [[ "$CIRCLE_PROJECT_USERNAME" != "nipreps" ]]; then
+              echo "Nothing to deploy for $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME."
+              circleci step halt
+            fi
+      - restore_cache:
+          keys:
+            - build-v2-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - /tmp/docker
+            - /tmp/images
+      - docker/install-docker-credential-helper
+      - run: *docker_auth
+      - run: *setup_docker_registry
+      - run: *pull_from_registry
+      - run:
+          name: Deploy to Docker Hub
+          no_output_timeout: 40m
+          command: |
+            # Format: docker/[<version-like>+]<tag> -> nipreps/fmriprep:<tag>
+            # <version-like>+<tag> guides setuptools_scm to get the right major/minor
+            docker tag nipreps/fmriprep nipreps/fmriprep:${CIRCLE_BRANCH##*[/+]}
+            docker push nipreps/fmriprep:${CIRCLE_BRANCH##*[/+]}
+
+  deploy_docker:
+    <<: *machine_defaults
+    steps:
+      - checkout:
+          path: *src
+      - run: *check_skip_job
+      - restore_cache:
+          keys:
+            - build-v2-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - /tmp/docker
+            - /tmp/images
+      - docker/install-docker-credential-helper
+      - run: *docker_auth
+      - run: *setup_docker_registry
+      - run: *pull_from_registry
+      - run:
+          name: Deploy to Docker Hub
+          no_output_timeout: 40m
+          command: |
+            if [[ -n "$DOCKER_PAT" ]]; then
+              echo "$DOCKER_PAT" | docker login -u $DOCKER_USER --password-stdin
+              docker tag nipreps/fmriprep nipreps/fmriprep:unstable
+              docker push nipreps/fmriprep:unstable
+              if [[ -n "$CIRCLE_TAG" ]]; then
+                docker push nipreps/fmriprep:latest
+                docker tag nipreps/fmriprep nipreps/fmriprep:$CIRCLE_TAG
+                docker push nipreps/fmriprep:$CIRCLE_TAG
+              fi
+            fi
+
+  test_deploy_pypi:
+    <<: *python_defaults
+    steps:
+      - checkout
+      - run:
+          name: Update build tools
+          command: pip install --upgrade build twine hatch
+      - run:
+          name: Build fMRIPrep
+          command: python -m build
+      - run:
+          name: Twine check fmriprep
+          command: twine check dist/*
+      - run:
+          name: Pre-run hatch version
+          command: hatch version
+      - store_artifacts:
+          path: /tmp/src/fmriprep/dist
+      - run:
+          name: Check sdist distribution
+          command: |
+            THISVERSION=$( hatch version )
+            THISVERSION=${CIRCLE_TAG:-$THISVERSION}
+            virtualenv --python=python sdist
+            source sdist/bin/activate
+            python -m pip install --upgrade pip
+            python -m pip install dist/fmriprep*.tar.gz
+            which fmriprep | grep sdist\\/bin
+            INSTALLED_VERSION=$(fmriprep --version)
+            INSTALLED_VERSION=${INSTALLED_VERSION%$'\r'}
+            INSTALLED_VERSION=${INSTALLED_VERSION#*"fMRIPrep v"}
+            echo "VERSION: \"$THISVERSION\""
+            echo "INSTALLED: \"$INSTALLED_VERSION\""
+            test "$INSTALLED_VERSION" = "$THISVERSION"
+      - run:
+          name: Check wheel distribution
+          command: |
+            THISVERSION=$( hatch version )
+            THISVERSION=${CIRCLE_TAG:-$THISVERSION}
+            virtualenv --python=python wheel
+            source wheel/bin/activate
+            python -m pip install dist/fmriprep*.whl
+            which fmriprep | grep wheel\\/bin
+            INSTALLED_VERSION=$(fmriprep --version)
+            INSTALLED_VERSION=${INSTALLED_VERSION%$'\r'}
+            INSTALLED_VERSION=${INSTALLED_VERSION#*"fMRIPrep v"}
+            echo "VERSION: \"$THISVERSION\""
+            echo "INSTALLED: \"$INSTALLED_VERSION\""
+            test "$INSTALLED_VERSION" = "$THISVERSION"
+      - run:
+          name: Build fmriprep-docker
+          command: python -m build wrapper
+      - run:
+          name: Twine check wrapper
+          command: twine check wrapper/dist/*
+      - store_artifacts:
+          path: /tmp/src/fmriprep/wrapper/dist
+
+  deploy_pypi:
+    <<: *python_defaults
+    steps:
+      - checkout
+      - run:
+          name: Update build tools
+          command: pip install --upgrade build twine
+      - run:
+          name: Build fMRIPrep
+          command: python -m build
+      - run:
+          name: Build fmriprep-docker
+          command: python -m build wrapper/
+      - run:
+          name: Upload packages to PyPI
+          command: python -m twine upload dist/fmriprep* wrapper/dist/fmriprep*
+
+  deployable:
+    docker:
+      - image: busybox:latest
+    steps:
+      - run: echo Deploying!
+
+workflows:
+  version: 2
+  build_from_scratch:
+    triggers:
+      - schedule:
+          cron: "0 13 * * 1"
+          filters:
+            branches:
+              only:
+                - master
+                - maint/20.2.x
+    jobs:
+      - build_clean:
+          context:
+            - nipreps-common
+
+  build_test_deploy:
+    jobs:
+      - build:
+          context:
+            - nipreps-common
+          filters:
+            branches:
+              ignore:
+                - /docs?\/.*/
+            tags:
+              only: /.*/
+
+      - get_data:
+          filters:
+            branches:
+              ignore:
+                - /docs?\/.*/
+                - /tests?\/.*/
+                - /docker\/.*/
+            tags:
+              only: /.*/
+
+      - test_deploy_pypi:
+          context:
+            - nipreps-common
+          filters:
+            branches:
+              only:
+                - /rel\/.*/
+                - /maint\/.*/
+            tags:
+              only: /.*/
+
+      - test_pytest:
+          context:
+            - nipreps-common
+          requires:
+            - build
+          filters:
+            branches:
+              ignore:
+                - /docs?\/.*/
+                - /ds005\/.*/
+                - /ds054\/.*/
+                - /ds210\/.*/
+                - /docker\/.*/
+            tags:
+              only: /.*/
+
+      - ds005:
+          context:
+            - nipreps-common
+          requires:
+            - get_data
+            - build
+          filters:
+            branches:
+              ignore:
+                - /docs?\/.*/
+                - /tests?\/.*/
+                - /ds054\/.*/
+                - /ds210\/.*/
+                - /docker\/.*/
+            tags:
+              only: /.*/
+
+      - ds054:
+          context:
+            - nipreps-common
+          requires:
+            - get_data
+            - build
+          filters:
+            branches:
+              ignore:
+                - /docs?\/.*/
+                - /tests?\/.*/
+                - /ds005\/.*/
+                - /ds210\/.*/
+                - /docker\/.*/
+            tags:
+              only: /.*/
+
+      - ds210:
+          context:
+            - nipreps-common
+          requires:
+            - get_data
+            - build
+          filters:
+            branches:
+              # only: /meepi.*/
+              ignore:
+                - /docs?\/.*/
+                - /tests?\/.*/
+                - /ds005\/.*/
+                - /ds054\/.*/
+                - /docker\/.*/
+            tags:
+              only: /.*/
+
+      - deploy_docker_patches:
+          context:
+            - nipreps-common
+          requires:
+            - build
+          filters:
+            branches:
+              only: /docker\/.*/
+
+      - deployable:
+          requires:
+            - test_deploy_pypi
+            - test_pytest
+            - ds005
+            - ds054
+            - ds210
+          filters:
+            branches:
+              only: master
+            tags:
+              only: /.*/
+
+      - deploy_docker:
+          context:
+            - nipreps-common
+          requires:
+            - deployable
+          filters:
+            branches:
+              only: master
+            tags:
+              only: /.*/
+
+      - deploy_pypi:
+          context:
+            - nipreps-common
+          requires:
+            - deployable
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /.*/

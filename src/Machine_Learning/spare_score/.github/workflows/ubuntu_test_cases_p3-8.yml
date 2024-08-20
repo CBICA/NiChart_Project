@@ -1,0 +1,36 @@
+name: spare_scores test cases on ubuntu for python 3.8
+
+# workflow dispatch has been added for testing purposes
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ["ubuntu-latest"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.8"
+      - name: Set-up miniconda for macos and ubuntu
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: 3.8
+          miniconda-version: "latest"
+      - name: Create conda env
+        run: conda create -n spare python=3.8
+      - name: Install pip
+        run: conda run -n spare conda install pip
+      - name: Install spare scores
+        run: |
+          pip install setuptools twine wheel
+          python setup.py bdist_wheel
+          cd dist
+          WHEEL_FILE=$(ls spare_scores*)
+          pip install "$WHEEL_FILE"
+      - name: Download dependencies
+        run: pip install setuptools && pip install .
+      - name: Run unit tests
+        run: |
+          cd tests/unit && python -m unittest discover -s . -p "*.py"

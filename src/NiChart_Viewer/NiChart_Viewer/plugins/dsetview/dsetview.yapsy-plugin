@@ -1,0 +1,20 @@
+[Core]
+Name = DATASETS
+Module = dsetview
+
+[Documentation]
+Author = Guray Erus
+Version = 0.1
+Website = 
+Description = ---------- Description ----------
+    Datasets view provides tools to select the active dataset, and to view and modify input datasets.
+    ---------- Actions ----------
+    Show Data Table: To display the data table
+    Select Columns: To select a subset of the columns
+    ---------- Notes ----------
+    - Only the first n=50 rows are shown when the user selects "Show Data". This option is provided for a quick look at the table structure, not to view all data values.
+      
+
+[Tab]
+#tab position starts from 0
+Position = 0

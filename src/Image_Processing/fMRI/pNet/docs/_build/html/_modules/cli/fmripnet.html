@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cli.fmripnet &mdash; pNet 1.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/theme_overrides.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=292eb321"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            pNet
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../auto_examples/index.html">Tutorials and Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pNet</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">cli.fmripnet</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cli.fmripnet</h1><div class="highlight"><pre>
+<span></span><span class="c1"># load pnet toolbox</span>
+<span class="kn">import</span> <span class="nn">pnet</span>
+
+<span class="kn">import</span> <span class="nn">argparse</span>
+
+<span class="kn">import</span> <span class="nn">tomli</span>
+<div class="viewcode-block" id="read_config">
+<a class="viewcode-back" href="../../cli.html#cli.fmripnet.read_config">[docs]</a>
+<span class="k">def</span> <span class="nf">read_config</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">tomli</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>  <span class="c1"># , &#39;owner&#39;)</span>
+        <span class="n">necessary_settings</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;necessary_settings&#39;</span><span class="p">]</span>
+        <span class="n">pFN_settings</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;pFN_settings&#39;</span><span class="p">]</span>
+        <span class="n">gFN_settings</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;gFN_settings&#39;</span><span class="p">]</span>
+        <span class="n">hpc_settings</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;hpc_settings&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">config</span> <span class="c1">#necessary_settings, pFN_settings, gFN_settings, hpc_settings</span>
+  <span class="k">except</span> <span class="n">tomli</span><span class="o">.</span><span class="n">TOMLDecodeError</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;errors in </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="main">
+<a class="viewcode-back" href="../../cli.html#cli.fmripnet.main">[docs]</a>
+<span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">config_file</span><span class="o">=</span><span class="s1">&#39;config.txt&#39;</span><span class="p">,</span> <span class="n">HPC</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="c1"># get configuration information</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">read_config</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
+    <span class="c1"># necessary_settings</span>
+    <span class="n">dataType</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;necessary_settings&#39;</span><span class="p">][</span><span class="s1">&#39;dataType&#39;</span><span class="p">]</span>
+    <span class="n">dataFormat</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;necessary_settings&#39;</span><span class="p">][</span><span class="s1">&#39;dataFormat&#39;</span><span class="p">]</span>
+    <span class="n">dir_pnet_result</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;necessary_settings&#39;</span><span class="p">][</span><span class="s1">&#39;dir_pnet_result&#39;</span><span class="p">]</span>
+    <span class="n">file_scans</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;necessary_settings&#39;</span><span class="p">][</span><span class="s1">&#39;file_scans&#39;</span><span class="p">]</span>
+    <span class="n">file_Brain_Template</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;necessary_settings&#39;</span><span class="p">][</span><span class="s1">&#39;file_Brain_Template&#39;</span><span class="p">]</span>
+    <span class="n">K</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;necessary_settings&#39;</span><span class="p">][</span><span class="s1">&#39;K&#39;</span><span class="p">]</span>
+    <span class="n">method</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;necessary_settings&#39;</span><span class="p">][</span><span class="s1">&#39;method&#39;</span><span class="p">]</span>
+    <span class="c1">#pFN_settings</span>
+    <span class="k">if</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;pFN_settings&#39;</span><span class="p">][</span><span class="s1">&#39;file_gFN&#39;</span><span class="p">]</span>  <span class="o">==</span> <span class="s2">&quot;None&quot;</span><span class="p">:</span>
+        <span class="n">file_gFN</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">file_gFN</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;pFN_settings&#39;</span><span class="p">][</span><span class="s1">&#39;file_gFN&#39;</span><span class="p">]</span>
+    <span class="c1">#gFN_setting</span>
+    <span class="n">sampleSize</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;gFN_settings&#39;</span><span class="p">][</span><span class="s1">&#39;sampleSize&#39;</span><span class="p">]</span>
+    <span class="n">nBS</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;gFN_settings&#39;</span><span class="p">][</span><span class="s1">&#39;nBS&#39;</span><span class="p">]</span>
+    <span class="n">nTPoints</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;gFN_settings&#39;</span><span class="p">][</span><span class="s1">&#39;nTPoints&#39;</span><span class="p">]</span>
+    <span class="c1">#hpc_settings</span>
+    <span class="n">pnet_env</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;hpc_settings&#39;</span><span class="p">][</span><span class="s1">&#39;pnet_env&#39;</span><span class="p">]</span>
+    <span class="n">hpc_submit</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;hpc_settings&#39;</span><span class="p">][</span><span class="s1">&#39;submit&#39;</span><span class="p">]</span>
+    <span class="n">hpc_computation_resource</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;hpc_settings&#39;</span><span class="p">][</span><span class="s1">&#39;computation_resource&#39;</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;computation resource: </span><span class="si">{</span><span class="n">hpc_computation_resource</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;dataType: </span><span class="si">{</span><span class="n">dataType</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;dataFormat: </span><span class="si">{</span><span class="n">dataFormat</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;dir_pent_result: </span><span class="si">{</span><span class="n">dir_pnet_result</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file_scan: </span><span class="si">{</span><span class="n">file_scans</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file_Brain_Template: </span><span class="si">{</span><span class="n">file_Brain_Template</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;K: </span><span class="si">{</span><span class="n">K</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sampleSize: </span><span class="si">{</span><span class="n">sampleSize</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;nBS: </span><span class="si">{</span><span class="n">nBS</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;nTPoints: </span><span class="si">{</span><span class="n">nTPoints</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">HPC</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+       <span class="n">pnet</span><span class="o">.</span><span class="n">workflow</span><span class="p">(</span>
+           <span class="n">dir_pnet_result</span><span class="o">=</span><span class="n">dir_pnet_result</span><span class="p">,</span>
+           <span class="n">dataType</span><span class="o">=</span><span class="n">dataType</span><span class="p">,</span>
+           <span class="n">dataFormat</span><span class="o">=</span><span class="n">dataFormat</span><span class="p">,</span>
+           <span class="n">file_scan</span><span class="o">=</span><span class="n">file_scans</span><span class="p">,</span>
+           <span class="n">file_Brain_Template</span><span class="o">=</span><span class="n">file_Brain_Template</span><span class="p">,</span>
+           <span class="n">K</span><span class="o">=</span><span class="n">K</span><span class="p">,</span>
+           <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
+           <span class="n">init</span><span class="o">=</span><span class="s1">&#39;random&#39;</span><span class="p">,</span> 
+           <span class="n">sampleSize</span><span class="o">=</span><span class="n">sampleSize</span><span class="p">,</span>
+           <span class="n">nBS</span><span class="o">=</span><span class="n">nBS</span><span class="p">,</span>
+           <span class="n">nTPoints</span><span class="o">=</span><span class="n">nTPoints</span><span class="p">,</span>
+           <span class="n">Computation_Mode</span><span class="o">=</span><span class="s1">&#39;CPU_Torch&#39;</span><span class="p">,</span>
+           <span class="n">Combine_Scan</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">HPC</span> <span class="o">==</span> <span class="s1">&#39;qsub&#39;</span><span class="p">:</span>
+       <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;HCP=</span><span class="si">{</span><span class="n">HPC</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+       <span class="n">pnet</span><span class="o">.</span><span class="n">workflow_cluster</span><span class="p">(</span>
+           <span class="n">dir_pnet_result</span><span class="o">=</span><span class="n">dir_pnet_result</span><span class="p">,</span>
+           <span class="n">dataType</span><span class="o">=</span><span class="n">dataType</span><span class="p">,</span>
+           <span class="n">dataFormat</span><span class="o">=</span><span class="n">dataFormat</span><span class="p">,</span>
+           <span class="n">file_Brain_Template</span><span class="o">=</span><span class="n">file_Brain_Template</span><span class="p">,</span>
+           <span class="n">file_scan</span><span class="o">=</span><span class="n">file_scans</span><span class="p">,</span>
+           <span class="n">file_subject_ID</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+           <span class="n">file_subject_folder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+           <span class="n">K</span><span class="o">=</span><span class="n">K</span><span class="p">,</span>
+           <span class="n">Combine_Scan</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+           <span class="n">sampleSize</span><span class="o">=</span><span class="n">sampleSize</span><span class="p">,</span>
+           <span class="n">nBS</span><span class="o">=</span><span class="n">nBS</span><span class="p">,</span>
+           <span class="n">nTPoints</span><span class="o">=</span><span class="n">nTPoints</span><span class="p">,</span>
+           <span class="n">dir_env</span><span class="o">=</span><span class="n">pnet_env</span><span class="p">[</span><span class="s1">&#39;dir_env&#39;</span><span class="p">],</span>
+           <span class="n">dir_python</span><span class="o">=</span><span class="n">pnet_env</span><span class="p">[</span><span class="s1">&#39;dir_python&#39;</span><span class="p">],</span>
+           <span class="n">dir_pnet</span><span class="o">=</span><span class="n">pnet_env</span><span class="p">[</span><span class="s1">&#39;dir_pnet&#39;</span><span class="p">],</span>
+           <span class="n">Computation_Mode</span><span class="o">=</span><span class="s1">&#39;CPU_Torch&#39;</span><span class="p">,</span>
+           <span class="n">submit_command</span><span class="o">=</span><span class="n">hpc_submit</span><span class="p">[</span><span class="s1">&#39;submit_command&#39;</span><span class="p">],</span>
+           <span class="n">thread_command</span><span class="o">=</span><span class="n">hpc_submit</span><span class="p">[</span><span class="s1">&#39;thread_command&#39;</span><span class="p">],</span>
+           <span class="n">memory_command</span><span class="o">=</span><span class="n">hpc_submit</span><span class="p">[</span><span class="s1">&#39;memory_command&#39;</span><span class="p">],</span>
+           <span class="n">log_command</span><span class="o">=</span><span class="n">hpc_submit</span><span class="p">[</span><span class="s1">&#39;log_command&#39;</span><span class="p">],</span>
+           <span class="n">computation_resource</span><span class="o">=</span><span class="n">hpc_computation_resource</span>
+       <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+       <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">HPC</span><span class="si">}</span><span class="s2"> is not supported yet!&quot;</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="c1">#Create the parser</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;pNet: a toolbox for computing personalized functional networks from preprocessed functional magnetic resonance imaging (fMRI) data&quot;</span><span class="p">)</span>
+    <span class="c1"># Add arguments</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-c&quot;</span><span class="p">,</span> <span class="s2">&quot;--config&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;A configuration file for setting parameters&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--hpc&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;HPC computing: None (default:not available) or qsub&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="c1"># Parse the arguments</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="n">config_file</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">config</span>
+    <span class="n">hpc</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">hpc</span>
+    <span class="n">main</span><span class="p">(</span><span class="n">config_file</span><span class="p">,</span> <span class="n">hpc</span><span class="p">)</span>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, pNet developers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

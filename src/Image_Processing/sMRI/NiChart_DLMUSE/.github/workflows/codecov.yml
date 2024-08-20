@@ -1,0 +1,14 @@
+name: Test Coverage and Report to Codecov
+on: 
+  pull_request:
+    branches: ["main"]
+
+    
+jobs:
+  codecov:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4.5.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
