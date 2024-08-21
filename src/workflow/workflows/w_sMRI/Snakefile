@@ -37,9 +37,9 @@ OUT_CONFIG = f"../../{dir_output}/config/config.yaml"
 OUT_RESULTS = expand(f"../../{dir_output}/{{study}}/out_combined/{{study}}_{{stype}}_All.csv", study = studies, stype = seg_types)
 OUT_FLAG = [f"../../{dir_output}/flag_VIEWED.csv"]
 
-#OUT_FILES = [OUT_CONFIG] + OUT_RESULTS + OUT_FLAG
+OUT_FILES = [OUT_CONFIG] + OUT_RESULTS + OUT_FLAG
 
-OUT_FILES = ["../../output/vTest2/Study1/dlmuse/Study1_DLMUSE.csv"]
+#OUT_FILES = [f"../../output/vTest{config['vTest']}/Study1/dlmuse/Study1_DLMUSE.csv"]
 
 #print("Target out files:" + '\n' + '\n'.join(OUT_FILES) + '\n')
 
