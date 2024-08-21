@@ -12,8 +12,7 @@ import os
 ## Default config file
 ## Runs the workflow with the test dataset
 ## Edit this for running it on other datasets
-#in_config = "../../config/vTest1/config.yaml"
-in_config = "../../config/vTest2/config.yaml"
+in_config = f"../../config/vTest{config['vTest']}/config.yaml"
 configfile: f"{in_config}"
 ###################################
 
