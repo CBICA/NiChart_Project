@@ -2,6 +2,9 @@ NiChart-Viewer-Demo
 spare-scores
 NiChartHarmonize
 NiChart_DLMUSE
+
+# general python dependencies
+argparse
 nibabel
 mamba
 snakemake
