@@ -1,4 +1,4 @@
-name: Pipeline test cases for ubuntu
+name: Pipeline test cases for macos
 
 # workflow dispatch has been added for testing purposes
 on: [push, pull_request, workflow_dispatch]
@@ -18,19 +18,9 @@ jobs:
           auto-update-conda: true
           python-version: 3.8
           miniconda-version: "latest"
-      - name: Create conda env
-        run: conda create -n spare python=3.8
-      - name: Install pip
-        run: conda run -n spare conda install pip
-      - name: Install spare scores
+      - name: Install dependencies
         run: |
-          pip install setuptools twine wheel
-          python setup.py bdist_wheel
-          cd dist
-          WHEEL_FILE=$(ls spare_scores*)
-          pip install "$WHEEL_FILE"
-      - name: Download dependencies
-        run: pip install setuptools && pip install .
-      - name: Run unit tests
+          pip install -r requirements.txt
+      - name: pipeline test for vTest1 using spare
         run: |
-          cd tests/unit && python -m unittest discover -s . -p "*.py"
+          python3 run.py --folder 1 --cores 4 --no_conda 0

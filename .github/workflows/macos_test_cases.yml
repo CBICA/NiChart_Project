@@ -5,7 +5,7 @@ on: [push, pull_request, workflow_dispatch]
 
 jobs:
   build:
-    runs-on: ["macos-13"]
+    runs-on: ["macos-latest"]
 
     steps:
       - uses: actions/checkout@v4
@@ -18,16 +18,9 @@ jobs:
           auto-update-conda: true
           python-version: 3.8
           miniconda-version: "latest"
-
-      - name: Install mamba & snakemake
+      - name: Install dependencies
         run: |
-          conda install -c conda-forge mamba
-          mamba init
-          mamba create -c conda-forge -c bioconda -n NiChart python=3.8
-          conda activate NiChart
           pip install -r requirements.txt
-          mamba install -c conda-forge -c bioconda snakemake
       - name: pipeline test for vTest1 using spare
         run: |
-          cd src/workflow/workflows/w_sMRI/
-          snakemake --cores 4 --config vTest=1
+          python3 run.py --folder 1 --cores 4 --no_conda 0
