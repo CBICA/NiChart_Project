@@ -26,12 +26,13 @@ NiChart is a comprehensive framework designed to revolutionize neuroimaging rese
 
 ## Installation Instructions
 
-1. `git clone --recursive https://github.com/CBICA/NiChart_Project.git`
+1. `git clone https://github.com/CBICA/NiChart_Project.git`
+2. `git submodule update --init --recursive --remote`
 2. Navigate to each submodule and follow their individual installation instructions.
 
 ## Example Usage
 
-*For a visual guide, see this GIF:*  
+*For a visual guide, see this GIF:*
 ![Usage GIF](https://imgur.com/a/qGT7Ey4)
 
 ---
