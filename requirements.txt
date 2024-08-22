@@ -8,3 +8,4 @@ argparse
 nibabel
 mamba
 snakemake
+pulp
