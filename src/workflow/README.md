@@ -2,7 +2,7 @@
 
 A toolkit that allows users to apply **NiChart** processing methods and pre-trained models on their data.  **NiChart<sup>Workflows</sup>** includes tools for [data harmonization](https://neuroimagingchart.com/components/#Harmonization) and [machine learning](https://neuroimagingchart.com/components/#Machine%20Learning), using pre-trained models and reference distributions provided by [**NiChart<sup>Engine</sup>**](https://github.com/gurayerus/NiChart_Engine). **NiChart<sup>Workflow</sup>** utilizes [Snakemake](https://snakemake.github.io) workflows to define multi-step image processing and data analytics pipelines.
 
-![Workflow Diagram](docs/NiChart_Flowchart_Level1B_v2.png)
+![Workflow Diagram](../../assets/NiChart_Flowchart_Level1B_v2.png)
 
 ## Installation:
 

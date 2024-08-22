@@ -8,7 +8,7 @@ def combat_prep_out(in_csv, key_var, suffix, out_csv):
     """
     Select combat output variables and prepare out file without combat suffix
     """
-    
+
     # Read input files
     df = pd.read_csv(in_csv, dtype = {'MRID':str})
 
@@ -17,7 +17,7 @@ def combat_prep_out(in_csv, key_var, suffix, out_csv):
 
     # Get variables (key + harmonized rois)
     sel_vars = [key_var] + df.columns[df.columns.str.contains(suffix)].tolist()
-    
+
     # Select variables
     df_out = df[sel_vars]
 
@@ -46,4 +46,3 @@ if __name__ == "__main__":
     combat_prep_out(in_csv, key_var, suffix, out_csv)
 
     print("Combat out data prep complete! Output file:", out_csv)
-
