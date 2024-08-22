@@ -8,4 +8,4 @@ argparse
 nibabel
 mamba
 snakemake
-pulp
+pulp==2.7.0
