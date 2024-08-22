@@ -1,0 +1,33 @@
+name: Pipeline test cases for macos
+
+# workflow dispatch has been added for testing purposes
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ["macos-13"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.8"
+      - name: Set-up miniconda for macos and ubuntu
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: 3.8
+          miniconda-version: "latest"
+
+      - name: Install mamba & snakemake
+        run: |
+          conda install -c conda-forge mamba
+          mamba init
+          mamba create -c conda-forge -c bioconda -n NiChart python=3.8
+          conda activate NiChart
+          pip install -r requirements.txt
+          mamba install -c conda-forge -c bioconda snakemake
+      - name: pipeline test for vTest1 using spare
+        run: |
+          cd src/workflow/workflows/w_sMRI/
+          snakemake --cores 4 --config vTest=1
