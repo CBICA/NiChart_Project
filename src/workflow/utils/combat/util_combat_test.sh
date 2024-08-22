@@ -3,7 +3,7 @@
 ## Read input
 in_csv=$(realpath $1)
 in_mdl=$(realpath $2)
-out_csv=$(realpath $3)
+out_csv=$3
 
 ## Apply combat learn
 cmd="neuroharm -a apply -i $in_csv -m $in_mdl -u ${out_csv%.csv}_tmpinit.csv"

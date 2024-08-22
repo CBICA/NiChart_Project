@@ -132,6 +132,9 @@ venv.bak/
 .spyderproject
 .spyproject
 
+# Snakemake logs
+.snakemake
+
 # Rope project settings
 .ropeproject
 
