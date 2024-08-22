@@ -4,3 +4,4 @@ NiChartHarmonize
 NiChart_DLMUSE
 nibabel
 mamba
+snakemake
