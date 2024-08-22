@@ -12,10 +12,8 @@ Install dependencies for the **NiChart<sup>Workflows</sup>** in a conda environm
 
 ```bash
 conda install -n base -c conda-forge mamba # If needed
-mamba init # If first time installing, then potentially source ~/.bashrc
 mamba create -c conda-forge -c bioconda -n NiChart_Workflows python=3.8
-mamba activate NiChart_Workflows
-pip install NiChart-Viewer-Demo spare-scores NiChartHarmonize
+conda activate NiChart_Workflows
 mamba install -c conda-forge -c bioconda snakemake
 ```
 ***Note:*** Mamba installation from conda-forge may be slow. Linux x86 64 users can use a faster alternative:
@@ -50,8 +48,8 @@ You can apply the structural MRI workflow on this dataset as follows:
 
 ```bash
 cd workflows/w_sMRI
-snakemake -np --config vTest=1 ## Dry run for vTest
-snakemake --cores 1 --config vTest=1     ## Run the pipeline on Study1 data provided in the vTest1 dataset
+snakemake -np --config vTest=1 ## Dry run for vTest1
+snakemake --cores 1 --config vTest=1 ## Run the pipeline on Study1 data provided in the vTest1 dataset
 ```
 
 If the workflow works successfully, workflow steps will be run on the data. Result files will be created inside the output folder:

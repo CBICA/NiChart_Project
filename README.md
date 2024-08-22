@@ -28,13 +28,11 @@ NiChart is a comprehensive framework designed to revolutionize neuroimaging rese
 
 1. `git clone https://github.com/CBICA/NiChart_Project.git`
 2. `git submodule update --init --recursive --remote`
-2. Navigate to each submodule and follow their individual installation instructions.
+3. `pip install -r requirements.txt`
 
 ## Example Usage
-
-*For a visual guide, see this GIF:*
-![Usage GIF](https://imgur.com/a/qGT7Ey4)
-
+1. `python3 run.py --folder 1 --cores 4 --no_conda 0` # this will run the vTest1 folder using 4 cores creating a new conda environment as well
+2. `python3 run.py --folder 2 --cores 2 --no_conda 1` # this will run the vTest2 folder using 2 cores without creating a new conda environment
 ---
 
 © 2024 CBICA. All Rights Reserved.
