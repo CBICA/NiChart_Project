@@ -58,6 +58,3 @@
 [submodule "src/Image_Processing/sMRI/DLMUSE"]
 	path = src/Image_Processing/sMRI/DLMUSE
 	url = https://github.com/CBICA/DLMUSE
-[submodule "src/Image_Processing/sMRI/NiChart_DLMUSE"]
-	path = src/Image_Processing/sMRI/NiChart_DLMUSE
-	url = https://github.com/CBICA/NiChart_DLMUSE
