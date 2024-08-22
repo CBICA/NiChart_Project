@@ -9,3 +9,4 @@ nibabel
 mamba
 snakemake
 pulp==2.7.0
+tabulate==0.8.10
