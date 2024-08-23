@@ -5,10 +5,10 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="sopnmf",
-    version="0.0.2",
+    version="0.0.4",
     author="junhao.wen",
     author_email="junhao.wen89@email.com",
-    description=" Orthogonal Projective Non-negative Matrix Factorization",
+    description="Stochastic Orthogonal Projective Non-negative Matrix Factorization",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/anbai106/SOPNMF",

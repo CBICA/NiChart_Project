@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pNet &mdash; pNet 1.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/theme_overrides.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=292eb321"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            pNet
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">Tutorials and Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">pNet</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">pNet</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pnet">
+<h1>pNet<a class="headerlink" href="#pnet" title="Link to this heading"></a></h1>
+<p>pNet is a Python package for computing personalized, sparse,
+non-negative large-scale functional networks from functional magnetic
+resonance imaging (fMRI) data, particularly resting state fMRI data. The
+personalized functional networks are comparable across subjects while
+maintaining subject specific variation, reflected by their improved
+functional coherence compared with their group-level counterparts. The
+computation of personalized functional networks is accompanied by
+quality control with visualization and quantification of their spatial
+correspondence and functional coherence in reference to their
+group-level counterparts.</p>
+<figure class="align-default">
+<img alt="image" src="https://github.com/user-attachments/assets/b45d02a1-2c82-43b5-b7d5-42fc38a7b298" />
+</figure>
+<section id="getting-started">
+<h2>Getting started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h2>
+<p>Follow the Installation Instructions to install pNet, and then check out
+the Tutorials and
+<a class="reference external" href="https://github.com/MLDataAnalytics/pNet/tree/main/src/pnet/examples">Examples</a>
+to learn how to get up and running!</p>
+<section id="download-pnet">
+<h3>1. Download pNet<a class="headerlink" href="#download-pnet" title="Link to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">MLDataAnalytics</span><span class="o">/</span><span class="n">pNet</span><span class="o">.</span><span class="n">git</span>
+</pre></div>
+</div>
+</section>
+<section id="create-a-new-conda-environment-for-pnet">
+<h3>2. Create a new conda environment for pNet<a class="headerlink" href="#create-a-new-conda-environment-for-pnet" title="Link to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">pNet</span>
+<span class="n">conda</span> <span class="n">env</span> <span class="n">create</span> <span class="o">--</span><span class="n">name</span> <span class="n">fmripnet</span> <span class="o">-</span><span class="n">f</span> <span class="n">environment_pnet</span><span class="o">.</span><span class="n">yml</span>
+</pre></div>
+</div>
+</section>
+<section id="install-pnet">
+<h3>3. Install pNet<a class="headerlink" href="#install-pnet" title="Link to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="n">pnet</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="o">.</span>
+<span class="c1"># or pip install fmripnet</span>
+</pre></div>
+</div>
+</section>
+<section id="script-usages">
+<h3>Script usages<a class="headerlink" href="#script-usages" title="Link to this heading"></a></h3>
+<section id="prepare-data">
+<h4>1. Prepare data<a class="headerlink" href="#prepare-data" title="Link to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">1</span><span class="p">)</span> <span class="n">a</span> <span class="n">number</span> <span class="n">of</span> <span class="n">preprocessed</span> <span class="n">fMRI</span> <span class="n">scans</span> <span class="n">that</span> <span class="n">have</span> <span class="n">been</span> <span class="n">spatially</span> <span class="n">aligned</span> <span class="n">to</span> <span class="n">a</span> <span class="n">template</span> <span class="n">space</span><span class="p">,</span>
+<span class="mi">2</span><span class="p">)</span> <span class="n">a</span> <span class="n">mask</span> <span class="n">image</span> <span class="k">for</span> <span class="n">excluding</span> <span class="n">voxels</span><span class="o">/</span><span class="n">vertices</span> <span class="n">of</span> <span class="n">uninterest</span><span class="p">,</span>
+<span class="mi">3</span><span class="p">)</span> <span class="n">a</span> <span class="n">brain</span> <span class="n">template</span> <span class="n">image</span><span class="o">/</span><span class="n">surface</span> <span class="k">for</span> <span class="n">visualization</span>
+<span class="mi">4</span><span class="p">)</span> <span class="n">a</span> <span class="n">script</span> <span class="n">can</span> <span class="n">be</span> <span class="n">found</span> <span class="ow">in</span> <span class="n">cli</span> <span class="n">folder</span> <span class="k">for</span> <span class="n">preparing</span> <span class="n">the</span> <span class="n">brain</span> <span class="n">template</span> <span class="n">data</span>
+</pre></div>
+</div>
+</section>
+<section id="run-the-computation-examples-can-be-found-in-examples-folder">
+<h4>2. Run the computation (examples can be found in examples folder)<a class="headerlink" href="#run-the-computation-examples-can-be-found-in-examples-folder" title="Link to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">5</span><span class="p">)</span> <span class="n">a</span> <span class="n">script</span> <span class="p">(</span><span class="n">fmripnet</span><span class="o">.</span><span class="n">py</span><span class="p">)</span> <span class="n">can</span> <span class="n">be</span> <span class="n">found</span> <span class="ow">in</span> <span class="n">cli</span> <span class="n">folder</span>  <span class="k">for</span> <span class="n">running</span> <span class="n">the</span> <span class="n">computation</span><span class="p">,</span> <span class="n">supplied</span> <span class="k">with</span> <span class="n">a</span> <span class="n">configuration</span> <span class="n">file</span> <span class="p">(</span><span class="o">*.</span><span class="n">toml</span><span class="p">)</span> <span class="k">for</span> <span class="n">setting</span> <span class="n">the</span> <span class="nb">input</span> <span class="ow">and</span> <span class="n">output</span> <span class="n">information</span>
+   <span class="n">run</span> <span class="s2">&quot;python fmripnet.py -h &quot;</span> <span class="n">to</span> <span class="n">get</span> <span class="n">help</span> <span class="n">information</span>
+   <span class="n">run</span> <span class="s2">&quot;python fmripnet.py -c a_config.toml&quot;</span> <span class="n">to</span> <span class="n">start</span> <span class="n">the</span> <span class="n">computation</span>
+   <span class="n">run</span> <span class="s2">&quot;python fmripnet.py -c a_config.toml --hpc qsub&quot;</span> <span class="n">to</span> <span class="n">start</span> <span class="n">the</span> <span class="n">computation</span> <span class="n">on</span> <span class="n">a</span> <span class="n">HPC</span> <span class="n">cluster</span> <span class="k">with</span> <span class="n">qsub</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="code-examples-and-usages">
+<h3>Code examples and usages<a class="headerlink" href="#code-examples-and-usages" title="Link to this heading"></a></h3>
+<section id="prepare-data-1">
+<span id="id1"></span><h4>1. Prepare data<a class="headerlink" href="#prepare-data-1" title="Link to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">1</span><span class="p">)</span> <span class="n">a</span> <span class="n">number</span> <span class="n">of</span> <span class="n">preprocessed</span> <span class="n">fMRI</span> <span class="n">scans</span> <span class="n">that</span> <span class="n">have</span> <span class="n">been</span> <span class="n">spatially</span> <span class="n">aligned</span> <span class="n">to</span> <span class="n">a</span> <span class="n">template</span> <span class="n">space</span><span class="p">,</span>
+<span class="mi">2</span><span class="p">)</span> <span class="n">a</span> <span class="n">mask</span> <span class="n">image</span> <span class="k">for</span> <span class="n">excluding</span> <span class="n">voxels</span><span class="o">/</span><span class="n">vertices</span> <span class="n">of</span> <span class="n">uninterest</span><span class="p">,</span>
+<span class="mi">3</span><span class="p">)</span> <span class="n">a</span> <span class="n">brain</span> <span class="n">template</span> <span class="n">image</span><span class="o">/</span><span class="n">surface</span> <span class="k">for</span> <span class="n">visualization</span>
+</pre></div>
+</div>
+</section>
+<section id="setup-the-computation">
+<h4>2. Setup the computation<a class="headerlink" href="#setup-the-computation" title="Link to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">1</span><span class="p">)</span> <span class="n">the</span> <span class="n">number</span> <span class="n">of</span> <span class="n">functional</span> <span class="n">networks</span><span class="p">,</span>
+<span class="mi">2</span><span class="p">)</span> <span class="n">the</span> <span class="n">output</span> <span class="n">folder</span> <span class="n">information</span><span class="p">,</span>
+<span class="mi">3</span><span class="p">)</span> <span class="n">optional</span> <span class="n">parameters</span>
+</pre></div>
+</div>
+</section>
+<section id="example-code">
+<h4>3. Example code:<a class="headerlink" href="#example-code" title="Link to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pnet</span>
+
+<span class="c1"># create a txt file of fMRI scans, each line with a fMRI scan</span>
+<span class="n">file_scan</span> <span class="o">=</span> <span class="s1">&#39;sbj_lst.txt&#39;</span>
+<span class="c1"># create a brain template file consisting of information of the mask image and the brain template for visualization or use a template that is distributed with the package)</span>
+<span class="n">file_Brain_Template</span> <span class="o">=</span> <span class="n">pnet</span><span class="o">.</span><span class="n">Brain_Template</span><span class="o">.</span><span class="n">file_MNI_vol</span>
+
+<span class="c1"># Setup</span>
+<span class="c1"># data type is volume</span>
+<span class="n">dataType</span> <span class="o">=</span> <span class="s1">&#39;Volume&#39;</span>
+<span class="c1"># data format is NIFTI, which stores a 4D matrix</span>
+<span class="n">dataFormat</span> <span class="o">=</span> <span class="s1">&#39;Volume (*.nii, *.nii.gz, *.mat)&#39;</span>
+<span class="c1"># output folder</span>
+<span class="n">dir_pnet_result</span> <span class="o">=</span> <span class="s1">&#39;Test_FN17_Results&#39;</span>
+
+<span class="c1"># number of FNs</span>
+<span class="n">K</span> <span class="o">=</span> <span class="mi">17</span>
+
+<span class="c1"># Setup number of scans loaded for each bootstrap run for estimating group functional networks</span>
+<span class="n">sampleSize</span> <span class="o">=</span> <span class="mi">100</span> <span class="c1"># The number should be no larger than the number of available fMRI scans. A larger number of samples can improve the computational robustness but also increase the computational cost.  Recommended: &gt;=100</span>
+<span class="c1"># Setup number of runs for bootstraps</span>
+<span class="n">nBS</span> <span class="o">=</span> <span class="mi">50</span>         <span class="c1"># A larger number of run can improve the computational robustness but also increase the computational cost. recommended: &gt;=10</span>
+<span class="c1"># Setup number of time points for computing group FNs with bootstraps</span>
+<span class="n">nTPoints</span> <span class="o">=</span> <span class="mi">200</span>   <span class="c1"># The number should be no larger than the number of available time points of the fMRI scans. A larger number of samples can improve the computational robustness but also increase the computational cost.  If not set, all available time points will be used if smaller than 9999.</span>
+
+<span class="c1"># Run pnet workflow</span>
+<span class="n">pnet</span><span class="o">.</span><span class="n">workflow_simple</span><span class="p">(</span>
+        <span class="n">dir_pnet_result</span><span class="o">=</span><span class="n">dir_pnet_result</span><span class="p">,</span>
+        <span class="n">dataType</span><span class="o">=</span><span class="n">dataType</span><span class="p">,</span>
+        <span class="n">dataFormat</span><span class="o">=</span><span class="n">dataFormat</span><span class="p">,</span>
+        <span class="n">file_scan</span><span class="o">=</span><span class="n">file_scan</span><span class="p">,</span>
+        <span class="n">file_Brain_Template</span><span class="o">=</span><span class="n">file_Brain_Template</span><span class="p">,</span>
+        <span class="n">K</span><span class="o">=</span><span class="n">K</span><span class="p">,</span>
+        <span class="n">sampleSize</span><span class="o">=</span><span class="n">sampleSize</span><span class="p">,</span>
+        <span class="n">nBS</span><span class="o">=</span><span class="n">nBS</span><span class="p">,</span>
+        <span class="n">nTPoints</span><span class="o">=</span><span class="n">nTPoints</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="support">
+<h2>Support<a class="headerlink" href="#support" title="Link to this heading"></a></h2>
+<p>If you encounter problems or bugs with pNet, or have questions or
+improvement suggestions, please feel free to get in touch via the
+<a class="reference external" href="https://github.com/MLDataAnalytics/pNet/issues">Github issues</a>.</p>
+</section>
+<section id="previous-versions">
+<h2>Previous versions:<a class="headerlink" href="#previous-versions" title="Link to this heading"></a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><p>Matlab and Python: <a class="reference external" href="https://github.com/MLDataAnalytics/pNet_Matlab">https://github.com/MLDataAnalytics/pNet_Matlab</a></p></li>
+<li><p>Matlab: <a class="reference external" href="https://github.com/MLDataAnalytics/Collaborative_Brain_Decomposition">https://github.com/MLDataAnalytics/Collaborative_Brain_Decomposition</a></p></li>
+<li><p>GIG-ICA: <a class="reference external" href="https://www.nitrc.org/projects/gig-ica/">https://www.nitrc.org/projects/gig-ica/</a></p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="modules.html">pnet</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">Tutorials and Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="auto_examples/index.html#tutorials">Tutorials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="auto_examples/index.html#examples">Examples</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, pNet developers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

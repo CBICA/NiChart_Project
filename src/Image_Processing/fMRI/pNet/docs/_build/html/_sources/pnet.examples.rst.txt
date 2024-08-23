@@ -1,0 +1,29 @@
+pnet.examples package
+=====================
+
+Submodules
+----------
+
+pnet.examples.Exp\_surf\_hcp10subjs module
+------------------------------------------
+
+.. automodule:: pnet.examples.Exp_surf_hcp10subjs
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pnet.examples.Exp\_vol\_data module
+-----------------------------------
+
+.. automodule:: pnet.examples.Exp_vol_data
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: pnet.examples
+   :members:
+   :undoc-members:
+   :show-inheritance:

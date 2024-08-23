@@ -12,10 +12,10 @@ from multiprocessing.pool import ThreadPool
 import torch
 
 __author__ = "Junhao Wen"
-__copyright__ = "Copyright 2019 The CBICA & SBIA Lab"
+__copyright__ = "Copyright 2023"
 __credits__ = ["Junhao Wen"]
 __license__ = "See LICENSE.txt file"
-__version__ = "0.0.1"
+__version__ = "0.0.4"
 __maintainer__ = "Junhao Wen"
 __email__ = "junhao.wen89@gmail.com"
 __status__ = "Development"

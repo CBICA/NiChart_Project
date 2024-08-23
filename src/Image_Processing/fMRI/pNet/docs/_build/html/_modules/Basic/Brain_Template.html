@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Basic.Brain_Template &mdash; pNet 1.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/theme_overrides.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=292eb321"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            pNet
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../auto_examples/index.html">Tutorials and Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pNet</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">Basic.Brain_Template</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for Basic.Brain_Template</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Yuncong Ma, 11/30/2023</span>
+<span class="c1"># Brain template information and data</span>
+<span class="c1"># Brain template is a dictionary containing &#39;Data_Type&#39; and &#39;Data_Format&#39;</span>
+<span class="c1"># &#39;Data_Type&#39; is &#39;Surface&#39;, &#39;Volume&#39;, &#39;Surface-Volume&#39;</span>
+<span class="c1"># Brain template is categorized into surface and volume types</span>
+<span class="c1"># If data type is volume, &#39;Brain_Mask&#39; and &#39;Overlay_Image&#39; are required, and both are 3D images</span>
+<span class="c1"># If data type is surface, &#39;Shape&#39; and &#39;Brain_Mask&#39; are required, and &#39;Shape_Inflated&#39; is optional</span>
+<span class="c1"># &#39;Shape&#39; and &#39;Shape_Inflated&#39; are nested dictionaries containing &#39;L&#39; and &#39;R&#39;, with &#39;faces&#39; and &#39;vertices&#39; in both</span>
+<span class="c1"># &#39;faces&#39; contains [N 3] matrix, and &#39;vertices&#39; contains [N 3] matrix</span>
+<span class="c1"># &#39;Brain_Mask&#39; is also a dictionary containing &#39;L&#39; and &#39;R&#39;, which store 1D vectors</span>
+
+<span class="c1">#########################################</span>
+<span class="c1"># Packages</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c1">#########################################</span>
+
+<span class="c1"># Get the directory of pNet based the location of this file</span>
+<span class="n">current_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+<span class="c1">#dir_python_package = os.path.dirname(current_file_path)</span>
+<span class="n">current_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">current_file_path</span><span class="p">)</span>    <span class="c1"># mod by hm</span>
+<span class="c1">#dir_python_package = os.path.dirname(current_dir)   # mod by hm</span>
+<span class="c1">#dir_pNet = os.path.dirname(dir_python_package)</span>
+<span class="n">dir_pNet</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">current_dir</span><span class="p">)</span>
+<span class="c1">#########################################</span>
+<span class="n">dir_Template</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_pNet</span><span class="p">,</span> <span class="s1">&#39;Brain_Template&#39;</span><span class="p">)</span>
+<span class="c1"># HCP surface</span>
+<span class="n">file_HCP_surf</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_Template</span><span class="p">,</span> <span class="s1">&#39;HCP_Surface&#39;</span><span class="p">,</span> <span class="s1">&#39;Brain_Template.json.zip&#39;</span><span class="p">)</span>
+
+<span class="c1"># HCP surface-volume</span>
+<span class="n">file_HCP_surf_vol</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_Template</span><span class="p">,</span> <span class="s1">&#39;HCP_Surface_Volume&#39;</span><span class="p">,</span> <span class="s1">&#39;Brain_Template.json.zip&#39;</span><span class="p">)</span>
+
+<span class="c1"># HCP volume</span>
+<span class="n">file_HCP_vol</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_Template</span><span class="p">,</span> <span class="s1">&#39;HCP_Volume&#39;</span><span class="p">,</span> <span class="s1">&#39;Brain_Template.json.zip&#39;</span><span class="p">)</span>
+
+<span class="c1"># FreeSurfer surface</span>
+<span class="n">file_FS_surf</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_Template</span><span class="p">,</span> <span class="s1">&#39;FreeSurfer_fsaverage5&#39;</span><span class="p">,</span> <span class="s1">&#39;Brain_Template.json.zip&#39;</span><span class="p">)</span>
+
+<span class="c1"># MNI volume</span>
+<span class="n">file_MNI_vol</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_Template</span><span class="p">,</span> <span class="s1">&#39;MNI_Volume&#39;</span><span class="p">,</span> <span class="s1">&#39;Brain_Template.json.zip&#39;</span><span class="p">)</span>
+<span class="c1"># Organize example into a class variable</span>
+
+
+<div class="viewcode-block" id="Brain_Template">
+<a class="viewcode-back" href="../../Basic.html#Basic.Brain_Template.Brain_Template">[docs]</a>
+<span class="k">class</span> <span class="nc">Brain_Template</span><span class="p">:</span>
+
+    <span class="c1"># HCP surface</span>
+    <span class="n">file_HCP_surf</span> <span class="o">=</span> <span class="n">file_HCP_surf</span>
+
+    <span class="c1"># HCP surface-volume</span>
+    <span class="n">file_HCP_surf_vol</span> <span class="o">=</span> <span class="n">file_HCP_surf_vol</span>
+
+    <span class="c1"># HCP volume</span>
+    <span class="n">file_HCP_vol</span> <span class="o">=</span> <span class="n">file_HCP_vol</span>
+
+    <span class="c1"># FreeSurfer surface</span>
+    <span class="n">file_FS_surf</span> <span class="o">=</span> <span class="n">file_FS_surf</span>
+
+    <span class="c1"># MNI volume</span>
+    <span class="n">file_MNI_vol</span> <span class="o">=</span> <span class="n">file_MNI_vol</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, pNet developers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
