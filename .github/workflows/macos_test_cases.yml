@@ -23,4 +23,4 @@ jobs:
           pip install -r requirements.txt
       - name: pipeline test for vTest1 using spare
         run: |
-          python3 run.py --folder 1 --cores 4 --no_conda 0
+          python3 run.py --dir_input src/workflow/input/vTest1 --dir_output src/workflow/output/vTest1 --studies 1 --version vTest --cores 4 --conda 0 --dry_run 1

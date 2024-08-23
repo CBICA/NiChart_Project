@@ -33,6 +33,7 @@ NiChart is a comprehensive framework designed to revolutionize neuroimaging rese
 ## Example Usage
 1. `python3 run.py --dir_input input folder --dir_output output_folder --studies 1 --version my_version --cores 4 --conda 0` # this will run the pipeline using 4 cores without initializing a new conda environment with an input folder containing 1 study
 2. `python3 run.py --dir_input input folder --dir_output output_folder --studies 2 --version my_version --cores 2 --conda 1` # this will run the pipeline using 2 cores initializing a new conda environment with an input folder containing 2 studies
+3. `python3 run.py --dir_input input folder --dir_output output_folder --studies 2 --version my_version --cores 2 --conda 1 -dry_run 1` # this will perform a dry run for the same parameters
 ---
 
 © 2024 CBICA. All Rights Reserved.

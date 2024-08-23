@@ -7,9 +7,10 @@ if __name__ == "__main__":
     parser.add_argument("--dir_input", help="Provide input folder", required=True)
     parser.add_argument("--dir_output", help="Provide output folder", required=True)
     parser.add_argument("--studies", type=int, help="Provide total studies", required=True)
-    parser.add_argument("--version", type=str, default="test", help="Provide version")
     parser.add_argument("--cores", help="Select number of cores that the workflow will use to run", required=True)
-    parser.add_argument("--conda", type=int, help="Run workflows without initializing a coda environment again", default=1)
+    parser.add_argument("--dry_run", help="Select dry run", default=0)
+    parser.add_argument("--version", type=str, default="test", help="Provide version")
+    parser.add_argument("--conda", type=int, help="Run workflows without initializing a coda environment again", default=0)
 
     options = parser.parse_args()
 
@@ -58,4 +59,7 @@ if __name__ == "__main__":
     os.system("mv info.json src/workflow/workflows/")
 
     os.chdir('src/workflow/workflows/w_sMRI')
-    os.system(f"snakemake --cores {options.cores}")
+    if int(options.dry_run) == 1:
+        os.system("snakemake -np")
+    else:
+        os.system(f"snakemake --cores {options.cores}")
