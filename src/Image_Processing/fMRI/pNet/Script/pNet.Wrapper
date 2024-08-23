@@ -1,0 +1,82 @@
+#! /bin/bash
+EXE=/cbica/home/mayun/IPP/ifun
+LOGFILE="/cbica/home/IPP/logs/wrappers.log"	# Do not change
+################  Functions  ##############################
+checkandexit()
+{
+	# Check the supplied value, typically the return value from the
+	# previous command. If the return value is not 0, then print a 
+	# message to STDERR and exit.
+
+	if [ $1 != 0 ] ; then
+		# There was an error, bail out!
+		/bin/echo "$2" 1>&2
+		logit "$2"
+		exit $1
+	fi
+}
+
+logit()
+{
+	now=`date`
+	printf "$now ${NAME}: $1\n" >> $LOGFILE
+}
+############## End of Functions ###########################
+
+################  Parse the command line  #################
+# Check the arguments
+while [ "X$1" != "X" ]
+do
+	case $1 in
+		-i|--source)
+			shift
+			subjectImage=$1
+			shift
+			;;
+
+		-df|--dataFormat)
+			shift
+			dataFormat=$1
+			shift
+			;;
+
+		-k)
+			shift
+			outputprefix=$1
+			shift
+			;;
+
+		--method)
+			shift
+			method=$1
+			shift
+			;;
+
+		-o|--outputprefix)
+			shift
+			outputprefix=$1
+			shift
+			;;
+
+		*)
+			checkandexit 1 "$0 -- Unexpected input: \"$1\""
+			;;
+	esac
+done
+
+for arg in inputfile templatefile outputprefix X Y Z
+do
+	if [ "X`eval echo \\$$arg`" = "X" ] ; then
+		checkandexit 1 "Missing argument \"$arg\""
+	fi
+done
+################  End of CLI parsing  #################
+
+
+################ Set up the environment ###############
+module load MATLAB2021b
+checkandexit $? "Failed to load module MATLAB2021b"
+################ End of environment config  ###########
+
+# Run the real program, with the arguments in the correct order
+$EXE $subjectImage $dataType $method $k $outputprefix
