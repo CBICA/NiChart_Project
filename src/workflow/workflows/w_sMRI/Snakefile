@@ -1,6 +1,14 @@
 ## Import packages
 import pandas as pd
+import json
 import os
+
+## Read config json file
+config_file = open("../info.json")
+config_data = json.load(config_file)
+
+## Set path to root dir
+os.chdir('../../../../')
 
 ## Flag to indicate rules that will be run locally (e.g. not submitted to slurm)
 #localrules:
@@ -8,41 +16,28 @@ import os
 ### Report data
 #report: "report/workflow.rst"
 
-###################################
-## Default config file
-## Runs the workflow with the test dataset
-## Edit this for running it on other datasets
-in_config = f"../../config/vTest{config['vTest']}/config.yaml"
-configfile: f"{in_config}"
-###################################
-
 
 ###################################
 ## Read config vars and lists
-dir_input = config["dir_input"]
-dir_output = config["dir_output"]
-derived_rois = config["list_derived_ROIs"]
-rois = config["list_ROIs_all"]
-rois_single = config["list_ROIs_single"]
-rois_primary = config["list_ROIs_primary"]
-spare_types = config["SPARE_types"]
-model_combat = config["model_combat"]
-seg_types = config["seg_types"]
-corr_type = config["corr_type"]
-studies = config["studies"]
+
+dir_input = config_data["dir_input"]
+dir_output = config_data["dir_output"]
+derived_rois = config_data["list_derived_ROIs"]
+rois = config_data["list_ROIs_all"]
+rois_single = config_data["list_ROIs_single"]
+rois_primary = config_data["list_ROIs_primary"]
+spare_types = config_data["SPARE_types"]
+model_combat = config_data["model_combat"]
+seg_types = config_data["seg_types"]
+corr_type = config_data["corr_type"]
+studies = config_data["studies"]
 
 ###################################
+
 ## Set output file names
-OUT_CONFIG = f"../../{dir_output}/config/config.yaml"
-OUT_RESULTS = expand(f"../../{dir_output}/{{study}}/out_combined/{{study}}_{{stype}}_All.csv", study = studies, stype = seg_types)
-OUT_FLAG = [f"../../{dir_output}/flag_VIEWED.csv"]
-
-OUT_FILES = [OUT_CONFIG] + OUT_RESULTS + OUT_FLAG
-
-#OUT_FILES = [f"../../output/vTest{config['vTest']}/Study1/dlmuse/Study1_DLMUSE.csv"]
-
-#print("Target out files:" + '\n' + '\n'.join(OUT_FILES) + '\n')
-
+OUT_RESULTS = expand(f"{dir_output}/{{study}}/out_combined/{{study}}_{{stype}}_All.csv", study = studies, stype = seg_types)
+OUT_FLAG = [f"{dir_output}/flag_VIEWED.csv"]
+OUT_FILES = OUT_RESULTS + OUT_FLAG
 ###################################
 ## Rules
 rule ALL:
@@ -51,29 +46,18 @@ rule ALL:
     '''
     input: OUT_FILES
 
-rule copy_config:
-    '''
-    Rule for copying config files to output dir
-    '''
-    input:
-        f"{in_config}"
-    output:
-        f"{OUT_CONFIG}"
-    shell:
-        "cp -v {input} {output}"
-
 rule run_dlmuse:
     '''
     Rename MUSE roi indices to roi codes
     '''
     input:
-        f"../../{dir_input}/{{study}}/{{study}}_Demog.csv",
+        f"{dir_input}/{{study}}/{{study}}_Demog.csv",
     output:
-        f"../../{dir_output}/{{study}}/dlmuse/{{study}}_DLMUSE.csv"
+        f"{dir_output}/{{study}}/dlmuse/{{study}}_DLMUSE.csv"
     resources:
         mem_mb=32000
     shell:
-        "bash ../../utils/dlmuse/util_dlmuse_apply.sh {input} {output}"
+        "bash src/workflow/utils/dlmuse/util_dlmuse_apply.sh {input} {output}"
 
 ruleorder: rename_rois_user > rename_rois_computed
 
@@ -82,110 +66,110 @@ rule rename_rois_computed:
     Rename MUSE roi indices to roi codes
     '''
     input:
-        roi=f"../../{dir_output}/{{study}}/dlmuse/{{study}}_{{dtype}}.csv",
-        dict=f"../../{rois}"
+        roi=f"{dir_output}/{{study}}/dlmuse/{{study}}_{{dtype}}.csv",
+        dict=f"src/workflow/{rois}"
     output:
-        f"../../{dir_output}/{{study}}/out_rois/{{study}}_{{dtype}}_raw.csv"
+        f"{dir_output}/{{study}}/out_rois/{{study}}_{{dtype}}_raw.csv"
     params:
         var_from = 'Index',
         var_to = 'Code'
     resources:
         mem_mb=8000
     shell:
-        "python ../../utils/generic/util_rename_df_columns.py {input} {params} {output}"
+        "python src/workflow/utils/generic/util_rename_df_columns.py {input} {params} {output}"
 
 rule rename_rois_user:
     '''
     Rename MUSE roi indices to roi codes
     '''
     input:
-        roi=f"../../{dir_input}/{{study}}/{{study}}_{{dtype}}.csv",
-        dict=f"../../{rois}"
+        roi=f"{dir_input}/{{study}}/{{study}}_{{dtype}}.csv",
+        dict=f"src/workflow/{rois}"
     output:
-        f"../../{dir_output}/{{study}}/out_rois/{{study}}_{{dtype}}_raw.csv"
+        f"{dir_output}/{{study}}/out_rois/{{study}}_{{dtype}}_raw.csv"
     params:
         var_from = 'Index',
         var_to = 'Code'
     resources:
         mem_mb=8000
     shell:
-        "python ../../utils/generic/util_rename_df_columns.py {input} {params} {output}"
+        "python src/workflow/utils/generic/util_rename_df_columns.py {input} {params} {output}"
 
 rule correct_icv:
     '''
     Normalize ROIs. Values are scaled either by f"../../{dir_output}/a constant factor (NormICV) or 100 (PercICV)
     '''
     input:
-        f"../../{dir_output}/{{study}}/out_rois/{{study}}_{{dtype}}_raw.csv"
+        f"{dir_output}/{{study}}/out_rois/{{study}}_{{dtype}}_raw.csv"
     params:
         icv_var = 'MUSE_702',
         exclude_vars = 'MRID',
         suffix = 'NONE'
     output:
-        f"../../{dir_output}/{{study}}/out_rois/{{study}}_{{dtype}}_{corr_type}.csv"
+        f"{dir_output}/{{study}}/out_rois/{{study}}_{{dtype}}_{corr_type}.csv"
     resources:
         mem_mb=8000
     shell:
-        f"python ../../utils/generic/util_corr_icv.py {{input}} {corr_type} {{params}} {{output}}"
+        f"python src/workflow/utils/generic/util_corr_icv.py {{input}} {corr_type} {{params}} {{output}}"
 
 rule merge_covars:
     '''
     Merge covars to ROIs
     '''
     input:
-        covar=f"../../{dir_input}/{{study}}/{{study}}_Demog.csv",
-        roi=f"../../{dir_output}/{{study}}/out_rois/{{study}}_{{dtype}}.csv",
+        covar=f"{dir_input}/{{study}}/{{study}}_Demog.csv",
+        roi=f"{dir_output}/{{study}}/out_rois/{{study}}_{{dtype}}.csv",
     params:
         key_var = 'MRID'
     output:
-        temp(f"../../{dir_output}/{{study}}/combined/{{study}}_{{dtype}}.csv")
+        temp(f"{dir_output}/{{study}}/combined/{{study}}_{{dtype}}.csv")
     resources:
         mem_mb=8000
     shell:
-        "python ../../utils/generic/util_merge_dfs.py {input} {params} {output}"
+        "python src/workflow/utils/generic/util_merge_dfs.py {input} {params} {output}"
 
 rule select_vars_harmonize:
     '''
     Select variables for harmonization
     '''
     input:
-        in_csv=f"../../{dir_output}/{{study}}/combined/{{study}}_{{dtype}}_raw.csv",
-        dict_csv=f"../../{rois_single}"
+        in_csv=f"{dir_output}/{{study}}/combined/{{study}}_{{dtype}}_raw.csv",
+        dict_csv=f"src/workflow/{rois_single}"
     params:
         dict_var = 'Code',
         covars ='MRID,Age,Sex,SITE,DLICV',
     output:
-        temp(f"../../{dir_output}/{{study}}/sel_vars/{{study}}_{{dtype}}_raw.csv")
+        temp(f"{dir_output}/{{study}}/sel_vars/{{study}}_{{dtype}}_raw.csv")
     resources:
         mem_mb=8000
     shell:
-        "python ../../utils/generic/util_select_vars.py {input} {params} {output}"
+        "python src/workflow/utils/generic/util_select_vars.py {input} {params} {output}"
 
 rule filter_age_harmonize:
     '''
     Check that sample has age range consistent with the model
     '''
     input:
-        f"../../{dir_output}/{{study}}/sel_vars/{{study}}_{{dtype}}.csv",
+        f"{dir_output}/{{study}}/sel_vars/{{study}}_{{dtype}}.csv",
     params:
         var_name='Age',
         min_val='50',
         max_val='95',
     output:
-        f"../../{dir_output}/{{study}}/filtered_data/{{study}}_{{dtype}}.csv"
+        f"{dir_output}/{{study}}/filtered_data/{{study}}_{{dtype}}.csv"
     resources:
         mem_mb=8000
     shell:
-        "python ../../utils/generic/util_filter_num_var.py {input} {params} {output}"
+        "python src/workflow/utils/generic/util_filter_num_var.py {input} {params} {output}"
 
 rule combat_apply:
     input:
-        data=f"../../{dir_output}/{{study}}/filtered_data/{{study}}_{{dtype}}.csv",
-        mdl=f"../../{model_combat}"
+        data=f"{dir_output}/{{study}}/filtered_data/{{study}}_{{dtype}}.csv",
+        mdl=f"src/workflow/{model_combat}"
     output:
-        f"../../{dir_output}/{{study}}/out_combat/{{study}}_{{dtype}}_COMBAT_single.csv"
+        f"{dir_output}/{{study}}/out_combat/{{study}}_{{dtype}}_COMBAT_single.csv"
     shell:
-        "bash ../../utils/combat/util_combat_test.sh {input} {output}"
+        "bash src/workflow/utils/combat/util_combat_test.sh {input} {output}"
 
 rule calc_derived_ROIs:
     '''
@@ -193,106 +177,106 @@ rule calc_derived_ROIs:
     - If the input data already includes derived ROIs, they will not be updated
     '''
     input:
-        in_csv=f"../../{dir_output}/{{study}}/out_combat/{{study}}_{{dtype}}_COMBAT_single.csv",
-        dict=f"../../{derived_rois}"
+        in_csv=f"{dir_output}/{{study}}/out_combat/{{study}}_{{dtype}}_COMBAT_single.csv",
+        dict=f"src/workflow/{derived_rois}"
     params:
         key_var='MRID',
         roi_prefix='MUSE_'
     output:
-        f"../../{dir_output}/{{study}}/out_combat/{{study}}_{{dtype}}_COMBAT_all.csv"
+        f"{dir_output}/{{study}}/out_combat/{{study}}_{{dtype}}_COMBAT_all.csv"
     resources:
         mem_mb=8000
     shell:
-        "python ../../utils/generic/util_combine_MUSE_rois.py {input} {params} {output}"
+        "python src/workflow/utils/generic/util_combine_MUSE_rois.py {input} {params} {output}"
 
 rule merge_covars_to_harmonized_rois:
     '''
     Merge covars to ROIs
     '''
     input:
-        covar=f"../../{dir_input}/{{study}}/{{study}}_Demog.csv",
-        roi=f"../../{dir_output}/{{study}}/out_combat/{{study}}_{{dtype}}_COMBAT_single.csv"
+        covar=f"{dir_input}/{{study}}/{{study}}_Demog.csv",
+        roi=f"{dir_output}/{{study}}/out_combat/{{study}}_{{dtype}}_COMBAT_single.csv"
     params:
         key_var = 'MRID'
     output:
-        temp(f"../../{dir_output}/{{study}}/spare/{{study}}_{{dtype}}_COMBAT_withcovar.csv")
+        temp(f"{dir_output}/{{study}}/spare/{{study}}_{{dtype}}_COMBAT_withcovar.csv")
     resources:
         mem_mb=8000
     shell:
-        "python ../../utils/generic/util_merge_dfs.py {input} {params} {output}"
+        "python src/workflow/utils/generic/util_merge_dfs.py {input} {params} {output}"
 
 rule select_vars_spare:
     '''
     Select variables for harmonization
     '''
     input:
-        in_csv=f"../../{dir_output}/{{study}}/spare/{{study}}_{{dtype}}_COMBAT_withcovar.csv",
-        dict_csv=f"../../{rois_single}"
+        in_csv=f"{dir_output}/{{study}}/spare/{{study}}_{{dtype}}_COMBAT_withcovar.csv",
+        dict_csv=f"src/workflow/{rois_single}"
     params:
         dict_var = 'Code',
         covars ='MRID,Age,Sex,DLICV',
     output:
-        temp(f"../../{dir_output}/{{study}}/spare/{{study}}_{{dtype}}_COMBAT.csv")
+        temp(f"{dir_output}/{{study}}/spare/{{study}}_{{dtype}}_COMBAT.csv")
     resources:
         mem_mb=8000
     shell:
-        "python ../../utils/generic/util_select_vars.py {input} {params} {output}"
+        "python src/workflow/utils/generic/util_select_vars.py {input} {params} {output}"
 
 def get_spare_model(wildcards):
-    model_name = config["model_SPARE-" + wildcards.stype]
-    path_spare='../../' + model_name
+    model_name = config_data["model_SPARE-" + wildcards.stype]
+    path_spare = "src/workflow/" + model_name
     return path_spare
 
 rule spare_apply:
     input:
-        data=f"../../{dir_output}/{{study}}/spare/{{study}}_{{dtype}}_COMBAT.csv",
+        data=f"{dir_output}/{{study}}/spare/{{study}}_{{dtype}}_COMBAT.csv",
         mdl=get_spare_model
     output:
-        temp(f"../../{dir_output}/{{study}}/out_spare/{{study}}_{{dtype}}_COMBAT_SPARE-{{stype}}.csv")
+        temp(f"{dir_output}/{{study}}/out_spare/{{study}}_{{dtype}}_COMBAT_SPARE-{{stype}}.csv")
     shell:
-        "bash ../../utils/spare/util_spare_test.sh {input} {wildcards.stype} {output}"
+        "bash src/workflow/utils/spare/util_spare_test.sh {input} {wildcards.stype} {output}"
 
 def get_spare_results(wildcards):
-    data_spare=expand(f"../../{dir_output}/{{study}}/out_spare/{{study}}_{{dtype}}_COMBAT_SPARE-{{stype}}.csv", study = wildcards.study, dtype = wildcards.dtype, stype = spare_types)
+    data_spare=expand(f"{dir_output}/{{study}}/out_spare/{{study}}_{{dtype}}_COMBAT_SPARE-{{stype}}.csv", study = wildcards.study, dtype = wildcards.dtype, stype = spare_types)
     return data_spare
 
 rule spare_combine:
     input:
         get_spare_results
     output:
-        csv=f"../../{dir_output}/{{study}}/out_spare/{{study}}_{{dtype}}_COMBAT_SPARE-Scores.csv"
+        csv=f"{dir_output}/{{study}}/out_spare/{{study}}_{{dtype}}_COMBAT_SPARE-Scores.csv"
     shell:
-        "python ../../utils/generic/util_merge_dfs_multi.py {output} MRID {input}"
+        "python src/workflow/utils/generic/util_merge_dfs_multi.py {output} MRID {input}"
 
 rule prep_output:
     '''
     Merge demog data to DLMUSE
     '''
     input:
-        demog=f"../../{dir_input}/{{study}}/{{study}}_Demog.csv",
-        rois=f"../../{rois_primary}",
-        out_raw=f"../../{dir_output}/{{study}}/out_rois/{{study}}_{{dtype}}_raw.csv",
-        out_corr=f"../../{dir_output}/{{study}}/out_rois/{{study}}_{{dtype}}_{corr_type}.csv",
-        out_harm=f"../../{dir_output}/{{study}}/out_combat/{{study}}_{{dtype}}_raw_COMBAT_all.csv",
-        out_spare=f"../../{dir_output}/{{study}}/out_spare/{{study}}_{{dtype}}_raw_COMBAT_SPARE-Scores.csv"
+        demog=f"{dir_input}/{{study}}/{{study}}_Demog.csv",
+        rois=f"src/workflow/{rois_primary}",
+        out_raw=f"{dir_output}/{{study}}/out_rois/{{study}}_{{dtype}}_raw.csv",
+        out_corr=f"{dir_output}/{{study}}/out_rois/{{study}}_{{dtype}}_{corr_type}.csv",
+        out_harm=f"{dir_output}/{{study}}/out_combat/{{study}}_{{dtype}}_raw_COMBAT_all.csv",
+        out_spare=f"{dir_output}/{{study}}/out_spare/{{study}}_{{dtype}}_raw_COMBAT_SPARE-Scores.csv"
     output:
-        f"../../{dir_output}/{{study}}/out_combined/{{study}}_{{dtype}}_All.csv"
+        f"{dir_output}/{{study}}/out_combined/{{study}}_{{dtype}}_All.csv"
     params:
         key_var = 'MRID'
     shell:
-        "python ../../utils/generic/util_combine_all.py {output} {input}"
+        "python src/workflow/utils/generic/util_combine_all.py {output} {input}"
 
 rule launch_viewer:
     '''
     Launch the viewer with the output file
     '''
     input:
-        expand(f"../../{dir_output}/{{study}}/out_combined/{{study}}_{{stype}}_All.csv", study = studies, stype = seg_types)
+        expand(f"{dir_output}/{{study}}/out_combined/{{study}}_{{stype}}_All.csv", study = studies, stype = seg_types)
     output:
-        touch(f"../../{dir_output}/flag_VIEWED.csv"),
+        touch(f"{dir_output}/flag_VIEWED.csv"),
     shell:
         "NiChart_Viewer --data_file {input}"
 
 ## Delete flag for the viewer, so that it will launch the viewer next time
-if os.path.exists(f"../../{dir_output}/flag_VIEWED.csv"):
-    os.remove(f"../../{dir_output}/flag_VIEWED.csv")
+if os.path.exists(f"{dir_output}/flag_VIEWED.csv"):
+    os.remove(f"{dir_output}/flag_VIEWED.csv")
