@@ -25,11 +25,6 @@ if __name__ == "__main__":
         os.system("conda activate NiChart_Workflows")
         os.system("mamba install -c conda-forge -c bioconda snakemake")
 
-    config = {
-        "dir_input": options.dir_input,
-        "dir_output": options.dir_output
-    }
-
     # generate info.json file for configuration
     if not os.path.exists("info.json"):
         os.system("touch info.json")
