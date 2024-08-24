@@ -8,7 +8,7 @@ A toolkit that allows users to apply **NiChart** processing methods and pre-trai
 
 Install dependencies for the **NiChart<sup>Workflows</sup>** in a conda environment using the following commands. **NiChart<sup>Workflows</sup>** uses snakemake to automate things, which is (most easily) installed with mamba.
 
-***Note:*** Installation tested on macOS and Linux. Windows compatibility is not guaranteed.
+***Note:*** Installation tested on macOS and Linux. Windows compatibility is not guaranteed. Make sure you installed the ```requirements.txt```.
 
 ```bash
 conda install -n base -c conda-forge mamba # If needed
@@ -42,19 +42,13 @@ Users can apply NiChart workflows to their data with a few simple steps:
 
 ## Examples:
 
-We provided a test dataset "input/vTest1" as an example. The dataset includes demographic data (Study1_Demog.csv) and regional brain volumes (Study1_DLMUSE.csv) for a test set. Please use the test data as a reference for your input data.
+We provided a test dataset "test_input/vTest1" as an example. The dataset includes demographic data (Study1_Demog.csv) and regional brain volumes (Study1_DLMUSE.csv) for a test set. Please use the test data as a reference for your input data.
 
-You can apply the structural MRI workflow on this dataset as follows:
-
-```bash
-cd workflows/w_sMRI
-snakemake -np --config vTest=1 ## Dry run for vTest1
-snakemake --cores 1 --config vTest=1 ## Run the pipeline on Study1 data provided in the vTest1 dataset
-```
+You can apply the structural MRI workflow on this dataset by running ```run.py``` in the root directory as it uses this workflow:
 
 If the workflow works successfully, workflow steps will be run on the data. Result files will be created inside the output folder:
 
-> "../../output/vTest1",
+> "test_output/vTest1",
 
 and the viewer will be launched with the combined result file as input.
 
