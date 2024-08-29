@@ -52,9 +52,18 @@
 [submodule "NiChart_Website"]
 	path = NiChart_Website
 	url = https://github.com/CBICA/NiChart_Website
-[submodule "src/Image_Processing/sMRI/DLICV"]
-	path = src/Image_Processing/sMRI/DLICV
-	url = https://github.com/CBICA/DLICV
 [submodule "src/Image_Processing/sMRI/DLMUSE"]
 	path = src/Image_Processing/sMRI/DLMUSE
 	url = https://github.com/CBICA/DLMUSE
+[submodule "src/Harmonization/NiChart_Harmonize"]
+	path = src/Harmonization/NiChart_Harmonize
+	url = https://github.com/CBICA/NiChart_Harmonize
+[submodule "src/Image_Processing/DTI/qsiprep"]
+	path = src/Image_Processing/DTI/qsiprep
+	url = https://github.com/PennLINC/qsiprep
+[submodule "src/Image_Processing/fMRI/pNet"]
+	path = src/Image_Processing/fMRI/pNet
+	url = https://github.com/CBICA/pNet
+[submodule "src/Image_Processing/sMRI/DLICV"]
+	path = src/Image_Processing/sMRI/DLICV
+	url = https://github.com/CBICA/DLICV

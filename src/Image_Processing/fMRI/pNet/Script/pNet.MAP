@@ -1,0 +1,7 @@
+# $Id$
+$Executable=“ifun”;
+$PARAMS{subjectImage}="--source";
+$PARAMS{dataFormat}=“-df”;
+$PARAMS{k}=“-k”;
+$PARAMS{method}=“-m”;
+$PARAMS{outputDir}="--outputDir";

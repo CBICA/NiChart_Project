@@ -1,8 +1,0 @@
-{
-    "bold": {
-        "task": ["frac2back", "rest"],
-        "run": [null],
-        "space": "MNI152NLin6Asym",
-        "res": "2"
-    }
-}
