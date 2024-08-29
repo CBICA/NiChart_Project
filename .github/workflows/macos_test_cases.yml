@@ -20,6 +20,7 @@ jobs:
           miniconda-version: "latest"
       - name: Install dependencies
         run: |
+          python -m pip cache purge
           pip install -r requirements.txt
       - name: pipeline test for vTest1 using spare
         run: |
