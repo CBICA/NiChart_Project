@@ -1,6 +1,0 @@
-ggplot
-matplotlib
-plotnine
-statsmodels
-surfplot
-tomli

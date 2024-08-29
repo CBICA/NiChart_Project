@@ -52,9 +52,51 @@
 [submodule "NiChart_Website"]
 	path = NiChart_Website
 	url = https://github.com/CBICA/NiChart_Website
-[submodule "src/Image_Processing/sMRI/DLICV"]
-	path = src/Image_Processing/sMRI/DLICV
-	url = https://github.com/CBICA/DLICV
 [submodule "src/Image_Processing/sMRI/DLMUSE"]
 	path = src/Image_Processing/sMRI/DLMUSE
 	url = https://github.com/CBICA/DLMUSE
+[submodule "src/Harmonization/NiChart_Harmonize"]
+	path = src/Harmonization/NiChart_Harmonize
+	url = https://github.com/CBICA/NiChart_Harmonize
+[submodule "src/Image_Processing/DTI/qsiprep"]
+	path = src/Image_Processing/DTI/qsiprep
+	url = https://github.com/PennLINC/qsiprep/
+[submodule "src/Image_Processing/fMRI/pNet"]
+	path = src/Image_Processing/fMRI/pNet
+	url = https://github.com/CBICA/pNet
+[submodule "src/Image_Processing/sMRI/DLICV"]
+	path = src/Image_Processing/sMRI/DLICV
+	url = https://github.com/CBICA/DLICV
+[submodule "src/Harmonization/ComBatFam_Pipeline"]
+	path = src/Harmonization/ComBatFam_Pipeline
+	url = https://github.com/PennSIVE/ComBatFam_Pipeline
+[submodule "src/Image_Processing/fMRI/fmriprep"]
+	path = src/Image_Processing/fMRI/fmriprep
+	url = https://github.com/nipreps/fmriprep
+[submodule "src/Image_Processing/fMRI/xcp_d"]
+	path = src/Image_Processing/fMRI/xcp_d
+	url = https://github.com/PennLINC/xcp_d
+[submodule "src/Image_Processing/sMRI/NiChart_Tissue_Segmentation"]
+	path = src/Image_Processing/sMRI/NiChart_Tissue_Segmentation
+	url = https://github.com/CBICA/NiChart_Tissue_Segmentation
+[submodule "src/Image_Processing/sMRI/SOPNMF"]
+	path = src/Image_Processing/sMRI/SOPNMF
+	url = https://github.com/anbai106/SOPNMF
+[submodule "src/Machine_Learning/GeneSGAN"]
+	path = src/Machine_Learning/GeneSGAN
+	url = https://github.com/zhijian-yang/GeneSGAN
+[submodule "src/Machine_Learning/SmileGAN"]
+	path = src/Machine_Learning/SmileGAN
+	url = https://github.com/zhijian-yang/SmileGAN
+[submodule "src/Machine_Learning/SurrealGAN"]
+	path = src/Machine_Learning/SurrealGAN
+	url = https://github.com/zhijian-yang/SurrealGAN
+[submodule "src/Machine_Learning/spare_score"]
+	path = src/Machine_Learning/spare_score
+	url = https://github.com/CBICA/spare_score
+[submodule "src/NiChart_Viewer"]
+	path = src/NiChart_Viewer
+	url = https://github.com/CBICA/NiChart_Viewer
+[submodule "src/NiChart_Website"]
+	path = src/NiChart_Website
+	url = https://github.com/CBICA/NiChart_Website
