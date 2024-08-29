@@ -1,0 +1,20 @@
+[
+    [
+        "in_dir",
+        "/Users/spirosmag/Documents/NiChart_Project/src/workflow/output/vTest2/Study1/dlmuse/tmprun_dlmuse/nnUNet_raw_database/nnUNet_raw_data"
+    ],
+    [
+        "out_dir",
+        "/Users/spirosmag/Documents/NiChart_Project/src/workflow/output/vTest2/Study1/dlmuse/tmprun_dlmuse/nnUNet_out/out_to_LPS"
+    ],
+    [
+        "out_suff",
+        "_0000"
+    ],
+    [
+        "needed_outputs",
+        [
+            "out_dir"
+        ]
+    ]
+]

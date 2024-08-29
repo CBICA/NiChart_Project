@@ -1,0 +1,14 @@
+# NiChart packages
+NiChart-Viewer-Demo
+spare-scores
+NiChartHarmonize
+NiChart_DLMUSE
+
+# general python dependencies
+argparse
+nibabel
+mamba
+snakemake
+pulp==2.7.0
+tabulate==0.8.10
+sphinx

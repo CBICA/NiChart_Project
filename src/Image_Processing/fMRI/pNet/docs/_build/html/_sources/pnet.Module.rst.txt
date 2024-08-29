@@ -1,0 +1,77 @@
+pnet.Module package
+===================
+
+Submodules
+----------
+
+pnet.Module.Data\_Input module
+------------------------------
+
+.. automodule:: pnet.Module.Data_Input
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pnet.Module.FN\_Computation module
+----------------------------------
+
+.. automodule:: pnet.Module.FN_Computation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pnet.Module.FN\_Computation\_torch module
+-----------------------------------------
+
+.. automodule:: pnet.Module.FN_Computation_torch
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pnet.Module.GIG\_ICA module
+---------------------------
+
+.. automodule:: pnet.Module.GIG_ICA
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pnet.Module.Quality\_Control module
+-----------------------------------
+
+.. automodule:: pnet.Module.Quality_Control
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pnet.Module.Quality\_Control\_torch module
+------------------------------------------
+
+.. automodule:: pnet.Module.Quality_Control_torch
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pnet.Module.SR\_NMF module
+--------------------------
+
+.. automodule:: pnet.Module.SR_NMF
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pnet.Module.Visualization module
+--------------------------------
+
+.. automodule:: pnet.Module.Visualization
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: pnet.Module
+   :members:
+   :undoc-members:
+   :show-inheritance:

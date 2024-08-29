@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pnet.Basic.Cluster_Computation &mdash; pNet 1.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/theme_overrides.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=292eb321"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            pNet
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../auto_examples/index.html">Tutorials and Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pNet</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pnet.Basic.Cluster_Computation</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pnet.Basic.Cluster_Computation</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Yuncong Ma, 2/12/2024</span>
+<span class="c1"># pNet</span>
+<span class="c1"># Provide functions to submit jobs to cluster environment</span>
+
+
+<span class="c1">#########################################</span>
+<span class="c1"># Packages</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">sys</span> <span class="kn">import</span> <span class="n">platform</span>
+
+<span class="kn">from</span> <span class="nn">Module.Data_Input</span> <span class="kn">import</span> <span class="n">write_json_setting</span><span class="p">,</span> <span class="n">load_json_setting</span><span class="p">,</span> <span class="n">setup_result_folder</span>
+
+<span class="c1">#########################################</span>
+
+
+<div class="viewcode-block" id="setup_cluster">
+<a class="viewcode-back" href="../../../pnet.Basic.html#pnet.Basic.Cluster_Computation.setup_cluster">[docs]</a>
+<span class="k">def</span> <span class="nf">setup_cluster</span><span class="p">(</span><span class="n">dir_pnet_result</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                  <span class="n">dir_env</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                  <span class="n">dir_pnet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                  <span class="n">dir_python</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                  <span class="n">submit_command</span><span class="o">=</span><span class="s1">&#39;qsub -terse -j y&#39;</span><span class="p">,</span>
+                  <span class="n">thread_command</span><span class="o">=</span><span class="s1">&#39;-pe threaded &#39;</span><span class="p">,</span>
+                  <span class="n">memory_command</span><span class="o">=</span><span class="s1">&#39;-l h_vmem=&#39;</span><span class="p">,</span>
+                  <span class="n">log_command</span><span class="o">=</span><span class="s1">&#39;-o &#39;</span><span class="p">,</span>
+                  <span class="n">computation_resource</span><span class="o">=</span><span class="kc">None</span> <span class="ow">or</span> <span class="nb">dict</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Setup cluster environment and commands to submit jobs</span>
+
+<span class="sd">    :param dir_pnet_result: directory of pNet result folder</span>
+<span class="sd">    :param dir_env: directory of the desired virtual environment</span>
+<span class="sd">    :param dir_pnet: directory of the pNet toolbox</span>
+<span class="sd">    :param dir_python: absolute directory to the python folder, ex. /Users/YuncongMa/.conda/envs/pnet/bin/python</span>
+<span class="sd">    :param submit_command: command to submit a cluster job</span>
+<span class="sd">    :param thread_command: command to setup number of threads for each job</span>
+<span class="sd">    :param memory_command: command to setup memory allowance for each job</span>
+<span class="sd">    :param log_command: command to specify the logfile</span>
+<span class="sd">    :param computation_resource: None or a dict which specifies the number of threads and memory for different processes</span>
+<span class="sd">    :return: None</span>
+
+<span class="sd">    Yuncong Ma, 2/12/2024</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">dir_pnet_dataInput</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">setup_result_folder</span><span class="p">(</span><span class="n">dir_pnet_result</span><span class="p">)</span>
+    <span class="n">setting</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;dir_env&#39;</span><span class="p">:</span> <span class="n">dir_env</span><span class="p">,</span> <span class="s1">&#39;dir_pnet&#39;</span><span class="p">:</span> <span class="n">dir_pnet</span><span class="p">,</span> <span class="s1">&#39;dir_python&#39;</span><span class="p">:</span> <span class="n">dir_python</span><span class="p">,</span> <span class="s1">&#39;submit_command&#39;</span><span class="p">:</span> <span class="n">submit_command</span><span class="p">,</span> <span class="s1">&#39;thread_command&#39;</span><span class="p">:</span> <span class="n">thread_command</span><span class="p">,</span> <span class="s1">&#39;memory_command&#39;</span><span class="p">:</span> <span class="n">memory_command</span><span class="p">,</span> <span class="s1">&#39;log_command&#39;</span><span class="p">:</span> <span class="n">log_command</span><span class="p">,</span>
+               <span class="s1">&#39;computation_resource&#39;</span><span class="p">:</span> <span class="n">computation_resource</span><span class="p">}</span>
+
+    <span class="n">write_json_setting</span><span class="p">(</span><span class="n">setting</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_pnet_dataInput</span><span class="p">,</span> <span class="s1">&#39;Cluster_Setting.json&#39;</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="submit_bash_job">
+<a class="viewcode-back" href="../../../pnet.Basic.html#pnet.Basic.Cluster_Computation.submit_bash_job">[docs]</a>
+<span class="k">def</span> <span class="nf">submit_bash_job</span><span class="p">(</span><span class="n">dir_pnet_result</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                    <span class="n">python_command</span><span class="p">:</span> <span class="nb">str</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">memory</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">n_thread</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                    <span class="n">logFile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">bashFile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">pythonFile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">create_python_file</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    submit a bash job to the desired cluster environment</span>
+<span class="sd">    Generate bash and python files automatically</span>
+
+<span class="sd">    :param dir_pnet_result: directory of pNet result folder</span>
+<span class="sd">    :param python_command: the Python function to run, with dir_pnet_result as a preset variable</span>
+<span class="sd">    :param memory: a real number in GB</span>
+<span class="sd">    :param n_thread: number of threads to use</span>
+<span class="sd">    :param logFile: full directory of a log file</span>
+<span class="sd">    :param bashFile: full directory of the bash file to generate</span>
+<span class="sd">    :param pythonFile: full directory of the python file to generate</span>
+<span class="sd">    :param create_python_file: bool, create a new Python file or not</span>
+<span class="sd">    :return: None</span>
+
+<span class="sd">    Yuncong Ma, 2/12/2024</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># load cluster setting</span>
+    <span class="n">dir_pnet_dataInput</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">setup_result_folder</span><span class="p">(</span><span class="n">dir_pnet_result</span><span class="p">)</span>
+    <span class="n">setting</span> <span class="o">=</span> <span class="n">load_json_setting</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_pnet_dataInput</span><span class="p">,</span> <span class="s1">&#39;Cluster_Setting.json&#39;</span><span class="p">))</span>
+    <span class="n">dir_env</span> <span class="o">=</span> <span class="n">setting</span><span class="p">[</span><span class="s1">&#39;dir_env&#39;</span><span class="p">]</span>
+    <span class="n">dir_pnet</span> <span class="o">=</span> <span class="n">setting</span><span class="p">[</span><span class="s1">&#39;dir_pnet&#39;</span><span class="p">]</span>
+    <span class="n">dir_python</span> <span class="o">=</span> <span class="n">setting</span><span class="p">[</span><span class="s1">&#39;dir_python&#39;</span><span class="p">]</span>
+    <span class="n">submit_command</span> <span class="o">=</span> <span class="n">setting</span><span class="p">[</span><span class="s1">&#39;submit_command&#39;</span><span class="p">]</span>
+    <span class="n">thread_command</span> <span class="o">=</span> <span class="n">setting</span><span class="p">[</span><span class="s1">&#39;thread_command&#39;</span><span class="p">]</span>
+    <span class="n">memory_command</span> <span class="o">=</span> <span class="n">setting</span><span class="p">[</span><span class="s1">&#39;memory_command&#39;</span><span class="p">]</span>
+    <span class="n">log_command</span> <span class="o">=</span> <span class="n">setting</span><span class="p">[</span><span class="s1">&#39;log_command&#39;</span><span class="p">]</span>
+
+    <span class="c1"># current date and time</span>
+    <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+    <span class="n">date_time</span> <span class="o">=</span> <span class="n">now</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%m/</span><span class="si">%d</span><span class="s2">/%Y, %H:%M:%S&quot;</span><span class="p">)</span>
+
+    <span class="c1"># create a new bash file</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">bashFile</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">bashFile</span><span class="p">)</span>
+
+    <span class="n">bashFile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">bashFile</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+    <span class="c1"># header</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;#!/bin/sh</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">bashFile</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;# This bash script is to run a pNet job in the desired cluster environment&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">bashFile</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;# created on </span><span class="si">{</span><span class="n">date_time</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">bashFile</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;# Use command to submit this job:</span><span class="se">\n</span><span class="s1"># $ </span><span class="si">{</span><span class="n">submit_command</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">thread_command</span><span class="si">}{</span><span class="n">n_thread</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">memory_command</span><span class="si">}{</span><span class="n">memory</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">log_command</span><span class="si">}{</span><span class="n">logFile</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">bashFile</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">bashFile</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;source activate </span><span class="si">{</span><span class="n">dir_env</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">bashFile</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;echo -e &quot;Start time : `date +</span><span class="si">%F</span><span class="s1">-%H:%M:%S`\n&quot; &#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">bashFile</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="si">{</span><span class="n">dir_python</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">pythonFile</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">bashFile</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;echo -e &quot;Finished time : `date +</span><span class="si">%F</span><span class="s1">-%H:%M:%S`\n&quot; &#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">bashFile</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">bashFile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">bashFile</span> <span class="o">=</span> <span class="n">bashFile</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="k">if</span> <span class="n">create_python_file</span><span class="p">:</span>
+        <span class="c1"># create a Python job file</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">pythonFile</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">pythonFile</span><span class="p">)</span>
+
+        <span class="n">pythonFile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">pythonFile</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;# This python file is to run a pNet job&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">pythonFile</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;# created on </span><span class="si">{</span><span class="n">date_time</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">pythonFile</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;import sys</span><span class="se">\n</span><span class="s1">import os</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">pythonFile</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;dir_pnet = &#39;</span><span class="si">{</span><span class="n">dir_pnet</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">pythonFile</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1">#print(f&quot;sys.path.append(os.path.join(dir_pnet, &#39;Python&#39;))&quot;, file=pythonFile, flush=True)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sys.path.append(dir_pnet)&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">pythonFile</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># modified by FY, 07/26/2024</span>
+        <span class="c1">#print(&#39;import pNet\n&#39;, file=pythonFile, flush=True)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;import pnet</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">pythonFile</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>     <span class="c1"># mod by hm, 07/19/2024</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;dir_pnet_result = &#39;</span><span class="si">{</span><span class="n">dir_pnet_result</span><span class="si">}</span><span class="s2">&#39;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">pythonFile</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">python_command</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">pythonFile</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">pythonFile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="c1"># execute a shell command to submit a cluster job, only for linux based systems</span>
+    <span class="k">if</span> <span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;linux&quot;</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">submit_command</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">thread_command</span><span class="si">}{</span><span class="n">n_thread</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">memory_command</span><span class="si">}{</span><span class="n">memory</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">log_command</span><span class="si">}{</span><span class="n">logFile</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">bashFile</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, pNet developers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

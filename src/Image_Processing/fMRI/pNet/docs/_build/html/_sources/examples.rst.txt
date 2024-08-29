@@ -1,0 +1,29 @@
+examples package
+================
+
+Submodules
+----------
+
+examples.Exp\_surf\_hcp10subjs module
+-------------------------------------
+
+.. automodule:: examples.Exp_surf_hcp10subjs
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+examples.Exp\_vol\_data module
+------------------------------
+
+.. automodule:: examples.Exp_vol_data
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: examples
+   :members:
+   :undoc-members:
+   :show-inheritance:

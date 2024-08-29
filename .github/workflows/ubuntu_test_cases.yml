@@ -1,0 +1,26 @@
+name: Pipeline test cases for ubuntu
+
+# workflow dispatch has been added for testing purposes
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ["ubuntu-latest"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.8"
+      - name: Set-up miniconda for macos and ubuntu
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: 3.8
+          miniconda-version: "latest"
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+      - name: pipeline test for vTest1 using spare
+        run: |
+          python3 run.py --dir_input src/workflow/test_input/vTest1 --dir_output src/workflow/test_output/vTest1 --studies 1 --version vTest --cores 4 --conda 1 --dry_run 1

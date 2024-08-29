@@ -1,0 +1,10 @@
+/mnt/8TBSSD/pnet_testing/HCP1200_data/106319/rfMRI_REST1_LR_Atlas_MSMAll_hp2000_clean.dtseries.nii
+/mnt/8TBSSD/pnet_testing/HCP1200_data/106521/rfMRI_REST1_LR_Atlas_MSMAll_hp2000_clean.dtseries.nii
+/mnt/8TBSSD/pnet_testing/HCP1200_data/106824/rfMRI_REST1_LR_Atlas_MSMAll_hp2000_clean.dtseries.nii
+/mnt/8TBSSD/pnet_testing/HCP1200_data/107018/rfMRI_REST1_LR_Atlas_MSMAll_hp2000_clean.dtseries.nii
+/mnt/8TBSSD/pnet_testing/HCP1200_data/107220/rfMRI_REST1_LR_Atlas_MSMAll_hp2000_clean.dtseries.nii
+/mnt/8TBSSD/pnet_testing/HCP1200_data/107321/rfMRI_REST1_LR_Atlas_MSMAll_hp2000_clean.dtseries.nii
+/mnt/8TBSSD/pnet_testing/HCP1200_data/107422/rfMRI_REST1_LR_Atlas_MSMAll_hp2000_clean.dtseries.nii
+/mnt/8TBSSD/pnet_testing/HCP1200_data/107725/rfMRI_REST1_LR_Atlas_MSMAll_hp2000_clean.dtseries.nii
+/mnt/8TBSSD/pnet_testing/HCP1200_data/108020/rfMRI_REST1_LR_Atlas_MSMAll_hp2000_clean.dtseries.nii
+/mnt/8TBSSD/pnet_testing/HCP1200_data/108121/rfMRI_REST1_LR_Atlas_MSMAll_hp2000_clean.dtseries.nii

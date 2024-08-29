@@ -1,0 +1,8 @@
+.Rproj.user
+.Rhistory
+.Rproj
+*.DS_Store
+/doc/
+/Meta/
+test.R
+.RData

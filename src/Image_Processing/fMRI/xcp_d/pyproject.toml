@@ -1,0 +1,203 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs", "nipreps-versions"]
+build-backend = "hatchling.build"
+
+[project]
+name = "xcp_d"
+description = "XCP-D: A Robust Postprocessing Pipeline of fMRI data"
+authors = [{name = "PennLINC and DCAN labs"}]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 3.10",
+]
+license = {file = "LICENSE"}
+requires-python = ">=3.10"
+dependencies = [
+    'importlib_resources; python_version < "3.11"',
+    "beautifulsoup4",  # to clean up HTML in DCAN executive summary outputs
+    "bids-validator <= 1.14.7.post0",
+    "h5py <= 3.11.0",  # for DCAN motion file
+    "indexed_gzip ~= 1.8.7",  # for loading imgs in nibabel
+    "jinja2 ~= 3.1.2",  # for executive summary
+    "joblib <= 1.4.2",
+    "matplotlib ~= 3.9.0",
+    "networkx <= 3.3",  # nipype needs networkx, but 3+ isn't compatible with nipype 1.8.5
+    "nibabel >= 3.2.1",
+    "nilearn == 0.10.4",  # 0.10.2 raises error with compcor from fMRIPrep 23
+    "nipype ~= 1.8.5",
+    "nireports ~= 23.2.1",
+    "niworkflows == 1.11.0",
+    "nitime",  # for DVARS calculation in Nipype
+    "num2words",  # for boilerplates
+    "numpy ~= 2.0",
+    "packaging",  # for version string parsing
+    "pandas",
+    "psutil >= 5.4",  # for sentry
+    "pybids ~= 0.17.0",
+    "pyyaml",
+    "scikit-learn <= 1.5.1",
+    "scipy <= 1.14.0,>= 1.14.0",  # nipype needs networkx, which needs scipy > 1.8.0
+    "seaborn",  # for plots
+    "sentry-sdk ~= 2.13.0",  # for usage reports
+    "templateflow ~= 24.2.0",
+    "toml",
+]
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.com/PennLINC/xcp_d"
+Documentation = "https://www.xcp-d.readthedocs.io"
+Paper = "https://doi.org/10.1038/s41592-022-01458-7"
+"Docker Images" = "https://hub.docker.com/r/pennlinc/xcp_d/tags/"
+NiPreps = "https://www.nipreps.org/"
+
+[project.optional-dependencies]
+doc = [
+    "doctest-ignore-unicode",
+    "pydot >=1.2.3",
+    "pydotplus",
+    "recommonmark",
+    "sphinx >= 4.2.0",
+    "sphinx-argparse != 0.5.0",
+    "sphinx-markdown-tables",
+    "sphinx_rtd_theme",
+    "sphinxcontrib-apidoc",
+    "sphinxcontrib-bibtex",
+    "svgutils",
+]
+tests = [
+    "coverage",
+    "flake8",
+    "flake8-absolute-import",
+    "flake8-black",
+    "flake8-docstrings",
+    "flake8-isort",
+    "flake8-pyproject",
+    "flake8-unused-arguments",
+    "flake8-use-fstring",
+    "pep8-naming",
+    "pytest",
+    "pytest-cov",
+    "pytest-env",
+]
+maint = [
+    "fuzzywuzzy",
+    "python-Levenshtein",
+]
+
+# Aliases
+all = ["xcp_d[doc,maint,tests]"]
+
+[project.scripts]
+xcp_d = "xcp_d.cli.run:main"
+xcp_d-combineqc = "xcp_d.cli.aggregate_qc:main"
+
+#
+# Hatch configurations
+#
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.sdist]
+exclude = [".git_archival.txt"]  # No longer needed in sdist
+
+[tool.hatch.build.targets.wheel]
+packages = ["xcp_d"]
+exclude = [
+    "xcp_d/tests/data",  # Large test data directory
+]
+
+##  The following two sections configure setuptools_scm in the hatch way
+
+[tool.hatch.version]
+source = "vcs"
+# raw-options = { version_scheme = "nipreps-calver" }
+
+[tool.hatch.build.hooks.vcs]
+version-file = "xcp_d/_version.py"
+
+#
+# Developer tool configurations
+#
+
+[tool.black]
+line-length = 99
+target-version = ['py38']
+include = '\.pyi?$'
+exclude = '''
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.github
+    | \.hg
+    | \.pytest_cache
+    | _build
+    | build
+    | dist
+  )/
+  | versioneer.py
+  | xcp_d/_version.py
+)
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+src_paths = ["isort", "test"]
+known_local_folder = ["xcp_d"]
+
+[tool.flake8]
+max-line-length = "99"
+doctests = "False"
+exclude = [
+    "*build/",
+    "xcp_d/_version.py",
+    "xcp_d/_warnings.py",
+    "xcp_d/config.py",
+    "xcp_d/data/",
+    "xcp_d/tests/",
+    "xcp_d/utils/sentry.py",
+]
+ignore = ["D107", "E203", "E402", "E722", "W503", "N803", "N806", "N815"]
+per-file-ignores = [
+    "**/__init__.py : F401",
+    "docs/conf.py : E265",
+]
+
+[tool.pytest.ini_options]
+addopts = '-m "not integration"'
+markers = [
+    "integration: mark test as an integration test",
+    "ds001419_nifti: mark NIfTI integration test for fMRIPrep derivatives from ds001419",
+    "ds001419_cifti: mark CIFTI integration test for fMRIPrep derivatives from ds001419",
+    "ukbiobank: mark integration test for UK Biobank derivatives with NIfTI settings",
+    "pnc_cifti: mark integration test for fMRIPrep derivatives with CIFTI settings",
+    "pnc_cifti_t2wonly: mark integration test for fMRIPrep derivatives with CIFTI settings and a simulated T2w file",
+    "fmriprep_without_freesurfer: mark integration test for fMRIPrep derivatives without FreeSurfer",
+    "fmriprep_without_freesurfer_with_main: mark integration test for fMRIPrep derivatives without FreeSurfer using main function",
+    "nibabies: mark integration test for nibabies derivatives",
+]
+env = [
+    "RUNNING_PYTEST = 1",
+]
+
+[tool.coverage.run]
+branch = true
+omit = [
+    "*/tests/*",
+    "*/__init__.py",
+    "*/conftest.py",
+    "xcp_d/_version.py"
+]
+
+[tool.coverage.report]
+# Regexes for lines to exclude from consideration
+exclude_lines = [
+    'raise NotImplementedError',
+    'warnings\.warn',
+]

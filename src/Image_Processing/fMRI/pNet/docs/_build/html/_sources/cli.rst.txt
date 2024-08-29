@@ -1,0 +1,29 @@
+cli package
+===========
+
+Submodules
+----------
+
+cli.Script\_Brain\_Template module
+----------------------------------
+
+.. automodule:: cli.Script_Brain_Template
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+cli.fmripnet module
+-------------------
+
+.. automodule:: cli.fmripnet
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: cli
+   :members:
+   :undoc-members:
+   :show-inheritance:

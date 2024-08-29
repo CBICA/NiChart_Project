@@ -1,0 +1,21 @@
+[Core]
+Name = View Centiles
+Module = centileview
+
+[Documentation]
+Author = Guray Erus
+Version = 0.1
+Website = 
+Description = ---------- Description ----------
+    Show age trends of user data together with centiles for the reference data
+    ---------- Options ----------
+    Reference sample: Sample used for calculating centiles
+    Y Var: Variable to display on y axis
+    ---------- Notes ----------
+    - Centile plots require that user data includes the "Age" column
+    - If provided, user data is grouped by the "Sex" column, to facilitate 
+      comparison to reference samples
+
+[Tab]
+#tab position starts from 0
+Position = 4

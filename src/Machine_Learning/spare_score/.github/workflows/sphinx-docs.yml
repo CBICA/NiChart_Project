@@ -1,0 +1,57 @@
+name: Deploy static cntent to Pages
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Activate conda
+        run: |
+          conda create -n spare python=3.12
+          conda run -n spare conda install pip
+          conda run -n spare pip install spare_scores
+      - name: Install dependencies
+        run: |
+          pip install -e .
+          pip install sphinx sphinx_rtd_theme sphinx-tabs sphinx_toolbox
+      - name: Sphinx build
+        run: |
+          sphinx-apidoc -o docs spare_scores/
+          cd docs/
+          make html
+          cd ..
+
+      - name: Upload pages artifact
+        uses: actions/upload-pages-artifact@v3
+
+        with:
+          path: docs/_build/html
+          retention-days: 90
+
+  deploy-docs:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    needs: build-docs
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.output.page_url }}
+
+    concurrency:
+      group: "pages"
+      cancel-in-progress: true
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy artifact to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

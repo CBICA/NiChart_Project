@@ -1,0 +1,29 @@
+pnet.cli package
+================
+
+Submodules
+----------
+
+pnet.cli.Script\_Brain\_Template module
+---------------------------------------
+
+.. automodule:: pnet.cli.Script_Brain_Template
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pnet.cli.fmripnet module
+------------------------
+
+.. automodule:: pnet.cli.fmripnet
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: pnet.cli
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name="fmripnet"
+version="1.0.1a"
+description="pNet: a python package for computing personalized fucntional networks"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers=[
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage= "https://github.com/MLDataAnalytics/pNet"
+Issues = "https://github.com/MLDataAnalytics/pNet/issues"

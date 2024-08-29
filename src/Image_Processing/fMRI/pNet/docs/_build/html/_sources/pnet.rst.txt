@@ -1,0 +1,21 @@
+pnet package
+============
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pnet.Basic
+   pnet.Module
+   pnet.Report
+   pnet.Workflow
+
+Module contents
+---------------
+
+.. automodule:: pnet
+   :members:
+   :undoc-members:
+   :show-inheritance:

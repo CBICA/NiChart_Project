@@ -1,12 +1,6 @@
-[submodule "NiChart_Website"]
-	path = NiChart_Website
-	url = https://github.com/CBICA/NiChart_Website
 [submodule "NiChart_Project_Resources"]
 	path = NiChart_Project_Resources
 	url = https://github.com/CBICA/NiChart_Project_Resources
-[submodule "Image_Processing/sMRI/SOPNMF"]
-	path = Image_Processing/sMRI/SOPNMF
-	url = https://github.com/anbai106/SOPNMF
 [submodule "Image_Processing/sMRI/DLMUSE"]
 	path = Image_Processing/sMRI/DLMUSE
 	url = https://github.com/CBICA/DLMUSE
@@ -16,24 +10,12 @@
 [submodule "Image_Processing/fMRI/fmriprep"]
 	path = Image_Processing/fMRI/fmriprep
 	url = https://github.com/nipreps/fmriprep
-[submodule "Image_Processing/fMRI/pNet"]
-	path = Image_Processing/fMRI/pNet
-	url = https://github.com/MLDataAnalytics/pNet
 [submodule "Image_Processing/DTI/qsiprep"]
 	path = Image_Processing/DTI/qsiprep
 	url = https://github.com/PennLINC/qsiprep
-[submodule "Machine_Learning/SmileGAN"]
-	path = Machine_Learning/SmileGAN
-	url = https://github.com/zhijian-yang/SmileGAN
 [submodule "Machine_Learning/SurrealGAN"]
 	path = Machine_Learning/SurrealGAN
 	url = https://github.com/zhijian-yang/SurrealGAN
-[submodule "Machine_Learning/GeneSGAN"]
-	path = Machine_Learning/GeneSGAN
-	url = https://github.com/zhijian-yang/GeneSGAN
-[submodule "Image_Processing/sMRI/NiChart_Tissue_Segmentation"]
-	path = Image_Processing/sMRI/NiChart_Tissue_Segmentation
-	url = https://github.com/CBICA/NiChart_Tissue_Segmentation
 [submodule "Image_Processing/sMRI/NiChart_DLMUSE"]
 	path = Image_Processing/sMRI/NiChart_DLMUSE
 	url = https://github.com/CBICA/NiChart_DLMUSE
@@ -52,3 +34,27 @@
 [submodule "NiChart_Viewer"]
 	path = NiChart_Viewer
 	url = https://github.com/gurayerus/NiChart_Viewer
+[submodule "Image_Processing/fMRI/pNet"]
+	path = Image_Processing/fMRI/pNet
+	url = https://github.com/CBICA/pNet
+[submodule "Machine_Learning/GeneSGAN"]
+	path = Machine_Learning/GeneSGAN
+	url = https://github.com/CBICA/GeneSGAN
+[submodule "Machine_Learning/SmileGAN"]
+	path = Machine_Learning/SmileGAN
+	url = https://github.com/CBICA/SmileGAN
+[submodule "Image_Processing/sMRI/NiChart_Tissue_Segmentation"]
+	path = Image_Processing/sMRI/NiChart_Tissue_Segmentation
+	url = https://github.com/CBICA/NiChart_Tissue_Segmentation
+[submodule "Image_Processing/sMRI/SOPNMF"]
+	path = Image_Processing/sMRI/SOPNMF
+	url = https://github.com/CBICA/SOPNMF
+[submodule "NiChart_Website"]
+	path = NiChart_Website
+	url = https://github.com/CBICA/NiChart_Website
+[submodule "src/Image_Processing/sMRI/DLICV"]
+	path = src/Image_Processing/sMRI/DLICV
+	url = https://github.com/CBICA/DLICV
+[submodule "src/Image_Processing/sMRI/DLMUSE"]
+	path = src/Image_Processing/sMRI/DLMUSE
+	url = https://github.com/CBICA/DLMUSE

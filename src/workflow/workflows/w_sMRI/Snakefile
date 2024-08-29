@@ -1,0 +1,282 @@
+## Import packages
+import pandas as pd
+import json
+import os
+
+## Read config json file
+config_file = open("../info.json")
+config_data = json.load(config_file)
+
+## Set path to root dir
+os.chdir('../../../../')
+
+## Flag to indicate rules that will be run locally (e.g. not submitted to slurm)
+#localrules:
+
+### Report data
+#report: "report/workflow.rst"
+
+
+###################################
+## Read config vars and lists
+
+dir_input = config_data["dir_input"]
+dir_output = config_data["dir_output"]
+derived_rois = config_data["list_derived_ROIs"]
+rois = config_data["list_ROIs_all"]
+rois_single = config_data["list_ROIs_single"]
+rois_primary = config_data["list_ROIs_primary"]
+spare_types = config_data["SPARE_types"]
+model_combat = config_data["model_combat"]
+seg_types = config_data["seg_types"]
+corr_type = config_data["corr_type"]
+studies = config_data["studies"]
+
+###################################
+
+## Set output file names
+OUT_RESULTS = expand(f"{dir_output}/{{study}}/out_combined/{{study}}_{{stype}}_All.csv", study = studies, stype = seg_types)
+OUT_FLAG = [f"{dir_output}/flag_VIEWED.csv"]
+OUT_FILES = OUT_RESULTS + OUT_FLAG
+###################################
+## Rules
+rule ALL:
+    '''
+    First rule: lists the final expected out files
+    '''
+    input: OUT_FILES
+
+rule run_dlmuse:
+    '''
+    Rename MUSE roi indices to roi codes
+    '''
+    input:
+        f"{dir_input}/{{study}}/{{study}}_Demog.csv",
+    output:
+        f"{dir_output}/{{study}}/dlmuse/{{study}}_DLMUSE.csv"
+    resources:
+        mem_mb=32000
+    shell:
+        "bash src/workflow/utils/dlmuse/util_dlmuse_apply.sh {input} {output}"
+
+ruleorder: rename_rois_user > rename_rois_computed
+
+rule rename_rois_computed:
+    '''
+    Rename MUSE roi indices to roi codes
+    '''
+    input:
+        roi=f"{dir_output}/{{study}}/dlmuse/{{study}}_{{dtype}}.csv",
+        dict=f"src/workflow/{rois}"
+    output:
+        f"{dir_output}/{{study}}/out_rois/{{study}}_{{dtype}}_raw.csv"
+    params:
+        var_from = 'Index',
+        var_to = 'Code'
+    resources:
+        mem_mb=8000
+    shell:
+        "python src/workflow/utils/generic/util_rename_df_columns.py {input} {params} {output}"
+
+rule rename_rois_user:
+    '''
+    Rename MUSE roi indices to roi codes
+    '''
+    input:
+        roi=f"{dir_input}/{{study}}/{{study}}_{{dtype}}.csv",
+        dict=f"src/workflow/{rois}"
+    output:
+        f"{dir_output}/{{study}}/out_rois/{{study}}_{{dtype}}_raw.csv"
+    params:
+        var_from = 'Index',
+        var_to = 'Code'
+    resources:
+        mem_mb=8000
+    shell:
+        "python src/workflow/utils/generic/util_rename_df_columns.py {input} {params} {output}"
+
+rule correct_icv:
+    '''
+    Normalize ROIs. Values are scaled either by f"../../{dir_output}/a constant factor (NormICV) or 100 (PercICV)
+    '''
+    input:
+        f"{dir_output}/{{study}}/out_rois/{{study}}_{{dtype}}_raw.csv"
+    params:
+        icv_var = 'MUSE_702',
+        exclude_vars = 'MRID',
+        suffix = 'NONE'
+    output:
+        f"{dir_output}/{{study}}/out_rois/{{study}}_{{dtype}}_{corr_type}.csv"
+    resources:
+        mem_mb=8000
+    shell:
+        f"python src/workflow/utils/generic/util_corr_icv.py {{input}} {corr_type} {{params}} {{output}}"
+
+rule merge_covars:
+    '''
+    Merge covars to ROIs
+    '''
+    input:
+        covar=f"{dir_input}/{{study}}/{{study}}_Demog.csv",
+        roi=f"{dir_output}/{{study}}/out_rois/{{study}}_{{dtype}}.csv",
+    params:
+        key_var = 'MRID'
+    output:
+        temp(f"{dir_output}/{{study}}/combined/{{study}}_{{dtype}}.csv")
+    resources:
+        mem_mb=8000
+    shell:
+        "python src/workflow/utils/generic/util_merge_dfs.py {input} {params} {output}"
+
+rule select_vars_harmonize:
+    '''
+    Select variables for harmonization
+    '''
+    input:
+        in_csv=f"{dir_output}/{{study}}/combined/{{study}}_{{dtype}}_raw.csv",
+        dict_csv=f"src/workflow/{rois_single}"
+    params:
+        dict_var = 'Code',
+        covars ='MRID,Age,Sex,SITE,DLICV',
+    output:
+        temp(f"{dir_output}/{{study}}/sel_vars/{{study}}_{{dtype}}_raw.csv")
+    resources:
+        mem_mb=8000
+    shell:
+        "python src/workflow/utils/generic/util_select_vars.py {input} {params} {output}"
+
+rule filter_age_harmonize:
+    '''
+    Check that sample has age range consistent with the model
+    '''
+    input:
+        f"{dir_output}/{{study}}/sel_vars/{{study}}_{{dtype}}.csv",
+    params:
+        var_name='Age',
+        min_val='50',
+        max_val='95',
+    output:
+        f"{dir_output}/{{study}}/filtered_data/{{study}}_{{dtype}}.csv"
+    resources:
+        mem_mb=8000
+    shell:
+        "python src/workflow/utils/generic/util_filter_num_var.py {input} {params} {output}"
+
+rule combat_apply:
+    input:
+        data=f"{dir_output}/{{study}}/filtered_data/{{study}}_{{dtype}}.csv",
+        mdl=f"src/workflow/{model_combat}"
+    output:
+        f"{dir_output}/{{study}}/out_combat/{{study}}_{{dtype}}_COMBAT_single.csv"
+    shell:
+        "bash src/workflow/utils/combat/util_combat_test.sh {input} {output}"
+
+rule calc_derived_ROIs:
+    '''
+    Calculate derived ROIs from harmonized data
+    - If the input data already includes derived ROIs, they will not be updated
+    '''
+    input:
+        in_csv=f"{dir_output}/{{study}}/out_combat/{{study}}_{{dtype}}_COMBAT_single.csv",
+        dict=f"src/workflow/{derived_rois}"
+    params:
+        key_var='MRID',
+        roi_prefix='MUSE_'
+    output:
+        f"{dir_output}/{{study}}/out_combat/{{study}}_{{dtype}}_COMBAT_all.csv"
+    resources:
+        mem_mb=8000
+    shell:
+        "python src/workflow/utils/generic/util_combine_MUSE_rois.py {input} {params} {output}"
+
+rule merge_covars_to_harmonized_rois:
+    '''
+    Merge covars to ROIs
+    '''
+    input:
+        covar=f"{dir_input}/{{study}}/{{study}}_Demog.csv",
+        roi=f"{dir_output}/{{study}}/out_combat/{{study}}_{{dtype}}_COMBAT_single.csv"
+    params:
+        key_var = 'MRID'
+    output:
+        temp(f"{dir_output}/{{study}}/spare/{{study}}_{{dtype}}_COMBAT_withcovar.csv")
+    resources:
+        mem_mb=8000
+    shell:
+        "python src/workflow/utils/generic/util_merge_dfs.py {input} {params} {output}"
+
+rule select_vars_spare:
+    '''
+    Select variables for harmonization
+    '''
+    input:
+        in_csv=f"{dir_output}/{{study}}/spare/{{study}}_{{dtype}}_COMBAT_withcovar.csv",
+        dict_csv=f"src/workflow/{rois_single}"
+    params:
+        dict_var = 'Code',
+        covars ='MRID,Age,Sex,DLICV',
+    output:
+        temp(f"{dir_output}/{{study}}/spare/{{study}}_{{dtype}}_COMBAT.csv")
+    resources:
+        mem_mb=8000
+    shell:
+        "python src/workflow/utils/generic/util_select_vars.py {input} {params} {output}"
+
+def get_spare_model(wildcards):
+    model_name = config_data["model_SPARE-" + wildcards.stype]
+    path_spare = "src/workflow/" + model_name
+    return path_spare
+
+rule spare_apply:
+    input:
+        data=f"{dir_output}/{{study}}/spare/{{study}}_{{dtype}}_COMBAT.csv",
+        mdl=get_spare_model
+    output:
+        temp(f"{dir_output}/{{study}}/out_spare/{{study}}_{{dtype}}_COMBAT_SPARE-{{stype}}.csv")
+    shell:
+        "bash src/workflow/utils/spare/util_spare_test.sh {input} {wildcards.stype} {output}"
+
+def get_spare_results(wildcards):
+    data_spare=expand(f"{dir_output}/{{study}}/out_spare/{{study}}_{{dtype}}_COMBAT_SPARE-{{stype}}.csv", study = wildcards.study, dtype = wildcards.dtype, stype = spare_types)
+    return data_spare
+
+rule spare_combine:
+    input:
+        get_spare_results
+    output:
+        csv=f"{dir_output}/{{study}}/out_spare/{{study}}_{{dtype}}_COMBAT_SPARE-Scores.csv"
+    shell:
+        "python src/workflow/utils/generic/util_merge_dfs_multi.py {output} MRID {input}"
+
+rule prep_output:
+    '''
+    Merge demog data to DLMUSE
+    '''
+    input:
+        demog=f"{dir_input}/{{study}}/{{study}}_Demog.csv",
+        rois=f"src/workflow/{rois_primary}",
+        out_raw=f"{dir_output}/{{study}}/out_rois/{{study}}_{{dtype}}_raw.csv",
+        out_corr=f"{dir_output}/{{study}}/out_rois/{{study}}_{{dtype}}_{corr_type}.csv",
+        out_harm=f"{dir_output}/{{study}}/out_combat/{{study}}_{{dtype}}_raw_COMBAT_all.csv",
+        out_spare=f"{dir_output}/{{study}}/out_spare/{{study}}_{{dtype}}_raw_COMBAT_SPARE-Scores.csv"
+    output:
+        f"{dir_output}/{{study}}/out_combined/{{study}}_{{dtype}}_All.csv"
+    params:
+        key_var = 'MRID'
+    shell:
+        "python src/workflow/utils/generic/util_combine_all.py {output} {input}"
+
+rule launch_viewer:
+    '''
+    Launch the viewer with the output file
+    '''
+    input:
+        expand(f"{dir_output}/{{study}}/out_combined/{{study}}_{{stype}}_All.csv", study = studies, stype = seg_types)
+    output:
+        touch(f"{dir_output}/flag_VIEWED.csv"),
+    shell:
+        "NiChart_Viewer --data_file {input}"
+
+## Delete flag for the viewer, so that it will launch the viewer next time
+if os.path.exists(f"{dir_output}/flag_VIEWED.csv"):
+    os.remove(f"{dir_output}/flag_VIEWED.csv")

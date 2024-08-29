@@ -1,0 +1,64 @@
+[
+    {
+        "group": 1,
+        "imports": [],
+        "name": "0_reorientToLPS",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "0_reorientToLPS"
+        ],
+        "name": "1_dlicv",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "1_dlicv"
+        ],
+        "name": "2_maskImage",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "2_maskImage"
+        ],
+        "name": "3_muse",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "3_muse"
+        ],
+        "name": "4_relabel",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "4_relabel"
+        ],
+        "name": "5_combineMasks",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "5_combineMasks"
+        ],
+        "name": "6_reorientToOrg",
+        "size": 1
+    },
+    {
+        "group": 1,
+        "imports": [
+            "6_reorientToOrg"
+        ],
+        "name": "7_roi_to_csv",
+        "size": 1
+    }
+]

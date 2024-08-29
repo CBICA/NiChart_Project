@@ -1,0 +1,18 @@
+# Configuration for new-pr-welcome - https://github.com/behaviorbot/new-pr-welcome
+
+# Comment to be posted to on PRs from first time contributors in your repository
+newPRWelcomeComment: >
+  Thanks for opening this pull request!
+  It looks like this is your first time contributing to *fMRIPrep*. :smile:
+  
+  We invite you to list yourself as an *fMRIPrep* contributor.
+  To learn more about what that entails and how we credit our contributors,
+  please check out the
+  [contributing guidelines](https://github.com/nipreps/fmriprep/blob/master/CONTRIBUTING.md#recognizing-contributions).
+  If your name is not already on the list, please insert it, in alphabetical order, into the
+  [``CONTRIBUTORS.md`` file](https://github.com/nipreps/fmriprep/blob/master/.maint/CONTRIBUTORS.md).
+  
+  Of course, if you want to opt-out this time there is no
+  problem at all with adding your name later.
+  You will be always welcome to add it in the future whenever
+  you feel it should be listed.

@@ -1,0 +1,2 @@
+include NiChart_Tissue_Segmentation/VERSION*
+include requirements*
