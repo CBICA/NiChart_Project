@@ -76,3 +76,27 @@
 [submodule "src/Image_Processing/fMRI/xcp_d"]
 	path = src/Image_Processing/fMRI/xcp_d
 	url = https://github.com/PennLINC/xcp_d
+[submodule "src/Image_Processing/sMRI/NiChart_Tissue_Segmentation"]
+	path = src/Image_Processing/sMRI/NiChart_Tissue_Segmentation
+	url = https://github.com/CBICA/NiChart_Tissue_Segmentation
+[submodule "src/Image_Processing/sMRI/SOPNMF"]
+	path = src/Image_Processing/sMRI/SOPNMF
+	url = https://github.com/anbai106/SOPNMF
+[submodule "src/Machine_Learning/GeneSGAN"]
+	path = src/Machine_Learning/GeneSGAN
+	url = https://github.com/zhijian-yang/GeneSGAN
+[submodule "src/Machine_Learning/SmileGAN"]
+	path = src/Machine_Learning/SmileGAN
+	url = https://github.com/zhijian-yang/SmileGAN
+[submodule "src/Machine_Learning/SurrealGAN"]
+	path = src/Machine_Learning/SurrealGAN
+	url = https://github.com/zhijian-yang/SurrealGAN
+[submodule "src/Machine_Learning/spare_score"]
+	path = src/Machine_Learning/spare_score
+	url = https://github.com/CBICA/spare_score
+[submodule "src/NiChart_Viewer"]
+	path = src/NiChart_Viewer
+	url = https://github.com/CBICA/NiChart_Viewer
+[submodule "src/NiChart_Website"]
+	path = src/NiChart_Website
+	url = https://github.com/CBICA/NiChart_Website

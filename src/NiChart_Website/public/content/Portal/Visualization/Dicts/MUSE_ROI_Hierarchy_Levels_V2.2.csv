@@ -1,7 +1,0 @@
-MUSE_ROI_Level_Index,MUSE_ROI_Level_Name,MUSE_ROI_Index_Range,Description
-M0,MUSE_ROI_Single,0-255,Single ROIs from original segmentation in MUSE atlas images
-M1,MUSE_ROI_Derived_SubLobar,300-399,Derived ROIs obtained by merging cortical structures in sublobar level
-M2,MUSE_ROI_Derived_Lobar_GMWM,400-499,Derived ROIs obtained by merging cortical structures in lobar level separately for GM and WM
-M3,MUSE_ROI_Derived_Lobar,500-599,Derived ROIs obtained by merging cortical structures in lobar level
-M4,MUSE_ROI_Derived_Four_Class,600-699 (Exception 509 VN),Derived ROIs based on tissue segmentation classes (GM; WM; CSF as ventricular and cortical)
-M5,MUSE_ROI_Derived_Total,700-800,Derived ROIs for global volumes (total brain and intra-cranial volume)
