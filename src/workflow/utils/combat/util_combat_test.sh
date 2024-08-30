@@ -11,7 +11,7 @@ echo "About to run: $cmd"
 $cmd
 
 ## Prepare out file with only harmonized variables
-cmd="python ../../utils/combat/util_combat_prep_out.py ${out_csv%.csv}_tmpinit.csv MRID _HARM ${out_csv}"
+cmd="python src/workflow/utils/combat/util_combat_prep_out.py ${out_csv%.csv}_tmpinit.csv MRID _HARM ${out_csv}"
 echo "About to run: $cmd"
 $cmd
 
