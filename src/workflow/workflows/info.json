@@ -1,7 +1,7 @@
 {
-    "version": "vTest",
-    "dir_input": "src/workflow/test_input/vTest1",
-    "dir_output": "src/workflow/test_output/vTest1",
+    "version": "test",
+    "dir_input": "../NiChart_Project/src/workflow/test_input/vTest1",
+    "dir_output": "../NiChart_Project/src/workflow/test_output",
     "studies": [
         "Study1"
     ],
