@@ -17,6 +17,38 @@ import numpy as np
 #     st.session_state.pid = 1
 #     st.session_state.instantiated = True
 
+# Config page
+st.set_page_config(page_title="DataFrame Demo", page_icon="📊", layout='wide')
+
+st.sidebar.image("../resources/nichart1.png")
+
+with st.sidebar:
+    st.markdown("# How to upload input files")
+    st.markdown("""
+                You can upload 1 or more csv files in once, the viewer \
+                will provide a dropdown selection for you to choose which \
+                csv file you want to work with. \
+                """)
+
+with st.sidebar:
+    st.markdown("# DataFrame filtering")
+    st.markdown("""
+                The filtering is done to a subset of the csv file as the visualization \
+                for such big datasets is not efficient. Have that in mind while you study the \
+                charts. \
+                """)
+
+st.sidebar.info("""
+                    Note: This website is based on materials from the [NiChart Project](https://neuroimagingchart.com/).
+                    The content and the logo of NiChart are intellectual property of [CBICA](https://www.med.upenn.edu/cbica/).
+                    Make sure that you read the [licence](https://github.com/CBICA/NiChart_Project/blob/main/LICENSE).
+                    """)
+
+with st.sidebar.expander("Acknowledgments"):
+    st.markdown("""
+                The CBICA Dev team
+                """)
+
 def show_nifti(img_ulay, img_olay, roi_ind, view):
     '''
     Displays the nifti img
@@ -32,11 +64,6 @@ def show_nifti(img_ulay, img_olay, roi_ind, view):
     # Extract the slice and display it
     st.image(img_ulay[:, :, slice_index])
     # st.image(img_ulay[:, :, slice_index], width=800)
-
-
-
-# Config page
-st.set_page_config(page_title="DataFrame Demo", page_icon="📊", layout='wide')
 
 # FIXME: Input data is hardcoded here for now
 # fname = "../examples/test_input/vTest1/Study1/StudyTest1_DLMUSE_All.csv"

@@ -11,6 +11,11 @@ from math import ceil
 from streamlit_plotly_events import plotly_events
 from utils_trace import *
 
+st.set_page_config(page_title="DataFrame Demo", page_icon="📊", layout='wide')
+st.sidebar.image("../resources/nichart1.png")
+
+
+
 # Initiate Session State Values
 if 'instantiated' not in st.session_state:
 
@@ -203,7 +208,6 @@ def filter_dataframe(df: pd.DataFrame, pid) -> pd.DataFrame:
     return df
 
 # Config page
-st.set_page_config(page_title="DataFrame Demo", page_icon="📊", layout='wide')
 
 # FIXME: Input data is hardcoded here for now
 
@@ -220,6 +224,10 @@ df_cent = pd.read_csv(fcent)
 
 # Page controls in side bar
 with st.sidebar:
+    st.markdown("# How to plot centiles")
+    st.markdown("""
+                Info about plotting centiles(idk)...
+                """)
 
     with st.container(border=True):
 
@@ -266,6 +274,17 @@ with st.sidebar:
     if st.button("Add plot"):
         add_plot()
 
+    st.sidebar.info("""
+                        Note: This website is based on materials from the [NiChart Project](https://neuroimagingchart.com/).
+                        The content and the logo of NiChart are intellectual property of [CBICA](https://www.med.upenn.edu/cbica/).
+                        Make sure that you read the [licence](https://github.com/CBICA/NiChart_Project/blob/main/LICENSE).
+                        """)
+
+    with st.sidebar.expander("Acknowledgments"):
+        st.markdown("""
+                    The CBICA Dev team
+                    """)
+
 # Add a single plot (initial page includes one plot)
 if st.session_state.plots.shape[0] == 0:
     add_plot()
@@ -290,5 +309,3 @@ for i in range(0, len(p_index)):
 # with st.expander('Saved DataFrames'):
 with st.container():
     st.session_state.plots
-
-
