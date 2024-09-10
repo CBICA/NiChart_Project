@@ -10,10 +10,9 @@ import plotly.express as px
 from math import ceil
 from streamlit_plotly_events import plotly_events
 from utils_trace import *
+from st_pages import hide_pages
 
-st.set_page_config(page_title="DataFrame Demo", page_icon="📊", layout='wide')
-st.sidebar.image("../resources/nichart1.png")
-
+#hide_pages(["Image Processing", "Data Analytics"])
 
 
 # Initiate Session State Values
@@ -110,13 +109,6 @@ def display_plot(pid):
             scatter_plot = px.scatter(df_filt, x = x_var, y = y_var, color = hue_var,
                                       trendline = trend_type)
 
-        # scatter_plot = linreg_trace(df, x_var, y_var, scatter_plot)
-        # linreg_trace(df, x_var, y_var, scatter_plot)
-        # lowess_trace(df, x_var, y_var, scatter_plot)
-        percentile_trace(df_cent, x_var, y_var, scatter_plot)
-
-
-
         # Add plot
         # - on_select: when clicked it will rerun and return the info
         sel_info = st.plotly_chart(scatter_plot, on_select='rerun', key=f"bubble_chart_{pid}")
@@ -207,27 +199,15 @@ def filter_dataframe(df: pd.DataFrame, pid) -> pd.DataFrame:
 
     return df
 
-# Config page
+# # Config page
+# st.set_page_config(page_title="DataFrame Demo", page_icon="📊", layout='wide')
 
 # FIXME: Input data is hardcoded here for now
-
-# fname = "../examples/test_input/vTest1/Study1/StudyTest1_DLMUSE_All.csv"
-
-fname = "../examples/test_input2/dset_test.csv"
-fcent = "../examples/test_input2/centiles_test.csv"
-
-# fname = "../examples/test_input3/DLMUSE_Volumes.csv"
-# fcent = "../examples/test_input2/centiles_test.csv"
-
+fname = "../examples/test_input3/ROIS_tmp2.csv"
 df = pd.read_csv(fname)
-df_cent = pd.read_csv(fcent)
 
 # Page controls in side bar
 with st.sidebar:
-    st.markdown("# How to plot centiles")
-    st.markdown("""
-                Info about plotting centiles(idk)...
-                """)
 
     with st.container(border=True):
 
@@ -266,24 +246,12 @@ with st.sidebar:
             st.session_state.default_hue_var = st.selectbox("Default Hue Var", df.columns, key=f"hue_var_init",
                                                             index = def_ind_hue)
             trend_index = st.session_state.trend_types.index(st.session_state.default_trend_type)
-            st.session_state.default_trend_type = st.selectbox("Default Trend Line",
-                                                               st.session_state.trend_types,
-                                                               key=f"trend_type_init", index = trend_index)
+            st.session_state.default_trend_type = st.selectbox("Default Trend Line", st.session_state.trend_types,
+                                                            key=f"trend_type_init", index = trend_index)
 
     # Button to add a new plot
     if st.button("Add plot"):
         add_plot()
-
-    st.sidebar.info("""
-                        Note: This website is based on materials from the [NiChart Project](https://neuroimagingchart.com/).
-                        The content and the logo of NiChart are intellectual property of [CBICA](https://www.med.upenn.edu/cbica/).
-                        Make sure that you read the [licence](https://github.com/CBICA/NiChart_Project/blob/main/LICENSE).
-                        """)
-
-    with st.sidebar.expander("Acknowledgments"):
-        st.markdown("""
-                    The CBICA Dev team
-                    """)
 
 # Add a single plot (initial page includes one plot)
 if st.session_state.plots.shape[0] == 0:
@@ -309,3 +277,5 @@ for i in range(0, len(p_index)):
 # with st.expander('Saved DataFrames'):
 with st.container():
     st.session_state.plots
+
+

@@ -166,3 +166,6 @@ cython_debug/
 # nnUNet folder & output folder
 src/workflow/workflows/w_SMRI/nnUNet_model/*
 src/workflow/output/*
+
+# do not ignore .streamlit folder
+!src/NiChart_Viewer/src/.streamlit

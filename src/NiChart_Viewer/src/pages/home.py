@@ -1,14 +1,11 @@
 import streamlit as st
 from PIL import Image
+import os
 
-nicon = Image.open("../resources/nichart1.png")
-st.set_page_config(
-        page_title="NiChart Viewer",
-        page_icon=nicon,
-        )
 
 st.sidebar.image("../resources/nichart1.png")
-st.write("# Welcome to NiChart! 👋")
+
+st.write("# Welcome to NiChart Project!")
 
 st.sidebar.info("""
                     Note: This website is based on materials from the [NiChart Project](https://neuroimagingchart.com/).
@@ -21,8 +18,6 @@ with st.sidebar.expander("Acknowledgments"):
                 The CBICA Dev team
                 """)
 
-
-
 st.sidebar.success("Select a task above")
 
 st.markdown(
@@ -30,8 +25,7 @@ st.markdown(
     NiChart is an open-source framework built specifically for
     deriving Machine Learning based indices from MRI data.
 
-    **👈 Select a task from the sidebar** to view your derived
-    data!
+    **👈 Select a task from the sidebar** to process, analyze and visualize your data!
 
     ### Want to learn more?
     - Check out [NiChart Web page](https://neuroimagingchart.com)

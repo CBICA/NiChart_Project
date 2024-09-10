@@ -15,18 +15,6 @@ from math import ceil
 #     st.session_state.pid = 1
 #     st.session_state.instantiated = True
 
-# Config page
-st.set_page_config(page_title="DataFrame Demo", page_icon="📊", layout='wide')
-
-st.sidebar.image("../resources/nichart1.png")
-
-
-
-with st.sidebar.expander("Acknowledgments"):
-    st.markdown("""
-                The CBICA Dev team
-                """)
-
 def display_plot(sel_id):
     '''
     Displays the plot with the given mrid
@@ -46,8 +34,11 @@ def display_plot(sel_id):
         fig = px.bar(x=dtmp, y=vtmp, title='Data Values')
         st.plotly_chart(fig)
 
+# # Config page
+# st.set_page_config(page_title="DataFrame Demo", page_icon="📊", layout='wide')
+
 # FIXME: Input data is hardcoded here for now
-fname = "../examples/test_input/vTest1/Study1/StudyTest1_DLMUSE_All.csv"
+fname = "../examples/test_input3/ROIS_tmp2.csv"
 df = pd.read_csv(fname)
 
 # Page controls in side bar
@@ -58,11 +49,6 @@ with st.sidebar:
     # - create a selectbox with all MRIDs
     # -- initialize it with the selected id if it's set
     # -- initialize it with the first id if not
-    st.markdown("# Plotting single subject")
-    st.markdown("""
-                Info about this(idk)....
-                """)
-
     sel_id = st.session_state.sel_id
     if sel_id == '':
         sel_ind = 0
@@ -76,12 +62,6 @@ with st.sidebar:
     st.warning(f'Selected {sel_type}: {sel_id}')
 
     st.write('---')
-
-    st.sidebar.info("""
-                    Note: This website is based on materials from the [NiChart Project](https://neuroimagingchart.com/).
-                    The content and the logo of NiChart are intellectual property of [CBICA](https://www.med.upenn.edu/cbica/).
-                    Make sure that you read the [licence](https://github.com/CBICA/NiChart_Project/blob/main/LICENSE).
-                    """)
 
 display_plot(sel_id)
     # # Button to add a new plot
