@@ -16,3 +16,5 @@ sphinx
 
 # streamlit
 streamlit_plotly_events
+Jinja2
+plotly-express
