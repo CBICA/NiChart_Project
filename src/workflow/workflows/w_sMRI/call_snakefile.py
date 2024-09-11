@@ -25,4 +25,4 @@ if __name__ == "__main__":
 
     print('Running cmd: ' + cmd)
 
-    os.system(cmd)
+    # os.system(cmd)

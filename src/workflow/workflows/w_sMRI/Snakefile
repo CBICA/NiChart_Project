@@ -42,7 +42,7 @@ rule ALL:
 
 #ruleorder: rename_rois_user > rename_rois_computed
 
-rule rename_rois_computed:
+rule rename_rois:
     '''
     Rename MUSE roi indices to roi codes
     '''
@@ -59,39 +59,22 @@ rule rename_rois_computed:
     shell:
         "python src/workflow/utils/generic/util_rename_df_columns.py {input} {params} {output}"
 
-#rule rename_rois_user:
-    #'''
-    #Rename MUSE roi indices to roi codes
-    #'''
-    #input:
-        #roi=f"{input_rois}",
-        #dict=f"src/workflow/{rois}"
-    #output:
-        #f"{dir_output}/out_rois/{{dtype}}_raw.csv"
-    #params:
-        #var_from = 'Index',
-        #var_to = 'Code'
-    #resources:
-        #mem_mb=8000
-    #shell:
-        #"python src/workflow/utils/generic/util_rename_df_columns.py {input} {params} {output}"
-
-#rule correct_icv:
-    #'''
-    #Normalize ROIs. Values are scaled either by f"../../{dir_output}/a constant factor (NormICV) or 100 (PercICV)
-    #'''
-    #input:
-        #f"{dir_output}/out_rois/{{dtype}}_raw.csv"
-    #params:
-        #icv_var = 'MUSE_702',
-        #exclude_vars = 'MRID',
-        #suffix = 'NONE'
-    #output:
-        #f"{dir_output}/out_rois/{{dtype}}_{corr_type}.csv"
-    #resources:
-        #mem_mb=8000
-    #shell:
-        #f"python src/workflow/utils/generic/util_corr_icv.py {{input}} {corr_type} {{params}} {{output}}"
+rule correct_icv:
+    '''
+    Normalize ROIs. Values are scaled either by a constant factor (NormICV) or 100 (PercICV)
+    '''
+    input:
+        f"{dir_output}/out_rois/{dset_name}_raw.csv"
+    params:
+        icv_var = 'MUSE_702',
+        exclude_vars = 'MRID',
+        suffix = 'NONE'
+    output:
+        f"{dir_output}/out_rois/{dset_name}_{corr_type}.csv"
+    resources:
+        mem_mb=8000
+    shell:
+        f"python src/workflow/utils/generic/util_corr_icv.py {{input}} {corr_type} {{params}} {{output}}"
 
 #rule merge_covars:
     #'''
