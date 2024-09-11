@@ -1,0 +1,32 @@
+{
+    "version": "",
+    "dir_input": "",
+    "dir_output": "/home/guraylab/GitHub/CBICA/NiChart_Project/test/test_output/tmp",
+    "list_ROIs_all": "MUSE/list_MUSE_all.csv",
+    "list_ROIs_single": "MUSE/list_MUSE_single.csv",
+    "list_ROIs_primary": "MUSE/list_MUSE_primary.csv",
+    "list_derived_ROIs": "MUSE/list_MUSE_mapping_derived.csv",
+    "corr_type": "normICV",
+    "model_combat": "models/vISTAG1/COMBAT/combined_DLMUSE_raw_COMBATModel.pkl.gz",
+    "model_SPARE-AD": "models/vISTAG1/SPARE/combined_DLMUSE_raw_COMBAT_SPARE-AD_Model.pkl.gz",
+    "model_SPARE-Age": "models/vISTAG1/SPARE/combined_DLMUSE_raw_COMBAT_SPARE-Age_Model.pkl.gz",
+    "model_SPARE-Diabetes": "models/vISTAG1/SPARE/combined_DLMUSE_raw_COMBAT_SPARE-Diabetes_Model.pkl.gz",
+    "model_SPARE-Hyperlipidemia": "models/vISTAG1/SPARE/combined_DLMUSE_raw_COMBAT_SPARE-Hyperlipidemia_Model.pkl.gz",
+    "model_SPARE-Hypertension": "models/vISTAG1/SPARE/combined_DLMUSE_raw_COMBAT_SPARE-Hypertension_Model.pkl.gz",
+    "model_SPARE-Obesity": "models/vISTAG1/SPARE/combined_DLMUSE_raw_COMBAT_SPARE-Obesity_Model.pkl.gz",
+    "model_SPARE-Smoking": "models/vISTAG1/SPARE/combined_DLMUSE_raw_COMBAT_SPARE-Smoking_Model.pkl.gz",
+    "SPARE_types": [
+        "AD",
+        "Age",
+        "Diabetes",
+        "Hyperlipidemia",
+        "Hypertension",
+        "Obesity",
+        "Smoking"
+    ],
+    "seg_types": [
+        "DLMUSE"
+    ],
+    "input_rois": "/home/guraylab/GitHub/CBICA/NiChart_Project/test/test_input/test2_rois/Study1/Study1_DLMUSE.csv",
+    "input_demog": "/home/guraylab/GitHub/CBICA/NiChart_Project/test/test_input/test2_rois/Study1/Study1_Demog.csv"
+}
