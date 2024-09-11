@@ -1,8 +1,7 @@
 # NiChart packages
-NiChart-Viewer-Demo
 spare-scores
 NiChartHarmonize
-NiChart_DLMUSE
+#NiChart_DLMUSE
 
 # general python dependencies
 argparse
@@ -15,6 +14,7 @@ sphinx
 
 
 # streamlit
+st_pages==1.0.1
 streamlit_plotly_events
 Jinja2
 plotly-express

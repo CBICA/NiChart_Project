@@ -1,1 +1,0 @@
-nnUNet_predict -i /Users/spirosmag/Documents/NiChart_Project/src/workflow/output/vTest2/Study1/dlmuse/tmprun_dlmuse/nnUNet_out/out_to_LPS --all_in_gpu True --disable_tta -f 1 -m 3d_fullres --mode fastest -t 802 -tr nnUNetTrainerV2 -o /Users/spirosmag/Documents/NiChart_Project/src/workflow/output/vTest2/Study1/dlmuse/tmprun_dlmuse/nnUNet_out/out_dlicv_mask
