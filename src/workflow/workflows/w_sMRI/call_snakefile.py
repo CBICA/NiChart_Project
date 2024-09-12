@@ -17,12 +17,14 @@ if __name__ == "__main__":
 
     # Run workflow
     print('Running: snakemake')
-    cmd = "snakemake -np"
+    # cmd = "snakemake -np"
+    cmd = "snakemake "
     cmd = cmd + " --config dset_name=" + options.dset_name
     cmd = cmd + " input_rois=" + options.input_rois
     cmd = cmd + " input_demog=" + options.input_demog
     cmd = cmd + " dir_output=" + options.dir_output
+    cmd = cmd + " --cores 1"
 
     print('Running cmd: ' + cmd)
 
-    # os.system(cmd)
+    os.system(cmd)
