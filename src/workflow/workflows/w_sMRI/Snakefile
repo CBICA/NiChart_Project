@@ -30,18 +30,9 @@ seg_types = config["seg_types"]
 corr_type = config["corr_type"]
 
 ## Set output file name
-OUT_FILE = f"{dir_output}/out_combined/{{dset_name}}_All.csv"
-OUT_FILE = f"{dir_output}/out_rois/{dset_name}_raw.csv"
-OUT_FILE = f"{dir_output}/combined/{dset_name}_raw.csv"
-OUT_FILE = f"{dir_output}/sel_vars/{dset_name}_raw.csv"
-OUT_FILE = f"{dir_output}/filtered_data/{dset_name}_raw.csv"
-OUT_FILE = f"{dir_output}/out_combat/{dset_name}_COMBAT_single.csv"
-OUT_FILE = f"{dir_output}/out_combat/{dset_name}_COMBAT_all.csv"
-OUT_FILE = f"{dir_output}/spare/{dset_name}_COMBAT_withcovar.csv"
-OUT_FILE = f"{dir_output}/spare/{dset_name}_COMBAT.csv"
-OUT_FILE = f"{dir_output}/out_spare/{dset_name}_COMBAT_SPARE-AD.csv"
-OUT_FILE = f"{dir_output}/out_spare/{dset_name}_COMBAT_SPARE-Scores.csv"
 OUT_FILE = f"{dir_output}/out_combined/{dset_name}_All.csv"
+
+print(config)
 
 ## Rules
 rule ALL:

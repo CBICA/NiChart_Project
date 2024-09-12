@@ -23,19 +23,33 @@ st.markdown(
 )
 
 with st.container(border=True):
-    dlmuse_csv = st.text_input("path to DLMUSE csv file")
-    demog_csv = st.text_input("path to demographic csv file")
-    output_folder = st.text_input("path to output folder")
 
-    if not os.path.exists(dlmuse_csv):
+    # Input text boxes
+    # FIXME: The init values for the input fields are set here to run tests quickly
+    #        they will be removed or replaced in the future
+    dset_name = st.text_input("Give a name to your dataset", value = 'Study1')
+
+    # input_rois = st.text_input("Enter the input rois file name:", key = 'input_rois')
+    # upload_rois = st.file_uploader("Upload the file:", key = 'upload_rois')
+
+    input_rois = st.text_input("path to DLMUSE csv file", value = '/home/gurayerus/GitHub/CBICA/NiChart_Project/test/test_input/test2_rois/Study1/Study1_DLMUSE.csv')
+    input_demog = st.text_input("path to demographic csv file", value = '/home/gurayerus/GitHub/CBICA/NiChart_Project/test/test_input/test2_rois/Study1/Study1_Demog.csv')
+    dir_output = st.text_input("path to output folder", value = '/home/gurayerus/GitHub/CBICA/NiChart_Project/test/test_output/test2_rois')
+
+    # Check input files
+    if not os.path.exists(input_rois):
         st.warning("Path to input DLMUSE csv doesn't exist")
-    if not os.path.exists(dlmuse_csv):
+    if not os.path.exists(input_rois):
         st.warning("Path to input demographic csv doesn't exist")
-    if not os.path.exists(output_folder):
+    if not os.path.exists(dir_output):
         st.warning("Path to output folder doesn't exist")
 
+    run_dir='../../workflow/workflows/w_sMRI'
+
+    # Run workflow
     if st.button("Run w_sMRI"):
         st.write("Pipeline is running, please wait!")
-        os.system("cd ../../NiCHart_Project/src/workflow")
-        os.system(f"cd ../../NiChart_Project && python3 run.py --input_dlmuse {dlmuse_csv} --input_demog {demog_csv} --dir_output {output_folder} --conda 1")
+        os.system(f"cd {run_dir}")
+        cmd = f"python3 {run_dir}/call_snakefile.py --run_dir {run_dir} --dset_name {dset_name} --input_rois {input_rois} --input_demog {input_demog} --dir_output {dir_output}"
+        os.system(cmd)
         st.write("Run completed!")
