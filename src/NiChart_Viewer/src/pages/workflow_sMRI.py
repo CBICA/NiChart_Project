@@ -14,13 +14,26 @@ from tempfile import NamedTemporaryFile
 import tkinter as tk
 from tkinter import filedialog
 
-def browse_file_folder(is_file, init_dir):
+def browse_file(init_dir):
+    '''
+    File selector
+    Returns the file name selected by the user and the parent folder
+    '''
     root = tk.Tk()
     root.withdraw()  # Hide the main window
-    if is_file == True:
-        out_path = filedialog.askopenfilename(initialdir = init_dir)
-    else:
-        out_path = filedialog.askdirectory(initialdir = init_dir)
+    out_path = filedialog.askopenfilename(initialdir = init_dir)
+    out_dir = os.path.dirname(out_path)
+    root.destroy()
+    return out_path, out_dir
+
+def browse_folder(init_dir):
+    '''
+    Folder selector
+    Returns the folder name selected by the user
+    '''
+    root = tk.Tk()
+    root.withdraw()  # Hide the main window
+    out_path = filedialog.askdirectory(initialdir = init_dir)
     root.destroy()
     return out_path
 
@@ -38,54 +51,43 @@ st.markdown(
 
 with st.container(border=True):
 
-    # Get path to root folder
-    dir_root = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
 
-    # Default file names
-    # FIXME: The init values for the input fields are set here to run tests quickly
-    #        - they will be replaced in the future with values used to link I/O
-    #          between modules (i.e if DLMUSE pipeline was run, it's out file will be set as input'
-    default_study_name = 'Study1'
-    default_roi_name = f'{dir_root}/test/test_input/test2_rois/Study1/Study1_DLMUSE.csv'
-    default_demog_name = f'{dir_root}/test/test_input/test2_rois/Study1/Study1_Demog.csv'
-    default_out_name = f'{dir_root}/test/test_output/test2_rois/Study1'
+    # Dataset name: Used to create a main folder for all outputs
+    dset_name = st.text_input("Give a name to your dataset", value = st.session_state.study_name)
+    st.session_state.study_name = dset_name
 
-    # Dset name: We use this to name all output for a study
-    dset_name = st.text_input("Give a name to your dataset", value = default_study_name)
-
-    # Roi file name (user can enter either using the file browser or type  full path)
+    # Roi file name
     tmpcol = st.columns((1,8))
-    fname_rois = default_roi_name
     with tmpcol[0]:
         if st.button("Select ROI file"):
-            fname_rois = browse_file_folder(True, dir_root)
+            st.session_state.in_csv_MUSE, st.session_state.init_dir = browse_file(st.session_state.init_dir)
     with tmpcol[1]:
-        input_rois = st.text_input("Enter the name of the ROI csv file:", value = fname_rois,
+        input_rois = st.text_input("Enter the name of the ROI csv file:",
+                                   value = st.session_state.in_csv_MUSE,
                                    label_visibility="collapsed")
 
-    # Demog file name (user can enter either using the file browser or type  full path)
+    # Demog file name
     tmpcol = st.columns((1,8))
-    fname_demog = default_demog_name
     with tmpcol[0]:
         if st.button("Select demog file"):
-            fname_demog = browse_file_folder(True, dir_root)
+            st.session_state.in_csv_Demog, st.session_state.init_dir = browse_file(st.session_state.init_dir)
     with tmpcol[1]:
-        input_demog = st.text_input("Enter the name of the demog csv file:", value = fname_demog,
-                                   label_visibility="collapsed")
+        input_demog = st.text_input("Enter the name of the demog csv file:",
+                                    value = st.session_state.in_csv_Demog,
+                                    label_visibility="collapsed")
 
-    # Out folder name (user can enter either using the file browser or type  full path)
+    # Out folder name
     tmpcol = st.columns((1,8))
-    dname_out = default_out_name
     with tmpcol[0]:
         if st.button("Select output folder"):
-            dname_out = browse_file_folder(False, dir_root)
+            st.session_state.out_dir = browse_folder(st.session_state.dir_root)
     with tmpcol[1]:
-        dir_output = st.text_input("Enter the name of the output folder:", value = dname_out,
+        dir_output = st.text_input("Enter the name of the output folder:",
+                                   value = st.session_state.out_dir,
                                    label_visibility="collapsed")
 
-    flag_files = 1
-
     # Check input files
+    flag_files = 1
     if not os.path.exists(input_rois):
         st.warning("Path to input DLMUSE csv doesn't exist")
         flag_files = 0
@@ -105,9 +107,15 @@ with st.container(border=True):
             os.system(cmd)
             st.write("Run completed!")
 
-    # Set output as the input file of the viewer
+    # Set the output file as the input for the related viewers
     out_csv = f"{dir_output}/out_combined/{dset_name}_All.csv"
     if os.path.exists(out_csv):
-        st.session_state.viewer_in_csv = out_csv
+        st.session_state.in_csv_sMRI = out_csv
 
+# FIXME: this is for debugging; will be removed
+with st.expander('session_state: Plots'):
+    st.session_state.plots
+
+with st.expander('session_state: All'):
+    st.write(st.session_state)
 

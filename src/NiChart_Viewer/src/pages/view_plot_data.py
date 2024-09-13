@@ -28,26 +28,6 @@ def browse_file_folder(is_file, init_dir):
 
 #hide_pages(["Image Processing", "Data Analytics"])
 
-
-# Initiate Session State Values
-if 'instantiated' not in st.session_state:
-
-    # Dataframe to keep plot ids
-    st.session_state.plots = pd.DataFrame({'PID':[]})
-    st.session_state.pid = 1
-
-    # Default values for plotting parameters
-    st.session_state.default_x_var = 'Age'
-    st.session_state.default_y_var = 'GM'
-    st.session_state.default_hue_var = 'Sex'
-    st.session_state.trend_types = ['none', 'ols', 'lowess']
-    st.session_state.default_trend_type = 'none'
-
-    # ID selected by user (default: empty)
-    st.session_state.sel_id = ''
-
-    st.session_state.instantiated = True
-
 def add_plot():
     '''
     Adds a new plot (updates a dataframe with plot ids)
@@ -142,8 +122,6 @@ def display_plot(pid):
         # ## FIXME: this is temp (for debugging the selection of clicked subject)
         # st.dataframe(df_filt)
 
-
-
 def filter_dataframe(df: pd.DataFrame, pid) -> pd.DataFrame:
     """
     Adds a UI on top of a dataframe to let viewers filter columns
@@ -220,20 +198,19 @@ dir_root = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
 
 # Page controls in side bar
 with st.sidebar:
+
     with st.container(border=True):
 
-        # Input file name (check if saved to session_state from a previous module)
-        if "viewer_in_csv" in st.session_state:
-            fname_spare = st.session_state.viewer_in_csv
-
-        # Input file name (user can enter either using the file browser or type  full path)
+        # Input file name
         if st.sidebar.button("Select input file"):
-            fname_spare = browse_file_folder(True, dir_root)
+            st.session_state.in_csv_sMRI = browse_file_folder(True, dir_root)
         spare_csv = st.sidebar.text_input("Enter the name of the ROI csv file:",
-                                          value = fname_spare,
+                                          value = st.session_state.in_csv_sMRI,
                                           label_visibility="collapsed")
 
 if os.path.exists(spare_csv):
+
+    # Read input csv
     df = pd.read_csv(spare_csv)
 
     with st.sidebar:
@@ -281,7 +258,7 @@ if os.path.exists(spare_csv):
         if st.button("Add plot"):
             add_plot()
 
-    # Add a single plot (initial page includes one plot)
+    # Add a single plot (default: initial page displays a single plot)
     if st.session_state.plots.shape[0] == 0:
         add_plot()
 
@@ -301,9 +278,9 @@ if os.path.exists(spare_csv):
             display_plot(p_index[i])
 
 
-    # FIXME: this is for debugging for now; will be removed
-    # with st.expander('Saved DataFrames'):
-    with st.container():
+    # FIXME: this is for debugging; will be removed
+    with st.expander('session_state: Plots'):
         st.session_state.plots
 
-
+    with st.expander('session_state: All'):
+        st.write(st.session_state)
