@@ -21,15 +21,7 @@ def browse_file_folder(is_file, init_dir):
         out_path = filedialog.askopenfilename(initialdir = init_dir)
     else:
         out_path = filedialog.askdirectory(initialdir = init_dir)
-
-    print('bb')
-    print(out_path)
-
     root.destroy()
-
-    print('aaa')
-    print(out_path)
-
     return out_path
 
 st.markdown(

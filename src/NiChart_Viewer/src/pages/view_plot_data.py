@@ -20,14 +20,10 @@ def browse_file_folder(is_file, init_dir):
     root = tk.Tk()
     # root.withdraw()  # Hide the main window
     if is_file == True:
-        out_path = filedialog.askopenfilenames(initialdir = init_dir, multiple=0)
+        out_path = filedialog.askopenfilename(initialdir = init_dir, multiple=0)
     else:
         out_path = filedialog.askdirectory(initialdir = init_dir)
-
-    print('aaaaaa')
-    print(out_path[0:5])
-    input()
-
+    root.destroy()
     return out_path
 
 #hide_pages(["Image Processing", "Data Analytics"])
@@ -228,11 +224,12 @@ with st.sidebar:
 
         # Input file name (user can enter either using the file browser or type  full path)
         default_spare_name = ''
-        fname_spare = st.sidebar.button("Select input file", on_click = browse_file_folder, key = 'fname_spare_btn', args=[True, dir_root])
-        if fname_spare == False:
-            fname_spare = default_spare_name
-        spare_csv = st.sidebar.text_input("Enter the name of the ROI csv file:", value = fname_spare,
-                                        label_visibility="collapsed")
+        fname_spare = default_spare_name
+        if st.sidebar.button("Select input file"):
+            fname_spare = browse_file_folder(True, dir_root)
+        spare_csv = st.sidebar.text_input("Enter the name of the ROI csv file:",
+                                          value = fname_spare,
+                                          label_visibility="collapsed")
 
 if os.path.exists(spare_csv):
     df = pd.read_csv(spare_csv)
