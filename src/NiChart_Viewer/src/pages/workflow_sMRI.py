@@ -104,3 +104,10 @@ with st.container(border=True):
             cmd = f"python3 {run_dir}/call_snakefile.py --run_dir {run_dir} --dset_name {dset_name} --input_rois {input_rois} --input_demog {input_demog} --dir_output {dir_output}"
             os.system(cmd)
             st.write("Run completed!")
+
+    # Set output as the input file of the viewer
+    out_csv = f"{dir_output}/out_combined/{dset_name}_All.csv"
+    if os.path.exists(out_csv):
+        st.session_state.viewer_in_csv = out_csv
+
+
