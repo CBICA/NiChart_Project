@@ -11,6 +11,24 @@ from math import ceil
 from streamlit_plotly_events import plotly_events
 from utils_trace import *
 from st_pages import hide_pages
+import os
+import tkinter as tk
+from tkinter import filedialog
+
+
+def browse_file_folder(is_file, init_dir):
+    root = tk.Tk()
+    # root.withdraw()  # Hide the main window
+    if is_file == True:
+        out_path = filedialog.askopenfilenames(initialdir = init_dir, multiple=0)
+    else:
+        out_path = filedialog.askdirectory(initialdir = init_dir)
+
+    print('aaaaaa')
+    print(out_path[0:5])
+    input()
+
+    return out_path
 
 #hide_pages(["Image Processing", "Data Analytics"])
 
@@ -202,80 +220,91 @@ def filter_dataframe(df: pd.DataFrame, pid) -> pd.DataFrame:
 # # Config page
 # st.set_page_config(page_title="DataFrame Demo", page_icon="📊", layout='wide')
 
-# FIXME: Input data is hardcoded here for now
-fname = "../examples/test_input3/ROIS_tmp2.csv"
-df = pd.read_csv(fname)
+dir_root = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
 
 # Page controls in side bar
 with st.sidebar:
-
     with st.container(border=True):
 
-        # Slider to set number of plots in a row
-        st.session_state.plot_per_raw = st.slider('Plots per raw',1, 5, 3, key='a_per_page')
+        # Input file name (user can enter either using the file browser or type  full path)
+        default_spare_name = ''
+        fname_spare = st.sidebar.button("Select input file", on_click = browse_file_folder, key = 'fname_spare_btn', args=[True, dir_root])
+        if fname_spare == False:
+            fname_spare = default_spare_name
+        spare_csv = st.sidebar.text_input("Enter the name of the ROI csv file:", value = fname_spare,
+                                        label_visibility="collapsed")
 
-    with st.container(border=True):
+if os.path.exists(spare_csv):
+    df = pd.read_csv(spare_csv)
 
-        st.write('Plot Settings')
+    with st.sidebar:
+        with st.container(border=True):
 
-        # Tabs for parameters
-        ptabs = st.tabs([":lock:", ":large_orange_circle:", ":large_yellow_circle:",
-                        ":large_green_circle:"])
+            # Slider to set number of plots in a row
+            st.session_state.plot_per_raw = st.slider('Plots per raw',1, 5, 3, key='a_per_page')
 
-        # Tab 0: to set plotting parameters
-        with ptabs[1]:
-            # Default values for plot params
-            st.session_state.default_hue_var = 'Sex'
+        with st.container(border=True):
 
-            def_ind_x = 0
-            if st.session_state.default_x_var in df.columns:
-                def_ind_x = df.columns.get_loc(st.session_state.default_x_var)
+            st.write('Plot Settings')
 
-            def_ind_y = 0
-            if st.session_state.default_y_var in df.columns:
-                def_ind_y = df.columns.get_loc(st.session_state.default_y_var)
+            # Tabs for parameters
+            ptabs = st.tabs([":lock:", ":large_orange_circle:", ":large_yellow_circle:",
+                            ":large_green_circle:"])
 
-            def_ind_hue = 0
-            if st.session_state.default_hue_var in df.columns:
-                def_ind_hue = df.columns.get_loc(st.session_state.default_hue_var)
+            # Tab 0: to set plotting parameters
+            with ptabs[1]:
+                # Default values for plot params
+                st.session_state.default_hue_var = 'Sex'
 
-            st.session_state.default_x_var = st.selectbox("Default X Var", df.columns, key=f"x_var_init",
-                                                        index = def_ind_x)
-            st.session_state.default_y_var = st.selectbox("Default Y Var", df.columns, key=f"y_var_init",
-                                                        index = def_ind_y)
-            st.session_state.default_hue_var = st.selectbox("Default Hue Var", df.columns, key=f"hue_var_init",
-                                                            index = def_ind_hue)
-            trend_index = st.session_state.trend_types.index(st.session_state.default_trend_type)
-            st.session_state.default_trend_type = st.selectbox("Default Trend Line", st.session_state.trend_types,
-                                                            key=f"trend_type_init", index = trend_index)
+                def_ind_x = 0
+                if st.session_state.default_x_var in df.columns:
+                    def_ind_x = df.columns.get_loc(st.session_state.default_x_var)
 
-    # Button to add a new plot
-    if st.button("Add plot"):
+                def_ind_y = 0
+                if st.session_state.default_y_var in df.columns:
+                    def_ind_y = df.columns.get_loc(st.session_state.default_y_var)
+
+                def_ind_hue = 0
+                if st.session_state.default_hue_var in df.columns:
+                    def_ind_hue = df.columns.get_loc(st.session_state.default_hue_var)
+
+                st.session_state.default_x_var = st.selectbox("Default X Var", df.columns, key=f"x_var_init",
+                                                            index = def_ind_x)
+                st.session_state.default_y_var = st.selectbox("Default Y Var", df.columns, key=f"y_var_init",
+                                                            index = def_ind_y)
+                st.session_state.default_hue_var = st.selectbox("Default Hue Var", df.columns, key=f"hue_var_init",
+                                                                index = def_ind_hue)
+                trend_index = st.session_state.trend_types.index(st.session_state.default_trend_type)
+                st.session_state.default_trend_type = st.selectbox("Default Trend Line", st.session_state.trend_types,
+                                                                key=f"trend_type_init", index = trend_index)
+
+        # Button to add a new plot
+        if st.button("Add plot"):
+            add_plot()
+
+    # Add a single plot (initial page includes one plot)
+    if st.session_state.plots.shape[0] == 0:
         add_plot()
 
-# Add a single plot (initial page includes one plot)
-if st.session_state.plots.shape[0] == 0:
-    add_plot()
+    # Read plot ids
+    df_p = st.session_state.plots
+    p_index = df_p.PID.tolist()
+    plot_per_raw = st.session_state.plot_per_raw
 
-# Read plot ids
-df_p = st.session_state.plots
-p_index = df_p.PID.tolist()
-plot_per_raw = st.session_state.plot_per_raw
-
-# Render plots
-#  - iterates over plots;
-#  - for every "plot_per_raw" plots, creates a new columns block, resets column index, and displays the plot
-for i in range(0, len(p_index)):
-    column_no = i % plot_per_raw
-    if column_no == 0:
-        blocks = st.columns(plot_per_raw)
-    with blocks[column_no]:
-        display_plot(p_index[i])
+    # Render plots
+    #  - iterates over plots;
+    #  - for every "plot_per_raw" plots, creates a new columns block, resets column index, and displays the plot
+    for i in range(0, len(p_index)):
+        column_no = i % plot_per_raw
+        if column_no == 0:
+            blocks = st.columns(plot_per_raw)
+        with blocks[column_no]:
+            display_plot(p_index[i])
 
 
-# FIXME: this is for debugging for now; will be removed
-# with st.expander('Saved DataFrames'):
-with st.container():
-    st.session_state.plots
+    # FIXME: this is for debugging for now; will be removed
+    # with st.expander('Saved DataFrames'):
+    with st.container():
+        st.session_state.plots
 
 

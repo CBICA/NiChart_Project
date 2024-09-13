@@ -9,17 +9,28 @@ from pandas.api.types import (
 import plotly.express as px
 from math import ceil
 import os
+from tempfile import NamedTemporaryFile
 
-def dir_selector(folder_path='.'):
-    dirnames = [d for d in os.listdir(folder_path) if os.path.isdir(os.path.join(folder_path, d))]
-    selected_folder = st.sidebar.selectbox('Select a folder', dirnames)
-    if selected_folder is None:
-        return None
-    return os.path.join(folder_path, selected_folder)
+import tkinter as tk
+from tkinter import filedialog
 
-st.write('Select folder')
-dirname = dir_selector()
+def browse_file_folder(is_file, init_dir):
+    root = tk.Tk()
+    root.withdraw()  # Hide the main window
+    if is_file == True:
+        out_path = filedialog.askopenfilename(initialdir = init_dir)
+    else:
+        out_path = filedialog.askdirectory(initialdir = init_dir)
 
+    print('bb')
+    print(out_path)
+
+    root.destroy()
+
+    print('aaa')
+    print(out_path)
+
+    return out_path
 
 st.markdown(
         """
@@ -35,32 +46,69 @@ st.markdown(
 
 with st.container(border=True):
 
-    # Input text boxes
+    # Get path to root folder
+    dir_root = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
+
+    # Default file names
     # FIXME: The init values for the input fields are set here to run tests quickly
-    #        they will be removed or replaced in the future
-    dset_name = st.text_input("Give a name to your dataset", value = 'Study1')
+    #        - they will be replaced in the future with values used to link I/O
+    #          between modules (i.e if DLMUSE pipeline was run, it's out file will be set as input'
+    default_study_name = 'Study1'
+    default_roi_name = f'{dir_root}/test/test_input/test2_rois/Study1/Study1_DLMUSE.csv'
+    default_demog_name = f'{dir_root}/test/test_input/test2_rois/Study1/Study1_Demog.csv'
+    default_out_name = f'{dir_root}/test/test_output/test2_rois/Study1'
 
-    # input_rois = st.text_input("Enter the input rois file name:", key = 'input_rois')
-    # upload_rois = st.file_uploader("Upload the file:", key = 'upload_rois')
+    # Dset name: We use this to name all output for a study
+    dset_name = st.text_input("Give a name to your dataset", value = default_study_name)
 
-    input_rois = st.text_input("path to DLMUSE csv file", value = '/home/gurayerus/GitHub/CBICA/NiChart_Project/test/test_input/test2_rois/Study1/Study1_DLMUSE.csv')
-    input_demog = st.text_input("path to demographic csv file", value = '/home/gurayerus/GitHub/CBICA/NiChart_Project/test/test_input/test2_rois/Study1/Study1_Demog.csv')
-    dir_output = st.text_input("path to output folder", value = '/home/gurayerus/GitHub/CBICA/NiChart_Project/test/test_output/test2_rois')
+    # Roi file name (user can enter either using the file browser or type  full path)
+    tmpcol = st.columns((1,8))
+    fname_rois = default_roi_name
+    with tmpcol[0]:
+        if st.button("Select ROI file"):
+            fname_rois = browse_file_folder(True, dir_root)
+    with tmpcol[1]:
+        input_rois = st.text_input("Enter the name of the ROI csv file:", value = fname_rois,
+                                   label_visibility="collapsed")
+
+    # Demog file name (user can enter either using the file browser or type  full path)
+    tmpcol = st.columns((1,8))
+    fname_demog = default_demog_name
+    with tmpcol[0]:
+        if st.button("Select demog file"):
+            fname_demog = browse_file_folder(True, dir_root)
+    with tmpcol[1]:
+        input_demog = st.text_input("Enter the name of the demog csv file:", value = fname_demog,
+                                   label_visibility="collapsed")
+
+    # Out folder name (user can enter either using the file browser or type  full path)
+    tmpcol = st.columns((1,8))
+    dname_out = default_out_name
+    with tmpcol[0]:
+        if st.button("Select output folder"):
+            dname_out = browse_file_folder(False, dir_root)
+    with tmpcol[1]:
+        dir_output = st.text_input("Enter the name of the output folder:", value = dname_out,
+                                   label_visibility="collapsed")
+
+    flag_files = 1
 
     # Check input files
     if not os.path.exists(input_rois):
         st.warning("Path to input DLMUSE csv doesn't exist")
-    if not os.path.exists(input_rois):
+        flag_files = 0
+
+    if not os.path.exists(input_demog):
         st.warning("Path to input demographic csv doesn't exist")
-    if not os.path.exists(dir_output):
-        st.warning("Path to output folder doesn't exist")
+        flag_files = 0
 
     run_dir='../../workflow/workflows/w_sMRI'
 
     # Run workflow
-    if st.button("Run w_sMRI"):
-        st.write("Pipeline is running, please wait!")
-        os.system(f"cd {run_dir}")
-        cmd = f"python3 {run_dir}/call_snakefile.py --run_dir {run_dir} --dset_name {dset_name} --input_rois {input_rois} --input_demog {input_demog} --dir_output {dir_output}"
-        os.system(cmd)
-        st.write("Run completed!")
+    if flag_files == 1:
+        if st.button("Run w_sMRI"):
+            st.write("Pipeline is running, please wait!")
+            os.system(f"cd {run_dir}")
+            cmd = f"python3 {run_dir}/call_snakefile.py --run_dir {run_dir} --dset_name {dset_name} --input_rois {input_rois} --input_demog {input_demog} --dir_output {dir_output}"
+            os.system(cmd)
+            st.write("Run completed!")
