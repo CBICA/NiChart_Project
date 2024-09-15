@@ -92,6 +92,8 @@ def display_plot(pid):
 
                 x_var = st.selectbox("X Var", df_filt.columns, key=f"x_var_{pid}", index = x_ind)
                 y_var = st.selectbox("Y Var", df_filt.columns, key=f"y_var_{pid}", index = y_ind)
+                st.session_state.sel_roi = y_var
+
                 hue_var = st.selectbox("Hue Var", df_filt.columns, key=f"hue_var_{pid}", index = hue_ind)
                 trend_type = st.selectbox("Trend Line", st.session_state.trend_types, key=f"trend_type_{pid}", index = trend_index)
 
@@ -219,6 +221,7 @@ with st.sidebar:
         spare_csv = st.sidebar.text_input("Enter the name of the ROI csv file:",
                                           value = st.session_state.in_csv_sMRI,
                                           label_visibility="collapsed")
+        st.session_state.fname_subj_list = spare_csv
 
 if os.path.exists(spare_csv):
 
@@ -260,6 +263,8 @@ if os.path.exists(spare_csv):
                                                             index = def_ind_x)
                 st.session_state.default_y_var = st.selectbox("Default Y Var", df.columns, key=f"y_var_init",
                                                             index = def_ind_y)
+                st.session_state.sel_roi = st.session_state.default_y_var
+
                 st.session_state.default_hue_var = st.selectbox("Default Hue Var", df.columns, key=f"hue_var_init",
                                                                 index = def_ind_hue)
                 trend_index = st.session_state.trend_types.index(st.session_state.default_trend_type)

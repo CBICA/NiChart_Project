@@ -35,6 +35,11 @@ if 'instantiated' not in st.session_state:
     # st.session_state.in_csv_MUSE = f'{st.session_state.dir_root}/test/test_input/test2_rois/Study1/Study1_DLMUSE.csv'
     # st.session_state.in_csv_Demog = f'{st.session_state.dir_root}/test/test_input/test2_rois/Study1/Study1_Demog.csv'
 
+    # FIXME: Set these variables when the images are loaded or computed
+    st.session_state.dir_t1img = st.session_state.dir_root + '/test/test_input/test3_nifti+roi'
+    st.session_state.dir_dlmuse = st.session_state.dir_root + '/test/test_input/test3_nifti+roi'
+    st.session_state.suffix_t1img = '_T1.nii.gz'
+    st.session_state.suffix_dlmuse = '_T1_DLMUSE.nii.gz'
 
     # Path to out folder
     st.session_state.out_dir = ''
