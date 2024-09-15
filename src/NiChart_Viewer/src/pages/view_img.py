@@ -18,6 +18,9 @@ from nibabel.orientations import axcodes2ornt, ornt_transform
 #     st.session_state.pid = 1
 #     st.session_state.instantiated = True
 
+VIEWS = ["axial", "sagittal", "coronal"]
+VIEW_AXES = [0, 1, 2]
+VIEW_OTHER_AXES = [(1,2), (0,2), (0,1)]
 
 def reorient_nifti(nii_in, ref_orient = 'LPS'):
 
@@ -37,8 +40,6 @@ def crop_image(img, mask):
     '''
     Crop img to the foreground of the mask
     '''
-
-
     # Detect bounding box
     nz = np.nonzero(mask)
     mn = np.min(nz, axis=1)
@@ -69,34 +70,30 @@ def crop_image(img, mask):
     mask = np.pad(mask, padding, mode='constant', constant_values=0)
     
     return img, mask
-        
 
-def show_nifti(img, mask, view):
+def detect_mask_bounds(mask):
+    '''
+    Detect the mask start, end and center in each view
+    '''
+    mask_bounds = np.zeros([3,3]).astype(int)
+    for i, axis in enumerate(VIEW_AXES):
+        mask_bounds[i,0] = 0
+        mask_bounds[i,1] = mask.shape[i]
+        slices_nz = np.where(np.sum(mask, axis = VIEW_OTHER_AXES[i]) > 0)[0]
+        try:
+            mask_bounds[i,2] = slices_nz[len(slices_nz) // 2]
+        except:
+            # Could not detect masked region. Set center to image center
+            mask_bounds[i,2] = mask.shape[i] // 2
+    return mask_bounds
+
+def show_nifti(img, view, sel_axis_bounds):
     '''
     Displays the nifti img
     '''
-    
-    # Set parameters based on orientation
-    if view == 'axial':
-        sel_axis = 0
-        other_axes = (1,2)
-        
-    if view == 'sagittal':
-        sel_axis = 2
-        other_axes = (0,1)
-
-    if view == 'coronal':
-        sel_axis = 1
-        other_axes = (0,2)
-
-
-    # Detect middle masked slice
-    slices_nz = np.where(np.sum(mask, axis = other_axes) > 0)[0]
-    sel_slice = slices_nz[len(slices_nz) // 2]
-    
     # Create a slider to select the slice index
-    slice_index = st.slider(f"{view}", 0, img.shape[sel_axis] - 1,
-                            value=sel_slice, key = f'slider_{view}')
+    slice_index = st.slider(f"{view}", 0, sel_axis_bounds[1] - 1,
+                            value=sel_axis_bounds[2], key = f'slider_{view}')
 
     # Extract the slice and display it
     if view == 'axial':
@@ -106,7 +103,37 @@ def show_nifti(img, mask, view):
     else:
         st.image(img[:, slice_index, :], use_column_width = True)
 
+@st.cache_data
+def prep_images(f_img, f_mask, sel_roi_ind):
+    # Read nifti
+    nii_img = nib.load(f_img)
+    nii_mask = nib.load(f_mask)
 
+    # Reorient nifti
+    nii_img = reorient_nifti(nii_img, ref_orient = 'IPL')
+    nii_mask = reorient_nifti(nii_mask, ref_orient = 'IPL')
+
+    # Extract image to matrix
+    img = nii_img.get_fdata()
+    mask = nii_mask.get_fdata()
+
+    # Crop image to ROIs and reshape
+    img, mask = crop_image(img, mask)
+
+    # Select target roi
+    mask = (mask == sel_roi_ind).astype(int)
+
+    # Merge image and mask
+    img = np.stack((img,)*3, axis=-1)
+
+    img_masked = img.copy()
+    img_masked[mask == 1] = mask_color
+
+    # Scale values
+    img = img / img.max()
+    img_masked = img_masked / img_masked.max()
+
+    return img, mask, img_masked
 
 # # Config page
 # st.set_page_config(page_title="DataFrame Demo", page_icon="📊", layout='wide')
@@ -122,8 +149,12 @@ f2 = "../examples/test_input3/IXI002-Guys-0828_T1_DLMUSE.nii.gz"
 sel_roi = 'Ventricles'
 mask_color = (0, 255, 0)  # RGB format
 
+# Select roi index
 dict_roi = {'Ventricles':51, 'Hippocampus_R':100, 'Hippocampus_L':48}
+sel_roi_ind = dict_roi[sel_roi]
 
+# Process image and mask to prepare final 3d matrix to display
+img, mask, img_masked = prep_images(f1, f2, sel_roi_ind)
 
 # Page controls in side bar
 with st.sidebar:
@@ -154,45 +185,25 @@ with st.sidebar:
     st.write('---')
 
     # Create a list of checkbox options
-    orient_options = ["axial", "sagittal", "coronal"]
-    #list_orient = st.multiselect("Select viewing planes:", orient_options, orient_options[0])
-    list_orient = st.multiselect("Select viewing planes:", orient_options, orient_options)
+    #list_orient = st.multiselect("Select viewing planes:", VIEWS, VIEWS[0])
+    list_orient = st.multiselect("Select viewing planes:", VIEWS, VIEWS)
+
+    # View hide overlay
+    is_show_overlay = st.checkbox('Show overlay', True)
 
     # Print the selected options (optional)
     if list_orient:
         st.write("Selected options:", list_orient)
 
-# Select roi index
-sel_roi_ind = dict_roi[sel_roi]
-
-# Read nifti
-nii_ulay = nib.load(f1)
-nii_olay = nib.load(f2)
-
-# Reorient nifti
-nii_ulay = reorient_nifti(nii_ulay, ref_orient = 'IPL')
-nii_olay = reorient_nifti(nii_olay, ref_orient = 'IPL')
-
-# Extract image to matrix
-img_ulay = nii_ulay.get_fdata()
-img_olay = nii_olay.get_fdata()
-
-# Crop image to ROIs and reshape
-img_ulay, img_olay = crop_image(img_ulay, img_olay)
-
-# Select target roi
-img_olay = (img_olay == sel_roi_ind).astype(int)
-
-# Merge image and mask
-img_ulay = np.stack((img_ulay,)*3, axis=-1)
-img_ulay[img_olay == 1] = mask_color
-
-# Scale values
-img_ulay = img_ulay / img_ulay.max()
-
+# Detect mask bounds and center in each view
+mask_bounds = detect_mask_bounds(mask)
 
 # Show images
 blocks = st.columns(len(list_orient))
 for i, tmp_orient in enumerate(list_orient):
     with blocks[i]:
-        show_nifti(img_ulay, img_olay, tmp_orient)
+        if is_show_overlay == False:
+            show_nifti(img, tmp_orient, mask_bounds[i,:])
+        else:
+            show_nifti(img_masked, tmp_orient, mask_bounds[i,:])
+

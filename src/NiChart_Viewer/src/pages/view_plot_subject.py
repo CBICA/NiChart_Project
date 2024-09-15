@@ -15,6 +15,57 @@ from math import ceil
 #     st.session_state.pid = 1
 #     st.session_state.instantiated = True
 
+def calc_subject_centiles(df_subj, df_cent):
+    '''
+    Calculate subject specific centile values
+    '''
+
+    # Filter centiles to subject's age
+    tmp_ind = (df2.Age - df1.Age[0]).abs().idxmin()
+    sel_age = df2.loc[tmp_ind, 'Age']
+    df_cent_sel = df_cent[df_cent.Age == sel_age]
+
+    # Find ROIs in subj data that are included in the centiles file
+    sel_rois = df_subj.columns[df_subj.columns.isin(df_cent_sel.ROI.unique())].tolist()
+    df_cent_sel = df_cent_sel[df_cent_sel.ROI.isin(sel_rois)].drop(['ROI','Age'], axis=1)
+
+    cent = df_cent_sel.columns.str.replace('centile_', '').astype(int).values
+    vals_cent = df_cent_sel.values
+    vals_subj = df_subj.loc[0,sel_rois]
+
+    cent_subj = np.zeros(vals_subj.shape[0])
+    for i, sval in enumerate(vals_subj):
+        # Find nearest x values
+        ind1 = np.where(vals_subj[i] < vals_cent[i,:])[0][0]-1
+        ind2 = ind1 + 1
+
+        print(ind1)
+
+        # Calculate slope
+        slope = (cent[ind2] - cent[ind1]) / (vals_cent[i, ind2] - vals_cent[i, ind1])
+
+        # Estimate subj centile
+        cent_subj[i] = cent[ind1] + slope * (vals_subj[i] - vals_cent[i, ind1])
+
+    df_out = pd.DataFrame(dict(ROI=sel_rois, Centiles=cent_subj))
+    return df_out
+
+
+print("Estimated y value for x =", target_x, "is:", estimated_y)
+
+lower_percentiles = centile_values[ind_l, :]
+upper_percentiles = centile_values[ind_u, :]
+proportions = (target_values[:, None] - lower_percentiles) / (upper_percentiles - lower_percentiles)
+
+estimated_percentiles = ind_l + proportions * (ind_u - ind_l)
+
+print("Estimated percentiles:", estimated_percentiles)
+
+    # Calculate subject centile values
+    for sel_roi in
+
+
+
 def display_plot(sel_id):
     '''
     Displays the plot with the given mrid

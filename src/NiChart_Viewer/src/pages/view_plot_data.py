@@ -15,14 +15,26 @@ import os
 import tkinter as tk
 from tkinter import filedialog
 
-
-def browse_file_folder(is_file, init_dir):
+def browse_file(init_dir):
+    '''
+    File selector
+    Returns the file name selected by the user and the parent folder
+    '''
     root = tk.Tk()
     root.withdraw()  # Hide the main window
-    if is_file == True:
-        out_path = filedialog.askopenfilename(initialdir = init_dir, multiple=0)
-    else:
-        out_path = filedialog.askdirectory(initialdir = init_dir)
+    out_path = filedialog.askopenfilename(initialdir = init_dir)
+    out_dir = os.path.dirname(out_path)
+    root.destroy()
+    return out_path, out_dir
+
+def browse_folder(init_dir):
+    '''
+    Folder selector
+    Returns the folder name selected by the user
+    '''
+    root = tk.Tk()
+    root.withdraw()  # Hide the main window
+    out_path = filedialog.askdirectory(initialdir = init_dir)
     root.destroy()
     return out_path
 
@@ -203,7 +215,7 @@ with st.sidebar:
 
         # Input file name
         if st.sidebar.button("Select input file"):
-            st.session_state.in_csv_sMRI = browse_file_folder(True, dir_root)
+            st.session_state.in_csv_sMRI, st.session_state.init_dir = browse_file(st.session_state.init_dir)
         spare_csv = st.sidebar.text_input("Enter the name of the ROI csv file:",
                                           value = st.session_state.in_csv_sMRI,
                                           label_visibility="collapsed")
