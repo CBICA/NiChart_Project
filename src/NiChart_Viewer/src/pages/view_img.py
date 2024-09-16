@@ -21,8 +21,8 @@ from nibabel.orientations import axcodes2ornt, ornt_transform
 
 # Parameters for viewer
 VIEWS = ["axial", "sagittal", "coronal"]
-VIEW_AXES = [0, 1, 2]
-VIEW_OTHER_AXES = [(1,2), (0,2), (0,1)]
+VIEW_AXES = [0, 2, 1]
+VIEW_OTHER_AXES = [(1,2), (0,1), (0,2)]
 MASK_COLOR = (0, 255, 0)  # RGB format
 
 def reorient_nifti(nii_in, ref_orient = 'LPS'):
@@ -94,7 +94,26 @@ def detect_mask_bounds(mask):
         except:
             # Could not detect masked region. Set center to image center
             mask_bounds[i,2] = mask.shape[i] // 2
+
     return mask_bounds
+
+def read_derived_roi_list(list_derived):
+    '''
+    Create a dictionary from derived roi list
+    '''
+
+    # Read list
+    df = pd.read_csv(list_derived, header=None)
+
+    # Create dict
+    dict_out = {}
+    for i, tmp_ind in enumerate(df[0].values):
+        df_tmp = df[df[0] == tmp_ind].drop([0,1], axis =1)
+        sel_vals = df_tmp.T.dropna().astype(int).values.flatten()
+        dict_out[tmp_ind] = sel_vals
+
+    return dict_out
+
 
 def show_nifti(img, view, sel_axis_bounds):
     '''
@@ -114,7 +133,7 @@ def show_nifti(img, view, sel_axis_bounds):
         st.image(img[:, slice_index, :], use_column_width = True)
 
 @st.cache_data
-def prep_images(f_img, f_mask, sel_roi_ind):
+def prep_images(f_img, f_mask, sel_roi_ind, dict_derived):
     '''
     Read images from files and create 3D matrices for display
     '''
@@ -131,11 +150,18 @@ def prep_images(f_img, f_mask, sel_roi_ind):
     img = nii_img.get_fdata()
     mask = nii_mask.get_fdata()
 
+    # Convert image to uint
+    img = (img / img.max() * 255).astype(int)
+
     # Crop image to ROIs and reshape
     img, mask = crop_image(img, mask)
 
-    # Select target roi
-    mask = (mask == sel_roi_ind).astype(int)
+    # Select target roi: derived roi
+    list_rois = dict_derived[sel_roi_ind]
+    mask = np.isin(mask, list_rois)
+
+    # # Select target roi: single roi
+    # mask = (mask == sel_roi_ind).astype(int)
 
     # Merge image and mask
     img = np.stack((img,)*3, axis=-1)
@@ -150,12 +176,17 @@ def prep_images(f_img, f_mask, sel_roi_ind):
     return img, mask, img_masked
 
 
-# FIXME: This will be read from file
-dict_roi = {'Ventricles':51, 'Hippocampus_R':100, 'Hippocampus_L':48}
+# Read dataframe with data
+df = pd.read_csv(st.session_state.fname_spare_csv)
 
+# Create a dictionary of MUSE indices and names
+df_muse = pd.read_csv(st.session_state.list_MUSE_all)
+df_muse = df_muse[df_muse.Name.isin(df.columns)]
+dict_roi = dict(zip(df_muse.Name, df_muse.Index))
 
-# Read dataframe with subject mrids
-df = pd.read_csv(st.session_state.fname_subj_list)
+# Read derived roi list and convert to a dict
+dict_derived = read_derived_roi_list(st.session_state.list_MUSE_derived)
+
 
 # Page controls in side bar
 with st.sidebar:
@@ -170,14 +201,20 @@ with st.sidebar:
         else:
             sel_ind = df.MRID.tolist().index(sel_id)
             sel_type = '(user)'
-        sel_id = st.selectbox("Select Subject", df.MRID.tolist(), key=f"selbox_mrid", index = sel_ind)
+        sel_id = st.selectbox("Selected Subject", df.MRID.tolist(), key=f"selbox_mrid", index = sel_ind)
 
         # st.sidebar.warning('Selected subject: ' + mrid)
         st.warning(f'Selected {sel_type}: {sel_id}')
 
-        ## FIXME: read list of rois from dictionary
-        ##        show the roi selected in the plot
-        sel_roi = st.selectbox("Select ROI", list(dict_roi.keys()), key=f"selbox_rois", index = 0)
+        # Selection of ROI
+        sel_roi = st.session_state.sel_roi
+        if sel_roi == '':
+            sel_ind = 0
+            sel_type = '(auto)'
+        else:
+            sel_ind = df_muse.Name.tolist().index(sel_roi)
+            sel_type = '(user)'
+        sel_roi = st.selectbox("Selected ROI", list(dict_roi.keys()), key=f"selbox_rois", index = sel_ind)
 
     with st.container(border=True):
 
@@ -192,7 +229,6 @@ with st.sidebar:
         if list_orient:
             st.write("Selected options:", list_orient)
 
-sel_roi = st.session_state.sel_roi
 
 # Select roi index
 sel_roi_ind = dict_roi[sel_roi]
@@ -205,7 +241,7 @@ f_mask = os.path.join(st.session_state.dir_dlmuse, sel_id + st.session_state.suf
 if os.path.exists(f_img) & os.path.exists(f_mask):
 
     # Process image and mask to prepare final 3d matrix to display
-    img, mask, img_masked = prep_images(f_img, f_mask, sel_roi_ind)
+    img, mask, img_masked = prep_images(f_img, f_mask, sel_roi_ind, dict_derived)
 
     # Detect mask bounds and center in each view
     mask_bounds = detect_mask_bounds(mask)

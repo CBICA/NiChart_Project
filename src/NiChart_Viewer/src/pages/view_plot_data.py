@@ -205,10 +205,6 @@ def filter_dataframe(df: pd.DataFrame, pid) -> pd.DataFrame:
 
     return df
 
-# # Config page
-# st.set_page_config(page_title="DataFrame Demo", page_icon="📊", layout='wide')
-
-dir_root = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
 
 # Page controls in side bar
 with st.sidebar:
@@ -221,7 +217,7 @@ with st.sidebar:
         spare_csv = st.sidebar.text_input("Enter the name of the ROI csv file:",
                                           value = st.session_state.in_csv_sMRI,
                                           label_visibility="collapsed")
-        st.session_state.fname_subj_list = spare_csv
+        st.session_state.fname_spare_csv = spare_csv
 
 if os.path.exists(spare_csv):
 

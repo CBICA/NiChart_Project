@@ -26,26 +26,37 @@ if 'instantiated' not in st.session_state:
     # ID selected by user
     st.session_state.sel_id = ''
 
+    # ROI selected by user
+    st.session_state.sel_roi = ''
+
     # Input fields for w_sMRI
     st.session_state.study_name = 'MyStudy'
     st.session_state.in_csv_MUSE = ''
     st.session_state.in_csv_Demog = ''
 
-    # # FIXME: set default values for easy run
-    # st.session_state.in_csv_MUSE = f'{st.session_state.dir_root}/test/test_input/test2_rois/Study1/Study1_DLMUSE.csv'
-    # st.session_state.in_csv_Demog = f'{st.session_state.dir_root}/test/test_input/test2_rois/Study1/Study1_Demog.csv'
-
-    # FIXME: Set these variables when the images are loaded or computed
+    # FIXME: temp path for running fast
+    # Should be set as the images are created
     st.session_state.dir_t1img = st.session_state.dir_root + '/test/test_input/test3_nifti+roi'
     st.session_state.dir_dlmuse = st.session_state.dir_root + '/test/test_input/test3_nifti+roi'
     st.session_state.suffix_t1img = '_T1.nii.gz'
     st.session_state.suffix_dlmuse = '_T1_DLMUSE.nii.gz'
+
+    # MUSE dictionaries
+    st.session_state.dir_resources = os.path.join(st.session_state.dir_root, 'resources')
+
+    st.session_state.list_MUSE_derived = os.path.join(st.session_state.dir_resources, 'MUSE',
+                                                      'list_MUSE_mapping_derived.csv')
+    st.session_state.list_MUSE_all = os.path.join(st.session_state.dir_resources, 'MUSE',
+                                                      'list_MUSE_all.csv')
 
     # Path to out folder
     st.session_state.out_dir = ''
 
     # Input fields for plotting
     st.session_state.in_csv_sMRI = ''
+
+    ## FIXME : this is for quickly loading a test example
+    st.session_state.in_csv_sMRI = st.session_state.dir_root + '/test/test_input/test3_nifti+roi/sMRI_Results_n4.csv'
 
     st.session_state.instantiated = True
 
