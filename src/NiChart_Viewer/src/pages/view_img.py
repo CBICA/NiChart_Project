@@ -225,10 +225,6 @@ with st.sidebar:
         # View hide overlay
         is_show_overlay = st.checkbox('Show overlay', True)
 
-        # Print the selected options (optional)
-        if list_orient:
-            st.write("Selected options:", list_orient)
-
 
 # Select roi index
 sel_roi_ind = dict_roi[sel_roi]
@@ -250,10 +246,11 @@ if os.path.exists(f_img) & os.path.exists(f_mask):
     blocks = st.columns(len(list_orient))
     for i, tmp_orient in enumerate(list_orient):
         with blocks[i]:
+            ind_view = VIEWS.index(tmp_orient)
             if is_show_overlay == False:
-                show_nifti(img, tmp_orient, mask_bounds[i,:])
+                show_nifti(img, tmp_orient, mask_bounds[ind_view,:])
             else:
-                show_nifti(img_masked, tmp_orient, mask_bounds[i,:])
+                show_nifti(img_masked, tmp_orient, mask_bounds[ind_view,:])
 
 else:
     if not os.path.exists(f_img):
