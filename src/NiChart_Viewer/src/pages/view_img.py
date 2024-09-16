@@ -24,6 +24,9 @@ VIEWS = ["axial", "sagittal", "coronal"]
 VIEW_AXES = [0, 2, 1]
 VIEW_OTHER_AXES = [(1,2), (0,1), (0,2)]
 MASK_COLOR = (0, 255, 0)  # RGB format
+MASK_COLOR = np.array([0.0, 1.0, 0.0])  # RGB format
+OLAY_ALPHA = 0.2
+
 
 def reorient_nifti(nii_in, ref_orient = 'LPS'):
     '''
@@ -151,7 +154,7 @@ def prep_images(f_img, f_mask, sel_roi_ind, dict_derived):
     mask = nii_mask.get_fdata()
 
     # Convert image to uint
-    img = (img / img.max() * 255).astype(int)
+    img = (img.astype(float) / img.max())
 
     # Crop image to ROIs and reshape
     img, mask = crop_image(img, mask)
@@ -167,11 +170,8 @@ def prep_images(f_img, f_mask, sel_roi_ind, dict_derived):
     img = np.stack((img,)*3, axis=-1)
 
     img_masked = img.copy()
-    img_masked[mask == 1] = MASK_COLOR
+    img_masked[mask == 1] = (img_masked[mask == 1] * (1 - OLAY_ALPHA) + MASK_COLOR * OLAY_ALPHA)
 
-    # Scale values
-    img = img / img.max()
-    img_masked = img_masked / img_masked.max()
 
     return img, mask, img_masked
 
