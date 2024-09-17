@@ -52,6 +52,13 @@ if 'instantiated' not in st.session_state:
     # Path to out folder
     st.session_state.out_dir = ''
 
+    # Path to various output sub-folders
+    st.session_state.dir_csv_demog = 'csv_demog'
+    st.session_state.dir_csv_dlmuse = 'csv_dlmuse'
+    st.session_state.dir_csv_spare = 'out_combined'
+    st.session_state.dir_img_t1 = 'img_t1'
+    st.session_state.dir_img_dlmuse = 'img_dlmuse'
+
     # Input fields for plotting
     st.session_state.in_csv_sMRI = ''
 

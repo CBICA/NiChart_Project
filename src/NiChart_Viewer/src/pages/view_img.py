@@ -76,8 +76,10 @@ def crop_image(img, mask):
 
     # Pad image
     padding = np.array([pad1, pad2]).T
-    img = np.pad(img, padding, mode='constant', constant_values=0)
-    mask = np.pad(mask, padding, mode='constant', constant_values=0)
+    
+    if padding.sum() > 0:
+        img = np.pad(img, padding, mode='constant', constant_values=0)
+        mask = np.pad(mask, padding, mode='constant', constant_values=0)
     
     return img, mask
 
@@ -177,7 +179,10 @@ def prep_images(f_img, f_mask, sel_roi_ind, dict_derived):
 
 
 # Read dataframe with data
-df = pd.read_csv(st.session_state.fname_spare_csv)
+
+in_csv = os.path.join(st.session_state.out_dir, st.session_state.dir_csv_spare, 
+                      st.session_state.study_name + '_All.csv')
+df = pd.read_csv(in_csv)
 
 # Create a dictionary of MUSE indices and names
 df_muse = pd.read_csv(st.session_state.list_MUSE_all)
@@ -231,8 +236,8 @@ sel_roi_ind = dict_roi[sel_roi]
 
 
 # File names for img and mask
-f_img = os.path.join(st.session_state.dir_t1img, sel_id + st.session_state.suffix_t1img)
-f_mask = os.path.join(st.session_state.dir_dlmuse, sel_id + st.session_state.suffix_dlmuse)
+f_img = os.path.join(st.session_state.out_dir, st.session_state.dir_img_t1, sel_id + st.session_state.suffix_t1img)
+f_mask = os.path.join(st.session_state.out_dir, st.session_state.dir_img_dlmuse, sel_id + st.session_state.suffix_dlmuse)
 
 if os.path.exists(f_img) & os.path.exists(f_mask):
 
