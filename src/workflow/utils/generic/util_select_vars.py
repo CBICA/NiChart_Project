@@ -32,6 +32,9 @@ def select_vars(in_csv, dict_csv, dict_var, vars_list, out_csv):
     
     # Select variables
     df_out = df[sel_vars]
+    
+    # FIXME: temp hack to rename MUSE_702 to DLICV
+    df_out = df_out.rename(columns = {'MUSE_702':'DLICV'})
 
     # Write out file
     df_out.to_csv(out_csv, index=False)

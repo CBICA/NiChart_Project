@@ -15,4 +15,4 @@ cmd="python src/workflow/utils/combat/util_combat_prep_out.py ${out_csv%.csv}_tm
 echo "About to run: $cmd"
 $cmd
 
-rm -rf ${out_csv%.csv}_tmpinit.csv
+# rm -rf ${out_csv%.csv}_tmpinit.csv

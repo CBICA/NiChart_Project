@@ -41,8 +41,6 @@ rule ALL:
     '''
     input: OUT_FILE
 
-#ruleorder: rename_rois_user > rename_rois_computed
-
 rule rename_rois:
     '''
     Rename MUSE roi indices to roi codes
@@ -102,7 +100,7 @@ rule select_vars_harmonize:
         dict_csv=f"src/workflow/{rois_single}"
     params:
         dict_var = 'Code',
-        covars ='MRID,Age,Sex,SITE,DLICV',
+        covars ='MRID,Age,Sex,SITE,MUSE_702',
     output:
         temp(f"{dir_output}/sel_vars/{dset_name}_raw.csv")
     resources:
@@ -152,7 +150,10 @@ rule calc_derived_ROIs:
     resources:
         mem_mb=8000
     shell:
-        "python src/workflow/utils/generic/util_combine_MUSE_rois.py {input} {params} {output}"
+        '''
+        echo python src/workflow/utils/generic/util_combine_MUSE_rois.py {input} {params} {output}
+        python src/workflow/utils/generic/util_combine_MUSE_rois.py {input} {params} {output}
+        '''
 
 rule merge_covars_to_harmonized_rois:
     '''
