@@ -40,8 +40,8 @@ if 'instantiated' not in st.session_state:
 
     # FIXME: temp path for running fast
     # Should be set as the images are created
-    st.session_state.dir_t1img = st.session_state.path_root + '/test/test_input/test3_nifti+roi'
-    st.session_state.dir_dlmuse = st.session_state.path_root + '/test/test_input/test3_nifti+roi'
+    st.session_state.dir_t1img = st.session_state.path_root + '/test/test3_nifti+roi'
+    st.session_state.dir_dlmuse = st.session_state.path_root + '/test/test3_nifti+roi'
     st.session_state.suffix_t1img = '_T1.nii.gz'
     st.session_state.suffix_dlmuse = '_T1_DLMUSE.nii.gz'
 
@@ -64,7 +64,7 @@ if 'instantiated' not in st.session_state:
     st.session_state.path_csv_spare = ''
 
     ## FIXME : this is for quickly loading a test example
-    st.session_state.path_csv_spare = st.session_state.path_root + '/test/test_input/test3_nifti+roi/sMRI_Results_n4.csv'
+    st.session_state.path_csv_spare = st.session_state.path_root + '/test4_adni3/output/out_combined/MyStudy_All.csv'
 
     st.session_state.instantiated = True
 
