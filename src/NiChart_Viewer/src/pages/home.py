@@ -9,6 +9,7 @@ if 'instantiated' not in st.session_state:
     # Dataframe to keep plot ids
     st.session_state.plots = pd.DataFrame(columns = ['pid', 'xvar', 'yvar', 'hvar', 'trend'])
     st.session_state.plot_index = 1
+    st.session_state.plot_active = ''
 
     # Path to root folder
     st.session_state.path_root = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))

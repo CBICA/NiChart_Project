@@ -201,7 +201,8 @@ with st.sidebar:
         st.warning(f'Selected {sel_type}: {sel_mrid}')
 
         # Selection of ROI
-        sel_var = st.session_state.sel_var
+        #  - The variable will be selected from the active plot
+        sel_var = st.session_state.plots.loc[st.session_state.plot_active, 'yvar']
         if sel_var == '':
             sel_ind = 0
             sel_type = '(auto)'

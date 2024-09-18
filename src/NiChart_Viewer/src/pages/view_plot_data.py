@@ -52,7 +52,6 @@ def add_plot():
                          st.session_state.plot_hvar,
                          st.session_state.plot_trend
                         ]
-
     st.session_state.plot_index += 1
 
 # Remove a plot
@@ -64,15 +63,19 @@ def remove_plot(plot_id):
     df_p = df_p[df_p.PID != plot_id]
     st.session_state.plots = df_p
 
-
 def display_plot(plot_id):
     '''
     Displays the plot with the plot_id
     '''
 
+    def callback_plot_clicked():
+        '''
+        Set the active plot id to plot that was clicked
+        '''
+        st.session_state.plot_active = plot_id
+
     # Create a copy of dataframe for filtered data
     df_filt = df.copy()
-
 
     # Main container for the plot
     with st.container(border=True):
@@ -138,22 +141,19 @@ def display_plot(plot_id):
 
         # Add plot
         # - on_select: when clicked it will rerun and return the info
-        sel_info = st.plotly_chart(scatter_plot, on_select='rerun', key=f"bubble_chart_{plot_id}")
+
+        sel_info = st.plotly_chart(scatter_plot, key=f"bubble_chart_{plot_id}", 
+                                   on_select = callback_plot_clicked)
 
         # Detect MRID from the click info
-        try:
+        if len(sel_info['selection']['points'])>0:
+
             sind = sel_info['selection']['point_indices'][0]
             lgroup = sel_info['selection']['points'][0]['legendgroup']
-            mrid = df_filt[df_filt[hue_var] == lgroup].iloc[sind]['MRID']
+            mrid = df_filt[df_filt[hvar] == lgroup].iloc[sind]['MRID']
             st.sidebar.warning('Selected subject: ' + mrid)
             st.session_state.sel_mrid = mrid
 
-        except:
-            print('Warning: Could not detect point!')
-            return
-
-        # ## FIXME: this is temp (for debugging the selection of clicked subject)
-        # st.dataframe(df_filt)
 
 def filter_dataframe(df: pd.DataFrame, plot_id) -> pd.DataFrame:
     """
@@ -311,6 +311,9 @@ if os.path.exists(spare_csv):
 
 
     # FIXME: this is for debugging; will be removed
+    with st.expander('session_state: Plots'):
+        st.session_state.plot_active
+
     with st.expander('session_state: Plots'):
         st.session_state.plots
 
