@@ -7,11 +7,12 @@ import os
 if 'instantiated' not in st.session_state:
 
     # Dataframe to keep plot ids
-    st.session_state.plots = pd.DataFrame({'PID':[]})
-    st.session_state.pid = 1
+    st.session_state.plots = pd.DataFrame(columns = ['pid', 'xvar', 'yvar', 'hvar', 'trend'])
+    st.session_state.plot_index = 1
 
     # Path to root folder
     st.session_state.path_root = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
+    st.session_state.path_root = os.path.join(st.session_state.path_root, 'test')
 
     # Path to input folder (used as the init path in file selection)
     st.session_state.path_input = st.session_state.path_root
@@ -20,11 +21,11 @@ if 'instantiated' not in st.session_state:
     st.session_state.path_output = ''
 
     # Default values for plotting parameters
-    st.session_state.default_x_var = 'Age'
-    st.session_state.default_y_var = 'GM'
-    st.session_state.default_hue_var = 'Sex'
+    st.session_state.plot_xvar = 'Age'
+    st.session_state.plot_yvar = 'GM'
+    st.session_state.plot_hvar = 'Sex'
     st.session_state.trend_types = ['none', 'ols', 'lowess']
-    st.session_state.default_trend_type = 'none'
+    st.session_state.plot_trend = 'none'
 
     # ID selected by user
     st.session_state.sel_mrid = ''

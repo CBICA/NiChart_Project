@@ -13,12 +13,6 @@ import nibabel as nib
 import numpy as np
 from nibabel.orientations import axcodes2ornt, ornt_transform
 
-# # Initiate Session State Values
-# if 'instantiated' not in st.session_state:
-#     st.session_state.plots = pd.DataFrame({'PID':[]})
-#     st.session_state.pid = 1
-#     st.session_state.instantiated = True
-
 # Parameters for viewer
 VIEWS = ["axial", "sagittal", "coronal"]
 VIEW_AXES = [0, 2, 1]
@@ -26,7 +20,6 @@ VIEW_OTHER_AXES = [(1,2), (0,1), (0,2)]
 MASK_COLOR = (0, 255, 0)  # RGB format
 MASK_COLOR = np.array([0.0, 1.0, 0.0])  # RGB format
 OLAY_ALPHA = 0.2
-
 
 def reorient_nifti(nii_in, ref_orient = 'LPS'):
     '''
@@ -192,7 +185,6 @@ dict_roi = dict(zip(df_muse.Name, df_muse.Index))
 # Read derived roi list and convert to a dict
 dict_derived = read_derived_roi_list(st.session_state.list_MUSE_derived)
 
-
 # Page controls in side bar
 with st.sidebar:
 
@@ -234,10 +226,14 @@ with st.sidebar:
 # Select roi index
 sel_var_ind = dict_roi[sel_var]
 
-
 # File names for img and mask
-f_img = os.path.join(st.session_state.path_output, st.session_state.folder_img_t1, sel_mrid + st.session_state.suffix_t1img)
-f_mask = os.path.join(st.session_state.path_output, st.session_state.folder_img_dlmuse, sel_mrid + st.session_state.suffix_dlmuse)
+f_img = os.path.join(st.session_state.path_output, 
+                     st.session_state.folder_img_t1, 
+                     sel_mrid + st.session_state.suffix_t1img)
+
+f_mask = os.path.join(st.session_state.path_output, 
+                      st.session_state.folder_img_dlmuse, 
+                      sel_mrid + st.session_state.suffix_dlmuse)
 
 if os.path.exists(f_img) & os.path.exists(f_mask):
 
