@@ -172,18 +172,15 @@ def prep_images(f_img, f_mask, sel_var_ind, dict_derived):
 
 
 # Read dataframe with data
-
-in_csv = os.path.join(st.session_state.path_output, st.session_state.folder_csv_spare, 
-                      st.session_state.study_name + '_All.csv')
-df = pd.read_csv(in_csv)
+df = pd.read_csv(st.session_state.path_csv_spare)
 
 # Create a dictionary of MUSE indices and names
-df_muse = pd.read_csv(st.session_state.list_MUSE_all)
+df_muse = pd.read_csv(st.session_state.dict_muse_all)
 df_muse = df_muse[df_muse.Name.isin(df.columns)]
 dict_roi = dict(zip(df_muse.Name, df_muse.Index))
 
 # Read derived roi list and convert to a dict
-dict_derived = read_derived_roi_list(st.session_state.list_MUSE_derived)
+dict_derived = read_derived_roi_list(st.session_state.dict_muse_derived)
 
 # Page controls in side bar
 with st.sidebar:

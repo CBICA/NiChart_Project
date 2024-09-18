@@ -107,10 +107,10 @@ with st.container(border=True):
             os.system(cmd)
             st.write("Run completed!")
 
-    # Set the output file as the input for the related viewers
-    out_csv = f"{dir_output}/out_combined/{dset_name}_All.csv"
-    if os.path.exists(out_csv):
-        st.session_state.path_csv_spare = out_csv
+        # Set the output file as the input for the related viewers
+        out_csv = f"{dir_output}/out_combined/{dset_name}_All.csv"
+        if os.path.exists(out_csv):
+            st.session_state.path_csv_spare = out_csv
 
 # FIXME: this is for debugging; will be removed
 with st.expander('session_state: Plots'):

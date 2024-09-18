@@ -12,13 +12,14 @@ if 'instantiated' not in st.session_state:
 
     # Path to root folder
     st.session_state.path_root = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
-    st.session_state.path_root = os.path.join(st.session_state.path_root, 'test')
+    #st.session_state.path_init = st.session_state.path_root
+    st.session_state.path_init = os.path.join(st.session_state.path_root, 'test')
 
     # Path to input folder (used as the init path in file selection)
-    st.session_state.path_input = st.session_state.path_root
+    st.session_state.path_input = st.session_state.path_init
 
     # Path to output folder (used as base path for all output files)
-    st.session_state.path_output = ''
+    st.session_state.path_output = st.session_state.path_init
 
     # Default values for plotting parameters
     st.session_state.plot_xvar = 'Age'
@@ -48,9 +49,9 @@ if 'instantiated' not in st.session_state:
     # MUSE dictionaries
     st.session_state.dir_resources = os.path.join(st.session_state.path_root, 'resources')
 
-    st.session_state.list_MUSE_derived = os.path.join(st.session_state.dir_resources, 'MUSE',
+    st.session_state.dict_muse_derived = os.path.join(st.session_state.dir_resources, 'MUSE',
                                                       'list_MUSE_mapping_derived.csv')
-    st.session_state.list_MUSE_all = os.path.join(st.session_state.dir_resources, 'MUSE',
+    st.session_state.dict_muse_all = os.path.join(st.session_state.dir_resources, 'MUSE',
                                                       'list_MUSE_all.csv')
 
     # Path to various output sub-folders
@@ -63,8 +64,10 @@ if 'instantiated' not in st.session_state:
     # Input fields for plotting
     st.session_state.path_csv_spare = ''
 
-    ## FIXME : this is for quickly loading a test example
-    st.session_state.path_csv_spare = st.session_state.path_root + '/test4_adni3/output/out_combined/MyStudy_All.csv'
+    ########################################################
+    ## FIXME : this is for quickly loading example test data
+    st.session_state.path_csv_spare = st.session_state.path_root + '/test/test4_adni3/output/out_combined/MyStudy_All.csv'
+    st.session_state.path_output = st.session_state.path_root + '/test/test4_adni3/output'
 
     st.session_state.instantiated = True
 
