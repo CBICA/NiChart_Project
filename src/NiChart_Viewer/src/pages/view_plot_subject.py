@@ -26,12 +26,12 @@ def calc_subject_centiles(df_subj, df_cent):
     df_cent_sel = df_cent[df_cent.Age == sel_age]
 
     # Find ROIs in subj data that are included in the centiles file
-    sel_rois = df_subj.columns[df_subj.columns.isin(df_cent_sel.ROI.unique())].tolist()
-    df_cent_sel = df_cent_sel[df_cent_sel.ROI.isin(sel_rois)].drop(['ROI','Age'], axis=1)
+    sel_vars = df_subj.columns[df_subj.columns.isin(df_cent_sel.ROI.unique())].tolist()
+    df_cent_sel = df_cent_sel[df_cent_sel.ROI.isin(sel_vars)].drop(['ROI','Age'], axis=1)
 
     cent = df_cent_sel.columns.str.replace('centile_', '').astype(int).values
     vals_cent = df_cent_sel.values
-    vals_subj = df_subj.loc[0,sel_rois]
+    vals_subj = df_subj.loc[0,sel_vars]
 
     cent_subj = np.zeros(vals_subj.shape[0])
     for i, sval in enumerate(vals_subj):
@@ -47,7 +47,7 @@ def calc_subject_centiles(df_subj, df_cent):
         # Estimate subj centile
         cent_subj[i] = cent[ind1] + slope * (vals_subj[i] - vals_cent[i, ind1])
 
-    df_out = pd.DataFrame(dict(ROI=sel_rois, Centiles=cent_subj))
+    df_out = pd.DataFrame(dict(ROI=sel_vars, Centiles=cent_subj))
     return df_out
 
 
@@ -62,21 +62,21 @@ estimated_percentiles = ind_l + proportions * (ind_u - ind_l)
 print("Estimated percentiles:", estimated_percentiles)
 
     # Calculate subject centile values
-    for sel_roi in
+    for sel_var in
 
 
 
-def display_plot(sel_id):
+def display_plot(sel_mrid):
     '''
     Displays the plot with the given mrid
     '''
 
     # Create a copy of dataframe for filtered data
-    df_sel = df[df.MRID == sel_id]
+    df_sel = df[df.MRID == sel_mrid]
 
     # Data columns
     dtmp = ['TotalBrain', 'GM', 'WM', 'Ventricles']
-    vtmp = df[df.MRID == sel_id][dtmp].iloc[0].values.tolist()
+    vtmp = df[df.MRID == sel_mrid][dtmp].iloc[0].values.tolist()
 
     # Main container for the plot
     plot_container = st.container(border=True)
@@ -100,21 +100,21 @@ with st.sidebar:
     # - create a selectbox with all MRIDs
     # -- initialize it with the selected id if it's set
     # -- initialize it with the first id if not
-    sel_id = st.session_state.sel_id
-    if sel_id == '':
+    sel_mrid = st.session_state.sel_mrid
+    if sel_mrid == '':
         sel_ind = 0
         sel_type = '(auto)'
     else:
-        sel_ind = df.MRID.tolist().index(sel_id)
+        sel_ind = df.MRID.tolist().index(sel_mrid)
         sel_type = '(user)'
-    sel_id = st.selectbox("Select Subject", df.MRID.tolist(), key=f"selbox_mrid", index = sel_ind)
+    sel_mrid = st.selectbox("Select Subject", df.MRID.tolist(), key=f"selbox_mrid", index = sel_ind)
 
     # st.sidebar.warning('Selected subject: ' + mrid)
-    st.warning(f'Selected {sel_type}: {sel_id}')
+    st.warning(f'Selected {sel_type}: {sel_mrid}')
 
     st.write('---')
 
-display_plot(sel_id)
+display_plot(sel_mrid)
     # # Button to add a new plot
     # if st.button("Add plot"):
-    #     display_plot(sel_id)
+    #     display_plot(sel_mrid)

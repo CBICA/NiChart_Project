@@ -26,7 +26,7 @@ if 'instantiated' not in st.session_state:
     st.session_state.default_trend_type = 'none'
 
     # ID selected by user (default: empty)
-    st.session_state.sel_id = ''
+    st.session_state.sel_mrid = ''
 
     st.session_state.instantiated = True
 
@@ -122,7 +122,7 @@ def display_plot(pid):
             lgroup = sel_info['selection']['points'][0]['legendgroup']
             mrid = df_filt[df_filt[hue_var] == lgroup].iloc[sind]['MRID']
             st.sidebar.warning('Selected subject: ' + mrid)
-            st.session_state.sel_id = mrid
+            st.session_state.sel_mrid = mrid
 
         except:
             print('Warning: Could not detect point!')

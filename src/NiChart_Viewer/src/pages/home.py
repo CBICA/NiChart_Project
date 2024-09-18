@@ -11,10 +11,13 @@ if 'instantiated' not in st.session_state:
     st.session_state.pid = 1
 
     # Path to root folder
-    st.session_state.dir_root = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
+    st.session_state.path_root = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
 
-    # Path to folder used as the init folder in file selection
-    st.session_state.init_dir = st.session_state.dir_root
+    # Path to input folder (used as the init path in file selection)
+    st.session_state.path_input = st.session_state.path_root
+
+    # Path to output folder (used as base path for all output files)
+    st.session_state.path_output = ''
 
     # Default values for plotting parameters
     st.session_state.default_x_var = 'Age'
@@ -24,46 +27,43 @@ if 'instantiated' not in st.session_state:
     st.session_state.default_trend_type = 'none'
 
     # ID selected by user
-    st.session_state.sel_id = ''
+    st.session_state.sel_mrid = ''
 
     # ROI selected by user
-    st.session_state.sel_roi = ''
+    st.session_state.sel_var = ''
 
-    # Input fields for w_sMRI
+    # Input study name
     st.session_state.study_name = 'MyStudy'
-    st.session_state.in_csv_MUSE = ''
-    st.session_state.in_csv_Demog = ''
+    st.session_state.path_csv_dlmuse = ''
+    st.session_state.path_csv_demog = ''
 
     # FIXME: temp path for running fast
     # Should be set as the images are created
-    st.session_state.dir_t1img = st.session_state.dir_root + '/test/test_input/test3_nifti+roi'
-    st.session_state.dir_dlmuse = st.session_state.dir_root + '/test/test_input/test3_nifti+roi'
+    st.session_state.dir_t1img = st.session_state.path_root + '/test/test_input/test3_nifti+roi'
+    st.session_state.dir_dlmuse = st.session_state.path_root + '/test/test_input/test3_nifti+roi'
     st.session_state.suffix_t1img = '_T1.nii.gz'
     st.session_state.suffix_dlmuse = '_T1_DLMUSE.nii.gz'
 
     # MUSE dictionaries
-    st.session_state.dir_resources = os.path.join(st.session_state.dir_root, 'resources')
+    st.session_state.dir_resources = os.path.join(st.session_state.path_root, 'resources')
 
     st.session_state.list_MUSE_derived = os.path.join(st.session_state.dir_resources, 'MUSE',
                                                       'list_MUSE_mapping_derived.csv')
     st.session_state.list_MUSE_all = os.path.join(st.session_state.dir_resources, 'MUSE',
                                                       'list_MUSE_all.csv')
 
-    # Path to out folder
-    st.session_state.out_dir = ''
-
     # Path to various output sub-folders
-    st.session_state.dir_csv_demog = 'csv_demog'
-    st.session_state.dir_csv_dlmuse = 'csv_dlmuse'
-    st.session_state.dir_csv_spare = 'out_combined'
-    st.session_state.dir_img_t1 = 'img_t1'
-    st.session_state.dir_img_dlmuse = 'img_dlmuse'
+    st.session_state.folder_csv_demog = 'csv_demog'
+    st.session_state.folder_csv_dlmuse = 'csv_dlmuse'
+    st.session_state.folder_csv_spare = 'out_combined'
+    st.session_state.folder_img_t1 = 'img_t1'
+    st.session_state.folder_img_dlmuse = 'img_dlmuse'
 
     # Input fields for plotting
-    st.session_state.in_csv_sMRI = ''
+    st.session_state.path_csv_spare = ''
 
     ## FIXME : this is for quickly loading a test example
-    st.session_state.in_csv_sMRI = st.session_state.dir_root + '/test/test_input/test3_nifti+roi/sMRI_Results_n4.csv'
+    st.session_state.path_csv_spare = st.session_state.path_root + '/test/test_input/test3_nifti+roi/sMRI_Results_n4.csv'
 
     st.session_state.instantiated = True
 

@@ -138,7 +138,7 @@ def show_nifti(img, view, sel_axis_bounds):
         st.image(img[:, slice_index, :], use_column_width = True)
 
 @st.cache_data
-def prep_images(f_img, f_mask, sel_roi_ind, dict_derived):
+def prep_images(f_img, f_mask, sel_var_ind, dict_derived):
     '''
     Read images from files and create 3D matrices for display
     '''
@@ -162,11 +162,11 @@ def prep_images(f_img, f_mask, sel_roi_ind, dict_derived):
     img, mask = crop_image(img, mask)
 
     # Select target roi: derived roi
-    list_rois = dict_derived[sel_roi_ind]
+    list_rois = dict_derived[sel_var_ind]
     mask = np.isin(mask, list_rois)
 
     # # Select target roi: single roi
-    # mask = (mask == sel_roi_ind).astype(int)
+    # mask = (mask == sel_var_ind).astype(int)
 
     # Merge image and mask
     img = np.stack((img,)*3, axis=-1)
@@ -180,7 +180,7 @@ def prep_images(f_img, f_mask, sel_roi_ind, dict_derived):
 
 # Read dataframe with data
 
-in_csv = os.path.join(st.session_state.out_dir, st.session_state.dir_csv_spare, 
+in_csv = os.path.join(st.session_state.path_output, st.session_state.folder_csv_spare, 
                       st.session_state.study_name + '_All.csv')
 df = pd.read_csv(in_csv)
 
@@ -199,27 +199,27 @@ with st.sidebar:
     with st.container(border=True):
 
         # Selection of MRID
-        sel_id = st.session_state.sel_id
-        if sel_id == '':
+        sel_mrid = st.session_state.sel_mrid
+        if sel_mrid == '':
             sel_ind = 0
             sel_type = '(auto)'
         else:
-            sel_ind = df.MRID.tolist().index(sel_id)
+            sel_ind = df.MRID.tolist().index(sel_mrid)
             sel_type = '(user)'
-        sel_id = st.selectbox("Selected Subject", df.MRID.tolist(), key=f"selbox_mrid", index = sel_ind)
+        sel_mrid = st.selectbox("Selected Subject", df.MRID.tolist(), key=f"selbox_mrid", index = sel_ind)
 
         # st.sidebar.warning('Selected subject: ' + mrid)
-        st.warning(f'Selected {sel_type}: {sel_id}')
+        st.warning(f'Selected {sel_type}: {sel_mrid}')
 
         # Selection of ROI
-        sel_roi = st.session_state.sel_roi
-        if sel_roi == '':
+        sel_var = st.session_state.sel_var
+        if sel_var == '':
             sel_ind = 0
             sel_type = '(auto)'
         else:
-            sel_ind = df_muse.Name.tolist().index(sel_roi)
+            sel_ind = df_muse.Name.tolist().index(sel_var)
             sel_type = '(user)'
-        sel_roi = st.selectbox("Selected ROI", list(dict_roi.keys()), key=f"selbox_rois", index = sel_ind)
+        sel_var = st.selectbox("Selected ROI", list(dict_roi.keys()), key=f"selbox_rois", index = sel_ind)
 
     with st.container(border=True):
 
@@ -232,17 +232,17 @@ with st.sidebar:
 
 
 # Select roi index
-sel_roi_ind = dict_roi[sel_roi]
+sel_var_ind = dict_roi[sel_var]
 
 
 # File names for img and mask
-f_img = os.path.join(st.session_state.out_dir, st.session_state.dir_img_t1, sel_id + st.session_state.suffix_t1img)
-f_mask = os.path.join(st.session_state.out_dir, st.session_state.dir_img_dlmuse, sel_id + st.session_state.suffix_dlmuse)
+f_img = os.path.join(st.session_state.path_output, st.session_state.folder_img_t1, sel_mrid + st.session_state.suffix_t1img)
+f_mask = os.path.join(st.session_state.path_output, st.session_state.folder_img_dlmuse, sel_mrid + st.session_state.suffix_dlmuse)
 
 if os.path.exists(f_img) & os.path.exists(f_mask):
 
     # Process image and mask to prepare final 3d matrix to display
-    img, mask, img_masked = prep_images(f_img, f_mask, sel_roi_ind, dict_derived)
+    img, mask, img_masked = prep_images(f_img, f_mask, sel_var_ind, dict_derived)
 
     # Detect mask bounds and center in each view
     mask_bounds = detect_mask_bounds(mask)

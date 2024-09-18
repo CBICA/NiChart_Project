@@ -14,26 +14,26 @@ from tempfile import NamedTemporaryFile
 import tkinter as tk
 from tkinter import filedialog
 
-def browse_file(init_dir):
+def browse_file(path_input):
     '''
     File selector
     Returns the file name selected by the user and the parent folder
     '''
     root = tk.Tk()
     root.withdraw()  # Hide the main window
-    out_path = filedialog.askopenfilename(initialdir = init_dir)
-    out_dir = os.path.dirname(out_path)
+    out_path = filedialog.askopenfilename(initialdir = path_input)
+    path_output = os.path.dirname(out_path)
     root.destroy()
-    return out_path, out_dir
+    return out_path, path_output
 
-def browse_folder(init_dir):
+def browse_folder(path_input):
     '''
     Folder selector
     Returns the folder name selected by the user
     '''
     root = tk.Tk()
     root.withdraw()  # Hide the main window
-    out_path = filedialog.askdirectory(initialdir = init_dir)
+    out_path = filedialog.askdirectory(initialdir = path_input)
     root.destroy()
     return out_path
 
@@ -60,30 +60,30 @@ with st.container(border=True):
     tmpcol = st.columns((1,8))
     with tmpcol[0]:
         if st.button("Select ROI file"):
-            st.session_state.in_csv_MUSE, st.session_state.init_dir = browse_file(st.session_state.init_dir)
+            st.session_state.path_csv_dlmuse, st.session_state.path_input = browse_file(st.session_state.path_input)
     with tmpcol[1]:
         input_rois = st.text_input("Enter the name of the ROI csv file:",
-                                   value = st.session_state.in_csv_MUSE,
+                                   value = st.session_state.path_csv_dlmuse,
                                    label_visibility="collapsed")
 
     # Demog file name
     tmpcol = st.columns((1,8))
     with tmpcol[0]:
         if st.button("Select demog file"):
-            st.session_state.in_csv_Demog, st.session_state.init_dir = browse_file(st.session_state.init_dir)
+            st.session_state.path_csv_demog, st.session_state.path_input = browse_file(st.session_state.path_input)
     with tmpcol[1]:
         input_demog = st.text_input("Enter the name of the demog csv file:",
-                                    value = st.session_state.in_csv_Demog,
+                                    value = st.session_state.path_csv_demog,
                                     label_visibility="collapsed")
 
     # Out folder name
     tmpcol = st.columns((1,8))
     with tmpcol[0]:
         if st.button("Select output folder"):
-            st.session_state.out_dir = browse_folder(st.session_state.dir_root)
+            st.session_state.path_output = browse_folder(st.session_state.path_root)
     with tmpcol[1]:
         dir_output = st.text_input("Enter the name of the output folder:",
-                                   value = st.session_state.out_dir,
+                                   value = st.session_state.path_output,
                                    label_visibility="collapsed")
 
     # Check input files
@@ -110,7 +110,7 @@ with st.container(border=True):
     # Set the output file as the input for the related viewers
     out_csv = f"{dir_output}/out_combined/{dset_name}_All.csv"
     if os.path.exists(out_csv):
-        st.session_state.in_csv_sMRI = out_csv
+        st.session_state.path_csv_spare = out_csv
 
 # FIXME: this is for debugging; will be removed
 with st.expander('session_state: Plots'):
