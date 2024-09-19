@@ -31,12 +31,12 @@ NiChart is a comprehensive framework designed to revolutionize neuroimaging rese
 3. `pip install -r requirements.txt`
 
 ## Example Usage
-
+```bash
 cd src/NiChart_Viewer/src
-streamlit run ./NiChartProject.py 
+streamlit run NiChartProject.py
+```
 
 The app will start in localhost
-
 ---
 
 © 2024 CBICA. All Rights Reserved.
