@@ -1,7 +1,7 @@
 name: Pipeline test cases for macos
 
 # workflow dispatch has been added for testing purposes
-on: [push, pull_request, workflow_dispatch]
+on: [workflow_dispatch]
 
 jobs:
   build:
