@@ -145,14 +145,18 @@ def display_plot(plot_id):
         sel_info = st.plotly_chart(scatter_plot, key=f"bubble_chart_{plot_id}", 
                                    on_select = callback_plot_clicked)
 
-        # Detect MRID from the click info
+        # Detect MRID from the click info and save to session_state
         if len(sel_info['selection']['points'])>0:
 
             sind = sel_info['selection']['point_indices'][0]
             lgroup = sel_info['selection']['points'][0]['legendgroup']
             mrid = df_filt[df_filt[hvar] == lgroup].iloc[sind]['MRID']
-            st.sidebar.warning('Selected subject: ' + mrid)
             st.session_state.sel_mrid = mrid
+            
+            st.sidebar.warning('Selected subject: ' + mrid)
+            st.sidebar.warning('Selected ROI: ' + 
+                               st.session_state.plots.loc[st.session_state.plot_active, 'yvar'])
+            
 
 
 def filter_dataframe(df: pd.DataFrame, plot_id) -> pd.DataFrame:
