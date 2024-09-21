@@ -10,8 +10,13 @@ is_section = true
 icon = ":file_folder:"
 
 [[pages]]
-path = "pages/img_process_sMRI.py"
-name = "DLMUSE"
+path = "pages/process_sMRI_DLMUSE.py"
+name = "DLMUSE (sMRI)"
+icon = ":black_small_square:"
+
+[[pages]]
+path = "pages/process_DTI_DTIPrep.py"
+name = "DTIPrep (DTI)"
 icon = ":black_small_square:"
 
 [[pages]]
@@ -20,8 +25,8 @@ is_section = true
 icon = ":file_folder:"
 
 [[pages]]
-path = "pages/workflow_sMRI.py"
-name = "sMRI Workflow"
+path = "pages/workflow_sMRI_MLScores.py"
+name = "ML Biomarkers (sMRI)"
 icon = ":black_small_square:"
 
 [[pages]]
@@ -30,22 +35,22 @@ is_section = true
 icon = ":file_folder:"
 
 [[pages]]
-path = "pages/view_plot_data.py"
-name = "Plot Data"
+path = "pages/view_sMRI_plot_vars_all.py"
+name = "Plot Variables - Study (sMRI)"
 icon = ":black_small_square:"
 
 [[pages]]
-path = "pages/view_plot_centiles.py"
-name = "Plot Centiles"
+path = "pages/view_sMRI_plot_centiles.py"
+name = "Plot Centiles (sMRI)"
 icon = ":black_small_square:"
 
 [[pages]]
-path = "pages/view_plot_subject.py"
-name = "Plot Subject"
+path = "pages/view_sMRI_plot_vars_single.py"
+name = "Plot Variables - Individual (sMRI)"
 icon = ":black_small_square:"
 
 [[pages]]
-path = "pages/view_img.py"
-name = "View Image"
+path = "pages/view_sMRI_DLMUSE.py"
+name = "View DLMUSE (sMRI)"
 icon = ":black_small_square:"
 
