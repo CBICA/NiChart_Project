@@ -110,7 +110,7 @@ with st.sidebar:
     sel_mrid = st.selectbox("Select Subject", df.MRID.tolist(), key=f"selbox_mrid", index = sel_ind)
 
     # st.sidebar.warning('Selected subject: ' + mrid)
-    st.warning(f'Selected {sel_type}: {sel_mrid}')
+    st.success(f'Selected {sel_type}: {sel_mrid}')
 
     st.write('---')
 

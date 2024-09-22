@@ -22,9 +22,9 @@ def browse_file(path_input):
     root = tk.Tk()
     root.withdraw()  # Hide the main window
     out_path = filedialog.askopenfilename(initialdir = path_input)
-    path_output = os.path.dirname(out_path)
+    path_out = os.path.dirname(out_path)
     root.destroy()
-    return out_path, path_output
+    return out_path, path_out
 
 def browse_folder(path_input):
     '''
@@ -62,40 +62,42 @@ with st.container(border=True):
     tmpcol = st.columns((8,1))
     with tmpcol[1]:
         if st.button("Select the ROI file"):
-            st.session_state.path_csv_dlmuse, st.session_state.path_input = browse_file(st.session_state.path_input)
+            st.session_state.path_csv_dlmuse, st.session_state.path_last_sel = browse_file(st.session_state.path_last_sel)
     with tmpcol[0]:
-        input_rois = st.text_input("ROI csv file", value = st.session_state.path_csv_dlmuse,
-                                  help = 'Input ROI file.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it')
+        csv_dlmuse = st.text_input("DLMUSE csv file", value = st.session_state.path_csv_dlmuse,
+                                  help = 'Input csv file with DLMUSE ROI volumes.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it')
+        if os.path.exists(csv_dlmuse):
+            st.session_state.path_csv_dlmuse = csv_dlmuse
 
     # Demog file name
     tmpcol = st.columns((8,1))
     with tmpcol[1]:
         if st.button("Select the demographics file"):
-            st.session_state.path_csv_demog, st.session_state.path_input = browse_file(st.session_state.path_input)
+            st.session_state.path_csv_demog, st.session_state.path_last_sel = browse_file(st.session_state.path_last_sel)
     with tmpcol[0]:
-        input_demog = st.text_input("Demog csv file", value = st.session_state.path_csv_demog,
-                                  help = 'Input demographics file.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it')
+        csv_demog = st.text_input("Demog csv file", value = st.session_state.path_csv_demog,
+                                  help = 'Input csv file with demographic values.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it')
+        if os.path.exists(csv_dlmuse):
+            st.session_state.path_csv_demog = csv_demog
 
     # Out folder name
     tmpcol = st.columns((8,1))
     with tmpcol[1]:
         if st.button("Select the output folder", help = 'Choose the path by typing it into the text field or using the file browser to browse and select it'):
-            st.session_state.path_output = browse_folder(st.session_state.path_output)
+            st.session_state.path_out = browse_folder(st.session_state.path_last_sel)
     with tmpcol[0]:
-        dir_output = st.text_input("Output folder",
-                                   value = st.session_state.path_output,
-                                   help = 'Results will be saved into the output folder, in a subfolder named "MLScores".\n\nThe results will include harmonized ROIs, SPARE scores and SurrealGAN scores.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it')
-        if os.path.exists(dir_output):
-            st.session_state.path_output = dir_output
+        dir_out = st.text_input("Output folder",
+                                value = st.session_state.path_out,
+                                help = 'Results will be saved into the output folder, in a subfolder named "MLScores".\n\nThe results will include harmonized ROIs, SPARE scores and SurrealGAN scores.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it')
+        if os.path.exists(dir_out):
+            st.session_state.path_out = dir_out
 
     # Check input files
     flag_files = 1
-    if not os.path.exists(input_rois):
-        st.warning("Path to input DLMUSE csv doesn't exist")
+    if not os.path.exists(csv_dlmuse):
         flag_files = 0
 
-    if not os.path.exists(input_demog):
-        st.warning("Path to input demographic csv doesn't exist")
+    if not os.path.exists(csv_demog):
         flag_files = 0
 
     run_dir = os.path.join(st.session_state.path_root, 'src', 'workflow', 'workflows', 'w_sMRI')
@@ -105,19 +107,22 @@ with st.container(border=True):
         if st.button("Run w_sMRI"):
 
             import time
-            dir_out_MLScores = os.path.join(dir_output, dset_name, 'MLScores')
-            st.info(f"Running: MLScores_workflow ", icon = ":material/manufacturing:")
+            dir_out_mlscores = os.path.join(dir_out, dset_name, 'MLScores')
+            st.info(f"Running: mlscores_workflow ", icon = ":material/manufacturing:")
             with st.spinner('Wait for it...'):
                 time.sleep(15)
                 os.system(f"cd {run_dir}")
-                cmd = f"python3 {run_dir}/call_snakefile.py --run_dir {run_dir} --dset_name {dset_name} --input_rois {input_rois} --input_demog {input_demog} --dir_output {dir_out_MLScores}"
+                cmd = f"python3 {run_dir}/call_snakefile.py --run_dir {run_dir} --dset_name {dset_name} --input_rois {csv_dlmuse} --input_demog {csv_demog} --dir_out {dir_out_mlscores}"
                 os.system(cmd)
                 st.success("Run completed!", icon = ":material/thumb_up:")
 
-            # Set the output file as the input for the related viewers
-            out_csv = f"{dir_out_MLScores}/{dset_name}_MLScores.csv"
-            if os.path.exists(out_csv):
-                st.session_state.path_csv_spare = out_csv
+                # Set the output file as the input for the related viewers
+                csv_mlscores = f"{dir_out_mlscores}/{dset_name}_DLMUSE+MLScores.csv"
+                if os.path.exists(csv_mlscores):
+                    st.session_state.path_csv_mlscores = csv_mlscores
+
+                st.success(f"Out file: {csv_mlscores}")
+
 
 # FIXME: this is for debugging; will be removed
 with st.expander('session_state: Plots'):

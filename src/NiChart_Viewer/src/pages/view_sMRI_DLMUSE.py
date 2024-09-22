@@ -172,7 +172,7 @@ def prep_images(f_img, f_mask, sel_var_ind, dict_derived):
 
 
 # Read dataframe with data
-df = pd.read_csv(st.session_state.path_csv_spare)
+df = pd.read_csv(st.session_state.path_csv_mlscores)
 
 # Create a dictionary of MUSE indices and names
 df_muse = pd.read_csv(st.session_state.dict_muse_all)
@@ -225,12 +225,12 @@ with st.sidebar:
 sel_var_ind = dict_roi[sel_var]
 
 # File names for img and mask
-f_img = os.path.join(st.session_state.path_output, 
-                     st.session_state.folder_img_t1, 
+f_img = os.path.join(st.session_state.path_out, 
+                     st.session_state.path_t1,
                      sel_mrid + st.session_state.suffix_t1img)
 
-f_mask = os.path.join(st.session_state.path_output, 
-                      st.session_state.folder_img_dlmuse, 
+f_mask = os.path.join(st.session_state.path_out, 
+                      st.session_state.path_dlmuse,
                       sel_mrid + st.session_state.suffix_dlmuse)
 
 if os.path.exists(f_img) & os.path.exists(f_mask):
