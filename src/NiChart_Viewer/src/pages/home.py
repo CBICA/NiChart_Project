@@ -29,16 +29,20 @@ if 'instantiated' not in st.session_state:
     st.session_state.trend_types = ['none', 'ols', 'lowess']
     st.session_state.plot_trend = 'none'
 
-    # ID selected by user
+    # MRID selected by user
     st.session_state.sel_mrid = ''
 
-    # ROI selected by user
+    # Variable selected by user
     st.session_state.sel_var = ''
 
     # Input study name
     st.session_state.study_name = 'MyStudy'
+
+    # I/O data files and paths
     st.session_state.path_csv_dlmuse = ''
     st.session_state.path_csv_demog = ''
+    st.session_state.dir_t1img = ''
+    st.session_state.dir_dlmuse = ''
 
     # FIXME: temp path for running fast
     # Should be set as the images are created
@@ -55,7 +59,7 @@ if 'instantiated' not in st.session_state:
     st.session_state.dict_muse_all = os.path.join(st.session_state.dir_resources, 'MUSE',
                                                       'list_MUSE_all.csv')
 
-    # Path to various output sub-folders
+    # Output sub-folders
     st.session_state.folder_csv_demog = 'csv_demog'
     st.session_state.folder_csv_dlmuse = 'csv_dlmuse'
     st.session_state.folder_csv_spare = 'out_combined'
@@ -65,10 +69,10 @@ if 'instantiated' not in st.session_state:
     # Input fields for plotting
     st.session_state.path_csv_spare = ''
 
-    ########################################################
-    ## FIXME : this is for quickly loading example test data
-    st.session_state.path_csv_spare = st.session_state.path_root + '/test/test4_adni3/output/out_combined/MyStudy_All.csv'
-    st.session_state.path_output = st.session_state.path_root + '/test/test4_adni3/output'
+    # ########################################################
+    # ## FIXME : this is for quickly loading example test data
+    # st.session_state.path_csv_spare = st.session_state.path_root + '/test/test4_adni3/output/out_combined/MyStudy_All.csv'
+    # st.session_state.path_output = st.session_state.path_root + '/test/test4_adni3/output'
 
     st.session_state.instantiated = True
 

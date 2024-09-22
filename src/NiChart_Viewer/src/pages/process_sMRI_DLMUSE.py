@@ -52,19 +52,25 @@ with st.container(border=True):
     tmpcol = st.columns((8,1))
     with tmpcol[1]:
         if st.button("Select the input folder"):
-            st.session_state.path_output = browse_folder(st.session_state.path_root)
+            st.session_state.path_input = browse_folder(st.session_state.path_root)
     with tmpcol[0]:
-        dir_input = st.text_input("Input folder", value = st.session_state.path_output,
-                                  help = 'DLMUSE will be applied to .nii/.nii.gz images directly in the input folder.')
+        dir_input = st.text_input("Input folder", value = st.session_state.path_input,
+                                  help = 'DLMUSE will be applied to .nii/.nii.gz images directly in the input folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it')
+        if os.path.exists(dir_input):
+            st.session_state.path_input = dir_input
+
 
     # Out folder name
     tmpcol = st.columns((8,1))
     with tmpcol[1]:
-        if st.button("Select the output folder", help = 'Hello'):
-            st.session_state.path_output = browse_folder(st.session_state.path_root)
+        if st.button("Select the output folder", help = 'Choose the path by typing it into the text field or using the file browser to browse and select it'):
+            st.session_state.path_output = browse_folder(st.session_state.path_output)
     with tmpcol[0]:
-        dir_output = st.text_input("Output folder", value = st.session_state.path_output,
-                                   help = 'DLMUSE results will be saved into the output folder, in a subfolder named "DLMUSE".\n\nDLMUSE will generate a segmented image for each input image, and a csv file with the volumes of ROIs for the complete dataset.')
+        dir_output = st.text_input("Output folder",
+                                   value = st.session_state.path_output,
+                                   help = 'DLMUSE results will be saved into the output folder, in a subfolder named "DLMUSE".\n\nDLMUSE will generate a segmented image for each input image, and a csv file with the volumes of ROIs for the complete dataset.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it')
+        if os.path.exists(dir_output):
+            st.session_state.path_output = dir_output
 
     # Device type
     tmpcol = st.columns((1,8))
@@ -86,13 +92,16 @@ with st.container(border=True):
     # Run workflow
     if flag_files == 1:
         if st.button("Run w_DLMUSE"):
-            st.write("Pipeline is running, please wait!")
+            import time
             dir_out_dlmuse = os.path.join(dir_output, dset_name, 'DLMUSE')
-            os.system(f"NiChart_DLMUSE -i {dir_input} -o {dir_out_dlmuse} -d {device}")
-            st.write("Run completed!")
+            st.info(f"Running: NiChart_DLMUSE -i {dir_input} -o {dir_out_dlmuse} -d {device}", icon = ":material/manufacturing:")
+            with st.spinner('Wait for it...'):
+                time.sleep(15)
+                os.system(f"NiChart_DLMUSE -i {dir_input} -o {dir_out_dlmuse} -d {device}")
+                st.success("Run completed!", icon = ":material/thumb_up:")
 
-            # Set the output file as the input for the related viewers
-            out_csv = f"{dir_output}/DLMUSE/DLMUSE_All.csv"
+            # Set the dlmuse output as input for other modules
+            out_csv = f"{dir_out_dlmuse}/DLMUSE_All.csv"
             if os.path.exists(out_csv):
                 st.session_state.path_dlmuse = out_csv
 

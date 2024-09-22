@@ -96,7 +96,7 @@ with st.container(border=True):
         st.warning("Path to input demographic csv doesn't exist")
         flag_files = 0
 
-    run_dir='../../workflow/workflows/w_sMRI'
+    run_dir = os.path.join(st.session_state.path_root, 'src', 'workflow', 'workflows', 'w_sMRI')
 
     # Run workflow
     if flag_files == 1:
