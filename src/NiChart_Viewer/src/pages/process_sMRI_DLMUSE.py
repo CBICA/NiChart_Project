@@ -101,7 +101,7 @@ with st.container(border=True):
                 st.success("Run completed!", icon = ":material/thumb_up:")
 
             # Set the dlmuse output as input for other modules
-            out_csv = f"{dir_out_dlmuse}/DLMUSE_All.csv"
+            out_csv = f"{dir_out_dlmuse}/{dset_name}_DLMUSE.csv"
             if os.path.exists(out_csv):
                 st.session_state.path_dlmuse = out_csv
 

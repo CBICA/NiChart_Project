@@ -51,40 +51,42 @@ st.markdown(
 
 with st.container(border=True):
 
-
     # Dataset name: Used to create a main folder for all outputs
-    dset_name = st.text_input("Give a name to your dataset", value = st.session_state.study_name)
-    st.session_state.study_name = dset_name
-
-    # Roi file name
     tmpcol = st.columns((1,8))
     with tmpcol[0]:
-        if st.button("Select ROI file"):
-            st.session_state.path_csv_dlmuse, st.session_state.path_input = browse_file(st.session_state.path_input)
+        dset_name = st.text_input("Dataset name", value = st.session_state.study_name,
+                                  help = "Each dataset's results are organized in a dedicated folder named after the dataset")
+        st.session_state.study_name = dset_name
+
+    # ROI file name
+    tmpcol = st.columns((8,1))
     with tmpcol[1]:
-        input_rois = st.text_input("Enter the name of the ROI csv file:",
-                                   value = st.session_state.path_csv_dlmuse,
-                                   label_visibility="collapsed")
+        if st.button("Select the ROI file"):
+            st.session_state.path_csv_dlmuse, st.session_state.path_input = browse_file(st.session_state.path_input)
+    with tmpcol[0]:
+        input_rois = st.text_input("ROI csv file", value = st.session_state.path_csv_dlmuse,
+                                  help = 'Input ROI file.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it')
 
     # Demog file name
-    tmpcol = st.columns((1,8))
-    with tmpcol[0]:
-        if st.button("Select demog file"):
-            st.session_state.path_csv_demog, st.session_state.path_input = browse_file(st.session_state.path_input)
+    tmpcol = st.columns((8,1))
     with tmpcol[1]:
-        input_demog = st.text_input("Enter the name of the demog csv file:",
-                                    value = st.session_state.path_csv_demog,
-                                    label_visibility="collapsed")
+        if st.button("Select the demographics file"):
+            st.session_state.path_csv_demog, st.session_state.path_input = browse_file(st.session_state.path_input)
+    with tmpcol[0]:
+        input_demog = st.text_input("Demog csv file", value = st.session_state.path_csv_demog,
+                                  help = 'Input demographics file.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it')
 
     # Out folder name
-    tmpcol = st.columns((1,8))
-    with tmpcol[0]:
-        if st.button("Select output folder"):
-            st.session_state.path_output = browse_folder(st.session_state.path_root)
+    tmpcol = st.columns((8,1))
     with tmpcol[1]:
-        dir_output = st.text_input("Enter the name of the output folder:",
+        if st.button("Select the output folder", help = 'Choose the path by typing it into the text field or using the file browser to browse and select it'):
+            st.session_state.path_output = browse_folder(st.session_state.path_output)
+    with tmpcol[0]:
+        dir_output = st.text_input("Output folder",
                                    value = st.session_state.path_output,
-                                   label_visibility="collapsed")
+                                   help = 'Results will be saved into the output folder, in a subfolder named "MLScores".\n\nThe results will include harmonized ROIs, SPARE scores and SurrealGAN scores.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it')
+        if os.path.exists(dir_output):
+            st.session_state.path_output = dir_output
 
     # Check input files
     flag_files = 1
@@ -101,16 +103,21 @@ with st.container(border=True):
     # Run workflow
     if flag_files == 1:
         if st.button("Run w_sMRI"):
-            st.write("Pipeline is running, please wait!")
-            os.system(f"cd {run_dir}")
-            cmd = f"python3 {run_dir}/call_snakefile.py --run_dir {run_dir} --dset_name {dset_name} --input_rois {input_rois} --input_demog {input_demog} --dir_output {dir_output}"
-            os.system(cmd)
-            st.write("Run completed!")
 
-        # Set the output file as the input for the related viewers
-        out_csv = f"{dir_output}/out_combined/{dset_name}_All.csv"
-        if os.path.exists(out_csv):
-            st.session_state.path_csv_spare = out_csv
+            import time
+            dir_out_MLScores = os.path.join(dir_output, dset_name, 'MLScores')
+            st.info(f"Running: MLScores_workflow ", icon = ":material/manufacturing:")
+            with st.spinner('Wait for it...'):
+                time.sleep(15)
+                os.system(f"cd {run_dir}")
+                cmd = f"python3 {run_dir}/call_snakefile.py --run_dir {run_dir} --dset_name {dset_name} --input_rois {input_rois} --input_demog {input_demog} --dir_output {dir_out_MLScores}"
+                os.system(cmd)
+                st.success("Run completed!", icon = ":material/thumb_up:")
+
+            # Set the output file as the input for the related viewers
+            out_csv = f"{dir_out_MLScores}/{dset_name}_MLScores.csv"
+            if os.path.exists(out_csv):
+                st.session_state.path_csv_spare = out_csv
 
 # FIXME: this is for debugging; will be removed
 with st.expander('session_state: Plots'):
