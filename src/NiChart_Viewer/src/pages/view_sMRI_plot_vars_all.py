@@ -251,7 +251,7 @@ if os.path.exists(spare_csv):
         with st.container(border=True):
 
             # Slider to set number of plots in a row
-            st.session_state.plot_per_raw = st.slider('Plots per raw',1, 5, 3, key='a_per_page')
+            st.session_state.plot_per_raw = st.slider('Plots per row',1, 5, 3, key='a_per_page')
 
         with st.container(border=True):
 
