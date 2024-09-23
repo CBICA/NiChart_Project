@@ -30,6 +30,7 @@ if 'instantiated' not in st.session_state:
     st.session_state.path_csv_demog = ''
     st.session_state.path_csv_dlmuse = ''
     st.session_state.path_csv_mlscores = ''
+    st.session_state.path_csv_viewdlmuse = ''
 
     # FIXME : for quick test
     st.session_state.path_csv_mlscores = st.session_state.path_root + '/test/test3_nifti+roi/output/MyStudy/MLScores/MyStudy_DLMUSE+MLScores.csv'
@@ -65,6 +66,9 @@ if 'instantiated' not in st.session_state:
                                                       'list_MUSE_mapping_derived.csv')
     st.session_state.dict_muse_all = os.path.join(st.session_state.dir_resources, 'MUSE',
                                                       'list_MUSE_all.csv')
+    
+    st.session_state.dict_muse_sel = os.path.join(st.session_state.dir_resources, 
+                                                       'MUSE', 'list_MUSE_primary.csv')
 
 
     # ########################################################
