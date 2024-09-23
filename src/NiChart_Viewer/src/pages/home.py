@@ -7,38 +7,54 @@ import os
 if 'instantiated' not in st.session_state:
 
     # Dataframe to keep plot ids
-    st.session_state.plots = pd.DataFrame(columns = ['pid', 'xvar', 'yvar', 'hvar', 'trend'])
+    st.session_state.plots = pd.DataFrame(columns = ['pid', 'xvar', 'yvar', 'hvar',
+                                                     'trend', 'centtype'])
     st.session_state.plot_index = 1
     st.session_state.plot_active = ''
 
     # Path to root folder
     st.session_state.path_root = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
-    #st.session_state.path_init = st.session_state.path_root
+
+    # Path to init folder
     st.session_state.path_init = os.path.join(st.session_state.path_root, 'test')
 
-    # Path to input folder (used as the init path in file selection)
-    st.session_state.path_input = st.session_state.path_init
+    # Path to input t1 folder
+    st.session_state.path_last_sel = st.session_state.path_init
 
     # Path to output folder (used as base path for all output files)
-    st.session_state.path_output = st.session_state.path_init
+    st.session_state.path_out = ''
+
+    # Paths to I/O files/folders
+    st.session_state.path_t1 = ''
+    st.session_state.path_dlmuse = ''
+    st.session_state.path_csv_demog = ''
+    st.session_state.path_csv_dlmuse = ''
+    st.session_state.path_csv_mlscores = ''
+
+    # FIXME : for quick test
+    st.session_state.path_csv_mlscores = st.session_state.path_root + '/test/test3_nifti+roi/output/MyStudy/MLScores/MyStudy_DLMUSE+MLScores.csv'
+
 
     # Default values for plotting parameters
     st.session_state.plot_xvar = 'Age'
     st.session_state.plot_yvar = 'GM'
     st.session_state.plot_hvar = 'Sex'
+
     st.session_state.trend_types = ['none', 'ols', 'lowess']
     st.session_state.plot_trend = 'none'
 
-    # ID selected by user
+    st.session_state.cent_types = ['none', 'CN-All', 'CN-F', 'CN-M']
+    st.session_state.plot_centtype = 'none'
+
+    # MRID selected by user
     st.session_state.sel_mrid = ''
 
-    # ROI selected by user
+    # Variable selected by user
     st.session_state.sel_var = ''
 
     # Input study name
     st.session_state.study_name = 'MyStudy'
-    st.session_state.path_csv_dlmuse = ''
-    st.session_state.path_csv_demog = ''
+
 
     # FIXME: temp path for running fast
     # Should be set as the images are created
@@ -55,20 +71,11 @@ if 'instantiated' not in st.session_state:
     st.session_state.dict_muse_all = os.path.join(st.session_state.dir_resources, 'MUSE',
                                                       'list_MUSE_all.csv')
 
-    # Path to various output sub-folders
-    st.session_state.folder_csv_demog = 'csv_demog'
-    st.session_state.folder_csv_dlmuse = 'csv_dlmuse'
-    st.session_state.folder_csv_spare = 'out_combined'
-    st.session_state.folder_img_t1 = 'img_t1'
-    st.session_state.folder_img_dlmuse = 'img_dlmuse'
 
-    # Input fields for plotting
-    st.session_state.path_csv_spare = ''
-
-    ########################################################
-    ## FIXME : this is for quickly loading example test data
-    st.session_state.path_csv_spare = st.session_state.path_root + '/test/test4_adni3/output/out_combined/MyStudy_All.csv'
-    st.session_state.path_output = st.session_state.path_root + '/test/test4_adni3/output'
+    # ########################################################
+    # ## FIXME : this is for quickly loading example test data
+    # st.session_state.path_csv_spare = st.session_state.path_root + '/test/test4_adni3/output/out_combined/MyStudy_All.csv'
+    # st.session_state.path_out = st.session_state.path_root + '/test/test4_adni3/output'
 
     st.session_state.instantiated = True
 

@@ -50,22 +50,6 @@ def calc_subject_centiles(df_subj, df_cent):
     df_out = pd.DataFrame(dict(ROI=sel_vars, Centiles=cent_subj))
     return df_out
 
-
-print("Estimated y value for x =", target_x, "is:", estimated_y)
-
-lower_percentiles = centile_values[ind_l, :]
-upper_percentiles = centile_values[ind_u, :]
-proportions = (target_values[:, None] - lower_percentiles) / (upper_percentiles - lower_percentiles)
-
-estimated_percentiles = ind_l + proportions * (ind_u - ind_l)
-
-print("Estimated percentiles:", estimated_percentiles)
-
-    # Calculate subject centile values
-    for sel_var in
-
-
-
 def display_plot(sel_mrid):
     '''
     Displays the plot with the given mrid
@@ -110,7 +94,7 @@ with st.sidebar:
     sel_mrid = st.selectbox("Select Subject", df.MRID.tolist(), key=f"selbox_mrid", index = sel_ind)
 
     # st.sidebar.warning('Selected subject: ' + mrid)
-    st.warning(f'Selected {sel_type}: {sel_mrid}')
+    st.success(f'Selected {sel_type}: {sel_mrid}')
 
     st.write('---')
 

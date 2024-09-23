@@ -15,6 +15,9 @@ import os
 import tkinter as tk
 from tkinter import filedialog
 
+from utils_trace import *
+
+
 def browse_file(path_input):
     '''
     File selector
@@ -23,9 +26,9 @@ def browse_file(path_input):
     root = tk.Tk()
     root.withdraw()  # Hide the main window
     out_path = filedialog.askopenfilename(initialdir = path_input)
-    path_output = os.path.dirname(out_path)
+    path_out = os.path.dirname(out_path)
     root.destroy()
-    return out_path, path_output
+    return out_path, path_out
 
 def browse_folder(path_input):
     '''
@@ -50,7 +53,8 @@ def add_plot():
                          st.session_state.plot_xvar,
                          st.session_state.plot_yvar,
                          st.session_state.plot_hvar,
-                         st.session_state.plot_trend
+                         st.session_state.plot_trend,
+                         st.session_state.plot_centtype
                         ]
     st.session_state.plot_index += 1
 
@@ -126,7 +130,18 @@ def display_plot(plot_id):
 
             # Tab 3: to set centiles
             with ptabs[3]:
-                cent_type = st.selectbox("Centile Type", ['CN-All', 'CN-F', 'CN-M'], key=f"cent_type_{plot_id}")
+
+                # Get plot params
+                centtype = st.session_state.plots.loc[plot_id].centtype
+
+                # Select plot params from the user
+                centind = st.session_state.cent_types.index(centtype)
+
+                centtype = st.selectbox("Centile Type", st.session_state.cent_types,
+                                        key=f"cent_type_{plot_id}", index = centind)
+
+                # Set plot params to session_state
+                st.session_state.plots.loc[plot_id].centtype = centtype
 
             # Tab 4: to reset parameters or to delete plot
             with ptabs[4]:
@@ -139,6 +154,14 @@ def display_plot(plot_id):
         else:
             scatter_plot = px.scatter(df_filt, x = xvar, y = yvar, color = hvar, trendline = trend)
 
+        # Add centile values
+        if centtype != 'none':
+            fcent = os.path.join(st.session_state.path_root, 'resources', 'centiles',
+                                 f'centiles_{centtype}.csv')
+            df_cent = pd.read_csv(fcent)
+            percentile_trace(df_cent, xvar, yvar, scatter_plot)
+
+
         # Add plot
         # - on_select: when clicked it will rerun and return the info
 
@@ -150,12 +173,17 @@ def display_plot(plot_id):
 
             sind = sel_info['selection']['point_indices'][0]
             lgroup = sel_info['selection']['points'][0]['legendgroup']
-            mrid = df_filt[df_filt[hvar] == lgroup].iloc[sind]['MRID']
-            st.session_state.sel_mrid = mrid
+
+            sel_mrid = df_filt[df_filt[hvar] == lgroup].iloc[sind]['MRID']
+            sel_roi = st.session_state.plots.loc[st.session_state.plot_active, 'yvar']
+
+            st.session_state.sel_mrid = sel_mrid
+            st.session_state.sel_roi = sel_roi
+
             
-            st.sidebar.warning('Selected subject: ' + mrid)
-            st.sidebar.warning('Selected ROI: ' + 
-                               st.session_state.plots.loc[st.session_state.plot_active, 'yvar'])
+            st.sidebar.success('Selected subject: ' +  sel_mrid)
+            st.sidebar.success('Selected ROI: ' + sel_roi)
+        # )
             
 
 
@@ -236,22 +264,23 @@ with st.sidebar:
 
         # Input file name
         if st.sidebar.button("Select input file"):
-            st.session_state.path_csv_spare, st.session_state.path_input = browse_file(st.session_state.path_input)
-        spare_csv = st.sidebar.text_input("Enter the name of the ROI csv file:",
-                                          value = st.session_state.path_csv_spare,
+            st.session_state.path_csv_mlscores, st.session_state.path_last_sel = browse_file(st.session_state.path_last_sel)
+        csv_mlscores = st.sidebar.text_input("Enter the name of the ROI csv file:",
+                                          value = st.session_state.path_csv_mlscores,
                                           label_visibility="collapsed")
-        st.session_state.fname_spare_csv = spare_csv
+        if os.path.exists(csv_mlscores):
+            st.session_state.path_csv_mlscores = csv_mlscores
 
-if os.path.exists(spare_csv):
+if os.path.exists(csv_mlscores):
 
     # Read input csv
-    df = pd.read_csv(spare_csv)
+    df = pd.read_csv(csv_mlscores)
 
     with st.sidebar:
         with st.container(border=True):
 
             # Slider to set number of plots in a row
-            st.session_state.plot_per_raw = st.slider('Plots per raw',1, 5, 3, key='a_per_page')
+            st.session_state.plot_per_raw = st.slider('Plots per row',1, 5, 3, key='a_per_page')
 
         with st.container(border=True):
 
