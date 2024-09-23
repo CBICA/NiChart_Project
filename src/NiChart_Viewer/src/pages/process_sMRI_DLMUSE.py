@@ -3,31 +3,30 @@ import os
 import streamlit as st
 import tkinter as tk
 from tkinter import filedialog
+import utils_st as utilst
 
-def browse_file(path_t1):
+def browse_file(path_init):
     '''
     File selector
     Returns the file name selected by the user and the parent folder
     '''
     root = tk.Tk()
     root.withdraw()  # Hide the main window
-    out_path = filedialog.askopenfilename(initialdir = path_t1)
+    out_path = filedialog.askopenfilename(initialdir = path_init)
     path_out = os.path.dirname(out_path)
     root.destroy()
     return out_path, path_out
 
-def browse_folder(path_t1):
+def browse_folder(path_init):
     '''
     Folder selector
     Returns the folder name selected by the user
     '''
     root = tk.Tk()
     root.withdraw()  # Hide the main window
-    out_path = filedialog.askdirectory(initialdir = path_t1)
+    out_path = filedialog.askdirectory(initialdir = path_init)
     root.destroy()
     return out_path
-
-
 
 st.markdown(
         """
@@ -41,48 +40,46 @@ st.markdown(
 
 with st.container(border=True):
 
-    # Dataset name: Used to create a main folder for all outputs
-    tmpcol = st.columns((1,8))
-    with tmpcol[0]:
-        dset_name = st.text_input("Dataset name", value = st.session_state.study_name,
-                                  help = "Each dataset's results are organized in a dedicated folder named after the dataset")
-        st.session_state.study_name = dset_name
+    # Dataset name: All results will be saved in a main folder named by the dataset name 
+    helpmsg = "Each dataset's results are organized in a dedicated folder named after the dataset"
+    dset_name = utilst.user_input_text("Dataset name", 
+                                        st.session_state.dset_name, 
+                                        helpmsg)
+    st.session_state.dset_name = dset_name
 
-    # In folder name
-    tmpcol = st.columns((8,1))
-    with tmpcol[1]:
-        if st.button("Select the input folder"):
-            st.session_state.path_t1 = browse_folder(st.session_state.path_last_sel)
-    with tmpcol[0]:
-        dir_t1 = st.text_input("Input folder", value = st.session_state.path_t1,
-                                  help = 'DLMUSE will be applied to .nii/.nii.gz images directly in the input folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it')
-        if os.path.exists(dir_t1):
-            st.session_state.path_t1 = dir_t1
+    # Input T1 image folder
+    helpmsg = 'DLMUSE will be applied to .nii/.nii.gz images directly in the input folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
+    path_t1 = utilst.user_input_folder("Select folder",
+                                       'btn_indir_t1',
+                                       "Input folder",
+                                       st.session_state.path_last_sel,
+                                       st.session_state.path_t1,
+                                       helpmsg)
+    st.session_state.path_t1 = path_t1
 
-
-    # Out folder name
-    tmpcol = st.columns((8,1))
-    with tmpcol[1]:
-        if st.button("Select the output folder", help = 'Choose the path by typing it into the text field or using the file browser to browse and select it'):
-            st.session_state.path_out = browse_folder(st.session_state.path_last_sel)
-    with tmpcol[0]:
-        dir_out = st.text_input("Output folder",
-                                   value = st.session_state.path_out,
-                                   help = 'DLMUSE will generate a segmented image for each input image, and a csv file with the volumes of ROIs for the complete dataset.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it')
-        if os.path.exists(dir_out):
-            st.session_state.path_out = dir_out
+    # Out folder
+    helpmsg = 'DLMUSE will generate a segmented image for each input image, and a csv file with the volumes of ROIs for the complete dataset.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
+    path_out = utilst.user_input_folder("Select folder",
+                                       'btn_out_dir',
+                                        "Output folder",
+                                        st.session_state.path_last_sel,
+                                        st.session_state.path_out,
+                                        helpmsg)
+    st.session_state.path_out = path_out
 
     # Device type
-    tmpcol = st.columns((1,8))
-    with tmpcol[0]:
-        device = st.selectbox("Device", ['cuda', 'cpu', 'mps'], key = 'dlmuse_sel_device', help = "Choose 'cuda' if your computer has an NVIDIA GPU, 'mps' if you have an Apple M-series chip, and 'cpu' if you have a standard CPU.")
+    helpmsg = "Choose 'cuda' if your computer has an NVIDIA GPU, 'mps' if you have an Apple M-series chip, and 'cpu' if you have a standard CPU."
+    device = utilst.user_input_select('Device',
+                                      ['cuda', 'cpu', 'mps'],
+                                      'dlmuse_sel_device',
+                                      helpmsg)
 
     # Check input files
     flag_files = 1
-    if not os.path.exists(dir_t1):
+    if not os.path.exists(path_t1):
         flag_files = 0
 
-    if not os.path.exists(dir_out):
+    if not os.path.exists(path_out):
         flag_files = 0
 
     run_dir = os.path.join(st.session_state.path_root, 'src', 'NiChart_DLMUSE')
@@ -91,17 +88,18 @@ with st.container(border=True):
     if flag_files == 1:
         if st.button("Run w_DLMUSE"):
             import time
-            dir_out_dlmuse = os.path.join(dir_out, dset_name, 'DLMUSE')
-            st.info(f"Running: NiChart_DLMUSE -i {dir_t1} -o {dir_out_dlmuse} -d {device}", icon = ":material/manufacturing:")
+            path_out_dlmuse = os.path.join(path_out, dset_name, 'DLMUSE')
+            st.info(f"Running: NiChart_DLMUSE -i {path_t1} -o {path_out_dlmuse} -d {device}", icon = ":material/manufacturing:")
             with st.spinner('Wait for it...'):
                 time.sleep(15)
-                os.system(f"NiChart_DLMUSE -i {dir_t1} -o {dir_out_dlmuse} -d {device}")
+                os.system(f"NiChart_DLMUSE -i {path_t1} -o {path_out_dlmuse} -d {device}")
                 st.success("Run completed!", icon = ":material/thumb_up:")
 
             # Set the dlmuse output as input for other modules
-            out_csv = f"{dir_out_dlmuse}/{dset_name}_DLMUSE.csv"
+            out_csv = f"{path_out_dlmuse}/{dset_name}_DLMUSE.csv"
             if os.path.exists(out_csv):
-                st.session_state.path_dlmuse = out_csv
+                st.session_state.path_csv_dlmuse = out_csv
+                st.session_state.path_dlmuse = path_out_dlmuse
 
 # FIXME: this is for debugging; will be removed
 with st.expander('session_state: All'):

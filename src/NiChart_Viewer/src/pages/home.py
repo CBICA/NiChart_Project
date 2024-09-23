@@ -34,6 +34,9 @@ if 'instantiated' not in st.session_state:
     # FIXME : for quick test
     st.session_state.path_csv_mlscores = st.session_state.path_root + '/test/test3_nifti+roi/output/MyStudy/MLScores/MyStudy_DLMUSE+MLScores.csv'
 
+    # Image suffixes
+    st.session_state.suff_t1img = '_T1.nii.gz'
+    st.session_state.suff_dlmuse = '_T1_DLMUSE.nii.gz'
 
     # Default values for plotting parameters
     st.session_state.plot_xvar = 'Age'
@@ -53,15 +56,7 @@ if 'instantiated' not in st.session_state:
     st.session_state.sel_var = ''
 
     # Input study name
-    st.session_state.study_name = 'MyStudy'
-
-
-    # FIXME: temp path for running fast
-    # Should be set as the images are created
-    st.session_state.dir_t1img = st.session_state.path_root + '/test/test3_nifti+roi'
-    st.session_state.dir_dlmuse = st.session_state.path_root + '/test/test3_nifti+roi'
-    st.session_state.suffix_t1img = '_T1.nii.gz'
-    st.session_state.suffix_dlmuse = '_T1_DLMUSE.nii.gz'
+    st.session_state.dset_name = 'MyStudy'
 
     # MUSE dictionaries
     st.session_state.dir_resources = os.path.join(st.session_state.path_root, 'resources')

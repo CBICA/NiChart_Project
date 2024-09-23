@@ -13,6 +13,9 @@ import nibabel as nib
 import numpy as np
 from nibabel.orientations import axcodes2ornt, ornt_transform
 
+import tkinter as tk
+from tkinter import filedialog
+
 # Parameters for viewer
 VIEWS = ["axial", "sagittal", "coronal"]
 VIEW_AXES = [0, 2, 1]
@@ -20,6 +23,29 @@ VIEW_OTHER_AXES = [(1,2), (0,1), (0,2)]
 MASK_COLOR = (0, 255, 0)  # RGB format
 MASK_COLOR = np.array([0.0, 1.0, 0.0])  # RGB format
 OLAY_ALPHA = 0.2
+
+def browse_file(path_t1):
+    '''
+    File selector
+    Returns the file name selected by the user and the parent folder
+    '''
+    root = tk.Tk()
+    root.withdraw()  # Hide the main window
+    out_path = filedialog.askopenfilename(initialdir = path_t1)
+    path_out = os.path.dirname(out_path)
+    root.destroy()
+    return out_path, path_out
+
+def browse_folder(path_t1):
+    '''
+    Folder selector
+    Returns the folder name selected by the user
+    '''
+    root = tk.Tk()
+    root.withdraw()  # Hide the main window
+    out_path = filedialog.askdirectory(initialdir = path_t1)
+    root.destroy()
+    return out_path
 
 def reorient_nifti(nii_in, ref_orient = 'LPS'):
     '''
@@ -172,20 +198,70 @@ def prep_images(f_img, f_mask, sel_var_ind, dict_derived):
 
 
 # Read dataframe with data
-df = pd.read_csv(st.session_state.path_csv_mlscores)
+if os.path.exists(st.session_state.path_csv_mlscores):
+    df = pd.read_csv(st.session_state.path_csv_mlscores)
 
-# Create a dictionary of MUSE indices and names
-df_muse = pd.read_csv(st.session_state.dict_muse_all)
-df_muse = df_muse[df_muse.Name.isin(df.columns)]
-dict_roi = dict(zip(df_muse.Name, df_muse.Index))
+    # Create a dictionary of MUSE indices and names
+    df_muse = pd.read_csv(st.session_state.dict_muse_all)
+    df_muse = df_muse[df_muse.Name.isin(df.columns)]
+    dict_roi = dict(zip(df_muse.Name, df_muse.Index))
 
-# Read derived roi list and convert to a dict
-dict_derived = read_derived_roi_list(st.session_state.dict_muse_derived)
+    # Read derived roi list and convert to a dict
+    dict_derived = read_derived_roi_list(st.session_state.dict_muse_derived)
+
+f_img = ''
+f_mask = ''
 
 # Page controls in side bar
-with st.sidebar:
+#with st.sidebar:
 
-    with st.container(border=True):
+with st.container(border=True):
+
+    # Selection of subject list and image paths
+    with st.expander('Select subject list and image paths'):
+        
+        # DLMUSE ROI file
+        if st.button("Select the ROI file"):
+            st.session_state.path_csv_dlmuse, st.session_state.path_last_sel = browse_file(st.session_state.path_last_sel)
+
+        csv_dlmuse = st.text_input("DLMUSE csv file", value = st.session_state.path_csv_dlmuse,
+                                help = 'Input csv file with DLMUSE ROI volumes.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it')
+        if os.path.exists(csv_dlmuse):
+            st.session_state.path_csv_dlmuse = csv_dlmuse
+
+        st.write('---')
+        
+        # T1 img path
+        if st.button("Select the T1 image path"):
+            st.session_state.path_t1 = browse_folder(st.session_state.path_last_sel)
+        path_t1 = st.text_input("T1 image path", value = st.session_state.path_t1,
+                                help = 'T1 images are used as the underlay')
+        if os.path.exists(path_t1):
+            st.session_state.path_t1 = path_t1
+        
+        # DLMUSE img path
+        if st.button("Select the DLMUSE image path"):
+            st.session_state.path_dlmuse = browse_folder(st.session_state.path_last_sel)
+        path_dlmuse = st.text_input("DLMUSE image path", value = st.session_state.path_dlmuse,
+                                help = 'DLMUSE images are used as the overlay')
+        if os.path.exists(path_dlmuse):
+            st.session_state.path_dlmuse = path_dlmuse
+
+        st.write('---')
+
+        # T1 suffix
+        if st.button("Select the T1 image suffix"):
+            suff_t1img = st.text_input("Suffix of the T1 image", value = st.session_state.suff_t1img,
+                                    help = "T1 image should be named as {MRID}{suff}")
+            st.session_state.suff_t1img = suff_t1img
+
+        # DLMUSE suffix
+        if st.button("Select the DLMUSE image suffix"):
+            suff_dlmuse = st.text_input("Suffix of the DLMUSE image", value = st.session_state.suff_dlmuse,
+                                    help = "DLMUSE image should be named as {MRID}{suff}")
+            st.session_state.suff_dlmuse = suff_dlmuse
+
+    if os.path.exists(st.session_state.path_csv_mlscores):
 
         # Selection of MRID
         sel_mrid = st.session_state.sel_mrid
@@ -195,10 +271,7 @@ with st.sidebar:
         else:
             sel_ind = df.MRID.tolist().index(sel_mrid)
             sel_type = '(user)'
-        sel_mrid = st.selectbox("Selected Subject", df.MRID.tolist(), key=f"selbox_mrid", index = sel_ind)
-
-        # st.sidebar.warning('Selected subject: ' + mrid)
-        st.warning(f'Selected {sel_type}: {sel_mrid}')
+        sel_mrid = st.selectbox("MRID", df.MRID.tolist(), key=f"selbox_mrid", index = sel_ind)
 
         # Selection of ROI
         #  - The variable will be selected from the active plot
@@ -209,29 +282,30 @@ with st.sidebar:
         else:
             sel_ind = df_muse.Name.tolist().index(sel_var)
             sel_type = '(user)'
-        sel_var = st.selectbox("Selected ROI", list(dict_roi.keys()), key=f"selbox_rois", index = sel_ind)
-
-    with st.container(border=True):
-
-        # Create a list of checkbox options
-        #list_orient = st.multiselect("Select viewing planes:", VIEWS, VIEWS[0])
-        list_orient = st.multiselect("Select viewing planes:", VIEWS, VIEWS)
-
-        # View hide overlay
-        is_show_overlay = st.checkbox('Show overlay', True)
+        sel_var = st.selectbox("ROI", list(dict_roi.keys()), key=f"selbox_rois", index = sel_ind)
 
 
-# Select roi index
-sel_var_ind = dict_roi[sel_var]
+        with st.container(border=True):
 
-# File names for img and mask
-f_img = os.path.join(st.session_state.path_out, 
-                     st.session_state.path_t1,
-                     sel_mrid + st.session_state.suffix_t1img)
+            # Create a list of checkbox options
+            #list_orient = st.multiselect("Select viewing planes:", VIEWS, VIEWS[0])
+            list_orient = st.multiselect("Select viewing planes:", VIEWS, VIEWS)
 
-f_mask = os.path.join(st.session_state.path_out, 
-                      st.session_state.path_dlmuse,
-                      sel_mrid + st.session_state.suffix_dlmuse)
+            # View hide overlay
+            is_show_overlay = st.checkbox('Show overlay', True)
+
+
+        # Select roi index
+        sel_var_ind = dict_roi[sel_var]
+
+        # File names for img and mask
+        f_img = os.path.join(st.session_state.path_out, 
+                            st.session_state.path_t1,
+                            sel_mrid + st.session_state.suff_t1img)
+
+        f_mask = os.path.join(st.session_state.path_out, 
+                            st.session_state.path_dlmuse,
+                            sel_mrid + st.session_state.suff_dlmuse)
 
 if os.path.exists(f_img) & os.path.exists(f_mask):
 
