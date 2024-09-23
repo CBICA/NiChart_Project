@@ -15,6 +15,9 @@ import os
 import tkinter as tk
 from tkinter import filedialog
 
+from utils_trace import *
+
+
 def browse_file(path_input):
     '''
     File selector
@@ -50,7 +53,8 @@ def add_plot():
                          st.session_state.plot_xvar,
                          st.session_state.plot_yvar,
                          st.session_state.plot_hvar,
-                         st.session_state.plot_trend
+                         st.session_state.plot_trend,
+                         st.session_state.plot_centtype
                         ]
     st.session_state.plot_index += 1
 
@@ -126,7 +130,18 @@ def display_plot(plot_id):
 
             # Tab 3: to set centiles
             with ptabs[3]:
-                cent_type = st.selectbox("Centile Type", ['CN-All', 'CN-F', 'CN-M'], key=f"cent_type_{plot_id}")
+
+                # Get plot params
+                centtype = st.session_state.plots.loc[plot_id].centtype
+
+                # Select plot params from the user
+                centind = st.session_state.cent_types.index(centtype)
+
+                centtype = st.selectbox("Centile Type", st.session_state.cent_types,
+                                        key=f"cent_type_{plot_id}", index = centind)
+
+                # Set plot params to session_state
+                st.session_state.plots.loc[plot_id].centtype = centtype
 
             # Tab 4: to reset parameters or to delete plot
             with ptabs[4]:
@@ -138,6 +153,14 @@ def display_plot(plot_id):
             scatter_plot = px.scatter(df_filt, x = xvar, y = yvar, color = hvar)
         else:
             scatter_plot = px.scatter(df_filt, x = xvar, y = yvar, color = hvar, trendline = trend)
+
+        # Add centile values
+        if centtype != 'none':
+            fcent = os.path.join(st.session_state.path_root, 'resources', 'centiles',
+                                 f'centiles_{centtype}.csv')
+            df_cent = pd.read_csv(fcent)
+            percentile_trace(df_cent, xvar, yvar, scatter_plot)
+
 
         # Add plot
         # - on_select: when clicked it will rerun and return the info

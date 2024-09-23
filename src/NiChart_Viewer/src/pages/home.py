@@ -7,7 +7,8 @@ import os
 if 'instantiated' not in st.session_state:
 
     # Dataframe to keep plot ids
-    st.session_state.plots = pd.DataFrame(columns = ['pid', 'xvar', 'yvar', 'hvar', 'trend'])
+    st.session_state.plots = pd.DataFrame(columns = ['pid', 'xvar', 'yvar', 'hvar',
+                                                     'trend', 'centtype'])
     st.session_state.plot_index = 1
     st.session_state.plot_active = ''
 
@@ -30,12 +31,20 @@ if 'instantiated' not in st.session_state:
     st.session_state.path_csv_dlmuse = ''
     st.session_state.path_csv_mlscores = ''
 
+    # FIXME : for quick test
+    st.session_state.path_csv_mlscores = st.session_state.path_root + '/test/test3_nifti+roi/output/MyStudy/MLScores/MyStudy_DLMUSE+MLScores.csv'
+
+
     # Default values for plotting parameters
     st.session_state.plot_xvar = 'Age'
     st.session_state.plot_yvar = 'GM'
     st.session_state.plot_hvar = 'Sex'
+
     st.session_state.trend_types = ['none', 'ols', 'lowess']
     st.session_state.plot_trend = 'none'
+
+    st.session_state.cent_types = ['none', 'CN-All', 'CN-F', 'CN-M']
+    st.session_state.plot_centtype = 'none'
 
     # MRID selected by user
     st.session_state.sel_mrid = ''

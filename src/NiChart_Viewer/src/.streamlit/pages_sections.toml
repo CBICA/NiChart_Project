@@ -40,11 +40,6 @@ name = "Plot Variables - Study (sMRI)"
 icon = ":black_small_square:"
 
 [[pages]]
-path = "pages/view_sMRI_plot_centiles.py"
-name = "Plot Centiles (sMRI)"
-icon = ":black_small_square:"
-
-[[pages]]
 path = "pages/view_sMRI_plot_vars_single.py"
 name = "Plot Variables - Individual (sMRI)"
 icon = ":black_small_square:"
