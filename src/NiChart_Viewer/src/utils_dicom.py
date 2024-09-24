@@ -23,11 +23,10 @@ def convert_dicoms_to_nifti(in_dir, out_dir):
     filesandirs = glob.glob(os.path.join(in_dir, '**', '*'), recursive=True)
     files = [f for f in filesandirs if os.path.isfile(f)]
     
-    # Read dicoms
+    # Read dicom meta data
     dicoms = [pydicom.dcmread(f, stop_before_pixels=True) for f in files]
 
-
-    dcm.convert_directory(in_dir, out_dir, compression=True, reorient=True)
+    #dcm.convert_directory(in_dir, out_dir, compression=True, reorient=True)
 
 
 #def read_DICOM_slices(path):
