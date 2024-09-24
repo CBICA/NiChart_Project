@@ -7,6 +7,11 @@ from nibabel.orientations import axcodes2ornt, ornt_transform
 import pydicom
 
 
+# https://stackoverflow.com/questions/71042522/conversion-not-working-properly-using-dicom2nifti
+# https://pypi.org/project/dicom2nifti/#history
+# https://pycad.medium.com/mvp-online-dicom-nifti-viewer-with-python-0da8b3aceadd
+# https://github.com/angelomenezes/dicom-labeling-tool
+
 def read_DICOM_slices(path):
 
     # Load the DICOM files
