@@ -8,10 +8,11 @@ from pandas.api.types import (
     is_object_dtype,
 )
 import plotly.express as px
-from math import ceil
-import nibabel as nib
+
+import utils_st as utilst
+import utils_nifti as utilni
 import numpy as np
-from nibabel.orientations import axcodes2ornt, ornt_transform
+import nibabel as nib
 
 # Parameters for viewer
 VIEWS = ["axial", "sagittal", "coronal"]
@@ -21,96 +22,30 @@ MASK_COLOR = (0, 255, 0)  # RGB format
 MASK_COLOR = np.array([0.0, 1.0, 0.0])  # RGB format
 OLAY_ALPHA = 0.2
 
-def reorient_nifti(nii_in, ref_orient = 'LPS'):
-    '''
-    Initial img is reoriented to a standard orientation
-    '''
-
-    # Find transform from current (approximate) orientation to
-    # target, in nibabel orientation matrix and affine forms
-    orient_in = nib.io_orientation(nii_in.affine)
-    orient_out = axcodes2ornt(ref_orient)
-    transform = ornt_transform(orient_in, orient_out)
-
-    # Apply transform
-    nii_reorient = nii_in.as_reoriented(transform)
-
-    # Return reoriented image
-    return nii_reorient
-
-def crop_image(img, mask):
-    '''
-    Crop img to the foreground of the mask
-    '''
-
-    # Detect bounding box
-    nz = np.nonzero(mask)
-    mn = np.min(nz, axis=1)
-    mx = np.max(nz, axis=1)
-
-    # Calculate crop to make all dimensions equal size
-    mask_sz = mask.shape
-    crop_sz = mx - mn 
-    new_sz = max(crop_sz)
-    pad_val = (new_sz - crop_sz) // 2
-    
-    min1 = mn - pad_val
-    max1 = mx + pad_val
-
-    min2 = np.max([min1, [0,0,0]], axis=0)
-    max2 = np.min([max1, mask_sz], axis=0)
-    
-    pad1 = list(np.max([min2-min1, [0,0,0]], axis=0))
-    pad2 = list(np.max([max1-max2, [0,0,0]], axis=0))
-    
-    # Crop image
-    img = img[min2[0]:max2[0], min2[1]:max2[1], min2[2]:max2[2]]
-    mask = mask[min2[0]:max2[0], min2[1]:max2[1], min2[2]:max2[2]]
-
-    # Pad image
-    padding = np.array([pad1, pad2]).T
-    
-    if padding.sum() > 0:
-        img = np.pad(img, padding, mode='constant', constant_values=0)
-        mask = np.pad(mask, padding, mode='constant', constant_values=0)
-    
-    return img, mask
-
-def detect_mask_bounds(mask):
-    '''
-    Detect the mask start, end and center in each view
-    Used later to set the slider in the image viewer
-    '''
-
-    mask_bounds = np.zeros([3,3]).astype(int)
-    for i, axis in enumerate(VIEW_AXES):
-        mask_bounds[i,0] = 0
-        mask_bounds[i,1] = mask.shape[i]
-        slices_nz = np.where(np.sum(mask, axis = VIEW_OTHER_AXES[i]) > 0)[0]
-        try:
-            mask_bounds[i,2] = slices_nz[len(slices_nz) // 2]
-        except:
-            # Could not detect masked region. Set center to image center
-            mask_bounds[i,2] = mask.shape[i] // 2
-
-    return mask_bounds
-
-def read_derived_roi_list(list_derived):
+def read_derived_roi_list(list_sel_rois, list_derived):
     '''
     Create a dictionary from derived roi list
     '''
 
     # Read list
+    df_sel = pd.read_csv(list_sel_rois)
     df = pd.read_csv(list_derived, header=None)
 
-    # Create dict
-    dict_out = {}
+    # Keep only selected ROIs
+    df = df[df[0].isin(df_sel.Index)]
+
+    # Create dict of roi names and indices
+    dict_roi = dict(zip(df[1], df[0]))
+
+    # Create dict of roi indices and derived indices
+    dict_derived = {}
     for i, tmp_ind in enumerate(df[0].values):
         df_tmp = df[df[0] == tmp_ind].drop([0,1], axis =1)
         sel_vals = df_tmp.T.dropna().astype(int).values.flatten()
-        dict_out[tmp_ind] = sel_vals
+        dict_derived[tmp_ind] = sel_vals
 
-    return dict_out
+
+    return dict_roi, dict_derived
 
 
 def show_nifti(img, view, sel_axis_bounds):
@@ -141,8 +76,8 @@ def prep_images(f_img, f_mask, sel_var_ind, dict_derived):
     nii_mask = nib.load(f_mask)
 
     # Reorient nifti
-    nii_img = reorient_nifti(nii_img, ref_orient = 'IPL')
-    nii_mask = reorient_nifti(nii_mask, ref_orient = 'IPL')
+    nii_img = utilni.reorient_nifti(nii_img, ref_orient = 'IPL')
+    nii_mask = utilni.reorient_nifti(nii_mask, ref_orient = 'IPL')
 
     # Extract image to matrix
     img = nii_img.get_fdata()
@@ -152,7 +87,7 @@ def prep_images(f_img, f_mask, sel_var_ind, dict_derived):
     img = (img.astype(float) / img.max())
 
     # Crop image to ROIs and reshape
-    img, mask = crop_image(img, mask)
+    img, mask = utilni.crop_image(img, mask)
 
     # Select target roi: derived roi
     list_rois = dict_derived[sel_var_ind]
@@ -171,21 +106,77 @@ def prep_images(f_img, f_mask, sel_var_ind, dict_derived):
     return img, mask, img_masked
 
 
-# Read dataframe with data
-df = pd.read_csv(st.session_state.path_csv_mlscores)
-
-# Create a dictionary of MUSE indices and names
-df_muse = pd.read_csv(st.session_state.dict_muse_all)
-df_muse = df_muse[df_muse.Name.isin(df.columns)]
-dict_roi = dict(zip(df_muse.Name, df_muse.Index))
-
-# Read derived roi list and convert to a dict
-dict_derived = read_derived_roi_list(st.session_state.dict_muse_derived)
-
 # Page controls in side bar
-with st.sidebar:
+#with st.sidebar:
+
+f_img = ''
+f_mask = ''
+
+
+# Selection of subject list and image paths
+with st.expander('Select subject list, image paths and suffixes'):
+    
+    # DLMUSE file name
+    helpmsg = 'Input csv file with DLMUSE ROI volumes.\n\nUsed for selecting the MRID and the ROI name.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it'
+    csv_dlmuse, csv_path = utilst.user_input_file("Select file",
+                                                    'btn_input_dlmuse',
+                                                    "DLMUSE ROI file",
+                                                    st.session_state.path_last_sel,
+                                                    st.session_state.path_csv_dlmuse,
+                                                    helpmsg)
+    if os.path.exists(csv_dlmuse):
+        st.session_state.path_csv_dlmuse = csv_dlmuse
+        st.session_state.path_last_sel = csv_path
+
+    # Input T1 image folder
+    helpmsg = 'Path to T1 images.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
+    path_t1 = utilst.user_input_folder("Select folder",
+                                    'btn_indir_t1',
+                                    "Input folder",
+                                    st.session_state.path_last_sel,
+                                    st.session_state.path_t1,
+                                    helpmsg)
+    st.session_state.path_t1 = path_t1
+    
+    # Input DLMUSE image folder
+    helpmsg = 'Path to DLMUSE images.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
+    path_dlmuse = utilst.user_input_folder("Select folder",
+                                            'btn_indir_dlmuse',
+                                            "Input folder",
+                                            st.session_state.path_last_sel,
+                                            st.session_state.path_dlmuse,
+                                            helpmsg)
+    st.session_state.path_dlmuse = path_dlmuse
+
+    # T1 suffix
+    suff_t1img = utilst.user_input_text("T1 img suffix", 
+                                        st.session_state.suff_t1img, 
+                                        helpmsg)
+    st.session_state.suff_t1img = suff_t1img
+
+    # DLMUSE suffix
+    suff_dlmuse = utilst.user_input_text("DLMUSE image suffix", 
+                                        st.session_state.suff_dlmuse, 
+                                        helpmsg)
+    st.session_state.suff_dlmuse = suff_dlmuse
+        
+
+# Selection of MRID and ROI name
+if os.path.exists(st.session_state.path_csv_dlmuse):
 
     with st.container(border=True):
+
+        df = pd.read_csv(st.session_state.path_csv_dlmuse)
+
+        # Create a dictionary of MUSE indices and names
+        df_muse = pd.read_csv(st.session_state.dict_muse_all)
+
+        #df_muse = df_muse[df_muse.Name.isin(df.columns)]
+        #dict_roi = dict(zip(df_muse.Name, df_muse.Index))
+
+        # Read derived roi list and convert to a dict
+        dict_roi, dict_derived = read_derived_roi_list(st.session_state.dict_muse_sel,
+                                             st.session_state.dict_muse_derived)
 
         # Selection of MRID
         sel_mrid = st.session_state.sel_mrid
@@ -195,21 +186,24 @@ with st.sidebar:
         else:
             sel_ind = df.MRID.tolist().index(sel_mrid)
             sel_type = '(user)'
-        sel_mrid = st.selectbox("Selected Subject", df.MRID.tolist(), key=f"selbox_mrid", index = sel_ind)
-
-        # st.sidebar.warning('Selected subject: ' + mrid)
-        st.warning(f'Selected {sel_type}: {sel_mrid}')
+        sel_mrid = st.selectbox("MRID", df.MRID.tolist(), key=f"selbox_mrid", index = sel_ind)
 
         # Selection of ROI
         #  - The variable will be selected from the active plot
-        sel_var = st.session_state.plots.loc[st.session_state.plot_active, 'yvar']
+        
+        sel_var = ''
+        try: 
+            sel_var = st.session_state.plots.loc[st.session_state.plot_active, 'yvar']
+        except:
+            print('Could not detect an active plot')
         if sel_var == '':
-            sel_ind = 0
+            sel_ind = 2
+            sel_var = list(dict_roi.keys())[0]
             sel_type = '(auto)'
         else:
             sel_ind = df_muse.Name.tolist().index(sel_var)
             sel_type = '(user)'
-        sel_var = st.selectbox("Selected ROI", list(dict_roi.keys()), key=f"selbox_rois", index = sel_ind)
+        sel_var = st.selectbox("ROI", list(dict_roi.keys()), key=f"selbox_rois", index = sel_ind)
 
     with st.container(border=True):
 
@@ -221,17 +215,17 @@ with st.sidebar:
         is_show_overlay = st.checkbox('Show overlay', True)
 
 
-# Select roi index
-sel_var_ind = dict_roi[sel_var]
+    # Select roi index
+    sel_var_ind = dict_roi[sel_var]
 
-# File names for img and mask
-f_img = os.path.join(st.session_state.path_out, 
-                     st.session_state.path_t1,
-                     sel_mrid + st.session_state.suffix_t1img)
+    # File names for img and mask
+    f_img = os.path.join(st.session_state.path_out, 
+                        st.session_state.path_t1,
+                        sel_mrid + st.session_state.suff_t1img)
 
-f_mask = os.path.join(st.session_state.path_out, 
-                      st.session_state.path_dlmuse,
-                      sel_mrid + st.session_state.suffix_dlmuse)
+    f_mask = os.path.join(st.session_state.path_out, 
+                        st.session_state.path_dlmuse,
+                        sel_mrid + st.session_state.suff_dlmuse)
 
 if os.path.exists(f_img) & os.path.exists(f_mask):
 
@@ -239,7 +233,7 @@ if os.path.exists(f_img) & os.path.exists(f_mask):
     img, mask, img_masked = prep_images(f_img, f_mask, sel_var_ind, dict_derived)
 
     # Detect mask bounds and center in each view
-    mask_bounds = detect_mask_bounds(mask)
+    mask_bounds = utilni.detect_mask_bounds(mask)
 
     # Show images
     blocks = st.columns(len(list_orient))
@@ -253,7 +247,7 @@ if os.path.exists(f_img) & os.path.exists(f_mask):
 
 else:
     if not os.path.exists(f_img):
-        st.sidebar.warning(f'Image not found: {f_img}')
+        st.warning(f'Image not found: {f_img}')
     else:
-        st.sidebar.warning(f'Mask not found: {f_mask}')
+        st.warning(f'Mask not found: {f_mask}')
 

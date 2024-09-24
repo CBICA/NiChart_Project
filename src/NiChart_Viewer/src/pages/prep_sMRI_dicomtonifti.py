@@ -4,6 +4,7 @@ import streamlit as st
 import tkinter as tk
 from tkinter import filedialog
 import utils_st as utilst
+import utils_dicom as utildcm
 
 def browse_file(path_init):
     '''
@@ -30,11 +31,7 @@ def browse_folder(path_init):
 
 st.markdown(
         """
-    - NiChart sMRI segmentation pipeline using DLMUSE.
-    - DLMUSE segments raw T1 images into 145 regions of interest (ROIs) + 105 composite ROIs.
-
-    ### Want to learn more?
-    - Visit [DLMUSE GitHub](https://github.com/CBICA/NiChart_DLMUSE)
+    - Extract sMRI Nifti scans from raw dicom filess.
         """
 )
 
@@ -47,59 +44,48 @@ with st.container(border=True):
                                         helpmsg)
     st.session_state.dset_name = dset_name
 
-    # Input T1 image folder
-    helpmsg = 'DLMUSE will be applied to .nii/.nii.gz images directly in the input folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
-    path_t1 = utilst.user_input_folder("Select folder",
-                                       'btn_indir_t1',
+    # Input dicom image folder
+    helpmsg = 'Input folder with dicom files (.dcm).\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
+    path_dicom = utilst.user_input_folder("Select folder",
+                                       'btn_indir_dicom',
                                        "Input folder",
                                        st.session_state.path_last_sel,
-                                       st.session_state.path_t1,
+                                       st.session_state.path_dicom,
                                        helpmsg)
-    st.session_state.path_t1 = path_t1
+    st.session_state.path_dicom = path_dicom
 
     # Out folder
-    helpmsg = 'DLMUSE will generate a segmented image for each input image, and a csv file with the volumes of ROIs for the complete dataset.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
+    helpmsg = 'Nifti images will be extracted to the output folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
     path_out = utilst.user_input_folder("Select folder",
-                                       'btn_out_dir',
+                                        'btn_out_dir',
                                         "Output folder",
                                         st.session_state.path_last_sel,
                                         st.session_state.path_out,
                                         helpmsg)
     st.session_state.path_out = path_out
 
-    # Device type
-    helpmsg = "Choose 'cuda' if your computer has an NVIDIA GPU, 'mps' if you have an Apple M-series chip, and 'cpu' if you have a standard CPU."
-    device = utilst.user_input_select('Device',
-                                      ['cuda', 'cpu', 'mps'],
-                                      'dlmuse_sel_device',
-                                      helpmsg)
-
     # Check input files
     flag_files = 1
-    if not os.path.exists(path_t1):
-        flag_files = 0
-
-    if not os.path.exists(path_out):
+    if not os.path.exists(path_dicom):
         flag_files = 0
 
     run_dir = os.path.join(st.session_state.path_root, 'src', 'NiChart_DLMUSE')
 
     # Run workflow
     if flag_files == 1:
-        if st.button("Run w_DLMUSE"):
+        if st.button("Extract Nifti"):
             import time
-            path_out_dlmuse = os.path.join(path_out, dset_name, 'DLMUSE')
-            st.info(f"Running: NiChart_DLMUSE -i {path_t1} -o {path_out_dlmuse} -d {device}", icon = ":material/manufacturing:")
+            path_out_t1 = os.path.join(path_out, dset_name, 'Images', 'T1')
+            if not os.path.exists(path_out_t1):
+                os.makedirs(path_out_t1)
+            
             with st.spinner('Wait for it...'):
-                time.sleep(15)
-                os.system(f"NiChart_DLMUSE -i {path_t1} -o {path_out_dlmuse} -d {device}")
+                utildcm.convert_dicoms_to_nifti(path_dicom, path_out_t1)
                 st.success("Run completed!", icon = ":material/thumb_up:")
 
-            # Set the dlmuse output as input for other modules
-            out_csv = f"{path_out_dlmuse}/{dset_name}_DLMUSE.csv"
-            if os.path.exists(out_csv):
-                st.session_state.path_csv_dlmuse = out_csv
-                st.session_state.path_dlmuse = path_out_dlmuse
+            # Set the nifti output as input for other modules
+            if os.path.exists(path_out_t1):
+                st.session_state.path_t1 = path_out_t1
 
 # FIXME: this is for debugging; will be removed
 with st.expander('session_state: All'):

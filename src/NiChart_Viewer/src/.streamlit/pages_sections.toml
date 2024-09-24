@@ -5,6 +5,16 @@ name = "Home"
 icon = "🏠"
 
 [[pages]]
+name = "MRI Preparation"
+is_section = true
+icon = ":file_folder:"
+
+[[pages]]
+path = "pages/prep_sMRI_dicomtonifti.py"
+name = "Dicom to Nifti (sMRI)"
+icon = ":black_small_square:"
+
+[[pages]]
 name = "Image Processing"
 is_section = true
 icon = ":file_folder:"

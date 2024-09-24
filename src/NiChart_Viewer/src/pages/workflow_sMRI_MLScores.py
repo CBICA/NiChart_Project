@@ -14,6 +14,8 @@ from tempfile import NamedTemporaryFile
 import tkinter as tk
 from tkinter import filedialog
 
+import utils_st as utilst
+
 def browse_file(path_input):
     '''
     File selector
@@ -51,46 +53,46 @@ st.markdown(
 
 with st.container(border=True):
 
-    # Dataset name: Used to create a main folder for all outputs
-    tmpcol = st.columns((1,8))
-    with tmpcol[0]:
-        dset_name = st.text_input("Dataset name", value = st.session_state.study_name,
-                                  help = "Each dataset's results are organized in a dedicated folder named after the dataset")
-        st.session_state.study_name = dset_name
+    # Dataset name: All results will be saved in a main folder named by the dataset name 
+    helpmsg = "Each dataset's results are organized in a dedicated folder named after the dataset"
+    dset_name = utilst.user_input_text("Dataset name", 
+                                        st.session_state.dset_name, 
+                                        helpmsg)
+    st.session_state.dset_name = dset_name
 
-    # ROI file name
-    tmpcol = st.columns((8,1))
-    with tmpcol[1]:
-        if st.button("Select the ROI file"):
-            st.session_state.path_csv_dlmuse, st.session_state.path_last_sel = browse_file(st.session_state.path_last_sel)
-    with tmpcol[0]:
-        csv_dlmuse = st.text_input("DLMUSE csv file", value = st.session_state.path_csv_dlmuse,
-                                  help = 'Input csv file with DLMUSE ROI volumes.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it')
-        if os.path.exists(csv_dlmuse):
-            st.session_state.path_csv_dlmuse = csv_dlmuse
+    # DLMUSE file name
+    helpmsg = 'Input csv file with DLMUSE ROI volumes.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it'
+    csv_dlmuse, csv_path = utilst.user_input_file("Select file",
+                                                  'btn_input_dlmuse',
+                                                  "DLMUSE ROI file",
+                                                  st.session_state.path_last_sel,
+                                                  st.session_state.path_csv_dlmuse,
+                                                  helpmsg)
+    if os.path.exists(csv_dlmuse):
+        st.session_state.path_csv_dlmuse = csv_dlmuse
+        st.session_state.path_last_sel = csv_path
 
     # Demog file name
-    tmpcol = st.columns((8,1))
-    with tmpcol[1]:
-        if st.button("Select the demographics file"):
-            st.session_state.path_csv_demog, st.session_state.path_last_sel = browse_file(st.session_state.path_last_sel)
-    with tmpcol[0]:
-        csv_demog = st.text_input("Demog csv file", value = st.session_state.path_csv_demog,
-                                  help = 'Input csv file with demographic values.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it')
-        if os.path.exists(csv_dlmuse):
-            st.session_state.path_csv_demog = csv_demog
+    helpmsg = 'Input csv file with demographic values.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it'
+    csv_demog, csv_path = utilst.user_input_file("Select file",
+                                                  'btn_input_demog',
+                                                  "Demographics file",
+                                                  st.session_state.path_last_sel,
+                                                  st.session_state.path_csv_demog,
+                                                  helpmsg)
+    if os.path.exists(csv_demog):
+        st.session_state.path_csv_demog = csv_demog
+        st.session_state.path_last_sel = csv_path
 
     # Out folder name
-    tmpcol = st.columns((8,1))
-    with tmpcol[1]:
-        if st.button("Select the output folder", help = 'Choose the path by typing it into the text field or using the file browser to browse and select it'):
-            st.session_state.path_out = browse_folder(st.session_state.path_last_sel)
-    with tmpcol[0]:
-        dir_out = st.text_input("Output folder",
-                                value = st.session_state.path_out,
-                                help = 'Results will be saved into the output folder, in a subfolder named "MLScores".\n\nThe results will include harmonized ROIs, SPARE scores and SurrealGAN scores.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it')
-        if os.path.exists(dir_out):
-            st.session_state.path_out = dir_out
+    helpmsg = 'Results will be saved into the output folder, in a subfolder named "MLScores".\n\nThe results will include harmonized ROIs, SPARE scores and SurrealGAN scores.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
+    path_out = utilst.user_input_folder("Select folder",
+                                        'btn_out_dir',
+                                        "Output folder",
+                                        st.session_state.path_last_sel,
+                                        st.session_state.path_out,
+                                        helpmsg)
+    st.session_state.path_out = path_out
 
     # Check input files
     flag_files = 1
@@ -107,17 +109,17 @@ with st.container(border=True):
         if st.button("Run w_sMRI"):
 
             import time
-            dir_out_mlscores = os.path.join(dir_out, dset_name, 'MLScores')
+            path_out_mlscores = os.path.join(path_out, dset_name, 'MLScores')
             st.info(f"Running: mlscores_workflow ", icon = ":material/manufacturing:")
             with st.spinner('Wait for it...'):
                 time.sleep(15)
                 os.system(f"cd {run_dir}")
-                cmd = f"python3 {run_dir}/call_snakefile.py --run_dir {run_dir} --dset_name {dset_name} --input_rois {csv_dlmuse} --input_demog {csv_demog} --dir_out {dir_out_mlscores}"
+                cmd = f"python3 {run_dir}/call_snakefile.py --run_dir {run_dir} --dset_name {dset_name} --input_rois {csv_dlmuse} --input_demog {csv_demog} --dir_out {path_out_mlscores}"
                 os.system(cmd)
                 st.success("Run completed!", icon = ":material/thumb_up:")
 
                 # Set the output file as the input for the related viewers
-                csv_mlscores = f"{dir_out_mlscores}/{dset_name}_DLMUSE+MLScores.csv"
+                csv_mlscores = f"{path_out_mlscores}/{dset_name}_DLMUSE+MLScores.csv"
                 if os.path.exists(csv_mlscores):
                     st.session_state.path_csv_mlscores = csv_mlscores
 
