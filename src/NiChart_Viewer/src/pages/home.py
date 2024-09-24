@@ -27,13 +27,17 @@ if 'instantiated' not in st.session_state:
     # Paths to I/O files/folders
     st.session_state.path_t1 = ''
     st.session_state.path_dlmuse = ''
+    st.session_state.path_dicom = ''
     st.session_state.path_csv_demog = ''
     st.session_state.path_csv_dlmuse = ''
     st.session_state.path_csv_mlscores = ''
     st.session_state.path_csv_viewdlmuse = ''
 
+    #####
     # FIXME : for quick test
-    st.session_state.path_csv_mlscores = st.session_state.path_root + '/test/test3_nifti+roi/output/MyStudy/MLScores/MyStudy_DLMUSE+MLScores.csv'
+    #st.session_state.path_csv_mlscores = st.session_state.path_root + '/test/test3_nifti+roi/output/MyStudy/MLScores/MyStudy_DLMUSE+MLScores.csv'   
+    st.session_state.path_last_sel = st.session_state.path_init + '/../../TestData'
+    #####
 
     # Image suffixes
     st.session_state.suff_t1img = '_T1.nii.gz'
