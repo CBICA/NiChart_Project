@@ -64,9 +64,6 @@
 [submodule "src/Image_Processing/fMRI/pNet"]
 	path = src/Image_Processing/fMRI/pNet
 	url = https://github.com/CBICA/pNet
-[submodule "src/Image_Processing/sMRI/DLICV"]
-	path = src/Image_Processing/sMRI/DLICV
-	url = https://github.com/CBICA/DLICV
 [submodule "src/Harmonization/ComBatFam_Pipeline"]
 	path = src/Harmonization/ComBatFam_Pipeline
 	url = https://github.com/PennSIVE/ComBatFam_Pipeline
@@ -100,3 +97,7 @@
 [submodule "src/NiChart_Website"]
 	path = src/NiChart_Website
 	url = https://github.com/CBICA/NiChart_Website
+[submodule "src/Image_Processing/sMRI/DLICV"]
+	path = src/Image_Processing/sMRI/DLICV
+	url = https://github.com/CBICA/DLICV.git
+	branch = main

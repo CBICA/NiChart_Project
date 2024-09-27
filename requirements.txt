@@ -1,17 +1,15 @@
-# NiChart packages
-spare-scores
-NiChartHarmonize
-#NiChart_DLMUSE
-
 # general python dependencies
+torch>=2.2.1
 argparse
-nibabel
+nibabel>=5.2
 mamba
 snakemake
 pulp==2.7.0
 tabulate==0.8.10
-sphinx
-
+sphinx==6.2.1
+huggingface_hub
+scipy
+pathlib
 
 # streamlit
 st_pages==1.0.1
@@ -19,3 +17,10 @@ streamlit_plotly_events
 chart_studio
 Jinja2
 plotly-express
+
+# NiChart packages
+DLICV>=1.0.1
+DLMUSE>=1.0.1
+spare-scores
+NiChartHarmonize
+#NiChart_DLMUSE
