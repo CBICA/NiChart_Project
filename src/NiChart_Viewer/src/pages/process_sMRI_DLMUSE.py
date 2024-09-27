@@ -5,29 +5,6 @@ import tkinter as tk
 from tkinter import filedialog
 import utils_st as utilst
 
-def browse_file(path_init):
-    '''
-    File selector
-    Returns the file name selected by the user and the parent folder
-    '''
-    root = tk.Tk()
-    root.withdraw()  # Hide the main window
-    out_path = filedialog.askopenfilename(initialdir = path_init)
-    path_out = os.path.dirname(out_path)
-    root.destroy()
-    return out_path, path_out
-
-def browse_folder(path_init):
-    '''
-    Folder selector
-    Returns the folder name selected by the user
-    '''
-    root = tk.Tk()
-    root.withdraw()  # Hide the main window
-    out_path = filedialog.askdirectory(initialdir = path_init)
-    root.destroy()
-    return out_path
-
 st.markdown(
         """
     - NiChart sMRI segmentation pipeline using DLMUSE.
@@ -95,11 +72,11 @@ with st.container(border=True):
                 os.system(f"NiChart_DLMUSE -i {path_t1} -o {path_out_dlmuse} -d {device}")
                 st.success("Run completed!", icon = ":material/thumb_up:")
 
-            # Set the dlmuse output as input for other modules
-            out_csv = f"{path_out_dlmuse}/{dset_name}_DLMUSE.csv"
-            if os.path.exists(out_csv):
-                st.session_state.path_csv_dlmuse = out_csv
-                st.session_state.path_dlmuse = path_out_dlmuse
+                # Set the dlmuse output as input for other modules
+                out_csv = f"{path_out_dlmuse}/DLMUSE_Volumes.csv"
+                if os.path.exists(out_csv):
+                    st.session_state.path_csv_dlmuse = out_csv
+                    st.session_state.path_dlmuse = path_out_dlmuse
 
 # FIXME: this is for debugging; will be removed
 with st.expander('session_state: All'):

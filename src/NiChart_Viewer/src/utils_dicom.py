@@ -10,6 +10,8 @@ import pandas as pd
 import dicom2nifti as dcm
 import pydicom
 
+# https://github.com/rordenlab/dcm2niix/blob/master/FILENAMING.md
+
 # https://stackoverflow.com/questions/71042522/conversion-not-working-properly-using-dicom2nifti
 # https://pypi.org/project/dicom2nifti/#history
 # https://pycad.medium.com/mvp-online-dicom-nifti-viewer-with-python-0da8b3aceadd
@@ -17,7 +19,14 @@ import pydicom
 
 def convert_dicoms_to_nifti(in_dir, out_dir):
     
-    dcm.convert_directory(in_dir, out_dir, compression=True, reorient=True)
+    # Detect files
+    filesandirs = glob.glob(os.path.join(in_dir, '**', '*'), recursive=True)
+    files = [f for f in filesandirs if os.path.isfile(f)]
+    
+    # Read dicom meta data
+    dicoms = [pydicom.dcmread(f, stop_before_pixels=True) for f in files]
+
+    #dcm.convert_directory(in_dir, out_dir, compression=True, reorient=True)
 
 
 #def read_DICOM_slices(path):
