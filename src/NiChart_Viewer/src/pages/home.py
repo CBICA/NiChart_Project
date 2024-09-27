@@ -32,11 +32,14 @@ if 'instantiated' not in st.session_state:
     st.session_state.path_csv_dlmuse = ''
     st.session_state.path_csv_mlscores = ''
     st.session_state.path_csv_viewdlmuse = ''
+    
+    # Dicom series
+    st.session_state.list_series = []    
 
     #####
     # FIXME : for quick test
     #st.session_state.path_csv_mlscores = st.session_state.path_root + '/test/test3_nifti+roi/output/MyStudy/MLScores/MyStudy_DLMUSE+MLScores.csv'   
-    #st.session_state.path_last_sel = st.session_state.path_init + '/../../TestData'
+    st.session_state.path_last_sel = st.session_state.path_init + '/../../TestData'
     #####
 
     # Image suffixes
