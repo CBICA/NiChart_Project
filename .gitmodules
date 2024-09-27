@@ -76,18 +76,6 @@
 [submodule "src/Image_Processing/sMRI/SOPNMF"]
 	path = src/Image_Processing/sMRI/SOPNMF
 	url = https://github.com/anbai106/SOPNMF
-[submodule "src/Machine_Learning/GeneSGAN"]
-	path = src/Machine_Learning/GeneSGAN
-	url = https://github.com/zhijian-yang/GeneSGAN
-[submodule "src/Machine_Learning/SmileGAN"]
-	path = src/Machine_Learning/SmileGAN
-	url = https://github.com/zhijian-yang/SmileGAN
-[submodule "src/Machine_Learning/SurrealGAN"]
-	path = src/Machine_Learning/SurrealGAN
-	url = https://github.com/zhijian-yang/SurrealGAN
-[submodule "src/Machine_Learning/spare_score"]
-	path = src/Machine_Learning/spare_score
-	url = https://github.com/CBICA/spare_score
 [submodule "src/NiChart_Viewer"]
 	path = src/NiChart_Viewer
 	url = https://github.com/CBICA/NiChart_Viewer
@@ -106,3 +94,7 @@
 	path = src/Image_Processing/sMRI/NiChart_DLMUSE
 	url = https://github.com/CBICA/NiChart_DLMUSE.git
 	branch = kb-dev
+[submodule "src/NiChart"]
+	path = src/NiChart
+	url = https://github.com/CBICA/NiChart_Viewer.git
+	branch = viewer_streamlit
