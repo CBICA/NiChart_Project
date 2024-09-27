@@ -20,7 +20,7 @@ import pydicom
 def convert_dicoms_to_nifti(in_dir, out_dir):
     
     # Detect files
-    filesandirs = glob.glob(os.path.join(in_dir, '**', '*'), recursive=True)
+    filesandirs = glob(os.path.join(in_dir, '**', '*'), recursive=True)
     files = [f for f in filesandirs if os.path.isfile(f)]
     
     # Read dicom meta data
