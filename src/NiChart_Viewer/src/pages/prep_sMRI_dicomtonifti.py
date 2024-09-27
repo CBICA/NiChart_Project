@@ -6,29 +6,6 @@ from tkinter import filedialog
 import utils_st as utilst
 import utils_dicom as utildcm
 
-def browse_file(path_init):
-    '''
-    File selector
-    Returns the file name selected by the user and the parent folder
-    '''
-    root = tk.Tk()
-    root.withdraw()  # Hide the main window
-    out_path = filedialog.askopenfilename(initialdir = path_init)
-    path_out = os.path.dirname(out_path)
-    root.destroy()
-    return out_path, path_out
-
-def browse_folder(path_init):
-    '''
-    Folder selector
-    Returns the folder name selected by the user
-    '''
-    root = tk.Tk()
-    root.withdraw()  # Hide the main window
-    out_path = filedialog.askdirectory(initialdir = path_init)
-    root.destroy()
-    return out_path
-
 st.markdown(
         """
     - Extract sMRI Nifti scans from raw dicom filess.
