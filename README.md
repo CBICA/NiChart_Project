@@ -4,7 +4,7 @@ NiChart is a comprehensive framework designed to revolutionize neuroimaging rese
 
 ## Components
 
-1. **Image Processing**: Utilizes tools like [DLMUSE](https://github.com/CBICA/DLMUSE), [fMRIPrep](https://github.com/nipreps/fmriprep) [XCEPengine](https://github.com/PennLINC/xcp_d), and [QSIPrep](https://github.com/PennLINC/qsiprep) for effective image analytics. Currently supports only [DLMUSE](https://github.com/CBICA/DLMUSE)
+1. **Image Processing**: Currently supports only [DLMUSE](https://github.com/CBICA/DLMUSE). Utilizes tools like [DLMUSE](https://github.com/CBICA/DLMUSE), [fMRIPrep](https://github.com/nipreps/fmriprep) [XCEPengine](https://github.com/PennLINC/xcp_d), and [QSIPrep](https://github.com/PennLINC/qsiprep) for effective image analytics.
 2. **Reference Data Curation**: Houses ISTAGING, 70000 Scans, and 14 individual studies to provide curated reference data.
 3. **Data Harmonization**: Employs [neuroharmonize](https://github.com/rpomponio/neuroHarmonize) and [Combat](https://github.com/Zheng206/ComBatFam_Pipeline) for ensuring consistent data standards.
 4. **Machine Learning Models**: Provides Supervised, Semi-supervised, and DL Models for advanced neuroimaging analysis.
