@@ -94,3 +94,6 @@
 	path = src/NiChart
 	url = https://github.com/CBICA/NiChart_Viewer.git
 	branch = viewer_streamlit
+[submodule "src/Image_Processing/sMRI/NiChart_DLMUSE"]
+	path = src/Image_Processing/sMRI/NiChart_DLMUSE
+	url = https://github.com/CBICA/NiChart_DLMUSE.git
