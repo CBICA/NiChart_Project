@@ -16,9 +16,6 @@
 [submodule "Machine_Learning/SurrealGAN"]
 	path = Machine_Learning/SurrealGAN
 	url = https://github.com/zhijian-yang/SurrealGAN
-[submodule "Image_Processing/sMRI/NiChart_DLMUSE"]
-	path = Image_Processing/sMRI/NiChart_DLMUSE
-	url = https://github.com/CBICA/NiChart_DLMUSE
 [submodule "Machine_Learning/spare_score"]
 	path = Machine_Learning/spare_score
 	url = https://github.com/CBICA/spare_score
@@ -31,9 +28,6 @@
 [submodule "Harmonization/NiChart_Harmonize"]
 	path = Harmonization/NiChart_Harmonize
 	url = https://github.com/CBICA/NiChart_Harmonize
-[submodule "NiChart_Viewer"]
-	path = NiChart_Viewer
-	url = https://github.com/gurayerus/NiChart_Viewer
 [submodule "Image_Processing/fMRI/pNet"]
 	path = Image_Processing/fMRI/pNet
 	url = https://github.com/CBICA/pNet
@@ -76,9 +70,6 @@
 [submodule "src/Image_Processing/sMRI/SOPNMF"]
 	path = src/Image_Processing/sMRI/SOPNMF
 	url = https://github.com/anbai106/SOPNMF
-[submodule "src/NiChart_Viewer"]
-	path = src/NiChart_Viewer
-	url = https://github.com/CBICA/NiChart_Viewer
 [submodule "src/NiChart_Website"]
 	path = src/NiChart_Website
 	url = https://github.com/CBICA/NiChart_Website
