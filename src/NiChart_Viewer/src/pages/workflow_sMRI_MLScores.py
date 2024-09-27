@@ -16,38 +16,13 @@ from tkinter import filedialog
 
 import utils_st as utilst
 
-def browse_file(path_input):
-    '''
-    File selector
-    Returns the file name selected by the user and the parent folder
-    '''
-    root = tk.Tk()
-    root.withdraw()  # Hide the main window
-    out_path = filedialog.askopenfilename(initialdir = path_input)
-    path_out = os.path.dirname(out_path)
-    root.destroy()
-    return out_path, path_out
-
-def browse_folder(path_input):
-    '''
-    Folder selector
-    Returns the folder name selected by the user
-    '''
-    root = tk.Tk()
-    root.withdraw()  # Hide the main window
-    out_path = filedialog.askdirectory(initialdir = path_input)
-    root.destroy()
-    return out_path
-
 st.markdown(
         """
-    NiChart sMRI ML pipeline using COMBAT harmonization, SPARE
-    scores, and SurrealGAN indices.
-    - Input data is a csv file with the DLMUSE ROI volumes and
-    a csv file with demographic info (Age, Sex, DX, Site).
+    - NiChart sMRI segmentation pipeline using DLMUSE.
+    - DLMUSE segments raw T1 images into 145 regions of interest (ROIs) + 105 composite ROIs.
 
     ### Want to learn more?
-    - Visit [SPARE GitHub](https://github.com/CBICA/spare_scores)
+    - Visit [DLMUSE GitHub](https://github.com/CBICA/NiChart_DLMUSE)
         """
 )
 
@@ -60,76 +35,60 @@ with st.container(border=True):
                                         helpmsg)
     st.session_state.dset_name = dset_name
 
-    # DLMUSE file name
-    helpmsg = 'Input csv file with DLMUSE ROI volumes.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it'
-    csv_dlmuse, csv_path = utilst.user_input_file("Select file",
-                                                  'btn_input_dlmuse',
-                                                  "DLMUSE ROI file",
-                                                  st.session_state.path_last_sel,
-                                                  st.session_state.path_csv_dlmuse,
-                                                  helpmsg)
-    if os.path.exists(csv_dlmuse):
-        st.session_state.path_csv_dlmuse = csv_dlmuse
-        st.session_state.path_last_sel = csv_path
+    # Input T1 image folder
+    helpmsg = 'DLMUSE will be applied to .nii/.nii.gz images directly in the input folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
+    path_t1 = utilst.user_input_folder("Select folder",
+                                       'btn_indir_t1',
+                                       "Input folder",
+                                       st.session_state.path_last_sel,
+                                       st.session_state.path_t1,
+                                       helpmsg)
+    st.session_state.path_t1 = path_t1
 
-    # Demog file name
-    helpmsg = 'Input csv file with demographic values.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it'
-    csv_demog, csv_path = utilst.user_input_file("Select file",
-                                                  'btn_input_demog',
-                                                  "Demographics file",
-                                                  st.session_state.path_last_sel,
-                                                  st.session_state.path_csv_demog,
-                                                  helpmsg)
-    if os.path.exists(csv_demog):
-        st.session_state.path_csv_demog = csv_demog
-        st.session_state.path_last_sel = csv_path
-
-    # Out folder name
-    helpmsg = 'Results will be saved into the output folder, in a subfolder named "MLScores".\n\nThe results will include harmonized ROIs, SPARE scores and SurrealGAN scores.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
+    # Out folder
+    helpmsg = 'DLMUSE will generate a segmented image for each input image, and a csv file with the volumes of ROIs for the complete dataset.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
     path_out = utilst.user_input_folder("Select folder",
-                                        'btn_out_dir',
+                                       'btn_out_dir',
                                         "Output folder",
                                         st.session_state.path_last_sel,
                                         st.session_state.path_out,
                                         helpmsg)
     st.session_state.path_out = path_out
 
+    # Device type
+    helpmsg = "Choose 'cuda' if your computer has an NVIDIA GPU, 'mps' if you have an Apple M-series chip, and 'cpu' if you have a standard CPU."
+    device = utilst.user_input_select('Device',
+                                      ['cuda', 'cpu', 'mps'],
+                                      'dlmuse_sel_device',
+                                      helpmsg)
+
     # Check input files
     flag_files = 1
-    if not os.path.exists(csv_dlmuse):
+    if not os.path.exists(path_t1):
         flag_files = 0
 
-    if not os.path.exists(csv_demog):
+    if not os.path.exists(path_out):
         flag_files = 0
 
-    run_dir = os.path.join(st.session_state.path_root, 'src', 'workflow', 'workflows', 'w_sMRI')
+    run_dir = os.path.join(st.session_state.path_root, 'src', 'NiChart_DLMUSE')
 
     # Run workflow
     if flag_files == 1:
-        if st.button("Run w_sMRI"):
-
+        if st.button("Run w_DLMUSE"):
             import time
-            path_out_mlscores = os.path.join(path_out, dset_name, 'MLScores')
-            st.info(f"Running: mlscores_workflow ", icon = ":material/manufacturing:")
+            path_out_dlmuse = os.path.join(path_out, dset_name, 'DLMUSE')
+            st.info(f"Running: NiChart_DLMUSE -i {path_t1} -o {path_out_dlmuse} -d {device}", icon = ":material/manufacturing:")
             with st.spinner('Wait for it...'):
                 time.sleep(15)
-                os.system(f"cd {run_dir}")
-                cmd = f"python3 {run_dir}/call_snakefile.py --run_dir {run_dir} --dset_name {dset_name} --input_rois {csv_dlmuse} --input_demog {csv_demog} --dir_out {path_out_mlscores}"
-                os.system(cmd)
+                os.system(f"NiChart_DLMUSE -i {path_t1} -o {path_out_dlmuse} -d {device}")
                 st.success("Run completed!", icon = ":material/thumb_up:")
 
-                # Set the output file as the input for the related viewers
-                csv_mlscores = f"{path_out_mlscores}/{dset_name}_DLMUSE+MLScores.csv"
-                if os.path.exists(csv_mlscores):
-                    st.session_state.path_csv_mlscores = csv_mlscores
-
-                st.success(f"Out file: {csv_mlscores}")
-
+                # Set the dlmuse output as input for other modules
+                out_csv = f"{path_out_dlmuse}/DLMUSE_Volumes.csv"
+                if os.path.exists(out_csv):
+                    st.session_state.path_csv_dlmuse = out_csv
+                    st.session_state.path_dlmuse = path_out_dlmuse
 
 # FIXME: this is for debugging; will be removed
-with st.expander('session_state: Plots'):
-    st.session_state.plots
-
 with st.expander('session_state: All'):
     st.write(st.session_state)
-
