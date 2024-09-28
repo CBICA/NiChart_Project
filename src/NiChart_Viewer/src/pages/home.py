@@ -33,8 +33,10 @@ if 'instantiated' not in st.session_state:
     st.session_state.path_csv_mlscores = ''
     st.session_state.path_csv_viewdlmuse = ''
     
-    # Dicom series
+    # Dicom vars
     st.session_state.list_series = []    
+    st.session_state.df_dicoms = pd.DataFrame()
+    st.session_state.sel_series = []
 
     #####
     # FIXME : for quick test

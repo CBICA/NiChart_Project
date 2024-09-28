@@ -134,108 +134,87 @@ def detect_series(in_dir):
     
     return df_dicoms, list_series
 
+def select_series(df_dicoms, dict_series):
+
+    # Select dicom files for which series desc. contains user keywords
+    df_sel_list = []
+    dict_out = {}
+    for key, value in dict_series.items():
+        df_sel = df_dicoms[df_dicoms.dtype.str.contains(value)]
+        dict_out[key] = df_sel.dtype.unique().tolist()
+        if df_sel.shape[0] > 0:
+            df_sel_list.append(df_sel)
+            print(f' Detected dicoms: {key} , {df_sel.shape[0]}')
+        else:
+            print(f' WARNING: No matching dicoms for {key}')
+
+    # Return selected files, series descriptions, and all series in the folder
+    return df_sel_list, dict_out
+
+
+def convert_single_series(list_files, out_dir, compression=True, reorient=True):
+    """
+    This function will extract dicom files given in the list to nifti
+    """
+    # Sort dicom files by series uid
+    dicom_series = {}
+    for file_path in list_files:
+        try:
+            dicom_headers = dcmread(file_path,
+                                    defer_size = "1 KB",
+                                    stop_before_pixels = False,
+                                    force = dicom2nifti.settings.pydicom_read_force)
+            if not _is_valid_imaging_dicom(dicom_headers):
+                print(f"Skipping: {file_path}")
+                continue
+            print(f"Organizing: {file_path}")
+            if dicom_headers.SeriesInstanceUID not in dicom_series:
+                dicom_series[dicom_headers.SeriesInstanceUID] = []
+            dicom_series[dicom_headers.SeriesInstanceUID].append(dicom_headers)
+        except:  # Explicitly capturing all errors here to be able to continue processing all the rest
+            print("Unable to read: %s" % file_path)
+
+    # Start converting one by one
+    for series_id, dicom_input in dicom_series.items():
+        base_filename = ""
+        try:
+            # construct the filename for the nifti
+            base_filename = ""
+            if 'PatientID' in dicom_input[0]:
+                base_filename = _remove_accents('%s' % dicom_input[0].PatientID)
+
+            ## FIXME: Check also "AcquisitionDate"
+            if 'StudyDate' in dicom_input[0]:
+                base_filename = _remove_accents(f'{base_filename}_{dicom_input[0].StudyDate}')
+
+            if 'SeriesDescription' in dicom_input[0]:
+                base_filename = _remove_accents(f'{base_filename}_{dicom_input[0].SeriesDescription}')
+
+            else:
+                base_filename = _remove_accents(dicom_input[0].SeriesInstanceUID)
+
+            print('--------------------------------------------')
+            print(f'Start converting {base_filename}')
+            if compression:
+                nifti_file = os.path.join(out_dir, base_filename + '.nii.gz')
+            else:
+                nifti_file = os.path.join(out_dir, base_filename + '.nii')
+            convert_dicom.dicom_array_to_nifti(dicom_input, nifti_file, reorient)
+            gc.collect()
+        except:  # Explicitly capturing app exceptions here to be able to continue processing
+            print(f'Unable to convert: {base_filename}')
+            traceback.print_exc()
+
+
+def convert_sel_series(df_dicoms, sel_series, out_dir):
     
-    #print(f"Total dicom files: {df_dicoms.shape[0]}")
-    #print(f"Dicom series: {series_out}")
+    # Convert all images for each selected series
+    for stmp in sel_series:
+        print(f'Converting series: {stmp}')
+        list_files = df_dicoms[df_dicoms.dtype == stmp].fname.tolist()
+        print(list_files)
 
-    ## Select dicoms with user keywords
-    #df_sel_list = []
-    #dict_out = {}
-    #for key, value in dict_series.items():
-        #df_sel = df_dicoms[df_dicoms.dtype.str.contains(value)]
-        #dict_out[key] = df_sel.dtype.unique().tolist()
-        #if df_sel.shape[0] > 0:
-            #df_sel_list.append(df_sel)
-            #print(f' Detected dicoms: {key} , {df_sel.shape[0]}')
-        #else:
-            #print(f' WARNING: No matching dicoms for {key}')
-
-    ## Return selected files, series descriptions, and all series in the folder
-    #return df_sel_list, dict_out, series_out
-
-    
-    ## sort dicom files by series uid
-    #dicom_series = {}
-    #for root, _, files in os.walk(dicom_directory):
-        #for dicom_file in files:
-            #file_path = os.path.join(root, dicom_file)
-            ## noinspection PyBroadException
-            #try:
-                #if common.is_dicom_file(file_path):
-                    ## read the dicom as fast as possible
-                    ## (max length for SeriesInstanceUID is 64 so defer_size 100 should be ok)
-
-                    #dicom_headers = dcmread(file_path, 
-                                            #defer_size="1 KB", 
-                                            #stop_before_pixels=False,
-                                            #force=dicom2nifti.settings.pydicom_read_force)
-                    #if not _is_valid_imaging_dicom(dicom_headers):
-                        #print(f"Skipping: {file_path}")
-                        #continue
-                    #print("Organizing: {file_path}")
-                    #if dicom_headers.SeriesInstanceUID not in dicom_series:
-                        #dicom_series[dicom_headers.SeriesInstanceUID] = []
-                    #dicom_series[dicom_headers.SeriesInstanceUID].append(dicom_headers)
-            
-            ## Explicitly capturing all errors here to be able to continue processing all the rest                    
-            #except:  
-                #print("Unable to read: {file_path}")
-
-            ##print(dicom_headers)
-            ##input()
-
-    ## start converting one by one
-    #for series_id, dicom_input in dicom_series.items():
-        #base_filename = ""
-        ## noinspection PyBroadException
-        #try:
-            ## construct the filename for the nifti
-            #base_filename = ""
-            #if 'PatientID' in dicom_input[0]:
-                #base_filename = _remove_accents('%s' % dicom_input[0].PatientID)
-                #if 'SeriesDescription' in dicom_input[0]:
-                    #base_filename = _remove_accents('%s_%s' % (base_filename,
-                                                               #dicom_input[0].SeriesDescription))
-                #elif 'SequenceName' in dicom_input[0]:
-                    #base_filename = _remove_accents('%s_%s' % (base_filename,
-                                                               #dicom_input[0].SequenceName))
-                #elif 'ProtocolName' in dicom_input[0]:
-                    #base_filename = _remove_accents('%s_%s' % (base_filename,
-                                                               #dicom_input[0].ProtocolName))
-            #else:
-                #base_filename = _remove_accents(dicom_input[0].SeriesInstanceUID)
-            #print('--------------------------------------------')
-            #print(f'Start converting {base_filename}')
-            #if compression:
-                #nifti_file = os.path.join(output_folder, base_filename + '.nii.gz')
-            #else:
-                #nifti_file = os.path.join(output_folder, base_filename + '.nii')
-            #convert_dicom.dicom_array_to_nifti(dicom_input, nifti_file, reorient)
-            #gc.collect()
-        #except:  # Explicitly capturing app exceptions here to be able to continue processing
-            #print(f'Unable to convert: {base_filename}')
-            #traceback.print_exc()
-
-
-def convert_dicoms_to_nifti(in_dir, out_dir):
-    
-    # Detect files
-    filesandirs = glob(os.path.join(in_dir, '**', '*'), recursive=True)
-    files = [f for f in filesandirs if os.path.isfile(f)]
-    
-    # Convert dicoms
-    #dcm.convert_directory(in_dir, out_dir, compression=True, reorient=True)
-    #dicoms = [pydicom.dcmread(f, stop_before_pixels=True) for f in files]
-
-    #convert_dir_selective(in_dir, out_dir, compression=True, reorient=True)
-    a,b,c = select_dicoms(in_dir, {'T1':'T1|T2', 'FL':'GGG', '4D':'BOLD|ASL|DTI'})
-    
-    print(a)
-    print('ee')
-    print(b)
-    print('ee')
-    print(c)
-    
+        convert_single_series(list_files, out_dir, compression=True, reorient=True)
     
 #def convert_dicoms_to_nifti(in_dir, out_dir):
     

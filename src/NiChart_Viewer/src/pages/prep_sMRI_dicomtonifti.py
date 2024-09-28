@@ -5,6 +5,7 @@ import tkinter as tk
 from tkinter import filedialog
 import utils_st as utilst
 import utils_dicom as utildcm
+import pandas as pd
 
 st.markdown(
         """
@@ -48,38 +49,47 @@ with st.container(border=True):
                 if len(list_series) == 0:
                     st.warning('Could not detect any dicom series!')
                 st.session_state.list_series = list_series
+                st.session_state.df_dicoms = df_dicoms
 
 if len(st.session_state.list_series) > 0:
 
     with st.container(border=True):
+        st.session_state.sel_series = st.multiselect("Select T1 Series:", st.session_state.list_series, [])
 
-        list_sel = st.multiselect("Select T1 Series:", st.session_state.list_series, [])
+    with st.container(border=True):
 
-                    
+        # Out folder
+        helpmsg = 'Nifti images will be extracted to the output folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
+        path_out = utilst.user_input_folder("Select folder",
+                                            'btn_out_dir',
+                                            "Output folder",
+                                            st.session_state.path_last_sel,
+                                            st.session_state.path_out,
+                                            helpmsg)
+        st.session_state.path_out = path_out
+
+        path_t1 = os.path.join(path_out, dset_name, 'Images', 'T1')
+        if not os.path.exists(path_t1):
+            os.makedirs(path_t1)
+
+        print(st.session_state.df_dicoms.shape[0])
+        print(len(st.session_state.sel_series))
+        print('aa')
+
+        if st.session_state.df_dicoms.shape[0] > 0 and len(st.session_state.sel_series) > 0:
+            if st.button("Convert Series"):
+                utildcm.convert_sel_series(st.session_state.df_dicoms, st.session_state.sel_series, path_t1)
+                st.success("Run completed!", icon = ":material/thumb_up:")
 
 
+        # Set the nifti output as input for other modules
+        if os.path.exists(path_t1):
+            st.session_state.path_t1 = path_t1
 
-    #path_out_t1 = os.path.join(path_out, dset_name, 'Images', 'T1')
 
-            #if not os.path.exists(path_out_t1):
-                #os.makedirs(path_out_t1)
-            
-
-    ## Out folder
-    #helpmsg = 'Nifti images will be extracted to the output folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
-    #path_out = utilst.user_input_folder("Select folder",
-                                        #'btn_out_dir',
-                                        #"Output folder",
-                                        #st.session_state.path_last_sel,
-                                        #st.session_state.path_out,
-                                        #helpmsg)
-    #st.session_state.path_out = path_out
-
-        ## Set the nifti output as input for other modules
-        #if os.path.exists(path_out_t1):
-            #st.session_state.path_t1 = path_out_t1
 
 # FIXME: this is for debugging; will be removed
 with st.expander('session_state: All'):
-    st.write(st.session_state)
+    st.write(st.session_state.df_dicoms)
+    st.write(st.session_state.sel_series)
 
