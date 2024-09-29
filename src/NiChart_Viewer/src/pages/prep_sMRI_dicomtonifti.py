@@ -4,8 +4,12 @@ import streamlit as st
 import tkinter as tk
 from tkinter import filedialog
 import utils_st as utilst
+import utils_nifti as utilni
 import utils_dicom as utildcm
 import pandas as pd
+import numpy as np
+
+VIEWS = ["axial", "sagittal", "coronal"]
 
 st.markdown(
         """
@@ -106,8 +110,41 @@ if len(st.session_state.list_series) > 0:
             # utilst.display_folder(st.session_state.path_selmod)
 
 # Panel for viewing extracted nifti images
-if len(st.session_state.list_input_nifti)) > 0:
+if len(st.session_state.list_input_nifti) > 0:
     with st.container(border=True):
+
+        # Selection of MRID
+        sel_img = st.selectbox("Images",
+                               st.session_state.list_input_nifti,
+                               key=f"selbox_images",
+                               index = 0)
+        path_sel_img = os.path.join(st.session_state.path_selmod, sel_img)
+
+
+        with st.container(border=True):
+            # Create a list of checkbox options
+            list_orient = st.multiselect("Select viewing planes:", VIEWS, VIEWS)
+
+            # View hide overlay
+            is_show_overlay = st.checkbox('Show overlay', True)
+
+    if os.path.exists(path_sel_img):
+
+        # Prepare final 3d matrix to display
+        img = utilni.prep_image(path_sel_img)
+
+        # Detect mask bounds and center in each view
+        img_bounds = utilni.detect_img_bounds(img)
+
+        # Show images
+        blocks = st.columns(len(list_orient))
+        for i, tmp_orient in enumerate(list_orient):
+            with blocks[i]:
+                ind_view = VIEWS.index(tmp_orient)
+                utilst.show_img3D(img, ind_view, img_bounds[ind_view,:], tmp_orient)
+
+    else:
+        st.warning(f'Image not found: {path_sel_img}')
 
 
 # FIXME: this is for debugging; will be removed
