@@ -12,35 +12,49 @@ if 'instantiated' not in st.session_state:
     st.session_state.plot_index = 1
     st.session_state.plot_active = ''
 
+    # Study name
+    st.session_state.dset_name = ''
+
     # Path to root folder
     st.session_state.path_root = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
 
     # Path to init folder
     st.session_state.path_init = os.path.join(st.session_state.path_root, 'test')
 
-    # Path to input t1 folder
+    # Path to last user selection (to initialize file/folder selector)
     st.session_state.path_last_sel = st.session_state.path_init
 
-    # Path to output folder (used as base path for all output files)
+    # Paths to output files/folders
     st.session_state.path_out = ''
-
-    # Paths to I/O files/folders
+    st.session_state.path_dset = ''
+    st.session_state.path_nifti = ''
+    st.session_state.path_selmod = ''
     st.session_state.path_t1 = ''
+    st.session_state.path_t2 = ''
+    st.session_state.path_fl = ''
+    st.session_state.path_dti = ''
+    st.session_state.path_fmri = ''
     st.session_state.path_dlmuse = ''
-    st.session_state.path_dicom = ''
     st.session_state.path_csv_demog = ''
     st.session_state.path_csv_dlmuse = ''
     st.session_state.path_csv_mlscores = ''
     st.session_state.path_csv_viewdlmuse = ''
+
+    # Input image vars
+    st.session_state.list_input_nifti = []
+
     
     # Dicom vars
+    st.session_state.path_dicom = ''
     st.session_state.list_series = []    
     st.session_state.df_dicoms = pd.DataFrame()
     st.session_state.sel_series = []
+    st.session_state.sel_mod = ''
 
     #####
     # FIXME : for quick test
     #st.session_state.path_csv_mlscores = st.session_state.path_root + '/test/test3_nifti+roi/output/MyStudy/MLScores/MyStudy_DLMUSE+MLScores.csv'   
+    st.session_state.path_last_sel = st.session_state.path_init
     st.session_state.path_last_sel = st.session_state.path_init + '/../../TestData'
     #####
 
@@ -64,9 +78,6 @@ if 'instantiated' not in st.session_state:
 
     # Variable selected by user
     st.session_state.sel_var = ''
-
-    # Input study name
-    st.session_state.dset_name = 'MyStudy'
 
     # MUSE dictionaries
     st.session_state.dir_resources = os.path.join(st.session_state.path_root, 'resources')

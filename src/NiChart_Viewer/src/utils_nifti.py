@@ -85,3 +85,43 @@ def detect_mask_bounds(mask):
             mask_bounds[i,2] = mask.shape[i] // 2
 
     return mask_bounds
+
+@st.cache_data
+def prep_image_and_olay(f_img, f_mask, sel_var_ind, dict_derived):
+    '''
+    Read images from files and create 3D matrices for display
+    '''
+
+    # Read nifti
+    nii_img = nib.load(f_img)
+    nii_mask = nib.load(f_mask)
+
+    # Reorient nifti
+    nii_img = reorient_nifti(nii_img, ref_orient = 'IPL')
+    nii_mask = reorient_nifti(nii_mask, ref_orient = 'IPL')
+
+    # Extract image to matrix
+    img = nii_img.get_fdata()
+    mask = nii_mask.get_fdata()
+
+    # Convert image to uint
+    img = (img.astype(float) / img.max())
+
+    # Crop image to ROIs and reshape
+    img, mask = crop_image(img, mask)
+
+    # Select target roi: derived roi
+    list_rois = dict_derived[sel_var_ind]
+    mask = np.isin(mask, list_rois)
+
+    # # Select target roi: single roi
+    # mask = (mask == sel_var_ind).astype(int)
+
+    # Merge image and mask
+    img = np.stack((img,)*3, axis=-1)
+
+    img_masked = img.copy()
+    img_masked[mask == 1] = (img_masked[mask == 1] * (1 - OLAY_ALPHA) + MASK_COLOR * OLAY_ALPHA)
+
+    return img, mask, img_masked
+
