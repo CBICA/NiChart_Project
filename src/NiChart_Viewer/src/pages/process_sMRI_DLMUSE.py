@@ -4,6 +4,11 @@ import streamlit as st
 import tkinter as tk
 from tkinter import filedialog
 import utils_st as utilst
+import pandas as pd
+import utils_muse as utilmuse
+import utils_nifti as utilni
+
+VIEWS = ["axial", "coronal", "sagittal"]
 
 st.markdown(
         """
@@ -15,68 +20,146 @@ st.markdown(
         """
 )
 
-with st.container(border=True):
-
-    # Dataset name: All results will be saved in a main folder named by the dataset name 
+# Panel for output (dataset name + out_dir)
+flag_expanded = st.session_state.path_dset == ''
+with st.expander('Select output', expanded = flag_expanded):
+    # Dataset name: All results will be saved in a main folder named by the dataset name
     helpmsg = "Each dataset's results are organized in a dedicated folder named after the dataset"
-    dset_name = utilst.user_input_text("Dataset name", 
-                                        st.session_state.dset_name, 
-                                        helpmsg)
-    st.session_state.dset_name = dset_name
-
-    # Input T1 image folder
-    helpmsg = 'DLMUSE will be applied to .nii/.nii.gz images directly in the input folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
-    path_t1 = utilst.user_input_folder("Select folder",
-                                       'btn_indir_t1',
-                                       "Input folder",
-                                       st.session_state.path_last_sel,
-                                       st.session_state.path_t1,
-                                       helpmsg)
-    st.session_state.path_t1 = path_t1
+    dset_name = utilst.user_input_text("Dataset name", st.session_state.dset_name, helpmsg)
 
     # Out folder
-    helpmsg = 'DLMUSE will generate a segmented image for each input image, and a csv file with the volumes of ROIs for the complete dataset.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
+    helpmsg = 'DLMUSE images will be saved to the output folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
     path_out = utilst.user_input_folder("Select folder",
-                                       'btn_out_dir',
+                                        'btn_sel_out_dir',
                                         "Output folder",
                                         st.session_state.path_last_sel,
                                         st.session_state.path_out,
                                         helpmsg)
-    st.session_state.path_out = path_out
+    if dset_name != '' and path_out != '':
+        st.session_state.dset_name = dset_name
+        st.session_state.path_out = path_out
+        st.session_state.path_dset = os.path.join(path_out, dset_name)
+        st.session_state.path_dlmuse = os.path.join(path_out, dset_name, 'DLMUSE')
 
-    # Device type
-    helpmsg = "Choose 'cuda' if your computer has an NVIDIA GPU, 'mps' if you have an Apple M-series chip, and 'cpu' if you have a standard CPU."
-    device = utilst.user_input_select('Device',
-                                      ['cuda', 'cpu', 'mps'],
-                                      'dlmuse_sel_device',
-                                      helpmsg)
+        if st.session_state.path_dlmuse != '':
+            if not os.path.exists(st.session_state.path_dlmuse):
+                os.makedirs(st.session_state.path_dlmuse)
+            st.success(f'Results will be saved to: {st.session_state.path_dlmuse}')
 
-    # Check input files
-    flag_files = 1
-    if not os.path.exists(path_t1):
-        flag_files = 0
+# Panel for running DLMUSE
+if st.session_state.dset_name != '':
+    with st.expander('Run DLMUSE', expanded = True):
 
-    if not os.path.exists(path_out):
-        flag_files = 0
+        # Input T1 image folder
+        helpmsg = 'DLMUSE will be applied to .nii/.nii.gz images directly in the input folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
+        path_t1 = utilst.user_input_folder("Select folder",
+                                        'btn_indir_t1',
+                                        "Input folder",
+                                        st.session_state.path_last_sel,
+                                        st.session_state.path_t1,
+                                        helpmsg)
+        st.session_state.path_t1 = path_t1
 
-    run_dir = os.path.join(st.session_state.path_root, 'src', 'NiChart_DLMUSE')
+        # Device type
+        helpmsg = "Choose 'cuda' if your computer has an NVIDIA GPU, 'mps' if you have an Apple M-series chip, and 'cpu' if you have a standard CPU."
+        device = utilst.user_input_select('Device',
+                                        ['cuda', 'cpu', 'mps'],
+                                        'dlmuse_sel_device',
+                                        helpmsg)
 
-    # Run workflow
-    if flag_files == 1:
-        if st.button("Run w_DLMUSE"):
+
+        # Button to run DLMUSE
+        flag_btn = os.path.exists(st.session_state.path_t1)
+        btn_dlmuse = st.button("Run DLMUSE", disabled = not flag_btn)
+
+        if btn_dlmuse:
+            run_dir = os.path.join(st.session_state.path_root, 'src', 'NiChart_DLMUSE')            
+            if not os.path.exists(st.session_state.path_dlmuse):
+                os.makedirs(st.session_state.path_dlmuse)
+            
             import time
-            path_out_dlmuse = os.path.join(path_out, dset_name, 'DLMUSE')
-            st.info(f"Running: NiChart_DLMUSE -i {path_t1} -o {path_out_dlmuse} -d {device}", icon = ":material/manufacturing:")
             with st.spinner('Wait for it...'):
-                time.sleep(15)
-                os.system(f"NiChart_DLMUSE -i {path_t1} -o {path_out_dlmuse} -d {device}")
+                dlmuse_cmd = f"NiChart_DLMUSE -i {st.session_state.path_t1} -o {st.session_state.path_dlmuse} -d {device}"
+                st.info(f'Running: {dlmuse_cmd}', icon = ":material/manufacturing:")
+                time.sleep(5)
+                #os.system(dlmuse_cmd)
                 st.success("Run completed!", icon = ":material/thumb_up:")
 
-                # Set the dlmuse output as input for other modules
-                out_csv = f"{path_out_dlmuse}/DLMUSE_Volumes.csv"
+                # Set the dlmuse csv output
+                out_csv = f"{st.session_state.path_dlmuse}/DLMUSE_Volumes.csv"
                 if os.path.exists(out_csv):
                     st.session_state.path_csv_dlmuse = out_csv
-                    st.session_state.path_dlmuse = path_out_dlmuse
+
+# Panel for viewing DLMUSE images
+if os.path.exists(st.session_state.path_csv_dlmuse):
+    with st.expander('View segmentations', expanded = True):
+
+        # Read dlmuse csv
+        df = pd.read_csv(st.session_state.path_csv_dlmuse)
+
+        # Create a dictionary of MUSE indices and names
+        df_muse = pd.read_csv(st.session_state.dict_muse_all)
+
+        # Read derived roi list and convert to a dict
+        dict_roi, dict_derived = utilmuse.read_derived_roi_list(st.session_state.dict_muse_sel,
+                                                                st.session_state.dict_muse_derived)
+
+        # Selection of MRID
+        sel_mrid = st.selectbox("MRID", df.MRID.tolist(), key=f"selbox_mrid", index = 0)
+
+        st.session_state.path_sel_img = os.path.join(st.session_state.path_t1, 
+                                                     sel_mrid + '.nii.gz')
+        st.session_state.path_sel_dlmuse = os.path.join(st.session_state.path_dlmuse, 
+                                                     sel_mrid + '_DLMUSE.nii.gz')
+        
+
+        # Selection of ROI
+        sel_var = st.selectbox("ROI", list(dict_roi.keys()), key=f"selbox_rois", index = 0)
+        sel_var_ind = dict_roi[sel_var]
+        
+
+        # Create a list of checkbox options
+        list_orient = st.multiselect("Select viewing planes:", VIEWS, VIEWS)
+
+        # View hide overlay
+        is_show_overlay = st.checkbox('Show overlay', True)
+
+        flag_btn = os.path.exists(st.session_state.path_sel_img)
+
+        with st.spinner('Wait for it...'):
+
+            ## Prepare final 3d matrix to display
+            #img = utilni.prep_image(st.session_state.path_sel_img)
+
+            ## Detect mask bounds and center in each view
+            #img_bounds = utilni.detect_img_bounds(img)
+
+            ## Show images
+            #blocks = st.columns(len(list_orient))
+            #for i, tmp_orient in enumerate(list_orient):
+                #with blocks[i]:
+                    #ind_view = VIEWS.index(tmp_orient)
+                    #utilst.show_img3D(img, ind_view, img_bounds[ind_view,:], tmp_orient)
+
+            # Process image and mask to prepare final 3d matrix to display
+            img, mask, img_masked = utilni.prep_image_and_olay(st.session_state.path_sel_img, 
+                                                               st.session_state.path_sel_dlmuse,
+                                                               sel_var_ind, 
+                                                               dict_derived)
+
+            # Detect mask bounds and center in each view
+            mask_bounds = utilni.detect_mask_bounds(mask)
+
+            # Show images
+            blocks = st.columns(len(list_orient))
+            for i, tmp_orient in enumerate(list_orient):
+                with blocks[i]:
+                    ind_view = VIEWS.index(tmp_orient)
+                    if is_show_overlay == False:
+                        utilst.show_img3D(img, ind_view, mask_bounds[ind_view,:], tmp_orient)
+                    else:
+                        utilst.show_img3D(img_masked, ind_view, mask_bounds[ind_view,:], tmp_orient)
+
 
 # FIXME: this is for debugging; will be removed
 with st.expander('session_state: All'):

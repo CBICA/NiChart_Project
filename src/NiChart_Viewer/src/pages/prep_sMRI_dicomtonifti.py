@@ -28,10 +28,12 @@ def progress(p, i, decoded):
 
 st.markdown(
         """
-    1. Select Input Folder: Choose the directory containing your raw DICOM files.
-    2. Detect Series: The application will automatically identify different imaging series within the selected folder.
-    3. Choose Series: Select the specific series you want to extract. You can pick multiple series if necessary.
-    4. Extract Nifti Scans: Click the "Extract" button to convert the selected DICOM series into Nifti format. The extracted Nifti files will be saved in the specified output folder.
+    1. Select Output: Select the folder where all results will be saved.
+    2. Select Input: Choose the directory containing your raw DICOM files.
+    3. Detect Series: The application will automatically identify different imaging series within the selected folder.
+    4. Choose Series: Select the specific series you want to extract. You can pick multiple series if necessary.
+    5. Extract Nifti Scans: Convert the selected DICOM series into Nifti format.
+    6. View Nifti Scans: View extracted scans.
         """
 )
 
@@ -55,10 +57,10 @@ with st.expander('Select output', expanded = True):
         st.session_state.path_dset = os.path.join(path_out, dset_name)
         st.session_state.path_nifti = os.path.join(path_out, dset_name, 'Nifti')
 
-        if st.session_state.path_nifti != '':
-            if not os.path.exists(st.session_state.path_nifti):
-                os.makedirs(st.session_state.path_nifti)
-            st.success(f'Results will be saved to: {st.session_state.path_nifti}')
+        if st.session_state.path_dset != '':
+            if not os.path.exists(st.session_state.path_dset):
+                os.makedirs(st.session_state.path_dset)
+            st.success(f'Results will be saved to: {st.session_state.path_dset}')
 
 # Panel for detecting dicom series
 if st.session_state.dset_name != '':
