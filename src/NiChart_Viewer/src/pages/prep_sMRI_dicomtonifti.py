@@ -21,7 +21,7 @@ st.markdown(
 )
 
 # Panel for output (dataset name + out_dir)
-with st.container(border=True):
+with st.expander('Select output', expanded = True):
     # Dataset name: All results will be saved in a main folder named by the dataset name
     helpmsg = "Each dataset's results are organized in a dedicated folder named after the dataset"
     dset_name = utilst.user_input_text("Dataset name", st.session_state.dset_name, helpmsg)
@@ -47,7 +47,7 @@ with st.container(border=True):
 
 # Panel for detecting dicom series
 if st.session_state.dset_name != '':
-    with st.container(border=True):
+    with st.expander('Detect dicom series', expanded = True):
         # Input dicom image folder
         helpmsg = 'Input folder with dicom files (.dcm).\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
         path_dicom = utilst.user_input_folder("Select folder",
@@ -74,7 +74,7 @@ if st.session_state.dset_name != '':
 
 # Panel for selecting and extracting dicom series
 if len(st.session_state.list_series) > 0:
-    with st.container(border=True):
+    with st.expander('Select dicom series', expanded = True):
 
         # Selection of img modality
         helpmsg = 'Modality of the extracted images'
@@ -111,41 +111,35 @@ if len(st.session_state.list_series) > 0:
 
 # Panel for viewing extracted nifti images
 if len(st.session_state.list_input_nifti) > 0:
-    with st.container(border=True):
+    with st.expander('View images', expanded = True):
+    #with st.container(border=True):
 
         # Selection of MRID
         sel_img = st.selectbox("Select Image",
                                st.session_state.list_input_nifti,
                                key=f"selbox_images",
                                index = 0)
-        path_sel_img = os.path.join(st.session_state.path_selmod, sel_img)
+        st.session_state.path_sel_img = os.path.join(st.session_state.path_selmod, sel_img)
 
         # Create a list of checkbox options
         list_orient = st.multiselect("Select viewing planes:", VIEWS, VIEWS)
 
-        # View hide overlay
-        is_show_overlay = st.checkbox('Show overlay', True)
+        flag_btn = os.path.exists(st.session_state.path_sel_img)
 
-        flag_btn = os.path.exists(path_sel_img)
-        btn_convert = st.button("View Image", disabled = not flag_btn)
+        with st.spinner('Wait for it...'):
 
-        if btn_convert:
-            with st.spinner('Wait for it...'):
+            # Prepare final 3d matrix to display
+            img = utilni.prep_image(st.session_state.path_sel_img)
 
-                # Prepare final 3d matrix to display
+            # Detect mask bounds and center in each view
+            img_bounds = utilni.detect_img_bounds(img)
 
-                print(path_sel_img)
-                img = utilni.prep_image(path_sel_img)
-
-                # Detect mask bounds and center in each view
-                img_bounds = utilni.detect_img_bounds(img)
-
-                # Show images
-                blocks = st.columns(len(list_orient))
-                for i, tmp_orient in enumerate(list_orient):
-                    with blocks[i]:
-                        ind_view = VIEWS.index(tmp_orient)
-                        utilst.show_img3D(img, ind_view, img_bounds[ind_view,:], tmp_orient)
+            # Show images
+            blocks = st.columns(len(list_orient))
+            for i, tmp_orient in enumerate(list_orient):
+                with blocks[i]:
+                    ind_view = VIEWS.index(tmp_orient)
+                    utilst.show_img3D(img, ind_view, img_bounds[ind_view,:], tmp_orient)
 
 
 # FIXME: this is for debugging; will be removed

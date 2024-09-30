@@ -24,6 +24,9 @@ if 'instantiated' not in st.session_state:
     # Path to last user selection (to initialize file/folder selector)
     st.session_state.path_last_sel = st.session_state.path_init
 
+    st.session_state.path_sel_img = ''
+    st.session_state.path_sel_mask = ''
+
     # Paths to output files/folders
     st.session_state.path_out = ''
     st.session_state.path_dset = ''

@@ -11,7 +11,7 @@ icon = ":file_folder:"
 
 [[pages]]
 path = "pages/prep_sMRI_dicomtonifti.py"
-name = "Dicom to Nifti (sMRI)"
+name = "Dicom to Nifti (sMRI, DTI, fMRI)"
 icon = ":black_small_square:"
 
 [[pages]]
