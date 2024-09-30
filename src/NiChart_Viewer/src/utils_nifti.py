@@ -138,29 +138,33 @@ def prep_image_and_olay(f_img, f_mask, sel_var_ind, dict_derived):
     nii_mask = reorient_nifti(nii_mask, ref_orient = 'IPL')
 
     # Extract image to matrix
-    img = nii_img.get_fdata()
-    mask = nii_mask.get_fdata()
+    out_img = nii_img.get_fdata()
+    out_mask = nii_mask.get_fdata()
+    
+    #Rescale image and out_mask to equal voxel size in all 3 dimensions
+    out_img = ndimage.zoom(out_img, nii_img.header.get_zooms(), order = 0, mode = 'nearest')
+    out_mask = ndimage.zoom(out_mask, nii_mask.header.get_zooms(), order = 0, mode = 'nearest')
 
     # Convert image to uint
-    img = (img.astype(float) / img.max())
+    out_img = (out_img.astype(float) / out_img.max())
 
     # Crop image to ROIs and reshape
-    img, mask = crop_image(img, mask)
+    out_img, out_mask = crop_image(out_img, out_mask)
 
     # Select target roi: derived roi
     list_rois = dict_derived[sel_var_ind]
-    mask = np.isin(mask, list_rois)
+    out_mask = np.isin(out_mask, list_rois)
 
     # # Select target roi: single roi
-    # mask = (mask == sel_var_ind).astype(int)
+    # out_mask = (out_mask == sel_var_ind).astype(int)
 
-    # Merge image and mask
-    img = np.stack((img,)*3, axis=-1)
+    # Merge image and out_mask
+    out_img = np.stack((out_img,)*3, axis=-1)
 
-    img_masked = img.copy()
-    img_masked[mask == 1] = (img_masked[mask == 1] * (1 - OLAY_ALPHA) + MASK_COLOR * OLAY_ALPHA)
+    out_img_out_masked = out_img.copy()
+    out_img_out_masked[out_mask == 1] = (out_img_out_masked[out_mask == 1] * (1 - OLAY_ALPHA) + MASK_COLOR * OLAY_ALPHA)
 
-    return img, mask, img_masked
+    return out_img, out_mask, out_img_out_masked
 
 @st.cache_data
 def prep_image(f_img):
@@ -178,10 +182,7 @@ def prep_image(f_img):
     out_img = nii_img.get_fdata()
 
     #Rescale image to equal voxel size in all 3 dimensions
-    out_img = ndimage.zoom(out_img, nii_img.header.get_zooms())
-
-    # Convert image to range 0-1
-    out_img = out_img - np.min([out_img.min(),0])
+    out_img = ndimage.zoom(out_img, nii_img.header.get_zooms(), order = 0, mode = 'nearest')
 
     out_img = (out_img.astype(float) / out_img.max())
 
