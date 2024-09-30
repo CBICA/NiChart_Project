@@ -11,99 +11,17 @@ import plotly.express as px
 
 import utils_st as utilst
 import utils_nifti as utilni
+import utils_muse as utilmuse
 import numpy as np
 import nibabel as nib
 
 # Parameters for viewer
-VIEWS = ["axial", "sagittal", "coronal"]
+VIEWS = ["axial", "coronal", "sagittal"]
 VIEW_AXES = [0, 2, 1]
 VIEW_OTHER_AXES = [(1,2), (0,1), (0,2)]
 MASK_COLOR = (0, 255, 0)  # RGB format
 MASK_COLOR = np.array([0.0, 1.0, 0.0])  # RGB format
 OLAY_ALPHA = 0.2
-
-def read_derived_roi_list(list_sel_rois, list_derived):
-    '''
-    Create a dictionary from derived roi list
-    '''
-
-    # Read list
-    df_sel = pd.read_csv(list_sel_rois)
-    df = pd.read_csv(list_derived, header=None)
-
-    # Keep only selected ROIs
-    df = df[df[0].isin(df_sel.Index)]
-
-    # Create dict of roi names and indices
-    dict_roi = dict(zip(df[1], df[0]))
-
-    # Create dict of roi indices and derived indices
-    dict_derived = {}
-    for i, tmp_ind in enumerate(df[0].values):
-        df_tmp = df[df[0] == tmp_ind].drop([0,1], axis =1)
-        sel_vals = df_tmp.T.dropna().astype(int).values.flatten()
-        dict_derived[tmp_ind] = sel_vals
-
-
-    return dict_roi, dict_derived
-
-
-def show_nifti(img, view, sel_axis_bounds):
-    '''
-    Displays the nifti img
-    '''
-
-    # Create a slider to select the slice index
-    slice_index = st.slider(f"{view}", 0, sel_axis_bounds[1] - 1,
-                            value=sel_axis_bounds[2], key = f'slider_{view}')
-
-    # Extract the slice and display it
-    if view == 'axial':
-        st.image(img[slice_index, :, :], use_column_width = True)
-    elif view == 'sagittal':
-        st.image(img[:, :, slice_index], use_column_width = True)
-    else:
-        st.image(img[:, slice_index, :], use_column_width = True)
-
-@st.cache_data
-def prep_images(f_img, f_mask, sel_var_ind, dict_derived):
-    '''
-    Read images from files and create 3D matrices for display
-    '''
-
-    # Read nifti
-    nii_img = nib.load(f_img)
-    nii_mask = nib.load(f_mask)
-
-    # Reorient nifti
-    nii_img = utilni.reorient_nifti(nii_img, ref_orient = 'IPL')
-    nii_mask = utilni.reorient_nifti(nii_mask, ref_orient = 'IPL')
-
-    # Extract image to matrix
-    img = nii_img.get_fdata()
-    mask = nii_mask.get_fdata()
-
-    # Convert image to uint
-    img = (img.astype(float) / img.max())
-
-    # Crop image to ROIs and reshape
-    img, mask = utilni.crop_image(img, mask)
-
-    # Select target roi: derived roi
-    list_rois = dict_derived[sel_var_ind]
-    mask = np.isin(mask, list_rois)
-
-    # # Select target roi: single roi
-    # mask = (mask == sel_var_ind).astype(int)
-
-    # Merge image and mask
-    img = np.stack((img,)*3, axis=-1)
-
-    img_masked = img.copy()
-    img_masked[mask == 1] = (img_masked[mask == 1] * (1 - OLAY_ALPHA) + MASK_COLOR * OLAY_ALPHA)
-
-
-    return img, mask, img_masked
 
 
 # Page controls in side bar
@@ -111,7 +29,6 @@ def prep_images(f_img, f_mask, sel_var_ind, dict_derived):
 
 f_img = ''
 f_mask = ''
-
 
 # Selection of subject list and image paths
 with st.expander('Select subject list, image paths and suffixes'):
@@ -175,8 +92,8 @@ if os.path.exists(st.session_state.path_csv_dlmuse):
         #dict_roi = dict(zip(df_muse.Name, df_muse.Index))
 
         # Read derived roi list and convert to a dict
-        dict_roi, dict_derived = read_derived_roi_list(st.session_state.dict_muse_sel,
-                                             st.session_state.dict_muse_derived)
+        dict_roi, dict_derived = utilmuse.read_derived_roi_list(st.session_state.dict_muse_sel,
+                                                                st.session_state.dict_muse_derived)
 
         # Selection of MRID
         sel_mrid = st.session_state.sel_mrid
@@ -230,7 +147,7 @@ if os.path.exists(st.session_state.path_csv_dlmuse):
 if os.path.exists(f_img) & os.path.exists(f_mask):
 
     # Process image and mask to prepare final 3d matrix to display
-    img, mask, img_masked = prep_images(f_img, f_mask, sel_var_ind, dict_derived)
+    img, mask, img_masked = utilni.prep_image_and_olay(f_img, f_mask, sel_var_ind, dict_derived)
 
     # Detect mask bounds and center in each view
     mask_bounds = utilni.detect_mask_bounds(mask)
@@ -241,9 +158,9 @@ if os.path.exists(f_img) & os.path.exists(f_mask):
         with blocks[i]:
             ind_view = VIEWS.index(tmp_orient)
             if is_show_overlay == False:
-                show_nifti(img, tmp_orient, mask_bounds[ind_view,:])
+                utilst.show_img3D(img, ind_view, mask_bounds[ind_view,:], tmp_orient)
             else:
-                show_nifti(img_masked, tmp_orient, mask_bounds[ind_view,:])
+                utilst.show_img3D(img_masked, ind_view, mask_bounds[ind_view,:], tmp_orient)
 
 else:
     if not os.path.exists(f_img):

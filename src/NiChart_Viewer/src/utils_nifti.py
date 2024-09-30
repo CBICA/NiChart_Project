@@ -4,8 +4,8 @@ from math import ceil
 import nibabel as nib
 import numpy as np
 from nibabel.orientations import axcodes2ornt, ornt_transform
+from scipy import ndimage
 
-VIEWS = ["axial", "sagittal", "coronal"]
 VIEW_AXES = [0, 2, 1]
 VIEW_OTHER_AXES = [(1,2), (0,1), (0,2)]
 MASK_COLOR = (0, 255, 0)  # RGB format
@@ -67,6 +67,28 @@ def crop_image(img, mask):
     
     return img, mask
 
+def pad_image(img):
+    '''
+    Pad img to equal x,y,z
+    '''
+
+    # Detect max size
+    simg = img.shape
+    mx = np.max(simg)
+
+    # Calculate padding values to make dims equal
+    pad_vals = (mx -np.array(simg))//2
+
+    # Create padded image
+    out_img = np.zeros([mx, mx, mx])
+
+    # Insert image inside the padded image
+    out_img[pad_vals[0]:pad_vals[0]+simg[0],
+            pad_vals[1]:pad_vals[1]+simg[1],
+            pad_vals[2]:pad_vals[2]+simg[2]] = img
+
+    return out_img
+
 def detect_mask_bounds(mask):
     '''
     Detect the mask start, end and center in each view
@@ -85,3 +107,91 @@ def detect_mask_bounds(mask):
             mask_bounds[i,2] = mask.shape[i] // 2
 
     return mask_bounds
+
+def detect_img_bounds(img):
+    '''
+    Detect the img start, end and center in each view
+    Used later to set the slider in the image viewer
+    '''
+
+    img_bounds = np.zeros([3,3]).astype(int)
+    for i, axis in enumerate(VIEW_AXES):
+        img_bounds[i,0] = 0
+        img_bounds[i,1] = img.shape[i]
+        img_bounds[i,2] = img.shape[i] // 2
+
+    return img_bounds
+
+
+@st.cache_data
+def prep_image_and_olay(f_img, f_mask, sel_var_ind, dict_derived):
+    '''
+    Read images from files and create 3D matrices for display
+    '''
+
+    # Read nifti
+    nii_img = nib.load(f_img)
+    nii_mask = nib.load(f_mask)
+
+    # Reorient nifti
+    nii_img = reorient_nifti(nii_img, ref_orient = 'IPL')
+    nii_mask = reorient_nifti(nii_mask, ref_orient = 'IPL')
+
+    # Extract image to matrix
+    out_img = nii_img.get_fdata()
+    out_mask = nii_mask.get_fdata()
+    
+    #Rescale image and out_mask to equal voxel size in all 3 dimensions
+    out_img = ndimage.zoom(out_img, nii_img.header.get_zooms(), order = 0, mode = 'nearest')
+    out_mask = ndimage.zoom(out_mask, nii_mask.header.get_zooms(), order = 0, mode = 'nearest')
+
+    # Convert image to uint
+    out_img = (out_img.astype(float) / out_img.max())
+
+    # Crop image to ROIs and reshape
+    out_img, out_mask = crop_image(out_img, out_mask)
+
+    # Select target roi: derived roi
+    list_rois = dict_derived[sel_var_ind]
+    out_mask = np.isin(out_mask, list_rois)
+
+    # # Select target roi: single roi
+    # out_mask = (out_mask == sel_var_ind).astype(int)
+
+    # Merge image and out_mask
+    out_img = np.stack((out_img,)*3, axis=-1)
+
+    out_img_out_masked = out_img.copy()
+    out_img_out_masked[out_mask == 1] = (out_img_out_masked[out_mask == 1] * (1 - OLAY_ALPHA) + MASK_COLOR * OLAY_ALPHA)
+
+    return out_img, out_mask, out_img_out_masked
+
+@st.cache_data
+def prep_image(f_img):
+    '''
+    Read image from file and create 3D matrice for display
+    '''
+
+    # Read nifti
+    nii_img = nib.load(f_img)
+
+    # Reorient nifti
+    nii_img = reorient_nifti(nii_img, ref_orient = 'IPL')
+
+    # Extract image to matrix
+    out_img = nii_img.get_fdata()
+
+    #Rescale image to equal voxel size in all 3 dimensions
+    out_img = ndimage.zoom(out_img, nii_img.header.get_zooms(), order = 0, mode = 'nearest')
+
+    out_img = (out_img.astype(float) / out_img.max())
+
+    # Pad image to equal size in x,y,z
+    out_img = pad_image(out_img)
+
+    # Convert image to rgb
+    out_img = np.stack((out_img,)*3, axis=-1)
+
+    return out_img
+
+
