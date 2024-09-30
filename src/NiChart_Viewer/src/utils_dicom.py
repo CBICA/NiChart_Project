@@ -110,7 +110,7 @@ def detect_series(in_dir):
     df_dicoms = pd.DataFrame(data = list_files, columns = ['fname'])
     df_dicoms = df_dicoms.reindex(columns = ['fname', 'dtype'])
     list_dtypes = []
-    for (_, file_path) in stqdm(enumerate(df_dicoms.fname.tolist()), desc="Detecting series..."):
+    for (_, file_path) in stqdm(enumerate(df_dicoms.fname.tolist()), desc="Detecting series...", total=len(df_dicoms.fname.tolist())):
         # noinspection PyBroadException
         dtype = ''
         try:
@@ -211,7 +211,7 @@ def convert_single_series(list_files, out_dir, compression=True, reorient=True):
 
 def convert_sel_series(df_dicoms, sel_series, out_dir):
     # Convert all images for each selected series
-    for (_, stmp) in stqdm(enumerate(sel_series), desc="Converting series..."):
+    for (_, stmp) in stqdm(enumerate(sel_series), desc="Converting series...", total=len(sel_series)):
         print(f'Converting series: {stmp}')
         list_files = df_dicoms[df_dicoms.dtype == stmp].fname.tolist()
         print(list_files)
