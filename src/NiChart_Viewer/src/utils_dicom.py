@@ -4,6 +4,9 @@ import os
 import re
 import traceback
 import unicodedata
+import time
+import streamlit as st
+from stqdm import stqdm
 
 import pydicom
 from pydicom import dcmread
@@ -16,6 +19,7 @@ import dicom2nifti.settings
 import pandas as pd
 
 from glob import glob
+
 
 ## Useful links
 # https://github.com/rordenlab/dcm2niix/blob/master/FILENAMING.md
@@ -105,33 +109,32 @@ def detect_series(in_dir):
             list_files.append(os.path.join(root, dicom_file))
     df_dicoms = pd.DataFrame(data = list_files, columns = ['fname'])
     df_dicoms = df_dicoms.reindex(columns = ['fname', 'dtype'])
-        
     list_dtypes = []
-    for file_path in df_dicoms.fname.tolist():
+    for (_, file_path) in stqdm(enumerate(df_dicoms.fname.tolist()), desc="Detecting series..."):
         # noinspection PyBroadException
         dtype = ''
         try:
             if common.is_dicom_file(file_path):
                 # read only dicom header without pixel data
-                dicom_headers = dcmread(file_path, 
-                                        defer_size="1 KB", 
+                dicom_headers = dcmread(file_path,
+                                        defer_size="1 KB",
                                         stop_before_pixels=True,
                                         force=dicom2nifti.settings.pydicom_read_force)
                 if _is_valid_imaging_dicom(dicom_headers):
                     dtype = dicom_headers.SeriesDescription
-                    
-        # Explicitly capturing all errors here to be able to continue processing all the rest                    
-        except:  
+
+        # Explicitly capturing all errors here to be able to continue processing all the rest
+        except:
             print(f"Unable to read: {file_path}")
-        
-        list_dtypes.append(dtype)        
-    
+
+        list_dtypes.append(dtype)
+
     # Create dataframe with file name and dicom series description
     df_dicoms['dtype'] = list_dtypes
-    
+
     # Detect all unique series
     list_series = df_dicoms.dtype.unique()
-    
+
     return df_dicoms, list_series
 
 def select_series(df_dicoms, dict_series):
@@ -207,23 +210,16 @@ def convert_single_series(list_files, out_dir, compression=True, reorient=True):
 
 
 def convert_sel_series(df_dicoms, sel_series, out_dir):
-    
     # Convert all images for each selected series
-    for stmp in sel_series:
+    for (_, stmp) in stqdm(enumerate(sel_series), desc="Converting series..."):
         print(f'Converting series: {stmp}')
         list_files = df_dicoms[df_dicoms.dtype == stmp].fname.tolist()
         print(list_files)
 
         convert_single_series(list_files, out_dir, compression=True, reorient=True)
-    
 #def convert_dicoms_to_nifti(in_dir, out_dir):
-    
     ## Detect files
     #filesandirs = glob(os.path.join(in_dir, '**', '*'), recursive=True)
     #files = [f for f in filesandirs if os.path.isfile(f)]
-    
     ## Read dicom meta data
     #dicoms = [pydicom.dcmread(f, stop_before_pixels=True) for f in files]
-
-
-

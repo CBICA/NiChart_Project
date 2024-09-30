@@ -14,7 +14,7 @@ if __name__ == "__main__":
 
     # Create out dir
     if not os.path.exists(options.dir_output):
-        os.makedirs(options.dir_output)    
+        os.makedirs(options.dir_output)
 
     # Change path
     os.chdir(options.run_dir)

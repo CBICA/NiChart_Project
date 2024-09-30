@@ -172,3 +172,6 @@ test/test_output
 
 # do not ignore .streamlit folder
 !src/NiChart_Viewer/src/.streamlit
+
+# ignore test dicom folder
+10089_short/
