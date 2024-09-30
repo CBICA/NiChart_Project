@@ -114,37 +114,38 @@ if len(st.session_state.list_input_nifti) > 0:
     with st.container(border=True):
 
         # Selection of MRID
-        sel_img = st.selectbox("Images",
+        sel_img = st.selectbox("Select Image",
                                st.session_state.list_input_nifti,
                                key=f"selbox_images",
                                index = 0)
         path_sel_img = os.path.join(st.session_state.path_selmod, sel_img)
 
+        # Create a list of checkbox options
+        list_orient = st.multiselect("Select viewing planes:", VIEWS, VIEWS)
 
-        with st.container(border=True):
-            # Create a list of checkbox options
-            list_orient = st.multiselect("Select viewing planes:", VIEWS, VIEWS)
+        # View hide overlay
+        is_show_overlay = st.checkbox('Show overlay', True)
 
-            # View hide overlay
-            is_show_overlay = st.checkbox('Show overlay', True)
+        flag_btn = os.path.exists(path_sel_img)
+        btn_convert = st.button("View Image", disabled = not flag_btn)
 
-    if os.path.exists(path_sel_img):
+        if btn_convert:
+            with st.spinner('Wait for it...'):
 
-        # Prepare final 3d matrix to display
-        img = utilni.prep_image(path_sel_img)
+                # Prepare final 3d matrix to display
 
-        # Detect mask bounds and center in each view
-        img_bounds = utilni.detect_img_bounds(img)
+                print(path_sel_img)
+                img = utilni.prep_image(path_sel_img)
 
-        # Show images
-        blocks = st.columns(len(list_orient))
-        for i, tmp_orient in enumerate(list_orient):
-            with blocks[i]:
-                ind_view = VIEWS.index(tmp_orient)
-                utilst.show_img3D(img, ind_view, img_bounds[ind_view,:], tmp_orient)
+                # Detect mask bounds and center in each view
+                img_bounds = utilni.detect_img_bounds(img)
 
-    else:
-        st.warning(f'Image not found: {path_sel_img}')
+                # Show images
+                blocks = st.columns(len(list_orient))
+                for i, tmp_orient in enumerate(list_orient):
+                    with blocks[i]:
+                        ind_view = VIEWS.index(tmp_orient)
+                        utilst.show_img3D(img, ind_view, img_bounds[ind_view,:], tmp_orient)
 
 
 # FIXME: this is for debugging; will be removed

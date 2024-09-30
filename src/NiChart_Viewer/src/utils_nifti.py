@@ -4,6 +4,7 @@ from math import ceil
 import nibabel as nib
 import numpy as np
 from nibabel.orientations import axcodes2ornt, ornt_transform
+from scipy import ndimage
 
 VIEW_AXES = [0, 2, 1]
 VIEW_OTHER_AXES = [(1,2), (0,1), (0,2)]
@@ -176,7 +177,12 @@ def prep_image(f_img):
     # Extract image to matrix
     out_img = nii_img.get_fdata()
 
-    # Convert image to uint
+    #Rescale image to equal voxel size in all 3 dimensions
+    out_img = ndimage.zoom(out_img, nii_img.header.get_zooms())
+
+    # Convert image to range 0-1
+    out_img = out_img - np.min([out_img.min(),0])
+
     out_img = (out_img.astype(float) / out_img.max())
 
     # Pad image to equal size in x,y,z
