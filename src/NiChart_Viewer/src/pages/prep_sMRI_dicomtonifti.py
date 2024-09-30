@@ -11,6 +11,21 @@ import numpy as np
 
 VIEWS = ["axial", "sagittal", "coronal"]
 
+
+result_holder = st.empty()
+def progress(p, i, decoded):
+    with result_holder.container():
+        st.progress(p, f'Progress: Token position={i}')
+        #if decoded and decoded[0]:
+            #st.markdown(decoded[0])
+
+#out = model.generate([input_text], 
+                     #max_gen_len=max_seq_len, 
+                     #temperature=temperature, 
+                     #top_p=top_p, 
+                     #callback=progress)
+
+
 st.markdown(
         """
     1. Select Input Folder: Choose the directory containing your raw DICOM files.
