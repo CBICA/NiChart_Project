@@ -138,7 +138,7 @@ def display_plot(plot_id):
 
         # Add centile values
         if centtype != 'none':
-            fcent = os.path.join(st.session_state.path_root, 'resources', 'centiles',
+            fcent = os.path.join(st.session_state.paths['root'], 'resources', 'centiles',
                                  f'centiles_{centtype}.csv')
             df_cent = pd.read_csv(fcent)
             percentile_trace(df_cent, xvar, yvar, scatter_plot)
@@ -244,14 +244,14 @@ with st.sidebar:
         csv_mlscores, csv_path = utilst.user_input_file("Select file",
                                                     'btn_input_mlscore',
                                                     "ML scores file",
-                                                    st.session_state.path_last_sel,
-                                                    st.session_state.path_csv_mlscores,
+                                                    st.session_state.paths['last_sel'],
+                                                    st.session_state.paths['csv_mlscores'],
                                                     helpmsg)
         if os.path.exists(csv_mlscores):
-            st.session_state.path_csv_mlscores = csv_mlscores
-            st.session_state.path_last_sel = csv_path
+            st.session_state.paths['csv_mlscores'] = csv_mlscores
+            st.session_state.paths['last_sel'] = csv_path
 
-if os.path.exists(st.session_state.path_csv_mlscores):
+if os.path.exists(st.session_state.paths['csv_mlscores']):
 
     # Read input csv
     df = pd.read_csv(csv_mlscores)
@@ -327,21 +327,21 @@ with st.expander('AAA'):
 
 
 # Panel for viewing images and DLMUSE masks
-if os.path.exists(st.session_state.path_csv_mlscores):
+if os.path.exists(st.session_state.paths['csv_mlscores']):
     with st.expander('View segmentations', expanded = False):
 
         # Read dlmuse csv
-        df = pd.read_csv(st.session_state.path_csv_mlscores)
+        df = pd.read_csv(st.session_state.paths['csv_mlscores'])
 
         # Create a dictionary of MUSE indices and names
-        df_muse = pd.read_csv(st.session_state.dict_muse_all)
+        df_muse = pd.read_csv(st.session_state.dicts['muse_all'])
 
         ## FIXME : extra roi not in dict
         df_muse = df_muse[df_muse.Name != 'CortCSF']
 
         # Read derived roi list and convert to a dict
-        dict_roi, dict_derived = utilmuse.read_derived_roi_list(st.session_state.dict_muse_sel,
-                                                                st.session_state.dict_muse_derived)
+        dict_roi, dict_derived = utilmuse.read_derived_roi_list(st.session_state.dicts['muse_sel'],
+                                                                st.session_state.dicts['muse_derived'])
 
         # Selection of MRID
         sel_mrid = st.session_state.sel_mrid
@@ -385,20 +385,20 @@ if os.path.exists(st.session_state.path_csv_mlscores):
         # View hide overlay
         is_show_overlay = st.checkbox('Show overlay', True)
 
-        flag_btn = os.path.exists(st.session_state.path_sel_img) and os.path.exists(st.session_state.path_sel_dlmuse)
+        flag_btn = os.path.exists(st.session_state.paths['sel_img']) and os.path.exists(st.session_state.paths['sel_dlmuse'])
 
         with st.spinner('Wait for it...'):
     
-            st.session_state.path_sel_img = os.path.join(st.session_state.path_t1,
+            st.session_state.paths['sel_img'] = os.path.join(st.session_state.paths['t1'],
                                                          sel_mrid + st.session_state.suff_t1img)
 
-            st.session_state.path_sel_dlmuse = os.path.join(st.session_state.path_dlmuse,
+            st.session_state.paths['sel_dlmuse'] = os.path.join(st.session_state.paths['dlmuse'],
                                                             sel_mrid + st.session_state.suff_dlmuse)
 
 
             # Process image and mask to prepare final 3d matrix to display
-            img, mask, img_masked = utilni.prep_image_and_olay(st.session_state.path_sel_img,
-                                                               st.session_state.path_sel_dlmuse,
+            img, mask, img_masked = utilni.prep_image_and_olay(st.session_state.paths['sel_img'],
+                                                               st.session_state.paths['sel_dlmuse'],
                                                                sel_var_ind,
                                                                dict_derived)
 

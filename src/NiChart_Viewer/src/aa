@@ -1,0 +1,1 @@
+df = pd.read_csv(st.session_state.path_csv_dlmuse)

@@ -38,32 +38,32 @@ with st.expander('Select subject list, image paths and suffixes'):
     csv_dlmuse, csv_path = utilst.user_input_file("Select file",
                                                     'btn_input_dlmuse',
                                                     "DLMUSE ROI file",
-                                                    st.session_state.path_last_sel,
-                                                    st.session_state.path_csv_dlmuse,
+                                                    st.session_state.paths['last_sel'],
+                                                    st.session_state.paths['csv_dlmuse'],
                                                     helpmsg)
     if os.path.exists(csv_dlmuse):
-        st.session_state.path_csv_dlmuse = csv_dlmuse
-        st.session_state.path_last_sel = csv_path
+        st.session_state.paths['csv_dlmuse'] = csv_dlmuse
+        st.session_state.paths['last_sel'] = csv_path
 
     # Input T1 image folder
     helpmsg = 'Path to T1 images.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
     path_t1 = utilst.user_input_folder("Select folder",
                                     'btn_indir_t1',
                                     "Input folder",
-                                    st.session_state.path_last_sel,
-                                    st.session_state.path_t1,
+                                    st.session_state.paths['last_sel'],
+                                    st.session_state.paths['t1'],
                                     helpmsg)
-    st.session_state.path_t1 = path_t1
+    st.session_state.paths['t1'] = path_t1
     
     # Input DLMUSE image folder
     helpmsg = 'Path to DLMUSE images.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
     path_dlmuse = utilst.user_input_folder("Select folder",
                                             'btn_indir_dlmuse',
                                             "Input folder",
-                                            st.session_state.path_last_sel,
-                                            st.session_state.path_dlmuse,
+                                            st.session_state.paths['last_sel'],
+                                            st.session_state.paths['dlmuse'],
                                             helpmsg)
-    st.session_state.path_dlmuse = path_dlmuse
+    st.session_state.paths['dlmuse'] = path_dlmuse
 
     # T1 suffix
     suff_t1img = utilst.user_input_text("T1 img suffix", 
@@ -79,21 +79,21 @@ with st.expander('Select subject list, image paths and suffixes'):
         
 
 # Selection of MRID and ROI name
-if os.path.exists(st.session_state.path_csv_dlmuse):
+if os.path.exists(st.session_state.paths['csv_dlmuse']):
 
     with st.container(border=True):
 
-        df = pd.read_csv(st.session_state.path_csv_dlmuse)
+        df = pd.read_csv(st.session_state.paths['csv_dlmuse'])
 
         # Create a dictionary of MUSE indices and names
-        df_muse = pd.read_csv(st.session_state.dict_muse_all)
+        df_muse = pd.read_csv(st.session_state.dicts['muse_all'])
 
         #df_muse = df_muse[df_muse.Name.isin(df.columns)]
         #dict_roi = dict(zip(df_muse.Name, df_muse.Index))
 
         # Read derived roi list and convert to a dict
-        dict_roi, dict_derived = utilmuse.read_derived_roi_list(st.session_state.dict_muse_sel,
-                                                                st.session_state.dict_muse_derived)
+        dict_roi, dict_derived = utilmuse.read_derived_roi_list(st.session_state.dicts['muse_sel'],
+                                                                st.session_state.dicts['muse_derived'])
 
         # Selection of MRID
         sel_mrid = st.session_state.sel_mrid
@@ -136,12 +136,12 @@ if os.path.exists(st.session_state.path_csv_dlmuse):
     sel_var_ind = dict_roi[sel_var]
 
     # File names for img and mask
-    f_img = os.path.join(st.session_state.path_out, 
-                        st.session_state.path_t1,
+    f_img = os.path.join(st.session_state.paths['out'], 
+                        st.session_state.paths['t1'],
                         sel_mrid + st.session_state.suff_t1img)
 
-    f_mask = os.path.join(st.session_state.path_out, 
-                        st.session_state.path_dlmuse,
+    f_mask = os.path.join(st.session_state.paths['out'], 
+                        st.session_state.paths['dlmuse'],
                         sel_mrid + st.session_state.suff_dlmuse)
 
 if os.path.exists(f_img) & os.path.exists(f_mask):
