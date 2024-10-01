@@ -85,7 +85,7 @@ rule merge_covars:
     params:
         key_var = 'MRID'
     output:
-        temp(f"{dir_output}/working_dir/combined/{dset_name}_raw.csv")
+        f"{dir_output}/working_dir/combined/{dset_name}_raw.csv"
     resources:
         mem_mb=8000
     shell:
@@ -102,7 +102,7 @@ rule select_vars_harmonize:
         dict_var = 'Code',
         covars ='MRID,Age,Sex,SITE,MUSE_702',
     output:
-        temp(f"{dir_output}/working_dir/sel_vars/{dset_name}_raw.csv")
+        f"{dir_output}/working_dir/sel_vars/{dset_name}_raw.csv"
     resources:
         mem_mb=8000
     shell:
@@ -165,7 +165,7 @@ rule merge_covars_to_harmonized_rois:
     params:
         key_var = 'MRID'
     output:
-        temp(f"{dir_output}/working_dir/spare/{dset_name}_COMBAT_withcovar.csv")
+        f"{dir_output}/working_dir/spare/{dset_name}_COMBAT_withcovar.csv"
     resources:
         mem_mb=8000
     shell:
@@ -182,7 +182,7 @@ rule select_vars_spare:
         dict_var = 'Code',
         covars ='MRID,Age,Sex,DLICV',
     output:
-        temp(f"{dir_output}/working_dir/spare/{dset_name}_COMBAT.csv")
+        f"{dir_output}/working_dir/spare/{dset_name}_COMBAT.csv"
     resources:
         mem_mb=8000
     shell:
@@ -198,7 +198,7 @@ rule spare_apply:
         data=f"{dir_output}/working_dir/spare/{dset_name}_COMBAT.csv",
         mdl=get_spare_model
     output:
-        temp(f"{dir_output}/working_dir/out_spare/{dset_name}_COMBAT_SPARE-{{stype}}.csv")
+        f"{dir_output}/working_dir/out_spare/{dset_name}_COMBAT_SPARE-{{stype}}.csv"
     shell:
         "bash src/workflow/utils/spare/util_spare_test.sh {input} {wildcards.stype} {output}"
 

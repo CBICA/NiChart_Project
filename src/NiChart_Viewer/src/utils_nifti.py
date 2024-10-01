@@ -6,7 +6,8 @@ import numpy as np
 from nibabel.orientations import axcodes2ornt, ornt_transform
 from scipy import ndimage
 
-VIEW_AXES = [0, 2, 1]
+VIEWS = ["axial", "coronal", "sagittal"]
+VIEW_AXES = [0, 1, 2]
 VIEW_OTHER_AXES = [(1,2), (0,1), (0,2)]
 MASK_COLOR = (0, 255, 0)  # RGB format
 MASK_COLOR = np.array([0.0, 1.0, 0.0])  # RGB format

@@ -15,51 +15,51 @@ if 'instantiated' not in st.session_state:
     # Study name
     st.session_state.dset_name = ''
 
-    # Path to root folder
-    st.session_state.path_root = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
+    # Paths to input/output files/folders
+    st.session_state.paths = {'root' : '',
+                              'init' : '',
+                              'last_sel' : '',
+                              'dset' : '',
+                              'out' : '',
+                              'nifti' : '',
+                              'dicom' : '',
+                              't1' : '',
+                              't2' : '',
+                              'fl' : '',
+                              'dti' : '',
+                              'fmri' : '',
+                              'dlmuse' : '',
+                              'mlscores' : '',
+                              'sel_img' : '',
+                              'sel_mask' : '',
+                              'csv_demog' : '',
+                              'csv_dlmuse' : '',
+                              'csv_mlscores' : '',
+                              'csv_viewdlmuse' : ''}    
+    st.session_state.paths['root'] = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
+    st.session_state.paths['init'] = os.path.join(st.session_state.paths['root'], 'test') 
+    st.session_state.paths['last_sel'] = st.session_state.paths['init']
 
-    # Path to init folder
-    st.session_state.path_init = os.path.join(st.session_state.path_root, 'test')
+    #########################################
+    # FIXME : for quick test
+    #st.session_state.paths['csv_mlscores'] = st.session_state.paths['root'] + '/test/test3_nifti+roi/output/MyStudy/MLScores/MyStudy_DLMUSE+MLScores.csv'   
+    st.session_state.paths['last_sel'] = st.session_state.paths['init'] + '/../../TestData'
+    #########################################
 
-    # Path to last user selection (to initialize file/folder selector)
-    st.session_state.path_last_sel = st.session_state.path_init
-
-    st.session_state.path_sel_img = ''
-    st.session_state.path_sel_mask = ''
-
-    # Paths to output files/folders
-    st.session_state.path_out = ''
-    st.session_state.path_dset = ''
-    st.session_state.path_nifti = ''
-    st.session_state.path_selmod = ''
-    st.session_state.path_t1 = ''
-    st.session_state.path_t2 = ''
-    st.session_state.path_fl = ''
-    st.session_state.path_dti = ''
-    st.session_state.path_fmri = ''
-    st.session_state.path_dlmuse = ''
-    st.session_state.path_csv_demog = ''
-    st.session_state.path_csv_dlmuse = ''
-    st.session_state.path_csv_mlscores = ''
-    st.session_state.path_csv_viewdlmuse = ''
+    # Dictionaries
+    tmp_dir = os.path.join(st.session_state.paths['root'], 'resources', 'MUSE')
+    st.session_state.dicts = {'muse_derived' : os.path.join(tmp_dir, 'list_MUSE_mapping_derived.csv'),
+                              'muse_all' : os.path.join(tmp_dir, 'list_MUSE_all.csv'),
+                              'muse_sel' : os.path.join(tmp_dir, 'list_MUSE_primary.csv')}
 
     # Input image vars
     st.session_state.list_input_nifti = []
-
     
     # Dicom vars
-    st.session_state.path_dicom = ''
     st.session_state.list_series = []    
     st.session_state.df_dicoms = pd.DataFrame()
     st.session_state.sel_series = []
     st.session_state.sel_mod = ''
-
-    #####
-    # FIXME : for quick test
-    #st.session_state.path_csv_mlscores = st.session_state.path_root + '/test/test3_nifti+roi/output/MyStudy/MLScores/MyStudy_DLMUSE+MLScores.csv'   
-    st.session_state.path_last_sel = st.session_state.path_init
-    st.session_state.path_last_sel = st.session_state.path_init + '/../../TestData'
-    #####
 
     # Image suffixes
     st.session_state.suff_t1img = '_T1.nii.gz'
@@ -81,23 +81,6 @@ if 'instantiated' not in st.session_state:
 
     # Variable selected by user
     st.session_state.sel_var = ''
-
-    # MUSE dictionaries
-    st.session_state.dir_resources = os.path.join(st.session_state.path_root, 'resources')
-
-    st.session_state.dict_muse_derived = os.path.join(st.session_state.dir_resources, 'MUSE',
-                                                      'list_MUSE_mapping_derived.csv')
-    st.session_state.dict_muse_all = os.path.join(st.session_state.dir_resources, 'MUSE',
-                                                      'list_MUSE_all.csv')
-    
-    st.session_state.dict_muse_sel = os.path.join(st.session_state.dir_resources, 
-                                                       'MUSE', 'list_MUSE_primary.csv')
-
-
-    # ########################################################
-    # ## FIXME : this is for quickly loading example test data
-    # st.session_state.path_csv_spare = st.session_state.path_root + '/test/test4_adni3/output/out_combined/MyStudy_All.csv'
-    # st.session_state.path_out = st.session_state.path_root + '/test/test4_adni3/output'
 
     st.session_state.instantiated = True
 

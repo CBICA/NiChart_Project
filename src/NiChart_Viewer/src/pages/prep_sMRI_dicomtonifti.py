@@ -9,9 +9,6 @@ import utils_dicom as utildcm
 import pandas as pd
 import numpy as np
 
-VIEWS = ["axial", "sagittal", "coronal"]
-
-
 result_holder = st.empty()
 def progress(p, i, decoded):
     with result_holder.container():
@@ -48,19 +45,16 @@ with st.expander('Select output', expanded = True):
     path_out = utilst.user_input_folder("Select folder",
                                         'btn_sel_out_dir',
                                         "Output folder",
-                                        st.session_state.path_last_sel,
-                                        st.session_state.path_out,
+                                        st.session_state.paths['last_sel'],
+                                        st.session_state.paths['out'],
                                         helpmsg)
     if dset_name != '' and path_out != '':
         st.session_state.dset_name = dset_name
-        st.session_state.path_out = path_out
-        st.session_state.path_dset = os.path.join(path_out, dset_name)
-        st.session_state.path_nifti = os.path.join(path_out, dset_name, 'Nifti')
-
-        if st.session_state.path_dset != '':
-            if not os.path.exists(st.session_state.path_dset):
-                os.makedirs(st.session_state.path_dset)
-            st.success(f'Results will be saved to: {st.session_state.path_dset}')
+        st.session_state.paths['out'] = path_out
+        st.session_state.paths['dset'] = os.path.join(path_out, dset_name)
+        st.session_state.paths['nifti'] = os.path.join(path_out, dset_name, 'Nifti')
+        st.success(f'Results will be saved to: {st.session_state.paths['nifti']}',
+                   icon = ":material/thumb_up:")
 
 # Panel for detecting dicom series
 if st.session_state.dset_name != '':
@@ -70,12 +64,12 @@ if st.session_state.dset_name != '':
         path_dicom = utilst.user_input_folder("Select folder",
                                         'btn_indir_dicom',
                                         "Input dicom folder",
-                                        st.session_state.path_last_sel,
-                                        st.session_state.path_dicom,
+                                        st.session_state.paths['last_sel'],
+                                        st.session_state.paths['dicom'],
                                         helpmsg)
-        st.session_state.path_dicom = path_dicom
+        st.session_state.paths['dicom'] = path_dicom
 
-        flag_btn = os.path.exists(st.session_state.path_dicom)
+        flag_btn = os.path.exists(st.session_state.paths['dicom'])
 
         # Detect dicom series
         btn_detect = st.button("Detect Series", disabled = not flag_btn)
@@ -85,7 +79,8 @@ if st.session_state.dset_name != '':
                 if len(list_series) == 0:
                     st.warning('Could not detect any dicom series!')
                 else:
-                    st.success(f"Detected {len(list_series)} dicom series!", icon = ":material/thumb_up:")
+                    st.success(f"Detected {len(list_series)} dicom series!", 
+                               icon = ":material/thumb_up:")
                 st.session_state.list_series = list_series
                 st.session_state.df_dicoms = df_dicoms
 
@@ -104,11 +99,10 @@ if len(st.session_state.list_series) > 0:
                                                      [])
         # Create out folder for the selected modality
         if len(st.session_state.sel_series) > 0:
-            if st.session_state.path_nifti != '':
-                st.session_state.path_selmod = os.path.join(st.session_state.path_nifti,
-                                                            st.session_state.sel_mod)
-                if not os.path.exists(st.session_state.path_selmod):
-                    os.makedirs(st.session_state.path_selmod)
+            if st.session_state.paths['nifti'] != '':
+                st.session_state.paths['selmod'] = os.path.join(st.session_state.paths['nifti'], st.session_state.sel_mod)
+                if not os.path.exists(st.session_state.paths['selmod']):
+                    os.makedirs(st.session_state.paths['selmod'])
 
         # Button for extraction
         flag_btn = st.session_state.df_dicoms.shape[0] > 0 and len(st.session_state.sel_series) > 0
@@ -116,15 +110,19 @@ if len(st.session_state.list_series) > 0:
         if btn_convert:
             with st.spinner('Wait for it...'):
                 utildcm.convert_sel_series(st.session_state.df_dicoms,
-                                        st.session_state.sel_series,
-                                        st.session_state.path_selmod)
-                st.session_state.list_input_nifti = [f for f in os.listdir(st.session_state.path_selmod) if f.endswith('nii.gz')]
+                                           st.session_state.sel_series,
+                                           st.session_state.paths['selmod'],
+                                           f'_{st.session_state.sel_mod}.nii.gz')
+                st.session_state.list_input_nifti = [f for f in os.listdir(st.session_state.paths['selmod']) if f.endswith('nii.gz')]
                 if len(st.session_state.list_input_nifti) == 0:
                     st.warning(f'Could not extract any nifti images')
                 else:
-                    st.success(f'Extracted {len(st.session_state.list_input_nifti)} nifti images')
+                    st.success(f'Extracted {len(st.session_state.list_input_nifti)} nifti images',
+                               icon = ":material/thumb_up:")
+                    if st.session_state.sel_mod == 'T1':
+                        st.session_state.paths['t1'] = st.session_state.paths['selmod']
 
-            # utilst.display_folder(st.session_state.path_selmod)
+            # utilst.display_folder(st.session_state.paths['selmod'])
 
 # Panel for viewing extracted nifti images
 if len(st.session_state.list_input_nifti) > 0:
@@ -136,17 +134,17 @@ if len(st.session_state.list_input_nifti) > 0:
                                st.session_state.list_input_nifti,
                                key=f"selbox_images",
                                index = 0)
-        st.session_state.path_sel_img = os.path.join(st.session_state.path_selmod, sel_img)
+        st.session_state.paths['sel_img'] = os.path.join(st.session_state.paths['selmod'], sel_img)
 
         # Create a list of checkbox options
-        list_orient = st.multiselect("Select viewing planes:", VIEWS, VIEWS)
+        list_orient = st.multiselect("Select viewing planes:", utilni.VIEWS, utilni.VIEWS)
 
-        flag_btn = os.path.exists(st.session_state.path_sel_img)
+        flag_btn = os.path.exists(st.session_state.paths['sel_img'])
 
         with st.spinner('Wait for it...'):
 
             # Prepare final 3d matrix to display
-            img = utilni.prep_image(st.session_state.path_sel_img)
+            img = utilni.prep_image(st.session_state.paths['sel_img'])
 
             # Detect mask bounds and center in each view
             img_bounds = utilni.detect_img_bounds(img)
@@ -155,7 +153,7 @@ if len(st.session_state.list_input_nifti) > 0:
             blocks = st.columns(len(list_orient))
             for i, tmp_orient in enumerate(list_orient):
                 with blocks[i]:
-                    ind_view = VIEWS.index(tmp_orient)
+                    ind_view = utilni.VIEWS.index(tmp_orient)
                     utilst.show_img3D(img, ind_view, img_bounds[ind_view,:], tmp_orient)
 
 
