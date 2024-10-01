@@ -190,8 +190,8 @@ def convert_single_series(list_files, out_dir, out_suff, compression=True, reori
             if 'StudyDate' in dicom_input[0]:
                 base_filename = _remove_accents(f'{base_filename}_{dicom_input[0].StudyDate}')
 
-            if 'SeriesDescription' in dicom_input[0]:
-                base_filename = _remove_accents(f'{base_filename}_{dicom_input[0].SeriesDescription}')
+            #if 'SeriesDescription' in dicom_input[0]:
+                #base_filename = _remove_accents(f'{base_filename}_{dicom_input[0].SeriesDescription}')
 
             else:
                 base_filename = _remove_accents(dicom_input[0].SeriesInstanceUID)

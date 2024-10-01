@@ -120,6 +120,8 @@ if len(st.session_state.list_series) > 0:
                 else:
                     st.success(f'Extracted {len(st.session_state.list_input_nifti)} nifti images',
                                icon = ":material/thumb_up:")
+                    if st.session_state.sel_mod == 'T1':
+                        st.session_state.path_t1 = st.session_state.path_selmod
 
             # utilst.display_folder(st.session_state.path_selmod)
 
