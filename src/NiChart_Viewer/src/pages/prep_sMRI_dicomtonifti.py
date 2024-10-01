@@ -56,11 +56,7 @@ with st.expander('Select output', expanded = True):
         st.session_state.path_out = path_out
         st.session_state.path_dset = os.path.join(path_out, dset_name)
         st.session_state.path_nifti = os.path.join(path_out, dset_name, 'Nifti')
-
-        if st.session_state.path_dset != '':
-            if not os.path.exists(st.session_state.path_dset):
-                os.makedirs(st.session_state.path_dset)
-            st.success(f'Results will be saved to: {st.session_state.path_dset}')
+        st.success(f'Results will be saved to: {st.session_state.path_nifti}')
 
 # Panel for detecting dicom series
 if st.session_state.dset_name != '':

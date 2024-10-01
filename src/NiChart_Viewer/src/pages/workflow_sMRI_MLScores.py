@@ -28,75 +28,76 @@ st.markdown(
         """
 )
 
-with st.container(border=True):
-
-    # Dataset name: All results will be saved in a main folder named by the dataset name 
+# Panel for output (dataset name + out_dir)
+flag_expanded = st.session_state.path_dset == ''
+with st.expander('Select output', expanded = flag_expanded):
+    # Dataset name: All results will be saved in a main folder named by the dataset name
     helpmsg = "Each dataset's results are organized in a dedicated folder named after the dataset"
-    dset_name = utilst.user_input_text("Dataset name", 
-                                        st.session_state.dset_name, 
-                                        helpmsg)
-    st.session_state.dset_name = dset_name
+    dset_name = utilst.user_input_text("Dataset name", st.session_state.dset_name, helpmsg)
 
-    # DLMUSE file name
-    helpmsg = 'Input csv file with DLMUSE ROI volumes.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it'
-    csv_dlmuse, csv_path = utilst.user_input_file("Select file",
-                                                  'btn_input_dlmuse',
-                                                  "DLMUSE ROI file",
-                                                  st.session_state.path_last_sel,
-                                                  st.session_state.path_csv_dlmuse,
-                                                  helpmsg)
-    if os.path.exists(csv_dlmuse):
-        st.session_state.path_csv_dlmuse = csv_dlmuse
-        st.session_state.path_last_sel = csv_path
-
-    # Demog file name
-    helpmsg = 'Input csv file with demographic values.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it'
-    csv_demog, csv_path = utilst.user_input_file("Select file",
-                                                  'btn_input_demog',
-                                                  "Demographics file",
-                                                  st.session_state.path_last_sel,
-                                                  st.session_state.path_csv_demog,
-                                                  helpmsg)
-    if os.path.exists(csv_demog):
-        st.session_state.path_csv_demog = csv_demog
-        st.session_state.path_last_sel = csv_path
-
-    # Out folder name
-    helpmsg = 'Results will be saved into the output folder, in a subfolder named "MLScores".\n\nThe results will include harmonized ROIs, SPARE scores and SurrealGAN scores.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
+    # Out folder
+    helpmsg = 'DLMUSE images will be saved to the output folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
     path_out = utilst.user_input_folder("Select folder",
-                                        'btn_out_dir',
+                                        'btn_sel_out_dir',
                                         "Output folder",
                                         st.session_state.path_last_sel,
                                         st.session_state.path_out,
                                         helpmsg)
-    st.session_state.path_out = path_out
+    if dset_name != '' and path_out != '':
+        st.session_state.dset_name = dset_name
+        st.session_state.path_out = path_out
+        st.session_state.path_dset = os.path.join(path_out, dset_name)
+        st.session_state.path_mlscore = os.path.join(path_out, dset_name, 'MLScores')
+        st.success(f'Results will be saved to: {st.session_state.path_mlscore}')
 
-    # Check input files
-    flag_files = 1
-    if not os.path.exists(csv_dlmuse):
-        flag_files = 0
+# Panel for running MLScore
+if st.session_state.path_mlscore != '':
+    with st.expander('Run MLScore', expanded = True):
 
-    if not os.path.exists(csv_demog):
-        flag_files = 0
+        # DLMUSE file name
+        helpmsg = 'Input csv file with DLMUSE ROI volumes.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it'
+        csv_dlmuse, csv_path = utilst.user_input_file("Select file",
+                                                    'btn_input_dlmuse',
+                                                    "DLMUSE ROI file",
+                                                    st.session_state.path_last_sel,
+                                                    st.session_state.path_csv_dlmuse,
+                                                    helpmsg)
+        if os.path.exists(csv_dlmuse):
+            st.session_state.path_csv_dlmuse = csv_dlmuse
+            st.session_state.path_last_sel = csv_path
 
-    run_dir = os.path.join(st.session_state.path_root, 'src', 'workflow', 'workflows', 'w_sMRI')
 
-    # Run workflow
-    if flag_files == 1:
-        if st.button("Run w_sMRI"):
+        # Demog file name
+        helpmsg = 'Input csv file with demographic values.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it'
+        csv_demog, csv_path = utilst.user_input_file("Select file",
+                                                    'btn_input_demog',
+                                                    "Demographics file",
+                                                    st.session_state.path_last_sel,
+                                                    st.session_state.path_csv_demog,
+                                                    helpmsg)
+        if os.path.exists(csv_demog):
+            st.session_state.path_csv_demog = csv_demog
+            st.session_state.path_last_sel = csv_path
 
-            import time
-            path_out_mlscores = os.path.join(path_out, dset_name, 'MLScores')
-            st.info(f"Running: mlscores_workflow ", icon = ":material/manufacturing:")
+        # Button to run MLScore
+        flag_btn = os.path.exists(st.session_state.path_csv_demog) and os.path.exists(st.session_state.path_csv_dlmuse)
+        btn_mlscore = st.button("Run MLScore", disabled = not flag_btn)
+
+        if btn_mlscore:
+            run_dir = os.path.join(st.session_state.path_root, 'src', 'workflow', 'workflows', 'w_sMRI')
+
+            if not os.path.exists(st.session_state.path_mlscore):
+                os.makedirs(st.session_state.path_mlscore)
+
             with st.spinner('Wait for it...'):
-                time.sleep(15)
                 os.system(f"cd {run_dir}")
-                cmd = f"python3 {run_dir}/call_snakefile.py --run_dir {run_dir} --dset_name {dset_name} --input_rois {csv_dlmuse} --input_demog {csv_demog} --dir_out {path_out_mlscores}"
+                st.info(f"Running: mlscores_workflow ", icon = ":material/manufacturing:")
+                cmd = f"python3 {run_dir}/call_snakefile.py --run_dir {run_dir} --dset_name {dset_name} --input_rois {csv_dlmuse} --input_demog {csv_demog} --dir_out {st.session_state.path_mlscore}"
                 os.system(cmd)
                 st.success("Run completed!", icon = ":material/thumb_up:")
 
                 # Set the output file as the input for the related viewers
-                csv_mlscores = f"{path_out_mlscores}/{dset_name}_DLMUSE+MLScores.csv"
+                csv_mlscores = f"{st.session_state.path_mlscore}/{dset_name}_DLMUSE+MLScores.csv"
                 if os.path.exists(csv_mlscores):
                     st.session_state.path_csv_mlscores = csv_mlscores
 

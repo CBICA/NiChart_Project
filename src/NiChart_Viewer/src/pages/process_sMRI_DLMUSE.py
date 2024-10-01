@@ -40,11 +40,7 @@ with st.expander('Select output', expanded = flag_expanded):
         st.session_state.path_out = path_out
         st.session_state.path_dset = os.path.join(path_out, dset_name)
         st.session_state.path_dlmuse = os.path.join(path_out, dset_name, 'DLMUSE')
-
-        if st.session_state.path_dlmuse != '':
-            if not os.path.exists(st.session_state.path_dlmuse):
-                os.makedirs(st.session_state.path_dlmuse)
-            st.success(f'Results will be saved to: {st.session_state.path_dlmuse}')
+        st.success(f'Results will be saved to: {st.session_state.path_dlmuse}')
 
 # Panel for running DLMUSE
 if st.session_state.dset_name != '':
@@ -77,11 +73,9 @@ if st.session_state.dset_name != '':
             if not os.path.exists(st.session_state.path_dlmuse):
                 os.makedirs(st.session_state.path_dlmuse)
             
-            import time
             with st.spinner('Wait for it...'):
                 dlmuse_cmd = f"NiChart_DLMUSE -i {st.session_state.path_t1} -o {st.session_state.path_dlmuse} -d {device}"
                 st.info(f'Running: {dlmuse_cmd}', icon = ":material/manufacturing:")
-                time.sleep(5)
                 #os.system(dlmuse_cmd)
                 st.success("Run completed!", icon = ":material/thumb_up:")
 
@@ -108,9 +102,9 @@ if os.path.exists(st.session_state.path_csv_dlmuse):
         sel_mrid = st.selectbox("MRID", df.MRID.tolist(), key=f"selbox_mrid", index = 0)
 
         st.session_state.path_sel_img = os.path.join(st.session_state.path_t1, 
-                                                     sel_mrid + '.nii.gz')
+                                                     sel_mrid + st.session_state.suff_t1img)
         st.session_state.path_sel_dlmuse = os.path.join(st.session_state.path_dlmuse, 
-                                                     sel_mrid + '_DLMUSE.nii.gz')
+                                                     sel_mrid + st.session_state.suff_dlmuse)
         
 
         # Selection of ROI
@@ -127,19 +121,6 @@ if os.path.exists(st.session_state.path_csv_dlmuse):
         flag_btn = os.path.exists(st.session_state.path_sel_img)
 
         with st.spinner('Wait for it...'):
-
-            ## Prepare final 3d matrix to display
-            #img = utilni.prep_image(st.session_state.path_sel_img)
-
-            ## Detect mask bounds and center in each view
-            #img_bounds = utilni.detect_img_bounds(img)
-
-            ## Show images
-            #blocks = st.columns(len(list_orient))
-            #for i, tmp_orient in enumerate(list_orient):
-                #with blocks[i]:
-                    #ind_view = VIEWS.index(tmp_orient)
-                    #utilst.show_img3D(img, ind_view, img_bounds[ind_view,:], tmp_orient)
 
             # Process image and mask to prepare final 3d matrix to display
             img, mask, img_masked = utilni.prep_image_and_olay(st.session_state.path_sel_img, 

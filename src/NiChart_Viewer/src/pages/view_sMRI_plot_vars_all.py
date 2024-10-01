@@ -17,29 +17,11 @@ from tkinter import filedialog
 
 from utils_trace import *
 
+import utils_st as utilst
+import utils_muse as utilmuse
+import utils_nifti as utilni
 
-def browse_file(path_input):
-    '''
-    File selector
-    Returns the file name selected by the user and the parent folder
-    '''
-    root = tk.Tk()
-    root.withdraw()  # Hide the main window
-    out_path = filedialog.askopenfilename(initialdir = path_input)
-    path_out = os.path.dirname(out_path)
-    root.destroy()
-    return out_path, path_out
-
-def browse_folder(path_input):
-    '''
-    Folder selector
-    Returns the folder name selected by the user
-    '''
-    root = tk.Tk()
-    root.withdraw()  # Hide the main window
-    out_path = filedialog.askdirectory(initialdir = path_input)
-    root.destroy()
-    return out_path
+VIEWS = ["axial", "coronal", "sagittal"]
 
 #hide_pages(["Image Processing", "Data Analytics"])
 
@@ -164,7 +146,6 @@ def display_plot(plot_id):
 
         # Add plot
         # - on_select: when clicked it will rerun and return the info
-
         sel_info = st.plotly_chart(scatter_plot, key=f"bubble_chart_{plot_id}", 
                                    on_select = callback_plot_clicked)
 
@@ -180,11 +161,8 @@ def display_plot(plot_id):
             st.session_state.sel_mrid = sel_mrid
             st.session_state.sel_roi = sel_roi
 
-            
             st.sidebar.success('Selected subject: ' +  sel_mrid)
             st.sidebar.success('Selected ROI: ' + sel_roi)
-        # )
-            
 
 
 def filter_dataframe(df: pd.DataFrame, plot_id) -> pd.DataFrame:
@@ -256,22 +234,24 @@ def filter_dataframe(df: pd.DataFrame, plot_id) -> pd.DataFrame:
 
     return df
 
-
 # Page controls in side bar
 with st.sidebar:
 
     with st.container(border=True):
 
         # Input file name
-        if st.sidebar.button("Select input file"):
-            st.session_state.path_csv_mlscores, st.session_state.path_last_sel = browse_file(st.session_state.path_last_sel)
-        csv_mlscores = st.sidebar.text_input("Enter the name of the ROI csv file:",
-                                          value = st.session_state.path_csv_mlscores,
-                                          label_visibility="collapsed")
+        helpmsg = 'Input csv file with MLScores.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it'
+        csv_mlscores, csv_path = utilst.user_input_file("Select file",
+                                                    'btn_input_mlscore',
+                                                    "ML scores file",
+                                                    st.session_state.path_last_sel,
+                                                    st.session_state.path_csv_mlscores,
+                                                    helpmsg)
         if os.path.exists(csv_mlscores):
             st.session_state.path_csv_mlscores = csv_mlscores
+            st.session_state.path_last_sel = csv_path
 
-if os.path.exists(csv_mlscores):
+if os.path.exists(st.session_state.path_csv_mlscores):
 
     # Read input csv
     df = pd.read_csv(csv_mlscores)
@@ -341,6 +321,98 @@ if os.path.exists(csv_mlscores):
             blocks = st.columns(plot_per_raw)
         with blocks[column_no]:
             display_plot(plot_ind)
+
+# Panel for viewing images and DLMUSE masks
+if os.path.exists(st.session_state.path_csv_mlscores):
+    with st.expander('View segmentations', expanded = True):
+
+        # Read dlmuse csv
+        df = pd.read_csv(st.session_state.path_csv_mlscores)
+
+        # Create a dictionary of MUSE indices and names
+        df_muse = pd.read_csv(st.session_state.dict_muse_all)
+
+        ## FIXME : extra roi not in dict
+        df_muse = df_muse[df_muse.Name != 'CortCSF']
+
+        # Read derived roi list and convert to a dict
+        dict_roi, dict_derived = utilmuse.read_derived_roi_list(st.session_state.dict_muse_sel,
+                                                                st.session_state.dict_muse_derived)
+
+        # Selection of MRID
+        sel_mrid = st.session_state.sel_mrid
+        if sel_mrid == '':
+            sel_ind = 0
+            sel_type = '(auto)'
+        else:
+            sel_ind = df.MRID.tolist().index(sel_mrid)
+            sel_type = '(user)'
+        sel_mrid = st.selectbox("MRID", df.MRID.tolist(), key=f"selbox_mrid", index = sel_ind)
+
+        # Selection of ROI
+        #  - The variable will be selected from the active plot
+
+        sel_var = ''
+        try:
+            sel_var = st.session_state.plots.loc[st.session_state.plot_active, 'yvar']
+        except:
+            print('Could not detect an active plot')
+        if sel_var == '':
+            sel_ind = 2
+            sel_var = list(dict_roi.keys())[0]
+            sel_type = '(auto)'
+        else:
+            sel_ind = df_muse.Name.tolist().index(sel_var)
+            sel_type = '(user)'
+        sel_var = st.selectbox("ROI", list(dict_roi.keys()), key=f"selbox_rois", index = sel_ind)
+
+
+        print(df_muse.Name)
+
+        print(dict_roi.keys())
+
+
+        # Select roi index
+        sel_var_ind = dict_roi[sel_var]
+
+        # Create a list of checkbox options
+        list_orient = st.multiselect("Select viewing planes:", VIEWS, VIEWS)
+
+        # View hide overlay
+        is_show_overlay = st.checkbox('Show overlay', True)
+
+        flag_btn = os.path.exists(st.session_state.path_sel_img) and os.path.exists(st.session_state.path_sel_dlmuse)
+
+        with st.spinner('Wait for it...'):
+
+            st.session_state.path_sel_img = os.path.join(st.session_state.path_out,
+                                                         st.session_state.path_t1,
+                                                         sel_mrid + st.session_state.suff_t1img)
+
+            st.session_state.path_sel_dlmuse = os.path.join(st.session_state.path_out,
+                                                            st.session_state.path_dlmuse,
+                                                            sel_mrid + st.session_state.suff_dlmuse)
+
+
+            # Process image and mask to prepare final 3d matrix to display
+            img, mask, img_masked = utilni.prep_image_and_olay(st.session_state.path_sel_img,
+                                                               st.session_state.path_sel_dlmuse,
+                                                               sel_var_ind,
+                                                               dict_derived)
+
+            # Detect mask bounds and center in each view
+            mask_bounds = utilni.detect_mask_bounds(mask)
+
+            # Show images
+            blocks = st.columns(len(list_orient))
+            for i, tmp_orient in enumerate(list_orient):
+                with blocks[i]:
+                    ind_view = VIEWS.index(tmp_orient)
+                    if is_show_overlay == False:
+                        utilst.show_img3D(img, ind_view, mask_bounds[ind_view,:], tmp_orient)
+                    else:
+                        utilst.show_img3D(img_masked, ind_view, mask_bounds[ind_view,:], tmp_orient)
+
 
 
     # FIXME: this is for debugging; will be removed

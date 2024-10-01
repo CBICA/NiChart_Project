@@ -38,6 +38,7 @@ if 'instantiated' not in st.session_state:
     st.session_state.path_dti = ''
     st.session_state.path_fmri = ''
     st.session_state.path_dlmuse = ''
+    st.session_state.path_mlscore = ''
     st.session_state.path_csv_demog = ''
     st.session_state.path_csv_dlmuse = ''
     st.session_state.path_csv_mlscores = ''
