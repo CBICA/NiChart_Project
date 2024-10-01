@@ -19,3 +19,4 @@ streamlit_plotly_events
 chart_studio
 Jinja2
 plotly-express
+stqdm
