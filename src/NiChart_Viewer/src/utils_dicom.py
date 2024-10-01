@@ -110,7 +110,7 @@ def detect_series(in_dir):
     df_dicoms = pd.DataFrame(data = list_files, columns = ['fname'])
     df_dicoms = df_dicoms.reindex(columns = ['fname', 'dtype'])
     list_dtypes = []
-    for (_, file_path) in stqdm(enumerate(df_dicoms.fname.tolist()), desc="Detecting series...", total=len(df_dicoms.fname.tolist())):
+    for (_, file_path) in stqdm(enumerate(df_dicoms.fname.tolist()), desc="Detecting series in dicom files ...", total=len(df_dicoms.fname.tolist())):
         # noinspection PyBroadException
         dtype = ''
         try:
@@ -155,7 +155,7 @@ def select_series(df_dicoms, dict_series):
     return df_sel_list, dict_out
 
 
-def convert_single_series(list_files, out_dir, compression=True, reorient=True):
+def convert_single_series(list_files, out_dir, out_suff, compression=True, reorient=True):
     """
     This function will extract dicom files given in the list to nifti
     """
@@ -178,7 +178,7 @@ def convert_single_series(list_files, out_dir, compression=True, reorient=True):
             print("Unable to read: %s" % file_path)
 
     # Start converting one by one
-    for series_id, dicom_input in dicom_series.items():
+    for series_id, dicom_input in stqdm(dicom_series.items(), desc="    Converting scans...", total=len(dicom_series)):
         base_filename = ""
         try:
             # construct the filename for the nifti
@@ -199,9 +199,9 @@ def convert_single_series(list_files, out_dir, compression=True, reorient=True):
             print('--------------------------------------------')
             print(f'Start converting {base_filename}')
             if compression:
-                nifti_file = os.path.join(out_dir, base_filename + '.nii.gz')
+                nifti_file = os.path.join(out_dir, base_filename + out_suff)
             else:
-                nifti_file = os.path.join(out_dir, base_filename + '.nii')
+                nifti_file = os.path.join(out_dir, base_filename + out_suff)
             convert_dicom.dicom_array_to_nifti(dicom_input, nifti_file, reorient)
             gc.collect()
         except:  # Explicitly capturing app exceptions here to be able to continue processing
@@ -209,14 +209,14 @@ def convert_single_series(list_files, out_dir, compression=True, reorient=True):
             traceback.print_exc()
 
 
-def convert_sel_series(df_dicoms, sel_series, out_dir):
+def convert_sel_series(df_dicoms, sel_series, out_dir, out_suff):
     # Convert all images for each selected series
     for (_, stmp) in stqdm(enumerate(sel_series), desc="Converting series...", total=len(sel_series)):
         print(f'Converting series: {stmp}')
         list_files = df_dicoms[df_dicoms.dtype == stmp].fname.tolist()
         print(list_files)
 
-        convert_single_series(list_files, out_dir, compression=True, reorient=True)
+        convert_single_series(list_files, out_dir, out_suff, compression=True, reorient=True)
 #def convert_dicoms_to_nifti(in_dir, out_dir):
     ## Detect files
     #filesandirs = glob(os.path.join(in_dir, '**', '*'), recursive=True)

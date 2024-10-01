@@ -322,9 +322,13 @@ if os.path.exists(st.session_state.path_csv_mlscores):
         with blocks[column_no]:
             display_plot(plot_ind)
 
+with st.expander('AAA'):
+    st.write(st.session_state)
+
+
 # Panel for viewing images and DLMUSE masks
 if os.path.exists(st.session_state.path_csv_mlscores):
-    with st.expander('View segmentations', expanded = True):
+    with st.expander('View segmentations', expanded = False):
 
         # Read dlmuse csv
         df = pd.read_csv(st.session_state.path_csv_mlscores)
@@ -384,13 +388,11 @@ if os.path.exists(st.session_state.path_csv_mlscores):
         flag_btn = os.path.exists(st.session_state.path_sel_img) and os.path.exists(st.session_state.path_sel_dlmuse)
 
         with st.spinner('Wait for it...'):
-
-            st.session_state.path_sel_img = os.path.join(st.session_state.path_out,
-                                                         st.session_state.path_t1,
+    
+            st.session_state.path_sel_img = os.path.join(st.session_state.path_t1,
                                                          sel_mrid + st.session_state.suff_t1img)
 
-            st.session_state.path_sel_dlmuse = os.path.join(st.session_state.path_out,
-                                                            st.session_state.path_dlmuse,
+            st.session_state.path_sel_dlmuse = os.path.join(st.session_state.path_dlmuse,
                                                             sel_mrid + st.session_state.suff_dlmuse)
 
 

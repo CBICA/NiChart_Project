@@ -8,7 +8,6 @@ import pandas as pd
 import utils_muse as utilmuse
 import utils_nifti as utilni
 
-VIEWS = ["axial", "coronal", "sagittal"]
 
 st.markdown(
         """
@@ -76,7 +75,7 @@ if st.session_state.dset_name != '':
             with st.spinner('Wait for it...'):
                 dlmuse_cmd = f"NiChart_DLMUSE -i {st.session_state.path_t1} -o {st.session_state.path_dlmuse} -d {device}"
                 st.info(f'Running: {dlmuse_cmd}', icon = ":material/manufacturing:")
-                #os.system(dlmuse_cmd)
+                os.system(dlmuse_cmd)
                 st.success("Run completed!", icon = ":material/thumb_up:")
 
                 # Set the dlmuse csv output
@@ -113,7 +112,7 @@ if os.path.exists(st.session_state.path_csv_dlmuse):
         
 
         # Create a list of checkbox options
-        list_orient = st.multiselect("Select viewing planes:", VIEWS, VIEWS)
+        list_orient = st.multiselect("Select viewing planes:", utilni.VIEWS, utilni.VIEWS)
 
         # View hide overlay
         is_show_overlay = st.checkbox('Show overlay', True)
@@ -135,7 +134,7 @@ if os.path.exists(st.session_state.path_csv_dlmuse):
             blocks = st.columns(len(list_orient))
             for i, tmp_orient in enumerate(list_orient):
                 with blocks[i]:
-                    ind_view = VIEWS.index(tmp_orient)
+                    ind_view = utilni.VIEWS.index(tmp_orient)
                     if is_show_overlay == False:
                         utilst.show_img3D(img, ind_view, mask_bounds[ind_view,:], tmp_orient)
                     else:

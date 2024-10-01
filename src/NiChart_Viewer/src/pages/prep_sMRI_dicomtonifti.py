@@ -9,9 +9,6 @@ import utils_dicom as utildcm
 import pandas as pd
 import numpy as np
 
-VIEWS = ["axial", "sagittal", "coronal"]
-
-
 result_holder = st.empty()
 def progress(p, i, decoded):
     with result_holder.container():
@@ -56,7 +53,8 @@ with st.expander('Select output', expanded = True):
         st.session_state.path_out = path_out
         st.session_state.path_dset = os.path.join(path_out, dset_name)
         st.session_state.path_nifti = os.path.join(path_out, dset_name, 'Nifti')
-        st.success(f'Results will be saved to: {st.session_state.path_nifti}')
+        st.success(f'Results will be saved to: {st.session_state.path_nifti}',
+                   icon = ":material/thumb_up:")
 
 # Panel for detecting dicom series
 if st.session_state.dset_name != '':
@@ -81,7 +79,8 @@ if st.session_state.dset_name != '':
                 if len(list_series) == 0:
                     st.warning('Could not detect any dicom series!')
                 else:
-                    st.success(f"Detected {len(list_series)} dicom series!", icon = ":material/thumb_up:")
+                    st.success(f"Detected {len(list_series)} dicom series!", 
+                               icon = ":material/thumb_up:")
                 st.session_state.list_series = list_series
                 st.session_state.df_dicoms = df_dicoms
 
@@ -112,13 +111,15 @@ if len(st.session_state.list_series) > 0:
         if btn_convert:
             with st.spinner('Wait for it...'):
                 utildcm.convert_sel_series(st.session_state.df_dicoms,
-                                        st.session_state.sel_series,
-                                        st.session_state.path_selmod)
+                                           st.session_state.sel_series,
+                                           st.session_state.path_selmod,
+                                           f'_{st.session_state.sel_mod}.nii.gz')
                 st.session_state.list_input_nifti = [f for f in os.listdir(st.session_state.path_selmod) if f.endswith('nii.gz')]
                 if len(st.session_state.list_input_nifti) == 0:
                     st.warning(f'Could not extract any nifti images')
                 else:
-                    st.success(f'Extracted {len(st.session_state.list_input_nifti)} nifti images')
+                    st.success(f'Extracted {len(st.session_state.list_input_nifti)} nifti images',
+                               icon = ":material/thumb_up:")
 
             # utilst.display_folder(st.session_state.path_selmod)
 
@@ -135,7 +136,7 @@ if len(st.session_state.list_input_nifti) > 0:
         st.session_state.path_sel_img = os.path.join(st.session_state.path_selmod, sel_img)
 
         # Create a list of checkbox options
-        list_orient = st.multiselect("Select viewing planes:", VIEWS, VIEWS)
+        list_orient = st.multiselect("Select viewing planes:", utilni.VIEWS, utilni.VIEWS)
 
         flag_btn = os.path.exists(st.session_state.path_sel_img)
 
@@ -151,7 +152,7 @@ if len(st.session_state.list_input_nifti) > 0:
             blocks = st.columns(len(list_orient))
             for i, tmp_orient in enumerate(list_orient):
                 with blocks[i]:
-                    ind_view = VIEWS.index(tmp_orient)
+                    ind_view = utilni.VIEWS.index(tmp_orient)
                     utilst.show_img3D(img, ind_view, img_bounds[ind_view,:], tmp_orient)
 
 
