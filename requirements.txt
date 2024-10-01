@@ -1,7 +1,7 @@
 # NiChart packages
 spare-scores
 NiChartHarmonize
-#NiChart_DLMUSE
+NiChart_DLMUSE
 
 # general python dependencies
 argparse
@@ -14,7 +14,8 @@ sphinx
 
 
 # streamlit
-st_pages==1.0.1
+## st_pages==1.0.1
+st_pages
 streamlit_plotly_events
 chart_studio
 Jinja2

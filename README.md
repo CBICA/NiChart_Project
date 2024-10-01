@@ -29,14 +29,53 @@ NiChart is a comprehensive framework designed to revolutionize neuroimaging rese
 1. `git clone https://github.com/CBICA/NiChart_Project.git`
 2. `git submodule update --init --recursive --remote`
 3. `pip install -r requirements.txt`
+4. (If needed for your system/CUDA version) Follow the [PyTorch installation instructions.](https://pytorch.org/get-started/locally/). Unless you receive CUDA errors while running NiChart, this is probably not needed.
 
 ## Example Usage
+
+### Run Locally
 ```bash
 cd src/NiChart_Viewer/src
 streamlit run NiChartProject.py
 ```
 
-The app will start in localhost
+The app will start, running on localhost, port 8501.
+Your browser should generally open automatically if you are running locally. 
+While it is running, you can connect by opening your browser and navigating to http://localhost:8501
+
+When you close your terminal, the server will stop running.
+
+### Run with Docker
+
+First, make sure you have [installed Docker.](https://docs.docker.com/engine/install/)
+
+Some example commands for the [docker container](https://hub.docker.com/repository/docker/cbica/nichart/general) are the following:
+
+
+```bash
+# Pull the image for your CUDA version (as needed)
+CUDA_VERSION=11.8 docker pull cbica/nichart:1.0.0-cuda${CUDA_VERSION}
+# or, for CPU:
+docker pull cbica/nichart:1.0.0
+
+## Suggested automatic inference run time command 
+## Place input in /path/to/input/on/host.
+## Each "/path/to/.../on/host" is a placeholder, use your actual paths!
+docker run -it --name nichart_server --rm -p 8501:8501
+    --mount type=bind,source=/path/to/input/on/host,target=/input,readonly 
+    --mount type=bind,source=/path/to/output/on/host,target=/output
+    --gpus all cbica/nichart:1.0.0
+## Run the above, then open your browser to http://localhost:8501 
+## The above runs the server in your terminal, use Ctrl-C to end it.
+## To run the server in the background, replace the "-it" flag in the command with "-d".
+## To end the background server, use "docker stop nichart_server"
+## DO NOT USE this as a public web server!
+```
+
+For a full explanation of Docker options, see the [docker run documentation.](https://docs.docker.com/reference/cli/docker/container/run/)
+
+### Run with Singularity/Apptainer
+Coming soon!
 ---
 
 © 2024 CBICA. All Rights Reserved.
