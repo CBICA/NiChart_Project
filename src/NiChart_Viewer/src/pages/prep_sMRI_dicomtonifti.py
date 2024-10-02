@@ -25,8 +25,7 @@ st.markdown(
 )
 
 # Panel for output (dataset name + out_dir)
-flag_expanded = st.session_state.paths["dset"] == ""
-with st.expander("Select output", expanded=flag_expanded):
+with st.expander("Select output", expanded=False):
     # Dataset name: All results will be saved in a main folder named by the dataset name
     helpmsg = "Each dataset's results are organized in a dedicated folder named after the dataset"
     dset_name = utilst.user_input_text(
@@ -131,7 +130,7 @@ with st.expander("Select dicom series", expanded=False):
 with st.expander("View images", expanded=False):
     # Selection of MRID
     sel_img = st.selectbox(
-        "Select Image", st.session_state.list_input_nifti, key="selbox_images", index=0
+        "Select Image", st.session_state.list_input_nifti, key="selbox_images", index=None
     )
 
     if sel_img is not None:
@@ -142,9 +141,7 @@ with st.expander("View images", expanded=False):
     flag_btn = os.path.exists(st.session_state.paths["sel_img"])
 
     # Create a list of checkbox options
-    list_orient = st.multiselect(
-        "Select viewing planes:", utilni.VIEWS, utilni.VIEWS, disabled=not flag_btn
-    )
+    list_orient = st.multiselect("Select viewing planes:", utilni.VIEWS, utilni.VIEWS)
 
     if flag_btn:
 

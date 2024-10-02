@@ -16,8 +16,7 @@ st.markdown(
 )
 
 # Panel for output (dataset name + out_dir)
-flag_expanded = st.session_state.paths["dset"] == ""
-with st.expander("Select output", expanded=flag_expanded):
+with st.expander("Select output", expanded=False):
     # Dataset name: All results will be saved in a main folder named by the dataset name
     helpmsg = "Each dataset's results are organized in a dedicated folder named after the dataset"
     dset_name = utilst.user_input_text(
@@ -44,8 +43,7 @@ with st.expander("Select output", expanded=flag_expanded):
         st.success(f'Results will be saved to: {st.session_state.paths['mlscore']}')
 
 # Panel for running MLScore
-flag_expanded = st.session_state.paths["mlscores"] == ""
-with st.expander("Run MLScore", expanded=flag_expanded):
+with st.expander("Run MLScore", expanded=False):
 
     # DLMUSE file name
     helpmsg = "Input csv file with DLMUSE ROI volumes.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it"
