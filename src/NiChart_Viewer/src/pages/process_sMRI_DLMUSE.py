@@ -48,15 +48,15 @@ if st.session_state.dset_name != "":
 
         # Input T1 image folder
         helpmsg = "DLMUSE will be applied to .nii/.nii.gz images directly in the input folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
-        path_t1 = utilst.user_input_folder(
+        st.session_state.paths['T1'] = utilst.user_input_folder(
             "Select folder",
             "btn_indir_t1",
             "Input folder",
             st.session_state.paths["last_sel"],
-            st.session_state.paths["t1"],
+            st.session_state.paths['T1'],
             helpmsg,
         )
-        st.session_state.paths["t1"] = path_t1
+        
 
         # Device type
         helpmsg = "Choose 'cuda' if your computer has an NVIDIA GPU, 'mps' if you have an Apple M-series chip, and 'cpu' if you have a standard CPU."
@@ -107,6 +107,7 @@ if os.path.exists(st.session_state.paths["csv_dlmuse"]):
         st.session_state.paths["sel_img"] = os.path.join(
             st.session_state.paths['T1'], sel_mrid + st.session_state.suff_t1img
         )
+        
         st.session_state.paths["sel_dlmuse"] = os.path.join(
             st.session_state.paths["dlmuse"], sel_mrid + st.session_state.suff_dlmuse
         )
