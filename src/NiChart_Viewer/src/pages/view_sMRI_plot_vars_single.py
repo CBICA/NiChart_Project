@@ -3,13 +3,6 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-# # Initiate Session State Values
-# if 'instantiated' not in st.session_state:
-#     st.session_state.plots = pd.DataFrame({'PID':[]})
-#     st.session_state.pid = 1
-#     st.session_state.instantiated = True
-
-
 def calc_subject_centiles(df_subj: pd.DataFrame, df_cent: pd.DataFrame) -> pd.DataFrame:
     """
     Calculate subject specific centile values

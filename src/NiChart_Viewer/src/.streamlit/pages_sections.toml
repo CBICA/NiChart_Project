@@ -25,11 +25,6 @@ name = "DLMUSE (sMRI)"
 icon = ":black_small_square:"
 
 [[pages]]
-path = "pages/process_DTI_DTIPrep.py"
-name = "DTIPrep (DTI)"
-icon = ":black_small_square:"
-
-[[pages]]
 name = "Data Analytics"
 is_section = true
 icon = ":file_folder:"
@@ -46,16 +41,16 @@ icon = ":file_folder:"
 
 [[pages]]
 path = "pages/view_sMRI_plot_vars_all.py"
-name = "Plot Variables - Study (sMRI)"
+name = "Study Data (sMRI)"
 icon = ":black_small_square:"
 
 [[pages]]
 path = "pages/view_sMRI_plot_vars_single.py"
-name = "Plot Variables - Individual (sMRI)"
+name = "Participant Data (sMRI)"
 icon = ":black_small_square:"
 
 [[pages]]
 path = "pages/view_sMRI_DLMUSE.py"
-name = "View DLMUSE (sMRI)"
+name = "View Images (sMRI)"
 icon = ":black_small_square:"
 
