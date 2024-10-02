@@ -1,6 +1,7 @@
 import nibabel as nib
 from nibabel.orientations import axcodes2ornt, ornt_transform
 
+
 def reorient_img(in_img, ref_orient = 'LPS', out_img):
     """
     Reorient input image to reference orientation
