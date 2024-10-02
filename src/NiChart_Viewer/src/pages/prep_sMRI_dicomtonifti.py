@@ -25,7 +25,8 @@ st.markdown(
 )
 
 # Panel for output (dataset name + out_dir)
-with st.expander("Select output", expanded=False):
+flag_expanded = st.session_state.paths["dset"] == ""
+with st.expander("Select output", expanded=flag_expanded):
     # Dataset name: All results will be saved in a main folder named by the dataset name
     helpmsg = "Each dataset's results are organized in a dedicated folder named after the dataset"
     dset_name = utilst.user_input_text(
