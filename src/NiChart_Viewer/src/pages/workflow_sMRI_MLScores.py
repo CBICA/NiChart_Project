@@ -1,19 +1,6 @@
-import pandas as pd
-import streamlit as st
-from pandas.api.types import (
-    is_categorical_dtype,
-    is_datetime64_any_dtype,
-    is_numeric_dtype,
-    is_object_dtype,
-)
-import plotly.express as px
-from math import ceil
 import os
-from tempfile import NamedTemporaryFile
 
-import tkinter as tk
-from tkinter import filedialog
-
+import streamlit as st
 import utils.utils_st as utilst
 
 st.markdown(
@@ -30,7 +17,7 @@ st.markdown(
 
 # Panel for output (dataset name + out_dir)
 flag_expanded = st.session_state.paths['dset'] == ''
-with st.expander('Select output', expanded = flag_expanded):
+with st.expander('Select output', expanded=flag_expanded):
     # Dataset name: All results will be saved in a main folder named by the dataset name
     helpmsg = "Each dataset's results are organized in a dedicated folder named after the dataset"
     dset_name = utilst.user_input_text("Dataset name", st.session_state.dset_name, helpmsg)
@@ -38,7 +25,7 @@ with st.expander('Select output', expanded = flag_expanded):
     # Out folder
     helpmsg = 'DLMUSE images will be saved to the output folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
     path_out = utilst.user_input_folder("Select folder",
-                                        'btn_sel_out_dir',
+                                        "btn_sel_out_dir",
                                         "Output folder",
                                         st.session_state.paths['last_sel'],
                                         st.session_state.paths['out'],
@@ -52,7 +39,7 @@ with st.expander('Select output', expanded = flag_expanded):
 
 # Panel for running MLScore
 if st.session_state.paths['mlscore'] != '':
-    with st.expander('Run MLScore', expanded = True):
+    with st.expander('Run MLScore', expanded=True):
 
         # DLMUSE file name
         helpmsg = 'Input csv file with DLMUSE ROI volumes.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it'
@@ -65,7 +52,6 @@ if st.session_state.paths['mlscore'] != '':
         if os.path.exists(csv_dlmuse):
             st.session_state.paths['csv_dlmuse'] = csv_dlmuse
             st.session_state.paths['last_sel'] = csv_path
-
 
         # Demog file name
         helpmsg = 'Input csv file with demographic values.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it'
@@ -81,7 +67,7 @@ if st.session_state.paths['mlscore'] != '':
 
         # Button to run MLScore
         flag_btn = os.path.exists(st.session_state.paths['csv_demog']) and os.path.exists(st.session_state.paths['csv_dlmuse'])
-        btn_mlscore = st.button("Run MLScore", disabled = not flag_btn)
+        btn_mlscore = st.button("Run MLScore", disabled=not flag_btn)
 
         if btn_mlscore:
             run_dir = os.path.join(st.session_state.paths['root'], 'src', 'workflow', 'workflows', 'w_sMRI')
@@ -91,10 +77,10 @@ if st.session_state.paths['mlscore'] != '':
 
             with st.spinner('Wait for it...'):
                 os.system(f"cd {run_dir}")
-                st.info(f"Running: mlscores_workflow ", icon = ":material/manufacturing:")
+                st.info("Running: mlscores_workflow ", icon=":material/manufacturing:")
                 cmd = f"python3 {run_dir}/call_snakefile.py --run_dir {run_dir} --dset_name {dset_name} --input_rois {csv_dlmuse} --input_demog {csv_demog} --dir_out {st.session_state.paths['mlscore']}"
                 os.system(cmd)
-                st.success("Run completed!", icon = ":material/thumb_up:")
+                st.success("Run completed!", icon=":material/thumb_up:")
 
                 # Set the output file as the input for the related viewers
                 csv_mlscores = f"{st.session_state.paths['mlscore']}/{dset_name}_DLMUSE+MLScores.csv"

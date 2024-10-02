@@ -1,41 +1,32 @@
-import plotly.express as px
 import os
+from typing import Any
+
 import streamlit as st
-import tkinter as tk
-from tkinter import filedialog
-import utils.utils_st as utilst
-import utils.utils_nifti as utilni
 import utils.utils_dicom as utildcm
-import pandas as pd
-import numpy as np
+import utils.utils_nifti as utilni
+import utils.utils_st as utilst
 
 result_holder = st.empty()
-def progress(p, i, decoded):
+
+
+def progress(p: int, i: int, decoded: Any) -> None:
     with result_holder.container():
         st.progress(p, f'Progress: Token position={i}')
-        #if decoded and decoded[0]:
-            #st.markdown(decoded[0])
-
-#out = model.generate([input_text],
-                     #max_gen_len=max_seq_len,
-                     #temperature=temperature,
-                     #top_p=top_p,
-                     #callback=progress)
 
 
 st.markdown(
-        """
+    """
     1. Select Output: Select the folder where all results will be saved.
     2. Select Input: Choose the directory containing your raw DICOM files.
     3. Detect Series: The application will automatically identify different imaging series within the selected folder.
     4. Choose Series: Select the specific series you want to extract. You can pick multiple series if necessary.
     5. Extract Nifti Scans: Convert the selected DICOM series into Nifti format.
     6. View Nifti Scans: View extracted scans.
-        """
+    """
 )
 
 # Panel for output (dataset name + out_dir)
-with st.expander('Select output', expanded = True):
+with st.expander('Select output', expanded=True):
     # Dataset name: All results will be saved in a main folder named by the dataset name
     helpmsg = "Each dataset's results are organized in a dedicated folder named after the dataset"
     dset_name = utilst.user_input_text("Dataset name", st.session_state.dset_name, helpmsg)
@@ -53,26 +44,27 @@ with st.expander('Select output', expanded = True):
         st.session_state.paths['out'] = path_out
         st.session_state.paths['dset'] = os.path.join(path_out, dset_name)
         st.session_state.paths['nifti'] = os.path.join(path_out, dset_name, 'Nifti')
-        st.success(f'Results will be saved to: {st.session_state.paths['nifti']}',
-                   icon = ":material/thumb_up:")
+        st.success(f'Results will be saved to: {st.session_state.paths['nifti']}', icon=":material/thumb_up:")
 
 # Panel for detecting dicom series
 if st.session_state.dset_name != '':
-    with st.expander('Detect dicom series', expanded = True):
+    with st.expander('Detect dicom series', expanded=True):
         # Input dicom image folder
         helpmsg = 'Input folder with dicom files (.dcm).\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
-        path_dicom = utilst.user_input_folder("Select folder",
-                                        'btn_indir_dicom',
+        path_dicom = utilst.user_input_folder(
+                                        "Select folder",
+                                        "btn_indir_dicom",
                                         "Input dicom folder",
                                         st.session_state.paths['last_sel'],
                                         st.session_state.paths['dicom'],
-                                        helpmsg)
+                                        helpmsg
+        )
         st.session_state.paths['dicom'] = path_dicom
 
         flag_btn = os.path.exists(st.session_state.paths['dicom'])
 
         # Detect dicom series
-        btn_detect = st.button("Detect Series", disabled = not flag_btn)
+        btn_detect = st.button("Detect Series", disabled=not flag_btn)
         if btn_detect:
             with st.spinner('Wait for it...'):
                 df_dicoms, list_series = utildcm.detect_series(path_dicom)
@@ -80,13 +72,13 @@ if st.session_state.dset_name != '':
                     st.warning('Could not detect any dicom series!')
                 else:
                     st.success(f"Detected {len(list_series)} dicom series!",
-                               icon = ":material/thumb_up:")
+                               icon=":material/thumb_up:")
                 st.session_state.list_series = list_series
                 st.session_state.df_dicoms = df_dicoms
 
 # Panel for selecting and extracting dicom series
 if len(st.session_state.list_series) > 0:
-    with st.expander('Select dicom series', expanded = True):
+    with st.expander('Select dicom series', expanded=True):
 
         # Selection of img modality
         helpmsg = 'Modality of the extracted images'
@@ -106,7 +98,7 @@ if len(st.session_state.list_series) > 0:
 
         # Button for extraction
         flag_btn = st.session_state.df_dicoms.shape[0] > 0 and len(st.session_state.sel_series) > 0
-        btn_convert = st.button("Convert Series", disabled = not flag_btn)
+        btn_convert = st.button("Convert Series", disabled=not flag_btn)
         if btn_convert:
             with st.spinner('Wait for it...'):
                 utildcm.convert_sel_series(st.session_state.df_dicoms,
@@ -115,10 +107,10 @@ if len(st.session_state.list_series) > 0:
                                            f'_{st.session_state.sel_mod}.nii.gz')
                 st.session_state.list_input_nifti = [f for f in os.listdir(st.session_state.paths['selmod']) if f.endswith('nii.gz')]
                 if len(st.session_state.list_input_nifti) == 0:
-                    st.warning(f'Could not extract any nifti images')
+                    st.warning("Could not extract any nifti images")
                 else:
                     st.success(f'Extracted {len(st.session_state.list_input_nifti)} nifti images',
-                               icon = ":material/thumb_up:")
+                               icon=":material/thumb_up:")
                     if st.session_state.sel_mod == 'T1':
                         st.session_state.paths['t1'] = st.session_state.paths['selmod']
 
@@ -126,14 +118,12 @@ if len(st.session_state.list_series) > 0:
 
 # Panel for viewing extracted nifti images
 if len(st.session_state.list_input_nifti) > 0:
-    with st.expander('View images', expanded = True):
-    #with st.container(border=True):
-
+    with st.expander('View images', expanded=True):
         # Selection of MRID
         sel_img = st.selectbox("Select Image",
-                               st.session_state.list_input_nifti,
-                               key=f"selbox_images",
-                               index = 0)
+                                st.session_state.list_input_nifti,
+                                key="selbox_images",
+                                index=0)
         st.session_state.paths['sel_img'] = os.path.join(st.session_state.paths['selmod'], sel_img)
 
         # Create a list of checkbox options
@@ -154,7 +144,7 @@ if len(st.session_state.list_input_nifti) > 0:
             for i, tmp_orient in enumerate(list_orient):
                 with blocks[i]:
                     ind_view = utilni.VIEWS.index(tmp_orient)
-                    utilst.show_img3D(img, ind_view, img_bounds[ind_view,:], tmp_orient)
+                    utilst.show_img3D(img, ind_view, img_bounds[ind_view, :], tmp_orient)
 
 
 # FIXME: this is for debugging; will be removed

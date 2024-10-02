@@ -1,86 +1,97 @@
-import streamlit as st
-from PIL import Image
-import pandas as pd
 import os
+
+import pandas as pd
+import streamlit as st
 
 # Initiate Session State Values
 if 'instantiated' not in st.session_state:
 
     # Dataframe to keep plot ids
-    st.session_state.plots = pd.DataFrame(columns = ['pid', 'xvar', 'yvar', 'hvar',
-                                                     'trend', 'centtype'])
+    st.session_state.plots = pd.DataFrame(
+        columns=["pid", "xvar", "yvar", "hvar", "trend", "centtype"]
+    )
     st.session_state.plot_index = 1
-    st.session_state.plot_active = ''
+    st.session_state.plot_active = ""
 
     # Study name
-    st.session_state.dset_name = ''
+    st.session_state.dset_name = ""
 
     # Paths to input/output files/folders
-    st.session_state.paths = {'root' : '',
-                              'init' : '',
-                              'last_sel' : '',
-                              'dset' : '',
-                              'out' : '',
-                              'nifti' : '',
-                              'dicom' : '',
-                              't1' : '',
-                              't2' : '',
-                              'fl' : '',
-                              'dti' : '',
-                              'fmri' : '',
-                              'dlmuse' : '',
-                              'mlscores' : '',
-                              'sel_img' : '',
-                              'sel_mask' : '',
-                              'csv_demog' : '',
-                              'csv_dlmuse' : '',
-                              'csv_mlscores' : '',
-                              'csv_viewdlmuse' : ''}    
-    st.session_state.paths['root'] = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
-    st.session_state.paths['init'] = os.path.join(st.session_state.paths['root'], 'test') 
-    st.session_state.paths['last_sel'] = st.session_state.paths['init']
+    st.session_state.paths = {
+        "root": "",
+        "init": "",
+        "last_sel": "",
+        "dset": "",
+        "out": "",
+        "nifti": "",
+        "dicom": "",
+        "t1": "",
+        "t2": "",
+        "fl": "",
+        "dti": "",
+        "fmri": "",
+        "dlmuse": "",
+        "mlscores": "",
+        "sel_img": "",
+        "sel_mask": "",
+        "csv_demog": "",
+        "csv_dlmuse": "",
+        "csv_mlscores": "",
+        "csv_viewdlmuse": "",
+    }
+    st.session_state.paths["root"] = os.path.dirname(
+        os.path.dirname(os.path.dirname(os.getcwd()))
+    )
+    st.session_state.paths["init"] = os.path.join(
+        st.session_state.paths["root"], "test"
+    )
+    st.session_state.paths["last_sel"] = st.session_state.paths["init"]
 
     #########################################
     # FIXME : for quick test
-    #st.session_state.paths['csv_mlscores'] = st.session_state.paths['root'] + '/test/test3_nifti+roi/output/MyStudy/MLScores/MyStudy_DLMUSE+MLScores.csv'   
-    st.session_state.paths['last_sel'] = st.session_state.paths['init'] + '/../../TestData'
+    # st.session_state.paths['csv_mlscores'] = st.session_state.paths['root'] + '/test/test3_nifti+roi/output/MyStudy/MLScores/MyStudy_DLMUSE+MLScores.csv'
+    st.session_state.paths["last_sel"] = (
+        st.session_state.paths["init"] + "/../../TestData"
+    )
     #########################################
 
     # Dictionaries
-    tmp_dir = os.path.join(st.session_state.paths['root'], 'resources', 'MUSE')
-    st.session_state.dicts = {'muse_derived' : os.path.join(tmp_dir, 'list_MUSE_mapping_derived.csv'),
-                              'muse_all' : os.path.join(tmp_dir, 'list_MUSE_all.csv'),
-                              'muse_sel' : os.path.join(tmp_dir, 'list_MUSE_primary.csv')}
+    tmp_dir = os.path.join(st.session_state.paths["root"], "resources", "MUSE")
+    st.session_state.dicts = {
+        "muse_derived": os.path.join(tmp_dir, "list_MUSE_mapping_derived.csv"),
+        "muse_all": os.path.join(tmp_dir, "list_MUSE_all.csv"),
+        "muse_sel": os.path.join(tmp_dir, "list_MUSE_primary.csv"),
+    }
 
     # Input image vars
     st.session_state.list_input_nifti = []
-    
+
     # Dicom vars
-    st.session_state.list_series = []    
+    st.session_state.list_series = []
     st.session_state.df_dicoms = pd.DataFrame()
     st.session_state.sel_series = []
-    st.session_state.sel_mod = ''
+    st.session_state.sel_mod = ""
 
     # Image suffixes
-    st.session_state.suff_t1img = '_T1.nii.gz'
-    st.session_state.suff_dlmuse = '_T1_DLMUSE.nii.gz'
+    st.session_state.suff_t1img = "_T1.nii.gz"
+    st.session_state.suff_dlmuse = "_T1_DLMUSE.nii.gz"
 
     # Default values for plotting parameters
-    st.session_state.plot_xvar = 'Age'
-    st.session_state.plot_yvar = 'GM'
-    st.session_state.plot_hvar = 'Sex'
+    st.session_state.plot_xvar = "Age"
+    st.session_state.plot_yvar = "GM"
+    st.session_state.plot_hvar = "Sex"
 
-    st.session_state.trend_types = ['none', 'ols', 'lowess']
-    st.session_state.plot_trend = 'none'
+    st.session_state.trend_types = ["none", "ols", "lowess"]
+    st.session_state.plot_trend = "none"
 
-    st.session_state.cent_types = ['none', 'CN-All', 'CN-F', 'CN-M']
-    st.session_state.plot_centtype = 'none'
+    st.session_state.cent_types = ["none", "CN-All", "CN-F", "CN-M"]
+    st.session_state.plot_centtype = "none"
 
     # MRID selected by user
-    st.session_state.sel_mrid = ''
+    st.session_state.sel_mrid = ""
 
     # Variable selected by user
-    st.session_state.sel_var = ''
+    st.session_state.sel_var = ""
 
     st.session_state.instantiated = True
 
@@ -88,21 +99,25 @@ st.sidebar.image("../resources/nichart1.png")
 
 st.write("# Welcome to NiChart Project!")
 
-st.sidebar.info("""
+st.sidebar.info(
+    """
                     Note: This website is based on materials from the [NiChart Project](https://neuroimagingchart.com/).
                     The content and the logo of NiChart are intellectual property of [CBICA](https://www.med.upenn.edu/cbica/).
                     Make sure that you read the [licence](https://github.com/CBICA/NiChart_Project/blob/main/LICENSE).
-                    """)
+                    """
+)
 
 with st.sidebar.expander("Acknowledgments"):
-    st.markdown("""
+    st.markdown(
+        """
                 The CBICA Dev team
-                """)
+                """
+    )
 
 st.sidebar.success("Select a task above")
 
 st.markdown(
-        """
+    """
     NiChart is an open-source framework built specifically for
     deriving Machine Learning based indices from MRI data.
 
@@ -118,7 +133,7 @@ st.markdown(
 )
 
 st.markdown(
-            """
+    """
             You can try NiChart manually via our github
             ```bash
             git clone https://github.com/CBICA/NiChart_Project

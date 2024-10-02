@@ -132,7 +132,7 @@ def user_input_file(label_btn, key_btn, label_txt, init_path_dir, init_path_curr
             path_curr = tmp_sel
     return path_curr, path_dir
 
-def user_input_folder(label_btn, key_btn, label_txt, init_path_dir, init_path_curr, help_msg):
+def user_input_folder(label_btn, key_btn, label_txt, init_path_dir, init_path_curr, help_msg) -> str:
     '''
     St button + text field to read an input directory path from the user
     '''
