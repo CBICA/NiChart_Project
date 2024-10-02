@@ -65,7 +65,7 @@ if st.session_state.dset_name != "":
         )
 
         # Button to run DLMUSE
-        flag_btn = os.path.exists(st.session_state.paths["t1"])
+        flag_btn = os.path.exists(st.session_state.paths['T1'])
         btn_dlmuse = st.button("Run DLMUSE", disabled=not flag_btn)
 
         if btn_dlmuse:
@@ -76,7 +76,7 @@ if st.session_state.dset_name != "":
                 os.makedirs(st.session_state.paths["dlmuse"])
 
             with st.spinner("Wait for it..."):
-                dlmuse_cmd = f"NiChart_DLMUSE -i {st.session_state.paths['t1']} -o {st.session_state.paths['dlmuse']} -d {device}"
+                dlmuse_cmd = f"NiChart_DLMUSE -i {st.session_state.paths['T1']} -o {st.session_state.paths['dlmuse']} -d {device}"
                 st.info(f"Running: {dlmuse_cmd}", icon=":material/manufacturing:")
                 os.system(dlmuse_cmd)
                 st.success("Run completed!", icon=":material/thumb_up:")
@@ -105,7 +105,7 @@ if os.path.exists(st.session_state.paths["csv_dlmuse"]):
         sel_mrid = st.selectbox("MRID", df.MRID.tolist(), key="selbox_mrid", index=0)
 
         st.session_state.paths["sel_img"] = os.path.join(
-            st.session_state.paths["t1"], sel_mrid + st.session_state.suff_t1img
+            st.session_state.paths['T1'], sel_mrid + st.session_state.suff_t1img
         )
         st.session_state.paths["sel_dlmuse"] = os.path.join(
             st.session_state.paths["dlmuse"], sel_mrid + st.session_state.suff_dlmuse
