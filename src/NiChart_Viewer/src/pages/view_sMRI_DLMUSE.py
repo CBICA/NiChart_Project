@@ -46,10 +46,10 @@ with st.expander("Select subject list, image paths and suffixes"):
         "btn_indir_t1",
         "Input folder",
         st.session_state.paths["last_sel"],
-        st.session_state.paths["t1"],
+        st.session_state.paths["T1"],
         helpmsg,
     )
-    st.session_state.paths["t1"] = path_t1
+    st.session_state.paths["T1"] = path_t1
 
     # Input DLMUSE image folder
     helpmsg = "Path to DLMUSE images.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
@@ -140,7 +140,7 @@ if os.path.exists(st.session_state.paths["csv_dlmuse"]):
     # File names for img and mask
     f_img = os.path.join(
         st.session_state.paths["out"],
-        st.session_state.paths["t1"],
+        st.session_state.paths["T1"],
         sel_mrid + st.session_state.suff_t1img,
     )
 
