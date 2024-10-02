@@ -3,9 +3,9 @@ import os
 import streamlit as st
 import tkinter as tk
 from tkinter import filedialog
-import utils_st as utilst
-import utils_nifti as utilni
-import utils_dicom as utildcm
+import utils.utils_st as utilst
+import utils.utils_nifti as utilni
+import utils.utils_dicom as utildcm
 import pandas as pd
 import numpy as np
 
@@ -16,10 +16,10 @@ def progress(p, i, decoded):
         #if decoded and decoded[0]:
             #st.markdown(decoded[0])
 
-#out = model.generate([input_text], 
-                     #max_gen_len=max_seq_len, 
-                     #temperature=temperature, 
-                     #top_p=top_p, 
+#out = model.generate([input_text],
+                     #max_gen_len=max_seq_len,
+                     #temperature=temperature,
+                     #top_p=top_p,
                      #callback=progress)
 
 
@@ -79,7 +79,7 @@ if st.session_state.dset_name != '':
                 if len(list_series) == 0:
                     st.warning('Could not detect any dicom series!')
                 else:
-                    st.success(f"Detected {len(list_series)} dicom series!", 
+                    st.success(f"Detected {len(list_series)} dicom series!",
                                icon = ":material/thumb_up:")
                 st.session_state.list_series = list_series
                 st.session_state.df_dicoms = df_dicoms
@@ -161,4 +161,3 @@ if len(st.session_state.list_input_nifti) > 0:
 with st.expander('session_state: All'):
     st.write(st.session_state.df_dicoms)
     st.write(st.session_state.sel_series)
-

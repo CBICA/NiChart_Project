@@ -3,10 +3,10 @@ import os
 import streamlit as st
 import tkinter as tk
 from tkinter import filedialog
-import utils_st as utilst
+import utils.utils_st as utilst
 import pandas as pd
-import utils_muse as utilmuse
-import utils_nifti as utilni
+import utils.utils_muse as utilmuse
+import utils.utils_nifti as utilni
 
 
 st.markdown(
@@ -68,10 +68,10 @@ if st.session_state.dset_name != '':
         btn_dlmuse = st.button("Run DLMUSE", disabled = not flag_btn)
 
         if btn_dlmuse:
-            run_dir = os.path.join(st.session_state.paths['root'], 'src', 'NiChart_DLMUSE')            
+            run_dir = os.path.join(st.session_state.paths['root'], 'src', 'NiChart_DLMUSE')
             if not os.path.exists(st.session_state.paths['dlmuse']):
                 os.makedirs(st.session_state.paths['dlmuse'])
-            
+
             with st.spinner('Wait for it...'):
                 dlmuse_cmd = f"NiChart_DLMUSE -i {st.session_state.paths['t1']} -o {st.session_state.paths['dlmuse']} -d {device}"
                 st.info(f'Running: {dlmuse_cmd}', icon = ":material/manufacturing:")
@@ -100,16 +100,16 @@ if os.path.exists(st.session_state.paths['csv_dlmuse']):
         # Selection of MRID
         sel_mrid = st.selectbox("MRID", df.MRID.tolist(), key=f"selbox_mrid", index = 0)
 
-        st.session_state.paths['sel_img'] = os.path.join(st.session_state.paths['t1'], 
+        st.session_state.paths['sel_img'] = os.path.join(st.session_state.paths['t1'],
                                                      sel_mrid + st.session_state.suff_t1img)
-        st.session_state.paths['sel_dlmuse'] = os.path.join(st.session_state.paths['dlmuse'], 
+        st.session_state.paths['sel_dlmuse'] = os.path.join(st.session_state.paths['dlmuse'],
                                                      sel_mrid + st.session_state.suff_dlmuse)
-        
+
 
         # Selection of ROI
         sel_var = st.selectbox("ROI", list(dict_roi.keys()), key=f"selbox_rois", index = 0)
         sel_var_ind = dict_roi[sel_var]
-        
+
 
         # Create a list of checkbox options
         list_orient = st.multiselect("Select viewing planes:", utilni.VIEWS, utilni.VIEWS)
@@ -122,9 +122,9 @@ if os.path.exists(st.session_state.paths['csv_dlmuse']):
         with st.spinner('Wait for it...'):
 
             # Process image and mask to prepare final 3d matrix to display
-            img, mask, img_masked = utilni.prep_image_and_olay(st.session_state.paths['sel_img'], 
+            img, mask, img_masked = utilni.prep_image_and_olay(st.session_state.paths['sel_img'],
                                                                st.session_state.paths['sel_dlmuse'],
-                                                               sel_var_ind, 
+                                                               sel_var_ind,
                                                                dict_derived)
 
             # Detect mask bounds and center in each view
@@ -144,4 +144,3 @@ if os.path.exists(st.session_state.paths['csv_dlmuse']):
 # FIXME: this is for debugging; will be removed
 with st.expander('session_state: All'):
     st.write(st.session_state)
-

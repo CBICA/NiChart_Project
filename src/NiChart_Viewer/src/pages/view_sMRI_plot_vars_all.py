@@ -9,17 +9,16 @@ from pandas.api.types import (
 import plotly.express as px
 from math import ceil
 from streamlit_plotly_events import plotly_events
-from utils_trace import *
 from st_pages import hide_pages
 import os
 import tkinter as tk
 from tkinter import filedialog
 
-from utils_trace import *
-
-import utils_st as utilst
-import utils_muse as utilmuse
-import utils_nifti as utilni
+from utils.utils_trace import *
+from utils.utils_trace import *
+import utils.utils_st as utilst
+import utils.utils_muse as utilmuse
+import utils.utils_nifti as utilni
 
 VIEWS = ["axial", "coronal", "sagittal"]
 
@@ -31,7 +30,7 @@ def add_plot():
     '''
     df_p = st.session_state.plots
     plot_id = f'Plot{st.session_state.plot_index}'
-    df_p.loc[plot_id] = [plot_id, 
+    df_p.loc[plot_id] = [plot_id,
                          st.session_state.plot_xvar,
                          st.session_state.plot_yvar,
                          st.session_state.plot_hvar,
@@ -77,7 +76,7 @@ def display_plot(plot_id):
             # Tab 1: to set plotting parameters
             with ptabs[1]:
                 plot_type = st.selectbox("Plot Type", ["DistPlot", "RegPlot"], key=f"plot_type_{plot_id}")
-                
+
                 # Get plot params
                 xvar = st.session_state.plots.loc[plot_id].xvar
                 yvar = st.session_state.plots.loc[plot_id].yvar
@@ -90,13 +89,13 @@ def display_plot(plot_id):
                 hind = df.columns.get_loc(hvar)
                 tind = st.session_state.trend_types.index(trend)
 
-                xvar = st.selectbox("X Var", df_filt.columns, 
+                xvar = st.selectbox("X Var", df_filt.columns,
                                      key=f"plot_xvar_{plot_id}", index = xind)
-                yvar = st.selectbox("Y Var", df_filt.columns, 
+                yvar = st.selectbox("Y Var", df_filt.columns,
                                      key=f"plot_yvar_{plot_id}", index = yind)
-                hvar = st.selectbox("Hue Var", df_filt.columns, 
+                hvar = st.selectbox("Hue Var", df_filt.columns,
                                        key=f"plot_hvar_{plot_id}", index = hind)
-                trend = st.selectbox("Trend Line", st.session_state.trend_types, 
+                trend = st.selectbox("Trend Line", st.session_state.trend_types,
                                           key=f"trend_type_{plot_id}", index = tind)
 
                 # Set plot params to session_state
@@ -146,7 +145,7 @@ def display_plot(plot_id):
 
         # Add plot
         # - on_select: when clicked it will rerun and return the info
-        sel_info = st.plotly_chart(scatter_plot, key=f"bubble_chart_{plot_id}", 
+        sel_info = st.plotly_chart(scatter_plot, key=f"bubble_chart_{plot_id}",
                                    on_select = callback_plot_clicked)
 
         # Detect MRID from the click info and save to session_state
@@ -388,7 +387,7 @@ if os.path.exists(st.session_state.paths['csv_mlscores']):
         flag_btn = os.path.exists(st.session_state.paths['sel_img']) and os.path.exists(st.session_state.paths['sel_dlmuse'])
 
         with st.spinner('Wait for it...'):
-    
+
             st.session_state.paths['sel_img'] = os.path.join(st.session_state.paths['t1'],
                                                          sel_mrid + st.session_state.suff_t1img)
 

@@ -14,7 +14,7 @@ from tempfile import NamedTemporaryFile
 import tkinter as tk
 from tkinter import filedialog
 
-import utils_st as utilst
+import utils.utils_st as utilst
 
 st.markdown(
         """

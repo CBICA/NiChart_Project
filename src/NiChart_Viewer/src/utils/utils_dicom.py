@@ -58,7 +58,7 @@ def _is_valid_imaging_dicom(dicom_header):
     except (KeyError, AttributeError):
         return False
 
-## Adapted from dicom2nifti
+# Adapted from dicom2nifti
 def _remove_accents(unicode_filename):
     """
     Function that will try to remove accents from a unicode string to be used in a filename.

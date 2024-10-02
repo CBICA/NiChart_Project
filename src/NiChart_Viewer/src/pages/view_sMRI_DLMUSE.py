@@ -9,9 +9,9 @@ from pandas.api.types import (
 )
 import plotly.express as px
 
-import utils_st as utilst
-import utils_nifti as utilni
-import utils_muse as utilmuse
+import utils.utils_st as utilst
+import utils.utils_nifti as utilni
+import utils.utils_muse as utilmuse
 import numpy as np
 import nibabel as nib
 
@@ -32,7 +32,7 @@ f_mask = ''
 
 # Selection of subject list and image paths
 with st.expander('Select subject list, image paths and suffixes'):
-    
+
     # DLMUSE file name
     helpmsg = 'Input csv file with DLMUSE ROI volumes.\n\nUsed for selecting the MRID and the ROI name.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it'
     csv_dlmuse, csv_path = utilst.user_input_file("Select file",
@@ -54,7 +54,7 @@ with st.expander('Select subject list, image paths and suffixes'):
                                     st.session_state.paths['t1'],
                                     helpmsg)
     st.session_state.paths['t1'] = path_t1
-    
+
     # Input DLMUSE image folder
     helpmsg = 'Path to DLMUSE images.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
     path_dlmuse = utilst.user_input_folder("Select folder",
@@ -66,17 +66,17 @@ with st.expander('Select subject list, image paths and suffixes'):
     st.session_state.paths['dlmuse'] = path_dlmuse
 
     # T1 suffix
-    suff_t1img = utilst.user_input_text("T1 img suffix", 
-                                        st.session_state.suff_t1img, 
+    suff_t1img = utilst.user_input_text("T1 img suffix",
+                                        st.session_state.suff_t1img,
                                         helpmsg)
     st.session_state.suff_t1img = suff_t1img
 
     # DLMUSE suffix
-    suff_dlmuse = utilst.user_input_text("DLMUSE image suffix", 
-                                        st.session_state.suff_dlmuse, 
+    suff_dlmuse = utilst.user_input_text("DLMUSE image suffix",
+                                        st.session_state.suff_dlmuse,
                                         helpmsg)
     st.session_state.suff_dlmuse = suff_dlmuse
-        
+
 
 # Selection of MRID and ROI name
 if os.path.exists(st.session_state.paths['csv_dlmuse']):
@@ -107,9 +107,9 @@ if os.path.exists(st.session_state.paths['csv_dlmuse']):
 
         # Selection of ROI
         #  - The variable will be selected from the active plot
-        
+
         sel_var = ''
-        try: 
+        try:
             sel_var = st.session_state.plots.loc[st.session_state.plot_active, 'yvar']
         except:
             print('Could not detect an active plot')
@@ -136,11 +136,11 @@ if os.path.exists(st.session_state.paths['csv_dlmuse']):
     sel_var_ind = dict_roi[sel_var]
 
     # File names for img and mask
-    f_img = os.path.join(st.session_state.paths['out'], 
+    f_img = os.path.join(st.session_state.paths['out'],
                         st.session_state.paths['t1'],
                         sel_mrid + st.session_state.suff_t1img)
 
-    f_mask = os.path.join(st.session_state.paths['out'], 
+    f_mask = os.path.join(st.session_state.paths['out'],
                         st.session_state.paths['dlmuse'],
                         sel_mrid + st.session_state.suff_dlmuse)
 
@@ -167,4 +167,3 @@ else:
         st.warning(f'Image not found: {f_img}')
     else:
         st.warning(f'Mask not found: {f_mask}')
-
