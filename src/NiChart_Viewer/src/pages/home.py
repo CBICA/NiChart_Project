@@ -25,17 +25,19 @@ if "instantiated" not in st.session_state:
         "out": "",
         "nifti": "",
         "dicom": "",
-        "t1": "",
-        "t2": "",
-        "fl": "",
-        "dti": "",
-        "fmri": "",
+        "T1": "",
+        "T2": "",
+        "FL": "",
+        "DTI": "",
+        "fMRI": "",
         "dlmuse": "",
         "mlscores": "",
+        "plots": "",
         "sel_img": "",
         "sel_mask": "",
         "csv_demog": "",
         "csv_dlmuse": "",
+        "csv_plot": "",
         "csv_mlscores": "",
         "csv_viewdlmuse": "",
     }
@@ -55,6 +57,9 @@ if "instantiated" not in st.session_state:
     )
     #########################################
 
+    # Image modalities
+    st.session_state.list_mods = ['T1', 'T2', 'FL', 'DTI', 'rMRI']
+
     # Dictionaries
     tmp_dir = os.path.join(st.session_state.paths["root"], "resources", "MUSE")
     st.session_state.dicts = {
@@ -70,7 +75,7 @@ if "instantiated" not in st.session_state:
     st.session_state.list_series = []
     st.session_state.df_dicoms = pd.DataFrame()
     st.session_state.sel_series = []
-    st.session_state.sel_mod = ""
+    st.session_state.sel_mod = 'T1'
 
     # Image suffixes
     st.session_state.suff_t1img = "_T1.nii.gz"
