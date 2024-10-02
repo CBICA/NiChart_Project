@@ -1,10 +1,13 @@
-import plotly.express as px
 import os
-import streamlit as st
 import tkinter as tk
 from tkinter import filedialog
+from typing import Any
 
-def display_folder_contents(folder_path, parent_folder=""):
+import numpy as np
+import streamlit as st
+
+
+def display_folder_contents(folder_path: str, parent_folder: str = "") -> None:
     """Displays the contents of a folder in a Streamlit panel with a tree structure.
 
     Args:
@@ -38,20 +41,24 @@ def display_folder_contents(folder_path, parent_folder=""):
             # Display the file name with indentation based on the parent folder
             file_name = os.path.basename(item_path)
             file_url = f"download/{file_name}"  # Adjust the download URL as needed
-            container.markdown(f"{'  ' * len(parent_folder.split('/'))}[Download]({file_url}) {file_name}")
+            container.markdown(
+                f"{'  ' * len(parent_folder.split('/'))}[Download]({file_url}) {file_name}"
+            )
         else:
             # Display the directory name with indentation and a link to explore it
             directory_name = os.path.basename(item_path)
-            container.markdown(f"{'  ' * len(parent_folder.split('/'))}[Explore]({directory_name}) {directory_name}")
+            container.markdown(
+                f"{'  ' * len(parent_folder.split('/'))}[Explore]({directory_name}) {directory_name}"
+            )
 
             # Recursively display the contents of the subdirectory
             display_folder_contents(item_path, parent_folder=directory_name)
 
 
-def display_folder(in_dir):
-    '''
+def display_folder(in_dir: str) -> None:
+    """
     Displays the contents of a folder in a Streamlit panel.
-    '''
+    """
 
     st.title("Folder Contents")
 
@@ -82,99 +89,122 @@ def display_folder(in_dir):
             container.write(f"[Explore]({directory_name}) {directory_name}")
 
 
-
-def browse_file(path_init):
-    '''
+def browse_file(path_init: str) -> Any:
+    """
     File selector
     Returns the file name selected by the user and the parent folder
-    '''
+    """
     root = tk.Tk()
     root.withdraw()  # Hide the main window
-    out_path = filedialog.askopenfilename(initialdir = path_init)
+    out_path = filedialog.askopenfilename(initialdir=path_init)
     path_out = os.path.dirname(out_path)
     root.destroy()
     return out_path, path_out
 
-def browse_folder(path_init):
-    '''
+
+def browse_folder(path_init: str) -> str:
+    """
     Folder selector
     Returns the folder name selected by the user
-    '''
+    """
     root = tk.Tk()
     root.withdraw()  # Hide the main window
-    out_path = filedialog.askdirectory(initialdir = path_init)
+    out_path = filedialog.askdirectory(initialdir=path_init)
     root.destroy()
     return out_path
 
-def user_input_text(label, init_val, help_msg):
-    '''
+
+def user_input_text(label: str, init_val: str, help_msg: str) -> Any:
+    """
     St text field to read a text input from the user
-    '''
-    tmpcol = st.columns((1,8))
+    """
+    tmpcol = st.columns((1, 8))
     with tmpcol[0]:
-        user_sel = st.text_input(label, value = init_val, help = help_msg)
+        user_sel = st.text_input(label, value=init_val, help=help_msg)
         return user_sel
 
-def user_input_file(label_btn, key_btn, label_txt, init_path_dir, init_path_curr, help_msg):
-    '''
+
+def user_input_file(
+    label_btn: Any,
+    key_btn: Any,
+    label_txt: str,
+    init_path_dir: str,
+    init_path_curr: str,
+    help_msg: str,
+) -> Any:
+    """
     St button + text field to read an input file path from the user
-    '''
+    """
     path_curr = init_path_curr
     path_dir = init_path_dir
-    tmpcol = st.columns((8,1))
+    tmpcol = st.columns((8, 1))
     with tmpcol[1]:
-        if st.button(label_btn, key = key_btn):
+        if st.button(label_btn, key=key_btn):
             path_curr, path_dir = browse_file(path_dir)
 
     with tmpcol[0]:
-        tmp_sel = st.text_input(label_txt, value = path_curr, help = help_msg)
+        tmp_sel = st.text_input(label_txt, value=path_curr, help=help_msg)
         if os.path.exists(tmp_sel):
             path_curr = tmp_sel
     return path_curr, path_dir
 
-def user_input_folder(label_btn, key_btn, label_txt, init_path_dir, init_path_curr, help_msg) -> str:
-    '''
+
+def user_input_folder(
+    label_btn: Any,
+    key_btn: Any,
+    label_txt: str,
+    init_path_dir: str,
+    init_path_curr: str,
+    help_msg: str,
+) -> str:
+    """
     St button + text field to read an input directory path from the user
-    '''
+    """
     path_curr = init_path_curr
     path_dir = init_path_dir
-    tmpcol = st.columns((8,1))
+    tmpcol = st.columns((8, 1))
     with tmpcol[1]:
-        if st.button(label_btn, key = key_btn):
-            if path_curr == '':
+        if st.button(label_btn, key=key_btn):
+            if path_curr == "":
                 path_curr = browse_folder(path_dir)
             else:
                 path_curr = browse_folder(path_curr)
 
     with tmpcol[0]:
-        path_curr = st.text_input(label_txt, value = path_curr, help = help_msg)
+        path_curr = st.text_input(label_txt, value=path_curr, help=help_msg)
     return path_curr
 
-def user_input_select(label, selections, key, helpmsg):
-    '''
+
+def user_input_select(label: Any, selections: Any, key: Any, helpmsg: str) -> Any:
+    """
     St selection box to selet a text from the user
-    '''
-    tmpcol = st.columns((1,8))
+    """
+    tmpcol = st.columns((1, 8))
     with tmpcol[0]:
-        user_sel = st.selectbox(label, selections, key = key, help = helpmsg)
+        user_sel = st.selectbox(label, selections, key=key, help=helpmsg)
     return user_sel
 
-def show_img3D(img, scroll_axis, sel_axis_bounds, img_name):
-    '''
+
+def show_img3D(
+    img: np.ndarray, scroll_axis: Any, sel_axis_bounds: Any, img_name: str
+) -> None:
+    """
     Displays a 3D img
-    '''
+    """
 
     # Create a slider to select the slice index
-    slice_index = st.slider(f"{img_name}",
-                            0,
-                            sel_axis_bounds[1] - 1,
-                            value=sel_axis_bounds[2],
-                            key = f'slider_{img_name}')
+    slice_index = st.slider(
+        f"{img_name}",
+        0,
+        sel_axis_bounds[1] - 1,
+        value=sel_axis_bounds[2],
+        key=f"slider_{img_name}",
+    )
 
     # Extract the slice and display it
     if scroll_axis == 0:
-        st.image(img[slice_index, :, :], use_column_width = True)
+        st.image(img[slice_index, :, :], use_column_width=True)
     elif scroll_axis == 1:
-        st.image(img[:, slice_index, :], use_column_width = True)
+        st.image(img[:, slice_index, :], use_column_width=True)
     else:
-        st.image(img[:, :, slice_index], use_column_width = True)
+        st.image(img[:, :, slice_index], use_column_width=True)

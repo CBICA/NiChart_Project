@@ -1,13 +1,12 @@
-import streamlit as st
-import os
-from math import ceil
-import numpy as np
+from typing import Any
+
 import pandas as pd
 
-def read_derived_roi_list(list_sel_rois, list_derived):
-    '''
+
+def read_derived_roi_list(list_sel_rois: list, list_derived: list) -> Any:
+    """
     Create a dictionary from derived roi list
-    '''
+    """
 
     # Read list
     df_sel = pd.read_csv(list_sel_rois)
@@ -22,7 +21,7 @@ def read_derived_roi_list(list_sel_rois, list_derived):
     # Create dict of roi indices and derived indices
     dict_derived = {}
     for i, tmp_ind in enumerate(df[0].values):
-        df_tmp = df[df[0] == tmp_ind].drop([0,1], axis =1)
+        df_tmp = df[df[0] == tmp_ind].drop([0, 1], axis=1)
         sel_vals = df_tmp.T.dropna().astype(int).values.flatten()
         dict_derived[tmp_ind] = sel_vals
 

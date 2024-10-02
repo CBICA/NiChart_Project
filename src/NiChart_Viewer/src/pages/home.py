@@ -4,7 +4,7 @@ import pandas as pd
 import streamlit as st
 
 # Initiate Session State Values
-if 'instantiated' not in st.session_state:
+if "instantiated" not in st.session_state:
 
     # Dataframe to keep plot ids
     st.session_state.plots = pd.DataFrame(
