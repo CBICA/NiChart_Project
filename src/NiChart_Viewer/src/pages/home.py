@@ -77,6 +77,10 @@ if "instantiated" not in st.session_state:
     st.session_state.sel_series = []
     st.session_state.sel_mod = "T1"
 
+    # Default number of plots in a row
+    st.session_state.max_plots_per_row = 5
+    st.session_state.plots_per_row = 3
+
     # Image suffixes
     st.session_state.suff_t1img = "_T1.nii.gz"
     st.session_state.suff_dlmuse = "_T1_DLMUSE.nii.gz"
