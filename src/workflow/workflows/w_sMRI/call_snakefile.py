@@ -4,11 +4,23 @@ import os
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--run_dir", help="Provide the path to snakefile", required=True)
-    parser.add_argument("--dset_name", help="Provide a name for your dataset", required=True)
-    parser.add_argument("--input_rois", help="Provide input csv name with ROIs", required=True)
-    parser.add_argument("--input_demog", help="Provide input csv name with demographic info", required=True)
-    parser.add_argument("--dir_output", help="Provide output folder name", required=True)
+    parser.add_argument(
+        "--run_dir", help="Provide the path to snakefile", required=True
+    )
+    parser.add_argument(
+        "--dset_name", help="Provide a name for your dataset", required=True
+    )
+    parser.add_argument(
+        "--input_rois", help="Provide input csv name with ROIs", required=True
+    )
+    parser.add_argument(
+        "--input_demog",
+        help="Provide input csv name with demographic info",
+        required=True,
+    )
+    parser.add_argument(
+        "--dir_output", help="Provide output folder name", required=True
+    )
 
     options = parser.parse_args()
 
@@ -35,7 +47,6 @@ if __name__ == "__main__":
     cmd = cmd + " dir_output=" + options.dir_output
     cmd = cmd + " --cores 1"
 
-
-    print('Running cmd: ' + cmd)
+    print("Running cmd: " + cmd)
 
     os.system(cmd)

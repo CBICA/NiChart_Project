@@ -3,8 +3,6 @@ import shutil
 from pathlib import Path
 from typing import Any
 
-from nipype import Node, Workflow
-
 # from . import DeepMRSegInterface
 from NiChart_DLMUSE import (
     CalculateROIVolumeInterface,
@@ -14,6 +12,7 @@ from NiChart_DLMUSE import (
     ROIRelabelInterface,
     nnUNetInterface,
 )
+from nipype import Node, Workflow
 
 
 def run_structural_pipeline(

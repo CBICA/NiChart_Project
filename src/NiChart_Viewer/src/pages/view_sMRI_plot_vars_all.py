@@ -45,7 +45,7 @@ def remove_plot(plot_id: str) -> None:
     st.session_state.plots = df_p
 
 
-def display_plot(plot_id: str) -> None:
+def display_plot(df: pd.DataFrame, plot_id: str) -> None:
     """
     Displays the plot with the plot_id
     """
@@ -261,56 +261,79 @@ def filter_dataframe(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
     return df
 
 
+# Panel for input csv, image paths and suffixes
+with st.expander('Select Input', expanded=False):
+
+    # Input csv
+    helpmsg = 'Input csv file with DLMUSE ROI volumes.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it'
+    csv_plot, csv_path = utilst.user_input_file("Select file",
+                                                'btn_input_dlmuse',
+                                                "DLMUSE ROI file",
+                                                st.session_state.paths['last_sel'],
+                                                st.session_state.paths['csv_plot'],
+                                                helpmsg)
+    if os.path.exists(csv_plot):
+        st.session_state.paths['csv_plot'] = csv_plot
+        st.session_state.paths['last_sel'] = csv_path
+
+    # Input T1 image folder
+    helpmsg = 'Folder with T1 images.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
+    path_t1 = utilst.user_input_folder("Select folder",
+                                    'btn_indir_t1',
+                                    "Input folder",
+                                    st.session_state.paths['last_sel'],
+                                    st.session_state.paths['T1'],
+                                    helpmsg)
+    st.session_state.paths['T1'] = path_t1
+
+    # Input DLMUSE image folder
+    helpmsg = 'Folder with DLMUSE images.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
+    path_dlmuse = utilst.user_input_folder("Select folder",
+                                    'btn_indir_dlmuse',
+                                    "Input folder",
+                                    st.session_state.paths['last_sel'],
+                                    st.session_state.paths['dlmuse'],
+                                    helpmsg)
+    st.session_state.paths['dlmuse'] = path_dlmuse
+
+    # T1 suffix
+    suff_t1img = utilst.user_input_text("T1 img suffix",
+                                        st.session_state.suff_t1img,
+                                        helpmsg)
+    st.session_state.suff_t1img = suff_t1img
+
+    # DLMUSE suffix
+    suff_dlmuse = utilst.user_input_text("DLMUSE image suffix",
+                                        st.session_state.suff_dlmuse,
+                                        helpmsg)
+    st.session_state.suff_dlmuse = suff_dlmuse
+
+
 # Page controls in side bar
 with st.sidebar:
-
-    with st.container(border=True):
-
-        # Input file name
-        helpmsg = "Input csv file with MLScores.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it"
-        csv_mlscores, csv_path = utilst.user_input_file(
-            "Select file",
-            "btn_input_mlscore",
-            "ML scores file",
-            st.session_state.paths["last_sel"],
-            st.session_state.paths["csv_mlscores"],
-            helpmsg,
-        )
-        if os.path.exists(csv_mlscores):
-            st.session_state.paths["csv_mlscores"] = csv_mlscores
-            st.session_state.paths["last_sel"] = csv_path
-
-if os.path.exists(st.session_state.paths["csv_mlscores"]):
-
-    # Read input csv
-    df = pd.read_csv(csv_mlscores)
-
-    with st.sidebar:
+    df = pd.DataFrame()
+    if os.path.exists(st.session_state.paths['csv_plot']):
+        # Read input csv
+        df = pd.read_csv(csv_plot)
         with st.container(border=True):
-
             # Slider to set number of plots in a row
-            st.session_state.plot_per_raw = st.slider(
-                "Plots per row", 1, 5, 3, key="a_per_page"
-            )
+            st.session_state.plots_per_row = st.slider('Plots per row', 1,
+                                                       st.session_state.max_plots_per_row,
+                                                       st.session_state.plots_per_row,
+                                                       key='a_per_page')
 
         with st.container(border=True):
 
-            st.write("Plot Settings")
+            st.write('Plot Settings')
 
             # Tabs for parameters
-            ptabs = st.tabs(
-                [
-                    ":lock:",
-                    ":large_orange_circle:",
-                    ":large_yellow_circle:",
-                    ":large_green_circle:",
-                ]
-            )
+            ptabs = st.tabs([":lock:", ":large_orange_circle:", ":large_yellow_circle:",
+                            ":large_green_circle:"])
 
             # Tab 0: to set plotting parameters
             with ptabs[1]:
                 # Default values for plot params
-                st.session_state.plot_hvar = "Sex"
+                st.session_state.plot_hvar = 'Sex'
 
                 plot_xvar_ind = 0
                 if st.session_state.plot_xvar in df.columns:
@@ -324,39 +347,26 @@ if os.path.exists(st.session_state.paths["csv_mlscores"]):
                 if st.session_state.plot_hvar in df.columns:
                     plot_hvar_ind = df.columns.get_loc(st.session_state.plot_hvar)
 
-                st.session_state.plot_xvar = st.selectbox(
-                    "Default X Var",
-                    df.columns,
-                    key="plot_xvar_init",
-                    index=plot_xvar_ind,
-                )
-                st.session_state.plot_yvar = st.selectbox(
-                    "Default Y Var",
-                    df.columns,
-                    key="plot_yvar_init",
-                    index=plot_yvar_ind,
-                )
+                st.session_state.plot_xvar = st.selectbox("Default X Var", df.columns, key="plot_xvar_init",
+                                                            index=plot_xvar_ind)
+                st.session_state.plot_yvar = st.selectbox("Default Y Var", df.columns, key="plot_yvar_init",
+                                                            index=plot_yvar_ind)
                 st.session_state.sel_var = st.session_state.plot_yvar
 
-                st.session_state.plot_hvar = st.selectbox(
-                    "Default Hue Var",
-                    df.columns,
-                    key="plot_hvar_init",
-                    index=plot_hvar_ind,
-                )
-                trend_index = st.session_state.trend_types.index(
-                    st.session_state.plot_trend
-                )
-                st.session_state.plot_trend = st.selectbox(
-                    "Default Trend Line",
-                    st.session_state.trend_types,
-                    key="trend_type_init",
-                    index=trend_index,
-                )
+                st.session_state.plot_hvar = st.selectbox("Default Hue Var", df.columns, key="plot_hvar_init",
+                                                                index=plot_hvar_ind)
+                trend_index = st.session_state.trend_types.index(st.session_state.plot_trend)
+                st.session_state.plot_trend = st.selectbox("Default Trend Line",
+                                                           st.session_state.trend_types,
+                                                           key="trend_type_init",
+                                                           index=trend_index)
 
-        # Button to add a new plot
-        if st.button("Add plot"):
-            add_plot()
+# Panel for plots
+with st.expander('Plot data', expanded=False):
+
+    # Button to add a new plot
+    if st.button("Add plot"):
+        add_plot()
 
     # Add a single plot (default: initial page displays a single plot)
     if st.session_state.plots.shape[0] == 0:
@@ -365,106 +375,87 @@ if os.path.exists(st.session_state.paths["csv_mlscores"]):
     # Read plot ids
     df_p = st.session_state.plots
     list_plots = df_p.index.tolist()
-    plot_per_raw = st.session_state.plot_per_raw
+    plots_per_row = st.session_state.plots_per_row
 
     # Render plots
     #  - iterates over plots;
-    #  - for every "plot_per_raw" plots, creates a new columns block, resets column index, and displays the plot
-    for i, plot_ind in enumerate(list_plots):
-        column_no = i % plot_per_raw
-        if column_no == 0:
-            blocks = st.columns(plot_per_raw)
-        with blocks[column_no]:
-            display_plot(plot_ind)
-
-with st.expander("AAA"):
-    st.write(st.session_state)
-
+    #  - for every "plots_per_row" plots, creates a new columns block, resets column index, and displays the plot
+    if df.shape[0] > 0:
+        for i, plot_ind in enumerate(list_plots):
+            column_no = i % plots_per_row
+            if column_no == 0:
+                blocks = st.columns(plots_per_row)
+            with blocks[column_no]:
+                display_plot(df, plot_ind)
 
 # Panel for viewing images and DLMUSE masks
-if os.path.exists(st.session_state.paths["csv_mlscores"]):
-    with st.expander("View segmentations", expanded=False):
+with st.expander('View segmentations', expanded=False):
 
-        # Read dlmuse csv
-        df = pd.read_csv(st.session_state.paths["csv_mlscores"])
+    # Create a dictionary of MUSE indices and names
+    df_muse = pd.read_csv(st.session_state.dicts['muse_all'])
 
-        # Create a dictionary of MUSE indices and names
-        df_muse = pd.read_csv(st.session_state.dicts["muse_all"])
+    # FIXME : extra roi not in dict
+    df_muse = df_muse[df_muse.Name != 'CortCSF']
 
-        # FIXME : extra roi not in dict
-        df_muse = df_muse[df_muse.Name != "CortCSF"]
+    # Read derived roi list and convert to a dict
+    dict_roi, dict_derived = utilmuse.read_derived_roi_list(st.session_state.dicts['muse_sel'],
+                                                            st.session_state.dicts['muse_derived'])
+    # Selection of MRID
+    try:
+        sel_ind = df.MRID.tolist().index(st.session_state.sel_mrid)
+        list_mrids = df.MRID.tolist()
+    except:
+        sel_ind = 0
+        list_mrids = []
+    st.session_state.sel_mrid = st.selectbox("MRID", df.MRID.tolist(),
+                                             key="selbox_mrid",
+                                             index=sel_ind)
 
-        # Read derived roi list and convert to a dict
-        dict_roi, dict_derived = utilmuse.read_derived_roi_list(
-            st.session_state.dicts["muse_sel"], st.session_state.dicts["muse_derived"]
-        )
+    # Selection of ROI
+    #  - The variable will be selected from the active plot
+    list_rois = df_muse.Name.tolist()
+    try:
+        sel_var = st.session_state.plots.loc[st.session_state.plot_active, 'yvar']
+        sel_ind = list_rois.index(sel_var)
+    except:
+        sel_ind = 2
+        sel_var = list_rois[sel_ind]
+    sel_var = st.selectbox("ROI", list(dict_roi.keys()), key="selbox_rois", index=sel_ind)
 
-        # Selection of MRID
-        sel_mrid = st.session_state.sel_mrid
-        if sel_mrid == "":
-            sel_ind = 0
-            sel_type = "(auto)"
+    # Select roi index
+    sel_var_ind = dict_roi[sel_var]
+
+    # Create a list of checkbox options
+    list_orient = st.multiselect("Select viewing planes:", VIEWS, VIEWS)
+
+    # View hide overlay
+    is_show_overlay = st.checkbox('Show overlay', True)
+
+    flag_btn = os.path.exists(st.session_state.paths['sel_img']) and os.path.exists(st.session_state.paths['sel_dlmuse'])
+
+    with st.spinner('Wait for it...'):
+
+        st.session_state.paths['sel_img'] = os.path.join(st.session_state.paths['T1'],
+                                                         st.session_state.sel_mrid + st.session_state.suff_t1img)
+
+        st.session_state.paths['sel_dlmuse'] = os.path.join(st.session_state.paths['dlmuse'],
+                                                        st.session_state.sel_mrid + st.session_state.suff_dlmuse)
+        # Process image and mask to prepare final 3d matrix to display
+        flag_files = 1
+        if not os.path.exists(st.session_state.paths['sel_img']):
+            flag_files = 0
+            warn_msg = f'Missing underlay image: {st.session_state.paths['sel_img']}'
+        if not os.path.exists(st.session_state.paths['sel_dlmuse']):
+            flag_files = 0
+            warn_msg = f'Missing overlay image: {st.session_state.paths['sel_dlmuse']}'
+
+        if flag_files == 0:
+            st.warning(warn_msg)
         else:
-            sel_ind = df.MRID.tolist().index(sel_mrid)
-            sel_type = "(user)"
-        sel_mrid = st.selectbox(
-            "MRID", df.MRID.tolist(), key="selbox_mrid", index=sel_ind
-        )
-
-        # Selection of ROI
-        #  - The variable will be selected from the active plot
-
-        sel_var = ""
-        try:
-            sel_var = st.session_state.plots.loc[st.session_state.plot_active, "yvar"]
-        except:
-            print("Could not detect an active plot")
-        if sel_var == "":
-            sel_ind = 2
-            sel_var = list(dict_roi.keys())[0]
-            sel_type = "(auto)"
-        else:
-            sel_ind = df_muse.Name.tolist().index(sel_var)
-            sel_type = "(user)"
-        sel_var = st.selectbox(
-            "ROI", list(dict_roi.keys()), key="selbox_rois", index=sel_ind
-        )
-
-        print(df_muse.Name)
-
-        print(dict_roi.keys())
-
-        # Select roi index
-        sel_var_ind = dict_roi[sel_var]
-
-        # Create a list of checkbox options
-        list_orient = st.multiselect("Select viewing planes:", VIEWS, VIEWS)
-
-        # View hide overlay
-        is_show_overlay = st.checkbox("Show overlay", True)
-
-        flag_btn = os.path.exists(st.session_state.paths["sel_img"]) and os.path.exists(
-            st.session_state.paths["sel_dlmuse"]
-        )
-
-        with st.spinner("Wait for it..."):
-
-            st.session_state.paths["sel_img"] = os.path.join(
-                st.session_state.paths["t1"], sel_mrid + st.session_state.suff_t1img
-            )
-
-            st.session_state.paths["sel_dlmuse"] = os.path.join(
-                st.session_state.paths["dlmuse"],
-                sel_mrid + st.session_state.suff_dlmuse,
-            )
-
-            # Process image and mask to prepare final 3d matrix to display
-            img, mask, img_masked = utilni.prep_image_and_olay(
-                st.session_state.paths["sel_img"],
-                st.session_state.paths["sel_dlmuse"],
-                sel_var_ind,
-                dict_derived,
-            )
+            img, mask, img_masked = utilni.prep_image_and_olay(st.session_state.paths['sel_img'],
+                                                            st.session_state.paths['sel_dlmuse'],
+                                                            sel_var_ind,
+                                                            dict_derived)
 
             # Detect mask bounds and center in each view
             mask_bounds = utilni.detect_mask_bounds(mask)
@@ -474,21 +465,7 @@ if os.path.exists(st.session_state.paths["csv_mlscores"]):
             for i, tmp_orient in enumerate(list_orient):
                 with blocks[i]:
                     ind_view = VIEWS.index(tmp_orient)
-                    if is_show_overlay is False:
-                        utilst.show_img3D(
-                            img, ind_view, mask_bounds[ind_view, :], tmp_orient
-                        )
+                    if not is_show_overlay:
+                        utilst.show_img3D(img, ind_view, mask_bounds[ind_view, :], tmp_orient)
                     else:
-                        utilst.show_img3D(
-                            img_masked, ind_view, mask_bounds[ind_view, :], tmp_orient
-                        )
-
-    # FIXME: this is for debugging; will be removed
-    with st.expander("session_state: Plots"):
-        st.session_state.plot_active
-
-    with st.expander("session_state: Plots"):
-        st.session_state.plots
-
-    with st.expander("session_state: All"):
-        st.write(st.session_state)
+                        utilst.show_img3D(img_masked, ind_view, mask_bounds[ind_view, :], tmp_orient)
