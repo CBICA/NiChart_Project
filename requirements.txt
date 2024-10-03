@@ -1,7 +1,9 @@
 # NiChart packages
 spare-scores
 NiChartHarmonize
-#NiChart_DLMUSE
+DLICV
+DLMUSE
+NiChart_DLMUSE
 
 # general python dependencies
 argparse
