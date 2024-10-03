@@ -391,6 +391,17 @@ with st.expander('Plot data', expanded=False):
 # Panel for viewing images and DLMUSE masks
 with st.expander('View segmentations', expanded=False):
 
+    # Selection of MRID
+    try:
+        sel_ind = df.MRID.tolist().index(st.session_state.sel_mrid)
+        list_mrids = df.MRID.tolist()
+    except:
+        sel_ind = 0
+        list_mrids = []
+    st.session_state.sel_mrid = st.selectbox("MRID", list_mrids,
+                                             key="selbox_mrid",
+                                             index=sel_ind)
+
     # Create a dictionary of MUSE indices and names
     df_muse = pd.read_csv(st.session_state.dicts['muse_all'])
 
@@ -400,16 +411,6 @@ with st.expander('View segmentations', expanded=False):
     # Read derived roi list and convert to a dict
     dict_roi, dict_derived = utilmuse.read_derived_roi_list(st.session_state.dicts['muse_sel'],
                                                             st.session_state.dicts['muse_derived'])
-    # Selection of MRID
-    try:
-        sel_ind = df.MRID.tolist().index(st.session_state.sel_mrid)
-        list_mrids = df.MRID.tolist()
-    except:
-        sel_ind = 0
-        list_mrids = []
-    st.session_state.sel_mrid = st.selectbox("MRID", df.MRID.tolist(),
-                                             key="selbox_mrid",
-                                             index=sel_ind)
 
     # Selection of ROI
     #  - The variable will be selected from the active plot
@@ -431,41 +432,47 @@ with st.expander('View segmentations', expanded=False):
     # View hide overlay
     is_show_overlay = st.checkbox('Show overlay', True)
 
-    flag_btn = os.path.exists(st.session_state.paths['sel_img']) and os.path.exists(st.session_state.paths['sel_dlmuse'])
-
-    with st.spinner('Wait for it...'):
-
+    flag_img = False
+    if st.session_state.sel_mrid is not None:
         st.session_state.paths['sel_img'] = os.path.join(st.session_state.paths['T1'],
                                                          st.session_state.sel_mrid + st.session_state.suff_t1img)
-
         st.session_state.paths['sel_dlmuse'] = os.path.join(st.session_state.paths['dlmuse'],
                                                         st.session_state.sel_mrid + st.session_state.suff_dlmuse)
-        # Process image and mask to prepare final 3d matrix to display
-        flag_files = 1
-        if not os.path.exists(st.session_state.paths['sel_img']):
-            flag_files = 0
-            warn_msg = f'Missing underlay image: {st.session_state.paths['sel_img']}'
-        if not os.path.exists(st.session_state.paths['sel_dlmuse']):
-            flag_files = 0
-            warn_msg = f'Missing overlay image: {st.session_state.paths['sel_dlmuse']}'
+    flag_img = os.path.exists(st.session_state.paths['sel_img']) and os.path.exists(st.session_state.paths['sel_dlmuse'])
 
-        if flag_files == 0:
-            st.warning(warn_msg)
-        else:
-            img, mask, img_masked = utilni.prep_image_and_olay(st.session_state.paths['sel_img'],
-                                                            st.session_state.paths['sel_dlmuse'],
-                                                            sel_var_ind,
-                                                            dict_derived)
+    if flag_img:
 
-            # Detect mask bounds and center in each view
-            mask_bounds = utilni.detect_mask_bounds(mask)
+        with st.spinner('Wait for it...'):
 
-            # Show images
-            blocks = st.columns(len(list_orient))
-            for i, tmp_orient in enumerate(list_orient):
-                with blocks[i]:
-                    ind_view = VIEWS.index(tmp_orient)
-                    if not is_show_overlay:
-                        utilst.show_img3D(img, ind_view, mask_bounds[ind_view, :], tmp_orient)
-                    else:
-                        utilst.show_img3D(img_masked, ind_view, mask_bounds[ind_view, :], tmp_orient)
+            # Process image and mask to prepare final 3d matrix to display
+            flag_files = 1
+            if not os.path.exists(st.session_state.paths['sel_img']):
+                flag_files = 0
+                warn_msg = f'Missing underlay image: {st.session_state.paths['sel_img']}'
+            if not os.path.exists(st.session_state.paths['sel_dlmuse']):
+                flag_files = 0
+                warn_msg = f'Missing overlay image: {st.session_state.paths['sel_dlmuse']}'
+
+            if flag_files == 0:
+                st.warning(warn_msg)
+            else:
+                img, mask, img_masked = utilni.prep_image_and_olay(st.session_state.paths['sel_img'],
+                                                                st.session_state.paths['sel_dlmuse'],
+                                                                sel_var_ind,
+                                                                dict_derived)
+
+                # Detect mask bounds and center in each view
+                mask_bounds = utilni.detect_mask_bounds(mask)
+
+                # Show images
+                blocks = st.columns(len(list_orient))
+                for i, tmp_orient in enumerate(list_orient):
+                    with blocks[i]:
+                        ind_view = VIEWS.index(tmp_orient)
+                        if not is_show_overlay:
+                            utilst.show_img3D(img, ind_view, mask_bounds[ind_view, :], tmp_orient)
+                        else:
+                            utilst.show_img3D(img_masked, ind_view, mask_bounds[ind_view, :], tmp_orient)
+
+with st.expander('FIXME: TMP - Session state'):
+    st.write(st.session_state)

@@ -158,3 +158,6 @@ st.markdown(
             You can always find more options at our documentation
             """
 )
+
+with st.expander("FIXME: TMP - Session state"):
+    st.write(st.session_state)

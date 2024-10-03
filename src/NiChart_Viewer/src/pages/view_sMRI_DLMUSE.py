@@ -30,7 +30,7 @@ with st.expander("Select subject list, image paths and suffixes"):
     csv_dlmuse, csv_path = utilst.user_input_file(
         "Select file",
         "btn_input_dlmuse",
-        "DLMUSE ROI file",
+        "Subject list",
         st.session_state.paths["last_sel"],
         st.session_state.paths["csv_dlmuse"],
         helpmsg,
@@ -44,19 +44,19 @@ with st.expander("Select subject list, image paths and suffixes"):
     path_t1 = utilst.user_input_folder(
         "Select folder",
         "btn_indir_t1",
-        "Input folder",
+        "T1 folder",
         st.session_state.paths["last_sel"],
-        st.session_state.paths["t1"],
+        st.session_state.paths["T1"],
         helpmsg,
     )
-    st.session_state.paths["t1"] = path_t1
+    st.session_state.paths["T1"] = path_t1
 
     # Input DLMUSE image folder
     helpmsg = "Path to DLMUSE images.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
     path_dlmuse = utilst.user_input_folder(
         "Select folder",
         "btn_indir_dlmuse",
-        "Input folder",
+        "DLMUSE folder",
         st.session_state.paths["last_sel"],
         st.session_state.paths["dlmuse"],
         helpmsg,
@@ -140,7 +140,7 @@ if os.path.exists(st.session_state.paths["csv_dlmuse"]):
     # File names for img and mask
     f_img = os.path.join(
         st.session_state.paths["out"],
-        st.session_state.paths["t1"],
+        st.session_state.paths["T1"],
         sel_mrid + st.session_state.suff_t1img,
     )
 

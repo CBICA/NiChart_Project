@@ -69,11 +69,13 @@ with st.expander("Detect dicom series", expanded=False):
     btn_detect = st.button("Detect Series", disabled=not flag_btn)
     if btn_detect:
         with st.spinner("Wait for it..."):
-            df_dicoms, list_series = utildcm.detect_series(path_dicom)
+            df_dicoms = utildcm.detect_series(path_dicom)
+            list_series = df_dicoms.SeriesDesc.unique()
+            num_scans = df_dicoms[['PatientID', 'StudyDate', 'SeriesDesc']].drop_duplicates().shape[0]
             if len(list_series) == 0:
                 st.warning("Could not detect any dicom series!")
             else:
-                st.success(f"Detected {len(list_series)} dicom series!",
+                st.success(f"Detected {num_scans} scans in {len(list_series)} series!",
                            icon=":material/thumb_up:")
             st.session_state.list_series = list_series
             st.session_state.df_dicoms = df_dicoms
@@ -130,7 +132,7 @@ with st.expander("Select dicom series", expanded=False):
 with st.expander("View images", expanded=False):
     # Selection of MRID
     sel_img = st.selectbox(
-        "Select Image", st.session_state.list_input_nifti, key="selbox_images", index=0
+        "Select Image", st.session_state.list_input_nifti, key="selbox_images", index=None
     )
 
     if sel_img is not None:
@@ -141,9 +143,7 @@ with st.expander("View images", expanded=False):
     flag_btn = os.path.exists(st.session_state.paths["sel_img"])
 
     # Create a list of checkbox options
-    list_orient = st.multiselect(
-        "Select viewing planes:", utilni.VIEWS, utilni.VIEWS, disabled=not flag_btn
-    )
+    list_orient = st.multiselect("Select viewing planes:", utilni.VIEWS, utilni.VIEWS)
 
     if flag_btn:
 
