@@ -98,6 +98,5 @@ with st.expander("Run MLScore", expanded=False):
             csv_mlscores = f"{st.session_state.paths['mlscore']}/{dset_name}_DLMUSE+MLScores.csv"
             if os.path.exists(csv_mlscores):
                 st.session_state.paths["csv_mlscores"] = csv_mlscores
-
+                st.session_state.paths["csv_plot"] = st.session_state.paths["csv_mlscores"]
             st.success(f"Out file: {csv_mlscores}")
- 

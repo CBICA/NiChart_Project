@@ -473,3 +473,6 @@ with st.expander('View segmentations', expanded=False):
                             utilst.show_img3D(img, ind_view, mask_bounds[ind_view, :], tmp_orient)
                         else:
                             utilst.show_img3D(img_masked, ind_view, mask_bounds[ind_view, :], tmp_orient)
+
+with st.expander('FIXME: TMP - Session state'):
+    st.write(st.session_state)

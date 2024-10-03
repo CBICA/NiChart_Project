@@ -54,7 +54,6 @@ with st.expander("Run DLMUSE", expanded=False):
         st.session_state.paths['T1'],
         helpmsg,
     )
-    
 
     # Device type
     helpmsg = "Choose 'cuda' if your computer has an NVIDIA GPU, 'mps' if you have an Apple M-series chip, and 'cpu' if you have a standard CPU."
@@ -76,7 +75,10 @@ with st.expander("Run DLMUSE", expanded=False):
         with st.spinner("Wait for it..."):
             dlmuse_cmd = f"NiChart_DLMUSE -i {st.session_state.paths['T1']} -o {st.session_state.paths['dlmuse']} -d {device}"
             st.info(f"Running: {dlmuse_cmd}", icon=":material/manufacturing:")
-            os.system(dlmuse_cmd)
+
+            # FIXME : bypass dlmuse run
+            # os.system(dlmuse_cmd)
+
             st.success("Run completed!", icon=":material/thumb_up:")
 
             # Set the dlmuse csv output
@@ -118,7 +120,7 @@ with st.expander("View segmentations", expanded=False):
     if sel_mrid is not None:
         st.session_state.paths["sel_img"] = os.path.join(
             st.session_state.paths['T1'], sel_mrid + st.session_state.suff_t1img
-        )        
+        )
         st.session_state.paths["sel_dlmuse"] = os.path.join(
             st.session_state.paths["dlmuse"], sel_mrid + st.session_state.suff_dlmuse
         )

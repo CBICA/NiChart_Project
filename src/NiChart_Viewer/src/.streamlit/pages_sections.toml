@@ -40,12 +40,12 @@ is_section = true
 icon = ":file_folder:"
 
 [[pages]]
-path = "pages/view_sMRI_plot_vars_all.py"
+path = "pages/plot_sMRI_vars_study.py"
 name = "Study Data (sMRI)"
 icon = ":black_small_square:"
 
 [[pages]]
-path = "pages/view_sMRI_plot_vars_single.py"
+path = "pages/plot_sMRI_vars_participant.py"
 name = "Participant Data (sMRI)"
 icon = ":black_small_square:"
 

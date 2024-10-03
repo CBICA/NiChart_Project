@@ -30,7 +30,7 @@ with st.expander("Select subject list, image paths and suffixes"):
     csv_dlmuse, csv_path = utilst.user_input_file(
         "Select file",
         "btn_input_dlmuse",
-        "DLMUSE ROI file",
+        "Subject list",
         st.session_state.paths["last_sel"],
         st.session_state.paths["csv_dlmuse"],
         helpmsg,
@@ -44,7 +44,7 @@ with st.expander("Select subject list, image paths and suffixes"):
     path_t1 = utilst.user_input_folder(
         "Select folder",
         "btn_indir_t1",
-        "Input folder",
+        "T1 folder",
         st.session_state.paths["last_sel"],
         st.session_state.paths["T1"],
         helpmsg,
@@ -56,7 +56,7 @@ with st.expander("Select subject list, image paths and suffixes"):
     path_dlmuse = utilst.user_input_folder(
         "Select folder",
         "btn_indir_dlmuse",
-        "Input folder",
+        "DLMUSE folder",
         st.session_state.paths["last_sel"],
         st.session_state.paths["dlmuse"],
         helpmsg,

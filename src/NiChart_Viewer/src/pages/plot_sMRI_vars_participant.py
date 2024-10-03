@@ -1,7 +1,11 @@
+import os
+
 import numpy as np
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+import utils.utils_st as utilst
+
 
 def calc_subject_centiles(df_subj: pd.DataFrame, df_cent: pd.DataFrame) -> pd.DataFrame:
     """
@@ -41,7 +45,7 @@ def calc_subject_centiles(df_subj: pd.DataFrame, df_cent: pd.DataFrame) -> pd.Da
     return df_out
 
 
-def display_plot(sel_mrid: str) -> None:
+def display_plot(df: pd.DataFrame, sel_mrid: str) -> None:
     """
     Displays the plot with the given mrid
     """
@@ -58,38 +62,33 @@ def display_plot(sel_mrid: str) -> None:
         st.plotly_chart(fig)
 
 
-# # Config page
-# st.set_page_config(page_title="DataFrame Demo", page_icon="📊", layout='wide')
+# Panel for input csv, image paths and suffixes
+with st.expander("Select Input", expanded=False):
 
-# FIXME: Input data is hardcoded here for now
-fname = "../examples/test_input3/ROIS_tmp2.csv"
-df = pd.read_csv(fname)
+    df = pd.DataFrame()
 
-# Page controls in side bar
-with st.sidebar:
-
-    # Show selected id (while providing the user the option to select it from the list of all MRIDs)
-    # - get the selected id from the session_state
-    # - create a selectbox with all MRIDs
-    # -- initialize it with the selected id if it's set
-    # -- initialize it with the first id if not
-    sel_mrid = st.session_state.sel_mrid
-    if sel_mrid == "":
-        sel_ind = 0
-        sel_type = "(auto)"
-    else:
-        sel_ind = df.MRID.tolist().index(sel_mrid)
-        sel_type = "(user)"
-    sel_mrid = st.selectbox(
-        "Select Subject", df.MRID.tolist(), key="selbox_mrid", index=sel_ind
+    # Input csv
+    helpmsg = "Input csv file with DLMUSE ROI volumes.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it"
+    csv_plot, csv_path = utilst.user_input_file(
+        "Select file",
+        "btn_input_dlmuse",
+        "DLMUSE ROI file",
+        st.session_state.paths["last_sel"],
+        st.session_state.paths["csv_plot"],
+        helpmsg,
     )
+    if os.path.exists(csv_plot):
+        st.session_state.paths["csv_plot"] = csv_plot
+        st.session_state.paths["last_sel"] = csv_path
+        df = pd.read_csv(csv_plot)
 
-    # st.sidebar.warning('Selected subject: ' + mrid)
-    st.success(f"Selected {sel_type}: {sel_mrid}")
+    # Selection of MRID
+    try:
+        df = pd.read_csv(st.session_state.paths["csv_plot"])
+        list_mrid = df.MRID.tolist()
+    except:
+        list_mrid = [""]
+    sel_mrid = st.selectbox("MRID", list_mrid, key="selbox_mrid", index=None)
 
-    st.write("---")
-
-display_plot(sel_mrid)
-# # Button to add a new plot
-# if st.button("Add plot"):
-#     display_plot(sel_mrid)
+    if sel_mrid is not None:
+        display_plot(df, sel_mrid)
