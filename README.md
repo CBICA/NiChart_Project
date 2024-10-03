@@ -1,6 +1,6 @@
-# NiChart: Neuro Imaging Chart
+# NiChart: Neuro-imaging Chart
 
-NiChart is a comprehensive framework designed to revolutionize neuroimaging research. It offers large-scale neuroimaging capabilities, sophisticated analysis methods, and user-friendly tools, all integrated seamlessly into the AWS Cloud.
+NiChart is a comprehensive framework designed to revolutionize neuroimaging research. It offers large-scale neuroimaging capabilities, sophisticated analysis methods, and user-friendly tools, all seamlessly integrated into a local installation version and the [AWS Cloud](https://neuroimagingchart.com/portal/).
 
 ## Components
 
@@ -23,6 +23,9 @@ NiChart is a comprehensive framework designed to revolutionize neuroimaging rese
 
 [![YouTube](https://img.shields.io/badge/YouTube-%23FF0000.svg?style=for-the-badge&logo=YouTube&logoColor=white)](https://www.youtube.com/@NiChart-UPenn)
 
+## System Requirements
+
+For recommended system configuration, please refer to: [nnUNet hardware requirements](https://github.com/MIC-DKFZ/nnUNet/blob/master/documentation/installation_instructions.md#hardware-requirements).
 
 ## Installation Instructions
 
@@ -49,13 +52,12 @@ NiChart is a comprehensive framework designed to revolutionize neuroimaging rese
    pip install -r requirements.txt
    ```
 
-## Usage
+## Run NiChart Locally (GUI)
 ```bash
 cd src/NiChart_Viewer/src
 streamlit run NiChartProject.py
 ```
+The app will start in your localhost.
 
-The app will start in localhost
----
 
 © 2024 CBICA. All Rights Reserved.
