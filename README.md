@@ -27,8 +27,7 @@ NiChart is a comprehensive framework designed to revolutionize neuroimaging rese
 ## Installation Instructions
 
 1. `git clone https://github.com/CBICA/NiChart_Project.git`
-2. `git submodule update --init --recursive --remote`
-3. `pip install -r requirements.txt`
+2. `pip install -r requirements.txt`
 
 ## Example Usage
 ```bash
