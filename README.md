@@ -26,8 +26,27 @@ NiChart is a comprehensive framework designed to revolutionize neuroimaging rese
 
 ## Installation Instructions
 
-1. `git clone https://github.com/CBICA/NiChart_Project.git`
-2. `pip install -r requirements.txt`
+1. Install Mamba
+    [Mamba Installation Guide (Official)](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html)
+    
+    Example (Linux x86):
+    ```bash
+    wget https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh
+
+    bash Mambaforge-Linux-x86_64.sh
+    ```
+2. Create a Mamba environment with Snakemake
+    ```bash
+    mamba create -c conda-forge -c bioconda -n NiChart_Projects snakemake
+    ```
+3. Clone the GitHub repo
+   ```bash
+   git clone https://github.com/CBICA/NiChart_Project.git
+   ```
+4. ```bash
+   cd NiChart_Project
+   pip install -r requirements.txt
+   ```
 
 ## Usage
 ```bash
