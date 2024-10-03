@@ -115,16 +115,14 @@ def detect_series(in_dir: str) -> Any:
     for root, _, files in os.walk(in_dir):
         for dicom_file in files:
             list_files.append(os.path.join(root, dicom_file))
-    df_dicoms = pd.DataFrame(data=list_files, columns=["fname"])
-    df_dicoms = df_dicoms.reindex(columns=["fname", "dtype"])
-    list_dtypes = []
+    list_dfields = []
     for _, file_path in stqdm(
-        enumerate(df_dicoms.fname.tolist()),
+        enumerate(list_files),
         desc="Detecting series in dicom files ...",
-        total=len(df_dicoms.fname.tolist()),
+        total=len(list_files),
     ):
         # noinspection PyBroadException
-        dtype = ""
+        dfields = []
         try:
             if common.is_dicom_file(file_path):
                 # read only dicom header without pixel data
@@ -135,21 +133,20 @@ def detect_series(in_dir: str) -> Any:
                     force=dicom2nifti.settings.pydicom_read_force,
                 )
                 if _is_valid_imaging_dicom(dicom_headers):
-                    dtype = dicom_headers.SeriesDescription
+                    dfields = [file_path,
+                               dicom_headers.PatientID,
+                               dicom_headers.StudyDate,
+                               dicom_headers.SeriesDescription]
+            list_dfields.append(dfields)
 
         # Explicitly capturing all errors here to be able to continue processing all the rest
         except:
             print(f"Unable to read: {file_path}")
-
-        list_dtypes.append(dtype)
-
+            
     # Create dataframe with file name and dicom series description
-    df_dicoms["dtype"] = list_dtypes
+    df_dicoms = pd.DataFrame(data=list_dfields, columns=['fname', 'PatientID', 'StudyDate', 'SeriesDesc'])
 
-    # Detect all unique series
-    list_series = df_dicoms.dtype.unique()
-
-    return df_dicoms, list_series
+    return df_dicoms
 
 
 def select_series(df_dicoms: pd.DataFrame, dict_series: pd.Series) -> Any:
@@ -158,8 +155,8 @@ def select_series(df_dicoms: pd.DataFrame, dict_series: pd.Series) -> Any:
     df_sel_list = []
     dict_out = {}
     for key, value in dict_series.items():
-        df_sel = df_dicoms[df_dicoms.dtype.str.contains(value)]
-        dict_out[key] = df_sel.dtype.unique().tolist()
+        df_sel = df_dicoms[df_dicoms.SeriesDesc.str.contains(value)]
+        dict_out[key] = df_sel.SeriesDesc.unique().tolist()
         if df_sel.shape[0] > 0:
             df_sel_list.append(df_sel)
             print(f" Detected dicoms: {key} , {df_sel.shape[0]}")
@@ -241,10 +238,10 @@ def convert_sel_series(
 ) -> None:
     # Convert all images for each selected series
     for _, stmp in stqdm(
-        enumerate(sel_series), desc="Converting series...", total=len(sel_series)
+        enumerate(sel_series), desc="Sorting series...", total=len(sel_series)
     ):
         print(f"Converting series: {stmp}")
-        list_files = df_dicoms[df_dicoms.dtype == stmp].fname.tolist()
+        list_files = df_dicoms[df_dicoms.SeriesDesc == stmp].fname.tolist()
         print(list_files)
 
         convert_single_series(
