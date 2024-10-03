@@ -35,9 +35,10 @@ NiChart is a comprehensive framework designed to revolutionize neuroimaging rese
 
     bash Mambaforge-Linux-x86_64.sh
     ```
-2. Create a Mamba environment with Snakemake
+2. Create a Mamba environment with Snakemake & Activate the environment
     ```bash
-    mamba create -c conda-forge -c bioconda -n NiChart_Projects snakemake
+    mamba create -c conda-forge -c bioconda -n NCP_env snakemake
+    mamba activate NCP_env
     ```
 3. Clone the GitHub repo
    ```bash
