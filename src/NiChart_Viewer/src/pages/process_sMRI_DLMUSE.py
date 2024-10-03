@@ -77,7 +77,7 @@ with st.expander("Run DLMUSE", expanded=False):
             st.info(f"Running: {dlmuse_cmd}", icon=":material/manufacturing:")
 
             # FIXME : bypass dlmuse run
-            # os.system(dlmuse_cmd)
+            os.system(dlmuse_cmd)
 
             st.success("Run completed!", icon=":material/thumb_up:")
 
