@@ -37,7 +37,7 @@ NiChart is a comprehensive framework designed to revolutionize neuroimaging rese
     ```
 2. Create a Mamba environment with Snakemake & Activate the environment
     ```bash
-    mamba create -c conda-forge -c bioconda -n NCP_env snakemake
+    mamba create -c conda-forge -c bioconda -n NCP_env python=3.12 snakemake
     mamba activate NCP_env
     ```
 3. Clone the GitHub repo
