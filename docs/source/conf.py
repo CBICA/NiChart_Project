@@ -13,8 +13,8 @@ basedir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "s
 sys.path.insert(0, basedir)
 
 project = "NiChart"
-copyright = "2024, Guray Erus, Alexander Getka, Spiros Maggioros"
-author = "Guray Erus, Alexander Getka, Spiros Maggioros"
+copyright = ""
+author = "Guray Erus, Alexander Getka, Spiros Maggioros, Kyunglok Baik"
 release = "2024"
 
 # -- General configuration ---------------------------------------------------

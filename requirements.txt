@@ -1,17 +1,17 @@
 # NiChart packages
 spare-scores
 NiChartHarmonize
-#NiChart_DLMUSE
+DLICV
+DLMUSE
+NiChart_DLMUSE
 
 # general python dependencies
+torch>=2.2.1,<=2.3.1
 argparse
 nibabel
-mamba
-snakemake
 pulp==2.7.0
 tabulate==0.8.10
 sphinx
-
 
 # streamlit
 st_pages==1.0.1
