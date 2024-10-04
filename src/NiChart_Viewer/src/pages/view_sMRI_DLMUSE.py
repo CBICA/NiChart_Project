@@ -58,10 +58,10 @@ with st.expander("Select subject list, image paths and suffixes"):
         "btn_indir_dlmuse",
         "DLMUSE folder",
         st.session_state.paths["last_sel"],
-        st.session_state.paths["dlmuse"],
+        st.session_state.paths["DLMUSE"],
         helpmsg,
     )
-    st.session_state.paths["dlmuse"] = path_dlmuse
+    st.session_state.paths["DLMUSE"] = path_dlmuse
 
     # T1 suffix
     suff_t1img = utilst.user_input_text(
@@ -146,7 +146,7 @@ if os.path.exists(st.session_state.paths["csv_dlmuse"]):
 
     f_mask = os.path.join(
         st.session_state.paths["out"],
-        st.session_state.paths["dlmuse"],
+        st.session_state.paths["DLMUSE"],
         sel_mrid + st.session_state.suff_dlmuse,
     )
 

@@ -16,31 +16,7 @@ st.markdown(
 )
 
 # Panel for output (dataset name + out_dir)
-with st.expander("Select output", expanded=False):
-    # Dataset name: All results will be saved in a main folder named by the dataset name
-    helpmsg = "Each dataset's results are organized in a dedicated folder named after the dataset"
-    dset_name = utilst.user_input_text(
-        "Dataset name", st.session_state.dset_name, helpmsg
-    )
-
-    # Out folder
-    helpmsg = "DLMUSE images will be saved to the output folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
-    path_out = utilst.user_input_folder(
-        "Select folder",
-        "btn_sel_out_dir",
-        "Output folder",
-        st.session_state.paths["last_sel"],
-        st.session_state.paths["out"],
-        helpmsg,
-    )
-    if dset_name != "" and path_out != "":
-        st.session_state.dset_name = dset_name
-        st.session_state.paths["out"] = path_out
-        st.session_state.paths["dset"] = os.path.join(path_out, dset_name)
-        st.session_state.paths["mlscore"] = os.path.join(
-            path_out, dset_name, "MLScores"
-        )
-        st.success(f'Results will be saved to: {st.session_state.paths['mlscore']}')
+utilst.util_panel_workingdir()
 
 # Panel for running MLScore
 with st.expander("Run MLScore", expanded=False):
@@ -84,19 +60,23 @@ with st.expander("Run MLScore", expanded=False):
             st.session_state.paths["root"], "src", "workflow", "workflows", "w_sMRI"
         )
 
-        if not os.path.exists(st.session_state.paths["mlscore"]):
-            os.makedirs(st.session_state.paths["mlscore"])
+        if not os.path.exists(st.session_state.paths["MLScores"]):
+            os.makedirs(st.session_state.paths["MLScores"])
 
         with st.spinner("Wait for it..."):
             os.system(f"cd {run_dir}")
             st.info("Running: mlscores_workflow ", icon=":material/manufacturing:")
-            cmd = f"python3 {run_dir}/call_snakefile.py --run_dir {run_dir} --dset_name {dset_name} --input_rois {csv_dlmuse} --input_demog {csv_demog} --dir_out {st.session_state.paths['mlscore']}"
+            cmd = f"python3 {run_dir}/call_snakefile.py --run_dir {run_dir} --dset_name {st.session_state.dset_name} --input_rois {csv_dlmuse} --input_demog {csv_demog} --dir_out {st.session_state.paths['MLScores']}"
+
+            #cmd = f"python3 {run_dir}/workflow_mlscores.py --root_dir {st.session_state.paths["root"]} --run_dir {run_dir} --dset_name {st.session_state.dset_name} --input_rois {csv_dlmuse} --input_demog {csv_demog} --dir_out {st.session_state.paths['MLScores']}"
+
             os.system(cmd)
-            st.success("Run completed!", icon=":material/thumb_up:")
 
             # Set the output file as the input for the related viewers
-            csv_mlscores = f"{st.session_state.paths['mlscore']}/{dset_name}_DLMUSE+MLScores.csv"
-            if os.path.exists(csv_mlscores):
-                st.session_state.paths["csv_mlscores"] = csv_mlscores
-                st.session_state.paths["csv_plot"] = st.session_state.paths["csv_mlscores"]
-            st.success(f"Out file: {csv_mlscores}")
+            if os.path.exists(st.session_state.paths["csv_mlscores"]):
+                st.success(f"Run completed! Out file: {st.session_state.paths['csv_mlscores']}", icon=":material/thumb_up:")
+
+with st.expander('FIXME: TMP - Session state'):
+    st.write(st.session_state)
+with st.expander('TMP: session vars - paths'):
+    st.write(st.session_state.paths)
