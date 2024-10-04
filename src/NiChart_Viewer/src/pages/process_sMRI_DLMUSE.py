@@ -17,29 +17,7 @@ st.markdown(
 )
 
 # Panel for output (dataset name + out_dir)
-with st.expander("Select output", expanded=False):
-    # Dataset name: All results will be saved in a main folder named by the dataset name
-    helpmsg = "Each dataset's results are organized in a dedicated folder named after the dataset"
-    dset_name = utilst.user_input_text(
-        "Dataset name", st.session_state.dset_name, helpmsg
-    )
-
-    # Out folder
-    helpmsg = "DLMUSE images will be saved to the output folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
-    path_out = utilst.user_input_folder(
-        "Select folder",
-        "btn_sel_out_dir",
-        "Output folder",
-        st.session_state.paths["last_sel"],
-        st.session_state.paths["out"],
-        helpmsg,
-    )
-    if dset_name != "" and path_out != "":
-        st.session_state.dset_name = dset_name
-        st.session_state.paths["out"] = path_out
-        st.session_state.paths["dset"] = os.path.join(path_out, dset_name)
-        st.session_state.paths["dlmuse"] = os.path.join(path_out, dset_name, "DLMUSE")
-        st.success(f'Results will be saved to: {st.session_state.paths['dlmuse']}')
+utilst.util_panel_workingdir()
 
 # Panel for running DLMUSE
 with st.expander("Run DLMUSE", expanded=False):
@@ -69,11 +47,11 @@ with st.expander("Run DLMUSE", expanded=False):
         run_dir = os.path.join(
             st.session_state.paths["root"], "src", "NiChart_DLMUSE"
         )
-        if not os.path.exists(st.session_state.paths["dlmuse"]):
-            os.makedirs(st.session_state.paths["dlmuse"])
+        if not os.path.exists(st.session_state.paths["DLMUSE"]):
+            os.makedirs(st.session_state.paths["DLMUSE"])
 
         with st.spinner("Wait for it..."):
-            dlmuse_cmd = f"NiChart_DLMUSE -i {st.session_state.paths['T1']} -o {st.session_state.paths['dlmuse']} -d {device}"
+            dlmuse_cmd = f"NiChart_DLMUSE -i {st.session_state.paths['T1']} -o {st.session_state.paths["DLMUSE"]} -d {device}"
             st.info(f"Running: {dlmuse_cmd}", icon=":material/manufacturing:")
 
             # FIXME : bypass dlmuse run
@@ -82,7 +60,7 @@ with st.expander("Run DLMUSE", expanded=False):
             st.success("Run completed!", icon=":material/thumb_up:")
 
             # Set the dlmuse csv output
-            out_csv = f"{st.session_state.paths['dlmuse']}/DLMUSE_Volumes.csv"
+            out_csv = f"{st.session_state.paths['DLMUSE']}/DLMUSE_Volumes.csv"
             if os.path.exists(out_csv):
                 st.session_state.paths["csv_dlmuse"] = out_csv
 
@@ -90,7 +68,7 @@ with st.expander("Run DLMUSE", expanded=False):
 with st.expander("View segmentations", expanded=False):
 
     # Set the dlmuse csv output
-    st.session_state.paths["csv_dlmuse"] = f"{st.session_state.paths['dlmuse']}/DLMUSE_Volumes.csv"
+    st.session_state.paths["csv_dlmuse"] = f"{st.session_state.paths["DLMUSE"]}/DLMUSE_Volumes.csv"
 
     # Selection of MRID
     try:
@@ -122,7 +100,7 @@ with st.expander("View segmentations", expanded=False):
             st.session_state.paths['T1'], sel_mrid + st.session_state.suff_t1img
         )
         st.session_state.paths["sel_dlmuse"] = os.path.join(
-            st.session_state.paths["dlmuse"], sel_mrid + st.session_state.suff_dlmuse
+            st.session_state.paths["DLMUSE"], sel_mrid + st.session_state.suff_dlmuse
         )
 
         flag_img = os.path.exists(st.session_state.paths["sel_img"]) and os.path.exists(st.session_state.paths["sel_dlmuse"])
@@ -157,4 +135,6 @@ with st.expander("View segmentations", expanded=False):
                         )
 
 with st.expander('TMP: session vars'):
+    st.write(st.session_state)
+with st.expander('TMP: session vars - paths'):
     st.write(st.session_state.paths)

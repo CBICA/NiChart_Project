@@ -69,22 +69,22 @@ with st.expander("Select Input", expanded=False):
 
     # Input csv
     helpmsg = "Input csv file with DLMUSE ROI volumes.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it"
-    csv_plot, csv_path = utilst.user_input_file(
+    csv_plots, csv_path = utilst.user_input_file(
         "Select file",
         "btn_input_dlmuse",
         "DLMUSE ROI file",
         st.session_state.paths["last_sel"],
-        st.session_state.paths["csv_plot"],
+        st.session_state.paths["csv_plots"],
         helpmsg,
     )
-    if os.path.exists(csv_plot):
-        st.session_state.paths["csv_plot"] = csv_plot
+    if os.path.exists(csv_plots):
+        st.session_state.paths["csv_plots"] = csv_plots
         st.session_state.paths["last_sel"] = csv_path
-        df = pd.read_csv(csv_plot)
+        df = pd.read_csv(csv_plots)
 
     # Selection of MRID
     try:
-        df = pd.read_csv(st.session_state.paths["csv_plot"])
+        df = pd.read_csv(st.session_state.paths["csv_plots"])
         list_mrid = df.MRID.tolist()
     except:
         list_mrid = [""]

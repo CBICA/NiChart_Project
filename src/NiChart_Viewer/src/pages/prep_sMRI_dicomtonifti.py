@@ -25,29 +25,7 @@ st.markdown(
 )
 
 # Panel for output (dataset name + out_dir)
-with st.expander("Select output", expanded=False):
-    # Dataset name: All results will be saved in a main folder named by the dataset name
-    helpmsg = "Each dataset's results are organized in a dedicated folder named after the dataset"
-    dset_name = utilst.user_input_text(
-        "Dataset name", st.session_state.dset_name, helpmsg
-    )
-
-    # Out folder
-    helpmsg = "Extracted Nifti images will be saved to the output folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
-    path_out = utilst.user_input_folder(
-        "Select folder",
-        "btn_sel_out_dir",
-        "Output folder",
-        st.session_state.paths["last_sel"],
-        st.session_state.paths["out"],
-        helpmsg,
-    )
-    if dset_name != "" and path_out != "":
-        st.session_state.dset_name = dset_name
-        st.session_state.paths["out"] = path_out
-        st.session_state.paths["dset"] = os.path.join(path_out, dset_name)
-        st.session_state.paths["nifti"] = os.path.join(path_out, dset_name, "Nifti")
-        st.success(f'Results will be saved to: {st.session_state.paths['nifti']}', icon=":material/thumb_up:")
+utilst.util_panel_workingdir()
 
 # Panel for detecting dicom series
 with st.expander("Detect dicom series", expanded=False):
@@ -58,12 +36,12 @@ with st.expander("Detect dicom series", expanded=False):
         "btn_indir_dicom",
         "Input dicom folder",
         st.session_state.paths["last_sel"],
-        st.session_state.paths["dicom"],
+        st.session_state.paths["Dicoms"],
         helpmsg,
     )
-    st.session_state.paths["dicom"] = path_dicom
+    st.session_state.paths["Dicoms"] = path_dicom
 
-    flag_btn = os.path.exists(st.session_state.paths["dicom"])
+    flag_btn = os.path.exists(st.session_state.paths["Dicoms"])
 
     # Detect dicom series
     btn_detect = st.button("Detect Series", disabled=not flag_btn)
@@ -97,9 +75,9 @@ with st.expander("Select dicom series", expanded=False):
     )
     # Create out folder for the selected modality
     if len(st.session_state.sel_series) > 0:
-        if st.session_state.paths["nifti"] != "":
+        if st.session_state.paths["Nifti"] != "":
             st.session_state.paths[st.session_state.sel_mod] = os.path.join(
-                st.session_state.paths["nifti"], st.session_state.sel_mod
+                st.session_state.paths["Nifti"], st.session_state.sel_mod
             )
             if not os.path.exists(st.session_state.paths[st.session_state.sel_mod]):
                 os.makedirs(st.session_state.paths[st.session_state.sel_mod])
@@ -163,3 +141,8 @@ with st.expander("View images", expanded=False):
                     utilst.show_img3D(
                         img, ind_view, img_bounds[ind_view, :], tmp_orient
                     )
+
+with st.expander('TMP: session vars'):
+    st.write(st.session_state)
+with st.expander('TMP: session vars - paths'):
+    st.write(st.session_state.paths)

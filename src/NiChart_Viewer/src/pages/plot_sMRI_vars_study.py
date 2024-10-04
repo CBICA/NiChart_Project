@@ -41,7 +41,7 @@ def remove_plot(plot_id: str) -> None:
     Removes the plot with the plot_id (updates the plot ids dataframe)
     """
     df_p = st.session_state.plots
-    df_p = df_p[df_p.PID != plot_id]
+    df_p = df_p[df_p.pid != plot_id]
     st.session_state.plots = df_p
 
 
@@ -261,60 +261,36 @@ def filter_dataframe(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
     return df
 
 
+# Panel for output (dataset name + out_dir)
+utilst.util_panel_workingdir()
+
 # Panel for input csv, image paths and suffixes
 with st.expander('Select Input', expanded=False):
 
+    # Set default path for the plot csv
+    if os.path.exists(st.session_state.paths['csv_mlscores']):
+        st.session_state.paths['csv_plots'] = st.session_state.paths['csv_mlscores']
+    elif os.path.exists(st.session_state.paths['csv_dlmuse']):
+        st.session_state.paths['csv_plots'] = st.session_state.paths['csv_dlmuse']
+
     # Input csv
     helpmsg = 'Input csv file with DLMUSE ROI volumes.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it'
-    csv_plot, csv_path = utilst.user_input_file("Select file",
+    csv_plots, csv_path = utilst.user_input_file("Select file",
                                                 'btn_input_dlmuse',
                                                 "DLMUSE ROI file",
                                                 st.session_state.paths['last_sel'],
-                                                st.session_state.paths['csv_plot'],
+                                                st.session_state.paths['csv_plots'],
                                                 helpmsg)
-    if os.path.exists(csv_plot):
-        st.session_state.paths['csv_plot'] = csv_plot
+    if os.path.exists(csv_plots):
+        st.session_state.paths['csv_plots'] = csv_plots
         st.session_state.paths['last_sel'] = csv_path
-
-    # Input T1 image folder
-    helpmsg = 'Folder with T1 images.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
-    path_t1 = utilst.user_input_folder("Select folder",
-                                    'btn_indir_t1',
-                                    "Input folder",
-                                    st.session_state.paths['last_sel'],
-                                    st.session_state.paths['T1'],
-                                    helpmsg)
-    st.session_state.paths['T1'] = path_t1
-
-    # Input DLMUSE image folder
-    helpmsg = 'Folder with DLMUSE images.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
-    path_dlmuse = utilst.user_input_folder("Select folder",
-                                    'btn_indir_dlmuse',
-                                    "Input folder",
-                                    st.session_state.paths['last_sel'],
-                                    st.session_state.paths['dlmuse'],
-                                    helpmsg)
-    st.session_state.paths['dlmuse'] = path_dlmuse
-
-    # T1 suffix
-    suff_t1img = utilst.user_input_text("T1 img suffix",
-                                        st.session_state.suff_t1img,
-                                        helpmsg)
-    st.session_state.suff_t1img = suff_t1img
-
-    # DLMUSE suffix
-    suff_dlmuse = utilst.user_input_text("DLMUSE image suffix",
-                                        st.session_state.suff_dlmuse,
-                                        helpmsg)
-    st.session_state.suff_dlmuse = suff_dlmuse
-
 
 # Page controls in side bar
 with st.sidebar:
     df = pd.DataFrame()
-    if os.path.exists(st.session_state.paths['csv_plot']):
+    if os.path.exists(st.session_state.paths['csv_plots']):
         # Read input csv
-        df = pd.read_csv(csv_plot)
+        df = pd.read_csv(csv_plots)
         with st.container(border=True):
             # Slider to set number of plots in a row
             st.session_state.plots_per_row = st.slider('Plots per row', 1,
@@ -388,43 +364,80 @@ with st.expander('Plot data', expanded=False):
             with blocks[column_no]:
                 display_plot(df, plot_ind)
 
-# Panel for viewing images and DLMUSE masks
-with st.expander('View segmentations', expanded=False):
+with st.expander('Select input folders for the image viewer'):
 
     # Selection of MRID
-    try:
-        sel_ind = df.MRID.tolist().index(st.session_state.sel_mrid)
-        list_mrids = df.MRID.tolist()
-    except:
-        sel_ind = 0
-        list_mrids = []
-    st.session_state.sel_mrid = st.selectbox("MRID", list_mrids,
-                                             key="selbox_mrid",
-                                             index=sel_ind)
+    #try:
+        #sel_ind = df.MRID.tolist().index(st.session_state.sel_mrid)
+        #list_mrids = df.MRID.tolist()
+    #except:
+        #sel_ind = 0
+        #list_mrids = []
+        
+    #print()
+        
+    #st.session_state.sel_mrid = st.selectbox("MRID", list_mrids,
+                                             #key="selbox_mrid",
+                                             #index=sel_ind)
 
-    # Create a dictionary of MUSE indices and names
-    df_muse = pd.read_csv(st.session_state.dicts['muse_all'])
+    ## Create a dictionary of MUSE indices and names
+    #df_muse = pd.read_csv(st.session_state.dicts['muse_all'])
 
-    # FIXME : extra roi not in dict
-    df_muse = df_muse[df_muse.Name != 'CortCSF']
+    ## FIXME : extra roi not in dict
+    #df_muse = df_muse[df_muse.Name != 'CortCSF']
 
-    # Read derived roi list and convert to a dict
-    dict_roi, dict_derived = utilmuse.read_derived_roi_list(st.session_state.dicts['muse_sel'],
-                                                            st.session_state.dicts['muse_derived'])
+    ## Read derived roi list and convert to a dict
+    #dict_roi, dict_derived = utilmuse.read_derived_roi_list(st.session_state.dicts['muse_sel'],
+                                                            #st.session_state.dicts['muse_derived'])
 
-    # Selection of ROI
-    #  - The variable will be selected from the active plot
-    list_rois = df_muse.Name.tolist()
-    try:
-        sel_var = st.session_state.plots.loc[st.session_state.plot_active, 'yvar']
-        sel_ind = list_rois.index(sel_var)
-    except:
-        sel_ind = 2
-        sel_var = list_rois[sel_ind]
-    sel_var = st.selectbox("ROI", list(dict_roi.keys()), key="selbox_rois", index=sel_ind)
+    ## Selection of ROI
+    ##  - The variable will be selected from the active plot
+    #list_rois = df_muse.Name.tolist()
+    #try:
+        #sel_var = st.session_state.plots.loc[st.session_state.plot_active, 'yvar']
+        #sel_ind = list_rois.index(sel_var)
+    #except:
+        #sel_ind = 2
+        #sel_var = list_rois[sel_ind]
+    #sel_var = st.selectbox("ROI", list(dict_roi.keys()), key="selbox_rois", index=sel_ind)
 
-    # Select roi index
-    sel_var_ind = dict_roi[sel_var]
+    ## Select roi index
+    #sel_var_ind = dict_roi[sel_var]
+
+    # Input T1 image folder
+    helpmsg = 'Folder with T1 images.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
+    path_t1 = utilst.user_input_folder("Select folder",
+                                    'btn_indir_t1',
+                                    "Input folder",
+                                    st.session_state.paths['last_sel'],
+                                    st.session_state.paths['T1'],
+                                    helpmsg)
+    st.session_state.paths['T1'] = path_t1
+
+    # Input DLMUSE image folder
+    helpmsg = 'Folder with DLMUSE images.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
+    path_dlmuse = utilst.user_input_folder("Select folder",
+                                    'btn_indir_dlmuse',
+                                    "Input folder",
+                                    st.session_state.paths['last_sel'],
+                                    st.session_state.paths['DLMUSE'],
+                                    helpmsg)
+    st.session_state.paths['DLMUSE'] = path_dlmuse
+
+    # T1 suffix
+    suff_t1img = utilst.user_input_text("T1 img suffix",
+                                        st.session_state.suff_t1img,
+                                        helpmsg)
+    st.session_state.suff_t1img = suff_t1img
+
+    # DLMUSE suffix
+    suff_dlmuse = utilst.user_input_text("DLMUSE image suffix",
+                                        st.session_state.suff_dlmuse,
+                                        helpmsg)
+    st.session_state.suff_dlmuse = suff_dlmuse
+
+# Panel for viewing images and DLMUSE masks
+with st.expander('View segmentations', expanded=False):
 
     # Create a list of checkbox options
     list_orient = st.multiselect("Select viewing planes:", VIEWS, VIEWS)
@@ -433,16 +446,32 @@ with st.expander('View segmentations', expanded=False):
     is_show_overlay = st.checkbox('Show overlay', True)
 
     flag_img = False
-    if st.session_state.sel_mrid is not None:
+    
+    if st.session_state.sel_mrid == '':
+        st.warning(f'Please select a subject on the plot!')
+    else:    
         st.session_state.paths['sel_img'] = os.path.join(st.session_state.paths['T1'],
                                                          st.session_state.sel_mrid + st.session_state.suff_t1img)
-        st.session_state.paths['sel_dlmuse'] = os.path.join(st.session_state.paths['dlmuse'],
+        st.session_state.paths['sel_dlmuse'] = os.path.join(st.session_state.paths['DLMUSE'],
                                                         st.session_state.sel_mrid + st.session_state.suff_dlmuse)
-    flag_img = os.path.exists(st.session_state.paths['sel_img']) and os.path.exists(st.session_state.paths['sel_dlmuse'])
+        if not os.path.exists(st.session_state.paths['sel_img']):
+            st.warning(f'Could not find underlay image: {st.session_state.paths['sel_img']}')
+
+        if not os.path.exists(st.session_state.paths['sel_dlmuse']):
+            st.warning(f'Could not find overlay image: {st.session_state.paths['sel_dlmuse']}')
+        
+        flag_img =  os.path.exists(st.session_state.paths['sel_img']) and os.path.exists(st.session_state.paths['sel_dlmuse'])
 
     if flag_img:
-
         with st.spinner('Wait for it...'):
+
+
+            dict_roi, dict_derived = utilmuse.read_derived_roi_list(st.session_state.dicts['muse_sel'],
+                                                                    st.session_state.dicts['muse_derived'])
+
+            sel_var = st.session_state.plots.loc[st.session_state.plot_active, 'yvar']
+            sel_var_ind = dict_roi[sel_var]
+
 
             # Process image and mask to prepare final 3d matrix to display
             flag_files = 1
@@ -474,5 +503,9 @@ with st.expander('View segmentations', expanded=False):
                         else:
                             utilst.show_img3D(img_masked, ind_view, mask_bounds[ind_view, :], tmp_orient)
 
+
+
 with st.expander('FIXME: TMP - Session state'):
     st.write(st.session_state)
+with st.expander('TMP: session vars - paths'):
+    st.write(st.session_state.paths)
