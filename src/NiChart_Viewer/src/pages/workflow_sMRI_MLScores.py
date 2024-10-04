@@ -91,6 +91,9 @@ with st.expander("Run MLScore", expanded=False):
             os.system(f"cd {run_dir}")
             st.info("Running: mlscores_workflow ", icon=":material/manufacturing:")
             cmd = f"python3 {run_dir}/call_snakefile.py --run_dir {run_dir} --dset_name {dset_name} --input_rois {csv_dlmuse} --input_demog {csv_demog} --dir_out {st.session_state.paths['mlscore']}"
+
+            #cmd = f"python3 {run_dir}/workflow_mlscores.py --root_dir {st.session_state.paths["root"]} --run_dir {run_dir} --dset_name {dset_name} --input_rois {csv_dlmuse} --input_demog {csv_demog} --dir_out {st.session_state.paths['mlscore']}"
+
             os.system(cmd)
             st.success("Run completed!", icon=":material/thumb_up:")
 
@@ -100,3 +103,6 @@ with st.expander("Run MLScore", expanded=False):
                 st.session_state.paths["csv_mlscores"] = csv_mlscores
                 st.session_state.paths["csv_plot"] = st.session_state.paths["csv_mlscores"]
             st.success(f"Out file: {csv_mlscores}")
+
+with st.expander('FIXME: TMP - Session state'):
+    st.write(st.session_state)
