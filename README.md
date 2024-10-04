@@ -29,26 +29,20 @@ For recommended system configuration, please refer to: [nnUNet hardware requirem
 
 ## Installation Instructions
 
-1. Install Mamba
+1. Mamba installation
     [Mamba Installation Guide (Official)](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html)
-    
+
     Example (Linux x86):
     ```bash
     wget https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh
 
     bash Mambaforge-Linux-x86_64.sh
-    ```
-2. Create a Mamba environment with Snakemake & Activate the environment
-    ```bash
     mamba create -c conda-forge -c bioconda -n NCP_env python=3.12 snakemake
     mamba activate NCP_env
     ```
-3. Clone the GitHub repo
+2. Manual installation
    ```bash
    git clone https://github.com/CBICA/NiChart_Project.git
-   ```
-4. ```bash
-   cd NiChart_Project
    pip install -r requirements.txt
    ```
 
