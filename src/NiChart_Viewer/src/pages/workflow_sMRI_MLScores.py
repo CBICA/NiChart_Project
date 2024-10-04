@@ -75,7 +75,6 @@ with st.expander("Run MLScore", expanded=False):
             # Set the output file as the input for the related viewers
             if os.path.exists(st.session_state.paths["csv_mlscores"]):
                 st.success(f"Run completed! Out file: {st.session_state.paths['csv_mlscores']}", icon=":material/thumb_up:")
-                st.success()
 
 with st.expander('FIXME: TMP - Session state'):
     st.write(st.session_state)
