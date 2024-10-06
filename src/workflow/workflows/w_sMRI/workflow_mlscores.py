@@ -51,105 +51,79 @@ def run_workflow(root_dir, dict_config):
     print(dict_config)
 
     # Rename MUSE roi indices to roi codes
-    out_tmp = os.path.join(dir_output, 'working_dir', 'out_rois')
-    out_csv = os.path.join(out_tmp, f"{dset_name}_raw.csv")
-    if not os.path.exists(out_tmp):
-        os.makedirs(out_tmp)
-    utilw.rename_df_columns(input_rois, list_rois, 'Index', 'Code', out_csv)
+    out_dir = os.path.join(dir_output, 'working_dir')
+    f_raw = os.path.join(out_dir, f"{dset_name}_raw.csv")
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
+    utilw.rename_df_columns(input_rois, list_rois, 'Index', 'Code', f_raw)
 
     # Normalize ROIs. Values are scaled either by a constant factor (NormICV) or 100 (PercICV)
-    in_csv = out_csv
     icv_var = 'MUSE_702'
     exclude_vars = 'MRID'
     suffix = 'NONE'
-    out_tmp = os.path.join(dir_output, 'working_dir', 'out_rois')
-    if not os.path.exists(out_tmp):
-        os.makedirs(out_tmp)
-    out_csv = os.path.join(out_tmp, f"{dset_name}_{corr_type}.csv")
-    utilw.corr_icv(in_csv, corr_type, icv_var, exclude_vars, suffix, out_csv)
+    f_corr = os.path.join(out_dir, f"{dset_name}_{corr_type}.csv")
+    utilw.corr_icv(f_raw, corr_type, icv_var, exclude_vars, suffix, f_corr)
 
     #Merge covars to ROIs
-    covar=f"{input_demog}",
-    roi=f"{dir_output}/working_dir/out_rois/{dset_name}_raw.csv",
     key_var = 'MRID'
-    out = f"{dir_output}/working_dir/combined/{dset_name}_raw.csv"
-    python src/workflow/utils/generic/util_merge_dfs.py covar roi key_var out
+    f_comb = os.path.join(out_dir, f'{dset_name}_comb.csv')
+    utilw.merge_dataframes(input_demog, f_raw, key_var, f_comb)
 
-    ## Select variables for harmonization
-    #in_csv=f"{dir_output}/working_dir/combined/{dset_name}_raw.csv",
-    #dict_csv=f"src/workflow/{rois_single}"
-    #dict_var = 'Code',
-    #covars = 'MRID,Age,Sex,SITE,MUSE_702',
-    #out = f"{dir_output}/working_dir/sel_vars/{dset_name}_raw.csv"
-    #python src/workflow/utils/generic/util_select_vars.py {input} {params} {output}
+    # Select variables for harmonization
+    dict_csv=os.path.join('src', 'workflow', rois_single)
+    dict_var = 'Code'
+    covars = 'MRID,Age,Sex,SITE,MUSE_702'
+    f_sel = os.path.join(out_dir, f'{dset_name}_sel.csv')
+    utilw.select_vars(f_comb, dict_csv, dict_var, covars, f_sel)
 
-    ## Check that sample has age range consistent with the model
-    #f"{dir_output}/working_dir/sel_vars/{dset_name}_raw.csv",
-    #var_name='Age',
-    #min_val='50',
-    #max_val='95',
-    #"{dir_output}/working_dir/filtered_data/{dset_name}_raw.csv"
-    #python src/workflow/utils/generic/util_filter_num_var.py {input} {params} {output}
+    # Check that sample has age range consistent with the model
+    var_name='Age'
+    min_val='50'
+    max_val='95'
+    f_filt = os.path.join(out_dir, f'{dset_name}_filt.csv')
+    utilw.filter_num_var(f_sel, var_name, min_val, max_val, f_filt)
 
-    ## Apply combat
-    #data=f"{dir_output}/working_dir/filtered_data/{dset_name}_raw.csv",
-    #mdl=f"src/workflow/{model_combat}"
-    #f"{dir_output}/working_dir/out_combat/{dset_name}_COMBAT_single.csv"
-    #python combat_prep_out(in_csv, key_var, suffix, out_csv)
+    # Apply combat
+    mdl = os.path.join('src', 'workflow', model_combat)
+    f_combat1 = os.path.join(out_dir, f'{dset_name}_COMBAT_single.csv')
+    # utilw.apply_combat(f_filt, mdl, 'MRID', '_HARM', f_combat1)
 
-    ## Calculate derived ROIs from harmonized data
-    #in_csv=f"{dir_output}/working_dir/out_combat/{dset_name}_COMBAT_single.csv",
-    #dict=f"src/workflow/{derived_rois}"
-    #key_var='MRID',
-    #roi_prefix='MUSE_'
-    #f"{dir_output}/working_dir/out_combat/{dset_name}_COMBAT_all.csv"
-    #python src/workflow/utils/generic/util_combine_MUSE_rois.py {input} {params} {output}
+    # Calculate derived ROIs from harmonized data
+    in_dict = os.path.join('src', 'workflow', derived_rois)
+    key_var='MRID',
+    roi_prefix='MUSE_'
+    f_combat2 = os.path.join(out_dir, f'{dset_name}_COMBAT_all.csv')
+    # utilw.combine_rois(f_combat1, in_dict, f_combat2)
 
-    ## Merge covars to ROIs
-    #covar=f"{input_demog}",
-    #roi=f"{dir_output}/working_dir/out_combat/{dset_name}_COMBAT_single.csv"
-    #key_var = 'MRID'
-    #f"{dir_output}/working_dir/spare/{dset_name}_COMBAT_withcovar.csv"
-    #python src/workflow/utils/generic/util_merge_dfs.py {input} {params} {output}"
+    # Merge covars to ROIs
+    covar=f"{input_demog}"
+    roi=f"{dir_output}/working_dir/out_combat/{dset_name}_COMBAT_single.csv"
+    key_var = 'MRID'
+    f_combat3 = os.path.join(out_dir, f'{dset_name}_COMBAT_withcovar.csv')
+    utilw.merge_dataframes(f_combat2, input_demog, roi, key_var, f_combat3)
 
-    ## Select variables for harmonization
-    #in_csv=f"{dir_output}/working_dir/spare/{dset_name}_COMBAT_withcovar.csv"
-    #dict_csv=f"src/workflow/{rois_single}"
-    #dict_var = 'Code'
-    #covars ='MRID,Age,Sex,DLICV',
-    #f"{dir_output}/working_dir/spare/{dset_name}_COMBAT.csv"
-    #python src/workflow/utils/generic/util_select_vars.py {input} {params} {output}
-
-    ##def get_spare_model(wildcards):
-        ##model_name = dict_config["model_SPARE-" + wildcards.stype]
-        ##path_spare = "src/workflow/" + model_name
-        ##return path_spare
-
-    ## spare apply
-    #data=f"{dir_output}/working_dir/spare/{dset_name}_COMBAT.csv",
-    #mdl=get_spare_model
-    #f"{dir_output}/working_dir/out_spare/{dset_name}_COMBAT_SPARE-{{stype}}.csv"
-    #"bash src/workflow/utils/spare/util_spare_test.sh {input} {wildcards.stype} {output}"
-
-    ### get_spare_results(wildcards):
-        ##data_spare=expand(f"{dir_output}/working_dir/out_spare/{dset_name}_COMBAT_SPARE-{{stype}}.csv", stype = spare_types)
-        ##return data_spare
-
-    ## spare_combine
-    #get_spare_results
-    #csv=f"{dir_output}/working_dir/out_spare/{dset_name}_COMBAT_SPARE-Scores.csv"
-    #python src/workflow/utils/generic/util_merge_dfs_multi.py {output} MRID {input}
-
-    ## Merge demog data to DLMUSE
-    #demog=f"{input_demog}",
-    #rois=f"src/workflow/{rois_primary}",
-    #out_raw=f"{dir_output}/working_dir/out_rois/{dset_name}_raw.csv",
-    #out_corr=f"{dir_output}/working_dir/out_rois/{dset_name}_{corr_type}.csv",
-    #out_harm=f"{dir_output}/working_dir/out_combat/{dset_name}_COMBAT_all.csv",
-    #out_spare=f"{dir_output}/working_dir/out_spare/{dset_name}_COMBAT_SPARE-Scores.csv"
-    #f"{dir_output}/{dset_name}_DLMUSE+MLScores.csv"
-    #key_var = 'MRID'
-    #python src/workflow/utils/generic/util_combine_all.py {output} {input}
+    # # Select variables for harmonization
+    # dict_csv=f"src/workflow/{rois_single}"
+    # dict_var = 'Code'
+    # covars ='MRID,Age,Sex,DLICV'
+    # f_combat4 = os.path.join(out_dir, f'{dset_name}_COMBAT.csv')
+    # utilw.select_vars(f_combat3, dict_csv, dict_var, covars)
+    #
+    # # spare apply
+    # list_spare = []
+    # for SPARETYPE in spare_types:
+    #     mdl=config[f'model_SPARE-{SPARETYPE}']
+    #     f_spare = os.path.join(out_dir, f'{dset_name}_SPARE')
+    #     utilw.spare_test(f_combat4, SPARETYPE, f'{f_spare}_{SPARETYPE}.csv')
+    #     list_spare.append(f'{f_spare}_{SPARETYPE}.csv')
+    #
+    # # merge spare
+    # f_spares = os.path.join(out_dir, f'{dset_name}_SPARE-ALL.csv')
+    # utilw.merge_dataframes_multi(f_spares, MRID, list_spare)
+    #
+    # # Merge demog data to DLMUSE
+    # f_all = os.path.join(out_dir, f'{dset_name}_DLMUSE+MLScores.csv')
+    # utilw.combine_all(f_all, input_demog, rois, out_raw, out_corr, out_harm, out_spares)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

@@ -9,6 +9,8 @@ import argparse
 import json
 import sys
 
+import os
+
 import pandas as pd
 
 def rename_df_columns(in_csv, in_dict, var_from, var_to, out_csv):
@@ -94,6 +96,7 @@ def select_vars(in_csv, dict_csv, dict_var, vars_list, out_csv):
     df.columns = df.columns.astype(str)
 
     # Get variable lists (input var list + rois)
+
     vars_list = vars_list.split(",")
     dict_vars = dfd[dict_var].astype(str).tolist()
 
@@ -120,6 +123,8 @@ def filter_num_var(in_csv, var_name, min_val, max_val, out_csv):
     """
     Filters data based values in a single column
     """
+    min_val = float(min_val)
+    max_val = float(max_val)
 
     # Read input files
     df = pd.read_csv(in_csv)
@@ -131,16 +136,15 @@ def filter_num_var(in_csv, var_name, min_val, max_val, out_csv):
     # Write out file
     df_out.to_csv(out_csv, index=False)
 
-def combat_prep_out(in_csv, key_var, suffix, out_csv):
+def apply_combat(in_csv, in_mdl, key_var, suffix, out_csv):
     """
     Select combat output variables and prepare out file without combat suffix
     """
-    
-    os.system('neuroharm -a apply -i $in_csv -m $in_mdl -u ${out_csv%.csv}_tmpinit.csv')
-    
+    out_tmp = f'{out_csv[0:-4]}_tmpinit.csv'
+    os.system(f'neuroharm -a apply -i {in_csv} -m {in_mdl} -u {out_tmp}')
 
     # Read input files
-    df = pd.read_csv(in_csv, dtype={"MRID": str})
+    df = pd.read_csv(out_tmp, dtype={"MRID": str})
 
     # Convert columns of dataframe to str (to handle numeric ROI indices)
     df.columns = df.columns.astype(str)
