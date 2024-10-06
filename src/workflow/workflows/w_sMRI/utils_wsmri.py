@@ -226,8 +226,6 @@ def merge_dataframes_multi(out_csv, key_var, list_in_csv):
     Output data includes an inner merge
     """
 
-    print(list_in_csv)
-    input('aaa')
 
     df_out = pd.read_csv(list_in_csv[0], dtype={"MRID": str})
     for i, in_csv in enumerate(list_in_csv[1:]):

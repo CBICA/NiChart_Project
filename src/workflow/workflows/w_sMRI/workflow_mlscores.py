@@ -86,25 +86,25 @@ def run_workflow(root_dir, dict_config):
     # Apply combat
     mdl = os.path.join('src', 'workflow', model_combat)
     f_combat1 = os.path.join(out_dir, f'{dset_name}_COMBAT_single.csv')
-    #utilw.apply_combat(f_filt, mdl, 'MRID', '_HARM', f_combat1)
+    utilw.apply_combat(f_filt, mdl, 'MRID', '_HARM', f_combat1)
 
     # Calculate derived ROIs from harmonized data
     in_dict = os.path.join('src', 'workflow', derived_rois)
     key_var='MRID',
     roi_prefix='MUSE_'
     f_combat2 = os.path.join(out_dir, f'{dset_name}_COMBAT_all.csv')
-    #utilw.combine_rois(f_combat1, in_dict, f_combat2)
+    utilw.combine_rois(f_combat1, in_dict, f_combat2)
 
     # Merge covars to ROIs
     key_var = 'MRID'
     f_combat3 = os.path.join(out_dir, f'{dset_name}_COMBAT_withcovar.csv')
-    #utilw.merge_dataframes(input_demog, f_combat2, key_var, f_combat3)
+    utilw.merge_dataframes(input_demog, f_combat2, key_var, f_combat3)
 
     # Select variables for harmonization
     dict_var = 'Code'
     covars ='MRID,Age,Sex,DLICV'
     f_combat4 = os.path.join(out_dir, f'{dset_name}_COMBAT.csv')
-    #utilw.select_vars(f_combat3, dict_csv, dict_var, covars, f_combat4)
+    utilw.select_vars(f_combat3, dict_csv, dict_var, covars, f_combat4)
 
     # spare apply
     list_spare = []
@@ -119,7 +119,7 @@ def run_workflow(root_dir, dict_config):
     utilw.merge_dataframes_multi(f_spares, 'MRID', list_spare)
 
     # Merge all
-    f_all = os.path.join(out_dir, f'{dset_name}_DLMUSE+MLScores.csv')
+    f_all = os.path.join(dir_output, f'{dset_name}_DLMUSE+MLScores.csv')
     utilw.combine_all(f_all, [input_demog, rois_primary, f_raw, f_corr, f_combat2, f_spares])
 
 if __name__ == "__main__":
