@@ -205,29 +205,29 @@ def combine_rois(in_csv, dict_csv, out_csv, key_var="MRID", roi_prefix="MUSE_"):
     ## Save df_out
     df_out.to_csv(out_csv, index=False)
     
-#def apply_spare():
-    ##! /bin/bash
+def apply_spare(in_csv, in_mdl, stype, out_csv):
 
-    ### Read input
-    #in_csv=$1
-    #in_mdl=$2
-    #stype=$3
-    #out_csv=$4
+    ## Apply spare test
+    out_tmp = f'{out_csv[0:-4]}_tmpinit.csv'
+    os.system(f'spare_score -a test -i {in_csv} -m {in_mdl} -o {out_tmp}')
 
-    ### Apply spare test
-    #cmd="spare_score -a test -i $in_csv -m $in_mdl -o ${out_csv%.csv}_tmpout.csv"
-    #echo "About to run: $cmd"
-    #$cmd
+    ## Change column name, select first two columns
+    df = pd.read_csv(out_tmp)
+    df = df[df.columns[0:2]]
+    df.columns = ['MRID', f'SPARE{stype}']
+    df.to_csv(out_csv, index = False)
 
-    ### Change column name, select first two columns
-    #sed "s/SPARE_score/SPARE${stype}/g" ${out_csv%.csv}_tmpout.csv | cut -d, -f1,2 > $out_csv
-    #rm -rf ${out_csv%.csv}_tmpout.csv    
+    # sed "s/SPARE_score/SPARE${stype}/g" ${out_csv%.csv}_tmpout.csv | cut -d, -f1,2 > $out_csv
+    # rm -rf ${out_csv%.csv}_tmpout.csv
         
 def merge_dataframes_multi(out_csv, key_var, list_in_csv):
     """
     Merge multiple input data files
     Output data includes an inner merge
     """
+
+    print(list_in_csv)
+    input('aaa')
 
     df_out = pd.read_csv(list_in_csv[0], dtype={"MRID": str})
     for i, in_csv in enumerate(list_in_csv[1:]):

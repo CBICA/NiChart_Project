@@ -23,7 +23,7 @@ dict_config = {
     "model_SPARE-Hypertension": "models/vISTAG1/SPARE/combined_DLMUSE_raw_COMBAT_SPARE-Hypertension_Model.pkl.gz",
     "model_SPARE-Obesity": "models/vISTAG1/SPARE/combined_DLMUSE_raw_COMBAT_SPARE-Obesity_Model.pkl.gz",
     "model_SPARE-Smoking": "models/vISTAG1/SPARE/combined_DLMUSE_raw_COMBAT_SPARE-Smoking_Model.pkl.gz",
-    "SPARE_types": ["AD", "Age", "Diabetes", "Hyperlipidemia", "Hypertension", "Obesity", "Smoking"],
+    "SPARE_types": ["AD", "Age"],
     "seg_types": ["DLMUSE"]
 }
 
@@ -86,44 +86,41 @@ def run_workflow(root_dir, dict_config):
     # Apply combat
     mdl = os.path.join('src', 'workflow', model_combat)
     f_combat1 = os.path.join(out_dir, f'{dset_name}_COMBAT_single.csv')
-    # utilw.apply_combat(f_filt, mdl, 'MRID', '_HARM', f_combat1)
+    #utilw.apply_combat(f_filt, mdl, 'MRID', '_HARM', f_combat1)
 
     # Calculate derived ROIs from harmonized data
     in_dict = os.path.join('src', 'workflow', derived_rois)
     key_var='MRID',
     roi_prefix='MUSE_'
     f_combat2 = os.path.join(out_dir, f'{dset_name}_COMBAT_all.csv')
-    # utilw.combine_rois(f_combat1, in_dict, f_combat2)
+    #utilw.combine_rois(f_combat1, in_dict, f_combat2)
 
     # Merge covars to ROIs
-    covar=f"{input_demog}"
-    roi=f"{dir_output}/working_dir/out_combat/{dset_name}_COMBAT_single.csv"
     key_var = 'MRID'
     f_combat3 = os.path.join(out_dir, f'{dset_name}_COMBAT_withcovar.csv')
-    utilw.merge_dataframes(f_combat2, input_demog, roi, key_var, f_combat3)
+    #utilw.merge_dataframes(input_demog, f_combat2, key_var, f_combat3)
 
-    # # Select variables for harmonization
-    # dict_csv=f"src/workflow/{rois_single}"
-    # dict_var = 'Code'
-    # covars ='MRID,Age,Sex,DLICV'
-    # f_combat4 = os.path.join(out_dir, f'{dset_name}_COMBAT.csv')
-    # utilw.select_vars(f_combat3, dict_csv, dict_var, covars)
-    #
-    # # spare apply
-    # list_spare = []
-    # for SPARETYPE in spare_types:
-    #     mdl=config[f'model_SPARE-{SPARETYPE}']
-    #     f_spare = os.path.join(out_dir, f'{dset_name}_SPARE')
-    #     utilw.spare_test(f_combat4, SPARETYPE, f'{f_spare}_{SPARETYPE}.csv')
-    #     list_spare.append(f'{f_spare}_{SPARETYPE}.csv')
-    #
-    # # merge spare
-    # f_spares = os.path.join(out_dir, f'{dset_name}_SPARE-ALL.csv')
-    # utilw.merge_dataframes_multi(f_spares, MRID, list_spare)
-    #
-    # # Merge demog data to DLMUSE
-    # f_all = os.path.join(out_dir, f'{dset_name}_DLMUSE+MLScores.csv')
-    # utilw.combine_all(f_all, input_demog, rois, out_raw, out_corr, out_harm, out_spares)
+    # Select variables for harmonization
+    dict_var = 'Code'
+    covars ='MRID,Age,Sex,DLICV'
+    f_combat4 = os.path.join(out_dir, f'{dset_name}_COMBAT.csv')
+    #utilw.select_vars(f_combat3, dict_csv, dict_var, covars, f_combat4)
+
+    # spare apply
+    list_spare = []
+    for SPARETYPE in spare_types:
+        mdl = os.path.join(bdir, dict_config[f'model_SPARE-{SPARETYPE}'])
+        f_spare = os.path.join(out_dir, f'{dset_name}_SPARE_{SPARETYPE}.csv')
+        utilw.apply_spare(f_combat4, mdl, SPARETYPE, f_spare)
+        list_spare.append(f_spare)
+
+    # merge spare
+    f_spares = os.path.join(out_dir, f'{dset_name}_SPARE-ALL.csv')
+    utilw.merge_dataframes_multi(f_spares, 'MRID', list_spare)
+
+    # Merge all
+    f_all = os.path.join(out_dir, f'{dset_name}_DLMUSE+MLScores.csv')
+    utilw.combine_all(f_all, [input_demog, rois_primary, f_raw, f_corr, f_combat2, f_spares])
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
