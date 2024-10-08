@@ -49,12 +49,18 @@ with st.expander("Detect dicom series", expanded=False):
         with st.spinner("Wait for it..."):
             df_dicoms = utildcm.detect_series(path_dicom)
             list_series = df_dicoms.SeriesDesc.unique()
-            num_scans = df_dicoms[['PatientID', 'StudyDate', 'SeriesDesc']].drop_duplicates().shape[0]
+            num_scans = (
+                df_dicoms[["PatientID", "StudyDate", "SeriesDesc"]]
+                .drop_duplicates()
+                .shape[0]
+            )
             if len(list_series) == 0:
                 st.warning("Could not detect any dicom series!")
             else:
-                st.success(f"Detected {num_scans} scans in {len(list_series)} series!",
-                           icon=":material/thumb_up:")
+                st.success(
+                    f"Detected {num_scans} scans in {len(list_series)} series!",
+                    icon=":material/thumb_up:",
+                )
             st.session_state.list_series = list_series
             st.session_state.df_dicoms = df_dicoms
 
@@ -103,14 +109,19 @@ with st.expander("Select dicom series", expanded=False):
             if len(st.session_state.list_input_nifti) == 0:
                 st.warning("Could not extract any nifti images")
             else:
-                st.success(f'Extracted {len(st.session_state.list_input_nifti)} nifti images',
-                           icon=":material/thumb_up:")
+                st.success(
+                    f"Extracted {len(st.session_state.list_input_nifti)} nifti images",
+                    icon=":material/thumb_up:",
+                )
 
 # Panel for viewing extracted nifti images
 with st.expander("View images", expanded=False):
     # Selection of MRID
     sel_img = st.selectbox(
-        "Select Image", st.session_state.list_input_nifti, key="selbox_images", index=None
+        "Select Image",
+        st.session_state.list_input_nifti,
+        key="selbox_images",
+        index=None,
     )
 
     if sel_img is not None:
@@ -142,7 +153,7 @@ with st.expander("View images", expanded=False):
                         img, ind_view, img_bounds[ind_view, :], tmp_orient
                     )
 
-with st.expander('TMP: session vars'):
+with st.expander("TMP: session vars"):
     st.write(st.session_state)
-with st.expander('TMP: session vars - paths'):
+with st.expander("TMP: session vars - paths"):
     st.write(st.session_state.paths)
