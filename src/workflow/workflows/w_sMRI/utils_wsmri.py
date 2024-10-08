@@ -1,17 +1,13 @@
 import csv as csv
-import sys
-
-import nibabel as nib
-import numpy as np
-import pandas as pd
-
-import argparse
-import json
-import sys
+import os
+from typing import Any
 
 import pandas as pd
 
-def rename_df_columns(in_csv, in_dict, var_from, var_to, out_csv):
+
+def rename_df_columns(
+    in_csv: str, in_dict: str, var_from: str, var_to: str, out_csv: str
+) -> None:
     """
     Rename columns of input csv using the dictionary
     """
@@ -33,7 +29,15 @@ def rename_df_columns(in_csv, in_dict, var_from, var_to, out_csv):
     # Write out file
     df_out.to_csv(out_csv, index=False)
 
-def corr_icv(in_csv, corr_type, icv_var, exclude_vars, suffix, out_csv):
+
+def corr_icv(
+    in_csv: str,
+    corr_type: str,
+    icv_var: str,
+    exclude_vars: str,
+    suffix: str,
+    out_csv: str,
+) -> None:
     """
     Calculates ICV corrected values
     """
@@ -43,16 +47,19 @@ def corr_icv(in_csv, corr_type, icv_var, exclude_vars, suffix, out_csv):
 
     # Get var groups
     list_exclude = exclude_vars.split(",") + [icv_var]
-    list_target = df.columns[df.columns.isin(list_exclude) == False]
+    list_target = df.columns[
+        df.columns.isin(list_exclude) if not df.columns.isin(list_exclude) else None
+    ]
     df_p1 = df[list_exclude]
     df_p2 = df[list_target]
     val_icv = df[icv_var]
 
+    corr_val: int = 0
     # Set correction factor
     if corr_type == "percICV":
         corr_val = 100
     if corr_type == "normICV":
-        corr_val = 1430000  ## Average ICV
+        corr_val = 1430000  # Average ICV
 
     # Add suffix to corrected variables
     if suffix != "NONE":
@@ -67,7 +74,8 @@ def corr_icv(in_csv, corr_type, icv_var, exclude_vars, suffix, out_csv):
     # Write out file
     df_out.to_csv(out_csv, index=False)
 
-def merge_dataframes(in_csv1, in_csv2, key_var, out_csv):
+
+def merge_dataframes(in_csv1: str, in_csv2: str, key_var: str, out_csv: str) -> None:
     """
     Merge two input data files
     Using an inner merge
@@ -81,7 +89,10 @@ def merge_dataframes(in_csv1, in_csv2, key_var, out_csv):
     # Write out file
     df_out.to_csv(out_csv, index=False)
 
-def select_vars(in_csv, dict_csv, dict_var, vars_list, out_csv):
+
+def select_vars(
+    in_csv: str, dict_csv: str, dict_var: str, vars_list: Any, out_csv: str
+) -> None:
     """
     Select variables from data file
     """
@@ -94,6 +105,7 @@ def select_vars(in_csv, dict_csv, dict_var, vars_list, out_csv):
     df.columns = df.columns.astype(str)
 
     # Get variable lists (input var list + rois)
+
     vars_list = vars_list.split(",")
     dict_vars = dfd[dict_var].astype(str).tolist()
 
@@ -116,7 +128,10 @@ def select_vars(in_csv, dict_csv, dict_var, vars_list, out_csv):
     # Write out file
     df_out.to_csv(out_csv, index=False)
 
-def filter_num_var(in_csv, var_name, min_val, max_val, out_csv):
+
+def filter_num_var(
+    in_csv: str, var_name: str, min_val: float, max_val: float, out_csv: str
+) -> None:
     """
     Filters data based values in a single column
     """
@@ -131,16 +146,18 @@ def filter_num_var(in_csv, var_name, min_val, max_val, out_csv):
     # Write out file
     df_out.to_csv(out_csv, index=False)
 
-def combat_prep_out(in_csv, key_var, suffix, out_csv):
+
+def apply_combat(
+    in_csv: str, in_mdl: str, key_var: str, suffix: str, out_csv: str
+) -> None:
     """
     Select combat output variables and prepare out file without combat suffix
     """
-    
-    os.system('neuroharm -a apply -i $in_csv -m $in_mdl -u ${out_csv%.csv}_tmpinit.csv')
-    
+    out_tmp = f"{out_csv[0:-4]}_tmpinit.csv"
+    os.system(f"neuroharm -a apply -i {in_csv} -m {in_mdl} -u {out_tmp}")
 
     # Read input files
-    df = pd.read_csv(in_csv, dtype={"MRID": str})
+    df = pd.read_csv(out_tmp, dtype={"MRID": str})
 
     # Convert columns of dataframe to str (to handle numeric ROI indices)
     df.columns = df.columns.astype(str)
@@ -156,8 +173,15 @@ def combat_prep_out(in_csv, key_var, suffix, out_csv):
 
     # Write out file
     df_out.to_csv(out_csv, index=False)
-    
-def combine_rois(in_csv, dict_csv, out_csv, key_var="MRID", roi_prefix="MUSE_"):
+
+
+def combine_rois(
+    in_csv: str,
+    dict_csv: str,
+    out_csv: str,
+    key_var: str = "MRID",
+    roi_prefix: str = "MUSE_",
+) -> None:
     """
     Calculates a dataframe with the volumes of derived + single rois.
     - Derived ROIs are calculated by adding composing single ROIs, read from the dictionary
@@ -167,7 +191,7 @@ def combine_rois(in_csv, dict_csv, out_csv, key_var="MRID", roi_prefix="MUSE_"):
     # Read input files
     df_in = pd.read_csv(in_csv, dtype={"MRID": str})
 
-    ## Read derived roi map file to a dictionary
+    # Read derived roi map file to a dictionary
     dict_roi = {}
     with open(dict_csv) as roi_map:
         reader = csv.reader(roi_map, delimiter=",")
@@ -176,7 +200,7 @@ def combine_rois(in_csv, dict_csv, out_csv, key_var="MRID", roi_prefix="MUSE_"):
             val = [roi_prefix + str(x) for x in row[2:]]
             dict_roi[key] = val
 
-    ## Create derived roi df
+    # Create derived roi df
     label_names = list(dict_roi.keys())
     df_out = df_in[[key_var]].copy()
     df_out = df_out.reindex(columns=[key_var] + label_names)
@@ -198,28 +222,27 @@ def combine_rois(in_csv, dict_csv, out_csv, key_var="MRID", roi_prefix="MUSE_"):
             df_out = df_out.drop(columns=key)
             print("WARNING:  Skip derived ROI with missing components: " + key)
 
-    ## Save df_out
+    # Save df_out
     df_out.to_csv(out_csv, index=False)
-    
-#def apply_spare():
-    ##! /bin/bash
 
-    ### Read input
-    #in_csv=$1
-    #in_mdl=$2
-    #stype=$3
-    #out_csv=$4
 
-    ### Apply spare test
-    #cmd="spare_score -a test -i $in_csv -m $in_mdl -o ${out_csv%.csv}_tmpout.csv"
-    #echo "About to run: $cmd"
-    #$cmd
+def apply_spare(in_csv: str, in_mdl: str, stype: str, out_csv: str) -> None:
 
-    ### Change column name, select first two columns
-    #sed "s/SPARE_score/SPARE${stype}/g" ${out_csv%.csv}_tmpout.csv | cut -d, -f1,2 > $out_csv
-    #rm -rf ${out_csv%.csv}_tmpout.csv    
-        
-def merge_dataframes_multi(out_csv, key_var, list_in_csv):
+    # Apply spare test
+    out_tmp = f"{out_csv[0:-4]}_tmpinit.csv"
+    os.system(f"spare_score -a test -i {in_csv} -m {in_mdl} -o {out_tmp}")
+
+    # Change column name, select first two columns
+    df = pd.read_csv(out_tmp)
+    df = df[df.columns[0:2]]
+    df.columns = ["MRID", f"SPARE{stype}"]
+    df.to_csv(out_csv, index=False)
+
+    # sed "s/SPARE_score/SPARE${stype}/g" ${out_csv%.csv}_tmpout.csv | cut -d, -f1,2 > $out_csv
+    # rm -rf ${out_csv%.csv}_tmpout.csv
+
+
+def merge_dataframes_multi(out_csv: str, key_var: str, list_in_csv: Any) -> None:
     """
     Merge multiple input data files
     Output data includes an inner merge
@@ -229,25 +252,32 @@ def merge_dataframes_multi(out_csv, key_var, list_in_csv):
     for i, in_csv in enumerate(list_in_csv[1:]):
         # Read csv files
         df_tmp = pd.read_csv(in_csv)
-        df_tmp = df_tmp[df_tmp[key_var].isna() == False]
+        df_tmp = df_tmp[
+            df_tmp[key_var].isna() if df_tmp[key_var].isna() is False else None
+        ]
 
         # Merge DataFrames
         df_out = df_out.merge(df_tmp, on=key_var, suffixes=["", "_tmpremovedupl"])
 
         # Remove duplicate columns
         df_out = df_out[
-            df_out.columns[df_out.columns.str.contains("_tmpremovedupl") == False]
+            df_out.columns[
+                (
+                    df_out.columns.str.contains("_tmpremovedupl")
+                    if df_out.columns.str.contains("_tmpremovedupl") is False
+                    else None
+                )
+            ]
         ]
 
     # Write out file
     df_out.to_csv(out_csv, index=False)
-    
-def combine_all(out_csv, list_in_csv):
+
+
+def combine_all(out_csv: str, list_in_csv: Any) -> None:
     """
     Combines final output files
     """
-
-    key_var = "MRID"
 
     df_demog = pd.read_csv(list_in_csv[0])
 
@@ -283,7 +313,3 @@ def combine_all(out_csv, list_in_csv):
 
     # Write out file
     df_out.to_csv(out_csv, index=False)
-    
-
-    
-

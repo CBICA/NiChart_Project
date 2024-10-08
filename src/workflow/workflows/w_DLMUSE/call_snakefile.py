@@ -1,5 +1,4 @@
 import argparse
-import json
 import os
 
 if __name__ == "__main__":
@@ -32,7 +31,7 @@ if __name__ == "__main__":
     os.chdir(options.run_dir)
 
     # Run workflow
-    print(f"Running: snakemake")
+    print("Running: snakemake")
 
     # cmd = "snakemake -np"
     # cmd = cmd + " --config dset_name=" + options.dset_name

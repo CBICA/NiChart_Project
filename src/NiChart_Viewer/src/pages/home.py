@@ -16,8 +16,19 @@ if "instantiated" not in st.session_state:
     # Study name
     st.session_state.dset_name = ""
 
-    st.session_state.list_out_dirs = ['Lists', 'Nifti', 'Dicoms', 'T1', 'T2', 'FL', 'DTI', 'fMRI', 'DLMUSE', 'MLScores', 'Plots']
-
+    st.session_state.list_out_dirs = [
+        "Lists",
+        "Nifti",
+        "Dicoms",
+        "T1",
+        "T2",
+        "FL",
+        "DTI",
+        "fMRI",
+        "DLMUSE",
+        "MLScores",
+        "Plots",
+    ]
 
     # Paths to input/output files/folders
     st.session_state.paths = {
@@ -165,5 +176,5 @@ st.markdown(
 
 with st.expander("FIXME: TMP - Session state"):
     st.write(st.session_state)
-with st.expander('TMP: session vars - paths'):
+with st.expander("TMP: session vars - paths"):
     st.write(st.session_state.paths)

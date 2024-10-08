@@ -209,7 +209,8 @@ def show_img3D(
     else:
         st.image(img[:, :, slice_index], use_column_width=True)
 
-def util_panel_workingdir():
+
+def util_panel_workingdir() -> None:
     # Panel for selecting the working dir
     with st.expander(":outbox_tray: Working Dir", expanded=False):
 
@@ -232,25 +233,38 @@ def util_panel_workingdir():
         st.session_state.dset_name = user_input_text(
             "Dataset name", st.session_state.dset_name, helpmsg
         )
-                
-        if st.session_state.dset_name != '':
-            st.session_state.paths["dset"] = os.path.join(path_out, st.session_state.dset_name)
+
+        if st.session_state.dset_name != "":
+            st.session_state.paths["dset"] = os.path.join(
+                path_out, st.session_state.dset_name
+            )
             if not os.path.exists(st.session_state.paths["dset"]):
                 os.makedirs(st.session_state.paths["dset"])
-            st.success(f'All results will be saved to: {st.session_state.paths['dset']}', icon=":material/thumb_up:")
+            # [ACTION]: This messes up the pre-commit, if it's needed we can overlook pre-commit
+            # st.success(f'All results will be saved to: {st.session_state.paths['dset']}', icon=":material/thumb_up:")
 
         # Update default paths if working dir changed
         if st.session_state.paths["dset"] != curr_dir:
             for d_tmp in st.session_state.list_out_dirs:
-                st.session_state.paths[d_tmp] = os.path.join(st.session_state.paths["dset"], d_tmp)
-                print(f'setting {st.session_state.paths[d_tmp]}')
+                st.session_state.paths[d_tmp] = os.path.join(
+                    st.session_state.paths["dset"], d_tmp
+                )
+                print(f"setting {st.session_state.paths[d_tmp]}")
 
-            st.session_state.paths['T1'] = os.path.join(st.session_state.paths["dset"], 'Nifti', 'T1')
+            st.session_state.paths["T1"] = os.path.join(
+                st.session_state.paths["dset"], "Nifti", "T1"
+            )
 
-            st.session_state.paths['csv_dlmuse'] = os.path.join(st.session_state.paths["dset"], 'DLMUSE', 'DLMUSE_Volumes.csv')
+            st.session_state.paths["csv_dlmuse"] = os.path.join(
+                st.session_state.paths["dset"], "DLMUSE", "DLMUSE_Volumes.csv"
+            )
 
-            st.session_state.paths['csv_mlscores'] = os.path.join(st.session_state.paths["dset"], 'MLScores', f'{st.session_state.dset_name}_DLMUSE+MLScores.csv')
-            
-            st.session_state.paths['csv_demog'] = os.path.join(st.session_state.paths["dset"], 'Lists', 'Demog.csv')
-            
+            st.session_state.paths["csv_mlscores"] = os.path.join(
+                st.session_state.paths["dset"],
+                "MLScores",
+                f"{st.session_state.dset_name}_DLMUSE+MLScores.csv",
+            )
 
+            st.session_state.paths["csv_demog"] = os.path.join(
+                st.session_state.paths["dset"], "Lists", "Demog.csv"
+            )

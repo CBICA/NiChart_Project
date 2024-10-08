@@ -133,18 +133,22 @@ def detect_series(in_dir: str) -> Any:
                     force=dicom2nifti.settings.pydicom_read_force,
                 )
                 if _is_valid_imaging_dicom(dicom_headers):
-                    dfields = [file_path,
-                               dicom_headers.PatientID,
-                               dicom_headers.StudyDate,
-                               dicom_headers.SeriesDescription]
+                    dfields = [
+                        file_path,
+                        dicom_headers.PatientID,
+                        dicom_headers.StudyDate,
+                        dicom_headers.SeriesDescription,
+                    ]
             list_dfields.append(dfields)
 
         # Explicitly capturing all errors here to be able to continue processing all the rest
         except:
             print(f"Unable to read: {file_path}")
-            
+
     # Create dataframe with file name and dicom series description
-    df_dicoms = pd.DataFrame(data=list_dfields, columns=['fname', 'PatientID', 'StudyDate', 'SeriesDesc'])
+    df_dicoms = pd.DataFrame(
+        data=list_dfields, columns=["fname", "PatientID", "StudyDate", "SeriesDesc"]
+    )
 
     return df_dicoms
 
