@@ -24,12 +24,12 @@ with st.expander("Run DLMUSE", expanded=False):
 
     # Input T1 image folder
     helpmsg = "DLMUSE will be applied to .nii/.nii.gz images directly in the input folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
-    st.session_state.paths['T1'] = utilst.user_input_folder(
+    st.session_state.paths["T1"] = utilst.user_input_folder(
         "Select folder",
         "btn_indir_t1",
         "Input folder",
         st.session_state.paths["last_sel"],
-        st.session_state.paths['T1'],
+        st.session_state.paths["T1"],
         helpmsg,
     )
 
@@ -40,18 +40,16 @@ with st.expander("Run DLMUSE", expanded=False):
     )
 
     # Button to run DLMUSE
-    flag_btn = os.path.exists(st.session_state.paths['T1'])
+    flag_btn = os.path.exists(st.session_state.paths["T1"])
     btn_dlmuse = st.button("Run DLMUSE", disabled=not flag_btn)
 
     if btn_dlmuse:
-        run_dir = os.path.join(
-            st.session_state.paths["root"], "src", "NiChart_DLMUSE"
-        )
+        run_dir = os.path.join(st.session_state.paths["root"], "src", "NiChart_DLMUSE")
         if not os.path.exists(st.session_state.paths["DLMUSE"]):
             os.makedirs(st.session_state.paths["DLMUSE"])
 
         with st.spinner("Wait for it..."):
-            dlmuse_cmd = f"NiChart_DLMUSE -i {st.session_state.paths['T1']} -o {st.session_state.paths["DLMUSE"]} -d {device}"
+            dlmuse_cmd = f"NiChart_DLMUSE -i {st.session_state.paths['T1']} -o {st.session_state.paths['DLMUSE']} -d {device}"
             st.info(f"Running: {dlmuse_cmd}", icon=":material/manufacturing:")
 
             # FIXME : bypass dlmuse run
@@ -68,14 +66,16 @@ with st.expander("Run DLMUSE", expanded=False):
 with st.expander("View segmentations", expanded=False):
 
     # Set the dlmuse csv output
-    st.session_state.paths["csv_dlmuse"] = f"{st.session_state.paths["DLMUSE"]}/DLMUSE_Volumes.csv"
+    st.session_state.paths["csv_dlmuse"] = (
+        f"{st.session_state.paths['DLMUSE']}/DLMUSE_Volumes.csv"
+    )
 
     # Selection of MRID
     try:
         df = pd.read_csv(st.session_state.paths["csv_dlmuse"])
         list_mrid = df.MRID.tolist()
     except:
-        list_mrid = ['']
+        list_mrid = [""]
     sel_mrid = st.selectbox("MRID", list_mrid, key="selbox_mrid", index=None)
 
     # Select ROI
@@ -86,9 +86,7 @@ with st.expander("View segmentations", expanded=False):
     sel_var_ind = dict_roi[sel_var]
 
     # Create a list of checkbox options
-    list_orient = st.multiselect(
-        "Select viewing planes:", utilni.VIEWS, utilni.VIEWS
-    )
+    list_orient = st.multiselect("Select viewing planes:", utilni.VIEWS, utilni.VIEWS)
 
     # View hide overlay
     is_show_overlay = st.checkbox("Show overlay", True)
@@ -97,13 +95,15 @@ with st.expander("View segmentations", expanded=False):
     flag_img = False
     if sel_mrid is not None:
         st.session_state.paths["sel_img"] = os.path.join(
-            st.session_state.paths['T1'], sel_mrid + st.session_state.suff_t1img
+            st.session_state.paths["T1"], sel_mrid + st.session_state.suff_t1img
         )
         st.session_state.paths["sel_dlmuse"] = os.path.join(
             st.session_state.paths["DLMUSE"], sel_mrid + st.session_state.suff_dlmuse
         )
 
-        flag_img = os.path.exists(st.session_state.paths["sel_img"]) and os.path.exists(st.session_state.paths["sel_dlmuse"])
+        flag_img = os.path.exists(st.session_state.paths["sel_img"]) and os.path.exists(
+            st.session_state.paths["sel_dlmuse"]
+        )
 
     if flag_img:
 
@@ -134,7 +134,7 @@ with st.expander("View segmentations", expanded=False):
                             img_masked, ind_view, mask_bounds[ind_view, :], tmp_orient
                         )
 
-with st.expander('TMP: session vars'):
+with st.expander("TMP: session vars"):
     st.write(st.session_state)
-with st.expander('TMP: session vars - paths'):
+with st.expander("TMP: session vars - paths"):
     st.write(st.session_state.paths)

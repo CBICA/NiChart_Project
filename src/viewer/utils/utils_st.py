@@ -210,33 +210,41 @@ def show_img3D(
         st.image(img[:, :, slice_index], use_column_width=True)
 
 
-def update_default_paths():
-    '''
+def update_default_paths() -> None:
+    """
     Update default paths if the working dir changed
-    '''
+    """
     for d_tmp in st.session_state.dict_paths.keys():
         st.session_state.paths[d_tmp] = os.path.join(
-            st.session_state.paths["dset"], 
+            st.session_state.paths["dset"],
             st.session_state.dict_paths[d_tmp][0],
-            st.session_state.dict_paths[d_tmp][1]
+            st.session_state.dict_paths[d_tmp][1],
         )
-        print(f'setting {st.session_state.paths[d_tmp]}')
+        print(f"setting {st.session_state.paths[d_tmp]}")
 
-    st.session_state.paths['csv_dlmuse'] = os.path.join(st.session_state.paths["dset"], 'DLMUSE', 'DLMUSE_Volumes.csv')
+    st.session_state.paths["csv_dlmuse"] = os.path.join(
+        st.session_state.paths["dset"], "DLMUSE", "DLMUSE_Volumes.csv"
+    )
 
-    st.session_state.paths['csv_mlscores'] = os.path.join(st.session_state.paths["dset"], 'MLScores', f'{st.session_state.dset_name}_DLMUSE+MLScores.csv')
-    
-    st.session_state.paths['csv_demog'] = os.path.join(st.session_state.paths["dset"], 'Lists', 'Demog.csv')
+    st.session_state.paths["csv_mlscores"] = os.path.join(
+        st.session_state.paths["dset"],
+        "MLScores",
+        f"{st.session_state.dset_name}_DLMUSE+MLScores.csv",
+    )
+
+    st.session_state.paths["csv_demog"] = os.path.join(
+        st.session_state.paths["dset"], "Lists", "Demog.csv"
+    )
 
 
-def util_panel_workingdir(app_type):
-    
+def util_panel_workingdir(app_type: str) -> None:
+
     # Panel for selecting the working dir
     with st.expander(":outbox_tray: Working Dir", expanded=False):
 
         curr_dir = st.session_state.paths["dset"]
-        
-        if app_type == 'DESKTOP':
+
+        if app_type == "DESKTOP":
             # Read output folder from the user
             helpmsg = "Results will be saved to the output folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
             st.session_state.paths["out"] = user_input_folder(
@@ -253,67 +261,23 @@ def util_panel_workingdir(app_type):
         st.session_state.dset_name = user_input_text(
             "Dataset name", st.session_state.dset_name, helpmsg
         )
-        
-        print(st.session_state.dset_name)
-        print(st.session_state.paths["dset"])
-        print('aaa')
-                
-        if st.session_state.dset_name != '':
-            st.session_state.paths["dset"] = os.path.join(st.session_state.paths["out"],
-                                                          st.session_state.dset_name)
-        
-        # Dataset output folder name changed
-        if curr_dir != st.session_state.paths["dset"]:
-            
-            # Create output folder
-            if not os.path.exists(st.session_state.paths["dset"]):
-                os.makedirs(st.session_state.paths["dset"])
-                
-            # Update paths for output subfolders
-            update_default_paths()
-            
-            st.success(f'All results will be saved to: {st.session_state.paths['dset']}', icon=":material/thumb_up:")
 
-
-def util_panel_workingdir(app_type):
-    
-    # Panel for selecting the working dir
-    with st.expander(":outbox_tray: Working Dir", expanded=False):
-
-        curr_dir = st.session_state.paths["dset"]
-        
-        if app_type == 'DESKTOP':
-            # Read output folder from the user
-            helpmsg = "Results will be saved to the output folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
-            st.session_state.paths["out"] = user_input_folder(
-                "Select folder",
-                "btn_sel_out_dir",
-                "Output folder",
-                st.session_state.paths["last_sel"],
-                st.session_state.paths["out"],
-                helpmsg,
+        if st.session_state.dset_name != "":
+            st.session_state.paths["dset"] = os.path.join(
+                st.session_state.paths["out"], st.session_state.dset_name
             )
 
-        # Read dataset name (used to create a folder where all results will be saved)
-        helpmsg = "Each dataset's results are organized in a dedicated folder named after the dataset"
-        st.session_state.dset_name = user_input_text(
-            "Dataset name", st.session_state.dset_name, helpmsg
-        )
-                
-        if st.session_state.dset_name != '':
-            st.session_state.paths["dset"] = os.path.join(st.session_state.paths["out"],
-                                                          st.session_state.dset_name)
-        
         # Dataset output folder name changed
         if curr_dir != st.session_state.paths["dset"]:
-            
+
             # Create output folder
             if not os.path.exists(st.session_state.paths["dset"]):
                 os.makedirs(st.session_state.paths["dset"])
-                
+
             # Update paths for output subfolders
             update_default_paths()
-            
-            st.success(f'All results will be saved to: {st.session_state.paths['dset']}', icon=":material/thumb_up:")
-            
 
+            st.success(
+                f"All results will be saved to: {st.session_state.paths['dset']}",
+                icon=":material/thumb_up:",
+            )

@@ -7,8 +7,8 @@ import streamlit as st
 if "instantiated" not in st.session_state:
 
     # App type ('DESKTOP' or 'CLOUD')
-    st.session_state.app_type = 'CLOUD'
-    
+    st.session_state.app_type = "CLOUD"
+
     # Dataframe to keep plot ids
     st.session_state.plots = pd.DataFrame(
         columns=["pid", "xvar", "yvar", "hvar", "trend", "centtype"]
@@ -19,21 +19,21 @@ if "instantiated" not in st.session_state:
     # Study name
     st.session_state.dset_name = ""
 
-    # Predefined paths for different tasks in the final results 
+    # Predefined paths for different tasks in the final results
     # The path structure allows nested folders with two levels
     # This should be good enough to keep results organized
     st.session_state.dict_paths = {
-        'Lists' : ['', 'Lists'],
-        'Dicoms' : ['', 'Dicoms'],
-        'T1' : ['Nifti', 'T1'],
-        'T2' : ['Nifti', 'T2'],
-        'FL' : ['Nifti', 'FL'],
-        'DTI' : ['Nifti', 'DTI'],
-        'fMRI' : ['Nifti', 'fMRI'],
-        'DLMUSE' : ['', 'DLMUSE'],
-        'MLScores' : ['', 'MLScores'],
-        'Plots' : ['', 'Plots'],
-        'OutZipped' : ['', 'Plots']
+        "Lists": ["", "Lists"],
+        "Dicoms": ["", "Dicoms"],
+        "T1": ["Nifti", "T1"],
+        "T2": ["Nifti", "T2"],
+        "FL": ["Nifti", "FL"],
+        "DTI": ["Nifti", "DTI"],
+        "fMRI": ["Nifti", "fMRI"],
+        "DLMUSE": ["", "DLMUSE"],
+        "MLScores": ["", "MLScores"],
+        "Plots": ["", "Plots"],
+        "OutZipped": ["", "Plots"],
     }
 
     # Paths to input/output files/folders
@@ -53,7 +53,7 @@ if "instantiated" not in st.session_state:
         "fMRI": "",
         "DLMUSE": "",
         "MLScores": "",
-        "OutZipped": "", 
+        "OutZipped": "",
         "Plots": "",
         "sel_img": "",
         "sel_mask": "",
@@ -63,7 +63,7 @@ if "instantiated" not in st.session_state:
         "csv_mlscores": "",
         "csv_viewdlmuse": "",
     }
-    
+
     st.session_state.paths["root"] = os.path.dirname(
         os.path.dirname(os.path.dirname(os.getcwd()))
     )
@@ -71,13 +71,14 @@ if "instantiated" not in st.session_state:
         st.session_state.paths["root"], "test"
     )
     st.session_state.paths["last_sel"] = st.session_state.paths["init"]
-    
+
     # FIXME: This sets the default out path on the cloud
     #        It's a folder inside the root folder for now
     #        Probably will require something more advanced
-    if st.session_state.app_type == 'CLOUD':
-        st.session_state.paths["out"] = os.path.join(st.session_state.paths["root"], "output_folder")
-    
+    if st.session_state.app_type == "CLOUD":
+        st.session_state.paths["out"] = os.path.join(
+            st.session_state.paths["root"], "output_folder"
+        )
 
     #########################################
     # FIXME : for quick test
@@ -191,5 +192,5 @@ st.markdown(
 
 with st.expander("FIXME: TMP - Session state"):
     st.write(st.session_state)
-with st.expander('TMP: session vars - paths'):
+with st.expander("TMP: session vars - paths"):
     st.write(st.session_state.paths)

@@ -50,9 +50,9 @@ with st.expander("Run MLScore", expanded=False):
         st.session_state.paths["last_sel"] = csv_path
 
     # Button to run MLScore
-    flag_btn = os.path.exists(
-        st.session_state.paths["csv_demog"]
-    ) and os.path.exists(st.session_state.paths["csv_dlmuse"])
+    flag_btn = os.path.exists(st.session_state.paths["csv_demog"]) and os.path.exists(
+        st.session_state.paths["csv_dlmuse"]
+    )
     btn_mlscore = st.button("Run MLScore", disabled=not flag_btn)
 
     if btn_mlscore:
@@ -69,15 +69,18 @@ with st.expander("Run MLScore", expanded=False):
 
             # cmd = f"python3 {run_dir}/call_snakefile.py --run_dir {run_dir} --dset_name {st.session_state.dset_name} --input_rois {csv_dlmuse} --input_demog {csv_demog} --dir_out {st.session_state.paths['MLScores']}"
 
-            cmd = f"python3 {run_dir}/workflow_mlscores.py --root_dir {st.session_state.paths["root"]} --run_dir {run_dir} --dset_name {st.session_state.dset_name} --input_rois {csv_dlmuse} --input_demog {csv_demog} --dir_out {st.session_state.paths['MLScores']}"
+            cmd = f"python3 {run_dir}/workflow_mlscores.py --root_dir {st.session_state.paths['root']} --run_dir {run_dir} --dset_name {st.session_state.dset_name} --input_rois {csv_dlmuse} --input_demog {csv_demog} --dir_out {st.session_state.paths['MLScores']}"
 
             os.system(cmd)
 
             # Set the output file as the input for the related viewers
             if os.path.exists(st.session_state.paths["csv_mlscores"]):
-                st.success(f"Run completed! Out file: {st.session_state.paths['csv_mlscores']}", icon=":material/thumb_up:")
+                st.success(
+                    f"Run completed! Out file: {st.session_state.paths['csv_mlscores']}",
+                    icon=":material/thumb_up:",
+                )
 
-with st.expander('FIXME: TMP - Session state'):
+with st.expander("FIXME: TMP - Session state"):
     st.write(st.session_state)
-with st.expander('TMP: session vars - paths'):
+with st.expander("TMP: session vars - paths"):
     st.write(st.session_state.paths)
