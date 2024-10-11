@@ -37,7 +37,7 @@ For recommended system configuration, please refer to: [nnUNet hardware requirem
 
 ## Run NiChart Locally (GUI)
 ```bash
-cd src/NiChart_Viewer/src
+cd src/viewer/
 streamlit run NiChartProject.py
 ```
 The app will start in your localhost.
