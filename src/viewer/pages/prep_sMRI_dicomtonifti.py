@@ -5,6 +5,7 @@ import streamlit as st
 import utils.utils_dicom as utildcm
 import utils.utils_nifti as utilni
 import utils.utils_st as utilst
+import utils.utils_io as utilio
 
 result_holder = st.empty()
 
@@ -25,42 +26,57 @@ st.markdown(
 )
 
 # Panel for output (dataset name + out_dir)
-utilst.util_panel_workingdir()
+utilst.util_panel_workingdir(st.session_state.app_type)
 
 # Panel for detecting dicom series
 with st.expander("Detect dicom series", expanded=False):
-    # Input dicom image folder
-    helpmsg = "Input folder with dicom files (.dcm).\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
-    path_dicom = utilst.user_input_folder(
-        "Select folder",
-        "btn_indir_dicom",
-        "Input dicom folder",
-        st.session_state.paths["last_sel"],
-        st.session_state.paths["Dicoms"],
-        helpmsg,
-    )
-    st.session_state.paths["Dicoms"] = path_dicom
 
-    flag_btn = os.path.exists(st.session_state.paths["Dicoms"])
+    # Create Dicoms folder
+    if os.path.exists(st.session_state.paths['dset']):
+        if not os.path.exists(st.session_state.paths['Dicoms']):
+            os.makedirs(st.session_state.paths['Dicoms'])
+    
+    if st.session_state.app_type == 'CLOUD':
+    
+        # Create Dicoms folder
+        flag_uploader = os.path.exists(st.session_state.paths['Dicoms'])
+                
+        # Upload dicom files
+        in_files = st.file_uploader("Upload dicom file(s)", accept_multiple_files=True)
 
+        # Save files to local storage
+        if len(in_files) > 0:
+            utilio.save_uploaded_files(in_files, st.session_state.paths["Dicoms"])
+    
+    else:   ## st.session_state.app_type == 'DESKTOP':
+
+        # Input dicom image folder
+        helpmsg = "Input folder with dicom files (.dcm).\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
+        st.session_state.paths["Dicoms"] = utilst.user_input_folder(
+            "Select folder",
+            "btn_indir_dicom",
+            "Input dicom folder",
+            st.session_state.paths["last_sel"],
+            st.session_state.paths["Dicoms"],
+            helpmsg,
+        )
+
+    flag_btn = False
+    if os.path.exists(st.session_state.paths["Dicoms"]):
+        flag_btn = len(os.listdir(st.session_state.paths["Dicoms"])) > 0
+    
     # Detect dicom series
     btn_detect = st.button("Detect Series", disabled=not flag_btn)
     if btn_detect:
         with st.spinner("Wait for it..."):
-            df_dicoms = utildcm.detect_series(path_dicom)
+            df_dicoms = utildcm.detect_series(st.session_state.paths["Dicoms"])
             list_series = df_dicoms.SeriesDesc.unique()
-            num_scans = (
-                df_dicoms[["PatientID", "StudyDate", "SeriesDesc"]]
-                .drop_duplicates()
-                .shape[0]
-            )
+            num_scans = df_dicoms[['PatientID', 'StudyDate', 'SeriesDesc']].drop_duplicates().shape[0]
             if len(list_series) == 0:
                 st.warning("Could not detect any dicom series!")
             else:
-                st.success(
-                    f"Detected {num_scans} scans in {len(list_series)} series!",
-                    icon=":material/thumb_up:",
-                )
+                st.success(f"Detected {num_scans} scans in {len(list_series)} series!",
+                           icon=":material/thumb_up:")
             st.session_state.list_series = list_series
             st.session_state.df_dicoms = df_dicoms
 
@@ -81,12 +97,8 @@ with st.expander("Select dicom series", expanded=False):
     )
     # Create out folder for the selected modality
     if len(st.session_state.sel_series) > 0:
-        if st.session_state.paths["Nifti"] != "":
-            st.session_state.paths[st.session_state.sel_mod] = os.path.join(
-                st.session_state.paths["Nifti"], st.session_state.sel_mod
-            )
-            if not os.path.exists(st.session_state.paths[st.session_state.sel_mod]):
-                os.makedirs(st.session_state.paths[st.session_state.sel_mod])
+        if not os.path.exists(st.session_state.paths[st.session_state.sel_mod]):
+            os.makedirs(st.session_state.paths[st.session_state.sel_mod])
 
     # Button for extraction
     flag_btn = (
@@ -109,19 +121,14 @@ with st.expander("Select dicom series", expanded=False):
             if len(st.session_state.list_input_nifti) == 0:
                 st.warning("Could not extract any nifti images")
             else:
-                st.success(
-                    f"Extracted {len(st.session_state.list_input_nifti)} nifti images",
-                    icon=":material/thumb_up:",
-                )
+                st.success(f'Extracted {len(st.session_state.list_input_nifti)} nifti images',
+                           icon=":material/thumb_up:")
 
 # Panel for viewing extracted nifti images
 with st.expander("View images", expanded=False):
     # Selection of MRID
     sel_img = st.selectbox(
-        "Select Image",
-        st.session_state.list_input_nifti,
-        key="selbox_images",
-        index=None,
+        "Select Image", st.session_state.list_input_nifti, key="selbox_images", index=None
     )
 
     if sel_img is not None:
@@ -153,7 +160,27 @@ with st.expander("View images", expanded=False):
                         img, ind_view, img_bounds[ind_view, :], tmp_orient
                     )
 
-with st.expander("TMP: session vars"):
+# Panel for downloading results
+if st.session_state.app_type == 'CLOUD':
+    with st.expander("Download Results", expanded=False):
+        # Zip results
+        flag_btn = os.path.exists(st.session_state.paths[st.session_state.sel_mod])
+        
+        out_zip = bytes()
+        if flag_btn:
+            if not os.path.exists(st.session_state.paths['OutZipped']):
+                os.makedirs(st.session_state.paths['OutZipped'])
+            f_tmp = os.path.join(st.session_state.paths['OutZipped'], 'T1.zip')
+            out_zip = utilio.zip_folder(st.session_state.paths['T1'], f_tmp)
+        
+        st.download_button("Download Extracted Scans",
+                           out_zip,
+                           file_name = f'{st.session_state.sel_mod}.zip',
+                           disabled=not flag_btn
+                           )
+
+
+with st.expander('TMP: session vars'):
     st.write(st.session_state)
-with st.expander("TMP: session vars - paths"):
+with st.expander('TMP: session vars - paths'):
     st.write(st.session_state.paths)

@@ -61,32 +61,29 @@ def display_plot(df: pd.DataFrame, sel_mrid: str) -> None:
         fig = px.bar(x=dtmp, y=vtmp, title="Data Values")
         st.plotly_chart(fig)
 
-
 # Panel for output (dataset name + out_dir)
 utilst.util_panel_workingdir()
 
 # Panel for input csv, image paths and suffixes
-with st.expander("Select Input", expanded=False):
+with st.expander('Select Input', expanded=False):
 
     # Set default path for the plot csv
-    if os.path.exists(st.session_state.paths["csv_mlscores"]):
-        st.session_state.paths["csv_plots"] = st.session_state.paths["csv_mlscores"]
-    elif os.path.exists(st.session_state.paths["csv_dlmuse"]):
-        st.session_state.paths["csv_plots"] = st.session_state.paths["csv_dlmuse"]
+    if os.path.exists(st.session_state.paths['csv_mlscores']):
+        st.session_state.paths['csv_plots'] = st.session_state.paths['csv_mlscores']
+    elif os.path.exists(st.session_state.paths['csv_dlmuse']):
+        st.session_state.paths['csv_plots'] = st.session_state.paths['csv_dlmuse']
 
     # Input csv
-    helpmsg = "Input csv file with DLMUSE ROI volumes.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it"
-    csv_plots, csv_path = utilst.user_input_file(
-        "Select file",
-        "btn_input_dlmuse",
-        "DLMUSE ROI file",
-        st.session_state.paths["last_sel"],
-        st.session_state.paths["csv_plots"],
-        helpmsg,
-    )
+    helpmsg = 'Input csv file with DLMUSE ROI volumes.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it'
+    csv_plots, csv_path = utilst.user_input_file("Select file",
+                                                'btn_input_dlmuse',
+                                                "DLMUSE ROI file",
+                                                st.session_state.paths['last_sel'],
+                                                st.session_state.paths['csv_plots'],
+                                                helpmsg)
     if os.path.exists(csv_plots):
-        st.session_state.paths["csv_plots"] = csv_plots
-        st.session_state.paths["last_sel"] = csv_path
+        st.session_state.paths['csv_plots'] = csv_plots
+        st.session_state.paths['last_sel'] = csv_path
 
         df = pd.read_csv(st.session_state.paths["csv_plots"])
         list_mrid = df.MRID.tolist()
