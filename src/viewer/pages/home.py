@@ -65,7 +65,7 @@ if "instantiated" not in st.session_state:
     }
 
     st.session_state.paths["root"] = os.path.dirname(
-        os.path.dirname(os.path.dirname(os.getcwd()))
+        os.path.dirname(os.getcwd())
     )
     st.session_state.paths["init"] = os.path.join(
         st.session_state.paths["root"], "test"

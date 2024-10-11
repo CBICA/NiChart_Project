@@ -16,7 +16,7 @@ st.markdown(
 )
 
 # Panel for output (dataset name + out_dir)
-utilst.util_panel_workingdir()
+utilst.util_panel_workingdir(st.session_state.app_type)
 
 # Panel for running MLScore
 with st.expander("Run MLScore", expanded=False):

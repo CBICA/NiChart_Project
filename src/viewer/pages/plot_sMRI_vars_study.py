@@ -262,7 +262,7 @@ def filter_dataframe(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
 
 
 # Panel for output (dataset name + out_dir)
-utilst.util_panel_workingdir()
+utilst.util_panel_workingdir(st.session_state.app_type)
 
 # Panel for input csv, image paths and suffixes
 with st.expander("Select Input", expanded=False):

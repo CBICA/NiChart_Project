@@ -17,7 +17,7 @@ st.markdown(
 )
 
 # Panel for output (dataset name + out_dir)
-utilst.util_panel_workingdir()
+utilst.util_panel_workingdir(st.session_state.app_type)
 
 # Panel for running DLMUSE
 with st.expander("Run DLMUSE", expanded=False):
