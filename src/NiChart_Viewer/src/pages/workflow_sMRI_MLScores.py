@@ -66,9 +66,10 @@ with st.expander("Run MLScore", expanded=False):
         with st.spinner("Wait for it..."):
             os.system(f"cd {run_dir}")
             st.info("Running: mlscores_workflow ", icon=":material/manufacturing:")
-            cmd = f"python3 {run_dir}/call_snakefile.py --run_dir {run_dir} --dset_name {st.session_state.dset_name} --input_rois {csv_dlmuse} --input_demog {csv_demog} --dir_out {st.session_state.paths['MLScores']}"
 
-            #cmd = f"python3 {run_dir}/workflow_mlscores.py --root_dir {st.session_state.paths["root"]} --run_dir {run_dir} --dset_name {st.session_state.dset_name} --input_rois {csv_dlmuse} --input_demog {csv_demog} --dir_out {st.session_state.paths['MLScores']}"
+            # cmd = f"python3 {run_dir}/call_snakefile.py --run_dir {run_dir} --dset_name {st.session_state.dset_name} --input_rois {csv_dlmuse} --input_demog {csv_demog} --dir_out {st.session_state.paths['MLScores']}"
+
+            cmd = f"python3 {run_dir}/workflow_mlscores.py --root_dir {st.session_state.paths["root"]} --run_dir {run_dir} --dset_name {st.session_state.dset_name} --input_rois {csv_dlmuse} --input_demog {csv_demog} --dir_out {st.session_state.paths['MLScores']}"
 
             os.system(cmd)
 

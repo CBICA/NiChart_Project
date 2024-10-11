@@ -365,45 +365,6 @@ with st.expander('Plot data', expanded=False):
                 display_plot(df, plot_ind)
 
 with st.expander('Select input folders for the image viewer'):
-
-    # Selection of MRID
-    #try:
-        #sel_ind = df.MRID.tolist().index(st.session_state.sel_mrid)
-        #list_mrids = df.MRID.tolist()
-    #except:
-        #sel_ind = 0
-        #list_mrids = []
-        
-    #print()
-        
-    #st.session_state.sel_mrid = st.selectbox("MRID", list_mrids,
-                                             #key="selbox_mrid",
-                                             #index=sel_ind)
-
-    ## Create a dictionary of MUSE indices and names
-    #df_muse = pd.read_csv(st.session_state.dicts['muse_all'])
-
-    ## FIXME : extra roi not in dict
-    #df_muse = df_muse[df_muse.Name != 'CortCSF']
-
-    ## Read derived roi list and convert to a dict
-    #dict_roi, dict_derived = utilmuse.read_derived_roi_list(st.session_state.dicts['muse_sel'],
-                                                            #st.session_state.dicts['muse_derived'])
-
-    ## Selection of ROI
-    ##  - The variable will be selected from the active plot
-    #list_rois = df_muse.Name.tolist()
-    #try:
-        #sel_var = st.session_state.plots.loc[st.session_state.plot_active, 'yvar']
-        #sel_ind = list_rois.index(sel_var)
-    #except:
-        #sel_ind = 2
-        #sel_var = list_rois[sel_ind]
-    #sel_var = st.selectbox("ROI", list(dict_roi.keys()), key="selbox_rois", index=sel_ind)
-
-    ## Select roi index
-    #sel_var_ind = dict_roi[sel_var]
-
     # Input T1 image folder
     helpmsg = 'Folder with T1 images.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it'
     path_t1 = utilst.user_input_folder("Select folder",
@@ -446,10 +407,10 @@ with st.expander('View segmentations', expanded=False):
     is_show_overlay = st.checkbox('Show overlay', True)
 
     flag_img = False
-    
+
     if st.session_state.sel_mrid == '':
-        st.warning(f'Please select a subject on the plot!')
-    else:    
+        st.warning("Please select a subject on the plot!")
+    else:
         st.session_state.paths['sel_img'] = os.path.join(st.session_state.paths['T1'],
                                                          st.session_state.sel_mrid + st.session_state.suff_t1img)
         st.session_state.paths['sel_dlmuse'] = os.path.join(st.session_state.paths['DLMUSE'],
@@ -459,19 +420,17 @@ with st.expander('View segmentations', expanded=False):
 
         if not os.path.exists(st.session_state.paths['sel_dlmuse']):
             st.warning(f'Could not find overlay image: {st.session_state.paths['sel_dlmuse']}')
-        
-        flag_img =  os.path.exists(st.session_state.paths['sel_img']) and os.path.exists(st.session_state.paths['sel_dlmuse'])
+
+        flag_img = os.path.exists(st.session_state.paths['sel_img']) and os.path.exists(st.session_state.paths['sel_dlmuse'])
 
     if flag_img:
         with st.spinner('Wait for it...'):
-
 
             dict_roi, dict_derived = utilmuse.read_derived_roi_list(st.session_state.dicts['muse_sel'],
                                                                     st.session_state.dicts['muse_derived'])
 
             sel_var = st.session_state.plots.loc[st.session_state.plot_active, 'yvar']
             sel_var_ind = dict_roi[sel_var]
-
 
             # Process image and mask to prepare final 3d matrix to display
             flag_files = 1
@@ -502,8 +461,6 @@ with st.expander('View segmentations', expanded=False):
                             utilst.show_img3D(img, ind_view, mask_bounds[ind_view, :], tmp_orient)
                         else:
                             utilst.show_img3D(img_masked, ind_view, mask_bounds[ind_view, :], tmp_orient)
-
-
 
 with st.expander('FIXME: TMP - Session state'):
     st.write(st.session_state)
