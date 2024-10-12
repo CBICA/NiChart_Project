@@ -22,8 +22,11 @@ OLAY_ALPHA = 0.2
 f_img = ""
 f_mask = ""
 
-# Selection of subject list and image paths
-with st.expander("Select subject list, image paths and suffixes"):
+# Panel for output (dataset name + out_dir)
+utilst.util_panel_workingdir(st.session_state.app_type)
+
+# Panel for selecting input data
+with st.expander("Select or upload input data", expanded=False):
 
     # DLMUSE file name
     helpmsg = "Input csv file with DLMUSE ROI volumes.\n\nUsed for selecting the MRID and the ROI name.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it"

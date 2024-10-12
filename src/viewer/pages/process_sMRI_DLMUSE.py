@@ -19,8 +19,8 @@ st.markdown(
 # Panel for output (dataset name + out_dir)
 utilst.util_panel_workingdir(st.session_state.app_type)
 
-# Panel for running DLMUSE
-with st.expander("Run DLMUSE", expanded=False):
+# Panel for selecting input data
+with st.expander("Select or upload input data", expanded=False):
 
     # Input T1 image folder
     helpmsg = "DLMUSE will be applied to .nii/.nii.gz images directly in the input folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
@@ -32,6 +32,9 @@ with st.expander("Run DLMUSE", expanded=False):
         st.session_state.paths["T1"],
         helpmsg,
     )
+
+# Panel for running DLMUSE
+with st.expander("Run DLMUSE", expanded=False):
 
     # Device type
     helpmsg = "Choose 'cuda' if your computer has an NVIDIA GPU, 'mps' if you have an Apple M-series chip, and 'cpu' if you have a standard CPU."

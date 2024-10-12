@@ -18,8 +18,8 @@ st.markdown(
 # Panel for output (dataset name + out_dir)
 utilst.util_panel_workingdir(st.session_state.app_type)
 
-# Panel for running MLScore
-with st.expander("Run MLScore", expanded=False):
+# Panel for selecting input data
+with st.expander("Select or upload input data", expanded=False):
 
     # DLMUSE file name
     helpmsg = "Input csv file with DLMUSE ROI volumes.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it"
@@ -48,6 +48,9 @@ with st.expander("Run MLScore", expanded=False):
     if os.path.exists(csv_demog):
         st.session_state.paths["csv_demog"] = csv_demog
         st.session_state.paths["last_sel"] = csv_path
+
+# Panel for running MLScore
+with st.expander("Run MLScore", expanded=False):
 
     # Button to run MLScore
     flag_btn = os.path.exists(st.session_state.paths["csv_demog"]) and os.path.exists(

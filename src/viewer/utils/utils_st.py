@@ -281,3 +281,5 @@ def util_panel_workingdir(app_type: str) -> None:
                 f"All results will be saved to: {st.session_state.paths['dset']}",
                 icon=":material/thumb_up:",
             )
+
+

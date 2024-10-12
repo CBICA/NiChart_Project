@@ -14,6 +14,11 @@ def progress(p: int, i: int, decoded: Any) -> None:
     with result_holder.container():
         st.progress(p, f"Progress: Token position={i}")
 
+def save_and_unzip_files():
+    # Save files to local storage
+    print('AAA')
+    if len(st.session_state['uploaded_dicoms']) > 0:
+        utilio.save_uploaded_files(st.session_state['uploaded_dicoms'], st.session_state.paths["Dicoms"])
 
 st.markdown(
     """
@@ -28,8 +33,8 @@ st.markdown(
 # Panel for output (dataset name + out_dir)
 utilst.util_panel_workingdir(st.session_state.app_type)
 
-# Panel for detecting dicom series
-with st.expander("Detect dicom series", expanded=False):
+# Panel for selecting input data
+with st.expander("Select or upload input data", expanded=False):
 
     # Create Dicoms folder
     if os.path.exists(st.session_state.paths["dset"]):
@@ -42,11 +47,12 @@ with st.expander("Detect dicom series", expanded=False):
         flag_uploader = os.path.exists(st.session_state.paths["Dicoms"])
 
         # Upload dicom files
-        in_files = st.file_uploader("Upload dicom file(s)", accept_multiple_files=True)
-
-        # Save files to local storage
-        if len(in_files) > 0:
-            utilio.save_uploaded_files(in_files, st.session_state.paths["Dicoms"])
+        in_files = st.file_uploader(
+            "Upload dicom file(s)",
+            key = 'uploaded_dicoms',
+            accept_multiple_files=True,
+            on_change = save_and_unzip_files
+        )
 
     else:  # st.session_state.app_type == 'DESKTOP':
 
@@ -60,6 +66,9 @@ with st.expander("Detect dicom series", expanded=False):
             st.session_state.paths["Dicoms"],
             helpmsg,
         )
+
+# Panel for detecting dicom series
+with st.expander("Detect dicom series", expanded=False):
 
     flag_btn = False
     if os.path.exists(st.session_state.paths["Dicoms"]):
