@@ -16,7 +16,6 @@ def progress(p: int, i: int, decoded: Any) -> None:
 
 def save_and_unzip_files():
     # Save files to local storage
-    print('AAA')
     if len(st.session_state['uploaded_dicoms']) > 0:
         utilio.save_uploaded_files(st.session_state['uploaded_dicoms'], st.session_state.paths["Dicoms"])
 

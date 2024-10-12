@@ -83,7 +83,28 @@ def display_plot(df: pd.DataFrame, plot_id: str) -> None:
                     "Plot Type", ["DistPlot", "RegPlot"], key=f"plot_type_{plot_id}"
                 )
 
-                # Get plot params
+                # Get df columns
+                list_cols = df.columns.to_list()
+
+                # Get default plot params
+                if st.session_state.plots.loc[plot_id].xvar not in list_cols:
+                    if st.session_state.plot_default_xvar in list_cols:
+                        st.session_state.plots.loc[plot_id].xvar = st.session_state.plot_default_xvar
+                    else:
+                        st.session_state.plots.loc[plot_id].xvar = list_cols[1]
+
+                if st.session_state.plots.loc[plot_id].yvar not in list_cols:
+                    if st.session_state.plot_default_yvar in list_cols:
+                        st.session_state.plots.loc[plot_id].yvar = st.session_state.plot_default_yvar
+                    else:
+                        st.session_state.plots.loc[plot_id].yvar = list_cols[2]
+
+                if st.session_state.plots.loc[plot_id].hvar not in list_cols:
+                    if st.session_state.plot_default_hvar in list_cols:
+                        st.session_state.plots.loc[plot_id].hvar = st.session_state.plot_default_hvar
+                    else:
+                        st.session_state.plots.loc[plot_id].hvar = ''
+
                 xvar = st.session_state.plots.loc[plot_id].xvar
                 yvar = st.session_state.plots.loc[plot_id].yvar
                 hvar = st.session_state.plots.loc[plot_id].hvar
@@ -92,7 +113,10 @@ def display_plot(df: pd.DataFrame, plot_id: str) -> None:
                 # Select plot params from the user
                 xind = df.columns.get_loc(xvar)
                 yind = df.columns.get_loc(yvar)
-                hind = df.columns.get_loc(hvar)
+                if hvar != '':
+                    hind = df.columns.get_loc(hvar)
+                else:
+                    hind = None
                 tind = st.session_state.trend_types.index(trend)
 
                 xvar = st.selectbox(
@@ -178,9 +202,13 @@ def display_plot(df: pd.DataFrame, plot_id: str) -> None:
         if len(sel_info["selection"]["points"]) > 0:
 
             sind = sel_info["selection"]["point_indices"][0]
-            lgroup = sel_info["selection"]["points"][0]["legendgroup"]
 
-            sel_mrid = df_filt[df_filt[hvar] == lgroup].iloc[sind]["MRID"]
+            if hind is None:
+                sel_mrid = df_filt.iloc[sind]["MRID"]
+            else:
+                lgroup = sel_info["selection"]["points"][0]["legendgroup"]
+                sel_mrid = df_filt[df_filt[hvar] == lgroup].iloc[sind]["MRID"]
+
             sel_roi = st.session_state.plots.loc[st.session_state.plot_active, "yvar"]
 
             st.session_state.sel_mrid = sel_mrid
@@ -473,6 +501,11 @@ with st.expander("View segmentations", expanded=False):
             )
 
             sel_var = st.session_state.plots.loc[st.session_state.plot_active, "yvar"]
+
+            if sel_var == '47':
+                sel_var = 'Hippocampus_L'
+
+
             sel_var_ind = dict_roi[sel_var]
 
             # Process image and mask to prepare final 3d matrix to display

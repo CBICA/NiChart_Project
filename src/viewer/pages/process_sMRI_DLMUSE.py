@@ -5,6 +5,12 @@ import streamlit as st
 import utils.utils_muse as utilmuse
 import utils.utils_nifti as utilni
 import utils.utils_st as utilst
+import utils.utils_io as utilio
+
+def save_and_unzip_files():
+    # Save files to local storage
+    if len(st.session_state['uploaded_t1s']) > 0:
+        utilio.save_uploaded_files(st.session_state['uploaded_t1s'], st.session_state.paths["T1"])
 
 st.markdown(
     """
@@ -22,16 +28,36 @@ utilst.util_panel_workingdir(st.session_state.app_type)
 # Panel for selecting input data
 with st.expander("Select or upload input data", expanded=False):
 
-    # Input T1 image folder
-    helpmsg = "DLMUSE will be applied to .nii/.nii.gz images directly in the input folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
-    st.session_state.paths["T1"] = utilst.user_input_folder(
-        "Select folder",
-        "btn_indir_t1",
-        "Input folder",
-        st.session_state.paths["last_sel"],
-        st.session_state.paths["T1"],
-        helpmsg,
-    )
+    # Create T1 folder
+    if os.path.exists(st.session_state.paths["dset"]):
+        if not os.path.exists(st.session_state.paths["T1"]):
+            os.makedirs(st.session_state.paths["T1"])
+
+    if st.session_state.app_type == "CLOUD":
+
+        # Create T1 folder
+        flag_uploader = os.path.exists(st.session_state.paths["T1"])
+
+        # Upload T1 files
+        in_files = st.file_uploader(
+            "Upload T1 image(s)",
+            key = 'uploaded_t1s',
+            accept_multiple_files=True,
+            on_change = save_and_unzip_files
+        )
+
+    else:  # st.session_state.app_type == 'DESKTOP':
+
+        # Input dicom image folder
+        helpmsg = "Input folder with T1 images (.nii/.nii.gz).\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
+        st.session_state.paths["T1"] = utilst.user_input_folder(
+            "Select folder",
+            "btn_indir_t1",
+            "Input T1 image folder",
+            st.session_state.paths["last_sel"],
+            st.session_state.paths["T1"],
+            helpmsg,
+        )
 
 # Panel for running DLMUSE
 with st.expander("Run DLMUSE", expanded=False):

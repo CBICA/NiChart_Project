@@ -117,9 +117,13 @@ if "instantiated" not in st.session_state:
     st.session_state.suff_dlmuse = "_T1_DLMUSE.nii.gz"
 
     # Default values for plotting parameters
-    st.session_state.plot_xvar = "Age"
-    st.session_state.plot_yvar = "GM"
-    st.session_state.plot_hvar = "Sex"
+    st.session_state.plot_default_xvar = "Age"
+    st.session_state.plot_default_yvar = "GM"
+    st.session_state.plot_default_hvar = "Sex"
+
+    st.session_state.plot_xvar = ""
+    st.session_state.plot_yvar = ""
+    st.session_state.plot_hvar = ""
 
     st.session_state.trend_types = ["none", "ols", "lowess"]
     st.session_state.plot_trend = "none"

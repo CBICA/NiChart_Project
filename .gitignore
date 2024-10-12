@@ -132,6 +132,9 @@ venv.bak/
 .spyderproject
 .spyproject
 
+# Out dir
+output_folder/
+
 # Snakemake logs
 .snakemake
 
