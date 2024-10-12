@@ -58,10 +58,9 @@ if "instantiated" not in st.session_state:
         "sel_img": "",
         "sel_mask": "",
         "csv_demog": "",
-        "csv_dlmuse": "",
+        "csv_seg": "",
         "csv_plots": "",
         "csv_mlscores": "",
-        "csv_viewdlmuse": "",
     }
 
     st.session_state.paths["root"] = os.path.dirname(
@@ -114,7 +113,7 @@ if "instantiated" not in st.session_state:
 
     # Image suffixes
     st.session_state.suff_t1img = "_T1.nii.gz"
-    st.session_state.suff_dlmuse = "_T1_DLMUSE.nii.gz"
+    st.session_state.suff_seg = "_T1_DLMUSE.nii.gz"
 
     # Default values for plotting parameters
     st.session_state.plot_default_xvar = "Age"

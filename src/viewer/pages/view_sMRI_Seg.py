@@ -30,16 +30,16 @@ with st.expander("Select or upload input data", expanded=False):
 
     # DLMUSE file name
     helpmsg = "Input csv file with DLMUSE ROI volumes.\n\nUsed for selecting the MRID and the ROI name.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it"
-    csv_dlmuse, csv_path = utilst.user_input_file(
+    csv_seg, csv_path = utilst.user_input_file(
         "Select file",
-        "btn_input_dlmuse",
+        "btn_input_seg",
         "Subject list",
         st.session_state.paths["last_sel"],
-        st.session_state.paths["csv_dlmuse"],
+        st.session_state.paths["csv_seg"],
         helpmsg,
     )
-    if os.path.exists(csv_dlmuse):
-        st.session_state.paths["csv_dlmuse"] = csv_dlmuse
+    if os.path.exists(csv_seg):
+        st.session_state.paths["csv_seg"] = csv_seg
         st.session_state.paths["last_sel"] = csv_path
 
     # Input T1 image folder
@@ -56,15 +56,15 @@ with st.expander("Select or upload input data", expanded=False):
 
     # Input DLMUSE image folder
     helpmsg = "Path to DLMUSE images.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
-    path_dlmuse = utilst.user_input_folder(
+    path_seg = utilst.user_input_folder(
         "Select folder",
-        "btn_indir_dlmuse",
+        "btn_indir_seg",
         "DLMUSE folder",
         st.session_state.paths["last_sel"],
         st.session_state.paths["DLMUSE"],
         helpmsg,
     )
-    st.session_state.paths["DLMUSE"] = path_dlmuse
+    st.session_state.paths["DLMUSE"] = path_seg
 
     # T1 suffix
     suff_t1img = utilst.user_input_text(
@@ -73,24 +73,24 @@ with st.expander("Select or upload input data", expanded=False):
     st.session_state.suff_t1img = suff_t1img
 
     # DLMUSE suffix
-    suff_dlmuse = utilst.user_input_text(
-        "DLMUSE image suffix", st.session_state.suff_dlmuse, helpmsg
+    suff_seg = utilst.user_input_text(
+        "DLMUSE image suffix", st.session_state.suff_seg, helpmsg
     )
-    st.session_state.suff_dlmuse = suff_dlmuse
+    st.session_state.suff_seg = suff_seg
 
 
 # Selection of MRID and ROI name
-if os.path.exists(st.session_state.paths["csv_dlmuse"]):
+if os.path.exists(st.session_state.paths["csv_seg"]):
 
     with st.container(border=True):
 
-        df = pd.read_csv(st.session_state.paths["csv_dlmuse"])
+        df = pd.read_csv(st.session_state.paths["csv_seg"])
 
         # Create a dictionary of MUSE indices and names
-        df_muse = pd.read_csv(st.session_state.dicts["muse_all"])
+        df_seg = pd.read_csv(st.session_state.dicts["muse_all"])
 
-        # df_muse = df_muse[df_muse.Name.isin(df.columns)]
-        # dict_roi = dict(zip(df_muse.Name, df_muse.Index))
+        # df_seg = df_seg[df_seg.Name.isin(df.columns)]
+        # dict_roi = dict(zip(df_seg.Name, df_seg.Index))
 
         # Read derived roi list and convert to a dict
         dict_roi, dict_derived = utilmuse.read_derived_roi_list(
@@ -122,7 +122,7 @@ if os.path.exists(st.session_state.paths["csv_dlmuse"]):
             sel_var = list(dict_roi.keys())[0]
             sel_type = "(auto)"
         else:
-            sel_ind = df_muse.Name.tolist().index(sel_var)
+            sel_ind = df_seg.Name.tolist().index(sel_var)
             sel_type = "(user)"
         sel_var = st.selectbox(
             "ROI", list(dict_roi.keys()), key="selbox_rois", index=sel_ind
@@ -150,7 +150,7 @@ if os.path.exists(st.session_state.paths["csv_dlmuse"]):
     f_mask = os.path.join(
         st.session_state.paths["out"],
         st.session_state.paths["DLMUSE"],
-        sel_mrid + st.session_state.suff_dlmuse,
+        sel_mrid + st.session_state.suff_seg,
     )
 
 if os.path.exists(f_img) & os.path.exists(f_mask):

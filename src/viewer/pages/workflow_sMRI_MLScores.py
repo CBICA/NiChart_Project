@@ -23,16 +23,16 @@ with st.expander("Select or upload input data", expanded=False):
 
     # DLMUSE file name
     helpmsg = "Input csv file with DLMUSE ROI volumes.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it"
-    csv_dlmuse, csv_path = utilst.user_input_file(
+    csv_seg, csv_path = utilst.user_input_file(
         "Select file",
-        "btn_input_dlmuse",
+        "btn_input_seg",
         "DLMUSE ROI file",
         st.session_state.paths["last_sel"],
-        st.session_state.paths["csv_dlmuse"],
+        st.session_state.paths["csv_seg"],
         helpmsg,
     )
-    if os.path.exists(csv_dlmuse):
-        st.session_state.paths["csv_dlmuse"] = csv_dlmuse
+    if os.path.exists(csv_seg):
+        st.session_state.paths["csv_seg"] = csv_seg
         st.session_state.paths["last_sel"] = csv_path
 
     # Demog file name
@@ -54,7 +54,7 @@ with st.expander("Run MLScore", expanded=False):
 
     # Button to run MLScore
     flag_btn = os.path.exists(st.session_state.paths["csv_demog"]) and os.path.exists(
-        st.session_state.paths["csv_dlmuse"]
+        st.session_state.paths["csv_seg"]
     )
     btn_mlscore = st.button("Run MLScore", disabled=not flag_btn)
 
@@ -70,9 +70,9 @@ with st.expander("Run MLScore", expanded=False):
             os.system(f"cd {run_dir}")
             st.info("Running: mlscores_workflow ", icon=":material/manufacturing:")
 
-            # cmd = f"python3 {run_dir}/call_snakefile.py --run_dir {run_dir} --dset_name {st.session_state.dset_name} --input_rois {csv_dlmuse} --input_demog {csv_demog} --dir_out {st.session_state.paths['MLScores']}"
+            # cmd = f"python3 {run_dir}/call_snakefile.py --run_dir {run_dir} --dset_name {st.session_state.dset_name} --input_rois {csv_seg} --input_demog {csv_demog} --dir_out {st.session_state.paths['MLScores']}"
 
-            cmd = f"python3 {run_dir}/workflow_mlscores.py --root_dir {st.session_state.paths['root']} --run_dir {run_dir} --dset_name {st.session_state.dset_name} --input_rois {csv_dlmuse} --input_demog {csv_demog} --dir_out {st.session_state.paths['MLScores']}"
+            cmd = f"python3 {run_dir}/workflow_mlscores.py --root_dir {st.session_state.paths['root']} --run_dir {run_dir} --dset_name {st.session_state.dset_name} --input_rois {csv_seg} --input_demog {csv_demog} --dir_out {st.session_state.paths['MLScores']}"
 
             os.system(cmd)
 

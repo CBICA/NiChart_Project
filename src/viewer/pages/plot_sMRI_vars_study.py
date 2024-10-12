@@ -298,14 +298,14 @@ with st.expander("Select or upload input data", expanded=False):
     # Set default path for the plot csv
     if os.path.exists(st.session_state.paths["csv_mlscores"]):
         st.session_state.paths["csv_plots"] = st.session_state.paths["csv_mlscores"]
-    elif os.path.exists(st.session_state.paths["csv_dlmuse"]):
-        st.session_state.paths["csv_plots"] = st.session_state.paths["csv_dlmuse"]
+    elif os.path.exists(st.session_state.paths["csv_seg"]):
+        st.session_state.paths["csv_plots"] = st.session_state.paths["csv_seg"]
 
     # Input csv
-    helpmsg = "Input csv file with DLMUSE ROI volumes.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it"
+    helpmsg = "Input csv file with segmented ROI volumes.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it"
     csv_plots, csv_path = utilst.user_input_file(
         "Select file",
-        "btn_input_dlmuse",
+        "btn_input_seg",
         "DLMUSE ROI file",
         st.session_state.paths["last_sel"],
         st.session_state.paths["csv_plots"],
@@ -434,15 +434,15 @@ with st.expander("Select input folders for the image viewer"):
 
     # Input DLMUSE image folder
     helpmsg = "Folder with DLMUSE images.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
-    path_dlmuse = utilst.user_input_folder(
+    path_seg = utilst.user_input_folder(
         "Select folder",
-        "btn_indir_dlmuse",
+        "btn_indir_seg",
         "Input folder",
         st.session_state.paths["last_sel"],
         st.session_state.paths["DLMUSE"],
         helpmsg,
     )
-    st.session_state.paths["DLMUSE"] = path_dlmuse
+    st.session_state.paths["DLMUSE"] = path_seg
 
     # T1 suffix
     suff_t1img = utilst.user_input_text(
@@ -451,12 +451,12 @@ with st.expander("Select input folders for the image viewer"):
     st.session_state.suff_t1img = suff_t1img
 
     # DLMUSE suffix
-    suff_dlmuse = utilst.user_input_text(
-        "DLMUSE image suffix", st.session_state.suff_dlmuse, helpmsg
+    suff_seg = utilst.user_input_text(
+        "DLMUSE image suffix", st.session_state.suff_seg, helpmsg
     )
-    st.session_state.suff_dlmuse = suff_dlmuse
+    st.session_state.suff_seg = suff_seg
 
-# Panel for viewing images and DLMUSE masks
+# Panel for viewing images and segmentations
 with st.expander("View segmentations", expanded=False):
 
     # Create a list of checkbox options
@@ -474,22 +474,22 @@ with st.expander("View segmentations", expanded=False):
             st.session_state.paths["T1"],
             st.session_state.sel_mrid + st.session_state.suff_t1img,
         )
-        st.session_state.paths["sel_dlmuse"] = os.path.join(
+        st.session_state.paths["sel_seg"] = os.path.join(
             st.session_state.paths["DLMUSE"],
-            st.session_state.sel_mrid + st.session_state.suff_dlmuse,
+            st.session_state.sel_mrid + st.session_state.suff_seg,
         )
         if not os.path.exists(st.session_state.paths["sel_img"]):
             st.warning(
                 f"Could not find underlay image: {st.session_state.paths['sel_img']}"
             )
 
-        if not os.path.exists(st.session_state.paths["sel_dlmuse"]):
+        if not os.path.exists(st.session_state.paths["sel_seg"]):
             st.warning(
-                f"Could not find overlay image: {st.session_state.paths['sel_dlmuse']}"
+                f"Could not find overlay image: {st.session_state.paths['sel_seg']}"
             )
 
         flag_img = os.path.exists(st.session_state.paths["sel_img"]) and os.path.exists(
-            st.session_state.paths["sel_dlmuse"]
+            st.session_state.paths["sel_seg"]
         )
 
     if flag_img:
@@ -515,10 +515,10 @@ with st.expander("View segmentations", expanded=False):
                 warn_msg = (
                     f"Missing underlay image: {st.session_state.paths['sel_img']}"
                 )
-            if not os.path.exists(st.session_state.paths["sel_dlmuse"]):
+            if not os.path.exists(st.session_state.paths["sel_seg"]):
                 flag_files = 0
                 warn_msg = (
-                    f"Missing overlay image: {st.session_state.paths['sel_dlmuse']}"
+                    f"Missing overlay image: {st.session_state.paths['sel_seg']}"
                 )
 
             if flag_files == 0:
@@ -526,7 +526,7 @@ with st.expander("View segmentations", expanded=False):
             else:
                 img, mask, img_masked = utilni.prep_image_and_olay(
                     st.session_state.paths["sel_img"],
-                    st.session_state.paths["sel_dlmuse"],
+                    st.session_state.paths["sel_seg"],
                     sel_var_ind,
                     dict_derived,
                 )
