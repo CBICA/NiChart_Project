@@ -63,7 +63,7 @@ def display_plot(df: pd.DataFrame, sel_mrid: str) -> None:
 
 
 # Panel for output (dataset name + out_dir)
-utilst.util_panel_workingdir()
+utilst.util_panel_workingdir(st.session_state.app_type)
 
 # Panel for input csv, image paths and suffixes
 with st.expander("Select Input", expanded=False):
