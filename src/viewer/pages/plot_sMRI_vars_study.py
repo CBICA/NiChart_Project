@@ -495,18 +495,23 @@ with st.expander("View segmentations", expanded=False):
     if flag_img:
         with st.spinner("Wait for it..."):
 
-            dict_roi, dict_derived = utilmuse.read_derived_roi_list(
-                st.session_state.dicts["muse_sel"],
-                st.session_state.dicts["muse_derived"],
-            )
-
+            # Check if sel label is an index that is present in the seg mask
             sel_var = st.session_state.plots.loc[st.session_state.plot_active, "yvar"]
+            is_in_mask = False
 
-            if sel_var == '47':
-                sel_var = 'Hippocampus_L'
+            if os.path.exists(st.session_state.paths["sel_seg"]):
+                is_in_mask = utilni.check_roi_index(st.session_state.paths["sel_seg"], sel_var)
 
+            if is_in_mask:
+                list_rois = [int(sel_var)]
 
-            sel_var_ind = dict_roi[sel_var]
+            else:
+                dict_roi, dict_derived = utilmuse.read_derived_roi_list(
+                    st.session_state.dicts["muse_sel"],
+                    st.session_state.dicts["muse_derived"],
+                )
+                list_rois = []
+                # sel_var_ind = dict_roi[sel_var]
 
             # Process image and mask to prepare final 3d matrix to display
             flag_files = 1
@@ -527,8 +532,7 @@ with st.expander("View segmentations", expanded=False):
                 img, mask, img_masked = utilni.prep_image_and_olay(
                     st.session_state.paths["sel_img"],
                     st.session_state.paths["sel_seg"],
-                    sel_var_ind,
-                    dict_derived,
+                    list_rois
                 )
 
                 # Detect mask bounds and center in each view

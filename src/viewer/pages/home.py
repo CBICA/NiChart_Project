@@ -82,9 +82,13 @@ if "instantiated" not in st.session_state:
     #########################################
     # FIXME : for quick test
     # st.session_state.paths['csv_mlscores'] = st.session_state.paths['root'] + '/test/test3_nifti+roi/output/MyStudy/MLScores/MyStudy_DLMUSE+MLScores.csv'
-    st.session_state.paths["last_sel"] = (
-        st.session_state.paths["init"] + "/../../TestData"
+    st.session_state.paths["init"] = os.path.join(
+        os.path.dirname(st.session_state.paths["root"]),
+        'TestData',
+        'TestDiffROIs'
     )
+    st.session_state.paths["last_sel"] = st.session_state.paths["init"]
+
     #########################################
 
     # Image modalities

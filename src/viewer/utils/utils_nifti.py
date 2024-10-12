@@ -133,8 +133,7 @@ def detect_img_bounds(img: np.ndarray) -> np.ndarray:
 
 @st.cache_data  # type:ignore
 def prep_image_and_olay(
-    f_img: np.ndarray, f_mask: Any, sel_var_ind: Any, dict_derived: Any
-) -> Any:
+    f_img: np.ndarray, f_mask: Any, list_rois: list) -> Any:
     """
     Read images from files and create 3D matrices for display
     """
@@ -163,12 +162,8 @@ def prep_image_and_olay(
     # Crop image to ROIs and reshape
     out_img, out_mask = crop_image(out_img, out_mask)
 
-    # Select target roi: derived roi
-    list_rois = dict_derived[sel_var_ind]
+    # Create mask with sel roi
     out_mask = np.isin(out_mask, list_rois)
-
-    # # Select target roi: single roi
-    # out_mask = (out_mask == sel_var_ind).astype(int)
 
     # Merge image and out_mask
     out_img = np.stack((out_img,) * 3, axis=-1)
@@ -211,3 +206,25 @@ def prep_image(f_img: np.ndarray) -> np.ndarray:
     out_img = np.stack((out_img,) * 3, axis=-1)
 
     return out_img
+
+def check_roi_index(f_img: str, roi_ind: str) -> bool:
+    """
+    Check if index is one of the labels in the seg img
+    """
+    try:
+        roi_ind = int(roi_ind)
+
+        # Read nifti
+        nii_img = nib.load(f_img)
+
+        # Extract image to matrix
+        out_img = nii_img.get_fdata().flatten()
+
+        # Get labels
+        list_lbl = np.unique(out_img)
+
+        return roi_ind in list_lbl
+
+    except:
+        return False
+
