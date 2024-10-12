@@ -264,8 +264,8 @@ def filter_dataframe(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
 # Panel for output (dataset name + out_dir)
 utilst.util_panel_workingdir(st.session_state.app_type)
 
-# Panel for input csv, image paths and suffixes
-with st.expander("Select Input", expanded=False):
+# Panel for selecting input data
+with st.expander("Select or upload input data", expanded=False):
 
     # Set default path for the plot csv
     if os.path.exists(st.session_state.paths["csv_mlscores"]):

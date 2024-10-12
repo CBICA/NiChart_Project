@@ -37,7 +37,6 @@ def unzip_zip_files(in_dir: str) -> None:
                     zip_ref.extractall(in_dir)
                     os.remove(zip_path)
 
-
 def save_uploaded_files(in_files: list, d_out: str) -> None:
     """
     Save uploaded files to the output dir and unzips zip files
