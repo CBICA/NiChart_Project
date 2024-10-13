@@ -35,6 +35,13 @@ utilst.util_panel_workingdir(st.session_state.app_type)
 # Panel for selecting input data
 with st.expander(":material/upload: Select or upload input data", expanded=False):
 
+    fcount = utilio.get_file_count(st.session_state.paths["Dicoms"])
+    if fcount > 0:
+        st.success(f'Detected input data ({st.session_state.paths["Dicoms"]}, {fcount} files)',
+                   icon=":material/thumb_up:"
+                  )
+        st.warning('You can either proceed with the next step or select/upload new data below')
+
     # Create Dicoms folder
     if os.path.exists(st.session_state.paths["dset"]):
         if not os.path.exists(st.session_state.paths["Dicoms"]):
@@ -74,6 +81,7 @@ with st.expander(":material/manage_search: Detect dicom series", expanded=False)
         flag_btn = len(os.listdir(st.session_state.paths["Dicoms"])) > 0
 
     # Detect dicom series
+    num_scans = 0
     btn_detect = st.button("Detect Series", disabled=not flag_btn)
     if btn_detect:
         with st.spinner("Wait for it..."):
@@ -84,15 +92,16 @@ with st.expander(":material/manage_search: Detect dicom series", expanded=False)
                 .drop_duplicates()
                 .shape[0]
             )
-            if len(list_series) == 0:
-                st.warning("Could not detect any dicom series!")
-            else:
-                st.success(
-                    f"Detected {num_scans} scans in {len(list_series)} series!",
-                    icon=":material/thumb_up:",
-                )
             st.session_state.list_series = list_series
             st.session_state.df_dicoms = df_dicoms
+            if len(list_series) == 0:
+                st.error("Could not detect any dicom series!")
+    if num_scans > 0:
+        st.success(
+            f"Detected {num_scans} scans in {len(list_series)} series!",
+            icon=":material/thumb_up:",
+        )
+
 
 # Panel for selecting and extracting dicom series
 with st.expander(":material/neurology: Extract scans", expanded=False):
@@ -133,10 +142,10 @@ with st.expander(":material/neurology: Extract scans", expanded=False):
                 if f.endswith("nii.gz")
             ]
             if len(st.session_state.list_input_nifti) == 0:
-                st.warning("Could not extract any nifti images")
+                st.error("Could not extract any nifti images")
             else:
                 st.success(
-                    f"Extracted {len(st.session_state.list_input_nifti)} nifti images",
+                    f"Extracted {len(st.session_state.list_input_nifti)} nifti images to {st.session_state.paths[st.session_state.sel_mod]}",
                     icon=":material/thumb_up:",
                 )
 

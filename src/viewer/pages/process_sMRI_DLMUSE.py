@@ -28,6 +28,13 @@ utilst.util_panel_workingdir(st.session_state.app_type)
 # Panel for selecting input data
 with st.expander("Select or upload input data", expanded=False):
 
+    fcount = utilio.get_file_count(st.session_state.paths["T1"])
+    if fcount > 0:
+        st.success(f'Detected input data ({st.session_state.paths["T1"]}, {fcount} files)',
+                   icon=":material/thumb_up:"
+                  )
+        st.warning('You can either proceed with the next step or select/upload new data below')
+
     # Create T1 folder
     if os.path.exists(st.session_state.paths["dset"]):
         if not os.path.exists(st.session_state.paths["T1"]):
