@@ -108,7 +108,7 @@ with st.expander("View segmentations", expanded=False):
     sel_mrid = st.selectbox("MRID", list_mrid, key="selbox_mrid", index=None)
 
     # Select ROI
-    dict_roi, dict_derived = utilmuse.read_derived_roi_list(
+    dict_roi, dict_derived = utilmuse.derived_list_to_dict(
         st.session_state.dicts["muse_sel"], st.session_state.dicts["muse_derived"]
     )
     sel_var = st.selectbox("ROI", list(dict_roi.keys()), key="selbox_rois", index=0)

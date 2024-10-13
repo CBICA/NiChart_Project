@@ -33,7 +33,7 @@ st.markdown(
 utilst.util_panel_workingdir(st.session_state.app_type)
 
 # Panel for selecting input data
-with st.expander("Select or upload input data", expanded=False):
+with st.expander(":material/upload: Select or upload input data", expanded=False):
 
     # Create Dicoms folder
     if os.path.exists(st.session_state.paths["dset"]):
@@ -67,7 +67,7 @@ with st.expander("Select or upload input data", expanded=False):
         )
 
 # Panel for detecting dicom series
-with st.expander("Detect dicom series", expanded=False):
+with st.expander(":material/manage_search: Detect dicom series", expanded=False):
 
     flag_btn = False
     if os.path.exists(st.session_state.paths["Dicoms"]):
@@ -95,7 +95,7 @@ with st.expander("Detect dicom series", expanded=False):
             st.session_state.df_dicoms = df_dicoms
 
 # Panel for selecting and extracting dicom series
-with st.expander("Select dicom series", expanded=False):
+with st.expander(":material/neurology: Extract scans", expanded=False):
 
     # Selection of img modality
     helpmsg = "Modality of the extracted images"
@@ -141,7 +141,7 @@ with st.expander("Select dicom series", expanded=False):
                 )
 
 # Panel for viewing extracted nifti images
-with st.expander("View images", expanded=False):
+with st.expander(":material/visibility: View images", expanded=False):
     # Selection of MRID
     sel_img = st.selectbox(
         "Select Image",
@@ -181,7 +181,7 @@ with st.expander("View images", expanded=False):
 
 # Panel for downloading results
 if st.session_state.app_type == "CLOUD":
-    with st.expander("Download Results", expanded=False):
+    with st.expander(":material/download: Download Results", expanded=False):
         # Zip results
         flag_btn = os.path.exists(st.session_state.paths[st.session_state.sel_mod])
 

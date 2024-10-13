@@ -301,6 +301,9 @@ with st.expander("Select or upload input data", expanded=False):
     elif os.path.exists(st.session_state.paths["csv_seg"]):
         st.session_state.paths["csv_plots"] = st.session_state.paths["csv_seg"]
 
+    if os.path.exists(st.session_state.paths["csv_plots"]):
+        st.success(f'Input file detected! Using: {st.session_state.paths["csv_plots"]}')
+
     # Input csv
     helpmsg = "Input csv file with segmented ROI volumes.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it"
     csv_plots, csv_path = utilst.user_input_file(
@@ -419,6 +422,7 @@ with st.expander("Plot data", expanded=False):
             with blocks[column_no]:
                 display_plot(df, plot_ind)
 
+# Panel for selecting input folders for images
 with st.expander("Select input folders for the image viewer"):
     # Input T1 image folder
     helpmsg = "Folder with T1 images.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
@@ -506,12 +510,10 @@ with st.expander("View segmentations", expanded=False):
                 list_rois = [int(sel_var)]
 
             else:
-                dict_roi, dict_derived = utilmuse.read_derived_roi_list(
-                    st.session_state.dicts["muse_sel"],
+                list_rois = utilmuse.get_derived_rois(
+                    sel_var,
                     st.session_state.dicts["muse_derived"],
                 )
-                list_rois = []
-                # sel_var_ind = dict_roi[sel_var]
 
             # Process image and mask to prepare final 3d matrix to display
             flag_files = 1
@@ -554,6 +556,7 @@ with st.expander("View segmentations", expanded=False):
                                 mask_bounds[ind_view, :],
                                 tmp_orient,
                             )
+
 
 with st.expander("FIXME: TMP - Session state"):
     st.write(st.session_state)

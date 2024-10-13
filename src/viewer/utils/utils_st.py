@@ -240,7 +240,7 @@ def update_default_paths() -> None:
 def util_panel_workingdir(app_type: str) -> None:
 
     # Panel for selecting the working dir
-    with st.expander(":outbox_tray: Working Dir", expanded=False):
+    with st.expander(":material/folder_shared: Working Dir", expanded=False):
 
         curr_dir = st.session_state.paths["dset"]
 
