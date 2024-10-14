@@ -128,7 +128,7 @@ def user_input_file(
     label_btn: Any,
     key_btn: Any,
     label_txt: str,
-    init_path_dir: str,
+    path_last: str,
     init_path_curr: str,
     help_msg: str,
 ) -> Any:
@@ -136,7 +136,7 @@ def user_input_file(
     St button + text field to read an input file path from the user
     """
     path_curr = init_path_curr
-    path_dir = init_path_dir
+    path_dir = path_last
     tmpcol = st.columns((8, 1))
     with tmpcol[1]:
         if st.button(label_btn, key=key_btn):
@@ -153,25 +153,34 @@ def user_input_folder(
     label_btn: Any,
     key_btn: Any,
     label_txt: str,
-    init_path_dir: str,
-    init_path_curr: str,
+    path_last: str,
+    path_curr: str,
     help_msg: str,
 ) -> str:
     """
     St button + text field to read an input directory path from the user
     """
-    path_curr = init_path_curr
-    path_dir = init_path_dir
     tmpcol = st.columns((8, 1))
+    
     with tmpcol[1]:
         if st.button(label_btn, key=key_btn):
-            if path_curr == "":
-                path_curr = browse_folder(path_dir)
-            else:
+            if os.path.exists(path_curr):
                 path_curr = browse_folder(path_curr)
+            else:
+                path_curr = browse_folder(path_last)
 
     with tmpcol[0]:
-        path_curr = st.text_input(label_txt, value=path_curr, help=help_msg)
+        if os.path.exists(path_curr):
+            path_curr = st.text_input(label_txt, value=path_curr, help=help_msg)
+        else:
+            path_curr = st.text_input(label_txt, value='', help=help_msg)
+    
+    if path_curr != '':
+        try: 
+            path_curr = os.path.abspath(path_curr)
+        except:
+            path_curr = ''
+    
     return path_curr
 
 
@@ -244,6 +253,12 @@ def util_panel_workingdir(app_type: str) -> None:
 
         curr_dir = st.session_state.paths["dset"]
 
+        # Read dataset name (used to create a folder where all results will be saved)
+        helpmsg = "Each study's results are organized in a dedicated folder named after the study"
+        st.session_state.dset_name = user_input_text(
+            "Study name", st.session_state.dset_name, helpmsg
+        )
+
         if app_type == "DESKTOP":
             # Read output folder from the user
             helpmsg = "Results will be saved to the output folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
@@ -251,18 +266,12 @@ def util_panel_workingdir(app_type: str) -> None:
                 "Select folder",
                 "btn_sel_out_dir",
                 "Output folder",
-                st.session_state.paths["last_sel"],
+                st.session_state.paths["last_in_dir"],
                 st.session_state.paths["out"],
                 helpmsg,
             )
 
-        # Read dataset name (used to create a folder where all results will be saved)
-        helpmsg = "Each study's results are organized in a dedicated folder named after the study"
-        st.session_state.dset_name = user_input_text(
-            "Study name", st.session_state.dset_name, helpmsg
-        )
-
-        if st.session_state.dset_name != "":
+        if st.session_state.dset_name != "" and st.session_state.paths["out"] != "":
             st.session_state.paths["dset"] = os.path.join(
                 st.session_state.paths["out"], st.session_state.dset_name
             )

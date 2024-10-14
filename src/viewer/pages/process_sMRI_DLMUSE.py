@@ -28,21 +28,14 @@ utilst.util_panel_workingdir(st.session_state.app_type)
 # Panel for selecting input data
 with st.expander(":material/upload: Select or upload input data", expanded=False):
 
-    fcount = utilio.get_file_count(st.session_state.paths["T1"])
-    if fcount > 0:
-        st.success(f'Detected input data ({st.session_state.paths["T1"]}, {fcount} files)',
-                   icon=":material/thumb_up:"
-                  )
-        st.warning('You can either proceed with the next step or select/upload new data below')
-
-    # Create T1 folder
-    if os.path.exists(st.session_state.paths["dset"]):
-        if not os.path.exists(st.session_state.paths["T1"]):
-            os.makedirs(st.session_state.paths["T1"])
-
     if st.session_state.app_type == "CLOUD":
 
         # Create T1 folder
+        if os.path.exists(st.session_state.paths["dset"]):
+            if not os.path.exists(st.session_state.paths["T1"]):
+                os.makedirs(st.session_state.paths["T1"])
+
+        # Check T1 folder
         flag_uploader = os.path.exists(st.session_state.paths["T1"])
 
         # Upload T1 files
@@ -57,14 +50,28 @@ with st.expander(":material/upload: Select or upload input data", expanded=False
 
         # Input dicom image folder
         helpmsg = "Input folder with T1 images (.nii/.nii.gz).\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
-        st.session_state.paths["T1"] = utilst.user_input_folder(
+        st.session_state.paths["user_T1"] = utilst.user_input_folder(
             "Select folder",
             "btn_indir_t1",
             "Input T1 image folder",
-            st.session_state.paths["last_sel"],
-            st.session_state.paths["T1"],
+            st.session_state.paths["last_in_dir"],
+            st.session_state.paths["user_T1"],
             helpmsg,
         )
+
+    # Link user input dicoms 
+    if not os.path.exists(st.session_state.paths["T1"]) and os.path.exists(st.session_state.paths["user_T1"]):
+        if not os.path.exists(os.path.dirname(st.session_state.paths["T1"])):
+            os.makedirs(os.path.dirname(st.session_state.paths["T1"]))
+        os.symlink(st.session_state.paths["user_T1"], st.session_state.paths["T1"])
+
+    fcount = utilio.get_file_count(st.session_state.paths["T1"])
+    if fcount > 0:
+        st.success(f'T1 scans ready ({st.session_state.paths["T1"]}, {fcount} files)',
+                   icon=":material/thumb_up:"
+                  )
+        st.warning('You can either proceed with the next step or select/upload new data')
+
 
 # Panel for running DLMUSE
 with st.expander(":material/grid_on: Segment image", expanded=False):

@@ -80,13 +80,13 @@ with st.expander(":material/upload: Select or upload input data", expanded=False
         "Select file",
         "btn_input_seg",
         "DLMUSE ROI file",
-        st.session_state.paths["last_sel"],
+        st.session_state.paths["last_in_dir"],
         st.session_state.paths["csv_plots"],
         helpmsg,
     )
     if os.path.exists(csv_plots):
         st.session_state.paths["csv_plots"] = csv_plots
-        st.session_state.paths["last_sel"] = csv_path
+        st.session_state.paths["last_in_dir"] = csv_path
 
         df = pd.read_csv(st.session_state.paths["csv_plots"])
         list_mrid = df.MRID.tolist()

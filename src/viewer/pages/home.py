@@ -8,6 +8,7 @@ if "instantiated" not in st.session_state:
 
     # App type ('DESKTOP' or 'CLOUD')
     st.session_state.app_type = "CLOUD"
+    st.session_state.app_type = "DESKTOP"
 
     # Dataframe to keep plot ids
     st.session_state.plots = pd.DataFrame(
@@ -40,13 +41,15 @@ if "instantiated" not in st.session_state:
     st.session_state.paths = {
         "root": "",
         "init": "",
-        "last_sel": "",
+        "last_in_dir": "",
         "dset": "",
         "out": "",
         "Lists": "",
         "Nifti": "",
         "Dicoms": "",
+        "user_Dicoms": "",
         "T1": "",
+        "user_T1": "",
         "T2": "",
         "FL": "",
         "DTI": "",
@@ -66,10 +69,15 @@ if "instantiated" not in st.session_state:
     st.session_state.paths["root"] = os.path.dirname(
         os.path.dirname(os.getcwd())
     )
-    st.session_state.paths["init"] = os.path.join(
-        st.session_state.paths["root"], "test"
-    )
-    st.session_state.paths["last_sel"] = st.session_state.paths["init"]
+
+    st.session_state.paths["init"] = st.session_state.paths["root"]
+
+    #########################################
+    # FIXME : set to test folder outside repo
+    st.session_state.paths["init"] = os.path.join(os.path.dirname(st.session_state.paths["root"]), 'TestData')
+    
+    st.session_state.paths["last_in_dir"] = st.session_state.paths["init"]
+    
 
     # FIXME: This sets the default out path on the cloud
     #        It's a folder inside the root folder for now
@@ -78,16 +86,6 @@ if "instantiated" not in st.session_state:
         st.session_state.paths["out"] = os.path.join(
             st.session_state.paths["root"], "output_folder"
         )
-
-    #########################################
-    # FIXME : for quick test
-    # st.session_state.paths['csv_mlscores'] = st.session_state.paths['root'] + '/test/test3_nifti+roi/output/MyStudy/MLScores/MyStudy_DLMUSE+MLScores.csv'
-    st.session_state.paths["init"] = os.path.join(
-        os.path.dirname(st.session_state.paths["root"]),
-        'TestData',
-        'TestDiffROIs'
-    )
-    st.session_state.paths["last_sel"] = st.session_state.paths["init"]
 
     #########################################
 

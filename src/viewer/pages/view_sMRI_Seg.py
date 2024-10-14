@@ -34,13 +34,13 @@ with st.expander(":material/upload: Select or upload input data", expanded=False
         "Select file",
         "btn_input_seg",
         "Subject list",
-        st.session_state.paths["last_sel"],
+        st.session_state.paths["last_in_dir"],
         st.session_state.paths["csv_seg"],
         helpmsg,
     )
     if os.path.exists(csv_seg):
         st.session_state.paths["csv_seg"] = csv_seg
-        st.session_state.paths["last_sel"] = csv_path
+        st.session_state.paths["last_in_dir"] = csv_path
 
     # Input T1 image folder
     helpmsg = "Path to T1 images.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
@@ -48,7 +48,7 @@ with st.expander(":material/upload: Select or upload input data", expanded=False
         "Select folder",
         "btn_indir_t1",
         "T1 folder",
-        st.session_state.paths["last_sel"],
+        st.session_state.paths["last_in_dir"],
         st.session_state.paths["T1"],
         helpmsg,
     )
@@ -60,7 +60,7 @@ with st.expander(":material/upload: Select or upload input data", expanded=False
         "Select folder",
         "btn_indir_seg",
         "DLMUSE folder",
-        st.session_state.paths["last_sel"],
+        st.session_state.paths["last_in_dir"],
         st.session_state.paths["DLMUSE"],
         helpmsg,
     )

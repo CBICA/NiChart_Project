@@ -33,13 +33,13 @@ with st.expander(":material/upload: Select or upload input data csv", expanded=F
         "Select file",
         "btn_input_seg",
         "DLMUSE ROI file",
-        st.session_state.paths["last_sel"],
+        st.session_state.paths["last_in_dir"],
         "",
         helpmsg,
     )
     if os.path.exists(csv_seg):
         st.session_state.paths["csv_seg"] = csv_seg
-        st.session_state.paths["last_sel"] = csv_path
+        st.session_state.paths["last_in_dir"] = csv_path
 
 # Panel for selecting demog csv
 with st.expander(":material/upload: Select or upload input demographics csv", expanded=False):
@@ -56,13 +56,13 @@ with st.expander(":material/upload: Select or upload input demographics csv", ex
         "Select file",
         "btn_input_demog",
         "Demographics file",
-        st.session_state.paths["last_sel"],
+        st.session_state.paths["last_in_dir"],
         st.session_state.paths["csv_demog"],
         helpmsg,
     )
     if os.path.exists(csv_demog):
         st.session_state.paths["csv_demog"] = csv_demog
-        st.session_state.paths["last_sel"] = csv_path
+        st.session_state.paths["last_in_dir"] = csv_path
 
 # Panel for running MLScore
 with st.expander(":material/model_training: Run MLScore", expanded=False):
