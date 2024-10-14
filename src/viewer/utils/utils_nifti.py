@@ -8,7 +8,7 @@ from scipy import ndimage
 
 VIEWS = ["axial", "coronal", "sagittal"]
 VIEW_AXES = [0, 1, 2]
-VIEW_OTHER_AXES = [(1, 2), (0, 1), (0, 2)]
+VIEW_OTHER_AXES = [(1, 2), (0, 2), (0, 1)]
 MASK_COLOR = (0, 255, 0)  # RGB format
 MASK_COLOR = np.array([0.0, 1.0, 0.0])  # RGB format
 OLAY_ALPHA = 0.2
@@ -32,13 +32,17 @@ def reorient_nifti(nii_in: Any, ref_orient: str = "LPS") -> Any:
     return nii_reorient
 
 
-def crop_image(img: np.ndarray, mask: np.ndarray) -> Any:
+def crop_image(img: np.ndarray, mask: np.ndarray, crop_to_mask: bool) -> Any:
     """
     Crop img to the foreground of the mask
     """
 
     # Detect bounding box
-    nz = np.nonzero(mask)
+    if crop_to_mask:
+        nz = np.nonzero(mask)
+    else:
+        nz = np.nonzero(img)
+        
     mn = np.min(nz, axis=1)
     mx = np.max(nz, axis=1)
 
@@ -133,7 +137,7 @@ def detect_img_bounds(img: np.ndarray) -> np.ndarray:
 
 @st.cache_data  # type:ignore
 def prep_image_and_olay(
-    f_img: np.ndarray, f_mask: Any, list_rois: list) -> Any:
+    f_img: np.ndarray, f_mask: Any, list_rois: list, crop_to_mask: bool) -> Any:
     """
     Read images from files and create 3D matrices for display
     """
@@ -156,11 +160,14 @@ def prep_image_and_olay(
         out_mask, nii_mask.header.get_zooms(), order=0, mode="nearest"
     )
 
+    # Shift values in out_img to remove negative values 
+    out_img = out_img - np.min([0, out_img.min()])
+
     # Convert image to uint
     out_img = out_img.astype(float) / out_img.max()
 
     # Crop image to ROIs and reshape
-    out_img, out_mask = crop_image(out_img, out_mask)
+    out_img, out_mask = crop_image(out_img, out_mask, crop_to_mask)
 
     # Create mask with sel roi
     out_mask = np.isin(out_mask, list_rois)

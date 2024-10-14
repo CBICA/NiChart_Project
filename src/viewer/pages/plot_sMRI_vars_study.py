@@ -429,7 +429,7 @@ with st.expander(":material/upload: Select input folders for the image viewer"):
     path_t1 = utilst.user_input_folder(
         "Select folder",
         "btn_indir_t1",
-        "Input folder",
+        "Input T1 image folder",
         st.session_state.paths["last_in_dir"],
         st.session_state.paths["T1"],
         helpmsg,
@@ -441,7 +441,7 @@ with st.expander(":material/upload: Select input folders for the image viewer"):
     path_seg = utilst.user_input_folder(
         "Select folder",
         "btn_indir_seg",
-        "Input folder",
+        "Input label image folder",
         st.session_state.paths["last_in_dir"],
         st.session_state.paths["DLMUSE"],
         helpmsg,
@@ -450,13 +450,13 @@ with st.expander(":material/upload: Select input folders for the image viewer"):
 
     # T1 suffix
     suff_t1img = utilst.user_input_text(
-        "T1 img suffix", st.session_state.suff_t1img, helpmsg
+        "T1 image suffix", st.session_state.suff_t1img, helpmsg
     )
     st.session_state.suff_t1img = suff_t1img
 
     # DLMUSE suffix
     suff_seg = utilst.user_input_text(
-        "DLMUSE image suffix", st.session_state.suff_seg, helpmsg
+        "Label image suffix", st.session_state.suff_seg, helpmsg
     )
     st.session_state.suff_seg = suff_seg
 
@@ -468,6 +468,9 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
 
     # View hide overlay
     is_show_overlay = st.checkbox("Show overlay", True)
+
+    # View hide overlay
+    crop_to_mask = st.checkbox("Crop to mask", True)
 
     flag_img = False
 
@@ -534,7 +537,8 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
                 img, mask, img_masked = utilni.prep_image_and_olay(
                     st.session_state.paths["sel_img"],
                     st.session_state.paths["sel_seg"],
-                    list_rois
+                    list_rois,
+                    crop_to_mask
                 )
 
                 # Detect mask bounds and center in each view
