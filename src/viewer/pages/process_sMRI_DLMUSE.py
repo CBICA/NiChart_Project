@@ -5,6 +5,12 @@ import streamlit as st
 import utils.utils_muse as utilmuse
 import utils.utils_nifti as utilni
 import utils.utils_st as utilst
+import utils.utils_io as utilio
+
+def save_and_unzip_files():
+    # Save files to local storage
+    if len(st.session_state['uploaded_t1s']) > 0:
+        utilio.save_uploaded_files(st.session_state['uploaded_t1s'], st.session_state.paths["T1"])
 
 st.markdown(
     """
@@ -20,21 +26,48 @@ st.markdown(
 utilst.util_panel_workingdir(st.session_state.app_type)
 
 # Panel for selecting input data
-with st.expander("Select or upload input data", expanded=False):
+with st.expander(":material/upload: Select or upload input data", expanded=False):
 
-    # Input T1 image folder
-    helpmsg = "DLMUSE will be applied to .nii/.nii.gz images directly in the input folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
-    st.session_state.paths["T1"] = utilst.user_input_folder(
-        "Select folder",
-        "btn_indir_t1",
-        "Input folder",
-        st.session_state.paths["last_sel"],
-        st.session_state.paths["T1"],
-        helpmsg,
-    )
+    fcount = utilio.get_file_count(st.session_state.paths["T1"])
+    if fcount > 0:
+        st.success(f'Detected input data ({st.session_state.paths["T1"]}, {fcount} files)',
+                   icon=":material/thumb_up:"
+                  )
+        st.warning('You can either proceed with the next step or select/upload new data below')
+
+    # Create T1 folder
+    if os.path.exists(st.session_state.paths["dset"]):
+        if not os.path.exists(st.session_state.paths["T1"]):
+            os.makedirs(st.session_state.paths["T1"])
+
+    if st.session_state.app_type == "CLOUD":
+
+        # Create T1 folder
+        flag_uploader = os.path.exists(st.session_state.paths["T1"])
+
+        # Upload T1 files
+        in_files = st.file_uploader(
+            "Upload T1 image(s)",
+            key = 'uploaded_t1s',
+            accept_multiple_files=True,
+            on_change = save_and_unzip_files
+        )
+
+    else:  # st.session_state.app_type == 'DESKTOP':
+
+        # Input dicom image folder
+        helpmsg = "Input folder with T1 images (.nii/.nii.gz).\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
+        st.session_state.paths["T1"] = utilst.user_input_folder(
+            "Select folder",
+            "btn_indir_t1",
+            "Input T1 image folder",
+            st.session_state.paths["last_sel"],
+            st.session_state.paths["T1"],
+            helpmsg,
+        )
 
 # Panel for running DLMUSE
-with st.expander("Run DLMUSE", expanded=False):
+with st.expander(":material/grid_on: Segment image", expanded=False):
 
     # Device type
     helpmsg = "Choose 'cuda' if your computer has an NVIDIA GPU, 'mps' if you have an Apple M-series chip, and 'cpu' if you have a standard CPU."
@@ -44,9 +77,9 @@ with st.expander("Run DLMUSE", expanded=False):
 
     # Button to run DLMUSE
     flag_btn = os.path.exists(st.session_state.paths["T1"])
-    btn_dlmuse = st.button("Run DLMUSE", disabled=not flag_btn)
+    btn_seg = st.button("Run DLMUSE", disabled=not flag_btn)
 
-    if btn_dlmuse:
+    if btn_seg:
         run_dir = os.path.join(st.session_state.paths["root"], "src", "NiChart_DLMUSE")
         if not os.path.exists(st.session_state.paths["DLMUSE"]):
             os.makedirs(st.session_state.paths["DLMUSE"])
@@ -63,26 +96,26 @@ with st.expander("Run DLMUSE", expanded=False):
             # Set the dlmuse csv output
             out_csv = f"{st.session_state.paths['DLMUSE']}/DLMUSE_Volumes.csv"
             if os.path.exists(out_csv):
-                st.session_state.paths["csv_dlmuse"] = out_csv
+                st.session_state.paths["csv_seg"] = out_csv
 
 # Panel for viewing DLMUSE images
-with st.expander("View segmentations", expanded=False):
+with st.expander(":material/visibility: View segmentations", expanded=False):
 
     # Set the dlmuse csv output
-    st.session_state.paths["csv_dlmuse"] = (
+    st.session_state.paths["csv_seg"] = (
         f"{st.session_state.paths['DLMUSE']}/DLMUSE_Volumes.csv"
     )
 
     # Selection of MRID
     try:
-        df = pd.read_csv(st.session_state.paths["csv_dlmuse"])
+        df = pd.read_csv(st.session_state.paths["csv_seg"])
         list_mrid = df.MRID.tolist()
     except:
         list_mrid = [""]
     sel_mrid = st.selectbox("MRID", list_mrid, key="selbox_mrid", index=None)
 
     # Select ROI
-    dict_roi, dict_derived = utilmuse.read_derived_roi_list(
+    dict_roi, dict_derived = utilmuse.derived_list_to_dict(
         st.session_state.dicts["muse_sel"], st.session_state.dicts["muse_derived"]
     )
     sel_var = st.selectbox("ROI", list(dict_roi.keys()), key="selbox_rois", index=0)
@@ -100,12 +133,12 @@ with st.expander("View segmentations", expanded=False):
         st.session_state.paths["sel_img"] = os.path.join(
             st.session_state.paths["T1"], sel_mrid + st.session_state.suff_t1img
         )
-        st.session_state.paths["sel_dlmuse"] = os.path.join(
-            st.session_state.paths["DLMUSE"], sel_mrid + st.session_state.suff_dlmuse
+        st.session_state.paths["sel_seg"] = os.path.join(
+            st.session_state.paths["DLMUSE"], sel_mrid + st.session_state.suff_seg
         )
 
         flag_img = os.path.exists(st.session_state.paths["sel_img"]) and os.path.exists(
-            st.session_state.paths["sel_dlmuse"]
+            st.session_state.paths["sel_seg"]
         )
 
     if flag_img:
@@ -115,7 +148,7 @@ with st.expander("View segmentations", expanded=False):
             # Process image and mask to prepare final 3d matrix to display
             img, mask, img_masked = utilni.prep_image_and_olay(
                 st.session_state.paths["sel_img"],
-                st.session_state.paths["sel_dlmuse"],
+                st.session_state.paths["sel_seg"],
                 sel_var_ind,
                 dict_derived,
             )

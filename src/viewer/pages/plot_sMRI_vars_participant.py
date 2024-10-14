@@ -66,19 +66,19 @@ def display_plot(df: pd.DataFrame, sel_mrid: str) -> None:
 utilst.util_panel_workingdir(st.session_state.app_type)
 
 # Panel for selecting input data
-with st.expander("Select or upload input data", expanded=False):
+with st.expander(":material/upload: Select or upload input data", expanded=False):
 
     # Set default path for the plot csv
     if os.path.exists(st.session_state.paths["csv_mlscores"]):
         st.session_state.paths["csv_plots"] = st.session_state.paths["csv_mlscores"]
-    elif os.path.exists(st.session_state.paths["csv_dlmuse"]):
-        st.session_state.paths["csv_plots"] = st.session_state.paths["csv_dlmuse"]
+    elif os.path.exists(st.session_state.paths["csv_seg"]):
+        st.session_state.paths["csv_plots"] = st.session_state.paths["csv_seg"]
 
     # Input csv
     helpmsg = "Input csv file with DLMUSE ROI volumes.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it"
     csv_plots, csv_path = utilst.user_input_file(
         "Select file",
-        "btn_input_dlmuse",
+        "btn_input_seg",
         "DLMUSE ROI file",
         st.session_state.paths["last_sel"],
         st.session_state.paths["csv_plots"],

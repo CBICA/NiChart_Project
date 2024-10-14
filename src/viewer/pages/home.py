@@ -58,10 +58,9 @@ if "instantiated" not in st.session_state:
         "sel_img": "",
         "sel_mask": "",
         "csv_demog": "",
-        "csv_dlmuse": "",
+        "csv_seg": "",
         "csv_plots": "",
         "csv_mlscores": "",
-        "csv_viewdlmuse": "",
     }
 
     st.session_state.paths["root"] = os.path.dirname(
@@ -83,9 +82,13 @@ if "instantiated" not in st.session_state:
     #########################################
     # FIXME : for quick test
     # st.session_state.paths['csv_mlscores'] = st.session_state.paths['root'] + '/test/test3_nifti+roi/output/MyStudy/MLScores/MyStudy_DLMUSE+MLScores.csv'
-    st.session_state.paths["last_sel"] = (
-        st.session_state.paths["init"] + "/../../TestData"
+    st.session_state.paths["init"] = os.path.join(
+        os.path.dirname(st.session_state.paths["root"]),
+        'TestData',
+        'TestDiffROIs'
     )
+    st.session_state.paths["last_sel"] = st.session_state.paths["init"]
+
     #########################################
 
     # Image modalities
@@ -114,12 +117,16 @@ if "instantiated" not in st.session_state:
 
     # Image suffixes
     st.session_state.suff_t1img = "_T1.nii.gz"
-    st.session_state.suff_dlmuse = "_T1_DLMUSE.nii.gz"
+    st.session_state.suff_seg = "_T1_DLMUSE.nii.gz"
 
     # Default values for plotting parameters
-    st.session_state.plot_xvar = "Age"
-    st.session_state.plot_yvar = "GM"
-    st.session_state.plot_hvar = "Sex"
+    st.session_state.plot_default_xvar = "Age"
+    st.session_state.plot_default_yvar = "GM"
+    st.session_state.plot_default_hvar = "Sex"
+
+    st.session_state.plot_xvar = ""
+    st.session_state.plot_yvar = ""
+    st.session_state.plot_hvar = ""
 
     st.session_state.trend_types = ["none", "ols", "lowess"]
     st.session_state.plot_trend = "none"

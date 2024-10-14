@@ -53,3 +53,10 @@ def save_uploaded_files(in_files: list, d_out: str) -> None:
     print("Extracting zip files")
     if os.path.exists(d_out):
         unzip_zip_files(d_out)
+
+def get_file_count(folder_path: str) -> int:
+    count = 0
+    if os.path.exists(folder_path):
+        for root, dirs, files in os.walk(folder_path):
+            count += len(files)
+    return count

@@ -50,7 +50,7 @@ name = "Participant Data (sMRI)"
 icon = ":black_small_square:"
 
 [[pages]]
-path = "pages/view_sMRI_DLMUSE.py"
+path = "pages/view_sMRI_Seg.py"
 name = "View Images (sMRI)"
 icon = ":black_small_square:"
 

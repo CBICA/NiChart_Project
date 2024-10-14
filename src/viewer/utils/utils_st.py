@@ -96,10 +96,10 @@ def browse_file(path_init: str) -> Any:
     """
     root = tk.Tk()
     root.withdraw()  # Hide the main window
-    out_path = filedialog.askopenfilename(initialdir=path_init)
-    path_out = os.path.dirname(out_path)
+    out_file = filedialog.askopenfilename(initialdir=path_init)
+    out_dir = os.path.dirname(out_file)
     root.destroy()
-    return out_path, path_out
+    return out_file, out_dir
 
 
 def browse_folder(path_init: str) -> str:
@@ -222,7 +222,7 @@ def update_default_paths() -> None:
         )
         print(f"setting {st.session_state.paths[d_tmp]}")
 
-    st.session_state.paths["csv_dlmuse"] = os.path.join(
+    st.session_state.paths["csv_seg"] = os.path.join(
         st.session_state.paths["dset"], "DLMUSE", "DLMUSE_Volumes.csv"
     )
 
@@ -240,7 +240,7 @@ def update_default_paths() -> None:
 def util_panel_workingdir(app_type: str) -> None:
 
     # Panel for selecting the working dir
-    with st.expander(":outbox_tray: Working Dir", expanded=False):
+    with st.expander(":material/folder_shared: Working Dir", expanded=False):
 
         curr_dir = st.session_state.paths["dset"]
 
@@ -257,9 +257,9 @@ def util_panel_workingdir(app_type: str) -> None:
             )
 
         # Read dataset name (used to create a folder where all results will be saved)
-        helpmsg = "Each dataset's results are organized in a dedicated folder named after the dataset"
+        helpmsg = "Each study's results are organized in a dedicated folder named after the study"
         st.session_state.dset_name = user_input_text(
-            "Dataset name", st.session_state.dset_name, helpmsg
+            "Study name", st.session_state.dset_name, helpmsg
         )
 
         if st.session_state.dset_name != "":
@@ -277,9 +277,10 @@ def util_panel_workingdir(app_type: str) -> None:
             # Update paths for output subfolders
             update_default_paths()
 
+        if os.path.exists(st.session_state.paths['dset']):
             st.success(
                 f"All results will be saved to: {st.session_state.paths['dset']}",
-                icon=":material/thumb_up:",
+                icon=":material/thumb_up:"
             )
 
 

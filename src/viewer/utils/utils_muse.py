@@ -3,7 +3,7 @@ from typing import Any
 import pandas as pd
 
 
-def read_derived_roi_list(list_sel_rois: list, list_derived: list) -> Any:
+def derived_list_to_dict(list_sel_rois: list, list_derived: list) -> Any:
     """
     Create a dictionary from derived roi list
     """
@@ -26,3 +26,25 @@ def read_derived_roi_list(list_sel_rois: list, list_derived: list) -> Any:
         dict_derived[tmp_ind] = sel_vals
 
     return dict_roi, dict_derived
+
+
+def get_derived_rois(sel_roi: str, list_derived: list) -> Any:
+    """
+    Create a list of derived roi indices for the selected roi
+    """
+
+    # Read list
+    df = pd.read_csv(list_derived, header=None)
+
+    # Keep only selected ROI
+    df = df[df[1] == sel_roi]
+
+    if df.shape[0] == 0:
+        return []
+
+    # Get list of derived rois
+    sel_vals = df.drop([0, 1], axis=1).T.dropna().astype(int).values.flatten()
+
+    return sel_vals
+
+

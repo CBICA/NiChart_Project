@@ -83,7 +83,28 @@ def display_plot(df: pd.DataFrame, plot_id: str) -> None:
                     "Plot Type", ["DistPlot", "RegPlot"], key=f"plot_type_{plot_id}"
                 )
 
-                # Get plot params
+                # Get df columns
+                list_cols = df.columns.to_list()
+
+                # Get default plot params
+                if st.session_state.plots.loc[plot_id].xvar not in list_cols:
+                    if st.session_state.plot_default_xvar in list_cols:
+                        st.session_state.plots.loc[plot_id].xvar = st.session_state.plot_default_xvar
+                    else:
+                        st.session_state.plots.loc[plot_id].xvar = list_cols[1]
+
+                if st.session_state.plots.loc[plot_id].yvar not in list_cols:
+                    if st.session_state.plot_default_yvar in list_cols:
+                        st.session_state.plots.loc[plot_id].yvar = st.session_state.plot_default_yvar
+                    else:
+                        st.session_state.plots.loc[plot_id].yvar = list_cols[2]
+
+                if st.session_state.plots.loc[plot_id].hvar not in list_cols:
+                    if st.session_state.plot_default_hvar in list_cols:
+                        st.session_state.plots.loc[plot_id].hvar = st.session_state.plot_default_hvar
+                    else:
+                        st.session_state.plots.loc[plot_id].hvar = ''
+
                 xvar = st.session_state.plots.loc[plot_id].xvar
                 yvar = st.session_state.plots.loc[plot_id].yvar
                 hvar = st.session_state.plots.loc[plot_id].hvar
@@ -92,7 +113,10 @@ def display_plot(df: pd.DataFrame, plot_id: str) -> None:
                 # Select plot params from the user
                 xind = df.columns.get_loc(xvar)
                 yind = df.columns.get_loc(yvar)
-                hind = df.columns.get_loc(hvar)
+                if hvar != '':
+                    hind = df.columns.get_loc(hvar)
+                else:
+                    hind = None
                 tind = st.session_state.trend_types.index(trend)
 
                 xvar = st.selectbox(
@@ -178,9 +202,13 @@ def display_plot(df: pd.DataFrame, plot_id: str) -> None:
         if len(sel_info["selection"]["points"]) > 0:
 
             sind = sel_info["selection"]["point_indices"][0]
-            lgroup = sel_info["selection"]["points"][0]["legendgroup"]
 
-            sel_mrid = df_filt[df_filt[hvar] == lgroup].iloc[sind]["MRID"]
+            if hind is None:
+                sel_mrid = df_filt.iloc[sind]["MRID"]
+            else:
+                lgroup = sel_info["selection"]["points"][0]["legendgroup"]
+                sel_mrid = df_filt[df_filt[hvar] == lgroup].iloc[sind]["MRID"]
+
             sel_roi = st.session_state.plots.loc[st.session_state.plot_active, "yvar"]
 
             st.session_state.sel_mrid = sel_mrid
@@ -265,19 +293,22 @@ def filter_dataframe(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
 utilst.util_panel_workingdir(st.session_state.app_type)
 
 # Panel for selecting input data
-with st.expander("Select or upload input data", expanded=False):
+with st.expander(":material/upload: Select or upload input data", expanded=False):
 
     # Set default path for the plot csv
     if os.path.exists(st.session_state.paths["csv_mlscores"]):
         st.session_state.paths["csv_plots"] = st.session_state.paths["csv_mlscores"]
-    elif os.path.exists(st.session_state.paths["csv_dlmuse"]):
-        st.session_state.paths["csv_plots"] = st.session_state.paths["csv_dlmuse"]
+    elif os.path.exists(st.session_state.paths["csv_seg"]):
+        st.session_state.paths["csv_plots"] = st.session_state.paths["csv_seg"]
+
+    if os.path.exists(st.session_state.paths["csv_plots"]):
+        st.success(f'Input file detected! Using: {st.session_state.paths["csv_plots"]}')
 
     # Input csv
-    helpmsg = "Input csv file with DLMUSE ROI volumes.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it"
+    helpmsg = "Input csv file with segmented ROI volumes.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it"
     csv_plots, csv_path = utilst.user_input_file(
         "Select file",
-        "btn_input_dlmuse",
+        "btn_input_seg",
         "DLMUSE ROI file",
         st.session_state.paths["last_sel"],
         st.session_state.paths["csv_plots"],
@@ -365,7 +396,7 @@ with st.sidebar:
                 )
 
 # Panel for plots
-with st.expander("Plot data", expanded=False):
+with st.expander(":material/monitoring: Plot data", expanded=False):
 
     # Button to add a new plot
     if st.button("Add plot"):
@@ -391,7 +422,8 @@ with st.expander("Plot data", expanded=False):
             with blocks[column_no]:
                 display_plot(df, plot_ind)
 
-with st.expander("Select input folders for the image viewer"):
+# Panel for selecting input folders for images
+with st.expander(":material/upload: Select input folders for the image viewer"):
     # Input T1 image folder
     helpmsg = "Folder with T1 images.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
     path_t1 = utilst.user_input_folder(
@@ -406,15 +438,15 @@ with st.expander("Select input folders for the image viewer"):
 
     # Input DLMUSE image folder
     helpmsg = "Folder with DLMUSE images.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
-    path_dlmuse = utilst.user_input_folder(
+    path_seg = utilst.user_input_folder(
         "Select folder",
-        "btn_indir_dlmuse",
+        "btn_indir_seg",
         "Input folder",
         st.session_state.paths["last_sel"],
         st.session_state.paths["DLMUSE"],
         helpmsg,
     )
-    st.session_state.paths["DLMUSE"] = path_dlmuse
+    st.session_state.paths["DLMUSE"] = path_seg
 
     # T1 suffix
     suff_t1img = utilst.user_input_text(
@@ -423,13 +455,13 @@ with st.expander("Select input folders for the image viewer"):
     st.session_state.suff_t1img = suff_t1img
 
     # DLMUSE suffix
-    suff_dlmuse = utilst.user_input_text(
-        "DLMUSE image suffix", st.session_state.suff_dlmuse, helpmsg
+    suff_seg = utilst.user_input_text(
+        "DLMUSE image suffix", st.session_state.suff_seg, helpmsg
     )
-    st.session_state.suff_dlmuse = suff_dlmuse
+    st.session_state.suff_seg = suff_seg
 
-# Panel for viewing images and DLMUSE masks
-with st.expander("View segmentations", expanded=False):
+# Panel for viewing images and segmentations
+with st.expander(":material/visibility: View segmentations", expanded=False):
 
     # Create a list of checkbox options
     list_orient = st.multiselect("Select viewing planes:", VIEWS, VIEWS)
@@ -446,34 +478,42 @@ with st.expander("View segmentations", expanded=False):
             st.session_state.paths["T1"],
             st.session_state.sel_mrid + st.session_state.suff_t1img,
         )
-        st.session_state.paths["sel_dlmuse"] = os.path.join(
+        st.session_state.paths["sel_seg"] = os.path.join(
             st.session_state.paths["DLMUSE"],
-            st.session_state.sel_mrid + st.session_state.suff_dlmuse,
+            st.session_state.sel_mrid + st.session_state.suff_seg,
         )
         if not os.path.exists(st.session_state.paths["sel_img"]):
             st.warning(
                 f"Could not find underlay image: {st.session_state.paths['sel_img']}"
             )
 
-        if not os.path.exists(st.session_state.paths["sel_dlmuse"]):
+        if not os.path.exists(st.session_state.paths["sel_seg"]):
             st.warning(
-                f"Could not find overlay image: {st.session_state.paths['sel_dlmuse']}"
+                f"Could not find overlay image: {st.session_state.paths['sel_seg']}"
             )
 
         flag_img = os.path.exists(st.session_state.paths["sel_img"]) and os.path.exists(
-            st.session_state.paths["sel_dlmuse"]
+            st.session_state.paths["sel_seg"]
         )
 
     if flag_img:
         with st.spinner("Wait for it..."):
 
-            dict_roi, dict_derived = utilmuse.read_derived_roi_list(
-                st.session_state.dicts["muse_sel"],
-                st.session_state.dicts["muse_derived"],
-            )
-
+            # Check if sel label is an index that is present in the seg mask
             sel_var = st.session_state.plots.loc[st.session_state.plot_active, "yvar"]
-            sel_var_ind = dict_roi[sel_var]
+            is_in_mask = False
+
+            if os.path.exists(st.session_state.paths["sel_seg"]):
+                is_in_mask = utilni.check_roi_index(st.session_state.paths["sel_seg"], sel_var)
+
+            if is_in_mask:
+                list_rois = [int(sel_var)]
+
+            else:
+                list_rois = utilmuse.get_derived_rois(
+                    sel_var,
+                    st.session_state.dicts["muse_derived"],
+                )
 
             # Process image and mask to prepare final 3d matrix to display
             flag_files = 1
@@ -482,10 +522,10 @@ with st.expander("View segmentations", expanded=False):
                 warn_msg = (
                     f"Missing underlay image: {st.session_state.paths['sel_img']}"
                 )
-            if not os.path.exists(st.session_state.paths["sel_dlmuse"]):
+            if not os.path.exists(st.session_state.paths["sel_seg"]):
                 flag_files = 0
                 warn_msg = (
-                    f"Missing overlay image: {st.session_state.paths['sel_dlmuse']}"
+                    f"Missing overlay image: {st.session_state.paths['sel_seg']}"
                 )
 
             if flag_files == 0:
@@ -493,9 +533,8 @@ with st.expander("View segmentations", expanded=False):
             else:
                 img, mask, img_masked = utilni.prep_image_and_olay(
                     st.session_state.paths["sel_img"],
-                    st.session_state.paths["sel_dlmuse"],
-                    sel_var_ind,
-                    dict_derived,
+                    st.session_state.paths["sel_seg"],
+                    list_rois
                 )
 
                 # Detect mask bounds and center in each view
@@ -517,6 +556,7 @@ with st.expander("View segmentations", expanded=False):
                                 mask_bounds[ind_view, :],
                                 tmp_orient,
                             )
+
 
 with st.expander("FIXME: TMP - Session state"):
     st.write(st.session_state)
