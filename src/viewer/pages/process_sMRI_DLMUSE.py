@@ -26,7 +26,7 @@ st.markdown(
 utilst.util_panel_workingdir(st.session_state.app_type)
 
 # Panel for selecting input data
-with st.expander("Select or upload input data", expanded=False):
+with st.expander(":material/upload: Select or upload input data", expanded=False):
 
     fcount = utilio.get_file_count(st.session_state.paths["T1"])
     if fcount > 0:
@@ -67,7 +67,7 @@ with st.expander("Select or upload input data", expanded=False):
         )
 
 # Panel for running DLMUSE
-with st.expander("Run DLMUSE", expanded=False):
+with st.expander(":material/grid_on: Segment image", expanded=False):
 
     # Device type
     helpmsg = "Choose 'cuda' if your computer has an NVIDIA GPU, 'mps' if you have an Apple M-series chip, and 'cpu' if you have a standard CPU."
@@ -99,7 +99,7 @@ with st.expander("Run DLMUSE", expanded=False):
                 st.session_state.paths["csv_seg"] = out_csv
 
 # Panel for viewing DLMUSE images
-with st.expander("View segmentations", expanded=False):
+with st.expander(":material/visibility: View segmentations", expanded=False):
 
     # Set the dlmuse csv output
     st.session_state.paths["csv_seg"] = (

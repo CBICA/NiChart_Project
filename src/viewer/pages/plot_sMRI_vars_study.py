@@ -293,7 +293,7 @@ def filter_dataframe(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
 utilst.util_panel_workingdir(st.session_state.app_type)
 
 # Panel for selecting input data
-with st.expander("Select or upload input data", expanded=False):
+with st.expander(":material/upload: Select or upload input data", expanded=False):
 
     # Set default path for the plot csv
     if os.path.exists(st.session_state.paths["csv_mlscores"]):
@@ -396,7 +396,7 @@ with st.sidebar:
                 )
 
 # Panel for plots
-with st.expander("Plot data", expanded=False):
+with st.expander(":material/monitoring: Plot data", expanded=False):
 
     # Button to add a new plot
     if st.button("Add plot"):
@@ -423,7 +423,7 @@ with st.expander("Plot data", expanded=False):
                 display_plot(df, plot_ind)
 
 # Panel for selecting input folders for images
-with st.expander("Select input folders for the image viewer"):
+with st.expander(":material/upload: Select input folders for the image viewer"):
     # Input T1 image folder
     helpmsg = "Folder with T1 images.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
     path_t1 = utilst.user_input_folder(
@@ -461,7 +461,7 @@ with st.expander("Select input folders for the image viewer"):
     st.session_state.suff_seg = suff_seg
 
 # Panel for viewing images and segmentations
-with st.expander("View segmentations", expanded=False):
+with st.expander(":material/visibility: View segmentations", expanded=False):
 
     # Create a list of checkbox options
     list_orient = st.multiselect("Select viewing planes:", VIEWS, VIEWS)

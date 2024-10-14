@@ -66,7 +66,7 @@ def display_plot(df: pd.DataFrame, sel_mrid: str) -> None:
 utilst.util_panel_workingdir(st.session_state.app_type)
 
 # Panel for selecting input data
-with st.expander("Select or upload input data", expanded=False):
+with st.expander(":material/upload: Select or upload input data", expanded=False):
 
     # Set default path for the plot csv
     if os.path.exists(st.session_state.paths["csv_mlscores"]):

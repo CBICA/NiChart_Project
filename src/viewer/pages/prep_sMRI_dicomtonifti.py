@@ -104,7 +104,7 @@ with st.expander(":material/manage_search: Detect dicom series", expanded=False)
 
 
 # Panel for selecting and extracting dicom series
-with st.expander(":material/neurology: Extract scans", expanded=False):
+with st.expander(":material/auto_awesome_motion: Extract scans", expanded=False):
 
     # Selection of img modality
     helpmsg = "Modality of the extracted images"

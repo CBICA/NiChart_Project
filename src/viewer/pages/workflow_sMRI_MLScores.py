@@ -19,7 +19,7 @@ st.markdown(
 utilst.util_panel_workingdir(st.session_state.app_type)
 
 # Panel for selecting data csv
-with st.expander("Select or upload input data csv", expanded=False):
+with st.expander(":material/upload: Select or upload input data csv", expanded=False):
 
     if os.path.exists(st.session_state.paths["csv_seg"]):
         st.success(f'Detected input data ({st.session_state.paths["Dicoms"]}, {fcount} files)',
@@ -42,7 +42,7 @@ with st.expander("Select or upload input data csv", expanded=False):
         st.session_state.paths["last_sel"] = csv_path
 
 # Panel for selecting demog csv
-with st.expander("Select or upload input demographics csv", expanded=False):
+with st.expander(":material/upload: Select or upload input demographics csv", expanded=False):
 
     if os.path.exists(st.session_state.paths["csv_demog"]):
         st.success(f'Detected input data ({st.session_state.paths["Dicoms"]}, {fcount} files)',
@@ -65,7 +65,7 @@ with st.expander("Select or upload input demographics csv", expanded=False):
         st.session_state.paths["last_sel"] = csv_path
 
 # Panel for running MLScore
-with st.expander("Run MLScore", expanded=False):
+with st.expander(":material/model_training: Run MLScore", expanded=False):
 
     # Button to run MLScore
     flag_btn = os.path.exists(st.session_state.paths["csv_demog"]) and os.path.exists(
