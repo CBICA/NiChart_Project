@@ -1,5 +1,7 @@
 import os
 
+import traceback
+
 import pandas as pd
 import plotly.express as px
 import streamlit as st
@@ -309,7 +311,7 @@ with st.expander(":material/upload: Select or upload input data", expanded=False
     csv_plots, csv_path = utilst.user_input_file(
         "Select file",
         "btn_input_seg",
-        "DLMUSE ROI file",
+        "ROI data file",
         st.session_state.paths["last_in_dir"],
         st.session_state.paths["csv_plots"],
         helpmsg,
@@ -318,12 +320,40 @@ with st.expander(":material/upload: Select or upload input data", expanded=False
         st.session_state.paths["csv_plots"] = csv_plots
         st.session_state.paths["last_in_dir"] = csv_path
 
+    # Input ROI dict
+    helpmsg = "ROI dictionary to rename ROI indices. Should include two columns: ROI_Name, ROI_Index.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it"
+    csv_roidict, csv_path = utilst.user_input_file(
+        "Select file",
+        "btn_input_roidict",
+        "ROI dictionary",
+        st.session_state.paths["last_in_dir"],
+        st.session_state.paths["csv_roidict"],
+        helpmsg,
+    )
+    if os.path.exists(csv_roidict):
+        st.session_state.paths["csv_roidict"] = csv_roidict
+        st.session_state.paths["last_in_dir"] = csv_path
+
+
 # Page controls in side bar
 with st.sidebar:
     df = pd.DataFrame()
     if os.path.exists(st.session_state.paths["csv_plots"]):
         # Read input csv
-        df = pd.read_csv(csv_plots)
+        df = pd.read_csv(st.session_state.paths["csv_plots"])
+        
+        # Apply roi dict to rename columns
+        try:
+            df_dict = pd.read_csv(st.session_state.paths["csv_roidict"])
+            dict_r1 = dict(zip(df_dict['ROI_Index'].astype(str), df_dict['ROI_Name'].astype(str)))
+            dict_r2 = dict(zip(df_dict['ROI_Name'].astype(str), df_dict['ROI_Index'].astype(str)))
+            st.session_state.roi_dict = dict_r1
+            st.session_state.roi_dict_rev = dict_r2
+            df = df.rename(columns = dict_r1)
+            
+        except Exception as e:
+            st.warning('Could not rename columns using roi dict!')
+        
         with st.container(border=True):
             # Slider to set number of plots in a row
             st.session_state.plots_per_row = st.slider(
@@ -435,27 +465,6 @@ with st.expander(":material/settings: Viewer settings", expanded=False):
     # View hide overlay
     crop_to_mask = st.checkbox("Crop to mask", True)
 
-    if st.session_state.sel_mrid == "":
-        st.warning("Please select a subject on the plot!")
-    else:
-        st.session_state.paths["sel_img"] = os.path.join(
-            st.session_state.paths["T1"],
-            st.session_state.sel_mrid + st.session_state.suff_t1img,
-        )
-        st.session_state.paths["sel_seg"] = os.path.join(
-            st.session_state.paths["DLMUSE"],
-            st.session_state.sel_mrid + st.session_state.suff_seg,
-        )
-        if not os.path.exists(st.session_state.paths["sel_img"]):
-            st.warning(
-                f"Could not find underlay image: {st.session_state.paths['sel_img']}"
-            )
-
-        if not os.path.exists(st.session_state.paths["sel_seg"]):
-            st.warning(
-                f"Could not find overlay image: {st.session_state.paths['sel_seg']}"
-            )
-
 # Panel for selecting input folders for images
 with st.expander(":material/upload: Viewer input folders"):
     # Input T1 image folder
@@ -497,17 +506,44 @@ with st.expander(":material/upload: Viewer input folders"):
 # Panel for viewing images and segmentations
 with placeholder_imgview.expander(":material/visibility: View segmentations", expanded=False):
 
-    flag_img = os.path.exists(st.session_state.paths["sel_img"]) and os.path.exists(
-        st.session_state.paths["sel_seg"]
-    )
+    flag_show = True
+    if st.session_state.sel_mrid == "":
+        st.warning("Please select a subject on the plot!")
+        flag_show = False
+    else:
+        st.session_state.paths["sel_img"] = os.path.join(
+            st.session_state.paths["T1"],
+            st.session_state.sel_mrid + st.session_state.suff_t1img,
+        )
+        st.session_state.paths["sel_seg"] = os.path.join(
+            st.session_state.paths["DLMUSE"],
+            st.session_state.sel_mrid + st.session_state.suff_seg,
+        )
+        if not os.path.exists(st.session_state.paths["sel_img"]):
+            st.warning(
+                f"Could not find underlay image: {st.session_state.paths['sel_img']}"
+            )
+            #st.error('Underlay image not found. Please check input path and suffix in the panel below!')
+            flag_show = False
 
-    if flag_img:
+        if not os.path.exists(st.session_state.paths["sel_seg"]):
+            st.warning(
+                f"Could not find overlay image: {st.session_state.paths['sel_seg']}"
+            )
+            flag_show = False
+
+    if flag_show:
         with st.spinner("Wait for it..."):
 
-            # Check if sel label is an index that is present in the seg mask
+            # Get selected y var
             sel_var = st.session_state.plots.loc[st.session_state.plot_active, "yvar"]
-            is_in_mask = False
 
+            # If roi dictionary was used, detect index
+            if st.session_state.roi_dict_rev is not None:
+                sel_var = st.session_state.roi_dict_rev[sel_var]
+
+            # Check if index exists in overlay mask
+            is_in_mask = False
             if os.path.exists(st.session_state.paths["sel_seg"]):
                 is_in_mask = utilni.check_roi_index(st.session_state.paths["sel_seg"], sel_var)
 

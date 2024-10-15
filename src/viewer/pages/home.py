@@ -63,6 +63,7 @@ if "instantiated" not in st.session_state:
         "csv_demog": "",
         "csv_seg": "",
         "csv_plots": "",
+        "csv_roidict": "",
         "csv_mlscores": "",
     }
 
@@ -99,6 +100,10 @@ if "instantiated" not in st.session_state:
         "muse_all": os.path.join(tmp_dir, "list_MUSE_all.csv"),
         "muse_sel": os.path.join(tmp_dir, "list_MUSE_primary.csv"),
     }
+
+    # Current roi dictionary
+    st.session_state.roi_dict = None
+    st.session_state.roi_dict_rev = None
 
     # Input image vars
     st.session_state.list_input_nifti = []
