@@ -422,8 +422,46 @@ with st.expander(":material/monitoring: Plot data", expanded=False):
             with blocks[column_no]:
                 display_plot(df, plot_ind)
 
+placeholder_imgview = st.empty()
+
+with st.expander(":material/settings: Viewer settings", expanded=False):
+
+    # Create a list of checkbox options
+    list_orient = st.multiselect("Select viewing planes:", VIEWS, VIEWS)
+
+    # View hide overlay
+    is_show_overlay = st.checkbox("Show overlay", True)
+
+    # View hide overlay
+    crop_to_mask = st.checkbox("Crop to mask", True)
+
+    if st.session_state.sel_mrid == "":
+        st.warning("Please select a subject on the plot!")
+    else:
+        st.session_state.paths["sel_img"] = os.path.join(
+            st.session_state.paths["T1"],
+            st.session_state.sel_mrid + st.session_state.suff_t1img,
+        )
+        st.session_state.paths["sel_seg"] = os.path.join(
+            st.session_state.paths["DLMUSE"],
+            st.session_state.sel_mrid + st.session_state.suff_seg,
+        )
+        if not os.path.exists(st.session_state.paths["sel_img"]):
+            st.warning(
+                f"Could not find underlay image: {st.session_state.paths['sel_img']}"
+            )
+
+        if not os.path.exists(st.session_state.paths["sel_seg"]):
+            st.warning(
+                f"Could not find overlay image: {st.session_state.paths['sel_seg']}"
+            )
+
+        flag_img = os.path.exists(st.session_state.paths["sel_img"]) and os.path.exists(
+            st.session_state.paths["sel_seg"]
+        )
+
 # Panel for selecting input folders for images
-with st.expander(":material/upload: Select input folders for the image viewer"):
+with st.expander(":material/upload: Viewer input folders"):
     # Input T1 image folder
     helpmsg = "Folder with T1 images.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
     path_t1 = utilst.user_input_folder(
@@ -461,44 +499,7 @@ with st.expander(":material/upload: Select input folders for the image viewer"):
     st.session_state.suff_seg = suff_seg
 
 # Panel for viewing images and segmentations
-with st.expander(":material/visibility: View segmentations", expanded=False):
-
-    # Create a list of checkbox options
-    list_orient = st.multiselect("Select viewing planes:", VIEWS, VIEWS)
-
-    # View hide overlay
-    is_show_overlay = st.checkbox("Show overlay", True)
-
-    # View hide overlay
-    crop_to_mask = st.checkbox("Crop to mask", True)
-
-    flag_img = False
-
-    if st.session_state.sel_mrid == "":
-        st.warning("Please select a subject on the plot!")
-    else:
-        st.session_state.paths["sel_img"] = os.path.join(
-            st.session_state.paths["T1"],
-            st.session_state.sel_mrid + st.session_state.suff_t1img,
-        )
-        st.session_state.paths["sel_seg"] = os.path.join(
-            st.session_state.paths["DLMUSE"],
-            st.session_state.sel_mrid + st.session_state.suff_seg,
-        )
-        if not os.path.exists(st.session_state.paths["sel_img"]):
-            st.warning(
-                f"Could not find underlay image: {st.session_state.paths['sel_img']}"
-            )
-
-        if not os.path.exists(st.session_state.paths["sel_seg"]):
-            st.warning(
-                f"Could not find overlay image: {st.session_state.paths['sel_seg']}"
-            )
-
-        flag_img = os.path.exists(st.session_state.paths["sel_img"]) and os.path.exists(
-            st.session_state.paths["sel_seg"]
-        )
-
+with placeholder_imgview.expander(":material/visibility: View segmentations", expanded=False):
     if flag_img:
         with st.spinner("Wait for it..."):
 
@@ -558,7 +559,7 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
                                 img_masked,
                                 ind_view,
                                 mask_bounds[ind_view, :],
-                                tmp_orient,
+                                tmp_orient
                             )
 
 
