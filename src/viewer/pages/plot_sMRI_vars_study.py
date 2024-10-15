@@ -456,10 +456,6 @@ with st.expander(":material/settings: Viewer settings", expanded=False):
                 f"Could not find overlay image: {st.session_state.paths['sel_seg']}"
             )
 
-        flag_img = os.path.exists(st.session_state.paths["sel_img"]) and os.path.exists(
-            st.session_state.paths["sel_seg"]
-        )
-
 # Panel for selecting input folders for images
 with st.expander(":material/upload: Viewer input folders"):
     # Input T1 image folder
@@ -500,6 +496,11 @@ with st.expander(":material/upload: Viewer input folders"):
 
 # Panel for viewing images and segmentations
 with placeholder_imgview.expander(":material/visibility: View segmentations", expanded=False):
+
+    flag_img = os.path.exists(st.session_state.paths["sel_img"]) and os.path.exists(
+        st.session_state.paths["sel_seg"]
+    )
+
     if flag_img:
         with st.spinner("Wait for it..."):
 
