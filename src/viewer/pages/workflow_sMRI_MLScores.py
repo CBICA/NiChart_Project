@@ -28,6 +28,10 @@ def save_dlmuse_file():
 utilst.util_panel_workingdir(st.session_state.app_type)
 
 # Panel for selecting data csv
+utilst.util_panel_infile(st.session_state.app_type)
+
+
+# Panel for selecting data csv
 with st.expander(":material/upload: Select or upload input data csv", expanded=False):
 
     if st.session_state.app_type == "CLOUD":
