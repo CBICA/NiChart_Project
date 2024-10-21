@@ -14,14 +14,6 @@ def progress(p: int, i: int, decoded: Any) -> None:
     with result_holder.container():
         st.progress(p, f"Progress: Token position={i}")
 
-#def save_and_unzip_files():
-    ## Save files to local storage
-    #if len(st.session_state['uploaded_dicoms']) > 0:
-        #utilio.copy_and_unzip_uploaded_files(
-            #st.session_state['uploaded_dicoms'],
-            #st.session_state.paths["Dicoms"]
-        #)
-
 st.markdown(
     """
     - Enables users to extract raw DICOM files in the input directory to NIFTI format.
@@ -75,7 +67,6 @@ with st.expander(":material/manage_search: Detect dicom series", expanded=False)
             f"Detected {num_scans} scans in {len(list_series)} series!",
             icon=":material/thumb_up:",
         )
-
 
 # Panel for selecting and extracting dicom series
 with st.expander(":material/auto_awesome_motion: Extract scans", expanded=False):
@@ -165,9 +156,9 @@ with st.expander(":material/visibility: View images", expanded=False):
 # Panel for downloading results
 if st.session_state.app_type == "CLOUD":
     with st.expander(":material/download: Download Results", expanded=False):
-        # Zip results
-        flag_btn = os.path.exists(st.session_state.paths[st.session_state.sel_mod])
 
+        # Zip results and download
+        flag_btn = os.path.exists(st.session_state.paths[st.session_state.sel_mod])
         out_zip = bytes()
         if flag_btn:
             if not os.path.exists(st.session_state.paths["OutZipped"]):
@@ -181,7 +172,6 @@ if st.session_state.app_type == "CLOUD":
             file_name=f"{st.session_state.sel_mod}.zip",
             disabled=not flag_btn,
         )
-
 
 with st.expander("TMP: session vars"):
     st.write(st.session_state)
