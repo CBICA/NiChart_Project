@@ -17,7 +17,10 @@ def progress(p: int, i: int, decoded: Any) -> None:
 def save_and_unzip_files():
     # Save files to local storage
     if len(st.session_state['uploaded_dicoms']) > 0:
-        utilio.save_uploaded_files(st.session_state['uploaded_dicoms'], st.session_state.paths["Dicoms"])
+        utilio.copy_and_unzip_uploaded_files(
+            st.session_state['uploaded_dicoms'],
+            st.session_state.paths["Dicoms"]
+        )
 
 st.markdown(
     """
@@ -65,8 +68,8 @@ with st.expander(":material/upload: Select or upload input data", expanded=False
             st.session_state.paths["user_Dicoms"],
             helpmsg,
         )
-        
-        # Link user input dicoms 
+
+        # Link user input dicoms
         if not os.path.exists(st.session_state.paths["Dicoms"]) and os.path.exists(st.session_state.paths["user_Dicoms"]):
             os.symlink(st.session_state.paths["user_Dicoms"], st.session_state.paths["Dicoms"])
 

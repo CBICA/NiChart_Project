@@ -15,37 +15,73 @@ st.markdown(
         """
 )
 
+def save_dlmuse_file():
+    # Save dlmuse file to local storage
+    if len(st.session_state['uploaded_dlmuse']) > 0:
+        utilio.copy_uploaded_file(
+            st.session_state['uploaded_dlmuse'],
+            os.path.join(st.session_state.paths["DLMUSE"], 'DLMUSE.csv')
+        )
+
+
 # Panel for output (dataset name + out_dir)
 utilst.util_panel_workingdir(st.session_state.app_type)
 
 # Panel for selecting data csv
 with st.expander(":material/upload: Select or upload input data csv", expanded=False):
 
-    if os.path.exists(st.session_state.paths["csv_seg"]):
-        st.success(f'Detected input data ({st.session_state.paths["Dicoms"]}, {fcount} files)',
-                   icon=":material/thumb_up:"
-                  )
-        st.warning('You can either proceed with the next step or select/upload new data below')
+    if st.session_state.app_type == "CLOUD":
 
-    # DLMUSE file name
-    helpmsg = "Input csv file with DLMUSE ROI volumes.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it"
-    csv_seg, csv_path = utilst.user_input_file(
-        "Select file",
-        "btn_input_seg",
-        "DLMUSE ROI file",
-        st.session_state.paths["last_in_dir"],
-        "",
-        helpmsg,
-    )
+        # Create DLMUSE folder
+        if os.path.exists(st.session_state.paths["dset"]):
+            if not os.path.exists(st.session_state.paths["DLMUSE"]):
+                os.makedirs(st.session_state.paths["DLMUSE"])
+
+        # Create DLMUSE folder
+        flag_uploader = os.path.exists(st.session_state.paths["DLMUSE"])
+
+        # Upload DLMUSE file
+        in_files = st.file_uploader(
+            "Upload csv file with DLMUSE ROI values",
+            key = 'uploaded_dlmuse',
+            accept_multiple_files=False,
+            on_change = save_dlmuse_file
+        )
+
+    else:  # st.session_state.app_type == 'DESKTOP':
+
+        # Input DLMUSE csv
+        helpmsg = "Input csv file with DLMUSE ROI volumes.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it"
+        user_csv_seg, csv_path = utilst.user_input_file(
+            "Select file",
+            "btn_input_seg",
+            "File with DLMUSE ROI values",
+            st.session_state.paths["last_in_dir"],
+            "",
+            helpmsg,
+        )
+
+        # Link user input dicoms
+        if not os.path.exists(st.session_state.paths["csv_seg"]) and os.path.exists(st.session_state.paths["user_csv_seg"]):
+            os.symlink(st.session_state.paths["user_csv_seg"], st.session_state.paths["csv_seg"])
+
+    # Check dlmuse file
+    fcount = utilio.get_file_count(st.session_state.paths["Dicoms"])
+    if os.path.exists(st.session_state.paths["csv_seg"]):
+        st.success(f'DLMUSE file ready ({st.session_state.paths["csv_seg"]})',
+                   icon=":material/thumb_up:"
+        )
+        st.warning('You can either proceed with the next step or select/upload new data')
+
     if os.path.exists(csv_seg):
-        st.session_state.paths["csv_seg"] = csv_seg
+        # st.session_state.paths["csv_seg"] = csv_seg
         st.session_state.paths["last_in_dir"] = csv_path
 
 # Panel for selecting demog csv
 with st.expander(":material/upload: Select or upload input demographics csv", expanded=False):
 
     if os.path.exists(st.session_state.paths["csv_demog"]):
-        st.success(f'Detected input data ({st.session_state.paths["Dicoms"]}, {fcount} files)',
+        st.success('Detected input data',
                    icon=":material/thumb_up:"
                   )
         st.warning('You can either proceed with the next step or select/upload new data below')
