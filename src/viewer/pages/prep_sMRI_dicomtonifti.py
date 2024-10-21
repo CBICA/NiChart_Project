@@ -14,13 +14,13 @@ def progress(p: int, i: int, decoded: Any) -> None:
     with result_holder.container():
         st.progress(p, f"Progress: Token position={i}")
 
-def save_and_unzip_files():
-    # Save files to local storage
-    if len(st.session_state['uploaded_dicoms']) > 0:
-        utilio.copy_and_unzip_uploaded_files(
-            st.session_state['uploaded_dicoms'],
-            st.session_state.paths["Dicoms"]
-        )
+#def save_and_unzip_files():
+    ## Save files to local storage
+    #if len(st.session_state['uploaded_dicoms']) > 0:
+        #utilio.copy_and_unzip_uploaded_files(
+            #st.session_state['uploaded_dicoms'],
+            #st.session_state.paths["Dicoms"]
+        #)
 
 st.markdown(
     """
@@ -35,51 +35,17 @@ st.markdown(
 # Panel for output (dataset name + out_dir)
 utilst.util_panel_workingdir(st.session_state.app_type)
 
-# Panel for selecting input data
-with st.expander(":material/upload: Select or upload input data", expanded=False):
+# Panel for selecting input dicom files
+flag_disabled = os.path.exists(st.session_state.paths["dset"]) == False
+if st.session_state.app_type == 'CLOUD':
+    utilst.util_upload_folder(st.session_state.paths['Dicoms'], flag_disabled)
 
-    if st.session_state.app_type == "CLOUD":
-
-        # Create Dicoms folder
-        if os.path.exists(st.session_state.paths["dset"]):
-            if not os.path.exists(st.session_state.paths["Dicoms"]):
-                os.makedirs(st.session_state.paths["Dicoms"])
-
-        # Create Dicoms folder
-        flag_uploader = os.path.exists(st.session_state.paths["Dicoms"])
-
-        # Upload dicom files
-        in_files = st.file_uploader(
-            "Upload dicom file(s)",
-            key = 'uploaded_dicoms',
-            accept_multiple_files=True,
-            on_change = save_and_unzip_files
-        )
-
-    else:  # st.session_state.app_type == 'DESKTOP':
-
-        # Input dicom image folder
-        helpmsg = "Input folder with dicom files (.dcm).\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
-        st.session_state.paths["user_Dicoms"] = utilst.user_input_folder(
-            "Select folder",
-            "btn_indir_dicom",
-            "Input dicom folder",
-            st.session_state.paths["last_in_dir"],
-            st.session_state.paths["user_Dicoms"],
-            helpmsg,
-        )
-
-        # Link user input dicoms
-        if not os.path.exists(st.session_state.paths["Dicoms"]) and os.path.exists(st.session_state.paths["user_Dicoms"]):
-            os.symlink(st.session_state.paths["user_Dicoms"], st.session_state.paths["Dicoms"])
-
-    # Check current dicom folder
-    fcount = utilio.get_file_count(st.session_state.paths["Dicoms"])
-    if fcount > 0:
-        st.success(f'Dicom files ready ({st.session_state.paths["Dicoms"]}, {fcount} files)',
-                icon=":material/thumb_up:"
-                )
-        st.warning('You can either proceed with the next step or select/upload new data')
+else:   # st.session_state.app_type == 'DESKTOP'
+    utilst.util_select_folder(
+        st.session_state.paths['Dicoms'],
+        st.session_state.paths['last_in_dir'],
+        flag_disabled
+    )
 
 # Panel for detecting dicom series
 with st.expander(":material/manage_search: Detect dicom series", expanded=False):

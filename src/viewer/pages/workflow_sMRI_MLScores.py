@@ -32,7 +32,7 @@ with st.expander(":material/upload: Select or upload input data csv", expanded=F
 
     if st.session_state.app_type == "CLOUD":
 
-        # Create DLMUSE folder
+        # Upload DLMUSE csv
         if os.path.exists(st.session_state.paths["dset"]):
             if not os.path.exists(st.session_state.paths["DLMUSE"]):
                 os.makedirs(st.session_state.paths["DLMUSE"])

@@ -42,6 +42,8 @@ if "instantiated" not in st.session_state:
         "root": "",
         "init": "",
         "last_in_dir": "",
+        "target_dir":"",
+        "target_file":"",        
         "dset": "",
         "out": "",
         "Lists": "",
