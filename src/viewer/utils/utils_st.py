@@ -127,11 +127,12 @@ def user_input_text(label: str, init_val: str, help_msg: str) -> Any:
 
 def user_input_file(
     label_btn: Any,
-    key_btn: Any,
+    key_st: Any,
     label_txt: str,
     path_last: str,
     init_path_curr: str,
     help_msg: str,
+    disabled: bool,
 ) -> Any:
     """
     St button + text field to read an input file path from the user
@@ -140,11 +141,11 @@ def user_input_file(
     path_dir = path_last
     tmpcol = st.columns((8, 1))
     with tmpcol[1]:
-        if st.button(label_btn, key=key_btn):
+        if st.button(label_btn, key=f'key_btn_{key_st}', disabled=disabled):
             path_curr, path_dir = browse_file(path_dir)
 
     with tmpcol[0]:
-        tmp_sel = st.text_input(label_txt, value=path_curr, help=help_msg)
+        tmp_sel = st.text_input(label_txt, key=f'key_txt_{key_st}', value=path_curr, help=help_msg, disabled=disabled)
         if os.path.exists(tmp_sel):
             path_curr = tmp_sel
     return path_curr, path_dir
@@ -152,7 +153,7 @@ def user_input_file(
 
 def user_input_folder(
     label_btn: Any,
-    key_btn: Any,
+    key_st: Any,
     label_txt: str,
     path_last: str,
     path_curr: str,
@@ -165,7 +166,7 @@ def user_input_folder(
     tmpcol = st.columns((8, 1))
 
     with tmpcol[1]:
-        if st.button(label_btn, key=key_btn, disabled=disabled):
+        if st.button(label_btn, key=f'btn_{key_st}', disabled=disabled):
             if os.path.exists(path_curr):
                 path_curr = browse_folder(path_curr)
             else:
@@ -174,11 +175,11 @@ def user_input_folder(
     with tmpcol[0]:
         if os.path.exists(path_curr):
             path_curr = st.text_input(
-                label_txt, value=path_curr, help=help_msg, disabled=disabled
+                label_txt, key=f'txt2_{key_st}', value=path_curr, help=help_msg, disabled=disabled
             )
         else:
             path_curr = st.text_input(
-                label_txt, value="", help=help_msg, disabled=disabled
+                label_txt, key=f'txt2_{key_st}', value="", help=help_msg, disabled=disabled
             )
 
     if path_curr != "":
@@ -251,6 +252,9 @@ def update_default_paths() -> None:
         st.session_state.paths["dset"], "Lists", "Demog.csv"
     )
 
+    st.session_state.paths["csv_plot"] = os.path.join(
+        st.session_state.paths["dset"], "Plots", "Data.csv"
+    )
 
 def util_panel_workingdir(app_type: str) -> None:
     # Panel for selecting the working dir
@@ -307,115 +311,151 @@ def copy_uploaded_to_dir() -> None:
         )
 
 
-def util_upload_folder(out_dir: str, flag_disabled: bool, msg_txt: bool) -> None:
+def util_upload_folder(
+    out_dir: str,
+    title_txt: str,
+    flag_disabled: bool,
+    help_txt: str
+) -> None:
     """
     Upload user data to target folder
     Input data may be a folder, multiple files, or a zip file (unzip the zip file if so)
     """
-    with st.expander(f":material/upload: {msg_txt}", expanded=False):
+    # Set target path
+    if not flag_disabled:
+        if not os.path.exists(out_dir):
+            os.makedirs(out_dir)
+        st.session_state.paths["target_path"] = out_dir
 
-        # Set target path
-        if not flag_disabled:
-            if not os.path.exists(out_dir):
-                os.makedirs(out_dir)
-            st.session_state.paths["target_path"] = out_dir
+    # Upload data
+    st.file_uploader(
+        title_txt,
+        key="uploaded_input",
+        accept_multiple_files=True,
+        on_change=copy_uploaded_to_dir,
+        disabled=flag_disabled,
+        help=help_txt,
+    )
 
-        # Upload data
-        st.file_uploader(
-            "Upload input folder/file(s)",
-            key="uploaded_input",
-            accept_multiple_files=True,
-            on_change=copy_uploaded_to_dir,
-            disabled=flag_disabled,
+    # Check uploaded data
+    fcount = utilio.get_file_count(out_dir)
+    if fcount > 0:
+        st.success(
+            f"Data is ready ({out_dir}, {fcount} files)", icon=":material/thumb_up:"
         )
-
-        # Check uploaded data
-        fcount = utilio.get_file_count(out_dir)
-        if fcount > 0:
-            st.success(
-                f"Data is ready ({out_dir}, {fcount} files)", icon=":material/thumb_up:"
-            )
-            st.warning("You can proceed with the next step or upload new data")
+        st.warning("You can proceed with the next step or upload new data")
 
 
 def util_upload_file(
-    out_file: str, key_uploader: str, flag_disabled: bool, msg_txt: bool
+    out_file: str,
+    title_txt: str,
+    key_uploader: str,
+    flag_disabled: bool,
+    label_visibility: str
 ) -> None:
     """
     Upload user data to target folder
     Input data is a single file
     """
-    with st.expander(f":material/upload: {msg_txt}", expanded=False):
+    # Set target path
+    if not flag_disabled:
+        if not os.path.exists(os.path.dirname(out_file)):
+            os.makedirs(os.path.dirname(out_file))
 
-        # Set target path
-        if not flag_disabled:
-            if not os.path.exists(os.path.dirname(out_file)):
-                os.makedirs(os.path.dirname(out_file))
+    # Upload data
+    in_file = st.file_uploader(
+        title_txt,
+        key=key_uploader,
+        accept_multiple_files=False,
+        disabled=flag_disabled,
+        label_visibility=label_visibility
+    )
 
-        # Upload data
-        in_file = st.file_uploader(
-            "Upload input folder/file(s)",
-            key=key_uploader,
-            accept_multiple_files=False,
-            disabled=flag_disabled,
-        )
+    # Check uploaded data
+    if not os.path.exists(out_file):
+        utilio.copy_uploaded_file(in_file, out_file)
 
-        # Check uploaded data
-        if not os.path.exists(out_file):
-            utilio.copy_uploaded_file(in_file, out_file)
-
-        if os.path.exists(out_file):
-            st.success(f"Data is ready ({out_file})", icon=":material/thumb_up:")
-            st.warning("You can proceed with the next step or upload new data")
+    if os.path.exists(out_file):
+        st.success(f"Data is ready ({out_file})", icon=":material/thumb_up:")
+        st.warning("You can proceed with the next step or upload new data")
 
 
-def util_select_folder(
-    out_dir: str, last_in_dir: str, flag_disabled: bool, msg_txt: bool
-) -> None:
+def util_select_folder(key_selector: str, out_dir: str, last_in_dir: str, flag_disabled: bool) -> None:
     """
     Select user input folder and link to target folder
     """
-    with st.expander(f":material/upload: {msg_txt}", expanded=False):
-
-        # Check if out folder already exists
-        curr_dir = ""
-        if os.path.exists(out_dir):
-            fcount = utilio.get_file_count(out_dir)
-            if fcount > 0:
-                curr_dir = out_dir
-
-        # Upload data
-        helpmsg = "Select input folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
-        sel_dir = user_input_folder(
-            "Select folder",
-            "btn_indir",
-            "Input data folder",
-            last_in_dir,
-            curr_dir,
-            helpmsg,
-            flag_disabled,
-        )
-
-        if not os.path.exists(out_dir) and os.path.exists(sel_dir):
-            # Create parent dir of output dir
-            if not os.path.exists(os.path.dirname(out_dir)):
-                os.makedirs(os.path.dirname(out_dir))
-            # Link user input dicoms
-            os.symlink(sel_dir, out_dir)
-
-        # Check uploaded data
+    # Check if out folder already exists
+    curr_dir = ""
+    if os.path.exists(out_dir):
         fcount = utilio.get_file_count(out_dir)
         if fcount > 0:
-            st.success(
-                f"Data is ready ({out_dir}, {fcount} files)", icon=":material/thumb_up:"
-            )
-            st.warning("You can proceed with the next step or select new data")
+            curr_dir = out_dir
+
+    # Upload data
+    helpmsg = "Select input folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
+    sel_dir = user_input_folder(
+        "Select folder",
+        f"btn_{key_selector}",
+        "Input data folder",
+        last_in_dir,
+        curr_dir,
+        helpmsg,
+        flag_disabled,
+    )
+
+    if not os.path.exists(out_dir) and os.path.exists(sel_dir):
+        # Create parent dir of output dir
+        if not os.path.exists(os.path.dirname(out_dir)):
+            os.makedirs(os.path.dirname(out_dir))
+        # Link user input dicoms
+        os.symlink(sel_dir, out_dir)
+
+    # Check uploaded data
+    fcount = utilio.get_file_count(out_dir)
+    if fcount > 0:
+        st.success(
+            f"Data is ready ({out_dir}, {fcount} files)", icon=":material/thumb_up:"
+        )
+        st.warning("You can proceed with the next step or select new data")
 
 
-def util_select_file(
-    out_file: str, last_in_dir: str, flag_disabled: bool, msg_txt: bool
-) -> None:
+def util_select_file(key_selector: str, out_file: str, last_in_dir: str, flag_disabled: bool) -> None:
     """
-    Select user input folder and link to target folder
+    Select user input file and copy to target file
     """
-    print(out_file)
+    # Set target path
+    if not flag_disabled:
+        if not os.path.exists(os.path.dirname(out_file)):
+            os.makedirs(os.path.dirname(out_file))
+
+    # Check if out folder already exists
+    curr_file = ""
+    if os.path.exists(out_file):
+        curr_file = out_file
+
+    # Select file
+    helpmsg = "Select input file.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
+    sel_file, last_in_dir = user_input_file(
+        "Select file",
+        f"btn_{key_selector}",
+        "Input file",
+        last_in_dir,
+        curr_file,
+        helpmsg,
+        flag_disabled,
+    )
+
+    if not os.path.exists(out_file) and os.path.exists(sel_file):
+        # Create parent dir of out file
+        if not os.path.exists(os.path.dirname(out_file)):
+            os.makedirs(os.path.dirname(out_file))
+        # Link user input dicoms
+        os.system(f"cp {sel_file} {out_file}")
+
+    # Check uploaded data
+    if os.path.exists(out_file):
+        st.success(
+            f"Data is ready ({out_file})", icon=":material/thumb_up:"
+        )
+        st.warning("You can proceed with the next step or select new data")
+

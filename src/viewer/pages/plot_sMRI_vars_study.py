@@ -294,53 +294,39 @@ def filter_dataframe(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
 # Panel for output (dataset name + out_dir)
 utilst.util_panel_workingdir(st.session_state.app_type)
 
-# Panel for selecting input data
-with st.expander(":material/upload: Select or upload input data", expanded=False):
+# Set default path for the data csv
+if os.path.exists(st.session_state.paths["csv_mlscores"]):
+    st.session_state.paths["csv_plot"] = st.session_state.paths["csv_mlscores"]
+elif os.path.exists(st.session_state.paths["csv_seg"]):
+    st.session_state.paths["csv_plot"] = st.session_state.paths["csv_seg"]
 
-    # Set default path for the plot csv
-    if os.path.exists(st.session_state.paths["csv_mlscores"]):
-        st.session_state.paths["csv_plots"] = st.session_state.paths["csv_mlscores"]
-    elif os.path.exists(st.session_state.paths["csv_seg"]):
-        st.session_state.paths["csv_plots"] = st.session_state.paths["csv_seg"]
+# Panel for selecting input csv
+flag_disabled = os.path.exists(st.session_state.paths["dset"]) == False
 
-    if os.path.exists(st.session_state.paths["csv_plots"]):
-        st.success(f'Input file detected! Using: {st.session_state.paths["csv_plots"]}')
+if st.session_state.app_type == 'CLOUD':
+    with st.expander(f":material/upload: Upload input csv file", expanded=False):
+        msg_txt = 'Upload input csv file'
+        utilst.util_upload_file(
+            st.session_state.paths['csv_plot'],
+            'uploaded_data_file',
+            flag_disabled,
+        )
 
-    # Input csv
-    helpmsg = "Input csv file with segmented ROI volumes.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it"
-    csv_plots, csv_path = utilst.user_input_file(
-        "Select file",
-        "btn_input_seg",
-        "ROI data file",
-        st.session_state.paths["last_in_dir"],
-        st.session_state.paths["csv_plots"],
-        helpmsg,
-    )
-    if os.path.exists(csv_plots):
-        st.session_state.paths["csv_plots"] = csv_plots
-        st.session_state.paths["last_in_dir"] = csv_path
-
-    # Input ROI dict
-    helpmsg = "ROI dictionary to rename ROI indices. Should include two columns: ROI_Name, ROI_Index.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it"
-    csv_roidict, csv_path = utilst.user_input_file(
-        "Select file",
-        "btn_input_roidict",
-        "ROI dictionary",
-        st.session_state.paths["last_in_dir"],
-        st.session_state.paths["csv_roidict"],
-        helpmsg,
-    )
-    if os.path.exists(csv_roidict):
-        st.session_state.paths["csv_roidict"] = csv_roidict
-        st.session_state.paths["last_in_dir"] = csv_path
-
+else:   # st.session_state.app_type == 'DESKTOP'
+    with st.expander(f":material/upload: Select input csv file", expanded=False):
+        utilst.util_select_file(
+            'selected_data_file',
+            st.session_state.paths['csv_plot'],
+            st.session_state.paths['last_in_dir'],
+            flag_disabled,
+        )
 
 # Page controls in side bar
 with st.sidebar:
     df = pd.DataFrame()
-    if os.path.exists(st.session_state.paths["csv_plots"]):
+    if os.path.exists(st.session_state.paths["csv_plot"]):
         # Read input csv
-        df = pd.read_csv(st.session_state.paths["csv_plots"])
+        df = pd.read_csv(st.session_state.paths["csv_plot"])
         
         # Apply roi dict to rename columns
         try:
@@ -465,43 +451,44 @@ with st.expander(":material/settings: Viewer settings", expanded=False):
     # Crop to mask area
     crop_to_mask = st.checkbox("Crop to mask", True)
 
-# Panel for selecting input folders for images
-with st.expander(":material/upload: Viewer input folders"):
-    # Input T1 image folder
-    helpmsg = "Folder with T1 images.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
-    path_t1 = utilst.user_input_folder(
-        "Select folder",
-        "btn_indir_t1",
-        "Input T1 image folder",
-        st.session_state.paths["last_in_dir"],
-        st.session_state.paths["T1"],
-        helpmsg,
-    )
-    st.session_state.paths["T1"] = path_t1
+# Panel for selecting input T1 images
+flag_disabled = os.path.exists(st.session_state.paths["dset"]) == False
+if st.session_state.app_type == 'CLOUD':
+    with st.expander(f":material/upload: Upload T1 images", expanded=False):
+        #utilst.util_upload_folder(st.session_state.paths['T1'], flag_disabled, msg_txt)
+        st.warning('Data upload for image viewer is not implemented in cloud version!')
 
-    # Input DLMUSE image folder
-    helpmsg = "Folder with DLMUSE images.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
-    path_seg = utilst.user_input_folder(
-        "Select folder",
-        "btn_indir_seg",
-        "Input label image folder",
-        st.session_state.paths["last_in_dir"],
-        st.session_state.paths["DLMUSE"],
-        helpmsg,
-    )
-    st.session_state.paths["DLMUSE"] = path_seg
+    with st.expander(f":material/upload: Upload DLMUSE images", expanded=False):
+        #utilst.util_upload_folder(st.session_state.paths['T1'], flag_disabled, msg_txt)
+        st.warning('Data upload for image viewer is not implemented in cloud version!')
 
-    # T1 suffix
-    suff_t1img = utilst.user_input_text(
-        "T1 image suffix", st.session_state.suff_t1img, helpmsg
-    )
-    st.session_state.suff_t1img = suff_t1img
+else:   # st.session_state.app_type == 'DESKTOP'
+    with st.expander(f":material/upload: Select T1 images", expanded=False):
+        utilst.util_select_folder(
+            'selected_t1_folder',
+            st.session_state.paths['T1'],
+            st.session_state.paths['last_in_dir'],
+            flag_disabled,
+        )
 
-    # DLMUSE suffix
-    suff_seg = utilst.user_input_text(
-        "Label image suffix", st.session_state.suff_seg, helpmsg
-    )
-    st.session_state.suff_seg = suff_seg
+        utilst.util_select_folder(
+            'selected_dlmuse_folder',
+            st.session_state.paths['DLMUSE'],
+            st.session_state.paths['last_in_dir'],
+            flag_disabled,
+        )
+
+        # T1 suffix
+        suff_t1img = utilst.user_input_text(
+            "T1 image suffix", st.session_state.suff_t1img, "Enter the suffix for the T1 images"
+        )
+        st.session_state.suff_t1img = suff_t1img
+
+        # DLMUSE suffix
+        suff_seg = utilst.user_input_text(
+            "Label image suffix", st.session_state.suff_seg, "Enter the suffix for the DLMUSE images"
+        )
+        st.session_state.suff_seg = suff_seg
 
 # Panel for viewing images and segmentations
 with placeholder_imgview.expander(":material/visibility: View segmentations", expanded=False):

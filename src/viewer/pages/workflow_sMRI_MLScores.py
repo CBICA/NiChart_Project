@@ -30,43 +30,39 @@ utilst.util_panel_workingdir(st.session_state.app_type)
 
 # Panel for selecting input dlmuse csv
 flag_disabled = os.path.exists(st.session_state.paths["dset"]) == False
+
 if st.session_state.app_type == 'CLOUD':
-    msg_txt = 'Upload DLMUSE csv file'
-    utilst.util_upload_file(
-        st.session_state.paths['csv_seg'],
-        'uploaded_dlmuse_file',
-        flag_disabled,
-        msg_txt
-    )
+    with st.expander(f":material/upload: Upload data", expanded=False):
+        utilst.util_upload_file(
+            st.session_state.paths['csv_seg'],
+            'DLMUSE csv',
+            'uploaded_dlmuse_file',
+            flag_disabled,
+            'visible'
+        )
+        utilst.util_upload_file(
+            st.session_state.paths['csv_demog'],
+            'Demographics csv',
+            'uploaded_demog_file',
+            flag_disabled,
+            'visible'
+        )
 
 else:   # st.session_state.app_type == 'DESKTOP'
-    msg_txt = 'Select DLMUSE csv file'
-    utilst.util_select_file(
-        st.session_state.paths['csv_seg'],
-        st.session_state.paths['last_in_dir'],
-        flag_disabled,
-        msg_txt
-    )
+    with st.expander(f":material/upload: Select data", expanded=False):
+        utilst.util_select_file(
+            'selected_dlmuse_file',
+            st.session_state.paths['csv_seg'],
+            st.session_state.paths['last_in_dir'],
+            flag_disabled,
+        )
 
-# Panel for selecting input demog csv
-flag_disabled = os.path.exists(st.session_state.paths["dset"]) == False
-if st.session_state.app_type == 'CLOUD':
-    msg_txt = 'Upload demographic csv file'
-    utilst.util_upload_file(
-        st.session_state.paths['csv_demog'],
-        'uploaded_demog_file',
-        flag_disabled,
-        msg_txt
-    )
-
-else:   # st.session_state.app_type == 'DESKTOP'
-    msg_txt = 'Select demographic csv file'
-    utilst.util_select_file(
-        st.session_state.paths['csv_demog'],
-        st.session_state.paths['last_in_dir'],
-        flag_disabled,
-        msg_txt
-    )
+        utilst.util_select_file(
+            'selected_demog_file',
+            st.session_state.paths['csv_demog'],
+            st.session_state.paths['last_in_dir'],
+            flag_disabled,
+        )
 
 # Panel for running MLScore
 with st.expander(":material/model_training: Run MLScore", expanded=False):

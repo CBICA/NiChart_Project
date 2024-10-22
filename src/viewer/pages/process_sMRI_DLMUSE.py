@@ -22,18 +22,24 @@ utilst.util_panel_workingdir(st.session_state.app_type)
 
 # Panel for selecting input image files
 flag_disabled = os.path.exists(st.session_state.paths["dset"]) == False
+
 if st.session_state.app_type == 'CLOUD':
-    msg_txt = 'Upload Nifti images'
-    utilst.util_upload_folder(st.session_state.paths['T1'], flag_disabled, msg_txt)
+    with st.expander(f":material/upload: Upload T1 Nifti images", expanded=False):
+        utilst.util_upload_folder(
+            st.session_state.paths['T1'],
+            "T1 images",            
+            flag_disabled,
+            'collapsed'
+        )
 
 else:   # st.session_state.app_type == 'DESKTOP'
-    msg_txt = 'Select Nifti images'
-    utilst.util_select_folder(
-        st.session_state.paths['T1'],
-        st.session_state.paths['last_in_dir'],
-        flag_disabled,
-        msg_txt
-    )
+    with st.expander(f":material/upload: Select T1 Nifti images", expanded=False):
+        utilst.util_select_folder(
+            'selected_img_folder',
+            st.session_state.paths['T1'],
+            st.session_state.paths['last_in_dir'],
+            flag_disabled,
+        )
 
 # Panel for running DLMUSE
 with st.expander(":material/grid_on: Segment image", expanded=False):
