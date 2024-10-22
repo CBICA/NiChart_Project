@@ -2,10 +2,10 @@ import os
 import tkinter as tk
 from tkinter import filedialog
 from typing import Any
-import utils.utils_io as utilio
 
 import numpy as np
 import streamlit as st
+import utils.utils_io as utilio
 
 
 def display_folder_contents(folder_path: str, parent_folder: str = "") -> None:
@@ -163,9 +163,9 @@ def user_input_folder(
     St button + text field to read an input directory path from the user
     """
     tmpcol = st.columns((8, 1))
-    
+
     with tmpcol[1]:
-        if st.button(label_btn, key=key_btn, disabled = disabled):
+        if st.button(label_btn, key=key_btn, disabled=disabled):
             if os.path.exists(path_curr):
                 path_curr = browse_folder(path_curr)
             else:
@@ -173,16 +173,20 @@ def user_input_folder(
 
     with tmpcol[0]:
         if os.path.exists(path_curr):
-            path_curr = st.text_input(label_txt, value=path_curr, help=help_msg, disabled = disabled)
+            path_curr = st.text_input(
+                label_txt, value=path_curr, help=help_msg, disabled=disabled
+            )
         else:
-            path_curr = st.text_input(label_txt, value='', help=help_msg, disabled = disabled)
-    
-    if path_curr != '':
-        try: 
+            path_curr = st.text_input(
+                label_txt, value="", help=help_msg, disabled=disabled
+            )
+
+    if path_curr != "":
+        try:
             path_curr = os.path.abspath(path_curr)
         except:
-            path_curr = ''
-    
+            path_curr = ""
+
     return path_curr
 
 
@@ -270,7 +274,7 @@ def util_panel_workingdir(app_type: str) -> None:
                 st.session_state.paths["last_in_dir"],
                 st.session_state.paths["out"],
                 helpmsg,
-                False
+                False,
             )
 
         if st.session_state.dset_name != "" and st.session_state.paths["out"] != "":
@@ -288,55 +292,59 @@ def util_panel_workingdir(app_type: str) -> None:
             # Update paths for output subfolders
             update_default_paths()
 
-        if os.path.exists(st.session_state.paths['dset']):
+        if os.path.exists(st.session_state.paths["dset"]):
             st.success(
                 f"All results will be saved to: {st.session_state.paths['dset']}",
-                icon=":material/thumb_up:"
+                icon=":material/thumb_up:",
             )
 
 
-def copy_uploaded_to_dir():
+def copy_uploaded_to_dir() -> None:
     # Copies files to local storage
-    if len(st.session_state['uploaded_input']) > 0:
+    if len(st.session_state["uploaded_input"]) > 0:
         utilio.copy_and_unzip_uploaded_files(
-            st.session_state['uploaded_input'],
-            st.session_state.paths["target_path"]
+            st.session_state["uploaded_input"], st.session_state.paths["target_path"]
         )
 
+
 def util_upload_folder(out_dir: str, flag_disabled: bool, msg_txt: bool) -> None:
-    '''
+    """
     Upload user data to target folder
     Input data may be a folder, multiple files, or a zip file (unzip the zip file if so)
-    '''
+    """
     with st.expander(f":material/upload: {msg_txt}", expanded=False):
-        
+
         # Set target path
         if not flag_disabled:
             if not os.path.exists(out_dir):
                 os.makedirs(out_dir)
             st.session_state.paths["target_path"] = out_dir
-        
+
         # Upload data
-        in_files = st.file_uploader(
+        st.file_uploader(
             "Upload input folder/file(s)",
-            key = 'uploaded_input',
+            key="uploaded_input",
             accept_multiple_files=True,
-            on_change = copy_uploaded_to_dir,
-            disabled = flag_disabled
+            on_change=copy_uploaded_to_dir,
+            disabled=flag_disabled,
         )
-        
+
         # Check uploaded data
         fcount = utilio.get_file_count(out_dir)
         if fcount > 0:
-            st.success(f'Data is ready ({out_dir}, {fcount} files)', icon=":material/thumb_up:")
-            st.warning('You can proceed with the next step or upload new data')
-        
+            st.success(
+                f"Data is ready ({out_dir}, {fcount} files)", icon=":material/thumb_up:"
+            )
+            st.warning("You can proceed with the next step or upload new data")
 
-def util_upload_file(out_file: str, key_uploader: str, flag_disabled: bool, msg_txt: bool) -> None:
-    '''
+
+def util_upload_file(
+    out_file: str, key_uploader: str, flag_disabled: bool, msg_txt: bool
+) -> None:
+    """
     Upload user data to target folder
     Input data is a single file
-    '''
+    """
     with st.expander(f":material/upload: {msg_txt}", expanded=False):
 
         # Set target path
@@ -347,34 +355,35 @@ def util_upload_file(out_file: str, key_uploader: str, flag_disabled: bool, msg_
         # Upload data
         in_file = st.file_uploader(
             "Upload input folder/file(s)",
-            key = key_uploader,
+            key=key_uploader,
             accept_multiple_files=False,
-            disabled = flag_disabled
+            disabled=flag_disabled,
         )
 
         # Check uploaded data
         if not os.path.exists(out_file):
             utilio.copy_uploaded_file(in_file, out_file)
 
-
         if os.path.exists(out_file):
-            st.success(f'Data is ready ({out_file})', icon=":material/thumb_up:")
-            st.warning('You can proceed with the next step or upload new data')
+            st.success(f"Data is ready ({out_file})", icon=":material/thumb_up:")
+            st.warning("You can proceed with the next step or upload new data")
 
 
-def util_select_folder(out_dir: str, last_in_dir: str, flag_disabled: bool, msg_txt: bool) -> None:
-    '''
+def util_select_folder(
+    out_dir: str, last_in_dir: str, flag_disabled: bool, msg_txt: bool
+) -> None:
+    """
     Select user input folder and link to target folder
-    '''
+    """
     with st.expander(f":material/upload: {msg_txt}", expanded=False):
-        
+
         # Check if out folder already exists
-        curr_dir = ''        
+        curr_dir = ""
         if os.path.exists(out_dir):
             fcount = utilio.get_file_count(out_dir)
             if fcount > 0:
                 curr_dir = out_dir
-        
+
         # Upload data
         helpmsg = "Select input folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
         sel_dir = user_input_folder(
@@ -384,7 +393,7 @@ def util_select_folder(out_dir: str, last_in_dir: str, flag_disabled: bool, msg_
             last_in_dir,
             curr_dir,
             helpmsg,
-            flag_disabled
+            flag_disabled,
         )
 
         if not os.path.exists(out_dir) and os.path.exists(sel_dir):
@@ -393,16 +402,20 @@ def util_select_folder(out_dir: str, last_in_dir: str, flag_disabled: bool, msg_
                 os.makedirs(os.path.dirname(out_dir))
             # Link user input dicoms
             os.symlink(sel_dir, out_dir)
-        
+
         # Check uploaded data
         fcount = utilio.get_file_count(out_dir)
         if fcount > 0:
-            st.success(f'Data is ready ({out_dir}, {fcount} files)', icon=":material/thumb_up:")
-            st.warning('You can proceed with the next step or select new data')
+            st.success(
+                f"Data is ready ({out_dir}, {fcount} files)", icon=":material/thumb_up:"
+            )
+            st.warning("You can proceed with the next step or select new data")
 
-def util_select_file(out_file: str, last_in_dir: str, flag_disabled: bool, msg_txt: bool) -> None:
-    '''
+
+def util_select_file(
+    out_file: str, last_in_dir: str, flag_disabled: bool, msg_txt: bool
+) -> None:
+    """
     Select user input folder and link to target folder
-    '''
+    """
     print(out_file)
-

@@ -42,7 +42,7 @@ def crop_image(img: np.ndarray, mask: np.ndarray, crop_to_mask: bool) -> Any:
         nz = np.nonzero(mask)
     else:
         nz = np.nonzero(img)
-        
+
     mn = np.min(nz, axis=1)
     mx = np.max(nz, axis=1)
 
@@ -137,7 +137,8 @@ def detect_img_bounds(img: np.ndarray) -> np.ndarray:
 
 @st.cache_data  # type:ignore
 def prep_image_and_olay(
-    f_img: np.ndarray, f_mask: Any, list_rois: list, crop_to_mask: bool) -> Any:
+    f_img: np.ndarray, f_mask: Any, list_rois: list, crop_to_mask: bool
+) -> Any:
     """
     Read images from files and create 3D matrices for display
     """
@@ -160,7 +161,7 @@ def prep_image_and_olay(
         out_mask, nii_mask.header.get_zooms(), order=0, mode="nearest"
     )
 
-    # Shift values in out_img to remove negative values 
+    # Shift values in out_img to remove negative values
     out_img = out_img - np.min([0, out_img.min()])
 
     # Convert image to uint
@@ -214,13 +215,12 @@ def prep_image(f_img: np.ndarray) -> np.ndarray:
 
     return out_img
 
-def check_roi_index(f_img: str, roi_ind: str) -> bool:
+
+def check_roi_index(f_img: str, roi_ind: int) -> bool:
     """
     Check if index is one of the labels in the seg img
     """
     try:
-        roi_ind = int(roi_ind)
-
         # Read nifti
         nii_img = nib.load(f_img)
 
@@ -234,4 +234,3 @@ def check_roi_index(f_img: str, roi_ind: str) -> bool:
 
     except:
         return False
-

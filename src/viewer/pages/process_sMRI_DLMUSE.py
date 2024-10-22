@@ -7,11 +7,6 @@ import utils.utils_nifti as utilni
 import utils.utils_st as utilst
 import utils.utils_io as utilio
 
-def save_and_unzip_files():
-    # Save files to local storage
-    if len(st.session_state['uploaded_t1s']) > 0:
-        utilio.save_uploaded_files(st.session_state['uploaded_t1s'], st.session_state.paths["T1"])
-
 st.markdown(
     """
     - NiChart sMRI segmentation pipeline using DLMUSE.
