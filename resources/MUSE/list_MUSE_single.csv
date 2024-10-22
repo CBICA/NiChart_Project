@@ -43,8 +43,8 @@ Index,Code,Name
 90,MUSE_90,Fornix_L
 91,MUSE_91,AnteriorLimbInternalCapsule_R
 92,MUSE_92,AnteriorLimbInternalCapsule_L
-93,MUSE_93,PosteriorLimbInternalCapsuleIncCerebralPeduncle_R
-94,MUSE_94,PosteriorLimbInternalCapsuleIncCerebralPeduncle_L
+93,MUSE_93,PosteriorLimbInternalCapsule_R
+94,MUSE_94,PosteriorLimbInternalCapsule_L
 95,MUSE_95,CorpusCallosum
 100,MUSE_100,AnteriorCingulateGyrus_R
 101,MUSE_101,AnteriorCingulateGyrus_L
@@ -134,8 +134,8 @@ Index,Code,Name
 195,MUSE_195,SupramarginalGyrus_L
 196,MUSE_196,SuperiorOccipitalGyrus_R
 197,MUSE_197,SuperiorOccipitalGyrus_L
-198,MUSE_198,Superior_parietalLobule_R
-199,MUSE_199,Superior_parietalLobule_L
+198,MUSE_198,SuperiorParietalLobule_R
+199,MUSE_199,SuperiorParietalLobule_L
 200,MUSE_200,SuperiorTemporalGyrus_R
 201,MUSE_201,SuperiorTemporalGyrus_L
 202,MUSE_202,TemporalPole_R

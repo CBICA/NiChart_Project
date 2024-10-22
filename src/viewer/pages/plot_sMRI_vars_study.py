@@ -462,7 +462,7 @@ with st.expander(":material/settings: Viewer settings", expanded=False):
     # View hide overlay
     is_show_overlay = st.checkbox("Show overlay", True)
 
-    # View hide overlay
+    # Crop to mask area
     crop_to_mask = st.checkbox("Crop to mask", True)
 
 # Panel for selecting input folders for images

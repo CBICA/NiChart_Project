@@ -1,7 +1,15 @@
 from typing import Any
-
+import streamlit as st
 import pandas as pd
 
+@st.cache
+def get_roi_names(csv_rois: str) -> list:
+    """
+    Get a list of ROI names
+    """
+    # Read list
+    df = pd.read_csv(csv_rois)
+    return df.Name.tolist()
 
 def derived_list_to_dict(list_sel_rois: list, list_derived: list) -> Any:
     """

@@ -89,17 +89,23 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
     sel_mrid = st.selectbox("MRID", list_mrid, key="selbox_mrid", index=None)
 
     # Select ROI
-    dict_roi, dict_derived = utilmuse.derived_list_to_dict(
-        st.session_state.dicts["muse_sel"], st.session_state.dicts["muse_derived"]
+    list_roi_names = utilmuse.get_roi_names(st.session_state.dicts["muse_sel"])
+    sel_var = st.selectbox("ROI", list_roi_names, key="selbox_rois", index=0)
+
+    # Detect list of ROI indices to display
+    list_sel_rois = utilmuse.get_derived_rois(
+        sel_var,
+        st.session_state.dicts["muse_derived"]
     )
-    sel_var = st.selectbox("ROI", list(dict_roi.keys()), key="selbox_rois", index=0)
-    sel_var_ind = dict_roi[sel_var]
 
     # Create a list of checkbox options
     list_orient = st.multiselect("Select viewing planes:", utilni.VIEWS, utilni.VIEWS)
 
     # View hide overlay
     is_show_overlay = st.checkbox("Show overlay", True)
+
+    # Crop to mask area
+    crop_to_mask = st.checkbox("Crop to mask", True)
 
     # Select images
     flag_img = False
@@ -123,8 +129,8 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
             img, mask, img_masked = utilni.prep_image_and_olay(
                 st.session_state.paths["sel_img"],
                 st.session_state.paths["sel_seg"],
-                sel_var_ind,
-                dict_derived,
+                list_sel_rois,
+                crop_to_mask,
             )
 
             # Detect mask bounds and center in each view
