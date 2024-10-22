@@ -83,7 +83,7 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
         list_mrid = [""]
     sel_mrid = st.selectbox("MRID", list_mrid, key="selbox_mrid", index=None)
 
-    # Select ROI
+    # Create combo list for selecting target ROI
     list_roi_names = utilmuse.get_roi_names(st.session_state.dicts["muse_sel"])
     sel_var = st.selectbox("ROI", list_roi_names, key="selbox_rois", index=0)
 
