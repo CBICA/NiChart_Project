@@ -8,7 +8,7 @@ if "instantiated" not in st.session_state:
 
     # App type ('DESKTOP' or 'CLOUD')
     st.session_state.app_type = "CLOUD"
-    st.session_state.app_type = "DESKTOP"
+    # st.session_state.app_type = "DESKTOP"
 
     # Dataframe to keep plot ids
     st.session_state.plots = pd.DataFrame(

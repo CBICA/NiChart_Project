@@ -2,6 +2,7 @@ import os
 
 import streamlit as st
 import utils.utils_st as utilst
+import utils.utils_io as utilio
 
 st.markdown(
     """
@@ -27,82 +28,45 @@ def save_dlmuse_file():
 # Panel for output (dataset name + out_dir)
 utilst.util_panel_workingdir(st.session_state.app_type)
 
-# Panel for selecting data csv
-utilst.util_panel_infile(st.session_state.app_type)
-
-
-# Panel for selecting data csv
-with st.expander(":material/upload: Select or upload input data csv", expanded=False):
-
-    if st.session_state.app_type == "CLOUD":
-
-        # Upload DLMUSE csv
-        if os.path.exists(st.session_state.paths["dset"]):
-            if not os.path.exists(st.session_state.paths["DLMUSE"]):
-                os.makedirs(st.session_state.paths["DLMUSE"])
-
-        # Create DLMUSE folder
-        flag_uploader = os.path.exists(st.session_state.paths["DLMUSE"])
-
-        # Upload DLMUSE file
-        in_files = st.file_uploader(
-            "Upload csv file with DLMUSE ROI values",
-            key = 'uploaded_dlmuse',
-            accept_multiple_files=False,
-            on_change = save_dlmuse_file
-        )
-
-    else:  # st.session_state.app_type == 'DESKTOP':
-
-        # Input DLMUSE csv
-        helpmsg = "Input csv file with DLMUSE ROI volumes.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it"
-        user_csv_seg, csv_path = utilst.user_input_file(
-            "Select file",
-            "btn_input_seg",
-            "File with DLMUSE ROI values",
-            st.session_state.paths["last_in_dir"],
-            "",
-            helpmsg,
-        )
-
-        # Link user input dicoms
-        if not os.path.exists(st.session_state.paths["csv_seg"]) and os.path.exists(st.session_state.paths["user_csv_seg"]):
-            os.symlink(st.session_state.paths["user_csv_seg"], st.session_state.paths["csv_seg"])
-
-    # Check dlmuse file
-    fcount = utilio.get_file_count(st.session_state.paths["Dicoms"])
-    if os.path.exists(st.session_state.paths["csv_seg"]):
-        st.success(f'DLMUSE file ready ({st.session_state.paths["csv_seg"]})',
-                   icon=":material/thumb_up:"
-        )
-        st.warning('You can either proceed with the next step or select/upload new data')
-
-    if os.path.exists(csv_seg):
-        # st.session_state.paths["csv_seg"] = csv_seg
-        st.session_state.paths["last_in_dir"] = csv_path
-
-# Panel for selecting demog csv
-with st.expander(":material/upload: Select or upload input demographics csv", expanded=False):
-
-    if os.path.exists(st.session_state.paths["csv_demog"]):
-        st.success('Detected input data',
-                   icon=":material/thumb_up:"
-                  )
-        st.warning('You can either proceed with the next step or select/upload new data below')
-
-    # Demog file name
-    helpmsg = "Input csv file with demographic values.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it"
-    csv_demog, csv_path = utilst.user_input_file(
-        "Select file",
-        "btn_input_demog",
-        "Demographics file",
-        st.session_state.paths["last_in_dir"],
-        st.session_state.paths["csv_demog"],
-        helpmsg,
+# Panel for selecting input dlmuse csv
+flag_disabled = os.path.exists(st.session_state.paths["dset"]) == False
+if st.session_state.app_type == 'CLOUD':
+    msg_txt = 'Upload DLMUSE csv file'
+    utilst.util_upload_file(
+        st.session_state.paths['csv_seg'],
+        'uploaded_dlmuse_file',
+        flag_disabled,
+        msg_txt
     )
-    if os.path.exists(csv_demog):
-        st.session_state.paths["csv_demog"] = csv_demog
-        st.session_state.paths["last_in_dir"] = csv_path
+
+else:   # st.session_state.app_type == 'DESKTOP'
+    msg_txt = 'Select DLMUSE csv file'
+    utilst.util_select_file(
+        st.session_state.paths['csv_seg'],
+        st.session_state.paths['last_in_dir'],
+        flag_disabled,
+        msg_txt
+    )
+
+# Panel for selecting input demog csv
+flag_disabled = os.path.exists(st.session_state.paths["dset"]) == False
+if st.session_state.app_type == 'CLOUD':
+    msg_txt = 'Upload demographic csv file'
+    utilst.util_upload_file(
+        st.session_state.paths['csv_demog'],
+        'uploaded_demog_file',
+        flag_disabled,
+        msg_txt
+    )
+
+else:   # st.session_state.app_type == 'DESKTOP'
+    msg_txt = 'Select demographic csv file'
+    utilst.util_select_file(
+        st.session_state.paths['csv_demog'],
+        st.session_state.paths['last_in_dir'],
+        flag_disabled,
+        msg_txt
+    )
 
 # Panel for running MLScore
 with st.expander(":material/model_training: Run MLScore", expanded=False):
@@ -127,16 +91,40 @@ with st.expander(":material/model_training: Run MLScore", expanded=False):
 
             # cmd = f"python3 {run_dir}/call_snakefile.py --run_dir {run_dir} --dset_name {st.session_state.dset_name} --input_rois {csv_seg} --input_demog {csv_demog} --dir_out {st.session_state.paths['MLScores']}"
 
-            cmd = f"python3 {run_dir}/workflow_mlscores.py --root_dir {st.session_state.paths['root']} --run_dir {run_dir} --dset_name {st.session_state.dset_name} --input_rois {csv_seg} --input_demog {csv_demog} --dir_out {st.session_state.paths['MLScores']}"
-
+            cmd = f"python3 {run_dir}/workflow_mlscores.py --root_dir {st.session_state.paths['root']} --run_dir {run_dir} --dset_name {st.session_state.dset_name} --input_rois {st.session_state.paths['csv_seg']} --input_demog {st.session_state.paths['csv_demog']} --dir_out {st.session_state.paths['MLScores']}"
+            print(f'About to run: {cmd}')
             os.system(cmd)
 
-            # Set the output file as the input for the related viewers
-            if os.path.exists(st.session_state.paths["csv_mlscores"]):
-                st.success(
-                    f"Run completed! Out file: {st.session_state.paths['csv_mlscores']}",
-                    icon=":material/thumb_up:",
-                )
+    # Check out file
+    if os.path.exists(st.session_state.paths["csv_mlscores"]):
+        st.success(
+            f"Out file created: {st.session_state.paths['csv_mlscores']}",
+            icon=":material/thumb_up:",
+        )
+
+
+
+
+# Panel for downloading results
+if st.session_state.app_type == "CLOUD":
+    with st.expander(":material/download: Download Results", expanded=False):
+
+        # Zip results and download
+        flag_btn = os.path.exists(st.session_state.paths['MLScores'])
+        out_zip = bytes()
+        if flag_btn:
+            if not os.path.exists(st.session_state.paths["OutZipped"]):
+                os.makedirs(st.session_state.paths["OutZipped"])
+            f_tmp = os.path.join(st.session_state.paths["OutZipped"], "MLScores.zip")
+            out_zip = utilio.zip_folder(st.session_state.paths["MLScores"], f_tmp)
+
+        st.download_button(
+            "Download ML Scores",
+            out_zip,
+            file_name="MLScores.zip",
+            disabled=not flag_btn,
+        )
+
 
 with st.expander("FIXME: TMP - Session state"):
     st.write(st.session_state)

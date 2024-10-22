@@ -30,13 +30,16 @@ utilst.util_panel_workingdir(st.session_state.app_type)
 # Panel for selecting input dicom files
 flag_disabled = os.path.exists(st.session_state.paths["dset"]) == False
 if st.session_state.app_type == 'CLOUD':
-    utilst.util_upload_folder(st.session_state.paths['Dicoms'], flag_disabled)
+    msg_txt = 'Upload dicom data'
+    utilst.util_upload_folder(st.session_state.paths['Dicoms'], flag_disabled, msg_txt)
 
 else:   # st.session_state.app_type == 'DESKTOP'
+    msg_txt = 'Select dicom data'
     utilst.util_select_folder(
         st.session_state.paths['Dicoms'],
         st.session_state.paths['last_in_dir'],
-        flag_disabled
+        flag_disabled,
+        msg_txt
     )
 
 # Panel for detecting dicom series

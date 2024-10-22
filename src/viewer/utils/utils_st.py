@@ -303,12 +303,12 @@ def copy_uploaded_to_dir():
             st.session_state.paths["target_path"]
         )
 
-def util_upload_folder(out_dir: str, flag_disabled: bool) -> None:
+def util_upload_folder(out_dir: str, flag_disabled: bool, msg_txt: bool) -> None:
     '''
     Upload user data to target folder
     Input data may be a folder, multiple files, or a zip file (unzip the zip file if so)
     '''
-    with st.expander(f":material/upload: Upload data", expanded=False):
+    with st.expander(f":material/upload: {msg_txt}", expanded=False):
         
         # Set target path
         if not flag_disabled:
@@ -332,11 +332,41 @@ def util_upload_folder(out_dir: str, flag_disabled: bool) -> None:
             st.warning('You can proceed with the next step or upload new data')
         
 
-def util_select_folder(out_dir: str, last_in_dir: str, flag_disabled: bool) -> None:
+def util_upload_file(out_file: str, key_uploader: str, flag_disabled: bool, msg_txt: bool) -> None:
+    '''
+    Upload user data to target folder
+    Input data is a single file
+    '''
+    with st.expander(f":material/upload: {msg_txt}", expanded=False):
+
+        # Set target path
+        if not flag_disabled:
+            if not os.path.exists(os.path.dirname(out_file)):
+                os.makedirs(os.path.dirname(out_file))
+
+        # Upload data
+        in_file = st.file_uploader(
+            "Upload input folder/file(s)",
+            key = key_uploader,
+            accept_multiple_files=False,
+            disabled = flag_disabled
+        )
+
+        # Check uploaded data
+        if not os.path.exists(out_file):
+            utilio.copy_uploaded_file(in_file, out_file)
+
+
+        if os.path.exists(out_file):
+            st.success(f'Data is ready ({out_file})', icon=":material/thumb_up:")
+            st.warning('You can proceed with the next step or upload new data')
+
+
+def util_select_folder(out_dir: str, last_in_dir: str, flag_disabled: bool, msg_txt: bool) -> None:
     '''
     Select user input folder and link to target folder
     '''
-    with st.expander(f":material/upload: Select data", expanded=False):
+    with st.expander(f":material/upload: {msg_txt}", expanded=False):
         
         # Check if out folder already exists
         curr_dir = ''        
@@ -357,8 +387,11 @@ def util_select_folder(out_dir: str, last_in_dir: str, flag_disabled: bool) -> N
             flag_disabled
         )
 
-        # Link user input dicoms
         if not os.path.exists(out_dir) and os.path.exists(sel_dir):
+            # Create parent dir of output dir
+            if not os.path.exists(os.path.dirname(out_dir)):
+                os.makedirs(os.path.dirname(out_dir))
+            # Link user input dicoms
             os.symlink(sel_dir, out_dir)
         
         # Check uploaded data
@@ -366,3 +399,10 @@ def util_select_folder(out_dir: str, last_in_dir: str, flag_disabled: bool) -> N
         if fcount > 0:
             st.success(f'Data is ready ({out_dir}, {fcount} files)', icon=":material/thumb_up:")
             st.warning('You can proceed with the next step or select new data')
+
+def util_select_file(out_file: str, last_in_dir: str, flag_disabled: bool, msg_txt: bool) -> None:
+    '''
+    Select user input folder and link to target folder
+    '''
+    print(out_file)
+
