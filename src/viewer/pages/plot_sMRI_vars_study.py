@@ -1,7 +1,5 @@
 import os
 
-import traceback
-
 import pandas as pd
 import plotly.express as px
 import streamlit as st
@@ -91,21 +89,27 @@ def display_plot(df: pd.DataFrame, plot_id: str) -> None:
                 # Get default plot params
                 if st.session_state.plots.loc[plot_id].xvar not in list_cols:
                     if st.session_state.plot_default_xvar in list_cols:
-                        st.session_state.plots.loc[plot_id].xvar = st.session_state.plot_default_xvar
+                        st.session_state.plots.loc[plot_id].xvar = (
+                            st.session_state.plot_default_xvar
+                        )
                     else:
                         st.session_state.plots.loc[plot_id].xvar = list_cols[1]
 
                 if st.session_state.plots.loc[plot_id].yvar not in list_cols:
                     if st.session_state.plot_default_yvar in list_cols:
-                        st.session_state.plots.loc[plot_id].yvar = st.session_state.plot_default_yvar
+                        st.session_state.plots.loc[plot_id].yvar = (
+                            st.session_state.plot_default_yvar
+                        )
                     else:
                         st.session_state.plots.loc[plot_id].yvar = list_cols[2]
 
                 if st.session_state.plots.loc[plot_id].hvar not in list_cols:
                     if st.session_state.plot_default_hvar in list_cols:
-                        st.session_state.plots.loc[plot_id].hvar = st.session_state.plot_default_hvar
+                        st.session_state.plots.loc[plot_id].hvar = (
+                            st.session_state.plot_default_hvar
+                        )
                     else:
-                        st.session_state.plots.loc[plot_id].hvar = ''
+                        st.session_state.plots.loc[plot_id].hvar = ""
 
                 xvar = st.session_state.plots.loc[plot_id].xvar
                 yvar = st.session_state.plots.loc[plot_id].yvar
@@ -115,7 +119,7 @@ def display_plot(df: pd.DataFrame, plot_id: str) -> None:
                 # Select plot params from the user
                 xind = df.columns.get_loc(xvar)
                 yind = df.columns.get_loc(yvar)
-                if hvar != '':
+                if hvar != "":
                     hind = df.columns.get_loc(hvar)
                 else:
                     hind = None
@@ -341,19 +345,23 @@ with st.sidebar:
     if os.path.exists(st.session_state.paths["csv_plots"]):
         # Read input csv
         df = pd.read_csv(st.session_state.paths["csv_plots"])
-        
+
         # Apply roi dict to rename columns
         try:
             df_dict = pd.read_csv(st.session_state.paths["csv_roidict"])
-            dict_r1 = dict(zip(df_dict['ROI_Index'].astype(str), df_dict['ROI_Name'].astype(str)))
-            dict_r2 = dict(zip(df_dict['ROI_Name'].astype(str), df_dict['ROI_Index'].astype(str)))
+            dict_r1 = dict(
+                zip(df_dict["ROI_Index"].astype(str), df_dict["ROI_Name"].astype(str))
+            )
+            dict_r2 = dict(
+                zip(df_dict["ROI_Name"].astype(str), df_dict["ROI_Index"].astype(str))
+            )
             st.session_state.roi_dict = dict_r1
             st.session_state.roi_dict_rev = dict_r2
-            df = df.rename(columns = dict_r1)
-            
-        except Exception as e:
-            st.warning('Could not rename columns using roi dict!')
-        
+            df = df.rename(columns=dict_r1)
+
+        except Exception:
+            st.warning("Could not rename columns using roi dict!")
+
         with st.container(border=True):
             # Slider to set number of plots in a row
             st.session_state.plots_per_row = st.slider(
@@ -504,7 +512,9 @@ with st.expander(":material/upload: Viewer input folders"):
     st.session_state.suff_seg = suff_seg
 
 # Panel for viewing images and segmentations
-with placeholder_imgview.expander(":material/visibility: View segmentations", expanded=False):
+with placeholder_imgview.expander(
+    ":material/visibility: View segmentations", expanded=False
+):
 
     flag_show = True
     if st.session_state.sel_mrid == "":
@@ -523,7 +533,7 @@ with placeholder_imgview.expander(":material/visibility: View segmentations", ex
             st.warning(
                 f"Could not find underlay image: {st.session_state.paths['sel_img']}"
             )
-            #st.error('Underlay image not found. Please check input path and suffix in the panel below!')
+            # st.error('Underlay image not found. Please check input path and suffix in the panel below!')
             flag_show = False
 
         if not os.path.exists(st.session_state.paths["sel_seg"]):
@@ -545,7 +555,9 @@ with placeholder_imgview.expander(":material/visibility: View segmentations", ex
             # Check if index exists in overlay mask
             is_in_mask = False
             if os.path.exists(st.session_state.paths["sel_seg"]):
-                is_in_mask = utilni.check_roi_index(st.session_state.paths["sel_seg"], sel_var)
+                is_in_mask = utilni.check_roi_index(
+                    st.session_state.paths["sel_seg"], sel_var
+                )
 
             if is_in_mask:
                 list_rois = [int(sel_var)]
@@ -565,9 +577,7 @@ with placeholder_imgview.expander(":material/visibility: View segmentations", ex
                 )
             if not os.path.exists(st.session_state.paths["sel_seg"]):
                 flag_files = 0
-                warn_msg = (
-                    f"Missing overlay image: {st.session_state.paths['sel_seg']}"
-                )
+                warn_msg = f"Missing overlay image: {st.session_state.paths['sel_seg']}"
 
             if flag_files == 0:
                 st.warning(warn_msg)
@@ -576,7 +586,7 @@ with placeholder_imgview.expander(":material/visibility: View segmentations", ex
                     st.session_state.paths["sel_img"],
                     st.session_state.paths["sel_seg"],
                     list_rois,
-                    crop_to_mask
+                    crop_to_mask,
                 )
 
                 # Detect mask bounds and center in each view
@@ -596,7 +606,7 @@ with placeholder_imgview.expander(":material/visibility: View segmentations", ex
                                 img_masked,
                                 ind_view,
                                 mask_bounds[ind_view, :],
-                                tmp_orient
+                                tmp_orient,
                             )
 
 

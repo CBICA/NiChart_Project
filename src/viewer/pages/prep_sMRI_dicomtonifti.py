@@ -14,10 +14,14 @@ def progress(p: int, i: int, decoded: Any) -> None:
     with result_holder.container():
         st.progress(p, f"Progress: Token position={i}")
 
-def save_and_unzip_files():
+
+def save_and_unzip_files() -> None:
     # Save files to local storage
-    if len(st.session_state['uploaded_dicoms']) > 0:
-        utilio.save_uploaded_files(st.session_state['uploaded_dicoms'], st.session_state.paths["Dicoms"])
+    if len(st.session_state["uploaded_dicoms"]) > 0:
+        utilio.save_uploaded_files(
+            st.session_state["uploaded_dicoms"], st.session_state.paths["Dicoms"]
+        )
+
 
 st.markdown(
     """
@@ -48,9 +52,9 @@ with st.expander(":material/upload: Select or upload input data", expanded=False
         # Upload dicom files
         in_files = st.file_uploader(
             "Upload dicom file(s)",
-            key = 'uploaded_dicoms',
+            key="uploaded_dicoms",
             accept_multiple_files=True,
-            on_change = save_and_unzip_files
+            on_change=save_and_unzip_files,
         )
 
     else:  # st.session_state.app_type == 'DESKTOP':
@@ -65,18 +69,25 @@ with st.expander(":material/upload: Select or upload input data", expanded=False
             st.session_state.paths["user_Dicoms"],
             helpmsg,
         )
-        
-        # Link user input dicoms 
-        if not os.path.exists(st.session_state.paths["Dicoms"]) and os.path.exists(st.session_state.paths["user_Dicoms"]):
-            os.symlink(st.session_state.paths["user_Dicoms"], st.session_state.paths["Dicoms"])
+
+        # Link user input dicoms
+        if not os.path.exists(st.session_state.paths["Dicoms"]) and os.path.exists(
+            st.session_state.paths["user_Dicoms"]
+        ):
+            os.symlink(
+                st.session_state.paths["user_Dicoms"], st.session_state.paths["Dicoms"]
+            )
 
     # Check current dicom folder
     fcount = utilio.get_file_count(st.session_state.paths["Dicoms"])
     if fcount > 0:
-        st.success(f'Dicom files ready ({st.session_state.paths["Dicoms"]}, {fcount} files)',
-                icon=":material/thumb_up:"
-                )
-        st.warning('You can either proceed with the next step or select/upload new data')
+        st.success(
+            f'Dicom files ready ({st.session_state.paths["Dicoms"]}, {fcount} files)',
+            icon=":material/thumb_up:",
+        )
+        st.warning(
+            "You can either proceed with the next step or select/upload new data"
+        )
 
 # Panel for detecting dicom series
 with st.expander(":material/manage_search: Detect dicom series", expanded=False):

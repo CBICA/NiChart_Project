@@ -67,18 +67,17 @@ if "instantiated" not in st.session_state:
         "csv_mlscores": "",
     }
 
-    st.session_state.paths["root"] = os.path.dirname(
-        os.path.dirname(os.getcwd())
-    )
+    st.session_state.paths["root"] = os.path.dirname(os.path.dirname(os.getcwd()))
 
     st.session_state.paths["init"] = st.session_state.paths["root"]
 
     #########################################
     # FIXME : set to test folder outside repo
-    st.session_state.paths["init"] = os.path.join(os.path.dirname(st.session_state.paths["root"]), 'TestData')
-    
+    st.session_state.paths["init"] = os.path.join(
+        os.path.dirname(st.session_state.paths["root"]), "TestData"
+    )
+
     st.session_state.paths["last_in_dir"] = st.session_state.paths["init"]
-    
 
     # FIXME: This sets the default out path on the cloud
     #        It's a folder inside the root folder for now

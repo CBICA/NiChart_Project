@@ -1,6 +1,7 @@
 import os
 
 import streamlit as st
+import utils.utils_io as utilio
 import utils.utils_st as utilst
 
 st.markdown(
@@ -20,12 +21,15 @@ utilst.util_panel_workingdir(st.session_state.app_type)
 
 # Panel for selecting data csv
 with st.expander(":material/upload: Select or upload input data csv", expanded=False):
-
+    fcount = utilio.get_file_count(st.session_state.paths["Dicoms"])
     if os.path.exists(st.session_state.paths["csv_seg"]):
-        st.success(f'Detected input data ({st.session_state.paths["Dicoms"]}, {fcount} files)',
-                   icon=":material/thumb_up:"
-                  )
-        st.warning('You can either proceed with the next step or select/upload new data below')
+        st.success(
+            f'Detected input data ({st.session_state.paths["Dicoms"]}, {fcount} files)',
+            icon=":material/thumb_up:",
+        )
+        st.warning(
+            "You can either proceed with the next step or select/upload new data below"
+        )
 
     # DLMUSE file name
     helpmsg = "Input csv file with DLMUSE ROI volumes.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it"
@@ -42,13 +46,19 @@ with st.expander(":material/upload: Select or upload input data csv", expanded=F
         st.session_state.paths["last_in_dir"] = csv_path
 
 # Panel for selecting demog csv
-with st.expander(":material/upload: Select or upload input demographics csv", expanded=False):
+with st.expander(
+    ":material/upload: Select or upload input demographics csv", expanded=False
+):
 
     if os.path.exists(st.session_state.paths["csv_demog"]):
-        st.success(f'Detected input data ({st.session_state.paths["Dicoms"]}, {fcount} files)',
-                   icon=":material/thumb_up:"
-                  )
-        st.warning('You can either proceed with the next step or select/upload new data below')
+        fcount = utilio.get_file_count(st.session_state.paths["Dicoms"])
+        st.success(
+            f'Detected input data ({st.session_state.paths["Dicoms"]}, {fcount} files)',
+            icon=":material/thumb_up:",
+        )
+        st.warning(
+            "You can either proceed with the next step or select/upload new data below"
+        )
 
     # Demog file name
     helpmsg = "Input csv file with demographic values.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it"

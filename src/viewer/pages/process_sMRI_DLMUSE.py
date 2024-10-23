@@ -2,15 +2,19 @@ import os
 
 import pandas as pd
 import streamlit as st
+import utils.utils_io as utilio
 import utils.utils_muse as utilmuse
 import utils.utils_nifti as utilni
 import utils.utils_st as utilst
-import utils.utils_io as utilio
 
-def save_and_unzip_files():
+
+def save_and_unzip_files() -> None:
     # Save files to local storage
-    if len(st.session_state['uploaded_t1s']) > 0:
-        utilio.save_uploaded_files(st.session_state['uploaded_t1s'], st.session_state.paths["T1"])
+    if len(st.session_state["uploaded_t1s"]) > 0:
+        utilio.save_uploaded_files(
+            st.session_state["uploaded_t1s"], st.session_state.paths["T1"]
+        )
+
 
 st.markdown(
     """
@@ -41,9 +45,9 @@ with st.expander(":material/upload: Select or upload input data", expanded=False
         # Upload T1 files
         in_files = st.file_uploader(
             "Upload T1 image(s)",
-            key = 'uploaded_t1s',
+            key="uploaded_t1s",
             accept_multiple_files=True,
-            on_change = save_and_unzip_files
+            on_change=save_and_unzip_files,
         )
 
     else:  # st.session_state.app_type == 'DESKTOP':
@@ -59,18 +63,23 @@ with st.expander(":material/upload: Select or upload input data", expanded=False
             helpmsg,
         )
 
-    # Link user input dicoms 
-    if not os.path.exists(st.session_state.paths["T1"]) and os.path.exists(st.session_state.paths["user_T1"]):
+    # Link user input dicoms
+    if not os.path.exists(st.session_state.paths["T1"]) and os.path.exists(
+        st.session_state.paths["user_T1"]
+    ):
         if not os.path.exists(os.path.dirname(st.session_state.paths["T1"])):
             os.makedirs(os.path.dirname(st.session_state.paths["T1"]))
         os.symlink(st.session_state.paths["user_T1"], st.session_state.paths["T1"])
 
     fcount = utilio.get_file_count(st.session_state.paths["T1"])
     if fcount > 0:
-        st.success(f'T1 scans ready ({st.session_state.paths["T1"]}, {fcount} files)',
-                   icon=":material/thumb_up:"
-                  )
-        st.warning('You can either proceed with the next step or select/upload new data')
+        st.success(
+            f'T1 scans ready ({st.session_state.paths["T1"]}, {fcount} files)',
+            icon=":material/thumb_up:",
+        )
+        st.warning(
+            "You can either proceed with the next step or select/upload new data"
+        )
 
 
 # Panel for running DLMUSE
