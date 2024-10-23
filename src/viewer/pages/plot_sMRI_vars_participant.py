@@ -70,25 +70,25 @@ with st.expander(":material/upload: Select or upload input data", expanded=False
 
     # Set default path for the plot csv
     if os.path.exists(st.session_state.paths["csv_mlscores"]):
-        st.session_state.paths["csv_plots"] = st.session_state.paths["csv_mlscores"]
+        st.session_state.paths["csv_plot"] = st.session_state.paths["csv_mlscores"]
     elif os.path.exists(st.session_state.paths["csv_seg"]):
-        st.session_state.paths["csv_plots"] = st.session_state.paths["csv_seg"]
+        st.session_state.paths["csv_plot"] = st.session_state.paths["csv_seg"]
 
     # Input csv
     helpmsg = "Input csv file with DLMUSE ROI volumes.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it"
-    csv_plots, csv_path = utilst.user_input_file(
+    csv_plot, csv_path = utilst.user_input_file(
         "Select file",
         "btn_input_seg",
         "DLMUSE ROI file",
         st.session_state.paths["last_in_dir"],
-        st.session_state.paths["csv_plots"],
+        st.session_state.paths["csv_plot"],
         helpmsg,
     )
-    if os.path.exists(csv_plots):
-        st.session_state.paths["csv_plots"] = csv_plots
+    if os.path.exists(csv_plot):
+        st.session_state.paths["csv_plot"] = csv_plot
         st.session_state.paths["last_in_dir"] = csv_path
 
-        df = pd.read_csv(st.session_state.paths["csv_plots"])
+        df = pd.read_csv(st.session_state.paths["csv_plot"])
         list_mrid = df.MRID.tolist()
 
         sel_mrid = st.selectbox("MRID", list_mrid, key="selbox_mrid", index=None)

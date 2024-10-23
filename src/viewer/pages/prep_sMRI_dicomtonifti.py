@@ -14,15 +14,6 @@ def progress(p: int, i: int, decoded: Any) -> None:
     with result_holder.container():
         st.progress(p, f"Progress: Token position={i}")
 
-
-def save_and_unzip_files() -> None:
-    # Save files to local storage
-    if len(st.session_state["uploaded_dicoms"]) > 0:
-        utilio.save_uploaded_files(
-            st.session_state["uploaded_dicoms"], st.session_state.paths["Dicoms"]
-        )
-
-
 st.markdown(
     """
     - Enables users to extract raw DICOM files in the input directory to NIFTI format.
@@ -36,57 +27,26 @@ st.markdown(
 # Panel for output (dataset name + out_dir)
 utilst.util_panel_workingdir(st.session_state.app_type)
 
-# Panel for selecting input data
-with st.expander(":material/upload: Select or upload input data", expanded=False):
+# Panel for selecting input dicom files
+flag_disabled = os.path.exists(st.session_state.paths["dset"]) == False
 
-    if st.session_state.app_type == "CLOUD":
-
-        # Create Dicoms folder
-        if os.path.exists(st.session_state.paths["dset"]):
-            if not os.path.exists(st.session_state.paths["Dicoms"]):
-                os.makedirs(st.session_state.paths["Dicoms"])
-
-        # Create Dicoms folder
-        flag_uploader = os.path.exists(st.session_state.paths["Dicoms"])
-
-        # Upload dicom files
-        in_files = st.file_uploader(
-            "Upload dicom file(s)",
-            key="uploaded_dicoms",
-            accept_multiple_files=True,
-            on_change=save_and_unzip_files,
+if st.session_state.app_type == 'CLOUD':
+    with st.expander(f":material/upload: Upload data", expanded=False):
+        utilst.util_upload_folder(
+            st.session_state.paths['Dicoms'],
+            "Dicom files or folders",
+            flag_disabled,
+            'Raw dicom files can be uploaded as a folder, multiple files, or a single zip file'
         )
 
-    else:  # st.session_state.app_type == 'DESKTOP':
-
-        # Input dicom image folder
-        helpmsg = "Input folder with dicom files (.dcm).\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
-        st.session_state.paths["user_Dicoms"] = utilst.user_input_folder(
-            "Select folder",
-            "btn_indir_dicom",
-            "Input dicom folder",
-            st.session_state.paths["last_in_dir"],
-            st.session_state.paths["user_Dicoms"],
-            helpmsg,
-        )
-
-        # Link user input dicoms
-        if not os.path.exists(st.session_state.paths["Dicoms"]) and os.path.exists(
-            st.session_state.paths["user_Dicoms"]
-        ):
-            os.symlink(
-                st.session_state.paths["user_Dicoms"], st.session_state.paths["Dicoms"]
-            )
-
-    # Check current dicom folder
-    fcount = utilio.get_file_count(st.session_state.paths["Dicoms"])
-    if fcount > 0:
-        st.success(
-            f'Dicom files ready ({st.session_state.paths["Dicoms"]}, {fcount} files)',
-            icon=":material/thumb_up:",
-        )
-        st.warning(
-            "You can either proceed with the next step or select/upload new data"
+else:   # st.session_state.app_type == 'DESKTOP'
+    with st.expander(f":material/upload: Select data", expanded=False):
+        utilst.util_select_folder(
+            'selected_dicom_folder',
+            'Dicom folder',
+            st.session_state.paths['Dicoms'],
+            st.session_state.paths['last_in_dir'],
+            flag_disabled
         )
 
 # Panel for detecting dicom series
@@ -117,7 +77,6 @@ with st.expander(":material/manage_search: Detect dicom series", expanded=False)
             f"Detected {num_scans} scans in {len(list_series)} series!",
             icon=":material/thumb_up:",
         )
-
 
 # Panel for selecting and extracting dicom series
 with st.expander(":material/auto_awesome_motion: Extract scans", expanded=False):
@@ -207,9 +166,9 @@ with st.expander(":material/visibility: View images", expanded=False):
 # Panel for downloading results
 if st.session_state.app_type == "CLOUD":
     with st.expander(":material/download: Download Results", expanded=False):
-        # Zip results
-        flag_btn = os.path.exists(st.session_state.paths[st.session_state.sel_mod])
 
+        # Zip results and download
+        flag_btn = os.path.exists(st.session_state.paths[st.session_state.sel_mod])
         out_zip = bytes()
         if flag_btn:
             if not os.path.exists(st.session_state.paths["OutZipped"]):
@@ -223,7 +182,6 @@ if st.session_state.app_type == "CLOUD":
             file_name=f"{st.session_state.sel_mod}.zip",
             disabled=not flag_btn,
         )
-
 
 with st.expander("TMP: session vars"):
     st.write(st.session_state)

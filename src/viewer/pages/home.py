@@ -42,6 +42,8 @@ if "instantiated" not in st.session_state:
         "root": "",
         "init": "",
         "last_in_dir": "",
+        "target_dir":"",
+        "target_file":"",        
         "dset": "",
         "out": "",
         "Lists": "",
@@ -62,7 +64,7 @@ if "instantiated" not in st.session_state:
         "sel_mask": "",
         "csv_demog": "",
         "csv_seg": "",
-        "csv_plots": "",
+        "csv_plot": "",
         "csv_roidict": "",
         "csv_mlscores": "",
     }
@@ -97,7 +99,8 @@ if "instantiated" not in st.session_state:
     st.session_state.dicts = {
         "muse_derived": os.path.join(tmp_dir, "list_MUSE_mapping_derived.csv"),
         "muse_all": os.path.join(tmp_dir, "list_MUSE_all.csv"),
-        "muse_sel": os.path.join(tmp_dir, "list_MUSE_primary.csv"),
+        #"muse_sel": os.path.join(tmp_dir, "list_MUSE_primary.csv"),
+        "muse_sel": os.path.join(tmp_dir, "list_MUSE_all.csv"),
     }
 
     # Current roi dictionary
@@ -124,7 +127,7 @@ if "instantiated" not in st.session_state:
     # Default values for plotting parameters
     st.session_state.plot_default_xvar = "Age"
     st.session_state.plot_default_yvar = "GM"
-    st.session_state.plot_default_hvar = "Sex"
+    st.session_state.plot_default_hvar = ""
 
     st.session_state.plot_xvar = ""
     st.session_state.plot_yvar = ""

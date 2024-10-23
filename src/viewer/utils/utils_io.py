@@ -1,5 +1,7 @@
 import os
+import shutil
 import zipfile
+from typing import BinaryIO
 
 # https://stackoverflow.com/questions/64719918/how-to-write-streamlit-uploadedfile-to-temporary-in_dir-with-original-filenam
 # https://gist.github.com/benlansdell/44000c264d1b373c77497c0ea73f0ef2
@@ -37,9 +39,10 @@ def unzip_zip_files(in_dir: str) -> None:
                     zip_ref.extractall(in_dir)
                     os.remove(zip_path)
 
-def save_uploaded_files(in_files: list, d_out: str) -> None:
+
+def copy_and_unzip_uploaded_files(in_files: list, d_out: str) -> None:
     """
-    Save uploaded files to the output dir and unzips zip files
+    Copy uploaded files to the output dir and unzip zip files
     """
     # Save uploaded files
     print("Saving uploaded files")
@@ -53,6 +56,16 @@ def save_uploaded_files(in_files: list, d_out: str) -> None:
     print("Extracting zip files")
     if os.path.exists(d_out):
         unzip_zip_files(d_out)
+
+
+def copy_uploaded_file(in_file: BinaryIO, out_file: str) -> None:
+    """
+    Save uploaded file to the output path
+    """
+    if in_file is not None:
+        with open(out_file, "wb") as f:
+            shutil.copyfileobj(in_file, f)
+
 
 def get_file_count(folder_path: str) -> int:
     count = 0

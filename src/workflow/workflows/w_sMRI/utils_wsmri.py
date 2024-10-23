@@ -47,9 +47,12 @@ def corr_icv(
 
     # Get var groups
     list_exclude = exclude_vars.split(",") + [icv_var]
-    list_target = df.columns[
-        df.columns.isin(list_exclude) if not df.columns.isin(list_exclude) else None
-    ]
+
+    print(df.columns)
+    print(list_exclude)
+
+    list_target = [x for x in df.columns if x not in list_exclude]
+
     df_p1 = df[list_exclude]
     df_p2 = df[list_target]
     val_icv = df[icv_var]
@@ -252,23 +255,16 @@ def merge_dataframes_multi(out_csv: str, key_var: str, list_in_csv: Any) -> None
     for i, in_csv in enumerate(list_in_csv[1:]):
         # Read csv files
         df_tmp = pd.read_csv(in_csv)
-        df_tmp = df_tmp[
-            df_tmp[key_var].isna() if df_tmp[key_var].isna() is False else None
-        ]
+        # df_tmp = df_tmp[
+        #     df_tmp[key_var].isna() if df_tmp[key_var].isna() is False else None
+        # ]
 
         # Merge DataFrames
         df_out = df_out.merge(df_tmp, on=key_var, suffixes=["", "_tmpremovedupl"])
 
         # Remove duplicate columns
-        df_out = df_out[
-            df_out.columns[
-                (
-                    df_out.columns.str.contains("_tmpremovedupl")
-                    if df_out.columns.str.contains("_tmpremovedupl") is False
-                    else None
-                )
-            ]
-        ]
+        sel_cols = df_out.columns[df_out.columns.str.contains("_tmpremovedupl") == False]
+        df_out = df_out[sel_cols]
 
     # Write out file
     df_out.to_csv(out_csv, index=False)

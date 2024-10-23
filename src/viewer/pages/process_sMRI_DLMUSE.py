@@ -7,15 +7,6 @@ import utils.utils_muse as utilmuse
 import utils.utils_nifti as utilni
 import utils.utils_st as utilst
 
-
-def save_and_unzip_files() -> None:
-    # Save files to local storage
-    if len(st.session_state["uploaded_t1s"]) > 0:
-        utilio.save_uploaded_files(
-            st.session_state["uploaded_t1s"], st.session_state.paths["T1"]
-        )
-
-
 st.markdown(
     """
     - NiChart sMRI segmentation pipeline using DLMUSE.
@@ -29,58 +20,27 @@ st.markdown(
 # Panel for output (dataset name + out_dir)
 utilst.util_panel_workingdir(st.session_state.app_type)
 
-# Panel for selecting input data
-with st.expander(":material/upload: Select or upload input data", expanded=False):
+# Panel for selecting input image files
+flag_disabled = os.path.exists(st.session_state.paths["dset"]) == False
 
-    if st.session_state.app_type == "CLOUD":
-
-        # Create T1 folder
-        if os.path.exists(st.session_state.paths["dset"]):
-            if not os.path.exists(st.session_state.paths["T1"]):
-                os.makedirs(st.session_state.paths["T1"])
-
-        # Check T1 folder
-        flag_uploader = os.path.exists(st.session_state.paths["T1"])
-
-        # Upload T1 files
-        in_files = st.file_uploader(
-            "Upload T1 image(s)",
-            key="uploaded_t1s",
-            accept_multiple_files=True,
-            on_change=save_and_unzip_files,
+if st.session_state.app_type == 'CLOUD':
+    with st.expander(f":material/upload: Upload data", expanded=False):
+        utilst.util_upload_folder(
+            st.session_state.paths['T1'],
+            "T1 images",            
+            flag_disabled,
+            'collapsed'
         )
 
-    else:  # st.session_state.app_type == 'DESKTOP':
-
-        # Input dicom image folder
-        helpmsg = "Input folder with T1 images (.nii/.nii.gz).\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
-        st.session_state.paths["user_T1"] = utilst.user_input_folder(
-            "Select folder",
-            "btn_indir_t1",
-            "Input T1 image folder",
-            st.session_state.paths["last_in_dir"],
-            st.session_state.paths["user_T1"],
-            helpmsg,
+else:   # st.session_state.app_type == 'DESKTOP'
+    with st.expander(f":material/upload: Select data", expanded=False):
+        utilst.util_select_folder(
+            'selected_img_folder',
+            'T1 nifti image folder',            
+            st.session_state.paths['T1'],
+            st.session_state.paths['last_in_dir'],
+            flag_disabled,
         )
-
-    # Link user input dicoms
-    if not os.path.exists(st.session_state.paths["T1"]) and os.path.exists(
-        st.session_state.paths["user_T1"]
-    ):
-        if not os.path.exists(os.path.dirname(st.session_state.paths["T1"])):
-            os.makedirs(os.path.dirname(st.session_state.paths["T1"]))
-        os.symlink(st.session_state.paths["user_T1"], st.session_state.paths["T1"])
-
-    fcount = utilio.get_file_count(st.session_state.paths["T1"])
-    if fcount > 0:
-        st.success(
-            f'T1 scans ready ({st.session_state.paths["T1"]}, {fcount} files)',
-            icon=":material/thumb_up:",
-        )
-        st.warning(
-            "You can either proceed with the next step or select/upload new data"
-        )
-
 
 # Panel for running DLMUSE
 with st.expander(":material/grid_on: Segment image", expanded=False):
@@ -130,18 +90,24 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
         list_mrid = [""]
     sel_mrid = st.selectbox("MRID", list_mrid, key="selbox_mrid", index=None)
 
-    # Select ROI
-    dict_roi, dict_derived = utilmuse.derived_list_to_dict(
-        st.session_state.dicts["muse_sel"], st.session_state.dicts["muse_derived"]
+    # Create combo list for selecting target ROI
+    list_roi_names = utilmuse.get_roi_names(st.session_state.dicts["muse_sel"])
+    sel_var = st.selectbox("ROI", list_roi_names, key="selbox_rois", index=0)
+
+    # Detect list of ROI indices to display
+    list_sel_rois = utilmuse.get_derived_rois(
+        sel_var,
+        st.session_state.dicts["muse_derived"]
     )
-    sel_var = st.selectbox("ROI", list(dict_roi.keys()), key="selbox_rois", index=0)
-    sel_var_ind = dict_roi[sel_var]
 
     # Create a list of checkbox options
     list_orient = st.multiselect("Select viewing planes:", utilni.VIEWS, utilni.VIEWS)
 
     # View hide overlay
     is_show_overlay = st.checkbox("Show overlay", True)
+
+    # Crop to mask area
+    crop_to_mask = st.checkbox("Crop to mask", True)
 
     # Select images
     flag_img = False
@@ -165,8 +131,8 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
             img, mask, img_masked = utilni.prep_image_and_olay(
                 st.session_state.paths["sel_img"],
                 st.session_state.paths["sel_seg"],
-                sel_var_ind,
-                dict_derived,
+                list_sel_rois,
+                crop_to_mask,
             )
 
             # Detect mask bounds and center in each view
@@ -185,6 +151,26 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
                         utilst.show_img3D(
                             img_masked, ind_view, mask_bounds[ind_view, :], tmp_orient
                         )
+
+# Panel for downloading results
+if st.session_state.app_type == "CLOUD":
+    with st.expander(":material/download: Download Results", expanded=False):
+
+        # Zip results and download
+        flag_btn = os.path.exists(st.session_state.paths[st.session_state.sel_mod])
+        out_zip = bytes()
+        if flag_btn:
+            if not os.path.exists(st.session_state.paths["OutZipped"]):
+                os.makedirs(st.session_state.paths["OutZipped"])
+            f_tmp = os.path.join(st.session_state.paths["OutZipped"], "DLMUSE.zip")
+            out_zip = utilio.zip_folder(st.session_state.paths["DLMUSE"], f_tmp)
+
+        st.download_button(
+            "Download DLMUSE results",
+            out_zip,
+            file_name=f"{st.session_state.sel_mod}.zip",
+            disabled=not flag_btn,
+        )
 
 with st.expander("TMP: session vars"):
     st.write(st.session_state)
