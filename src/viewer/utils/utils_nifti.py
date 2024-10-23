@@ -135,7 +135,7 @@ def detect_img_bounds(img: np.ndarray) -> np.ndarray:
     return img_bounds
 
 
-@st.cache_data  # type:ignore
+@st.cache_data(max_entries=1)  # type:ignore
 def prep_image_and_olay(
     f_img: np.ndarray, f_mask: Any, list_rois: list, crop_to_mask: bool
 ) -> Any:
