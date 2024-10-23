@@ -12,6 +12,7 @@ from pandas.api.types import (
     is_datetime64_any_dtype,
     is_numeric_dtype,
 )
+from stqdm import stqdm
 
 VIEWS = ["axial", "coronal", "sagittal"]
 
@@ -305,26 +306,30 @@ elif os.path.exists(st.session_state.paths["csv_seg"]):
     st.session_state.paths["csv_plot"] = st.session_state.paths["csv_seg"]
 
 # Panel for selecting input csv
-flag_disabled = os.path.exists(st.session_state.paths["dset"]) == False
+flag_disabled = (
+    True if os.path.exists(st.session_state.paths["dset"]) is False else False
+)
 
-if st.session_state.app_type == 'CLOUD':
-    with st.expander(f":material/upload: Upload input csv file", expanded=False):
-        msg_txt = 'Upload input csv file'
+if st.session_state.app_type == "CLOUD":
+    with st.expander(
+        ":material/upload: Upload input csv file", expanded=False
+    ):  # type:ignore
+        msg_txt = "Upload input csv file"
         utilst.util_upload_file(
-            st.session_state.paths['csv_plot'],
-            'uploaded_data_file',
-            'key_in_csv',
+            st.session_state.paths["csv_plot"],
+            "uploaded_data_file",
+            "key_in_csv",
             flag_disabled,
-            'visible'
+            "visible",
         )
 
-else:   # st.session_state.app_type == 'DESKTOP'
-    with st.expander(f":material/upload: Select data", expanded=False):
+else:  # st.session_state.app_type == 'DESKTOP'
+    with st.expander(":material/upload: Select data", expanded=False):
         utilst.util_select_file(
-            'selected_data_file',
-            'Data csv',
-            st.session_state.paths['csv_plot'],
-            st.session_state.paths['last_in_dir'],
+            "selected_data_file",
+            "Data csv",
+            st.session_state.paths["csv_plot"],
+            st.session_state.paths["last_in_dir"],
             flag_disabled,
         )
 
@@ -379,7 +384,7 @@ with st.sidebar:
             with ptabs[1]:
 
                 # Default values for plot params
-                #st.session_state.plot_hvar = ""
+                # st.session_state.plot_hvar = ""
 
                 plot_xvar_ind = 0
                 if st.session_state.plot_xvar in df.columns:
@@ -443,14 +448,17 @@ with st.expander(":material/monitoring: Plot data", expanded=False):
     #  - iterates over plots;
     #  - for every "plots_per_row" plots, creates a new columns block, resets column index, and displays the plot
     if df.shape[0] > 0:
-        for i, plot_ind in enumerate(list_plots):
+        for i, plot_ind in stqdm(
+            enumerate(list_plots), desc="Rendering plots ...", total=len(list_plots)
+        ):
             column_no = i % plots_per_row
             if column_no == 0:
                 blocks = st.columns(plots_per_row)
             with blocks[column_no]:
                 display_plot(df, plot_ind)
 
-def check_image_and_mask():
+
+def check_image_and_mask() -> bool:
     st.session_state.paths["sel_img"] = os.path.join(
         st.session_state.paths["T1"],
         st.session_state.sel_mrid + st.session_state.suff_t1img,
@@ -462,10 +470,11 @@ def check_image_and_mask():
     if not os.path.exists(st.session_state.paths["sel_img"]):
         return False
 
-    if not os.path.exists(st.session_state.paths["sel_seg"]):\
+    if not os.path.exists(st.session_state.paths["sel_seg"]):
         return False
 
     return True
+
 
 # Panel for viewing images and segmentations
 with st.expander(":material/visibility: View segmentations", expanded=False):
@@ -478,38 +487,46 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
     else:
         if not check_image_and_mask():
             if st.session_state.app_type == "CLOUD":
-                st.warning('Sorry, there are no images to show! Uploading images for viewing purposes is not implemented in the cloud version!')
+                st.warning(
+                    "Sorry, there are no images to show! Uploading images for viewing purposes is not implemented in the cloud version!"
+                )
             else:
-                st.warning("I'm having trouble locating the image. Please select paths and suffixes!")
+                st.warning(
+                    "I'm having trouble locating the image. Please select paths and suffixes!"
+                )
 
                 # Select images
                 utilst.util_select_folder(
-                    'selected_t1_folder',
-                    'Underlay image folder',
-                    st.session_state.paths['T1'],
-                    st.session_state.paths['last_in_dir'],
+                    "selected_t1_folder",
+                    "Underlay image folder",
+                    st.session_state.paths["T1"],
+                    st.session_state.paths["last_in_dir"],
                     flag_disabled,
                 )
 
                 utilst.util_select_folder(
-                    'selected_dlmuse_folder',
-                    'Overlay image folder',
-                    st.session_state.paths['DLMUSE'],
-                    st.session_state.paths['last_in_dir'],
+                    "selected_dlmuse_folder",
+                    "Overlay image folder",
+                    st.session_state.paths["DLMUSE"],
+                    st.session_state.paths["last_in_dir"],
                     flag_disabled,
                 )
 
                 # Select suffixes
                 suff_t1img = utilst.user_input_text(
-                    "Underlay image suffix", st.session_state.suff_t1img, "Enter the suffix for the T1 images"
+                    "Underlay image suffix",
+                    st.session_state.suff_t1img,
+                    "Enter the suffix for the T1 images",
                 )
                 st.session_state.suff_t1img = suff_t1img
 
                 suff_seg = utilst.user_input_text(
-                    "Overlay image suffix", st.session_state.suff_seg, "Enter the suffix for the DLMUSE images"
+                    "Overlay image suffix",
+                    st.session_state.suff_seg,
+                    "Enter the suffix for the DLMUSE images",
                 )
                 st.session_state.suff_seg = suff_seg
-                
+
                 if check_image_and_mask():
                     st.rerun()
 
@@ -517,7 +534,9 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
             with st.spinner("Wait for it..."):
 
                 # Get selected y var
-                sel_var = st.session_state.plots.loc[st.session_state.plot_active, "yvar"]
+                sel_var = st.session_state.plots.loc[
+                    st.session_state.plot_active, "yvar"
+                ]
 
                 # If roi dictionary was used, detect index
                 if st.session_state.roi_dict_rev is not None:
@@ -526,7 +545,9 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
                 # Check if index exists in overlay mask
                 is_in_mask = False
                 if os.path.exists(st.session_state.paths["sel_seg"]):
-                    is_in_mask = utilni.check_roi_index(st.session_state.paths["sel_seg"], sel_var)
+                    is_in_mask = utilni.check_roi_index(
+                        st.session_state.paths["sel_seg"], sel_var
+                    )
 
                 if is_in_mask:
                     list_rois = [int(sel_var)]
@@ -561,7 +582,7 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
                         st.session_state.paths["sel_img"],
                         st.session_state.paths["sel_seg"],
                         list_rois,
-                        crop_to_mask
+                        crop_to_mask,
                     )
 
                     # Detect mask bounds and center in each view
@@ -569,7 +590,11 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
 
                     # Show images
                     blocks = st.columns(len(list_orient))
-                    for i, tmp_orient in enumerate(list_orient):
+                    for i, tmp_orient in stqdm(
+                        enumerate(list_orient),
+                        desc="Showing images ...",
+                        total=len(list_orient),
+                    ):
                         with blocks[i]:
                             ind_view = VIEWS.index(tmp_orient)
                             if not is_show_overlay:
@@ -581,7 +606,7 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
                                     img_masked,
                                     ind_view,
                                     mask_bounds[ind_view, :],
-                                    tmp_orient
+                                    tmp_orient,
                                 )
 
             # Create a list of checkbox options

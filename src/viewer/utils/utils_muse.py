@@ -2,6 +2,7 @@ from typing import Any
 
 import pandas as pd
 import streamlit as st
+from stqdm import stqdm
 
 
 @st.cache_data  # type:ignore
@@ -31,7 +32,11 @@ def derived_list_to_dict(list_sel_rois: list, list_derived: list) -> Any:
 
     # Create dict of roi indices and derived indices
     dict_derived = {}
-    for i, tmp_ind in enumerate(df[0].values):
+    for i, tmp_ind in stqdm(
+        enumerate(df[0].values),
+        desc="Creating derived roi indices ...",
+        total=len(df[0].values),
+    ):
         df_tmp = df[df[0] == tmp_ind].drop([0, 1], axis=1)
         sel_vals = df_tmp.T.dropna().astype(int).values.flatten()
         dict_derived[tmp_ind] = sel_vals

@@ -42,8 +42,8 @@ if "instantiated" not in st.session_state:
         "root": "",
         "init": "",
         "last_in_dir": "",
-        "target_dir":"",
-        "target_file":"",        
+        "target_dir": "",
+        "target_file": "",
         "dset": "",
         "out": "",
         "Lists": "",
@@ -99,7 +99,7 @@ if "instantiated" not in st.session_state:
     st.session_state.dicts = {
         "muse_derived": os.path.join(tmp_dir, "list_MUSE_mapping_derived.csv"),
         "muse_all": os.path.join(tmp_dir, "list_MUSE_all.csv"),
-        #"muse_sel": os.path.join(tmp_dir, "list_MUSE_primary.csv"),
+        # "muse_sel": os.path.join(tmp_dir, "list_MUSE_primary.csv"),
         "muse_sel": os.path.join(tmp_dir, "list_MUSE_all.csv"),
     }
 

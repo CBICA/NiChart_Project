@@ -6,6 +6,7 @@ import utils.utils_dicom as utildcm
 import utils.utils_io as utilio
 import utils.utils_nifti as utilni
 import utils.utils_st as utilst
+from stqdm import stqdm
 
 result_holder = st.empty()
 
@@ -13,6 +14,7 @@ result_holder = st.empty()
 def progress(p: int, i: int, decoded: Any) -> None:
     with result_holder.container():
         st.progress(p, f"Progress: Token position={i}")
+
 
 st.markdown(
     """
@@ -28,25 +30,27 @@ st.markdown(
 utilst.util_panel_workingdir(st.session_state.app_type)
 
 # Panel for selecting input dicom files
-flag_disabled = os.path.exists(st.session_state.paths["dset"]) == False
+flag_disabled = (
+    True if os.path.exists(st.session_state.paths["dset"]) is False else False
+)
 
-if st.session_state.app_type == 'CLOUD':
-    with st.expander(f":material/upload: Upload data", expanded=False):
+if st.session_state.app_type == "CLOUD":
+    with st.expander(":material/upload: Upload data", expanded=False):  # type:ignore
         utilst.util_upload_folder(
-            st.session_state.paths['Dicoms'],
+            st.session_state.paths["Dicoms"],
             "Dicom files or folders",
             flag_disabled,
-            'Raw dicom files can be uploaded as a folder, multiple files, or a single zip file'
+            "Raw dicom files can be uploaded as a folder, multiple files, or a single zip file",
         )
 
-else:   # st.session_state.app_type == 'DESKTOP'
-    with st.expander(f":material/upload: Select data", expanded=False):
+else:  # st.session_state.app_type == 'DESKTOP'
+    with st.expander(":material/upload: Select data", expanded=False):  # type:ignore
         utilst.util_select_folder(
-            'selected_dicom_folder',
-            'Dicom folder',
-            st.session_state.paths['Dicoms'],
-            st.session_state.paths['last_in_dir'],
-            flag_disabled
+            "selected_dicom_folder",
+            "Dicom folder",
+            st.session_state.paths["Dicoms"],
+            st.session_state.paths["last_in_dir"],
+            flag_disabled,
         )
 
 # Panel for detecting dicom series
@@ -156,7 +160,11 @@ with st.expander(":material/visibility: View images", expanded=False):
 
             # Show images
             blocks = st.columns(len(list_orient))
-            for i, tmp_orient in enumerate(list_orient):
+            for i, tmp_orient in stqdm(
+                enumerate(list_orient),
+                desc="Showing images ...",
+                total=len(list_orient),
+            ):
                 with blocks[i]:
                     ind_view = utilni.VIEWS.index(tmp_orient)
                     utilst.show_img3D(

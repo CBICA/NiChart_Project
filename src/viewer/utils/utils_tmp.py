@@ -5,9 +5,7 @@ import numpy as np
 
 
 def process_image(image: np.ndarray) -> None:
-    print("Hello ...")
     time.sleep(5)
-    print("Bye ...")
 
 
 def process_images(images: list, callback: Any) -> None:
