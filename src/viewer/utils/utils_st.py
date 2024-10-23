@@ -425,7 +425,13 @@ def util_select_folder(
         st.warning("You can proceed with the next step or select new data")
 
 
-def util_select_file(key_selector: str, out_file: str, last_in_dir: str, flag_disabled: bool) -> None:
+def util_select_file(
+    key_selector: str,
+    title_txt,
+    out_file: str,
+    last_in_dir: str,
+    flag_disabled: bool
+) -> None:
     """
     Select user input file and copy to target file
     """
@@ -444,7 +450,7 @@ def util_select_file(key_selector: str, out_file: str, last_in_dir: str, flag_di
     sel_file, last_in_dir = user_input_file(
         "Select file",
         f"btn_{key_selector}",
-        "Input file",
+        title_txt,
         last_in_dir,
         curr_file,
         helpmsg,

@@ -52,6 +52,7 @@ else:   # st.session_state.app_type == 'DESKTOP'
     with st.expander(f":material/upload: Select data", expanded=False):
         utilst.util_select_file(
             'selected_dlmuse_file',
+            'DLMUSE csv',
             st.session_state.paths['csv_seg'],
             st.session_state.paths['last_in_dir'],
             flag_disabled,
@@ -59,6 +60,7 @@ else:   # st.session_state.app_type == 'DESKTOP'
 
         utilst.util_select_file(
             'selected_demog_file',
+            'Demographics csv',
             st.session_state.paths['csv_demog'],
             st.session_state.paths['last_in_dir'],
             flag_disabled,

@@ -315,9 +315,10 @@ if st.session_state.app_type == 'CLOUD':
         )
 
 else:   # st.session_state.app_type == 'DESKTOP'
-    with st.expander(f":material/upload: Select input csv file", expanded=False):
+    with st.expander(f":material/upload: Select data", expanded=False):
         utilst.util_select_file(
             'selected_data_file',
+            'Data csv',
             st.session_state.paths['csv_plot'],
             st.session_state.paths['last_in_dir'],
             flag_disabled,

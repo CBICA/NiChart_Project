@@ -40,9 +40,10 @@ if st.session_state.app_type == 'CLOUD':
         )
 
 else:   # st.session_state.app_type == 'DESKTOP'
-    with st.expander(f":material/upload: Select dicom data", expanded=False):
+    with st.expander(f":material/upload: Select data", expanded=False):
         utilst.util_select_folder(
             'selected_dicom_folder',
+            'Dicom folder',
             st.session_state.paths['Dicoms'],
             st.session_state.paths['last_in_dir'],
             flag_disabled
