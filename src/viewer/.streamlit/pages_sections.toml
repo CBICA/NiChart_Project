@@ -1,6 +1,6 @@
 
 [[pages]]
-path = "pages/home.py"
+path = "pages_custom/home.py"
 name = "Home"
 icon = "🏠"
 
@@ -10,7 +10,7 @@ is_section = true
 icon = ":file_folder:"
 
 [[pages]]
-path = "pages/prep_sMRI_dicomtonifti.py"
+path = "pages_custom/prep_sMRI_dicomtonifti.py"
 name = "Dicom to Nifti (sMRI, DTI, fMRI)"
 icon = ":black_small_square:"
 
@@ -20,7 +20,7 @@ is_section = true
 icon = ":file_folder:"
 
 [[pages]]
-path = "pages/process_sMRI_DLMUSE.py"
+path = "pages_custom/process_sMRI_DLMUSE.py"
 name = "DLMUSE (sMRI)"
 icon = ":black_small_square:"
 
@@ -30,7 +30,7 @@ is_section = true
 icon = ":file_folder:"
 
 [[pages]]
-path = "pages/workflow_sMRI_MLScores.py"
+path = "pages_custom/workflow_sMRI_MLScores.py"
 name = "ML Biomarkers (sMRI)"
 icon = ":black_small_square:"
 
@@ -40,17 +40,17 @@ is_section = true
 icon = ":file_folder:"
 
 [[pages]]
-path = "pages/plot_sMRI_vars_study.py"
+path = "pages_custom/plot_sMRI_vars_study.py"
 name = "Study Data (sMRI)"
 icon = ":black_small_square:"
 
 [[pages]]
-path = "pages/plot_sMRI_vars_participant.py"
+path = "pages_custom/plot_sMRI_vars_participant.py"
 name = "Participant Data (sMRI)"
 icon = ":black_small_square:"
 
 [[pages]]
-path = "pages/view_sMRI_Seg.py"
+path = "pages_custom/view_sMRI_Seg.py"
 name = "View Images (sMRI)"
 icon = ":black_small_square:"
 
