@@ -8,7 +8,7 @@ if "instantiated" not in st.session_state:
 
     # App type ('DESKTOP' or 'CLOUD')
     st.session_state.app_type = "CLOUD"
-    #st.session_state.app_type = "DESKTOP"
+    st.session_state.app_type = "DESKTOP"
 
     # Dataframe to keep plot ids
     st.session_state.plots = pd.DataFrame(
@@ -128,7 +128,7 @@ if "instantiated" not in st.session_state:
     # Default values for plotting parameters
     st.session_state.plot_default_xvar = "Age"
     st.session_state.plot_default_yvar = "GM"
-    st.session_state.plot_default_hvar = "Sex"
+    st.session_state.plot_default_hvar = ""
 
     st.session_state.plot_xvar = ""
     st.session_state.plot_yvar = ""

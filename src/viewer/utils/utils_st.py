@@ -380,7 +380,13 @@ def util_upload_file(
         st.warning("You can proceed with the next step or upload new data")
 
 
-def util_select_folder(key_selector: str, out_dir: str, last_in_dir: str, flag_disabled: bool) -> None:
+def util_select_folder(
+    key_selector: str,
+    title_txt,
+    out_dir: str,
+    last_in_dir: str,
+    flag_disabled: bool
+) -> None:
     """
     Select user input folder and link to target folder
     """
@@ -396,7 +402,7 @@ def util_select_folder(key_selector: str, out_dir: str, last_in_dir: str, flag_d
     sel_dir = user_input_folder(
         "Select folder",
         f"btn_{key_selector}",
-        "Input data folder",
+        title_txt,
         last_in_dir,
         curr_dir,
         helpmsg,
