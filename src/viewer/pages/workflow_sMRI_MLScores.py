@@ -1,6 +1,7 @@
 import os
 
 import streamlit as st
+import utils.utils_io as utilio
 import utils.utils_st as utilst
 import utils.utils_io as utilio
 
@@ -23,7 +24,6 @@ def save_dlmuse_file():
             st.session_state['uploaded_dlmuse'],
             os.path.join(st.session_state.paths["DLMUSE"], 'DLMUSE.csv')
         )
-
 
 # Panel for output (dataset name + out_dir)
 utilst.util_panel_workingdir(st.session_state.app_type)

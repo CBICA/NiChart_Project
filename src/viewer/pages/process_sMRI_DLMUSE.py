@@ -2,10 +2,10 @@ import os
 
 import pandas as pd
 import streamlit as st
+import utils.utils_io as utilio
 import utils.utils_muse as utilmuse
 import utils.utils_nifti as utilni
 import utils.utils_st as utilst
-import utils.utils_io as utilio
 
 st.markdown(
     """

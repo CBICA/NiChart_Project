@@ -1,7 +1,5 @@
 import os
 
-import traceback
-
 import pandas as pd
 import plotly.express as px
 import streamlit as st
@@ -91,21 +89,27 @@ def display_plot(df: pd.DataFrame, plot_id: str) -> None:
                 # Get default plot params
                 if st.session_state.plots.loc[plot_id].xvar not in list_cols:
                     if st.session_state.plot_default_xvar in list_cols:
-                        st.session_state.plots.loc[plot_id].xvar = st.session_state.plot_default_xvar
+                        st.session_state.plots.loc[plot_id].xvar = (
+                            st.session_state.plot_default_xvar
+                        )
                     else:
                         st.session_state.plots.loc[plot_id].xvar = list_cols[1]
 
                 if st.session_state.plots.loc[plot_id].yvar not in list_cols:
                     if st.session_state.plot_default_yvar in list_cols:
-                        st.session_state.plots.loc[plot_id].yvar = st.session_state.plot_default_yvar
+                        st.session_state.plots.loc[plot_id].yvar = (
+                            st.session_state.plot_default_yvar
+                        )
                     else:
                         st.session_state.plots.loc[plot_id].yvar = list_cols[2]
 
                 if st.session_state.plots.loc[plot_id].hvar not in list_cols:
                     if st.session_state.plot_default_hvar in list_cols:
-                        st.session_state.plots.loc[plot_id].hvar = st.session_state.plot_default_hvar
+                        st.session_state.plots.loc[plot_id].hvar = (
+                            st.session_state.plot_default_hvar
+                        )
                     else:
-                        st.session_state.plots.loc[plot_id].hvar = ''
+                        st.session_state.plots.loc[plot_id].hvar = ""
 
                 xvar = st.session_state.plots.loc[plot_id].xvar
                 yvar = st.session_state.plots.loc[plot_id].yvar
@@ -115,7 +119,7 @@ def display_plot(df: pd.DataFrame, plot_id: str) -> None:
                 # Select plot params from the user
                 xind = df.columns.get_loc(xvar)
                 yind = df.columns.get_loc(yvar)
-                if hvar != '':
+                if hvar != "":
                     hind = df.columns.get_loc(hvar)
                 else:
                     hind = None
@@ -330,19 +334,23 @@ with st.sidebar:
     if os.path.exists(st.session_state.paths["csv_plot"]):
         # Read input csv
         df = pd.read_csv(st.session_state.paths["csv_plot"])
-        
+
         # Apply roi dict to rename columns
         try:
             df_dict = pd.read_csv(st.session_state.paths["csv_roidict"])
-            dict_r1 = dict(zip(df_dict['ROI_Index'].astype(str), df_dict['ROI_Name'].astype(str)))
-            dict_r2 = dict(zip(df_dict['ROI_Name'].astype(str), df_dict['ROI_Index'].astype(str)))
+            dict_r1 = dict(
+                zip(df_dict["ROI_Index"].astype(str), df_dict["ROI_Name"].astype(str))
+            )
+            dict_r2 = dict(
+                zip(df_dict["ROI_Name"].astype(str), df_dict["ROI_Index"].astype(str))
+            )
             st.session_state.roi_dict = dict_r1
             st.session_state.roi_dict_rev = dict_r2
-            df = df.rename(columns = dict_r1)
-            
-        except Exception as e:
-            st.warning('Could not rename columns using roi dict!')
-        
+            df = df.rename(columns=dict_r1)
+
+        except Exception:
+            st.warning("Could not rename columns using roi dict!")
+
         with st.container(border=True):
             # Slider to set number of plots in a row
             st.session_state.plots_per_row = st.slider(
