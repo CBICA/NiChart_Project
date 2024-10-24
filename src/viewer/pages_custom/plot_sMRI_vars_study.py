@@ -1,5 +1,5 @@
 import os
-
+import glob
 import pandas as pd
 import plotly.express as px
 import streamlit as st
@@ -450,148 +450,194 @@ with st.expander(":material/monitoring: Plot data", expanded=False):
             with blocks[column_no]:
                 display_plot(df, plot_ind)
 
-def check_image_and_mask():
-    st.session_state.paths["sel_img"] = os.path.join(
+def detect_image_path(img_dir, mrid, img_suff):
+    ''' 
+    Detect image path using image folder, mrid and suffix
+    Image search covers two different folder structures:
+    - {img_dir}/{mrid}*{img_suff}
+    - {img_dir}/{mrid}/{mrid}*{img_suff}
+    '''
+    print('Searching for image' + f'{img_dir}  {mrid}  {img_suff}')
+    
+    pattern = os.path.join(img_dir, f"{mrid}*{img_suff}")    
+    tmp_sel = glob.glob(pattern, recursive=False)    
+    if len(tmp_sel) > 0:
+        return tmp_sel[0]
+    
+    pattern = os.path.join(img_dir, mrid, f"{mrid}*{img_suff}")    
+    tmp_sel = glob.glob(pattern, recursive=False)
+    if len(tmp_sel) > 0:
+        return tmp_sel[0]
+
+    return None
+
+def check_images():
+    '''
+    Checks if underlay and overlay images exists 
+    '''
+
+    # Check underlay image
+    sel_img = detect_image_path(
         st.session_state.paths["T1"],
-        st.session_state.sel_mrid + st.session_state.suff_t1img,
+        st.session_state.sel_mrid,
+        st.session_state.suff_t1img
     )
-    st.session_state.paths["sel_seg"] = os.path.join(
+    if sel_img is None:
+        return False
+    else:    
+        st.session_state.paths["sel_img"] = sel_img
+
+    # Check overlay image
+    sel_img = detect_image_path(
         st.session_state.paths["DLMUSE"],
-        st.session_state.sel_mrid + st.session_state.suff_seg,
+        st.session_state.sel_mrid,
+        st.session_state.suff_seg
     )
-    if not os.path.exists(st.session_state.paths["sel_img"]):
+    if sel_img is None:
         return False
+    else:    
+        st.session_state.paths["sel_seg"] = sel_img
+        return True
 
-    if not os.path.exists(st.session_state.paths["sel_seg"]):\
-        return False
+        
+def get_image_paths():
+    ''' 
+    Reads image path and suffix info from the user
+    '''
+    if st.session_state.app_type == "CLOUD":
+        st.warning('Sorry, there are no images to show! Uploading images for viewing purposes is not implemented in the cloud version!')
+    else:
+        st.warning("I'm having trouble locating the underlay image. Please select path and suffix!")
+        
+        # Select image dir
+        utilst.util_select_folder(
+            'selected_t1_folder',
+            'Underlay image folder',
+            st.session_state.paths['T1'],
+            st.session_state.paths['last_in_dir'],
+            flag_disabled,
+        )
 
-    return True
+        # Select suffix
+        suff_t1img = utilst.user_input_text(
+            "Underlay image suffix", st.session_state.suff_t1img, "Enter the suffix for the T1 images"
+        )
+        st.session_state.suff_t1img = suff_t1img
+
+        # Select image dir
+        utilst.util_select_folder(
+            'selected_dlmuse_folder',
+            'Overlay image folder',
+            st.session_state.paths['DLMUSE'],
+            st.session_state.paths['last_in_dir'],
+            flag_disabled,
+        )
+
+        # Select suffix
+        suff_seg = utilst.user_input_text(
+            "Overlay image suffix", st.session_state.suff_seg, "Enter the suffix for the DLMUSE images"
+        )
+        st.session_state.suff_seg = suff_seg
+        
+        if st.button("Check image paths!"):
+            if check_images():
+                st.rerun()
+            else:
+                st.warning('Image not found!')
+            
 
 # Panel for viewing images and segmentations
 with st.expander(":material/visibility: View segmentations", expanded=False):
 
     # Check if data point selected
+    flag_ready = True
     if st.session_state.sel_mrid == "":
+        flag_ready = False
         st.warning("Please select a subject on the plot!")
-        flag_images = False
 
-    else:
-        if not check_image_and_mask():
-            if st.session_state.app_type == "CLOUD":
-                st.warning('Sorry, there are no images to show! Uploading images for viewing purposes is not implemented in the cloud version!')
-            else:
-                st.warning("I'm having trouble locating the image. Please select paths and suffixes!")
-
-                # Select images
-                utilst.util_select_folder(
-                    'selected_t1_folder',
-                    'Underlay image folder',
-                    st.session_state.paths['T1'],
-                    st.session_state.paths['last_in_dir'],
-                    flag_disabled,
-                )
-
-                utilst.util_select_folder(
-                    'selected_dlmuse_folder',
-                    'Overlay image folder',
-                    st.session_state.paths['DLMUSE'],
-                    st.session_state.paths['last_in_dir'],
-                    flag_disabled,
-                )
-
-                # Select suffixes
-                suff_t1img = utilst.user_input_text(
-                    "Underlay image suffix", st.session_state.suff_t1img, "Enter the suffix for the T1 images"
-                )
-                st.session_state.suff_t1img = suff_t1img
-
-                suff_seg = utilst.user_input_text(
-                    "Overlay image suffix", st.session_state.suff_seg, "Enter the suffix for the DLMUSE images"
-                )
-                st.session_state.suff_seg = suff_seg
+    if flag_ready:
+        if not check_images():
+            get_image_paths()
                 
-                if check_image_and_mask():
-                    st.rerun()
+    if flag_ready:
+        with st.spinner("Wait for it..."):
 
-        else:
-            with st.spinner("Wait for it..."):
+            # Get selected y var
+            sel_var = st.session_state.plots.loc[st.session_state.plot_active, "yvar"]
 
-                # Get selected y var
-                sel_var = st.session_state.plots.loc[st.session_state.plot_active, "yvar"]
+            # If roi dictionary was used, detect index
+            if st.session_state.roi_dict_rev is not None:
+                sel_var = st.session_state.roi_dict_rev[sel_var]
 
-                # If roi dictionary was used, detect index
-                if st.session_state.roi_dict_rev is not None:
-                    sel_var = st.session_state.roi_dict_rev[sel_var]
+            # Check if index exists in overlay mask
+            is_in_mask = False
+            if os.path.exists(st.session_state.paths["sel_seg"]):
+                is_in_mask = utilni.check_roi_index(st.session_state.paths["sel_seg"], sel_var)
 
-                # Check if index exists in overlay mask
-                is_in_mask = False
-                if os.path.exists(st.session_state.paths["sel_seg"]):
-                    is_in_mask = utilni.check_roi_index(st.session_state.paths["sel_seg"], sel_var)
+            if is_in_mask:
+                list_rois = [int(sel_var)]
 
-                if is_in_mask:
-                    list_rois = [int(sel_var)]
+            else:
+                list_rois = utilmuse.get_derived_rois(
+                    sel_var,
+                    st.session_state.dicts["muse_derived"],
+                )
 
-                else:
-                    list_rois = utilmuse.get_derived_rois(
-                        sel_var,
-                        st.session_state.dicts["muse_derived"],
-                    )
+            # Process image and mask to prepare final 3d matrix to display
+            flag_files = 1
+            if not os.path.exists(st.session_state.paths["sel_img"]):
+                flag_files = 0
+                warn_msg = (
+                    f"Missing underlay image: {st.session_state.paths['sel_img']}"
+                )
+            if not os.path.exists(st.session_state.paths["sel_seg"]):
+                flag_files = 0
+                warn_msg = (
+                    f"Missing overlay image: {st.session_state.paths['sel_seg']}"
+                )
 
-                # Process image and mask to prepare final 3d matrix to display
-                flag_files = 1
-                if not os.path.exists(st.session_state.paths["sel_img"]):
-                    flag_files = 0
-                    warn_msg = (
-                        f"Missing underlay image: {st.session_state.paths['sel_img']}"
-                    )
-                if not os.path.exists(st.session_state.paths["sel_seg"]):
-                    flag_files = 0
-                    warn_msg = (
-                        f"Missing overlay image: {st.session_state.paths['sel_seg']}"
-                    )
+            crop_to_mask = False
+            is_show_overlay = True
+            list_orient = VIEWS
 
-                crop_to_mask = False
-                is_show_overlay = True
-                list_orient = VIEWS
+            if flag_files == 0:
+                st.warning(warn_msg)
+            else:
+                img, mask, img_masked = utilni.prep_image_and_olay(
+                    st.session_state.paths["sel_img"],
+                    st.session_state.paths["sel_seg"],
+                    list_rois,
+                    crop_to_mask
+                )
 
-                if flag_files == 0:
-                    st.warning(warn_msg)
-                else:
-                    img, mask, img_masked = utilni.prep_image_and_olay(
-                        st.session_state.paths["sel_img"],
-                        st.session_state.paths["sel_seg"],
-                        list_rois,
-                        crop_to_mask
-                    )
+                # Detect mask bounds and center in each view
+                mask_bounds = utilni.detect_mask_bounds(mask)
 
-                    # Detect mask bounds and center in each view
-                    mask_bounds = utilni.detect_mask_bounds(mask)
+                # Show images
+                blocks = st.columns(len(list_orient))
+                for i, tmp_orient in enumerate(list_orient):
+                    with blocks[i]:
+                        ind_view = VIEWS.index(tmp_orient)
+                        if not is_show_overlay:
+                            utilst.show_img3D(
+                                img, ind_view, mask_bounds[ind_view, :], tmp_orient
+                            )
+                        else:
+                            utilst.show_img3D(
+                                img_masked,
+                                ind_view,
+                                mask_bounds[ind_view, :],
+                                tmp_orient
+                            )
 
-                    # Show images
-                    blocks = st.columns(len(list_orient))
-                    for i, tmp_orient in enumerate(list_orient):
-                        with blocks[i]:
-                            ind_view = VIEWS.index(tmp_orient)
-                            if not is_show_overlay:
-                                utilst.show_img3D(
-                                    img, ind_view, mask_bounds[ind_view, :], tmp_orient
-                                )
-                            else:
-                                utilst.show_img3D(
-                                    img_masked,
-                                    ind_view,
-                                    mask_bounds[ind_view, :],
-                                    tmp_orient
-                                )
+        # Create a list of checkbox options
+        list_orient = st.multiselect("Select viewing planes:", VIEWS, VIEWS)
 
-            # Create a list of checkbox options
-            list_orient = st.multiselect("Select viewing planes:", VIEWS, VIEWS)
+        # View hide overlay
+        is_show_overlay = st.checkbox("Show overlay", True)
 
-            # View hide overlay
-            is_show_overlay = st.checkbox("Show overlay", True)
-
-            # Crop to mask area
-            crop_to_mask = st.checkbox("Crop to mask", True)
+        # Crop to mask area
+        crop_to_mask = st.checkbox("Crop to mask", True)
 
 
 with st.expander("FIXME: TMP - Session state"):

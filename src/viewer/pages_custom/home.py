@@ -61,7 +61,7 @@ if "instantiated" not in st.session_state:
         "OutZipped": "",
         "Plots": "",
         "sel_img": "",
-        "sel_mask": "",
+        "sel_seg": "",
         "csv_demog": "",
         "csv_seg": "",
         "csv_plot": "",
