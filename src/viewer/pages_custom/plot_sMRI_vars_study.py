@@ -304,9 +304,7 @@ elif os.path.exists(st.session_state.paths["csv_seg"]):
     st.session_state.paths["csv_plot"] = st.session_state.paths["csv_seg"]
 
 # Panel for selecting input csv
-flag_disabled = (
-    True if os.path.exists(st.session_state.paths["dset"]) is False else False
-)
+flag_disabled = not st.session_state.flags['dset']
 
 if st.session_state.app_type == "CLOUD":
     with st.expander(
