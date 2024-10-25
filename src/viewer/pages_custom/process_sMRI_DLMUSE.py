@@ -43,7 +43,7 @@ else:  # st.session_state.app_type == 'DESKTOP'
 # Panel for running DLMUSE
 with st.expander(":material/grid_on: Segment image", expanded=False):
 
-    flag_disabled = not st.session_state.flags['Nifti']
+    flag_disabled = not st.session_state.flags['T1']
 
     # Device type
     helpmsg = "Choose 'cuda' if your computer has an NVIDIA GPU, 'mps' if you have an Apple M-series chip, and 'cpu' if you have a standard CPU."

@@ -30,9 +30,7 @@ def save_dlmuse_file() -> None:
 utilst.util_panel_workingdir(st.session_state.app_type)
 
 # Panel for selecting input dlmuse csv
-flag_disabled = (
-    True if os.path.exists(st.session_state.paths["dset"]) is False else False
-)
+flag_disabled = not st.session_state.flags['dset']
 
 if st.session_state.app_type == "CLOUD":
     with st.expander(":material/upload: Upload data", expanded=False):  # type:ignore
@@ -72,11 +70,10 @@ else:  # st.session_state.app_type == 'DESKTOP'
 # Panel for running MLScore
 with st.expander(":material/model_training: Run MLScore", expanded=False):
 
-    # Button to run MLScore
-    flag_btn = os.path.exists(st.session_state.paths["csv_demog"]) and os.path.exists(
-        st.session_state.paths["csv_seg"]
+    flag_disabled = not (os.path.exists(st.session_state.paths["csv_demog"]) and os.path.exists(
+        st.session_state.paths["csv_seg"])
     )
-    btn_mlscore = st.button("Run MLScore", disabled=not flag_btn)
+    btn_mlscore = st.button("Run MLScore", disabled = flag_disabled)
 
     if btn_mlscore:
         run_dir = os.path.join(
@@ -109,19 +106,19 @@ if st.session_state.app_type == "CLOUD":
     with st.expander(":material/download: Download Results", expanded=False):
 
         # Zip results and download
-        flag_btn = os.path.exists(st.session_state.paths["MLScores"])
+        flag_disabled = not os.path.exists(st.session_state.paths["csv_mlscores"])
         out_zip = bytes()
-        if flag_btn:
-            if not os.path.exists(st.session_state.paths["out_zipped"]):
-                os.makedirs(st.session_state.paths["out_zipped"])
-            f_tmp = os.path.join(st.session_state.paths["out_zipped"], "MLScores.zip")
+        if not flag_disabled:
+            if not os.path.exists(st.session_state.paths["OutZipped"]):
+                os.makedirs(st.session_state.paths["OutZipped"])
+            f_tmp = os.path.join(st.session_state.paths["OutZipped"], "MLScores.zip")
             out_zip = utilio.zip_folder(st.session_state.paths["MLScores"], f_tmp)
 
         st.download_button(
             "Download ML Scores",
             out_zip,
             file_name="MLScores.zip",
-            disabled=not flag_btn,
+            disabled=flag_disabled,
         )
 
 if st.session_state.debug_show_state:
@@ -131,3 +128,7 @@ if st.session_state.debug_show_state:
 if st.session_state.debug_show_paths:
     with st.expander("DEBUG: Session state - paths"):
         st.write(st.session_state.paths)
+
+if st.session_state.debug_show_flags:
+    with st.expander("DEBUG: Session state - flags"):
+        st.write(st.session_state.flags)
