@@ -12,6 +12,7 @@ from pandas.api.types import (
     is_datetime64_any_dtype,
     is_numeric_dtype,
 )
+from stqdm import stqdm
 
 VIEWS = ["axial", "coronal", "sagittal"]
 
@@ -305,26 +306,30 @@ elif os.path.exists(st.session_state.paths["csv_seg"]):
     st.session_state.paths["csv_plot"] = st.session_state.paths["csv_seg"]
 
 # Panel for selecting input csv
-flag_disabled = os.path.exists(st.session_state.paths["dset"]) == False
+flag_disabled = (
+    True if os.path.exists(st.session_state.paths["dset"]) is False else False
+)
 
-if st.session_state.app_type == 'CLOUD':
-    with st.expander(f":material/upload: Upload input csv file", expanded=False):
-        msg_txt = 'Upload input csv file'
+if st.session_state.app_type == "CLOUD":
+    with st.expander(
+        ":material/upload: Upload input csv file", expanded=False
+    ):  # type:ignore
+        msg_txt = "Upload input csv file"
         utilst.util_upload_file(
-            st.session_state.paths['csv_plot'],
-            'uploaded_data_file',
-            'key_in_csv',
+            st.session_state.paths["csv_plot"],
+            "uploaded_data_file",
+            "key_in_csv",
             flag_disabled,
-            'visible'
+            "visible",
         )
 
-else:   # st.session_state.app_type == 'DESKTOP'
-    with st.expander(f":material/upload: Select data", expanded=False):
+else:  # st.session_state.app_type == 'DESKTOP'
+    with st.expander(":material/upload: Select data", expanded=False):
         utilst.util_select_file(
-            'selected_data_file',
-            'Data csv',
-            st.session_state.paths['csv_plot'],
-            st.session_state.paths['last_in_dir'],
+            "selected_data_file",
+            "Data csv",
+            st.session_state.paths["csv_plot"],
+            st.session_state.paths["last_in_dir"],
             flag_disabled,
         )
 
@@ -379,7 +384,7 @@ with st.sidebar:
             with ptabs[1]:
 
                 # Default values for plot params
-                #st.session_state.plot_hvar = ""
+                # st.session_state.plot_hvar = ""
 
                 plot_xvar_ind = 0
                 if st.session_state.plot_xvar in df.columns:
@@ -443,7 +448,9 @@ with st.expander(":material/monitoring: Plot data", expanded=False):
     #  - iterates over plots;
     #  - for every "plots_per_row" plots, creates a new columns block, resets column index, and displays the plot
     if df.shape[0] > 0:
-        for i, plot_ind in enumerate(list_plots):
+        for i, plot_ind in stqdm(
+            enumerate(list_plots), desc="Rendering plots ...", total=len(list_plots)
+        ):
             column_no = i % plots_per_row
             if column_no == 0:
                 blocks = st.columns(plots_per_row)
@@ -499,7 +506,6 @@ def check_images():
         st.session_state.paths["sel_seg"] = sel_img
         return True
 
-        
 def get_image_paths():
     ''' 
     Reads image path and suffix info from the user
@@ -545,6 +551,7 @@ def get_image_paths():
             else:
                 st.warning('Image not found!')
             
+
 
 # Panel for viewing images and segmentations
 with st.expander(":material/visibility: View segmentations", expanded=False):

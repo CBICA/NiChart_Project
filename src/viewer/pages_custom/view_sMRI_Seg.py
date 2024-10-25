@@ -6,6 +6,7 @@ import streamlit as st
 import utils.utils_muse as utilmuse
 import utils.utils_nifti as utilni
 import utils.utils_st as utilst
+from stqdm import stqdm
 
 # Parameters for viewer
 VIEWS = ["axial", "coronal", "sagittal"]
@@ -81,7 +82,6 @@ with st.expander(":material/upload: Select or upload input data", expanded=False
 
 # Selection of MRID and ROI name
 if os.path.exists(st.session_state.paths["csv_seg"]):
-
     with st.container(border=True):
 
         df = pd.read_csv(st.session_state.paths["csv_seg"])
@@ -165,7 +165,9 @@ if os.path.exists(f_img) & os.path.exists(f_mask):
 
     # Show images
     blocks = st.columns(len(list_orient))
-    for i, tmp_orient in enumerate(list_orient):
+    for i, tmp_orient in stqdm(
+        enumerate(list_orient), desc="Showing images ...", total=len(list_orient)
+    ):
         with blocks[i]:
             ind_view = VIEWS.index(tmp_orient)
             if is_show_overlay is False:

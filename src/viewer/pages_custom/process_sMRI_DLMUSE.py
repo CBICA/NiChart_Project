@@ -6,6 +6,7 @@ import utils.utils_io as utilio
 import utils.utils_muse as utilmuse
 import utils.utils_nifti as utilni
 import utils.utils_st as utilst
+from stqdm import stqdm
 
 st.markdown(
     """
@@ -21,24 +22,23 @@ st.markdown(
 utilst.util_panel_workingdir(st.session_state.app_type)
 
 # Panel for selecting input image files
-flag_disabled = os.path.exists(st.session_state.paths["dset"]) == False
+flag_disabled = (
+    True if os.path.exists(st.session_state.paths["dset"]) is False else False
+)
 
-if st.session_state.app_type == 'CLOUD':
-    with st.expander(f":material/upload: Upload data", expanded=False):
+if st.session_state.app_type == "CLOUD":
+    with st.expander(":material/upload: Upload data", expanded=False):  # type:ignore
         utilst.util_upload_folder(
-            st.session_state.paths['T1'],
-            "T1 images",            
-            flag_disabled,
-            'collapsed'
+            st.session_state.paths["T1"], "T1 images", flag_disabled, "collapsed"
         )
 
-else:   # st.session_state.app_type == 'DESKTOP'
-    with st.expander(f":material/upload: Select data", expanded=False):
+else:  # st.session_state.app_type == 'DESKTOP'
+    with st.expander(":material/upload: Select data", expanded=False):  # type:ignore
         utilst.util_select_folder(
-            'selected_img_folder',
-            'T1 nifti image folder',            
-            st.session_state.paths['T1'],
-            st.session_state.paths['last_in_dir'],
+            "selected_img_folder",
+            "T1 nifti image folder",
+            st.session_state.paths["T1"],
+            st.session_state.paths["last_in_dir"],
             flag_disabled,
         )
 
@@ -96,8 +96,7 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
 
     # Detect list of ROI indices to display
     list_sel_rois = utilmuse.get_derived_rois(
-        sel_var,
-        st.session_state.dicts["muse_derived"]
+        sel_var, st.session_state.dicts["muse_derived"]
     )
 
     # Create a list of checkbox options
@@ -140,7 +139,11 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
 
             # Show images
             blocks = st.columns(len(list_orient))
-            for i, tmp_orient in enumerate(list_orient):
+            for i, tmp_orient in stqdm(
+                enumerate(list_orient),
+                desc="Showing images ...",
+                total=len(list_orient),
+            ):
                 with blocks[i]:
                     ind_view = utilni.VIEWS.index(tmp_orient)
                     if is_show_overlay is False:

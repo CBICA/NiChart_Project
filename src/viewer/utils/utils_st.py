@@ -141,11 +141,17 @@ def user_input_file(
     path_dir = path_last
     tmpcol = st.columns((8, 1))
     with tmpcol[1]:
-        if st.button(label_btn, key=f'key_btn_{key_st}', disabled=disabled):
+        if st.button(label_btn, key=f"key_btn_{key_st}", disabled=disabled):
             path_curr, path_dir = browse_file(path_dir)
 
     with tmpcol[0]:
-        tmp_sel = st.text_input(label_txt, key=f'key_txt_{key_st}', value=path_curr, help=help_msg, disabled=disabled)
+        tmp_sel = st.text_input(
+            label_txt,
+            key=f"key_txt_{key_st}",
+            value=path_curr,
+            help=help_msg,
+            disabled=disabled,
+        )
         if os.path.exists(tmp_sel):
             path_curr = tmp_sel
     return path_curr, path_dir
@@ -166,7 +172,7 @@ def user_input_folder(
     tmpcol = st.columns((8, 1))
 
     with tmpcol[1]:
-        if st.button(label_btn, key=f'btn_{key_st}', disabled=disabled):
+        if st.button(label_btn, key=f"btn_{key_st}", disabled=disabled):
             if os.path.exists(path_curr):
                 path_curr = browse_folder(path_curr)
             else:
@@ -175,11 +181,19 @@ def user_input_folder(
     with tmpcol[0]:
         if os.path.exists(path_curr):
             path_curr = st.text_input(
-                label_txt, key=f'txt2_{key_st}', value=path_curr, help=help_msg, disabled=disabled
+                label_txt,
+                key=f"txt2_{key_st}",
+                value=path_curr,
+                help=help_msg,
+                disabled=disabled,
             )
         else:
             path_curr = st.text_input(
-                label_txt, key=f'txt2_{key_st}', value="", help=help_msg, disabled=disabled
+                label_txt,
+                key=f"txt2_{key_st}",
+                value="",
+                help=help_msg,
+                disabled=disabled,
             )
 
     if path_curr != "":
@@ -256,6 +270,7 @@ def update_default_paths() -> None:
         st.session_state.paths["dset"], "Plots", "Data.csv"
     )
 
+
 def util_panel_workingdir(app_type: str) -> None:
     # Panel for selecting the working dir
     with st.expander(":material/folder_shared: Working Dir", expanded=False):
@@ -312,10 +327,7 @@ def copy_uploaded_to_dir() -> None:
 
 
 def util_upload_folder(
-    out_dir: str,
-    title_txt: str,
-    flag_disabled: bool,
-    help_txt: str
+    out_dir: str, title_txt: str, flag_disabled: bool, help_txt: str
 ) -> None:
     """
     Upload user data to target folder
@@ -351,7 +363,7 @@ def util_upload_file(
     title_txt: str,
     key_uploader: str,
     flag_disabled: bool,
-    label_visibility: str
+    label_visibility: str,
 ) -> None:
     """
     Upload user data to target folder
@@ -368,7 +380,7 @@ def util_upload_file(
         key=key_uploader,
         accept_multiple_files=False,
         disabled=flag_disabled,
-        label_visibility=label_visibility
+        label_visibility=label_visibility,
     )
 
     # Check uploaded data
@@ -381,11 +393,7 @@ def util_upload_file(
 
 
 def util_select_folder(
-    key_selector: str,
-    title_txt,
-    out_dir: str,
-    last_in_dir: str,
-    flag_disabled: bool
+    key_selector: str, title_txt, out_dir: str, last_in_dir: str, flag_disabled: bool
 ) -> None:
     """
     Select user input folder and link to target folder
@@ -426,11 +434,7 @@ def util_select_folder(
 
 
 def util_select_file(
-    key_selector: str,
-    title_txt,
-    out_file: str,
-    last_in_dir: str,
-    flag_disabled: bool
+    key_selector: str, title_txt, out_file: str, last_in_dir: str, flag_disabled: bool
 ) -> None:
     """
     Select user input file and copy to target file
@@ -466,8 +470,5 @@ def util_select_file(
 
     # Check uploaded data
     if os.path.exists(out_file):
-        st.success(
-            f"Data is ready ({out_file})", icon=":material/thumb_up:"
-        )
+        st.success(f"Data is ready ({out_file})", icon=":material/thumb_up:")
         st.warning("You can proceed with the next step or select new data")
-
