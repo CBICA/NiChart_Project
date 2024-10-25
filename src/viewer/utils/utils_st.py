@@ -391,7 +391,11 @@ def util_upload_file(
 
 
 def util_select_folder(
-    key_selector: str, title_txt, out_dir: str, last_in_dir: str, flag_disabled: bool
+    key_selector: str,
+    title_txt: str,
+    out_dir: str,
+    last_in_dir: str,
+    flag_disabled: bool,
 ) -> None:
     """
     Select user input folder and link to target folder
@@ -431,7 +435,11 @@ def util_select_folder(
 
 
 def util_select_file(
-    key_selector: str, title_txt, out_file: str, last_in_dir: str, flag_disabled: bool
+    key_selector: str,
+    title_txt: str,
+    out_file: str,
+    last_in_dir: str,
+    flag_disabled: bool,
 ) -> None:
     """
     Select user input file and copy to target file
