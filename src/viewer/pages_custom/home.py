@@ -145,6 +145,11 @@ if "instantiated" not in st.session_state:
     # Variable selected by user
     st.session_state.sel_var = ""
 
+    # Debugging variables
+    st.session_state.debug_show_state = True
+    st.session_state.debug_show_paths = True
+
+
     st.session_state.instantiated = True
 
 st.sidebar.image("../resources/nichart1.png")
@@ -167,6 +172,23 @@ with st.sidebar.expander("Acknowledgments"):
     )
 
 st.sidebar.success("Select a task above")
+
+with st.sidebar.expander('Flags'):
+
+    if st.checkbox("Show paths?"):
+        st.session_state.debug_show_paths = True
+    else:
+        st.session_state.debug_show_paths = False
+
+    if st.checkbox("Show all session state vars?"):
+        st.session_state.debug_show_state = True
+    else:
+        st.session_state.debug_show_state = False
+
+    if st.checkbox("Switch to CLOUD?"):
+        st.session_state.app_type = 'CLOUD'
+    else:
+        st.session_state.app_type = 'DESKTOP'
 
 st.markdown(
     """
@@ -202,7 +224,10 @@ st.markdown(
             """
 )
 
-with st.expander("FIXME: TMP - Session state"):
-    st.write(st.session_state)
-with st.expander("TMP: session vars - paths"):
-    st.write(st.session_state.paths)
+if st.session_state.debug_show_state:
+    with st.expander("DEBUG: Session state - all variables"):
+        st.write(st.session_state)
+
+if st.session_state.debug_show_paths:
+    with st.expander("DEBUG: Session state - paths"):
+        st.write(st.session_state.paths)

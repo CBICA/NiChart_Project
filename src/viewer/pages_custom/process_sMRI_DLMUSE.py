@@ -70,7 +70,11 @@ with st.expander(":material/grid_on: Segment image", expanded=False):
             st.success("Run completed!", icon=":material/thumb_up:")
 
             # Set the dlmuse csv output
-            out_csv = f"{st.session_state.paths['DLMUSE']}/DLMUSE_Volumes.csv"
+            out_csv = f"{st.session_state.#with st.expander("TMP: session vars"):
+    #st.write(st.session_state)
+#with st.expander("TMP: session vars - paths"):
+    #st.write(st.session_state.paths)
+paths['DLMUSE']}/DLMUSE_Volumes.csv"
             if os.path.exists(out_csv):
                 st.session_state.paths["csv_seg"] = out_csv
 
@@ -175,7 +179,10 @@ if st.session_state.app_type == "CLOUD":
             disabled=not flag_btn,
         )
 
-with st.expander("TMP: session vars"):
-    st.write(st.session_state)
-with st.expander("TMP: session vars - paths"):
-    st.write(st.session_state.paths)
+if st.session_state.debug_show_state:
+    with st.expander("DEBUG: Session state - all variables"):
+        st.write(st.session_state)
+
+if st.session_state.debug_show_paths:
+    with st.expander("DEBUG: Session state - paths"):
+        st.write(st.session_state.paths)

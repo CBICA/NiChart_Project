@@ -191,7 +191,10 @@ if st.session_state.app_type == "CLOUD":
             disabled=not flag_btn,
         )
 
-with st.expander("TMP: session vars"):
-    st.write(st.session_state)
-with st.expander("TMP: session vars - paths"):
-    st.write(st.session_state.paths)
+if st.session_state.debug_show_state:
+    with st.expander("DEBUG: Session state - all variables"):
+        st.write(st.session_state)
+
+if st.session_state.debug_show_paths:
+    with st.expander("DEBUG: Session state - paths"):
+        st.write(st.session_state.paths)

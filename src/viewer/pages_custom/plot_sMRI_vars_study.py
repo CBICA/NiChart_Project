@@ -312,12 +312,11 @@ flag_disabled = (
 
 if st.session_state.app_type == "CLOUD":
     with st.expander(
-        ":material/upload: Upload input csv file", expanded=False
+        ":material/upload: Upload data", expanded=False
     ):  # type:ignore
-        msg_txt = "Upload input csv file"
         utilst.util_upload_file(
             st.session_state.paths["csv_plot"],
-            "uploaded_data_file",
+            "Input data csv file",
             "key_in_csv",
             flag_disabled,
             "visible",
@@ -647,7 +646,10 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
         crop_to_mask = st.checkbox("Crop to mask", True)
 
 
-with st.expander("FIXME: TMP - Session state"):
-    st.write(st.session_state)
-with st.expander("TMP: session vars - paths"):
-    st.write(st.session_state.paths)
+if st.session_state.debug_show_state:
+    with st.expander("DEBUG: Session state - all variables"):
+        st.write(st.session_state)
+
+if st.session_state.debug_show_paths:
+    with st.expander("DEBUG: Session state - paths"):
+        st.write(st.session_state.paths)
