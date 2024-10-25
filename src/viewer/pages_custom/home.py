@@ -69,6 +69,17 @@ if "instantiated" not in st.session_state:
         "csv_mlscores": "",
     }
 
+    # Flags for various input/output
+    st.session_state.flags = {
+        "dset": False,
+        "dicoms": False,
+        "dicom_series": False,
+        "nifti": False,
+        "sel_img": False,
+        "sel_mask": False
+    }
+
+
     st.session_state.paths["root"] = os.path.dirname(os.path.dirname(os.getcwd()))
 
     st.session_state.paths["init"] = st.session_state.paths["root"]

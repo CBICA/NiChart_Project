@@ -205,13 +205,20 @@ def user_input_folder(
     return path_curr
 
 
-def user_input_select(label: Any, selections: Any, key: Any, helpmsg: str) -> Any:
+def user_input_select(
+    label: Any,
+    selections: Any,
+    key: Any,
+    helpmsg: str,
+    flag_disabled: bool
+) -> Any:
     """
     St selection box to selet a text from the user
     """
     tmpcol = st.columns((1, 8))
     with tmpcol[0]:
-        user_sel = st.selectbox(label, selections, key=key, help=helpmsg)
+        user_sel = st.selectbox(label, selections, index=None, key=key,
+                                help=helpmsg, disabled=flag_disabled)
     return user_sel
 
 
@@ -316,6 +323,7 @@ def util_panel_workingdir(app_type: str) -> None:
                 f"All results will be saved to: {st.session_state.paths['dset']}",
                 icon=":material/thumb_up:",
             )
+            st.session_state.flags['dset'] = True
 
 
 def copy_uploaded_to_dir() -> None:
@@ -355,6 +363,7 @@ def util_upload_folder(
         st.success(
             f"Data is ready ({out_dir}, {fcount} files)", icon=":material/thumb_up:"
         )
+        st.session_state.flags['dicoms'] = True
 
 
 def util_upload_file(
@@ -428,7 +437,7 @@ def util_select_folder(
         st.success(
             f"Data is ready ({out_dir}, {fcount} files)", icon=":material/thumb_up:"
         )
-
+        st.session_state.flags['dicoms'] = True
 
 def util_select_file(
     key_selector: str, title_txt, out_file: str, last_in_dir: str, flag_disabled: bool

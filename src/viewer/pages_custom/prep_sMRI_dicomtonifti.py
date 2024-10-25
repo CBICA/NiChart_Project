@@ -18,11 +18,11 @@ def progress(p: int, i: int, decoded: Any) -> None:
 
 st.markdown(
     """
-    - Enables users to extract raw DICOM files in the input directory to NIFTI format.
-    - The application automatically identifies different imaging series within the folder.
-    - Users can choose specific series they want to extract.
-    - The extracted Nifti files are consistently named using dicom information ({participant_id}\\_{scan_date}\\_{modality}.nii.gz)
-    - Extracted images can be viewed to review them visually.
+    - Extracts raw DICOM files to NIFTI format.
+    - Automatically identifies and separates different imaging series.
+    - Allows users to select specific series for extraction.
+    - Generates consistently named NIFTI files based on DICOM information.
+    - Provides a visual review of extracted images.
     """
 )
 
@@ -30,9 +30,7 @@ st.markdown(
 utilst.util_panel_workingdir(st.session_state.app_type)
 
 # Panel for selecting input dicom files
-flag_disabled = (
-    True if os.path.exists(st.session_state.paths["dset"]) is False else False
-)
+flag_disabled = not st.session_state.flags['dset']
 
 if st.session_state.app_type == "CLOUD":
     with st.expander(":material/upload: Upload data", expanded=False):  # type:ignore
@@ -56,13 +54,11 @@ else:  # st.session_state.app_type == 'DESKTOP'
 # Panel for detecting dicom series
 with st.expander(":material/manage_search: Detect dicom series", expanded=False):
 
-    flag_btn = False
-    if os.path.exists(st.session_state.paths["Dicoms"]):
-        flag_btn = len(os.listdir(st.session_state.paths["Dicoms"])) > 0
+    flag_disabled = not st.session_state.flags['dicoms']
 
     # Detect dicom series
     num_scans = 0
-    btn_detect = st.button("Detect Series", disabled=not flag_btn)
+    btn_detect = st.button("Detect Series", disabled=flag_disabled)
     if btn_detect:
         with st.spinner("Wait for it..."):
             df_dicoms = utildcm.detect_series(st.session_state.paths["Dicoms"])
@@ -81,17 +77,22 @@ with st.expander(":material/manage_search: Detect dicom series", expanded=False)
             f"Detected {num_scans} scans in {len(list_series)} series!",
             icon=":material/thumb_up:",
         )
+        st.session_state.flags['dicom_series'] = True
+
 
 # Panel for selecting and extracting dicom series
 with st.expander(":material/auto_awesome_motion: Extract scans", expanded=False):
+
+    flag_disabled = not st.session_state.flags['dicom_series']
 
     # Selection of img modality
     helpmsg = "Modality of the extracted images"
     st.session_state.sel_mod = utilst.user_input_select(
         "Image Modality",
         st.session_state.list_mods,
-        st.session_state.list_mods[0],
+        'key_selbox_modality',
         helpmsg,
+        flag_disabled
     )
     # Selection of dicom series
     st.session_state.sel_series = st.multiselect(
@@ -102,11 +103,7 @@ with st.expander(":material/auto_awesome_motion: Extract scans", expanded=False)
         if not os.path.exists(st.session_state.paths[st.session_state.sel_mod]):
             os.makedirs(st.session_state.paths[st.session_state.sel_mod])
 
-    # Button for extraction
-    flag_btn = (
-        st.session_state.df_dicoms.shape[0] > 0 and len(st.session_state.sel_series) > 0
-    )
-    btn_convert = st.button("Convert Series", disabled=not flag_btn)
+    btn_convert = st.button("Convert Series", disabled=flag_disabled)
     if btn_convert:
         with st.spinner("Wait for it..."):
             utildcm.convert_sel_series(
@@ -122,34 +119,45 @@ with st.expander(":material/auto_awesome_motion: Extract scans", expanded=False)
             ]
             if len(st.session_state.list_input_nifti) == 0:
                 st.error("Could not extract any nifti images")
-            else:
-                st.success(
-                    f"Extracted {len(st.session_state.list_input_nifti)} nifti images to {st.session_state.paths[st.session_state.sel_mod]}",
-                    icon=":material/thumb_up:",
-                )
+                st.session_state.flags['nifti'] = True
+
+    if st.session_state.flags['nifti']:
+        st.success(
+            f"Detected {len(st.session_state.list_input_nifti)} nifti scans",
+            icon=":material/thumb_up:",
+        )
 
 # Panel for viewing extracted nifti images
 with st.expander(":material/visibility: View images", expanded=False):
+
+    flag_disabled = st.session_state.flags['nifti']
+
     # Selection of MRID
     sel_img = st.selectbox(
         "Select Image",
         st.session_state.list_input_nifti,
         key="selbox_images",
         index=None,
+        disabled=flag_disabled
     )
 
     if sel_img is not None:
         st.session_state.paths["sel_img"] = os.path.join(
             st.session_state.paths[st.session_state.sel_mod], sel_img
         )
-
-    flag_btn = os.path.exists(st.session_state.paths["sel_img"])
+        if os.path.exists(st.session_state.paths["sel_img"]):
+            st.session_state.flags['sel_img'] = True
 
     # Create a list of checkbox options
-    list_orient = st.multiselect("Select viewing planes:", utilni.VIEWS, utilni.VIEWS)
+    flag_img = st.session_state.flags['sel_img']
+    list_orient = st.multiselect(
+        "Select viewing planes:",
+        utilni.VIEWS,
+        utilni.VIEWS,
+        disabled=not flag_img
+    )
 
-    if flag_btn:
-
+    if flag_img:
         with st.spinner("Wait for it..."):
 
             # Prepare final 3d matrix to display
