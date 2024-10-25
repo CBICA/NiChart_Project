@@ -34,7 +34,7 @@ if "instantiated" not in st.session_state:
         "DLMUSE": ["", "DLMUSE"],
         "MLScores": ["", "MLScores"],
         "Plots": ["", "Plots"],
-        "OutZipped": ["", "Plots"],
+        "OutZipped": ["", "OutZipped"],
     }
 
     # Paths to input/output files/folders
@@ -49,7 +49,7 @@ if "instantiated" not in st.session_state:
         "Lists": "",
         "Nifti": "",
         "Dicoms": "",
-        "user_Dicoms": "",
+        "user_dicoms": "",
         "T1": "",
         "user_T1": "",
         "T2": "",
@@ -72,9 +72,10 @@ if "instantiated" not in st.session_state:
     # Flags for various input/output
     st.session_state.flags = {
         "dset": False,
-        "dicoms": False,
+        "Dicoms": False,
         "dicom_series": False,
-        "nifti": False,
+        "Nifti": False,
+        "T1": False,
         "sel_img": False,
         "sel_mask": False
     }
@@ -92,13 +93,13 @@ if "instantiated" not in st.session_state:
 
     st.session_state.paths["last_in_dir"] = st.session_state.paths["init"]
 
-    # FIXME: This sets the default out path on the cloud
-    #        It's a folder inside the root folder for now
+    # FIXME: This sets the default out path to a folder inside the root folder for now
     #        Probably will require something more advanced
-    if st.session_state.app_type == "CLOUD":
-        st.session_state.paths["out"] = os.path.join(
-            st.session_state.paths["root"], "output_folder"
-        )
+    #if st.session_state.app_type == "CLOUD":
+    st.session_state.paths["out"] = os.path.join(
+        st.session_state.paths["root"],
+        "output_folder"
+    )
 
     #########################################
 
@@ -123,6 +124,7 @@ if "instantiated" not in st.session_state:
 
     # Dicom vars
     st.session_state.list_series = []
+    st.session_state.num_dicom_scans = []
     st.session_state.df_dicoms = pd.DataFrame()
     st.session_state.sel_series = []
     st.session_state.sel_mod = "T1"
@@ -157,8 +159,9 @@ if "instantiated" not in st.session_state:
     st.session_state.sel_var = ""
 
     # Debugging variables
-    st.session_state.debug_show_state = True
-    st.session_state.debug_show_paths = True
+    st.session_state.debug_show_state = False
+    st.session_state.debug_show_paths = False
+    st.session_state.debug_show_flags = False
 
 
     st.session_state.instantiated = True
@@ -186,12 +189,17 @@ st.sidebar.success("Select a task above")
 
 with st.sidebar.expander('Flags'):
 
-    if st.checkbox("Show paths?"):
+    if st.checkbox("Show paths?", value=True):
         st.session_state.debug_show_paths = True
     else:
         st.session_state.debug_show_paths = False
 
-    if st.checkbox("Show all session state vars?"):
+    if st.checkbox("Show flags?", value=True):
+        st.session_state.debug_show_flags = True
+    else:
+        st.session_state.debug_show_flags = False
+
+    if st.checkbox("Show all session state vars?", value=True):
         st.session_state.debug_show_state = True
     else:
         st.session_state.debug_show_state = False
@@ -242,3 +250,7 @@ if st.session_state.debug_show_state:
 if st.session_state.debug_show_paths:
     with st.expander("DEBUG: Session state - paths"):
         st.write(st.session_state.paths)
+
+if st.session_state.debug_show_flags:
+    with st.expander("DEBUG: Session state - flags"):
+        st.write(st.session_state.flags)

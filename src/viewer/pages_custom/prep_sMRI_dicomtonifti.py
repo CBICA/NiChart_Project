@@ -54,7 +54,7 @@ else:  # st.session_state.app_type == 'DESKTOP'
 # Panel for detecting dicom series
 with st.expander(":material/manage_search: Detect dicom series", expanded=False):
 
-    flag_disabled = not st.session_state.flags['dicoms']
+    flag_disabled = not st.session_state.flags['Dicoms']
 
     # Detect dicom series
     num_scans = 0
@@ -63,22 +63,22 @@ with st.expander(":material/manage_search: Detect dicom series", expanded=False)
         with st.spinner("Wait for it..."):
             df_dicoms = utildcm.detect_series(st.session_state.paths["Dicoms"])
             list_series = df_dicoms.SeriesDesc.unique()
-            num_scans = (
+            num_dicom_scans = (
                 df_dicoms[["PatientID", "StudyDate", "SeriesDesc"]]
                 .drop_duplicates()
                 .shape[0]
             )
             st.session_state.list_series = list_series
+            st.session_state.num_dicom_scans = num_dicom_scans
             st.session_state.df_dicoms = df_dicoms
             if len(list_series) == 0:
                 st.error("Could not detect any dicom series!")
-    if num_scans > 0:
+    if len(st.session_state.list_series) > 0:
         st.success(
-            f"Detected {num_scans} scans in {len(list_series)} series!",
+            f"Detected {st.session_state.num_dicom_scans} scans in {len(st.session_state.list_series)} series!",
             icon=":material/thumb_up:",
         )
         st.session_state.flags['dicom_series'] = True
-
 
 # Panel for selecting and extracting dicom series
 with st.expander(":material/auto_awesome_motion: Extract scans", expanded=False):
@@ -87,13 +87,16 @@ with st.expander(":material/auto_awesome_motion: Extract scans", expanded=False)
 
     # Selection of img modality
     helpmsg = "Modality of the extracted images"
-    st.session_state.sel_mod = utilst.user_input_select(
+    sel_mod = utilst.user_input_select(
         "Image Modality",
         st.session_state.list_mods,
         'key_selbox_modality',
         helpmsg,
         flag_disabled
     )
+    if sel_mod is not None:
+        st.session_state.sel_mod = sel_mod
+        
     # Selection of dicom series
     st.session_state.sel_series = st.multiselect(
         "Select series:", st.session_state.list_series, []
@@ -119,18 +122,19 @@ with st.expander(":material/auto_awesome_motion: Extract scans", expanded=False)
             ]
             if len(st.session_state.list_input_nifti) == 0:
                 st.error("Could not extract any nifti images")
-                st.session_state.flags['nifti'] = True
+            else:
+                st.session_state.flags[st.session_state.sel_mod] = True
 
-    if st.session_state.flags['nifti']:
+    if st.session_state.flags[st.session_state.sel_mod]:
         st.success(
-            f"Detected {len(st.session_state.list_input_nifti)} nifti scans",
+            f"Nifti images are ready ({st.session_state.paths[st.session_state.sel_mod]}, {len(st.session_state.list_input_nifti)} scan(s)",
             icon=":material/thumb_up:",
         )
 
 # Panel for viewing extracted nifti images
 with st.expander(":material/visibility: View images", expanded=False):
 
-    flag_disabled = st.session_state.flags['nifti']
+    flag_disabled = not st.session_state.flags[st.session_state.sel_mod]
 
     # Selection of MRID
     sel_img = st.selectbox(
@@ -183,20 +187,20 @@ with st.expander(":material/visibility: View images", expanded=False):
 if st.session_state.app_type == "CLOUD":
     with st.expander(":material/download: Download Results", expanded=False):
 
-        # Zip results and download
-        flag_btn = os.path.exists(st.session_state.paths[st.session_state.sel_mod])
+        flag_disabled = not st.session_state.flags[st.session_state.sel_mod]
+
         out_zip = bytes()
-        if flag_btn:
-            if not os.path.exists(st.session_state.paths["OutZipped"]):
-                os.makedirs(st.session_state.paths["OutZipped"])
-            f_tmp = os.path.join(st.session_state.paths["OutZipped"], "T1.zip")
-            out_zip = utilio.zip_folder(st.session_state.paths["T1"], f_tmp)
+        if not flag_disabled:
+            if not os.path.exists(st.session_state.paths["out_zipped"]):
+                os.makedirs(st.session_state.paths["out_zipped"])
+            f_tmp = os.path.join(st.session_state.paths["out_zipped"], f"{st.session_state.sel_mod}.zip")
+            out_zip = utilio.zip_folder(st.session_state.paths[st.session_state.sel_mod], f_tmp)
 
         st.download_button(
             "Download Extracted Scans",
             out_zip,
             file_name=f"{st.session_state.sel_mod}.zip",
-            disabled=not flag_btn,
+            disabled = flag_disabled
         )
 
 if st.session_state.debug_show_state:
@@ -206,3 +210,7 @@ if st.session_state.debug_show_state:
 if st.session_state.debug_show_paths:
     with st.expander("DEBUG: Session state - paths"):
         st.write(st.session_state.paths)
+
+if st.session_state.debug_show_flags:
+    with st.expander("DEBUG: Session state - flags"):
+        st.write(st.session_state.flags)

@@ -308,6 +308,11 @@ def util_panel_workingdir(app_type: str) -> None:
                 st.session_state.paths["out"], st.session_state.dset_name
             )
 
+        print('aaaa')
+        print(st.session_state.dset_name)
+        print(st.session_state.paths["out"])
+        print(st.session_state.paths["dset"])
+
         # Dataset output folder name changed
         if curr_dir != st.session_state.paths["dset"]:
 
@@ -363,7 +368,7 @@ def util_upload_folder(
         st.success(
             f"Data is ready ({out_dir}, {fcount} files)", icon=":material/thumb_up:"
         )
-        st.session_state.flags['dicoms'] = True
+        st.session_state.flags['Dicoms'] = True
 
 
 def util_upload_file(
@@ -437,7 +442,7 @@ def util_select_folder(
         st.success(
             f"Data is ready ({out_dir}, {fcount} files)", icon=":material/thumb_up:"
         )
-        st.session_state.flags['dicoms'] = True
+        st.session_state.flags['Dicoms'] = True
 
 def util_select_file(
     key_selector: str, title_txt, out_file: str, last_in_dir: str, flag_disabled: bool

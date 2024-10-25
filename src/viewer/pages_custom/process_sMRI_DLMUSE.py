@@ -22,9 +22,7 @@ st.markdown(
 utilst.util_panel_workingdir(st.session_state.app_type)
 
 # Panel for selecting input image files
-flag_disabled = (
-    True if os.path.exists(st.session_state.paths["dset"]) is False else False
-)
+flag_disabled = not st.session_state.flags['dset']
 
 if st.session_state.app_type == "CLOUD":
     with st.expander(":material/upload: Upload data", expanded=False):  # type:ignore
@@ -45,15 +43,16 @@ else:  # st.session_state.app_type == 'DESKTOP'
 # Panel for running DLMUSE
 with st.expander(":material/grid_on: Segment image", expanded=False):
 
+    flag_disabled = not st.session_state.flags['Nifti']
+
     # Device type
     helpmsg = "Choose 'cuda' if your computer has an NVIDIA GPU, 'mps' if you have an Apple M-series chip, and 'cpu' if you have a standard CPU."
     device = utilst.user_input_select(
-        "Device", ["cuda", "cpu", "mps"], "dlmuse_sel_device", helpmsg
+        "Device", ["cuda", "cpu", "mps"], "dlmuse_sel_device", helpmsg, flag_disabled = flag_disabled
     )
 
     # Button to run DLMUSE
-    flag_btn = os.path.exists(st.session_state.paths["T1"])
-    btn_seg = st.button("Run DLMUSE", disabled=not flag_btn)
+    btn_seg = st.button("Run DLMUSE", disabled = flag_disabled)
 
     if btn_seg:
         run_dir = os.path.join(st.session_state.paths["root"], "src", "NiChart_DLMUSE")

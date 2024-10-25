@@ -112,9 +112,9 @@ if st.session_state.app_type == "CLOUD":
         flag_btn = os.path.exists(st.session_state.paths["MLScores"])
         out_zip = bytes()
         if flag_btn:
-            if not os.path.exists(st.session_state.paths["OutZipped"]):
-                os.makedirs(st.session_state.paths["OutZipped"])
-            f_tmp = os.path.join(st.session_state.paths["OutZipped"], "MLScores.zip")
+            if not os.path.exists(st.session_state.paths["out_zipped"]):
+                os.makedirs(st.session_state.paths["out_zipped"])
+            f_tmp = os.path.join(st.session_state.paths["out_zipped"], "MLScores.zip")
             out_zip = utilio.zip_folder(st.session_state.paths["MLScores"], f_tmp)
 
         st.download_button(
