@@ -355,7 +355,6 @@ def util_upload_folder(
         st.success(
             f"Data is ready ({out_dir}, {fcount} files)", icon=":material/thumb_up:"
         )
-        st.warning("You can proceed with the next step or upload new data")
 
 
 def util_upload_file(
@@ -389,7 +388,6 @@ def util_upload_file(
 
     if os.path.exists(out_file):
         st.success(f"Data is ready ({out_file})", icon=":material/thumb_up:")
-        st.warning("You can proceed with the next step or upload new data")
 
 
 def util_select_folder(
@@ -430,7 +428,6 @@ def util_select_folder(
         st.success(
             f"Data is ready ({out_dir}, {fcount} files)", icon=":material/thumb_up:"
         )
-        st.warning("You can proceed with the next step or select new data")
 
 
 def util_select_file(
@@ -471,4 +468,3 @@ def util_select_file(
     # Check uploaded data
     if os.path.exists(out_file):
         st.success(f"Data is ready ({out_file})", icon=":material/thumb_up:")
-        st.warning("You can proceed with the next step or select new data")
