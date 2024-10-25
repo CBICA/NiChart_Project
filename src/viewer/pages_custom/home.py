@@ -76,6 +76,7 @@ if "instantiated" not in st.session_state:
         "dicom_series": False,
         "Nifti": False,
         "T1": False,
+        "T2": False,
         "sel_img": False,
         "sel_mask": False
     }
