@@ -14,8 +14,6 @@ from pandas.api.types import (
 )
 from stqdm import stqdm
 
-VIEWS = ["axial", "coronal", "sagittal"]
-
 # hide_pages(["Image Processing", "Data Analytics"])
 
 
@@ -604,7 +602,7 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
 
             crop_to_mask = False
             is_show_overlay = True
-            list_orient = VIEWS
+            list_orient = utilni.img_views
 
             if flag_files == 0:
                 st.warning(warn_msg)
@@ -623,7 +621,7 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
                 blocks = st.columns(len(list_orient))
                 for i, tmp_orient in enumerate(list_orient):
                     with blocks[i]:
-                        ind_view = VIEWS.index(tmp_orient)
+                        ind_view = utilni.img_views.index(tmp_orient)
                         if not is_show_overlay:
                             utilst.show_img3D(
                                 img, ind_view, mask_bounds[ind_view, :], tmp_orient
@@ -637,7 +635,7 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
                             )
 
         # Create a list of checkbox options
-        list_orient = st.multiselect("Select viewing planes:", VIEWS, VIEWS)
+        list_orient = st.multiselect("Select viewing planes:", utilni.img_views, utilni.img_views)
 
         # View hide overlay
         is_show_overlay = st.checkbox("Show overlay", True)

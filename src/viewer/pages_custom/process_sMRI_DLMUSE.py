@@ -103,7 +103,7 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
     )
 
     # Create a list of checkbox options
-    list_orient = st.multiselect("Select viewing planes:", utilni.VIEWS, utilni.VIEWS)
+    list_orient = st.multiselect("Select viewing planes:", utilni.img_views, utilni.img_views)
 
     # View hide overlay
     is_show_overlay = st.checkbox("Show overlay", True)
@@ -148,7 +148,7 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
                 total=len(list_orient),
             ):
                 with blocks[i]:
-                    ind_view = utilni.VIEWS.index(tmp_orient)
+                    ind_view = utilni.img_views.index(tmp_orient)
                     if is_show_overlay is False:
                         utilst.show_img3D(
                             img, ind_view, mask_bounds[ind_view, :], tmp_orient

@@ -156,8 +156,8 @@ with st.expander(":material/visibility: View images", expanded=False):
     flag_img = st.session_state.flags['sel_img']
     list_orient = st.multiselect(
         "Select viewing planes:",
-        utilni.VIEWS,
-        utilni.VIEWS,
+        utilni.img_views,
+        utilni.img_views,
         disabled=not flag_img
     )
 
@@ -178,7 +178,7 @@ with st.expander(":material/visibility: View images", expanded=False):
                 total=len(list_orient),
             ):
                 with blocks[i]:
-                    ind_view = utilni.VIEWS.index(tmp_orient)
+                    ind_view = utilni.img_views.index(tmp_orient)
                     utilst.show_img3D(
                         img, ind_view, img_bounds[ind_view, :], tmp_orient
                     )

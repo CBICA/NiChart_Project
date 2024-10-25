@@ -81,7 +81,6 @@ if "instantiated" not in st.session_state:
         "sel_mask": False
     }
 
-
     st.session_state.paths["root"] = os.path.dirname(os.path.dirname(os.getcwd()))
 
     st.session_state.paths["init"] = st.session_state.paths["root"]
@@ -163,6 +162,8 @@ if "instantiated" not in st.session_state:
     st.session_state.debug_show_state = False
     st.session_state.debug_show_paths = False
     st.session_state.debug_show_flags = False
+
+    # Viewing variables
 
 
     st.session_state.instantiated = True

@@ -9,7 +9,7 @@ import utils.utils_st as utilst
 from stqdm import stqdm
 
 # Parameters for viewer
-VIEWS = ["axial", "coronal", "sagittal"]
+utilni.img_views = ["axial", "coronal", "sagittal"]
 VIEW_AXES = [0, 2, 1]
 VIEW_OTHER_AXES = [(1, 2), (0, 1), (0, 2)]
 MASK_COLOR = (0, 255, 0)  # RGB format
@@ -131,8 +131,8 @@ if os.path.exists(st.session_state.paths["csv_seg"]):
     with st.container(border=True):
 
         # Create a list of checkbox options
-        # list_orient = st.multiselect("Select viewing planes:", VIEWS, VIEWS[0])
-        list_orient = st.multiselect("Select viewing planes:", VIEWS, VIEWS)
+        # list_orient = st.multiselect("Select viewing planes:", utilni.img_views, utilni.img_views[0])
+        list_orient = st.multiselect("Select viewing planes:", utilni.img_views, utilni.img_views)
 
         # View hide overlay
         is_show_overlay = st.checkbox("Show overlay", True)
@@ -169,7 +169,7 @@ if os.path.exists(f_img) & os.path.exists(f_mask):
         enumerate(list_orient), desc="Showing images ...", total=len(list_orient)
     ):
         with blocks[i]:
-            ind_view = VIEWS.index(tmp_orient)
+            ind_view = utilni.img_views.index(tmp_orient)
             if is_show_overlay is False:
                 utilst.show_img3D(img, ind_view, mask_bounds[ind_view, :], tmp_orient)
             else:
