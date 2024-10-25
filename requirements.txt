@@ -14,7 +14,7 @@ tabulate==0.8.10
 sphinx
 
 # streamlit
-streamlit
+streamlit==1.39.0
 st_pages==1.0.1
 streamlit_plotly_events
 chart_studio
