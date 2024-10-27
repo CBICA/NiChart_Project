@@ -307,9 +307,7 @@ elif os.path.exists(st.session_state.paths["csv_seg"]):
 flag_disabled = not st.session_state.flags['dset']
 
 if st.session_state.app_type == "CLOUD":
-    with st.expander(
-        ":material/upload: Upload data", expanded=False
-    ):  # type:ignore
+    with st.expander(":material/upload: Upload data", expanded=False):  # type:ignore
         utilst.util_upload_file(
             st.session_state.paths["csv_plot"],
             "Input data csv file",
@@ -317,6 +315,8 @@ if st.session_state.app_type == "CLOUD":
             flag_disabled,
             "visible",
         )
+        if not flag_disabled and os.path.exists(st.session_state.paths["csv_plot"]):
+            st.success(f"Data is ready ({st.session_state.paths["csv_plot"]})", icon=":material/thumb_up:")
 
 else:  # st.session_state.app_type == 'DESKTOP'
     with st.expander(":material/upload: Select data", expanded=False):
@@ -327,6 +327,8 @@ else:  # st.session_state.app_type == 'DESKTOP'
             st.session_state.paths["last_in_dir"],
             flag_disabled,
         )
+        if not flag_disabled and os.path.exists(st.session_state.paths["csv_plot"]):
+            st.success(f"Data is ready ({st.session_state.paths["csv_plot"]})", icon=":material/thumb_up:")
 
 # Page controls in side bar
 with st.sidebar:
@@ -427,31 +429,35 @@ with st.sidebar:
 # Panel for plots
 with st.expander(":material/monitoring: Plot data", expanded=False):
 
+    flag_disabled = not os.path.exists(st.session_state.paths['csv_plot'])
+
     # Button to add a new plot
-    if st.button("Add plot"):
+    if st.button("Add plot", disabled = flag_disabled):
         add_plot()
 
-    # Add a single plot (default: initial page displays a single plot)
-    if st.session_state.plots.shape[0] == 0:
-        add_plot()
+    if not flag_disabled:
 
-    # Read plot ids
-    df_p = st.session_state.plots
-    list_plots = df_p.index.tolist()
-    plots_per_row = st.session_state.plots_per_row
+        # Add a single plot (default: initial page displays a single plot)
+        if st.session_state.plots.shape[0] == 0:
+            add_plot()
 
-    # Render plots
-    #  - iterates over plots;
-    #  - for every "plots_per_row" plots, creates a new columns block, resets column index, and displays the plot
-    if df.shape[0] > 0:
-        for i, plot_ind in stqdm(
-            enumerate(list_plots), desc="Rendering plots ...", total=len(list_plots)
-        ):
-            column_no = i % plots_per_row
-            if column_no == 0:
-                blocks = st.columns(plots_per_row)
-            with blocks[column_no]:
-                display_plot(df, plot_ind)
+        # Read plot ids
+        df_p = st.session_state.plots
+        list_plots = df_p.index.tolist()
+        plots_per_row = st.session_state.plots_per_row
+
+        # Render plots
+        #  - iterates over plots;
+        #  - for every "plots_per_row" plots, creates a new columns block, resets column index, and displays the plot
+        if df.shape[0] > 0:
+            for i, plot_ind in stqdm(
+                enumerate(list_plots), desc="Rendering plots ...", total=len(list_plots)
+            ):
+                column_no = i % plots_per_row
+                if column_no == 0:
+                    blocks = st.columns(plots_per_row)
+                with blocks[column_no]:
+                    display_plot(df, plot_ind)
 
 def detect_image_path(img_dir, mrid, img_suff):
     ''' 
