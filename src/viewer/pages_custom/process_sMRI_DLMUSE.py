@@ -27,8 +27,17 @@ flag_disabled = not st.session_state.flags['dset']
 if st.session_state.app_type == "CLOUD":
     with st.expander(":material/upload: Upload data", expanded=False):  # type:ignore
         utilst.util_upload_folder(
-            st.session_state.paths["T1"], "T1 images", flag_disabled, "collapsed"
+            st.session_state.paths["T1"], "T1 images", flag_disabled,
+            "Nifti images can be uploaded as a folder, multiple files, or a single zip file"
         )
+        if not flag_disabled:
+            fcount = utilio.get_file_count(st.session_state.paths["T1"])
+            if fcount > 0:
+                st.session_state.flags['T1'] = True
+                st.success(
+                    f"Data is ready ({st.session_state.paths["T1"]}, {fcount} files)",
+                    icon=":material/thumb_up:"
+                )
 
 else:  # st.session_state.app_type == 'DESKTOP'
     with st.expander(":material/upload: Select data", expanded=False):  # type:ignore
@@ -39,6 +48,14 @@ else:  # st.session_state.app_type == 'DESKTOP'
             st.session_state.paths["last_in_dir"],
             flag_disabled,
         )
+        if not flag_disabled:
+            fcount = utilio.get_file_count(st.session_state.paths["T1"])
+            if fcount > 0:
+                st.session_state.flags['T1'] = True
+                st.success(
+                    f"Data is ready ({st.session_state.paths["T1"]}, {fcount} files)",
+                    icon=":material/thumb_up:"
+                )
 
 # Panel for running DLMUSE
 with st.expander(":material/grid_on: Segment image", expanded=False):
@@ -53,7 +70,6 @@ with st.expander(":material/grid_on: Segment image", expanded=False):
 
     # Button to run DLMUSE
     btn_seg = st.button("Run DLMUSE", disabled = flag_disabled)
-
     if btn_seg:
         run_dir = os.path.join(st.session_state.paths["root"], "src", "NiChart_DLMUSE")
         if not os.path.exists(st.session_state.paths["DLMUSE"]):
@@ -66,24 +82,22 @@ with st.expander(":material/grid_on: Segment image", expanded=False):
             # FIXME : bypass dlmuse run
             os.system(dlmuse_cmd)
 
-            st.success("Run completed!", icon=":material/thumb_up:")
+    if not flag_disabled:
+        out_csv = f"{st.session_state.paths['DLMUSE']}/DLMUSE_Volumes.csv"
+        num_dlmuse = utilio.get_file_count(st.session_state.paths["DLMUSE"], '.nii.gz')
+        if os.path.exists(out_csv):
+            st.session_state.paths["csv_seg"] = out_csv
+            st.session_state.flags["csv_dlmuse"] = True
+            st.success(
+                f"DLMUSE images are ready ({st.session_state.paths['DLMUSE']}, {num_dlmuse} scan(s))",
+                icon=":material/thumb_up:",
+        )
 
-            # Set the dlmuse csv output
-            out_csv = f"{st.session_state.#with st.expander("TMP: session vars"):
-    #st.write(st.session_state)
-#with st.expander("TMP: session vars - paths"):
-    #st.write(st.session_state.paths)
-paths['DLMUSE']}/DLMUSE_Volumes.csv"
-            if os.path.exists(out_csv):
-                st.session_state.paths["csv_seg"] = out_csv
 
 # Panel for viewing DLMUSE images
 with st.expander(":material/visibility: View segmentations", expanded=False):
 
-    # Set the dlmuse csv output
-    st.session_state.paths["csv_seg"] = (
-        f"{st.session_state.paths['DLMUSE']}/DLMUSE_Volumes.csv"
-    )
+    flag_disabled = not st.session_state.flags['csv_dlmuse']
 
     # Selection of MRID
     try:
@@ -91,72 +105,78 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
         list_mrid = df.MRID.tolist()
     except:
         list_mrid = [""]
-    sel_mrid = st.selectbox("MRID", list_mrid, key="selbox_mrid", index=None)
+    sel_mrid = st.selectbox("MRID", list_mrid, key="selbox_mrid", index=None, disabled = flag_disabled)
 
     # Create combo list for selecting target ROI
     list_roi_names = utilmuse.get_roi_names(st.session_state.dicts["muse_sel"])
-    sel_var = st.selectbox("ROI", list_roi_names, key="selbox_rois", index=0)
-
-    # Detect list of ROI indices to display
-    list_sel_rois = utilmuse.get_derived_rois(
-        sel_var, st.session_state.dicts["muse_derived"]
-    )
+    sel_var = st.selectbox("ROI", list_roi_names, key="selbox_rois", index=None, disabled = flag_disabled)
 
     # Create a list of checkbox options
-    list_orient = st.multiselect("Select viewing planes:", utilni.img_views, utilni.img_views)
+    list_orient = st.multiselect(
+        "Select viewing planes:",
+        utilni.img_views,
+        utilni.img_views,
+        disabled = flag_disabled
+    )
 
     # View hide overlay
-    is_show_overlay = st.checkbox("Show overlay", True)
+    is_show_overlay = st.checkbox("Show overlay", True, disabled = flag_disabled)
 
     # Crop to mask area
-    crop_to_mask = st.checkbox("Crop to mask", True)
+    crop_to_mask = st.checkbox("Crop to mask", True, disabled = flag_disabled)
 
-    # Select images
-    flag_img = False
-    if sel_mrid is not None:
-        st.session_state.paths["sel_img"] = os.path.join(
-            st.session_state.paths["T1"], sel_mrid + st.session_state.suff_t1img
-        )
-        st.session_state.paths["sel_seg"] = os.path.join(
-            st.session_state.paths["DLMUSE"], sel_mrid + st.session_state.suff_seg
+    if not flag_disabled:
+
+        # Detect list of ROI indices to display
+        list_sel_rois = utilmuse.get_derived_rois(
+            sel_var, st.session_state.dicts["muse_derived"]
         )
 
-        flag_img = os.path.exists(st.session_state.paths["sel_img"]) and os.path.exists(
-            st.session_state.paths["sel_seg"]
-        )
-
-    if flag_img:
-
-        with st.spinner("Wait for it..."):
-
-            # Process image and mask to prepare final 3d matrix to display
-            img, mask, img_masked = utilni.prep_image_and_olay(
-                st.session_state.paths["sel_img"],
-                st.session_state.paths["sel_seg"],
-                list_sel_rois,
-                crop_to_mask,
+        # Select images
+        flag_img = False
+        if sel_mrid is not None:
+            st.session_state.paths["sel_img"] = os.path.join(
+                st.session_state.paths["T1"], sel_mrid + st.session_state.suff_t1img
+            )
+            st.session_state.paths["sel_seg"] = os.path.join(
+                st.session_state.paths["DLMUSE"], sel_mrid + st.session_state.suff_seg
             )
 
-            # Detect mask bounds and center in each view
-            mask_bounds = utilni.detect_mask_bounds(mask)
+            flag_img = os.path.exists(st.session_state.paths["sel_img"]) and os.path.exists(
+                st.session_state.paths["sel_seg"]
+            )
 
-            # Show images
-            blocks = st.columns(len(list_orient))
-            for i, tmp_orient in stqdm(
-                enumerate(list_orient),
-                desc="Showing images ...",
-                total=len(list_orient),
-            ):
-                with blocks[i]:
-                    ind_view = utilni.img_views.index(tmp_orient)
-                    if is_show_overlay is False:
-                        utilst.show_img3D(
-                            img, ind_view, mask_bounds[ind_view, :], tmp_orient
-                        )
-                    else:
-                        utilst.show_img3D(
-                            img_masked, ind_view, mask_bounds[ind_view, :], tmp_orient
-                        )
+        if flag_img:
+            with st.spinner("Wait for it..."):
+
+                # Process image and mask to prepare final 3d matrix to display
+                img, mask, img_masked = utilni.prep_image_and_olay(
+                    st.session_state.paths["sel_img"],
+                    st.session_state.paths["sel_seg"],
+                    list_sel_rois,
+                    crop_to_mask,
+                )
+
+                # Detect mask bounds and center in each view
+                mask_bounds = utilni.detect_mask_bounds(mask)
+
+                # Show images
+                blocks = st.columns(len(list_orient))
+                for i, tmp_orient in stqdm(
+                    enumerate(list_orient),
+                    desc="Showing images ...",
+                    total=len(list_orient),
+                ):
+                    with blocks[i]:
+                        ind_view = utilni.img_views.index(tmp_orient)
+                        if is_show_overlay is False:
+                            utilst.show_img3D(
+                                img, ind_view, mask_bounds[ind_view, :], tmp_orient
+                            )
+                        else:
+                            utilst.show_img3D(
+                                img_masked, ind_view, mask_bounds[ind_view, :], tmp_orient
+                            )
 
 # Panel for downloading results
 if st.session_state.app_type == "CLOUD":
@@ -166,7 +186,7 @@ if st.session_state.app_type == "CLOUD":
 
         # Zip results and download
         out_zip = bytes()
-        if flag_disabled:
+        if not flag_disabled:
             if not os.path.exists(st.session_state.paths["OutZipped"]):
                 os.makedirs(st.session_state.paths["OutZipped"])
             f_tmp = os.path.join(st.session_state.paths["OutZipped"], "DLMUSE.zip")
@@ -176,7 +196,7 @@ if st.session_state.app_type == "CLOUD":
             "Download DLMUSE results",
             out_zip,
             file_name=f"{st.session_state.dset}_DLMUSE.zip",
-            disabled=not flag_btn,
+            disabled=flag_disabled,
         )
 
 if st.session_state.debug_show_state:
@@ -186,3 +206,7 @@ if st.session_state.debug_show_state:
 if st.session_state.debug_show_paths:
     with st.expander("DEBUG: Session state - paths"):
         st.write(st.session_state.paths)
+
+if st.session_state.debug_show_flags:
+    with st.expander("DEBUG: Session state - flags"):
+        st.write(st.session_state.flags)

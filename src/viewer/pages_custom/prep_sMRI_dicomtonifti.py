@@ -10,11 +10,9 @@ from stqdm import stqdm
 
 result_holder = st.empty()
 
-
 def progress(p: int, i: int, decoded: Any) -> None:
     with result_holder.container():
         st.progress(p, f"Progress: Token position={i}")
-
 
 st.markdown(
     """
@@ -34,12 +32,22 @@ flag_disabled = not st.session_state.flags['dset']
 
 if st.session_state.app_type == "CLOUD":
     with st.expander(":material/upload: Upload data", expanded=False):  # type:ignore
+        # Upload data
         utilst.util_upload_folder(
             st.session_state.paths["Dicoms"],
             "Dicom files or folders",
             flag_disabled,
-            "Raw dicom files can be uploaded as a folder, multiple files, or a single zip file",
+            "Raw dicom files can be uploaded as a folder, multiple files, or a single zip file"
         )
+
+        if not flag_disabled:
+            fcount = utilio.get_file_count(st.session_state.paths["Dicoms"])
+            if fcount > 0:
+                st.session_state.flags['Dicoms'] = True
+                st.success(
+                    f"Data is ready ({st.session_state.paths["Dicoms"]}, {fcount} files)",
+                    icon=":material/thumb_up:"
+                )
 
 else:  # st.session_state.app_type == 'DESKTOP'
     with st.expander(":material/upload: Select data", expanded=False):  # type:ignore
@@ -50,6 +58,15 @@ else:  # st.session_state.app_type == 'DESKTOP'
             st.session_state.paths["last_in_dir"],
             flag_disabled,
         )
+
+        if not flag_disabled:
+            fcount = utilio.get_file_count(st.session_state.paths["Dicoms"])
+            if fcount > 0:
+                st.session_state.flags['Dicoms'] = True
+                st.success(
+                    f"Data is ready ({st.session_state.paths["Dicoms"]}, {fcount} files)",
+                    icon=":material/thumb_up:"
+                )
 
 # Panel for detecting dicom series
 with st.expander(":material/manage_search: Detect dicom series", expanded=False):
@@ -71,16 +88,14 @@ with st.expander(":material/manage_search: Detect dicom series", expanded=False)
             st.session_state.list_series = list_series
             st.session_state.num_dicom_scans = num_dicom_scans
             st.session_state.df_dicoms = df_dicoms
-            if len(list_series) == 0:
-                st.error("Could not detect any dicom series!")
-            else:
-                st.session_state.flags['dicom_series'] = True
 
-    if not flag_disabled and st.session_state.flags['dicom_series']:
-        st.success(
-            f"Detected {st.session_state.num_dicom_scans} scans in {len(st.session_state.list_series)} series!",
-            icon=":material/thumb_up:",
-        )
+    if not flag_disabled:
+        if len(st.session_state.list_series) > 0:
+            st.session_state.flags['dicom_series'] = True
+            st.success(
+                f"Detected {st.session_state.num_dicom_scans} scans in {len(st.session_state.list_series)} series!",
+                icon=":material/thumb_up:"
+            )
 
 # Panel for selecting and extracting dicom series
 with st.expander(":material/auto_awesome_motion: Extract scans", expanded=False):
@@ -121,19 +136,18 @@ with st.expander(":material/auto_awesome_motion: Extract scans", expanded=False)
             st.session_state.paths[st.session_state.sel_mod],
             '.nii.gz'
         )
-
         if num_nifti > 0:
             st.session_state.flags['Nifti'] = True
             st.session_state.flags[st.session_state.sel_mod] = True
             st.success(
-                f"Nifti images are ready ({st.session_state.paths[st.session_state.sel_mod]}, {len(st.session_state.list_input_nifti)} scan(s)",
+                f"Nifti images are ready ({st.session_state.paths[st.session_state.sel_mod]}, {num_nifti} scan(s))",
                 icon=":material/thumb_up:",
             )
 
 # Panel for viewing extracted nifti images
 with st.expander(":material/visibility: View images", expanded=False):
 
-    flag_disabled = not st.session_state.flags[st.session_state.sel_mod]
+    flag_disabled = not st.session_state.flags['Nifti']
 
     # Selection of img modality
     helpmsg = "Modality of the images to view"
@@ -173,10 +187,10 @@ with st.expander(":material/visibility: View images", expanded=False):
         "Select viewing planes:",
         utilni.img_views,
         utilni.img_views,
-        disabled=not flag_img
+        disabled=flag_disabled
     )
 
-    if not flag_disabled and flag_img:
+    if not flag_disabled and flag_img and len(list_orient) > 0:
         with st.spinner("Wait for it..."):
 
             # Prepare final 3d matrix to display
@@ -229,9 +243,6 @@ if st.session_state.app_type == "CLOUD":
                 st.session_state.paths["OutZipped"],
                 f"{st.session_state.sel_mod}"
             )
-            print(f_tmp)
-            print(st.session_state.paths[st.session_state.sel_mod])
-
             out_zip = utilio.zip_folder(st.session_state.paths[st.session_state.sel_mod], f_tmp)
 
         st.download_button(

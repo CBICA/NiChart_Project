@@ -167,7 +167,7 @@ def user_input_folder(
     disabled: bool,
 ) -> str:
     """
-    St button + text field to read an input directory path from the user
+    Button + text field to read an input directory path from the user
     """
     tmpcol = st.columns((8, 1))
 
@@ -368,14 +368,6 @@ def util_upload_folder(
         help=help_txt,
     )
 
-    # Check uploaded data
-    fcount = utilio.get_file_count(out_dir)
-    if fcount > 0:
-        st.success(
-            f"Data is ready ({out_dir}, {fcount} files)", icon=":material/thumb_up:"
-        )
-        st.session_state.flags['Dicoms'] = True
-
 
 def util_upload_file(
     out_file: str,
@@ -441,14 +433,6 @@ def util_select_folder(
             os.makedirs(os.path.dirname(out_dir))
         # Link user input dicoms
         os.symlink(sel_dir, out_dir)
-
-    # Check uploaded data
-    fcount = utilio.get_file_count(out_dir)
-    if fcount > 0:
-        st.success(
-            f"Data is ready ({out_dir}, {fcount} files)", icon=":material/thumb_up:"
-        )
-        st.session_state.flags['Dicoms'] = True
 
 def util_select_file(
     key_selector: str, title_txt, out_file: str, last_in_dir: str, flag_disabled: bool

@@ -82,6 +82,8 @@ if "instantiated" not in st.session_state:
         "DTI": False,
         "fMRI": False,
         "DLMUSE": False,
+        "csv_dlmuse": False,
+        "csv_mlscores": False,
         "sel_img": False,
         "sel_mask": False
     }
