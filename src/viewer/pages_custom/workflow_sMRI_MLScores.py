@@ -35,14 +35,14 @@ flag_disabled = not st.session_state.flags['dset']
 if st.session_state.app_type == "CLOUD":
     with st.expander(":material/upload: Upload data", expanded=False):  # type:ignore
         utilst.util_upload_file(
-            st.session_state.paths["csv_seg"],
+            st.session_state.paths["csv_dlmuse"],
             "DLMUSE csv",
             "uploaded_dlmuse_file",
             flag_disabled,
             "visible",
         )
-        if not flag_disabled and os.path.exists(st.session_state.paths["csv_seg"]):
-            st.success(f"Data is ready ({st.session_state.paths["csv_seg"]})", icon=":material/thumb_up:")
+        if not flag_disabled and os.path.exists(st.session_state.paths["csv_dlmuse"]):
+            st.success(f"Data is ready ({st.session_state.paths["csv_dlmuse"]})", icon=":material/thumb_up:")
 
         utilst.util_upload_file(
             st.session_state.paths["csv_demog"],
@@ -59,12 +59,12 @@ else:  # st.session_state.app_type == 'DESKTOP'
         utilst.util_select_file(
             "selected_dlmuse_file",
             "DLMUSE csv",
-            st.session_state.paths["csv_seg"],
+            st.session_state.paths["csv_dlmuse"],
             st.session_state.paths["last_in_dir"],
             flag_disabled,
         )
-        if not flag_disabled and os.path.exists(st.session_state.paths["csv_seg"]):
-            st.success(f"Data is ready ({st.session_state.paths["csv_seg"]})", icon=":material/thumb_up:")
+        if not flag_disabled and os.path.exists(st.session_state.paths["csv_dlmuse"]):
+            st.success(f"Data is ready ({st.session_state.paths["csv_dlmuse"]})", icon=":material/thumb_up:")
 
         utilst.util_select_file(
             "selected_demog_file",
@@ -80,7 +80,7 @@ else:  # st.session_state.app_type == 'DESKTOP'
 with st.expander(":material/model_training: Run MLScore", expanded=False):
 
     flag_disabled = not (os.path.exists(st.session_state.paths["csv_demog"]) and os.path.exists(
-        st.session_state.paths["csv_seg"])
+        st.session_state.paths["csv_dlmuse"])
     )
 
     btn_mlscore = st.button("Run MLScore", disabled = flag_disabled)
@@ -96,9 +96,9 @@ with st.expander(":material/model_training: Run MLScore", expanded=False):
             os.system(f"cd {run_dir}")
             st.info("Running: mlscores_workflow ", icon=":material/manufacturing:")
 
-            # cmd = f"python3 {run_dir}/call_snakefile.py --run_dir {run_dir} --dset_name {st.session_state.dset} --input_rois {csv_seg} --input_demog {csv_demog} --dir_out {st.session_state.paths['MLScores']}"
+            # cmd = f"python3 {run_dir}/call_snakefile.py --run_dir {run_dir} --dset_name {st.session_state.dset} --input_rois {csv_dlmuse} --input_demog {csv_demog} --dir_out {st.session_state.paths['MLScores']}"
 
-            cmd = f"python3 {run_dir}/workflow_mlscores.py --root_dir {st.session_state.paths['root']} --run_dir {run_dir} --dset_name {st.session_state.dset} --input_rois {st.session_state.paths['csv_seg']} --input_demog {st.session_state.paths['csv_demog']} --dir_out {st.session_state.paths['MLScores']}"
+            cmd = f"python3 {run_dir}/workflow_mlscores.py --root_dir {st.session_state.paths['root']} --run_dir {run_dir} --dset_name {st.session_state.dset} --input_rois {st.session_state.paths['csv_dlmuse']} --input_demog {st.session_state.paths['csv_demog']} --dir_out {st.session_state.paths['MLScores']}"
             print(f"About to run: {cmd}")
             os.system(cmd)
 

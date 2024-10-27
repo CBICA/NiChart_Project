@@ -64,7 +64,7 @@ if "instantiated" not in st.session_state:
         "sel_img": "",
         "sel_seg": "",
         "csv_demog": "",
-        "csv_seg": "",
+        "csv_dlmuse": "",
         "csv_plot": "",
         "csv_roidict": "",
         "csv_mlscores": "",

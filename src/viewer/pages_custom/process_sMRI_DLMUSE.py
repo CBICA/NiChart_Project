@@ -86,7 +86,7 @@ with st.expander(":material/grid_on: Segment image", expanded=False):
         out_csv = f"{st.session_state.paths['DLMUSE']}/DLMUSE_Volumes.csv"
         num_dlmuse = utilio.get_file_count(st.session_state.paths["DLMUSE"], '.nii.gz')
         if os.path.exists(out_csv):
-            st.session_state.paths["csv_seg"] = out_csv
+            st.session_state.paths["csv_dlmuse"] = out_csv
             st.session_state.flags["csv_dlmuse"] = True
             st.success(
                 f"DLMUSE images are ready ({st.session_state.paths['DLMUSE']}, {num_dlmuse} scan(s))",
@@ -101,7 +101,7 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
 
     # Selection of MRID
     try:
-        df = pd.read_csv(st.session_state.paths["csv_seg"])
+        df = pd.read_csv(st.session_state.paths["csv_dlmuse"])
         list_mrid = df.MRID.tolist()
     except:
         list_mrid = [""]

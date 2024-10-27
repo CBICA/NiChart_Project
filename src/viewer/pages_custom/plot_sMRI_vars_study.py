@@ -6,6 +6,7 @@ import streamlit as st
 import utils.utils_muse as utilmuse
 import utils.utils_nifti as utilni
 import utils.utils_st as utilst
+import utils.utils_viewimg as utilvi
 import utils.utils_trace as utilstrace
 from pandas.api.types import (
     is_categorical_dtype,
@@ -300,8 +301,8 @@ utilst.util_panel_workingdir(st.session_state.app_type)
 # Set default path for the data csv
 if os.path.exists(st.session_state.paths["csv_mlscores"]):
     st.session_state.paths["csv_plot"] = st.session_state.paths["csv_mlscores"]
-elif os.path.exists(st.session_state.paths["csv_seg"]):
-    st.session_state.paths["csv_plot"] = st.session_state.paths["csv_seg"]
+elif os.path.exists(st.session_state.paths["csv_dlmuse"]):
+    st.session_state.paths["csv_plot"] = st.session_state.paths["csv_dlmuse"]
 
 # Panel for selecting input csv
 flag_disabled = not st.session_state.flags['dset']
@@ -459,102 +460,6 @@ with st.expander(":material/monitoring: Plot data", expanded=False):
                 with blocks[column_no]:
                     display_plot(df, plot_ind)
 
-def detect_image_path(img_dir, mrid, img_suff):
-    ''' 
-    Detect image path using image folder, mrid and suffix
-    Image search covers two different folder structures:
-    - {img_dir}/{mrid}*{img_suff}
-    - {img_dir}/{mrid}/{mrid}*{img_suff}
-    '''
-    print('Searching for image' + f'{img_dir}  {mrid}  {img_suff}')
-    
-    pattern = os.path.join(img_dir, f"{mrid}*{img_suff}")    
-    tmp_sel = glob.glob(pattern, recursive=False)    
-    if len(tmp_sel) > 0:
-        return tmp_sel[0]
-    
-    pattern = os.path.join(img_dir, mrid, f"{mrid}*{img_suff}")    
-    tmp_sel = glob.glob(pattern, recursive=False)
-    if len(tmp_sel) > 0:
-        return tmp_sel[0]
-
-    return None
-
-def check_images():
-    '''
-    Checks if underlay and overlay images exists 
-    '''
-
-    # Check underlay image
-    sel_img = detect_image_path(
-        st.session_state.paths["T1"],
-        st.session_state.sel_mrid,
-        st.session_state.suff_t1img
-    )
-    if sel_img is None:
-        return False
-    else:    
-        st.session_state.paths["sel_img"] = sel_img
-
-    # Check overlay image
-    sel_img = detect_image_path(
-        st.session_state.paths["DLMUSE"],
-        st.session_state.sel_mrid,
-        st.session_state.suff_seg
-    )
-    if sel_img is None:
-        return False
-    else:    
-        st.session_state.paths["sel_seg"] = sel_img
-        return True
-
-def get_image_paths():
-    ''' 
-    Reads image path and suffix info from the user
-    '''
-    if st.session_state.app_type == "CLOUD":
-        st.warning('Sorry, there are no images to show! Uploading images for viewing purposes is not implemented in the cloud version!')
-    else:
-        st.warning("I'm having trouble locating the underlay image. Please select path and suffix!")
-        
-        # Select image dir
-        utilst.util_select_folder(
-            'selected_t1_folder',
-            'Underlay image folder',
-            st.session_state.paths['T1'],
-            st.session_state.paths['last_in_dir'],
-            flag_disabled,
-        )
-
-        # Select suffix
-        suff_t1img = utilst.user_input_text(
-            "Underlay image suffix", st.session_state.suff_t1img, "Enter the suffix for the T1 images"
-        )
-        st.session_state.suff_t1img = suff_t1img
-
-        # Select image dir
-        utilst.util_select_folder(
-            'selected_dlmuse_folder',
-            'Overlay image folder',
-            st.session_state.paths['DLMUSE'],
-            st.session_state.paths['last_in_dir'],
-            flag_disabled,
-        )
-
-        # Select suffix
-        suff_seg = utilst.user_input_text(
-            "Overlay image suffix", st.session_state.suff_seg, "Enter the suffix for the DLMUSE images"
-        )
-        st.session_state.suff_seg = suff_seg
-        
-        if st.button("Check image paths!"):
-            if check_images():
-                st.rerun()
-            else:
-                st.warning('Image not found!')
-            
-
-
 # Panel for viewing images and segmentations
 with st.expander(":material/visibility: View segmentations", expanded=False):
 
@@ -565,8 +470,8 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
         st.warning("Please select a subject on the plot!")
 
     if flag_ready:
-        if not check_images():
-            get_image_paths()
+        if not utilvi.check_images():
+            utilvi.get_image_paths()
                 
     if flag_ready:
         with st.spinner("Wait for it..."):

@@ -115,13 +115,13 @@ def browse_folder(path_init: str) -> str:
     return out_path
 
 
-def user_input_text(label: str, init_val: str, help_msg: str) -> Any:
+def user_input_text(label: str, init_val: str, help_msg: str, flag_disabled: bool) -> Any:
     """
     St text field to read a text input from the user
     """
     tmpcol = st.columns((1, 8))
     with tmpcol[0]:
-        user_sel = st.text_input(label, value=init_val, help=help_msg)
+        user_sel = st.text_input(label, value=init_val, help=help_msg, disabled = flag_disabled)
         return user_sel
 
 
@@ -259,7 +259,7 @@ def update_default_paths() -> None:
         )
         print(f"setting {st.session_state.paths[d_tmp]}")
 
-    st.session_state.paths["csv_seg"] = os.path.join(
+    st.session_state.paths["csv_dlmuse"] = os.path.join(
         st.session_state.paths["dset"], "DLMUSE", "DLMUSE_Volumes.csv"
     )
 
@@ -297,7 +297,7 @@ def util_panel_workingdir(app_type: str) -> None:
         # Read dataset name (used to create a folder where all results will be saved)
         helpmsg = "Each study's results are organized in a dedicated folder named after the study"
         st.session_state.dset = user_input_text(
-            "Study name", st.session_state.dset, helpmsg
+            "Study name", st.session_state.dset, helpmsg, False
         )
 
         if app_type == "DESKTOP":
