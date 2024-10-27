@@ -17,13 +17,13 @@ st.markdown(
 )
 
 
-def save_dlmuse_file() -> None:
-    # Save dlmuse file to local storage
-    if len(st.session_state["uploaded_dlmuse"]) > 0:
-        utilio.copy_uploaded_file(
-            st.session_state["uploaded_dlmuse"],
-            os.path.join(st.session_state.paths["DLMUSE"], "DLMUSE.csv"),
-        )
+# def save_dlmuse_file() -> None:
+#     # Save dlmuse file to local storage
+#     if len(st.session_state["uploaded_dlmuse"]) > 0:
+#         utilio.copy_uploaded_file(
+#             st.session_state["uploaded_dlmuse"],
+#             os.path.join(st.session_state.paths["DLMUSE"], "DLMUSE.csv"),
+#         )
 
 
 # Panel for output (dataset name + out_dir)
@@ -41,6 +41,9 @@ if st.session_state.app_type == "CLOUD":
             flag_disabled,
             "visible",
         )
+        if not flag_disabled and os.path.exists(st.session_state.paths["csv_seg"]):
+            st.success(f"Data is ready ({st.session_state.paths["csv_seg"]})", icon=":material/thumb_up:")
+
         utilst.util_upload_file(
             st.session_state.paths["csv_demog"],
             "Demographics csv",
@@ -48,6 +51,8 @@ if st.session_state.app_type == "CLOUD":
             flag_disabled,
             "visible",
         )
+        if not flag_disabled and os.path.exists(st.session_state.paths["csv_demog"]):
+            st.success(f"Data is ready ({st.session_state.paths["csv_demog"]})", icon=":material/thumb_up:")
 
 else:  # st.session_state.app_type == 'DESKTOP'
     with st.expander(":material/upload: Select data", expanded=False):  # type:ignore
@@ -58,6 +63,8 @@ else:  # st.session_state.app_type == 'DESKTOP'
             st.session_state.paths["last_in_dir"],
             flag_disabled,
         )
+        if not flag_disabled and os.path.exists(st.session_state.paths["csv_seg"]):
+            st.success(f"Data is ready ({st.session_state.paths["csv_seg"]})", icon=":material/thumb_up:")
 
         utilst.util_select_file(
             "selected_demog_file",
@@ -66,6 +73,8 @@ else:  # st.session_state.app_type == 'DESKTOP'
             st.session_state.paths["last_in_dir"],
             flag_disabled,
         )
+        if not flag_disabled and os.path.exists(st.session_state.paths["csv_demog"]):
+            st.success(f"Data is ready ({st.session_state.paths["csv_demog"]})", icon=":material/thumb_up:")
 
 # Panel for running MLScore
 with st.expander(":material/model_training: Run MLScore", expanded=False):
@@ -73,8 +82,8 @@ with st.expander(":material/model_training: Run MLScore", expanded=False):
     flag_disabled = not (os.path.exists(st.session_state.paths["csv_demog"]) and os.path.exists(
         st.session_state.paths["csv_seg"])
     )
-    btn_mlscore = st.button("Run MLScore", disabled = flag_disabled)
 
+    btn_mlscore = st.button("Run MLScore", disabled = flag_disabled)
     if btn_mlscore:
         run_dir = os.path.join(
             st.session_state.paths["root"], "src", "workflow", "workflows", "w_sMRI"
@@ -96,7 +105,7 @@ with st.expander(":material/model_training: Run MLScore", expanded=False):
     # Check out file
     if os.path.exists(st.session_state.paths["csv_mlscores"]):
         st.success(
-            f"Out file created: {st.session_state.paths['csv_mlscores']}",
+            f"Data is ready ({st.session_state.paths['csv_mlscores']})",
             icon=":material/thumb_up:",
         )
 
@@ -105,8 +114,8 @@ with st.expander(":material/model_training: Run MLScore", expanded=False):
 if st.session_state.app_type == "CLOUD":
     with st.expander(":material/download: Download Results", expanded=False):
 
-        # Zip results and download
         flag_disabled = not os.path.exists(st.session_state.paths["csv_mlscores"])
+
         out_zip = bytes()
         if not flag_disabled:
             if not os.path.exists(st.session_state.paths["OutZipped"]):
@@ -117,7 +126,7 @@ if st.session_state.app_type == "CLOUD":
         st.download_button(
             "Download ML Scores",
             out_zip,
-            file_name="MLScores.zip",
+            file_name=f"{st.session_state.dset}_MLScores.zip",
             disabled=flag_disabled,
         )
 

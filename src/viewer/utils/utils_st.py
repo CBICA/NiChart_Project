@@ -385,7 +385,7 @@ def util_upload_file(
         if not os.path.exists(os.path.dirname(out_file)):
             os.makedirs(os.path.dirname(out_file))
 
-    # Upload data
+    # Upload input
     in_file = st.file_uploader(
         title_txt,
         key=key_uploader,
@@ -394,12 +394,9 @@ def util_upload_file(
         label_visibility=label_visibility,
     )
 
-    # Check uploaded data
+    # Copy to target
     if not os.path.exists(out_file):
         utilio.copy_uploaded_file(in_file, out_file)
-
-    if os.path.exists(out_file):
-        st.success(f"Data is ready ({out_file})", icon=":material/thumb_up:")
 
 
 def util_select_folder(
@@ -468,7 +465,3 @@ def util_select_file(
             os.makedirs(os.path.dirname(out_file))
         # Link user input dicoms
         os.system(f"cp {sel_file} {out_file}")
-
-    # Check uploaded data
-    if os.path.exists(out_file):
-        st.success(f"Data is ready ({out_file})", icon=":material/thumb_up:")
