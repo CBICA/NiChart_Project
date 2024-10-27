@@ -12,19 +12,25 @@ def zip_folder(in_dir: str, f_out: str) -> bytes:
     """
     Zips a folder and its contents.
     """
-    if os.path.exists(in_dir):
-        with zipfile.ZipFile(f_out, "w") as zip_file:
-            for root, dirs, files in os.walk(in_dir):
-                for file in files:
-                    zip_file.write(
-                        os.path.join(root, file),
-                        os.path.relpath(os.path.join(root, file), in_dir),
-                    )
+    # if os.path.exists(in_dir):
+    #     with zipfile.ZipFile(f_out, "w") as zip_file:
+    #         for root, dirs, files in os.walk(in_dir):
+    #             for file in files:
+    #                 zip_file.write(
+    #                     os.path.join(root, file),
+    #                     os.path.relpath(os.path.join(root, file), in_dir),
+    #                 )
+    #         zip_file.write(in_dir, os.path.basename(in_dir))
 
-    with open(f_out, "rb") as f:
-        out_zip = f.read()
+    if not os.path.exists(in_dir):
+        return None
+    else:
+        shutil.make_archive(f_out, 'zip', os.path.dirname(in_dir), os.path.basename(in_dir))
 
-    return out_zip
+        with open(f"{f_out}.zip", "rb") as f:
+            out_zip = f.read()
+
+        return out_zip
 
 
 def unzip_zip_files(in_dir: str) -> None:
@@ -67,9 +73,24 @@ def copy_uploaded_file(in_file: BinaryIO, out_file: str) -> None:
             shutil.copyfileobj(in_file, f)
 
 
-def get_file_count(folder_path: str) -> int:
+def get_file_count(folder_path: str, file_suff: str = '') -> int:
     count = 0
     if os.path.exists(folder_path):
-        for root, dirs, files in os.walk(folder_path):
-            count += len(files)
+        if file_suff == '':
+            for root, dirs, files in os.walk(folder_path):
+                count += len(files)
+        else:
+            for root, dirs, files in os.walk(folder_path):
+                for file in files:
+                    if file.endswith(file_suff):
+                        count += 1
     return count
+
+def get_file_list(folder_path: str, file_suff: str = '') -> list:
+    list_nifti = []
+    if not os.path.exists(folder_path):
+        return list_nifti
+    for f in os.listdir(folder_path):
+        if f.endswith(file_suff):
+            list_nifti.append(f)
+    return list_nifti

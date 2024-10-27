@@ -407,6 +407,7 @@ with st.sidebar:
                 )
                 st.session_state.sel_var = st.session_state.plot_yvar
 
+
                 st.session_state.plot_hvar = st.selectbox(
                     "Default Hue Var",
                     df.columns,

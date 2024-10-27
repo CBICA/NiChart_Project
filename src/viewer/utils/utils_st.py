@@ -266,7 +266,7 @@ def update_default_paths() -> None:
     st.session_state.paths["csv_mlscores"] = os.path.join(
         st.session_state.paths["dset"],
         "MLScores",
-        f"{st.session_state.dset_name}_DLMUSE+MLScores.csv",
+        f"{st.session_state.dset}_DLMUSE+MLScores.csv",
     )
 
     st.session_state.paths["csv_demog"] = os.path.join(
@@ -277,6 +277,16 @@ def update_default_paths() -> None:
         st.session_state.paths["dset"], "Plots", "Data.csv"
     )
 
+def reset_flags() -> None:
+    """
+    Resets flags if the working dir changed
+    """
+    for tmp_key in st.session_state.flags.keys():
+        st.session_state.flags[tmp_key] = False
+    print('AAAAA')
+    print(st.session_state.flags)
+    st.session_state.flags['dset'] = True
+
 
 def util_panel_workingdir(app_type: str) -> None:
     # Panel for selecting the working dir
@@ -286,8 +296,8 @@ def util_panel_workingdir(app_type: str) -> None:
 
         # Read dataset name (used to create a folder where all results will be saved)
         helpmsg = "Each study's results are organized in a dedicated folder named after the study"
-        st.session_state.dset_name = user_input_text(
-            "Study name", st.session_state.dset_name, helpmsg
+        st.session_state.dset = user_input_text(
+            "Study name", st.session_state.dset, helpmsg
         )
 
         if app_type == "DESKTOP":
@@ -303,15 +313,10 @@ def util_panel_workingdir(app_type: str) -> None:
                 False,
             )
 
-        if st.session_state.dset_name != "" and st.session_state.paths["out"] != "":
+        if st.session_state.dset != "" and st.session_state.paths["out"] != "":
             st.session_state.paths["dset"] = os.path.join(
-                st.session_state.paths["out"], st.session_state.dset_name
+                st.session_state.paths["out"], st.session_state.dset
             )
-
-        print('aaaa')
-        print(st.session_state.dset_name)
-        print(st.session_state.paths["out"])
-        print(st.session_state.paths["dset"])
 
         # Dataset output folder name changed
         if curr_dir != st.session_state.paths["dset"]:
@@ -322,6 +327,7 @@ def util_panel_workingdir(app_type: str) -> None:
 
             # Update paths for output subfolders
             update_default_paths()
+            reset_flags()
 
         if os.path.exists(st.session_state.paths["dset"]):
             st.success(

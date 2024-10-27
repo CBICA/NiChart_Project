@@ -162,10 +162,11 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
 if st.session_state.app_type == "CLOUD":
     with st.expander(":material/download: Download Results", expanded=False):
 
+        flag_disabled = not st.session_state.flags['DLMUSE']
+
         # Zip results and download
-        flag_btn = os.path.exists(st.session_state.paths[st.session_state.sel_mod])
         out_zip = bytes()
-        if flag_btn:
+        if flag_disabled:
             if not os.path.exists(st.session_state.paths["OutZipped"]):
                 os.makedirs(st.session_state.paths["OutZipped"])
             f_tmp = os.path.join(st.session_state.paths["OutZipped"], "DLMUSE.zip")
@@ -174,7 +175,7 @@ if st.session_state.app_type == "CLOUD":
         st.download_button(
             "Download DLMUSE results",
             out_zip,
-            file_name=f"{st.session_state.sel_mod}.zip",
+            file_name=f"{st.session_state.dset}_DLMUSE.zip",
             disabled=not flag_btn,
         )
 

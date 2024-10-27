@@ -87,9 +87,9 @@ with st.expander(":material/model_training: Run MLScore", expanded=False):
             os.system(f"cd {run_dir}")
             st.info("Running: mlscores_workflow ", icon=":material/manufacturing:")
 
-            # cmd = f"python3 {run_dir}/call_snakefile.py --run_dir {run_dir} --dset_name {st.session_state.dset_name} --input_rois {csv_seg} --input_demog {csv_demog} --dir_out {st.session_state.paths['MLScores']}"
+            # cmd = f"python3 {run_dir}/call_snakefile.py --run_dir {run_dir} --dset_name {st.session_state.dset} --input_rois {csv_seg} --input_demog {csv_demog} --dir_out {st.session_state.paths['MLScores']}"
 
-            cmd = f"python3 {run_dir}/workflow_mlscores.py --root_dir {st.session_state.paths['root']} --run_dir {run_dir} --dset_name {st.session_state.dset_name} --input_rois {st.session_state.paths['csv_seg']} --input_demog {st.session_state.paths['csv_demog']} --dir_out {st.session_state.paths['MLScores']}"
+            cmd = f"python3 {run_dir}/workflow_mlscores.py --root_dir {st.session_state.paths['root']} --run_dir {run_dir} --dset_name {st.session_state.dset} --input_rois {st.session_state.paths['csv_seg']} --input_demog {st.session_state.paths['csv_demog']} --dir_out {st.session_state.paths['MLScores']}"
             print(f"About to run: {cmd}")
             os.system(cmd)
 
