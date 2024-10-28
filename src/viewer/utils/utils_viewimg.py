@@ -3,9 +3,11 @@ import tkinter as tk
 from tkinter import filedialog
 from typing import Any
 
+import utils.utils_st as utilst
 import numpy as np
 import streamlit as st
 import utils.utils_io as utilio
+import glob
 
 def detect_image_path(img_dir, mrid, img_suff):
     '''
@@ -39,6 +41,9 @@ def check_images():
         st.session_state.sel_mrid,
         st.session_state.suff_t1img
     )
+    
+    print(f"aaa {sel_img}")
+    
     if sel_img is None:
         return False
     else:
@@ -71,12 +76,15 @@ def get_image_paths():
             'Underlay image folder',
             st.session_state.paths['T1'],
             st.session_state.paths['last_in_dir'],
-            flag_disabled,
+            False,
         )
 
         # Select suffix
         suff_t1img = utilst.user_input_text(
-            "Underlay image suffix", st.session_state.suff_t1img, "Enter the suffix for the T1 images"
+            "Underlay image suffix",
+            st.session_state.suff_t1img,
+            "Enter the suffix for the T1 images",
+            False
         )
         st.session_state.suff_t1img = suff_t1img
 
@@ -86,12 +94,15 @@ def get_image_paths():
             'Overlay image folder',
             st.session_state.paths['DLMUSE'],
             st.session_state.paths['last_in_dir'],
-            flag_disabled,
+            False,
         )
 
         # Select suffix
         suff_seg = utilst.user_input_text(
-            "Overlay image suffix", st.session_state.suff_seg, "Enter the suffix for the DLMUSE images"
+            "Overlay image suffix",
+            st.session_state.suff_seg,
+            "Enter the suffix for the DLMUSE images",
+            False
         )
         st.session_state.suff_seg = suff_seg
 
