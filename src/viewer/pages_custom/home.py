@@ -18,7 +18,7 @@ if "instantiated" not in st.session_state:
     st.session_state.plot_active = ""
 
     # Study name
-    st.session_state.dset_name = ""
+    st.session_state.dset = ""
 
     # Predefined paths for different tasks in the final results
     # The path structure allows nested folders with two levels
@@ -26,6 +26,7 @@ if "instantiated" not in st.session_state:
     st.session_state.dict_paths = {
         "Lists": ["", "Lists"],
         "Dicoms": ["", "Dicoms"],
+        "Nifti": ["", "Nifti"],
         "T1": ["Nifti", "T1"],
         "T2": ["Nifti", "T2"],
         "FL": ["Nifti", "FL"],
@@ -63,7 +64,7 @@ if "instantiated" not in st.session_state:
         "sel_img": "",
         "sel_seg": "",
         "csv_demog": "",
-        "csv_seg": "",
+        "csv_dlmuse": "",
         "csv_plot": "",
         "csv_roidict": "",
         "csv_mlscores": "",
@@ -76,13 +77,19 @@ if "instantiated" not in st.session_state:
         "dicom_series": False,
         "Nifti": False,
         "T1": False,
+        "T2": False,
+        "FL": False,
+        "DTI": False,
+        "fMRI": False,
+        "DLMUSE": False,
+        "csv_dlmuse": False,
+        "csv_mlscores": False,
         "sel_img": False,
         "sel_mask": False
     }
 
-
+    # Paths for output
     st.session_state.paths["root"] = os.path.dirname(os.path.dirname(os.getcwd()))
-
     st.session_state.paths["init"] = st.session_state.paths["root"]
 
     #########################################
@@ -94,13 +101,10 @@ if "instantiated" not in st.session_state:
     st.session_state.paths["last_in_dir"] = st.session_state.paths["init"]
 
     # FIXME: This sets the default out path to a folder inside the root folder for now
-    #        Probably will require something more advanced
-    #if st.session_state.app_type == "CLOUD":
     st.session_state.paths["out"] = os.path.join(
         st.session_state.paths["root"],
         "output_folder"
     )
-
     #########################################
 
     # Image modalities
@@ -162,6 +166,8 @@ if "instantiated" not in st.session_state:
     st.session_state.debug_show_state = False
     st.session_state.debug_show_paths = False
     st.session_state.debug_show_flags = False
+
+    # Viewing variables
 
 
     st.session_state.instantiated = True

@@ -8,177 +8,174 @@ import utils.utils_nifti as utilni
 import utils.utils_st as utilst
 from stqdm import stqdm
 
-# Parameters for viewer
-VIEWS = ["axial", "coronal", "sagittal"]
-VIEW_AXES = [0, 2, 1]
-VIEW_OTHER_AXES = [(1, 2), (0, 1), (0, 2)]
-MASK_COLOR = (0, 255, 0)  # RGB format
-MASK_COLOR = np.array([0.0, 1.0, 0.0])  # RGB format
-OLAY_ALPHA = 0.2
-
-
-# Page controls in side bar
-# with st.sidebar:
-
-f_img = ""
-f_mask = ""
+st.markdown(
+    """
+    - View image (underlay) and segmentation (overlay)
+    """
+)
 
 # Panel for output (dataset name + out_dir)
 utilst.util_panel_workingdir(st.session_state.app_type)
 
-# Panel for selecting input data
-with st.expander(":material/upload: Select or upload input data", expanded=False):
+# Set default path for the data csv
+if os.path.exists(st.session_state.paths["csv_mlscores"]):
+    st.session_state.paths["csv_plot"] = st.session_state.paths["csv_mlscores"]
+elif os.path.exists(st.session_state.paths["csv_dlmuse"]):
+    st.session_state.paths["csv_plot"] = st.session_state.paths["csv_dlmuse"]
 
-    # DLMUSE file name
-    helpmsg = "Input csv file with DLMUSE ROI volumes.\n\nUsed for selecting the MRID and the ROI name.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it"
-    csv_seg, csv_path = utilst.user_input_file(
-        "Select file",
-        "btn_input_seg",
-        "Subject list",
-        st.session_state.paths["last_in_dir"],
-        st.session_state.paths["csv_seg"],
-        helpmsg,
-    )
-    if os.path.exists(csv_seg):
-        st.session_state.paths["csv_seg"] = csv_seg
-        st.session_state.paths["last_in_dir"] = csv_path
+# Panel for selecting input csv
+flag_disabled = not st.session_state.flags['dset']
 
-    # Input T1 image folder
-    helpmsg = "Path to T1 images.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
-    path_t1 = utilst.user_input_folder(
-        "Select folder",
-        "btn_indir_t1",
-        "T1 folder",
-        st.session_state.paths["last_in_dir"],
-        st.session_state.paths["T1"],
-        helpmsg,
-    )
-    st.session_state.paths["T1"] = path_t1
+if st.session_state.app_type == "CLOUD":
+    with st.expander(":material/upload: Upload data", expanded=False):  # type:ignore
+        utilst.util_upload_file(
+            st.session_state.paths["csv_dlmuse"],
+            "Input data csv file",
+            "key_in_csv",
+            flag_disabled,
+            "visible",
+        )
+        if not flag_disabled and os.path.exists(st.session_state.paths["csv_plot"]):
+            st.success(f"Data is ready ({st.session_state.paths["csv_plot"]})", icon=":material/thumb_up:")
 
-    # Input DLMUSE image folder
-    helpmsg = "Path to DLMUSE images.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
-    path_seg = utilst.user_input_folder(
-        "Select folder",
-        "btn_indir_seg",
-        "DLMUSE folder",
-        st.session_state.paths["last_in_dir"],
-        st.session_state.paths["DLMUSE"],
-        helpmsg,
-    )
-    st.session_state.paths["DLMUSE"] = path_seg
+else:  # st.session_state.app_type == 'DESKTOP'
+    with st.expander(":material/upload: Select data", expanded=False):
+        utilst.util_select_file(
+            "selected_data_file",
+            "Data csv",
+            st.session_state.paths["csv_dlmuse"],
+            st.session_state.paths["last_in_dir"],
+            flag_disabled,
+        )
+        if not flag_disabled and os.path.exists(st.session_state.paths["csv_dlmuse"]):
+            st.success(f"Data is ready ({st.session_state.paths["csv_dlmuse"]})", icon=":material/thumb_up:")
+
+    with st.expander(":material/upload: Select data", expanded=False):  # type:ignore
+        utilst.util_select_folder(
+            "key_sel_img_folder_viewer",
+            "T1 nifti image folder",
+            st.session_state.paths["T1"],
+            st.session_state.paths["last_in_dir"],
+            flag_disabled,
+        )
+        if not flag_disabled:
+            fcount = utilio.get_file_count(st.session_state.paths["T1"])
+            if fcount > 0:
+                st.session_state.flags['T1'] = True
+                st.success(
+                    f"Data is ready ({st.session_state.paths["T1"]}, {fcount} files)",
+                    icon=":material/thumb_up:"
+                )
+
+    with st.expander(":material/upload: Select data", expanded=False):  # type:ignore
+        utilst.util_select_folder(
+            "key_sel_dlmuse_folder_viewer",
+            "T1 nifti image folder",
+            st.session_state.paths["DLMUSE"],
+            st.session_state.paths["last_in_dir"],
+            flag_disabled,
+        )
+        if not flag_disabled:
+            fcount = utilio.get_file_count(st.session_state.paths["DLMUSE"])
+            if fcount > 0:
+                st.session_state.flags['DLMUSE'] = True
+                st.success(
+                    f"Data is ready ({st.session_state.paths["DLMUSE"]}, {fcount} files)",
+                    icon=":material/thumb_up:"
+                )
 
     # T1 suffix
     suff_t1img = utilst.user_input_text(
-        "T1 img suffix", st.session_state.suff_t1img, helpmsg
+        "T1 img suffix", st.session_state.suff_t1img, 'T1 img suffix', flag_disabled
     )
     st.session_state.suff_t1img = suff_t1img
 
     # DLMUSE suffix
     suff_seg = utilst.user_input_text(
-        "DLMUSE image suffix", st.session_state.suff_seg, helpmsg
+        "DLMUSE image suffix", st.session_state.suff_seg, 'DLMUSE img suffix', flag_disabled
     )
     st.session_state.suff_seg = suff_seg
 
+# Panel for viewing DLMUSE images
+with st.expander(":material/visibility: View segmentations", expanded=False):
 
-# Selection of MRID and ROI name
-if os.path.exists(st.session_state.paths["csv_seg"]):
-    with st.container(border=True):
+    flag_disabled = not st.session_state.flags['csv_dlmuse']
 
-        df = pd.read_csv(st.session_state.paths["csv_seg"])
+    # Selection of MRID
+    try:
+        df = pd.read_csv(st.session_state.paths["csv_dlmuse"])
+        list_mrid = df.MRID.tolist()
+    except:
+        list_mrid = [""]
+    sel_mrid = st.selectbox("MRID", list_mrid, key="selbox_mrid", index=None, disabled = flag_disabled)
 
-        # Create a dictionary of MUSE indices and names
-        df_seg = pd.read_csv(st.session_state.dicts["muse_all"])
+    # Create combo list for selecting target ROI
+    list_roi_names = utilmuse.get_roi_names(st.session_state.dicts["muse_sel"])
+    sel_var = st.selectbox("ROI", list_roi_names, key="selbox_rois", index=None, disabled = flag_disabled)
 
-        # df_seg = df_seg[df_seg.Name.isin(df.columns)]
-        # dict_roi = dict(zip(df_seg.Name, df_seg.Index))
-
-        # Read derived roi list and convert to a dict
-        dict_roi, dict_derived = utilmuse.read_derived_roi_list(
-            st.session_state.dicts["muse_sel"], st.session_state.dicts["muse_derived"]
-        )
-
-        # Selection of MRID
-        sel_mrid = st.session_state.sel_mrid
-        if sel_mrid == "":
-            sel_ind = 0
-            sel_type = "(auto)"
-        else:
-            sel_ind = df.MRID.tolist().index(sel_mrid)
-            sel_type = "(user)"
-        sel_mrid = st.selectbox(
-            "MRID", df.MRID.tolist(), key="selbox_mrid", index=sel_ind
-        )
-
-        # Selection of ROI
-        #  - The variable will be selected from the active plot
-
-        sel_var = ""
-        try:
-            sel_var = st.session_state.plots.loc[st.session_state.plot_active, "yvar"]
-        except:
-            print("Could not detect an active plot")
-        if sel_var == "":
-            sel_ind = 2
-            sel_var = list(dict_roi.keys())[0]
-            sel_type = "(auto)"
-        else:
-            sel_ind = df_seg.Name.tolist().index(sel_var)
-            sel_type = "(user)"
-        sel_var = st.selectbox(
-            "ROI", list(dict_roi.keys()), key="selbox_rois", index=sel_ind
-        )
-
-    with st.container(border=True):
-
-        # Create a list of checkbox options
-        # list_orient = st.multiselect("Select viewing planes:", VIEWS, VIEWS[0])
-        list_orient = st.multiselect("Select viewing planes:", VIEWS, VIEWS)
-
-        # View hide overlay
-        is_show_overlay = st.checkbox("Show overlay", True)
-
-    # Select roi index
-    sel_var_ind = dict_roi[sel_var]
-
-    # File names for img and mask
-    f_img = os.path.join(
-        st.session_state.paths["out"],
-        st.session_state.paths["T1"],
-        sel_mrid + st.session_state.suff_t1img,
+    # Create a list of checkbox options
+    list_orient = st.multiselect(
+        "Select viewing planes:",
+        utilni.img_views,
+        utilni.img_views,
+        disabled = flag_disabled
     )
 
-    f_mask = os.path.join(
-        st.session_state.paths["out"],
-        st.session_state.paths["DLMUSE"],
-        sel_mrid + st.session_state.suff_seg,
-    )
+    # View hide overlay
+    is_show_overlay = st.checkbox("Show overlay", True, disabled = flag_disabled)
 
-if os.path.exists(f_img) & os.path.exists(f_mask):
+    # Crop to mask area
+    crop_to_mask = st.checkbox("Crop to mask", True, disabled = flag_disabled)
 
-    # Process image and mask to prepare final 3d matrix to display
-    img, mask, img_masked = utilni.prep_image_and_olay(
-        f_img, f_mask, sel_var_ind, dict_derived
-    )
+    if not flag_disabled:
 
-    # Detect mask bounds and center in each view
-    mask_bounds = utilni.detect_mask_bounds(mask)
+        # Detect list of ROI indices to display
+        list_sel_rois = utilmuse.get_derived_rois(
+            sel_var, st.session_state.dicts["muse_derived"]
+        )
 
-    # Show images
-    blocks = st.columns(len(list_orient))
-    for i, tmp_orient in stqdm(
-        enumerate(list_orient), desc="Showing images ...", total=len(list_orient)
-    ):
-        with blocks[i]:
-            ind_view = VIEWS.index(tmp_orient)
-            if is_show_overlay is False:
-                utilst.show_img3D(img, ind_view, mask_bounds[ind_view, :], tmp_orient)
-            else:
-                utilst.show_img3D(
-                    img_masked, ind_view, mask_bounds[ind_view, :], tmp_orient
+        # Select images
+        flag_img = False
+        if sel_mrid is not None:
+            st.session_state.paths["sel_img"] = os.path.join(
+                st.session_state.paths["T1"], sel_mrid + st.session_state.suff_t1img
+            )
+            st.session_state.paths["sel_seg"] = os.path.join(
+                st.session_state.paths["DLMUSE"], sel_mrid + st.session_state.suff_seg
+            )
+
+            flag_img = os.path.exists(st.session_state.paths["sel_img"]) and os.path.exists(
+                st.session_state.paths["sel_seg"]
+            )
+
+        if flag_img:
+            with st.spinner("Wait for it..."):
+
+                # Process image and mask to prepare final 3d matrix to display
+                img, mask, img_masked = utilni.prep_image_and_olay(
+                    st.session_state.paths["sel_img"],
+                    st.session_state.paths["sel_seg"],
+                    list_sel_rois,
+                    crop_to_mask,
                 )
 
-else:
-    if not os.path.exists(f_img):
-        st.warning(f"Image not found: {f_img}")
-    else:
-        st.warning(f"Mask not found: {f_mask}")
+                # Detect mask bounds and center in each view
+                mask_bounds = utilni.detect_mask_bounds(mask)
+
+                # Show images
+                blocks = st.columns(len(list_orient))
+                for i, tmp_orient in stqdm(
+                    enumerate(list_orient),
+                    desc="Showing images ...",
+                    total=len(list_orient),
+                ):
+                    with blocks[i]:
+                        ind_view = utilni.img_views.index(tmp_orient)
+                        if is_show_overlay is False:
+                            utilst.show_img3D(
+                                img, ind_view, mask_bounds[ind_view, :], tmp_orient
+                            )
+                        else:
+                            utilst.show_img3D(
+                                img_masked, ind_view, mask_bounds[ind_view, :], tmp_orient
+                            )

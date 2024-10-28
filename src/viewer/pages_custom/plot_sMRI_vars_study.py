@@ -6,6 +6,7 @@ import streamlit as st
 import utils.utils_muse as utilmuse
 import utils.utils_nifti as utilni
 import utils.utils_st as utilst
+import utils.utils_viewimg as utilvi
 import utils.utils_trace as utilstrace
 from pandas.api.types import (
     is_categorical_dtype,
@@ -13,8 +14,6 @@ from pandas.api.types import (
     is_numeric_dtype,
 )
 from stqdm import stqdm
-
-VIEWS = ["axial", "coronal", "sagittal"]
 
 # hide_pages(["Image Processing", "Data Analytics"])
 
@@ -302,18 +301,14 @@ utilst.util_panel_workingdir(st.session_state.app_type)
 # Set default path for the data csv
 if os.path.exists(st.session_state.paths["csv_mlscores"]):
     st.session_state.paths["csv_plot"] = st.session_state.paths["csv_mlscores"]
-elif os.path.exists(st.session_state.paths["csv_seg"]):
-    st.session_state.paths["csv_plot"] = st.session_state.paths["csv_seg"]
+elif os.path.exists(st.session_state.paths["csv_dlmuse"]):
+    st.session_state.paths["csv_plot"] = st.session_state.paths["csv_dlmuse"]
 
 # Panel for selecting input csv
-flag_disabled = (
-    True if os.path.exists(st.session_state.paths["dset"]) is False else False
-)
+flag_disabled = not st.session_state.flags['dset']
 
 if st.session_state.app_type == "CLOUD":
-    with st.expander(
-        ":material/upload: Upload data", expanded=False
-    ):  # type:ignore
+    with st.expander(":material/upload: Upload data", expanded=False):  # type:ignore
         utilst.util_upload_file(
             st.session_state.paths["csv_plot"],
             "Input data csv file",
@@ -321,6 +316,8 @@ if st.session_state.app_type == "CLOUD":
             flag_disabled,
             "visible",
         )
+        if not flag_disabled and os.path.exists(st.session_state.paths["csv_plot"]):
+            st.success(f"Data is ready ({st.session_state.paths["csv_plot"]})", icon=":material/thumb_up:")
 
 else:  # st.session_state.app_type == 'DESKTOP'
     with st.expander(":material/upload: Select data", expanded=False):
@@ -331,6 +328,8 @@ else:  # st.session_state.app_type == 'DESKTOP'
             st.session_state.paths["last_in_dir"],
             flag_disabled,
         )
+        if not flag_disabled and os.path.exists(st.session_state.paths["csv_plot"]):
+            st.success(f"Data is ready ({st.session_state.paths["csv_plot"]})", icon=":material/thumb_up:")
 
 # Page controls in side bar
 with st.sidebar:
@@ -403,6 +402,7 @@ with st.sidebar:
                     key="plot_xvar_init",
                     index=plot_xvar_ind,
                 )
+                st.columns()
                 st.session_state.plot_yvar = st.selectbox(
                     "Default Y Var",
                     df.columns,
@@ -410,6 +410,7 @@ with st.sidebar:
                     index=plot_yvar_ind,
                 )
                 st.session_state.sel_var = st.session_state.plot_yvar
+
 
                 st.session_state.plot_hvar = st.selectbox(
                     "Default Hue Var",
@@ -430,127 +431,35 @@ with st.sidebar:
 # Panel for plots
 with st.expander(":material/monitoring: Plot data", expanded=False):
 
+    flag_disabled = not os.path.exists(st.session_state.paths['csv_plot'])
+
     # Button to add a new plot
-    if st.button("Add plot"):
+    if st.button("Add plot", disabled = flag_disabled):
         add_plot()
 
-    # Add a single plot (default: initial page displays a single plot)
-    if st.session_state.plots.shape[0] == 0:
-        add_plot()
+    if not flag_disabled:
 
-    # Read plot ids
-    df_p = st.session_state.plots
-    list_plots = df_p.index.tolist()
-    plots_per_row = st.session_state.plots_per_row
+        # Add a single plot (default: initial page displays a single plot)
+        if st.session_state.plots.shape[0] == 0:
+            add_plot()
 
-    # Render plots
-    #  - iterates over plots;
-    #  - for every "plots_per_row" plots, creates a new columns block, resets column index, and displays the plot
-    if df.shape[0] > 0:
-        for i, plot_ind in stqdm(
-            enumerate(list_plots), desc="Rendering plots ...", total=len(list_plots)
-        ):
-            column_no = i % plots_per_row
-            if column_no == 0:
-                blocks = st.columns(plots_per_row)
-            with blocks[column_no]:
-                display_plot(df, plot_ind)
+        # Read plot ids
+        df_p = st.session_state.plots
+        list_plots = df_p.index.tolist()
+        plots_per_row = st.session_state.plots_per_row
 
-def detect_image_path(img_dir, mrid, img_suff):
-    ''' 
-    Detect image path using image folder, mrid and suffix
-    Image search covers two different folder structures:
-    - {img_dir}/{mrid}*{img_suff}
-    - {img_dir}/{mrid}/{mrid}*{img_suff}
-    '''
-    print('Searching for image' + f'{img_dir}  {mrid}  {img_suff}')
-    
-    pattern = os.path.join(img_dir, f"{mrid}*{img_suff}")    
-    tmp_sel = glob.glob(pattern, recursive=False)    
-    if len(tmp_sel) > 0:
-        return tmp_sel[0]
-    
-    pattern = os.path.join(img_dir, mrid, f"{mrid}*{img_suff}")    
-    tmp_sel = glob.glob(pattern, recursive=False)
-    if len(tmp_sel) > 0:
-        return tmp_sel[0]
-
-    return None
-
-def check_images():
-    '''
-    Checks if underlay and overlay images exists 
-    '''
-
-    # Check underlay image
-    sel_img = detect_image_path(
-        st.session_state.paths["T1"],
-        st.session_state.sel_mrid,
-        st.session_state.suff_t1img
-    )
-    if sel_img is None:
-        return False
-    else:    
-        st.session_state.paths["sel_img"] = sel_img
-
-    # Check overlay image
-    sel_img = detect_image_path(
-        st.session_state.paths["DLMUSE"],
-        st.session_state.sel_mrid,
-        st.session_state.suff_seg
-    )
-    if sel_img is None:
-        return False
-    else:    
-        st.session_state.paths["sel_seg"] = sel_img
-        return True
-
-def get_image_paths():
-    ''' 
-    Reads image path and suffix info from the user
-    '''
-    if st.session_state.app_type == "CLOUD":
-        st.warning('Sorry, there are no images to show! Uploading images for viewing purposes is not implemented in the cloud version!')
-    else:
-        st.warning("I'm having trouble locating the underlay image. Please select path and suffix!")
-        
-        # Select image dir
-        utilst.util_select_folder(
-            'selected_t1_folder',
-            'Underlay image folder',
-            st.session_state.paths['T1'],
-            st.session_state.paths['last_in_dir'],
-            flag_disabled,
-        )
-
-        # Select suffix
-        suff_t1img = utilst.user_input_text(
-            "Underlay image suffix", st.session_state.suff_t1img, "Enter the suffix for the T1 images"
-        )
-        st.session_state.suff_t1img = suff_t1img
-
-        # Select image dir
-        utilst.util_select_folder(
-            'selected_dlmuse_folder',
-            'Overlay image folder',
-            st.session_state.paths['DLMUSE'],
-            st.session_state.paths['last_in_dir'],
-            flag_disabled,
-        )
-
-        # Select suffix
-        suff_seg = utilst.user_input_text(
-            "Overlay image suffix", st.session_state.suff_seg, "Enter the suffix for the DLMUSE images"
-        )
-        st.session_state.suff_seg = suff_seg
-        
-        if st.button("Check image paths!"):
-            if check_images():
-                st.rerun()
-            else:
-                st.warning('Image not found!')
-            
-
+        # Render plots
+        #  - iterates over plots;
+        #  - for every "plots_per_row" plots, creates a new columns block, resets column index, and displays the plot
+        if df.shape[0] > 0:
+            for i, plot_ind in stqdm(
+                enumerate(list_plots), desc="Rendering plots ...", total=len(list_plots)
+            ):
+                column_no = i % plots_per_row
+                if column_no == 0:
+                    blocks = st.columns(plots_per_row)
+                with blocks[column_no]:
+                    display_plot(df, plot_ind)
 
 # Panel for viewing images and segmentations
 with st.expander(":material/visibility: View segmentations", expanded=False):
@@ -562,8 +471,8 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
         st.warning("Please select a subject on the plot!")
 
     if flag_ready:
-        if not check_images():
-            get_image_paths()
+        if not utilvi.check_images():
+            utilvi.get_image_paths()
                 
     if flag_ready:
         with st.spinner("Wait for it..."):
@@ -604,7 +513,7 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
 
             crop_to_mask = False
             is_show_overlay = True
-            list_orient = VIEWS
+            list_orient = utilni.img_views
 
             if flag_files == 0:
                 st.warning(warn_msg)
@@ -623,7 +532,7 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
                 blocks = st.columns(len(list_orient))
                 for i, tmp_orient in enumerate(list_orient):
                     with blocks[i]:
-                        ind_view = VIEWS.index(tmp_orient)
+                        ind_view = utilni.img_views.index(tmp_orient)
                         if not is_show_overlay:
                             utilst.show_img3D(
                                 img, ind_view, mask_bounds[ind_view, :], tmp_orient
@@ -637,7 +546,7 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
                             )
 
         # Create a list of checkbox options
-        list_orient = st.multiselect("Select viewing planes:", VIEWS, VIEWS)
+        list_orient = st.multiselect("Select viewing planes:", utilni.img_views, utilni.img_views)
 
         # View hide overlay
         is_show_overlay = st.checkbox("Show overlay", True)

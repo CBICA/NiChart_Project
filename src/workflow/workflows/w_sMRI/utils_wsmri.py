@@ -291,6 +291,8 @@ def combine_all(out_csv: str, list_in_csv: Any) -> None:
     # print([['MRID'] +  df_roi.Code.to_list()])
     # input()
 
+    df_roi = df_roi[df_roi.Code.isin(df_data.columns.tolist())]
+
     df_data = df_data.rename(columns=dict(zip(df_roi.Code, df_roi.Name)))
     df_data = df_data[["MRID"] + df_roi.Name.to_list()]
 

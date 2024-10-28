@@ -115,13 +115,13 @@ def browse_folder(path_init: str) -> str:
     return out_path
 
 
-def user_input_text(label: str, init_val: str, help_msg: str) -> Any:
+def user_input_text(label: str, init_val: str, help_msg: str, flag_disabled: bool) -> Any:
     """
     St text field to read a text input from the user
     """
     tmpcol = st.columns((1, 8))
     with tmpcol[0]:
-        user_sel = st.text_input(label, value=init_val, help=help_msg)
+        user_sel = st.text_input(label, value=init_val, help=help_msg, disabled = flag_disabled)
         return user_sel
 
 
@@ -167,7 +167,7 @@ def user_input_folder(
     disabled: bool,
 ) -> str:
     """
-    St button + text field to read an input directory path from the user
+    Button + text field to read an input directory path from the user
     """
     tmpcol = st.columns((8, 1))
 
@@ -259,14 +259,14 @@ def update_default_paths() -> None:
         )
         print(f"setting {st.session_state.paths[d_tmp]}")
 
-    st.session_state.paths["csv_seg"] = os.path.join(
+    st.session_state.paths["csv_dlmuse"] = os.path.join(
         st.session_state.paths["dset"], "DLMUSE", "DLMUSE_Volumes.csv"
     )
 
     st.session_state.paths["csv_mlscores"] = os.path.join(
         st.session_state.paths["dset"],
         "MLScores",
-        f"{st.session_state.dset_name}_DLMUSE+MLScores.csv",
+        f"{st.session_state.dset}_DLMUSE+MLScores.csv",
     )
 
     st.session_state.paths["csv_demog"] = os.path.join(
@@ -277,6 +277,16 @@ def update_default_paths() -> None:
         st.session_state.paths["dset"], "Plots", "Data.csv"
     )
 
+def reset_flags() -> None:
+    """
+    Resets flags if the working dir changed
+    """
+    for tmp_key in st.session_state.flags.keys():
+        st.session_state.flags[tmp_key] = False
+    print('AAAAA')
+    print(st.session_state.flags)
+    st.session_state.flags['dset'] = True
+
 
 def util_panel_workingdir(app_type: str) -> None:
     # Panel for selecting the working dir
@@ -286,8 +296,8 @@ def util_panel_workingdir(app_type: str) -> None:
 
         # Read dataset name (used to create a folder where all results will be saved)
         helpmsg = "Each study's results are organized in a dedicated folder named after the study"
-        st.session_state.dset_name = user_input_text(
-            "Study name", st.session_state.dset_name, helpmsg
+        st.session_state.dset = user_input_text(
+            "Study name", st.session_state.dset, helpmsg, False
         )
 
         if app_type == "DESKTOP":
@@ -303,15 +313,10 @@ def util_panel_workingdir(app_type: str) -> None:
                 False,
             )
 
-        if st.session_state.dset_name != "" and st.session_state.paths["out"] != "":
+        if st.session_state.dset != "" and st.session_state.paths["out"] != "":
             st.session_state.paths["dset"] = os.path.join(
-                st.session_state.paths["out"], st.session_state.dset_name
+                st.session_state.paths["out"], st.session_state.dset
             )
-
-        print('aaaa')
-        print(st.session_state.dset_name)
-        print(st.session_state.paths["out"])
-        print(st.session_state.paths["dset"])
 
         # Dataset output folder name changed
         if curr_dir != st.session_state.paths["dset"]:
@@ -322,6 +327,7 @@ def util_panel_workingdir(app_type: str) -> None:
 
             # Update paths for output subfolders
             update_default_paths()
+            reset_flags()
 
         if os.path.exists(st.session_state.paths["dset"]):
             st.success(
@@ -362,14 +368,6 @@ def util_upload_folder(
         help=help_txt,
     )
 
-    # Check uploaded data
-    fcount = utilio.get_file_count(out_dir)
-    if fcount > 0:
-        st.success(
-            f"Data is ready ({out_dir}, {fcount} files)", icon=":material/thumb_up:"
-        )
-        st.session_state.flags['Dicoms'] = True
-
 
 def util_upload_file(
     out_file: str,
@@ -387,7 +385,7 @@ def util_upload_file(
         if not os.path.exists(os.path.dirname(out_file)):
             os.makedirs(os.path.dirname(out_file))
 
-    # Upload data
+    # Upload input
     in_file = st.file_uploader(
         title_txt,
         key=key_uploader,
@@ -396,12 +394,9 @@ def util_upload_file(
         label_visibility=label_visibility,
     )
 
-    # Check uploaded data
+    # Copy to target
     if not os.path.exists(out_file):
         utilio.copy_uploaded_file(in_file, out_file)
-
-    if os.path.exists(out_file):
-        st.success(f"Data is ready ({out_file})", icon=":material/thumb_up:")
 
 
 def util_select_folder(
@@ -435,14 +430,6 @@ def util_select_folder(
             os.makedirs(os.path.dirname(out_dir))
         # Link user input dicoms
         os.symlink(sel_dir, out_dir)
-
-    # Check uploaded data
-    fcount = utilio.get_file_count(out_dir)
-    if fcount > 0:
-        st.success(
-            f"Data is ready ({out_dir}, {fcount} files)", icon=":material/thumb_up:"
-        )
-        st.session_state.flags['Dicoms'] = True
 
 def util_select_file(
     key_selector: str, title_txt, out_file: str, last_in_dir: str, flag_disabled: bool
@@ -478,7 +465,3 @@ def util_select_file(
             os.makedirs(os.path.dirname(out_file))
         # Link user input dicoms
         os.system(f"cp {sel_file} {out_file}")
-
-    # Check uploaded data
-    if os.path.exists(out_file):
-        st.success(f"Data is ready ({out_file})", icon=":material/thumb_up:")
