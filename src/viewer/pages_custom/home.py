@@ -105,6 +105,9 @@ if "instantiated" not in st.session_state:
         st.session_state.paths["root"],
         "output_folder"
     )
+    if not os.path.exists(st.session_state.paths["out"]):
+        os.makedirs(st.session_state.paths["out"])
+        
     #########################################
 
     # Image modalities
@@ -195,7 +198,7 @@ st.sidebar.success("Select a task above")
 
 with st.sidebar.expander('Flags'):
 
-    if st.checkbox("Show paths?", value=False):
+    if st.checkbox("Show paths?", value=True):
         st.session_state.debug_show_paths = True
     else:
         st.session_state.debug_show_paths = False

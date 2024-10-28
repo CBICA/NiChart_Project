@@ -303,7 +303,7 @@ def util_panel_workingdir(app_type: str) -> None:
         if app_type == "DESKTOP":
             # Read output folder from the user
             helpmsg = "Results will be saved to the output folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
-            st.session_state.paths["out"] = user_input_folder(
+            out_dir = user_input_folder(
                 "Select folder",
                 "btn_sel_out_dir",
                 "Output folder",
@@ -312,6 +312,8 @@ def util_panel_workingdir(app_type: str) -> None:
                 helpmsg,
                 False,
             )
+            if out_dir != '':
+                st.session_state.paths["out"] = out_dir
 
         if st.session_state.dset != "" and st.session_state.paths["out"] != "":
             st.session_state.paths["dset"] = os.path.join(
