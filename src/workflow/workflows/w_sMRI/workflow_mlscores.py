@@ -40,7 +40,7 @@ def run_workflow(root_dir: Any, dict_config: Any) -> None:
     derived_rois = os.path.join(bdir, dict_config["list_derived_ROIs"])
     list_rois = os.path.join(bdir, dict_config["list_ROIs_all"])
     rois_single = os.path.join(bdir, dict_config["list_ROIs_single"])
-    rois_primary = os.path.join(bdir, dict_config["list_ROIs_primary"])
+    rois_sel = os.path.join(bdir, dict_config["list_ROIs_all"])
     spare_types = dict_config["SPARE_types"]
     model_combat = os.path.join(bdir, dict_config["model_combat"])
     # seg_types = dict_config["seg_types"]
@@ -122,7 +122,7 @@ def run_workflow(root_dir: Any, dict_config: Any) -> None:
     # Merge all
     f_all = os.path.join(dir_output, f"{dset_name}_DLMUSE+MLScores.csv")
     utilw.combine_all(
-        f_all, [input_demog, rois_primary, f_raw, f_corr, f_combat2, f_spares]
+        f_all, [input_demog, rois_sel, f_raw, f_corr, f_combat2, f_spares]
     )
 
 

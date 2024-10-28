@@ -402,6 +402,7 @@ with st.sidebar:
                     key="plot_xvar_init",
                     index=plot_xvar_ind,
                 )
+                st.columns()
                 st.session_state.plot_yvar = st.selectbox(
                     "Default Y Var",
                     df.columns,
