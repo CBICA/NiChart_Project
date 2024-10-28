@@ -189,17 +189,17 @@ st.sidebar.success("Select a task above")
 
 with st.sidebar.expander('Flags'):
 
-    if st.checkbox("Show paths?", value=True):
+    if st.checkbox("Show paths?", value=False):
         st.session_state.debug_show_paths = True
     else:
         st.session_state.debug_show_paths = False
 
-    if st.checkbox("Show flags?", value=True):
+    if st.checkbox("Show flags?", value=False):
         st.session_state.debug_show_flags = True
     else:
         st.session_state.debug_show_flags = False
 
-    if st.checkbox("Show all session state vars?", value=True):
+    if st.checkbox("Show all session state vars?", value=False):
         st.session_state.debug_show_state = True
     else:
         st.session_state.debug_show_state = False
