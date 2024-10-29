@@ -51,8 +51,11 @@ else:  # st.session_state.app_type == 'DESKTOP'
         if not flag_disabled and os.path.exists(st.session_state.paths["csv_plot"]):
             st.success(f"Data is ready ({st.session_state.paths["csv_plot"]})", icon=":material/thumb_up:")
 
-# Page controls in side bar
-with st.sidebar:
+# Panel for plots
+with st.expander(":material/monitoring: Plot data", expanded=False):
+
+    flag_disabled = not os.path.exists(st.session_state.paths['csv_plot'])
+
     df = pd.DataFrame()
     if os.path.exists(st.session_state.paths["csv_plot"]):
         # Read input csv
@@ -83,74 +86,6 @@ with st.sidebar:
                 st.session_state.plots_per_row,
                 key="a_per_page",
             )
-
-        with st.container(border=True):
-
-            st.write("Plot Settings")
-
-            # Tabs for parameters
-            ptabs = st.tabs(
-                [
-                    ":lock:",
-                    ":large_orange_circle:",
-                    ":large_yellow_circle:",
-                    ":large_green_circle:",
-                ]
-            )
-
-            # Tab 0: to set plotting parameters
-            with ptabs[1]:
-
-                # Default values for plot params
-                # st.session_state.plot_hvar = ""
-
-                plot_xvar_ind = 0
-                if st.session_state.plot_xvar in df.columns:
-                    plot_xvar_ind = df.columns.get_loc(st.session_state.plot_xvar)
-
-                plot_yvar_ind = 1
-                if st.session_state.plot_yvar in df.columns:
-                    plot_yvar_ind = df.columns.get_loc(st.session_state.plot_yvar)
-
-                plot_hvar_ind = None
-                if st.session_state.plot_hvar in df.columns:
-                    plot_hvar_ind = df.columns.get_loc(st.session_state.plot_hvar)
-
-                st.session_state.plot_xvar = st.selectbox(
-                    "Default X Var",
-                    df.columns,
-                    key="plot_xvar_init",
-                    index=plot_xvar_ind,
-                )
-                st.session_state.plot_yvar = st.selectbox(
-                    "Default Y Var",
-                    df.columns,
-                    key="plot_yvar_init",
-                    index=plot_yvar_ind,
-                )
-                st.session_state.sel_var = st.session_state.plot_yvar
-
-
-                st.session_state.plot_hvar = st.selectbox(
-                    "Default Hue Var",
-                    df.columns,
-                    key="plot_hvar_init",
-                    index=None,
-                )
-                trend_index = st.session_state.trend_types.index(
-                    st.session_state.plot_trend
-                )
-                st.session_state.plot_trend = st.selectbox(
-                    "Default Trend Line",
-                    st.session_state.trend_types,
-                    key="trend_type_init",
-                    index=trend_index,
-                )
-
-# Panel for plots
-with st.expander(":material/monitoring: Plot data", expanded=False):
-
-    flag_disabled = not os.path.exists(st.session_state.paths['csv_plot'])
 
     # Button to add a new plot
     if st.button("Add plot", disabled = flag_disabled):
