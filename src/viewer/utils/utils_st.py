@@ -1,131 +1,27 @@
 import os
-import tkinter as tk
-from tkinter import filedialog
 from typing import Any
 
 import numpy as np
 import streamlit as st
 import utils.utils_io as utilio
+import utils.utils_session as utilses
 
-
-def display_folder_contents(folder_path: str, parent_folder: str = "") -> None:
-    """Displays the contents of a folder in a Streamlit panel with a tree structure.
-
-    Args:
-        folder_path (str): The path to the folder.
-        parent_folder (str): The parent folder's name (optional).
+def user_input_textfield(
+    label: str,
+    init_val: str,
+    help_msg: str,
+    flag_disabled: bool
+) -> Any:
     """
-
-    st.title("Folder Contents")
-
-    # Check if the folder exists
-    if not os.path.exists(folder_path):
-        st.error(f"Folder '{folder_path}' does not exist.")
-        return
-
-    # Get a list of files and directories in the folder
-    contents = os.listdir(folder_path)
-
-    # Create a container for the folder contents
-    container = st.container()
-
-    # Display the parent folder name
-    if parent_folder:
-        container.markdown(f"**{parent_folder}**")
-
-    # Iterate over the contents and display them
-    for item in contents:
-        item_path = os.path.join(folder_path, item)
-
-        # Check if the item is a file or a directory
-        if os.path.isfile(item_path):
-            # Display the file name with indentation based on the parent folder
-            file_name = os.path.basename(item_path)
-            file_url = f"download/{file_name}"  # Adjust the download URL as needed
-            container.markdown(
-                f"{'  ' * len(parent_folder.split('/'))}[Download]({file_url}) {file_name}"
-            )
-        else:
-            # Display the directory name with indentation and a link to explore it
-            directory_name = os.path.basename(item_path)
-            container.markdown(
-                f"{'  ' * len(parent_folder.split('/'))}[Explore]({directory_name}) {directory_name}"
-            )
-
-            # Recursively display the contents of the subdirectory
-            display_folder_contents(item_path, parent_folder=directory_name)
-
-
-def display_folder(in_dir: str) -> None:
+    Single text field to read a text input from the user
     """
-    Displays the contents of a folder in a Streamlit panel.
-    """
-
-    st.title("Folder Contents")
-
-    # Check if the folder exists
-    if not os.path.exists(in_dir):
-        st.error(f"Folder '{in_dir}' does not exist.")
-        return
-
-    # Get a list of files and directories in the folder
-    contents = os.listdir(in_dir)
-
-    # Create a container for the folder contents
-    container = st.container()
-
-    # Iterate over the contents and display them
-    for item in contents:
-        item_path = os.path.join(in_dir, item)
-
-        # Check if the item is a file or a directory
-        if os.path.isfile(item_path):
-            # Display the file name with a link to download it
-            file_name = os.path.basename(item_path)
-            file_url = f"download/{file_name}"  # Adjust the download URL as needed
-            container.write(f"[Download]({file_url}) {file_name}")
-        else:
-            # Display the directory name with a link to explore it
-            directory_name = os.path.basename(item_path)
-            container.write(f"[Explore]({directory_name}) {directory_name}")
-
-
-def browse_file(path_init: str) -> Any:
-    """
-    File selector
-    Returns the file name selected by the user and the parent folder
-    """
-    root = tk.Tk()
-    root.withdraw()  # Hide the main window
-    out_file = filedialog.askopenfilename(initialdir=path_init)
-    out_dir = os.path.dirname(out_file)
-    root.destroy()
-    return out_file, out_dir
-
-
-def browse_folder(path_init: str) -> str:
-    """
-    Folder selector
-    Returns the folder name selected by the user
-    """
-    root = tk.Tk()
-    root.withdraw()  # Hide the main window
-    out_path = filedialog.askdirectory(initialdir=path_init)
-    root.destroy()
-    return out_path
-
-
-def user_input_text(label: str, init_val: str, help_msg: str, flag_disabled: bool) -> Any:
-    """
-    St text field to read a text input from the user
-    """
-    tmpcol = st.columns((1, 8))
+    tmpcol = st.columns((3, 1))
     with tmpcol[0]:
         user_sel = st.text_input(label, value=init_val, help=help_msg, disabled = flag_disabled)
         return user_sel
 
 
-def user_input_file(
+def user_input_filename(
     label_btn: Any,
     key_st: Any,
     label_txt: str,
@@ -135,14 +31,14 @@ def user_input_file(
     disabled: bool,
 ) -> Any:
     """
-    St button + text field to read an input file path from the user
+    Text field in left and button in right to read an input file path
     """
     path_curr = init_path_curr
     path_dir = path_last
-    tmpcol = st.columns((8, 1))
+    tmpcol = st.columns((3, 1))
     with tmpcol[1]:
         if st.button(label_btn, key=f"key_btn_{key_st}", disabled=disabled):
-            path_curr, path_dir = browse_file(path_dir)
+            path_curr, path_dir = utilio.browse_file(path_dir)
 
     with tmpcol[0]:
         tmp_sel = st.text_input(
@@ -157,7 +53,7 @@ def user_input_file(
     return path_curr, path_dir
 
 
-def user_input_folder(
+def user_input_foldername(
     label_btn: Any,
     key_st: Any,
     label_txt: str,
@@ -167,16 +63,16 @@ def user_input_folder(
     disabled: bool,
 ) -> str:
     """
-    Button + text field to read an input directory path from the user
+    Text field in left and button in right to read an input folder path
     """
-    tmpcol = st.columns((8, 1))
+    tmpcol = st.columns((3, 1), vertical_alignment="bottom")
 
     with tmpcol[1]:
         if st.button(label_btn, key=f"btn_{key_st}", disabled=disabled):
             if os.path.exists(path_curr):
-                path_curr = browse_folder(path_curr)
+                path_curr = utilio.browse_folder(path_curr)
             else:
-                path_curr = browse_folder(path_last)
+                path_curr = utilio.browse_folder(path_last)
 
     with tmpcol[0]:
         if os.path.exists(path_curr):
@@ -213,9 +109,9 @@ def user_input_select(
     flag_disabled: bool
 ) -> Any:
     """
-    St selection box to selet a text from the user
+    Single selection box to read user selection
     """
-    tmpcol = st.columns((1, 8))
+    tmpcol = st.columns((1, 2))
     with tmpcol[0]:
         user_sel = st.selectbox(label, selections, index=None, key=key,
                                 help=helpmsg, disabled=flag_disabled)
@@ -223,12 +119,14 @@ def user_input_select(
 
 
 def show_img3D(
-    img: np.ndarray, scroll_axis: Any, sel_axis_bounds: Any, img_name: str
+    img: np.ndarray,
+    scroll_axis: Any,
+    sel_axis_bounds: Any,
+    img_name: str
 ) -> None:
     """
-    Displays a 3D img
+    Display a 3D img
     """
-
     # Create a slider to select the slice index
     slice_index = st.slider(
         f"{img_name}",
@@ -246,48 +144,6 @@ def show_img3D(
     else:
         st.image(img[:, :, slice_index], use_column_width=True)
 
-
-def update_default_paths() -> None:
-    """
-    Update default paths if the working dir changed
-    """
-    for d_tmp in st.session_state.dict_paths.keys():
-        st.session_state.paths[d_tmp] = os.path.join(
-            st.session_state.paths["dset"],
-            st.session_state.dict_paths[d_tmp][0],
-            st.session_state.dict_paths[d_tmp][1],
-        )
-        print(f"setting {st.session_state.paths[d_tmp]}")
-
-    st.session_state.paths["csv_dlmuse"] = os.path.join(
-        st.session_state.paths["dset"], "DLMUSE", "DLMUSE_Volumes.csv"
-    )
-
-    st.session_state.paths["csv_mlscores"] = os.path.join(
-        st.session_state.paths["dset"],
-        "MLScores",
-        f"{st.session_state.dset}_DLMUSE+MLScores.csv",
-    )
-
-    st.session_state.paths["csv_demog"] = os.path.join(
-        st.session_state.paths["dset"], "Lists", "Demog.csv"
-    )
-
-    st.session_state.paths["csv_plot"] = os.path.join(
-        st.session_state.paths["dset"], "Plots", "Data.csv"
-    )
-
-def reset_flags() -> None:
-    """
-    Resets flags if the working dir changed
-    """
-    for tmp_key in st.session_state.flags.keys():
-        st.session_state.flags[tmp_key] = False
-    print('AAAAA')
-    print(st.session_state.flags)
-    st.session_state.flags['dset'] = True
-
-
 def util_panel_workingdir(app_type: str) -> None:
     # Panel for selecting the working dir
     with st.expander(":material/folder_shared: Working Dir", expanded=False):
@@ -296,14 +152,14 @@ def util_panel_workingdir(app_type: str) -> None:
 
         # Read dataset name (used to create a folder where all results will be saved)
         helpmsg = "Each study's results are organized in a dedicated folder named after the study"
-        st.session_state.dset = user_input_text(
+        st.session_state.dset = user_input_textfield(
             "Study name", st.session_state.dset, helpmsg, False
         )
 
         if app_type == "DESKTOP":
             # Read output folder from the user
             helpmsg = "Results will be saved to the output folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
-            out_dir = user_input_folder(
+            out_dir = user_input_foldername(
                 "Select folder",
                 "btn_sel_out_dir",
                 "Output folder",
@@ -328,8 +184,8 @@ def util_panel_workingdir(app_type: str) -> None:
                 os.makedirs(st.session_state.paths["dset"])
 
             # Update paths for output subfolders
-            update_default_paths()
-            reset_flags()
+            utilses.update_default_paths()
+            utilses.reset_flags()
 
         if os.path.exists(st.session_state.paths["dset"]):
             st.success(
@@ -416,7 +272,7 @@ def util_select_folder(
 
     # Upload data
     helpmsg = "Select input folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
-    sel_dir = user_input_folder(
+    sel_dir = user_input_foldername(
         "Select folder",
         f"btn_{key_selector}",
         title_txt,
@@ -451,7 +307,7 @@ def util_select_file(
 
     # Select file
     helpmsg = "Select input file.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
-    sel_file, last_in_dir = user_input_file(
+    sel_file, last_in_dir = user_input_filename(
         "Select file",
         f"btn_{key_selector}",
         title_txt,

@@ -2,11 +2,38 @@ import os
 import shutil
 import zipfile
 from typing import BinaryIO
+import tkinter as tk
+from tkinter import filedialog
+from typing import Any
+
 
 # https://stackoverflow.com/questions/64719918/how-to-write-streamlit-uploadedfile-to-temporary-in_dir-with-original-filenam
 # https://gist.github.com/benlansdell/44000c264d1b373c77497c0ea73f0ef2
 # https://stackoverflow.com/questions/65612750/how-can-i-specify-the-exact-folder-in-streamlit-for-the-uploaded-file-to-be-save
 
+def browse_file(path_init: str) -> Any:
+    """
+    File selector
+    Returns the file name selected by the user and the parent folder
+    """
+    root = tk.Tk()
+    root.withdraw()  # Hide the main window
+    out_file = filedialog.askopenfilename(initialdir=path_init)
+    out_dir = os.path.dirname(out_file)
+    root.destroy()
+    return out_file, out_dir
+
+
+def browse_folder(path_init: str) -> str:
+    """
+    Folder selector
+    Returns the folder name selected by the user
+    """
+    root = tk.Tk()
+    root.withdraw()  # Hide the main window
+    out_path = filedialog.askdirectory(initialdir=path_init)
+    root.destroy()
+    return out_path
 
 def zip_folder(in_dir: str, f_out: str) -> bytes:
     """

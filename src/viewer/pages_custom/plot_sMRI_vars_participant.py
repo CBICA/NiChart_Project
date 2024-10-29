@@ -76,7 +76,7 @@ with st.expander(":material/upload: Select or upload input data", expanded=False
 
     # Input csv
     helpmsg = "Input csv file with DLMUSE ROI volumes.\n\nChoose the file by typing it into the text field or using the file browser to browse and select it"
-    csv_plot, csv_path = utilst.user_input_file(
+    csv_plot, csv_path = utilst.user_input_filename(
         "Select file",
         "btn_input_seg",
         "DLMUSE ROI file",

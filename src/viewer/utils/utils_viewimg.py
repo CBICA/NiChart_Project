@@ -80,7 +80,7 @@ def get_image_paths():
         )
 
         # Select suffix
-        suff_t1img = utilst.user_input_text(
+        suff_t1img = utilst.user_input_textfield(
             "Underlay image suffix",
             st.session_state.suff_t1img,
             "Enter the suffix for the T1 images",
@@ -98,7 +98,7 @@ def get_image_paths():
         )
 
         # Select suffix
-        suff_seg = utilst.user_input_text(
+        suff_seg = utilst.user_input_textfield(
             "Overlay image suffix",
             st.session_state.suff_seg,
             "Enter the suffix for the DLMUSE images",

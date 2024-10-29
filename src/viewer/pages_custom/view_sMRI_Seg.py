@@ -85,13 +85,13 @@ else:  # st.session_state.app_type == 'DESKTOP'
                 )
 
     # T1 suffix
-    suff_t1img = utilst.user_input_text(
+    suff_t1img = utilst.user_input_textfield(
         "T1 img suffix", st.session_state.suff_t1img, 'T1 img suffix', flag_disabled
     )
     st.session_state.suff_t1img = suff_t1img
 
     # DLMUSE suffix
-    suff_seg = utilst.user_input_text(
+    suff_seg = utilst.user_input_textfield(
         "DLMUSE image suffix", st.session_state.suff_seg, 'DLMUSE img suffix', flag_disabled
     )
     st.session_state.suff_seg = suff_seg
