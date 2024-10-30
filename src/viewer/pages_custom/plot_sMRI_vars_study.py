@@ -1,7 +1,5 @@
-import glob
 import os
-from typing import Any
-
+import glob
 import pandas as pd
 import streamlit as st
 import utils.utils_muse as utilmuse
@@ -125,6 +123,10 @@ with st.expander(":material/visibility: View segmentations", expanded):
         st.warning("Please select a subject on the plot!")
 
     if flag_ready:
+        if not utilvi.check_images():
+            utilvi.get_image_paths()
+                
+    if flag_ready:
         with st.spinner("Wait for it..."):
 
             # Get selected y var
@@ -137,9 +139,7 @@ with st.expander(":material/visibility: View segmentations", expanded):
             # Check if index exists in overlay mask
             is_in_mask = False
             if os.path.exists(st.session_state.paths["sel_seg"]):
-                is_in_mask = utilni.check_roi_index(
-                    st.session_state.paths["sel_seg"], sel_var
-                )
+                is_in_mask = utilni.check_roi_index(st.session_state.paths["sel_seg"], sel_var)
 
             if is_in_mask:
                 list_rois = [int(sel_var)]
@@ -159,7 +159,9 @@ with st.expander(":material/visibility: View segmentations", expanded):
                 )
             if not os.path.exists(st.session_state.paths["sel_seg"]):
                 flag_files = 0
-                warn_msg = f"Missing overlay image: {st.session_state.paths['sel_seg']}"
+                warn_msg = (
+                    f"Missing overlay image: {st.session_state.paths['sel_seg']}"
+                )
 
             crop_to_mask = False
             is_show_overlay = True
@@ -172,7 +174,7 @@ with st.expander(":material/visibility: View segmentations", expanded):
                     st.session_state.paths["sel_img"],
                     st.session_state.paths["sel_seg"],
                     list_rois,
-                    crop_to_mask,
+                    crop_to_mask
                 )
 
                 # Detect mask bounds and center in each view
@@ -192,7 +194,7 @@ with st.expander(":material/visibility: View segmentations", expanded):
                                 img_masked,
                                 ind_view,
                                 mask_bounds[ind_view, :],
-                                tmp_orient,
+                                tmp_orient
                             )
 
         # Create a list of checkbox options
