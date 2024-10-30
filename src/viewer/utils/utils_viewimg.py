@@ -60,7 +60,7 @@ def check_images() -> bool:
         return True
 
 
-# @st.dialog("Get input data")
+@st.dialog("Get input data")
 def get_image_paths() -> None:
     """
     Reads image path and suffix info from the user
