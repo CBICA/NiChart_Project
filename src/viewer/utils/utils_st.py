@@ -9,20 +9,21 @@ import utils.utils_session as utilses
 COL_LEFT = 3
 COL_RIGHT_EMPTY = 0.01
 COL_RIGHT_BUTTON = 1
- 
+
+
 def user_input_textfield(
-    label: str,
-    init_val: str,
-    help_msg: str,
-    flag_disabled: bool
+    label: str, init_val: str, help_msg: str, flag_disabled: bool
 ) -> Any:
     """
     Single text field to read a text input from the user
     """
     tmpcol = st.columns((COL_LEFT, COL_RIGHT_EMPTY))
     with tmpcol[0]:
-        user_sel = st.text_input(label, value=init_val, help=help_msg, disabled = flag_disabled)
+        user_sel = st.text_input(
+            label, value=init_val, help=help_msg, disabled=flag_disabled
+        )
         return user_sel
+
 
 def user_input_select(
     label: Any,
@@ -30,16 +31,23 @@ def user_input_select(
     selections: Any,
     init_val: Any,
     helpmsg: str,
-    flag_disabled: bool
+    flag_disabled: bool,
 ) -> Any:
     """
     Single selection box to read user selection
     """
     tmpcol = st.columns((COL_LEFT, COL_RIGHT_EMPTY))
     with tmpcol[0]:
-        user_sel = st.selectbox(label, selections, index=init_val, key=key,
-                                help=helpmsg, disabled=flag_disabled)
+        user_sel = st.selectbox(
+            label,
+            selections,
+            index=init_val,
+            key=key,
+            help=helpmsg,
+            disabled=flag_disabled,
+        )
     return user_sel
+
 
 def user_input_multiselect(
     label: str,
@@ -47,14 +55,16 @@ def user_input_multiselect(
     options: list,
     init_val: str,
     help_msg: str,
-    flag_disabled: bool
+    flag_disabled: bool,
 ) -> Any:
     """
     Single text field to read a text input from the user
     """
     tmpcol = st.columns((COL_LEFT, COL_RIGHT_EMPTY))
     with tmpcol[0]:
-        user_sel = st.multiselect(label, options, init_val, key = key, help=help_msg, disabled = flag_disabled)
+        user_sel = st.multiselect(
+            label, options, init_val, key=key, help=help_msg, disabled=flag_disabled
+        )
         return user_sel
 
 
@@ -136,11 +146,9 @@ def user_input_foldername(
 
     return path_curr
 
+
 def show_img3D(
-    img: np.ndarray,
-    scroll_axis: Any,
-    sel_axis_bounds: Any,
-    img_name: str
+    img: np.ndarray, scroll_axis: Any, sel_axis_bounds: Any, img_name: str
 ) -> None:
     """
     Display a 3D img
@@ -161,6 +169,7 @@ def show_img3D(
         st.image(img[:, slice_index, :], use_column_width=True)
     else:
         st.image(img[:, :, slice_index], use_column_width=True)
+
 
 def util_panel_workingdir(app_type: str) -> None:
     # Panel for selecting the working dir
@@ -186,7 +195,7 @@ def util_panel_workingdir(app_type: str) -> None:
                 helpmsg,
                 False,
             )
-            if out_dir != '':
+            if out_dir != "":
                 st.session_state.paths["out"] = out_dir
 
         if st.session_state.dset != "" and st.session_state.paths["out"] != "":
@@ -210,7 +219,7 @@ def util_panel_workingdir(app_type: str) -> None:
                 f"All results will be saved to: {st.session_state.paths['dset']}",
                 icon=":material/thumb_up:",
             )
-            st.session_state.flags['dset'] = True
+            st.session_state.flags["dset"] = True
 
 
 def copy_uploaded_to_dir() -> None:
@@ -276,7 +285,11 @@ def util_upload_file(
 
 
 def util_select_folder(
-    key_selector: str, title_txt, out_dir: str, last_in_dir: str, flag_disabled: bool
+    key_selector: str,
+    title_txt: str,
+    out_dir: str,
+    last_in_dir: str,
+    flag_disabled: bool,
 ) -> None:
     """
     Select user input folder and link to target folder
@@ -307,8 +320,13 @@ def util_select_folder(
         # Link user input dicoms
         os.symlink(sel_dir, out_dir)
 
+
 def util_select_file(
-    key_selector: str, title_txt, out_file: str, last_in_dir: str, flag_disabled: bool
+    key_selector: str,
+    title_txt: str,
+    out_file: str,
+    last_in_dir: str,
+    flag_disabled: bool,
 ) -> None:
     """
     Select user input file and copy to target file

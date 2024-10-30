@@ -7,12 +7,6 @@ import utils.utils_nifti as utilni
 import utils.utils_st as utilst
 import utils.utils_viewimg as utilvi
 import utils.utils_plot as utilpl
-import utils.utils_trace as utilstrace
-from pandas.api.types import (
-    is_categorical_dtype,
-    is_datetime64_any_dtype,
-    is_numeric_dtype,
-)
 from stqdm import stqdm
 
 # Panel for output (dataset name + out_dir)

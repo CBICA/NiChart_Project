@@ -1,9 +1,11 @@
-from typing import Any
+import os
 
-import streamlit as st
 import pandas as pd
-import numpy as np
 import plotly.express as px
+import streamlit as st
+import utils.utils_dataframe as utilsdf
+import utils.utils_trace as utilstrace
+
 
 def add_plot() -> None:
     """
@@ -21,6 +23,7 @@ def add_plot() -> None:
     ]
     st.session_state.plot_index += 1
 
+
 # Remove a plot
 def remove_plot(plot_id: str) -> None:
     """
@@ -29,6 +32,7 @@ def remove_plot(plot_id: str) -> None:
     df_p = st.session_state.plots
     df_p = df_p[df_p.pid != plot_id]
     st.session_state.plots = df_p
+
 
 def add_plot_tabs(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
     with st.container(border=True):
@@ -117,7 +121,7 @@ def add_plot_tabs(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
 
         # Tab 2: to set data filtering parameters
         with ptabs[2]:
-            df_filt = filter_dataframe(df, plot_id)
+            df_filt = utilsdf.filter_dataframe(df, plot_id)
 
         # Tab 3: to set centiles
         with ptabs[3]:
@@ -146,7 +150,7 @@ def add_plot_tabs(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
                 on_click=remove_plot,
                 args=[plot_id],
             )
-            
+
         return df_filt, trend, xvar, yvar, hind, hvar, centtype
 
 
@@ -166,7 +170,7 @@ def display_plot(df: pd.DataFrame, plot_id: str) -> None:
 
         # Tabs for plot parameters
         df_filt, trend, xvar, yvar, hind, hvar, centtype = add_plot_tabs(df, plot_id)
-        
+
         # Main plot
         if trend == "none":
             scatter_plot = px.scatter(df_filt, x=xvar, y=yvar, color=hvar)
@@ -210,75 +214,3 @@ def display_plot(df: pd.DataFrame, plot_id: str) -> None:
 
             st.sidebar.success("Selected subject: " + sel_mrid)
             st.sidebar.success("Selected ROI: " + sel_roi)
-
-
-
-def filter_dataframe(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
-    """
-    Adds a UI on top of a dataframe to let viewers filter columns
-
-    Args:
-        df (pd.DataFrame): Original dataframe
-
-    Returns:
-        pd.DataFrame: Filtered dataframe
-    """
-
-    df = df.copy()
-
-    # Create filters selected by the user
-    modification_container = st.container()
-    with modification_container:
-        widget_no = plot_id + "_filter"
-        to_filter_columns = st.multiselect(
-            "Filter dataframe on", df.columns, key=widget_no
-        )
-        for vno, column in enumerate(to_filter_columns):
-            left, right = st.columns((1, 20))
-            left.write("↳")
-            # Treat columns with < 10 unique values as categorical
-            if is_categorical_dtype(df[column]) or df[column].nunique() < 10:
-                widget_no = plot_id + "_col_" + str(vno)
-                user_cat_input = right.multiselect(
-                    f"Values for {column}",
-                    df[column].unique(),
-                    default=list(df[column].unique()),
-                    key=widget_no,
-                )
-                df = df[df[column].isin(user_cat_input)]
-            elif is_numeric_dtype(df[column]):
-                _min = float(df[column].min())
-                _max = float(df[column].max())
-                step = (_max - _min) / 100
-                user_num_input = right.slider(
-                    f"Values for {column}",
-                    _min,
-                    _max,
-                    (_min, _max),
-                    step=step,
-                )
-                df = df[df[column].between(*user_num_input)]
-            elif is_datetime64_any_dtype(df[column]):
-                user_date_input = right.date_input(
-                    f"Values for {column}",
-                    value=(
-                        df[column].min(),
-                        df[column].max(),
-                    ),
-                )
-                if len(user_date_input) == 2:
-                    user_date_input = tuple(map(pd.to_datetime, user_date_input))
-                    start_date, end_date = user_date_input
-                    df = df.loc[df[column].between(start_date, end_date)]
-            else:
-                user_text_input = right.text_input(
-                    f"Substring or regex in {column}",
-                )
-                if user_text_input:
-                    df = df[df[column].str.contains(user_text_input)]
-
-    # Print sample size after filtering
-    dim1, dim2 = df.shape
-    st.success("Sample size is: " + str(dim1))
-
-    return df

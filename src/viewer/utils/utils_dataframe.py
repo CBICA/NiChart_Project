@@ -1,8 +1,11 @@
-from typing import Any
-
-import streamlit as st
 import pandas as pd
-import numpy as np
+import streamlit as st
+from pandas.api.types import (
+    is_categorical_dtype,
+    is_datetime64_any_dtype,
+    is_numeric_dtype,
+)
+
 
 def filter_dataframe(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
     """

@@ -1,6 +1,7 @@
-from typing import Any
-import streamlit as st
 import os
+
+import streamlit as st
+
 
 def update_default_paths() -> None:
     """
@@ -32,11 +33,11 @@ def update_default_paths() -> None:
         st.session_state.paths["dset"], "Plots", "Data.csv"
     )
 
+
 def reset_flags() -> None:
     """
     Resets flags if the working dir changed
     """
     for tmp_key in st.session_state.flags.keys():
         st.session_state.flags[tmp_key] = False
-    st.session_state.flags['dset'] = True
-
+    st.session_state.flags["dset"] = True
