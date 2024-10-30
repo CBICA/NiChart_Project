@@ -65,7 +65,12 @@ with st.expander(":material/grid_on: Segment image", expanded=False):
     # Device type
     helpmsg = "Choose 'cuda' if your computer has an NVIDIA GPU, 'mps' if you have an Apple M-series chip, and 'cpu' if you have a standard CPU."
     device = utilst.user_input_select(
-        "Device", ["cuda", "cpu", "mps"], "dlmuse_sel_device", helpmsg, flag_disabled = flag_disabled
+        "Device",
+        "key_select_device",
+        ["cuda", "cpu", "mps"],
+        None,
+        helpmsg, 
+        flag_disabled
     )
 
     # Button to run DLMUSE

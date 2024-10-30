@@ -7,6 +7,7 @@ st.set_page_config(
     page_title="NiChart",
     page_icon=nicon,
     layout="wide",
+    #layout="centered",
     menu_items={
         "Get help": "https://neuroimagingchart.com/",
         "Report a bug": "https://neuroimagingchart.com/",

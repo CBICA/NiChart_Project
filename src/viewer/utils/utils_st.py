@@ -6,6 +6,10 @@ import streamlit as st
 import utils.utils_io as utilio
 import utils.utils_session as utilses
 
+COL_LEFT = 3
+COL_RIGHT_EMPTY = 0.01
+COL_RIGHT_BUTTON = 1
+ 
 def user_input_textfield(
     label: str,
     init_val: str,
@@ -15,9 +19,42 @@ def user_input_textfield(
     """
     Single text field to read a text input from the user
     """
-    tmpcol = st.columns((3, 1))
+    tmpcol = st.columns((COL_LEFT, COL_RIGHT_EMPTY))
     with tmpcol[0]:
         user_sel = st.text_input(label, value=init_val, help=help_msg, disabled = flag_disabled)
+        return user_sel
+
+def user_input_select(
+    label: Any,
+    key: Any,
+    selections: Any,
+    init_val: Any,
+    helpmsg: str,
+    flag_disabled: bool
+) -> Any:
+    """
+    Single selection box to read user selection
+    """
+    tmpcol = st.columns((COL_LEFT, COL_RIGHT_EMPTY))
+    with tmpcol[0]:
+        user_sel = st.selectbox(label, selections, index=init_val, key=key,
+                                help=helpmsg, disabled=flag_disabled)
+    return user_sel
+
+def user_input_multiselect(
+    label: str,
+    key: Any,
+    options: list,
+    init_val: str,
+    help_msg: str,
+    flag_disabled: bool
+) -> Any:
+    """
+    Single text field to read a text input from the user
+    """
+    tmpcol = st.columns((COL_LEFT, COL_RIGHT_EMPTY))
+    with tmpcol[0]:
+        user_sel = st.multiselect(label, options, init_val, key = key, help=help_msg, disabled = flag_disabled)
         return user_sel
 
 
@@ -31,11 +68,11 @@ def user_input_filename(
     disabled: bool,
 ) -> Any:
     """
-    Text field in left and button in right to read an input file path
+    Text field next to a button to read an input file path
     """
     path_curr = init_path_curr
     path_dir = path_last
-    tmpcol = st.columns((3, 1))
+    tmpcol = st.columns((COL_LEFT, COL_RIGHT_BUTTON), vertical_alignment="bottom")
     with tmpcol[1]:
         if st.button(label_btn, key=f"key_btn_{key_st}", disabled=disabled):
             path_curr, path_dir = utilio.browse_file(path_dir)
@@ -65,7 +102,7 @@ def user_input_foldername(
     """
     Text field in left and button in right to read an input folder path
     """
-    tmpcol = st.columns((3, 1), vertical_alignment="bottom")
+    tmpcol = st.columns((COL_LEFT, COL_RIGHT_BUTTON), vertical_alignment="bottom")
 
     with tmpcol[1]:
         if st.button(label_btn, key=f"btn_{key_st}", disabled=disabled):
@@ -99,24 +136,6 @@ def user_input_foldername(
             path_curr = ""
 
     return path_curr
-
-
-def user_input_select(
-    label: Any,
-    selections: Any,
-    key: Any,
-    helpmsg: str,
-    flag_disabled: bool
-) -> Any:
-    """
-    Single selection box to read user selection
-    """
-    tmpcol = st.columns((1, 2))
-    with tmpcol[0]:
-        user_sel = st.selectbox(label, selections, index=None, key=key,
-                                help=helpmsg, disabled=flag_disabled)
-    return user_sel
-
 
 def show_img3D(
     img: np.ndarray,
@@ -295,11 +314,6 @@ def util_select_file(
     """
     Select user input file and copy to target file
     """
-    # Set target path
-    if not flag_disabled:
-        if not os.path.exists(os.path.dirname(out_file)):
-            os.makedirs(os.path.dirname(out_file))
-
     # Check if out folder already exists
     curr_file = ""
     if os.path.exists(out_file):

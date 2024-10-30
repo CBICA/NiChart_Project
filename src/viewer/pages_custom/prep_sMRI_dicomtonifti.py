@@ -103,12 +103,12 @@ with st.expander(":material/auto_awesome_motion: Extract scans", expanded=False)
     flag_disabled = not st.session_state.flags['dicom_series']
 
     # Selection of img modality
-    helpmsg = "Modality of the extracted images"
     sel_mod = utilst.user_input_select(
         "Image Modality",
+        'key_select_modality',
         st.session_state.list_mods,
-        'key_selbox_modality',
-        helpmsg,
+        None,
+        "Modality of the extracted images",
         flag_disabled
     )
     if sel_mod is not None:
@@ -117,8 +117,13 @@ with st.expander(":material/auto_awesome_motion: Extract scans", expanded=False)
             os.makedirs(st.session_state.paths[st.session_state.sel_mod])
         
     # Selection of dicom series
-    st.session_state.sel_series = st.multiselect(
-        "Select series:", st.session_state.list_series, [], disabled = flag_disabled
+    st.session_state.sel_series = utilst.user_input_multiselect(
+        "Select series:",
+        "key_multiselect_dseries",
+        st.session_state.list_series,
+        [],
+        '',
+        flag_disabled=flag_disabled
     )
 
     btn_convert = st.button("Convert Series", disabled=flag_disabled)
@@ -150,12 +155,12 @@ with st.expander(":material/visibility: View images", expanded=False):
     flag_disabled = not st.session_state.flags['Nifti']
 
     # Selection of img modality
-    helpmsg = "Modality of the images to view"
     sel_mod = utilst.user_input_select(
         "Image Modality",
-        st.session_state.list_mods,
         'key_selbox_modality_viewer',
-        helpmsg,
+        st.session_state.list_mods,
+        None,
+        "Modality of the images to view",
         flag_disabled
     )
 
@@ -165,12 +170,13 @@ with st.expander(":material/visibility: View images", expanded=False):
         list_nifti = utilio.get_file_list(st.session_state.paths[st.session_state.sel_mod], '.nii.gz')
 
     # Selection of image
-    sel_img = st.selectbox(
+    sel_img = utilst.user_input_select(
         "Select Image",
+        "key_select_img",
         list_nifti,
-        key="selbox_images",
-        index=None,
-        disabled=flag_disabled
+        None,
+        'FIXME: Help message',        
+        flag_disabled
     )
     if sel_img is None:
         st.session_state.flags['sel_img'] = False
@@ -183,11 +189,13 @@ with st.expander(":material/visibility: View images", expanded=False):
 
     # Create a list of checkbox options
     flag_img = st.session_state.flags['sel_img']
-    list_orient = st.multiselect(
+    list_orient = utilst.user_input_multiselect(
         "Select viewing planes:",
+        "key_multiselect_viewplanes",
         utilni.img_views,
         utilni.img_views,
-        disabled=flag_disabled
+        'FIXME: Help message',
+        flag_disabled=flag_disabled
     )
 
     if not flag_disabled and flag_img and len(list_orient) > 0:
@@ -219,12 +227,12 @@ if st.session_state.app_type == "CLOUD":
         flag_disabled = not st.session_state.flags['Nifti']
 
         # Selection of img modality
-        helpmsg = "Modality of the images to download"
         sel_mod = utilst.user_input_select(
             "Image Modality",
-            ['All'] + st.session_state.list_mods,
             'key_selbox_modality_download',
-            helpmsg,
+            ['All'] + st.session_state.list_mods,
+            None,
+            "Modality of the images to download",
             flag_disabled
         )
 
