@@ -1,30 +1,65 @@
 import os
 import shutil
+import tkinter as tk
 import zipfile
-from typing import BinaryIO
+from tkinter import filedialog
+from typing import Any, BinaryIO, List, Optional
 
 # https://stackoverflow.com/questions/64719918/how-to-write-streamlit-uploadedfile-to-temporary-in_dir-with-original-filenam
 # https://gist.github.com/benlansdell/44000c264d1b373c77497c0ea73f0ef2
 # https://stackoverflow.com/questions/65612750/how-can-i-specify-the-exact-folder-in-streamlit-for-the-uploaded-file-to-be-save
 
 
-def zip_folder(in_dir: str, f_out: str) -> bytes:
+def browse_file(path_init: str) -> Any:
+    """
+    File selector
+    Returns the file name selected by the user and the parent folder
+    """
+    root = tk.Tk()
+    root.withdraw()  # Hide the main window
+    out_file = filedialog.askopenfilename(initialdir=path_init)
+    out_dir = os.path.dirname(out_file)
+    root.destroy()
+    return out_file, out_dir
+
+
+def browse_folder(path_init: str) -> str:
+    """
+    Folder selector
+    Returns the folder name selected by the user
+    """
+    root = tk.Tk()
+    root.withdraw()  # Hide the main window
+    out_path = filedialog.askdirectory(initialdir=path_init)
+    root.destroy()
+    return out_path
+
+
+def zip_folder(in_dir: str, f_out: str) -> Optional[bytes]:
     """
     Zips a folder and its contents.
     """
-    if os.path.exists(in_dir):
-        with zipfile.ZipFile(f_out, "w") as zip_file:
-            for root, dirs, files in os.walk(in_dir):
-                for file in files:
-                    zip_file.write(
-                        os.path.join(root, file),
-                        os.path.relpath(os.path.join(root, file), in_dir),
-                    )
+    # if os.path.exists(in_dir):
+    #     with zipfile.ZipFile(f_out, "w") as zip_file:
+    #         for root, dirs, files in os.walk(in_dir):
+    #             for file in files:
+    #                 zip_file.write(
+    #                     os.path.join(root, file),
+    #                     os.path.relpath(os.path.join(root, file), in_dir),
+    #                 )
+    #         zip_file.write(in_dir, os.path.basename(in_dir))
 
-    with open(f_out, "rb") as f:
-        out_zip = f.read()
+    if not os.path.exists(in_dir):
+        return None
+    else:
+        shutil.make_archive(
+            f_out, "zip", os.path.dirname(in_dir), os.path.basename(in_dir)
+        )
 
-    return out_zip
+        with open(f"{f_out}.zip", "rb") as f:
+            out_zip = f.read()
+
+        return out_zip
 
 
 def unzip_zip_files(in_dir: str) -> None:
@@ -67,9 +102,25 @@ def copy_uploaded_file(in_file: BinaryIO, out_file: str) -> None:
             shutil.copyfileobj(in_file, f)
 
 
-def get_file_count(folder_path: str) -> int:
+def get_file_count(folder_path: str, file_suff: str = "") -> int:
     count = 0
     if os.path.exists(folder_path):
-        for root, dirs, files in os.walk(folder_path):
-            count += len(files)
+        if file_suff == "":
+            for root, dirs, files in os.walk(folder_path):
+                count += len(files)
+        else:
+            for root, dirs, files in os.walk(folder_path):
+                for file in files:
+                    if file.endswith(file_suff):
+                        count += 1
     return count
+
+
+def get_file_list(folder_path: str, file_suff: str = "") -> List:
+    list_nifti: List[str] = []
+    if not os.path.exists(folder_path):
+        return list_nifti
+    for f in os.listdir(folder_path):
+        if f.endswith(file_suff):
+            list_nifti.append(f)
+    return list_nifti

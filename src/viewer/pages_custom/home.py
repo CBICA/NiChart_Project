@@ -10,6 +10,9 @@ if "instantiated" not in st.session_state:
     st.session_state.app_type = "CLOUD"
     st.session_state.app_type = "DESKTOP"
 
+    # State for expanders
+    st.session_state.state_expander_plotsmri_imgview = False
+
     # Dataframe to keep plot ids
     st.session_state.plots = pd.DataFrame(
         columns=["pid", "xvar", "yvar", "hvar", "trend", "centtype"]
@@ -18,7 +21,7 @@ if "instantiated" not in st.session_state:
     st.session_state.plot_active = ""
 
     # Study name
-    st.session_state.dset_name = ""
+    st.session_state.dset = ""
 
     # Predefined paths for different tasks in the final results
     # The path structure allows nested folders with two levels
@@ -26,6 +29,7 @@ if "instantiated" not in st.session_state:
     st.session_state.dict_paths = {
         "Lists": ["", "Lists"],
         "Dicoms": ["", "Dicoms"],
+        "Nifti": ["", "Nifti"],
         "T1": ["Nifti", "T1"],
         "T2": ["Nifti", "T2"],
         "FL": ["Nifti", "FL"],
@@ -34,7 +38,7 @@ if "instantiated" not in st.session_state:
         "DLMUSE": ["", "DLMUSE"],
         "MLScores": ["", "MLScores"],
         "Plots": ["", "Plots"],
-        "OutZipped": ["", "Plots"],
+        "OutZipped": ["", "OutZipped"],
     }
 
     # Paths to input/output files/folders
@@ -49,7 +53,7 @@ if "instantiated" not in st.session_state:
         "Lists": "",
         "Nifti": "",
         "Dicoms": "",
-        "user_Dicoms": "",
+        "user_dicoms": "",
         "T1": "",
         "user_T1": "",
         "T2": "",
@@ -63,14 +67,32 @@ if "instantiated" not in st.session_state:
         "sel_img": "",
         "sel_seg": "",
         "csv_demog": "",
-        "csv_seg": "",
+        "csv_dlmuse": "",
         "csv_plot": "",
         "csv_roidict": "",
         "csv_mlscores": "",
     }
 
-    st.session_state.paths["root"] = os.path.dirname(os.path.dirname(os.getcwd()))
+    # Flags for various input/output
+    st.session_state.flags = {
+        "dset": False,
+        "Dicoms": False,
+        "dicom_series": False,
+        "Nifti": False,
+        "T1": False,
+        "T2": False,
+        "FL": False,
+        "DTI": False,
+        "fMRI": False,
+        "DLMUSE": False,
+        "csv_dlmuse": False,
+        "csv_mlscores": False,
+        "sel_img": False,
+        "sel_mask": False
+    }
 
+    # Paths for output
+    st.session_state.paths["root"] = os.path.dirname(os.path.dirname(os.getcwd()))
     st.session_state.paths["init"] = st.session_state.paths["root"]
 
     #########################################
@@ -81,14 +103,14 @@ if "instantiated" not in st.session_state:
 
     st.session_state.paths["last_in_dir"] = st.session_state.paths["init"]
 
-    # FIXME: This sets the default out path on the cloud
-    #        It's a folder inside the root folder for now
-    #        Probably will require something more advanced
-    if st.session_state.app_type == "CLOUD":
-        st.session_state.paths["out"] = os.path.join(
-            st.session_state.paths["root"], "output_folder"
-        )
-
+    # FIXME: This sets the default out path to a folder inside the root folder for now
+    st.session_state.paths["out"] = os.path.join(
+        st.session_state.paths["root"],
+        "output_folder"
+    )
+    if not os.path.exists(st.session_state.paths["out"]):
+        os.makedirs(st.session_state.paths["out"])
+        
     #########################################
 
     # Image modalities
@@ -112,6 +134,7 @@ if "instantiated" not in st.session_state:
 
     # Dicom vars
     st.session_state.list_series = []
+    st.session_state.num_dicom_scans = []
     st.session_state.df_dicoms = pd.DataFrame()
     st.session_state.sel_series = []
     st.session_state.sel_mod = "T1"
@@ -145,6 +168,14 @@ if "instantiated" not in st.session_state:
     # Variable selected by user
     st.session_state.sel_var = ""
 
+    # Debugging variables
+    st.session_state.debug_show_state = False
+    st.session_state.debug_show_paths = False
+    st.session_state.debug_show_flags = False
+
+    # Viewing variables
+
+
     st.session_state.instantiated = True
 
 st.sidebar.image("../resources/nichart1.png")
@@ -167,6 +198,28 @@ with st.sidebar.expander("Acknowledgments"):
     )
 
 st.sidebar.success("Select a task above")
+
+with st.sidebar.expander('Flags'):
+
+    if st.checkbox("Show paths?", value=True):
+        st.session_state.debug_show_paths = True
+    else:
+        st.session_state.debug_show_paths = False
+
+    if st.checkbox("Show flags?", value=False):
+        st.session_state.debug_show_flags = True
+    else:
+        st.session_state.debug_show_flags = False
+
+    if st.checkbox("Show all session state vars?", value=False):
+        st.session_state.debug_show_state = True
+    else:
+        st.session_state.debug_show_state = False
+
+    if st.checkbox("Switch to CLOUD?"):
+        st.session_state.app_type = 'CLOUD'
+    else:
+        st.session_state.app_type = 'DESKTOP'
 
 st.markdown(
     """
@@ -202,7 +255,14 @@ st.markdown(
             """
 )
 
-with st.expander("FIXME: TMP - Session state"):
-    st.write(st.session_state)
-with st.expander("TMP: session vars - paths"):
-    st.write(st.session_state.paths)
+if st.session_state.debug_show_state:
+    with st.expander("DEBUG: Session state - all variables"):
+        st.write(st.session_state)
+
+if st.session_state.debug_show_paths:
+    with st.expander("DEBUG: Session state - paths"):
+        st.write(st.session_state.paths)
+
+if st.session_state.debug_show_flags:
+    with st.expander("DEBUG: Session state - flags"):
+        st.write(st.session_state.flags)
