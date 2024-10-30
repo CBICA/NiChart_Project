@@ -85,6 +85,7 @@ with st.expander(":material/grid_on: Segment image", expanded=False):
             st.info(f"Running: {dlmuse_cmd}", icon=":material/manufacturing:")
 
             # FIXME : bypass dlmuse run
+            print(f"About to run: {dlmuse_cmd}")
             os.system(dlmuse_cmd)
 
     if not flag_disabled:

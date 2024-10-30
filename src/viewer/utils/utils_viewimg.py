@@ -61,6 +61,7 @@ def check_images():
         st.session_state.paths["sel_seg"] = sel_img
         return True
 
+@st.dialog("Get input data")
 def get_image_paths():
     '''
     Reads image path and suffix info from the user

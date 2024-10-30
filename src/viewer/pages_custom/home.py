@@ -10,6 +10,9 @@ if "instantiated" not in st.session_state:
     st.session_state.app_type = "CLOUD"
     st.session_state.app_type = "DESKTOP"
 
+    # State for expanders
+    st.session_state.state_expander_plotsmri_imgview = False
+
     # Dataframe to keep plot ids
     st.session_state.plots = pd.DataFrame(
         columns=["pid", "xvar", "yvar", "hvar", "trend", "centtype"]

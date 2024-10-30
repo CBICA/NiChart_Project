@@ -103,7 +103,6 @@ def user_input_foldername(
     Text field in left and button in right to read an input folder path
     """
     tmpcol = st.columns((COL_LEFT, COL_RIGHT_BUTTON), vertical_alignment="bottom")
-
     with tmpcol[1]:
         if st.button(label_btn, key=f"btn_{key_st}", disabled=disabled):
             if os.path.exists(path_curr):

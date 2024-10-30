@@ -51,6 +51,17 @@ else:  # st.session_state.app_type == 'DESKTOP'
         if not flag_disabled and os.path.exists(st.session_state.paths["csv_plot"]):
             st.success(f"Data is ready ({st.session_state.paths["csv_plot"]})", icon=":material/thumb_up:")
 
+# Sidebar parameters
+with st.sidebar:
+    # Slider to set number of plots in a row
+    st.session_state.plots_per_row = st.slider(
+        "Plots per row",
+        1,
+        st.session_state.max_plots_per_row,
+        st.session_state.plots_per_row,
+        key="a_per_page",
+    )
+
 # Panel for plots
 with st.expander(":material/monitoring: Plot data", expanded=False):
 
@@ -75,17 +86,7 @@ with st.expander(":material/monitoring: Plot data", expanded=False):
             df = df.rename(columns=dict_r1)
 
         except Exception:
-            st.warning("Could not rename columns using roi dict!")
-
-        with st.container(border=True):
-            # Slider to set number of plots in a row
-            st.session_state.plots_per_row = st.slider(
-                "Plots per row",
-                1,
-                st.session_state.max_plots_per_row,
-                st.session_state.plots_per_row,
-                key="a_per_page",
-            )
+            print("Could not rename columns using roi dict!")
 
     # Button to add a new plot
     if st.button("Add plot", disabled = flag_disabled):
@@ -116,7 +117,10 @@ with st.expander(":material/monitoring: Plot data", expanded=False):
                     utilpl.display_plot(df, plot_ind)
 
 # Panel for viewing images and segmentations
-with st.expander(":material/visibility: View segmentations", expanded=False):
+expanded = False
+if st.session_state.sel_mrid != '':
+    expanded = True
+with st.expander(":material/visibility: View segmentations", expanded):
 
     # Check if data point selected
     flag_ready = True
