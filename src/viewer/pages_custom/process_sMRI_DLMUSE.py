@@ -143,12 +143,16 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
 
         # Select images
         flag_img = False
+        ## FIXME: at least on cloud, can get here with multiple _T1 appended (see marked lines)
+        flag_img = False
         if sel_mrid is not None:
             st.session_state.paths["sel_img"] = os.path.join(
-                st.session_state.paths["T1"], sel_mrid + st.session_state.suff_t1img
+                ## hardcoded fix for T1 suffix
+                st.session_state.paths["T1"], re.sub(r"_T1$", "", sel_mrid)  + st.session_state.suff_t1img
             )
             st.session_state.paths["sel_seg"] = os.path.join(
-                st.session_state.paths["DLMUSE"], sel_mrid + st.session_state.suff_seg
+                ## hardcoded fix for T1 suffix 
+                st.session_state.paths["DLMUSE"], re.sub(r"_T1$", "", sel_mrid) + st.session_state.suff_seg
             )
 
             flag_img = os.path.exists(st.session_state.paths["sel_img"]) and os.path.exists(
