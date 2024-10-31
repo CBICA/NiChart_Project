@@ -63,15 +63,18 @@ with st.expander(":material/grid_on: Segment image", expanded=False):
     flag_disabled = not st.session_state.flags['T1']
 
     # Device type
-    helpmsg = "Choose 'cuda' if your computer has an NVIDIA GPU, 'mps' if you have an Apple M-series chip, and 'cpu' if you have a standard CPU."
-    device = utilst.user_input_select(
-        "Device",
-        "key_select_device",
-        ["cuda", "cpu", "mps"],
-        None,
-        helpmsg, 
-        flag_disabled
-    )
+    if st.session_state.app_type == "CLOUD":
+        device = 'cuda'
+    else:
+        helpmsg = "Choose 'cuda' if your computer has an NVIDIA GPU, 'mps' if you have an Apple M-series chip, and 'cpu' if you have a standard CPU."
+        device = utilst.user_input_select(
+            "Device",
+            "key_select_device",
+            ["cuda", "cpu", "mps"],
+            None,
+            helpmsg, 
+            flag_disabled
+        )
 
     # Button to run DLMUSE
     btn_seg = st.button("Run DLMUSE", disabled = flag_disabled)
