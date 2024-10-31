@@ -1,0 +1,6 @@
+.github
+test
+**/*.nii.gz
+build
+**/build
+src/NiChart_Website
