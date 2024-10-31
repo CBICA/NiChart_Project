@@ -233,7 +233,7 @@ with st.sidebar.expander('Flags'):
     else:
         st.session_state.debug_show_state = False
 
-    if st.checkbox("Switch to CLOUD?"):
+    if st.checkbox("Switch to CLOUD?", value=(st.session_state.app_type == 'CLOUD')):
         st.session_state.app_type = 'CLOUD'
     else:
         st.session_state.app_type = 'DESKTOP'
