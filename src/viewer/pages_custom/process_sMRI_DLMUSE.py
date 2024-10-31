@@ -81,7 +81,7 @@ with st.expander(":material/grid_on: Segment image", expanded=False):
             os.makedirs(st.session_state.paths["DLMUSE"])
 
         with st.spinner("Wait for it..."):
-            dlmuse_cmd = f"NiChart_DLMUSE -i {st.session_state.paths['T1']} -o {st.session_state.paths['DLMUSE']} -d {device}"
+            dlmuse_cmd = f"NiChart_DLMUSE -i {st.session_state.paths['T1']} -o {st.session_state.paths['DLMUSE']} -d {device} --cores 1"
             st.info(f"Running: {dlmuse_cmd}", icon=":material/manufacturing:")
 
             # FIXME : bypass dlmuse run
