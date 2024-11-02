@@ -48,6 +48,11 @@ else:  # st.session_state.app_type == 'DESKTOP'
 
 # Sidebar parameters
 with st.sidebar:
+
+    # Button to add a new plot
+    if st.button("Add plot", disabled = flag_disabled):
+        utilpl.add_plot()
+
     # Slider to set number of plots in a row
     st.session_state.plots_per_row = st.slider(
         "Plots per row",
@@ -55,7 +60,13 @@ with st.sidebar:
         st.session_state.max_plots_per_row,
         st.session_state.plots_per_row,
         key="a_per_page",
+        disabled = flag_disabled
     )
+
+    show_settings = st.checkbox("Show plot settings")
+
+    show_img = st.checkbox("Show image")
+
 
 # Panel for plots
 with st.expander(":material/monitoring: Plot data", expanded=False):
@@ -83,10 +94,6 @@ with st.expander(":material/monitoring: Plot data", expanded=False):
         except Exception:
             print("Could not rename columns using roi dict!")
 
-    # Button to add a new plot
-    if st.button("Add plot", disabled = flag_disabled):
-        utilpl.add_plot()
-
     if not flag_disabled:
 
         # Add a single plot (default: initial page displays a single plot)
@@ -109,13 +116,15 @@ with st.expander(":material/monitoring: Plot data", expanded=False):
                 if column_no == 0:
                     blocks = st.columns(plots_per_row)
                 with blocks[column_no]:
-                    utilpl.display_plot(df, plot_ind)
+                    utilpl.display_plot(df, plot_ind, show_settings, st.session_state.sel_mrid)
 
 # Panel for viewing images and segmentations
-expanded = False
-if st.session_state.sel_mrid != '':
-    expanded = True
-with st.expander(":material/visibility: View segmentations", expanded):
+# expanded = False
+# if st.session_state.sel_mrid != '':
+#     expanded = True
+# with st.expander(":material/visibility: View segmentations", expanded):
+
+if show_img and st.session_state.sel_mrid != '':
 
     # Check if data point selected
     flag_ready = True

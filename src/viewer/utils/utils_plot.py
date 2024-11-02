@@ -5,6 +5,7 @@ import plotly.express as px
 import streamlit as st
 import utils.utils_dataframe as utilsdf
 import utils.utils_trace as utilstrace
+import plotly.graph_objs as go
 
 
 def add_plot() -> None:
@@ -34,12 +35,22 @@ def remove_plot(plot_id: str) -> None:
     st.session_state.plots = df_p
 
 
-def add_plot_tabs(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
-    with st.container(border=True):
+def add_plot_tabs(df: pd.DataFrame, plot_id: str, show_settings: bool) -> pd.DataFrame:
+
+    df_filt = df
+    trend = None
+    xvar = 'Age'
+    yvar = 'GM'
+    hind = 0
+    hvar = 'Sex'
+    centtype = 'none'
+
+    if show_settings:
+
+    # with st.container(border=True):
         # Tabs for parameters
         ptabs = st.tabs(
             [
-                ":lock:",
                 ":large_orange_circle:",
                 ":large_yellow_circle:",
                 ":large_green_circle:",
@@ -50,7 +61,7 @@ def add_plot_tabs(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
         # Tab 0: to hide other tabs
 
         # Tab 1: to set plotting parameters
-        with ptabs[1]:
+        with ptabs[0]:
             st.selectbox(
                 "Plot Type", ["DistPlot", "RegPlot"], key=f"plot_type_{plot_id}"
             )
@@ -120,11 +131,11 @@ def add_plot_tabs(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
             st.session_state.plots.loc[plot_id].trend = trend
 
         # Tab 2: to set data filtering parameters
-        with ptabs[2]:
+        with ptabs[1]:
             df_filt = utilsdf.filter_dataframe(df, plot_id)
 
         # Tab 3: to set centiles
-        with ptabs[3]:
+        with ptabs[2]:
 
             # Get plot params
             centtype = st.session_state.plots.loc[plot_id].centtype
@@ -143,7 +154,7 @@ def add_plot_tabs(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
             st.session_state.plots.loc[plot_id].centtype = centtype
 
         # Tab 4: to reset parameters or to delete plot
-        with ptabs[4]:
+        with ptabs[3]:
             st.button(
                 "Delete Plot",
                 key=f"p_delete_{plot_id}",
@@ -151,10 +162,15 @@ def add_plot_tabs(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
                 args=[plot_id],
             )
 
-        return df_filt, trend, xvar, yvar, hind, hvar, centtype
+    return df_filt, trend, xvar, yvar, hind, hvar, centtype
 
 
-def display_plot(df: pd.DataFrame, plot_id: str) -> None:
+def display_plot(
+    df: pd.DataFrame,
+    plot_id: str,
+    show_settings: bool,
+    sel_mrid: str
+) -> None:
     """
     Displays the plot with the plot_id
     """
@@ -169,7 +185,7 @@ def display_plot(df: pd.DataFrame, plot_id: str) -> None:
     with st.container(border=True):
 
         # Tabs for plot parameters
-        df_filt, trend, xvar, yvar, hind, hvar, centtype = add_plot_tabs(df, plot_id)
+        df_filt, trend, xvar, yvar, hind, hvar, centtype = add_plot_tabs(df, plot_id, show_settings)
 
         # Main plot
         if trend == "none":
@@ -190,7 +206,12 @@ def display_plot(df: pd.DataFrame, plot_id: str) -> None:
             df_cent = pd.read_csv(fcent)
             utilstrace.percentile_trace(df_cent, xvar, yvar, scatter_plot)
 
-        # Add plot
+        # Highlight selected data point
+        if sel_mrid != '':
+            utilstrace.selid_trace(df, sel_mrid, xvar, yvar, scatter_plot)
+
+
+        # Catch clicks on plot
         # - on_select: when clicked it will rerun and return the info
         sel_info = st.plotly_chart(
             scatter_plot, key=f"bubble_chart_{plot_id}", on_select=callback_plot_clicked

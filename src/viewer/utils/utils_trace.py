@@ -8,6 +8,22 @@ import statsmodels.api as sm
 from sklearn.linear_model import LinearRegression
 
 
+def selid_trace(df: pd.DataFrame, sel_mrid: str, xvar: str, yvar: str, fig: Any) -> Any:
+    df_tmp = df[df.MRID == sel_mrid]
+    fig.add_trace(
+        go.Scatter(
+            x=df_tmp[xvar],
+            y=df_tmp[yvar],
+            mode='markers',
+            name='Selected',
+            marker=dict(color='rgba(135, 206, 250, 0.5)',
+                        size=12,
+                        line=dict(color='MediumPurple', width=2)
+                        )
+            )
+    )
+
+
 def percentile_trace(df: pd.DataFrame, xvar: str, yvar: str, fig: Any) -> Any:
 
     cline = [
