@@ -27,27 +27,22 @@ def detect_image_path(img_dir: str, mrid: str, img_suff: str) -> Optional[str]:
 
     return None
 
-
-def check_images() -> bool:
+def check_image_underlay() -> bool:
     """
-    Checks if underlay and overlay images exists
+    Checks if underlay image exists
     """
-
-    # Check underlay image
     sel_img = detect_image_path(
         st.session_state.paths["T1"],
         st.session_state.sel_mrid,
         st.session_state.suff_t1img,
     )
-
-    print(f"aaa {sel_img}")
-
     if sel_img is None:
         return False
     else:
         st.session_state.paths["sel_img"] = sel_img
+        return True
 
-    # Check overlay image
+def check_image_overlay() -> bool:
     sel_img = detect_image_path(
         st.session_state.paths["DLMUSE"],
         st.session_state.sel_mrid,
@@ -58,7 +53,6 @@ def check_images() -> bool:
     else:
         st.session_state.paths["sel_seg"] = sel_img
         return True
-
 
 @st.dialog("Get input data")
 def get_image_paths() -> None:
@@ -92,6 +86,9 @@ def get_image_paths() -> None:
         )
         st.session_state.suff_t1img = suff_t1img
 
+        if check_image_underlay():
+            st.success(f'Underlay image found! {st.session_state.paths["sel_img"]}')
+
         # Select image dir
         utilst.util_select_folder(
             "selected_dlmuse_folder",
@@ -110,8 +107,6 @@ def get_image_paths() -> None:
         )
         st.session_state.suff_seg = suff_seg
 
-        if st.button("Check image paths!"):
-            if check_images():
-                st.rerun()
-            else:
-                st.warning("Image not found!")
+        if check_image_underlay():
+            st.success(f'Overlay image found! {st.session_state.paths["sel_seg"]}')
+            st.rerun()

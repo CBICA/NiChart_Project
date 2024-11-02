@@ -4,6 +4,7 @@ import pandas as pd
 import streamlit as st
 import utils.utils_muse as utilmuse
 import utils.utils_nifti as utilni
+import utils.utils_trace as utiltr
 import utils.utils_st as utilst
 import utils.utils_viewimg as utilvi
 import utils.utils_plot as utilpl
@@ -46,12 +47,33 @@ else:  # st.session_state.app_type == 'DESKTOP'
         if not flag_disabled and os.path.exists(st.session_state.paths["csv_plot"]):
             st.success(f"Data is ready ({st.session_state.paths["csv_plot"]})", icon=":material/thumb_up:")
 
+# Input csv
+flag_disabled = not os.path.exists(st.session_state.paths['csv_plot'])
+
+df = pd.DataFrame()
+if os.path.exists(st.session_state.paths["csv_plot"]):
+    # Read input csv
+    df = pd.read_csv(st.session_state.paths["csv_plot"])
+
+    # Apply roi dict to rename columns
+    try:
+        df_dict = pd.read_csv(st.session_state.paths["csv_roidict"])
+        dict_r1 = dict(
+            zip(df_dict["ROI_Index"].astype(str), df_dict["ROI_Name"].astype(str))
+        )
+        dict_r2 = dict(
+            zip(df_dict["ROI_Name"].astype(str), df_dict["ROI_Index"].astype(str))
+        )
+        st.session_state.roi_dict = dict_r1
+        st.session_state.roi_dict_rev = dict_r2
+        df = df.rename(columns=dict_r1)
+
+    except Exception:
+        print("Could not rename columns using roi dict!")
+
+
 # Sidebar parameters
 with st.sidebar:
-
-    # Button to add a new plot
-    if st.button("Add plot", disabled = flag_disabled):
-        utilpl.add_plot()
 
     # Slider to set number of plots in a row
     st.session_state.plots_per_row = st.slider(
@@ -63,42 +85,34 @@ with st.sidebar:
         disabled = flag_disabled
     )
 
-    show_settings = st.checkbox("Show plot settings")
+    if st.session_state.plot_xvar == '':
+        xvar = st.selectbox(
+            "X Var", df.columns, key="key_plot_xvar", index=None, disabled = flag_disabled
+        )
+        if xvar is not None:
+            st.session_state.plot_xvar = xvar
+    if st.session_state.plot_yvar == '':
+        yvar = st.selectbox(
+            "Y Var", df.columns, key="key_plot_yvar", index=None, disabled = flag_disabled
+        )
+        if yvar is not None:
+            st.session_state.plot_yvar = yvar
 
-    show_img = st.checkbox("Show image")
+    # Checkbox to show/hide plot options
+    flag_plot_settings = st.checkbox("Show plot settings", disabled = flag_disabled)
+
+    # Checkbox to show/hide mri image
+    flag_show_img = st.checkbox("Show image", disabled = flag_disabled)
+
+    # Button to add a new plot
+    if st.button("Add plot", disabled = flag_disabled):
+        utilpl.add_plot()
 
 
 # Panel for plots
 with st.expander(":material/monitoring: Plot data", expanded=False):
 
-    flag_disabled = not os.path.exists(st.session_state.paths['csv_plot'])
-
-    df = pd.DataFrame()
-    if os.path.exists(st.session_state.paths["csv_plot"]):
-        # Read input csv
-        df = pd.read_csv(st.session_state.paths["csv_plot"])
-
-        # Apply roi dict to rename columns
-        try:
-            df_dict = pd.read_csv(st.session_state.paths["csv_roidict"])
-            dict_r1 = dict(
-                zip(df_dict["ROI_Index"].astype(str), df_dict["ROI_Name"].astype(str))
-            )
-            dict_r2 = dict(
-                zip(df_dict["ROI_Name"].astype(str), df_dict["ROI_Index"].astype(str))
-            )
-            st.session_state.roi_dict = dict_r1
-            st.session_state.roi_dict_rev = dict_r2
-            df = df.rename(columns=dict_r1)
-
-        except Exception:
-            print("Could not rename columns using roi dict!")
-
     if not flag_disabled:
-
-        # Add a single plot (default: initial page displays a single plot)
-        if st.session_state.plots.shape[0] == 0:
-            utilpl.add_plot()
 
         # Read plot ids
         df_p = st.session_state.plots
@@ -109,6 +123,7 @@ with st.expander(":material/monitoring: Plot data", expanded=False):
         #  - iterates over plots;
         #  - for every "plots_per_row" plots, creates a new columns block, resets column index, and displays the plot
         if df.shape[0] > 0:
+            plots_arr = []
             for i, plot_ind in stqdm(
                 enumerate(list_plots), desc="Rendering plots ...", total=len(list_plots)
             ):
@@ -116,27 +131,37 @@ with st.expander(":material/monitoring: Plot data", expanded=False):
                 if column_no == 0:
                     blocks = st.columns(plots_per_row)
                 with blocks[column_no]:
-                    utilpl.display_plot(df, plot_ind, show_settings, st.session_state.sel_mrid)
+                    new_plot = utilpl.display_plot(
+                        df,
+                        plot_ind,
+                        flag_plot_settings,
+                        st.session_state.sel_mrid
+                    )
+                    plots_arr.append(new_plot)
 
-# Panel for viewing images and segmentations
-# expanded = False
-# if st.session_state.sel_mrid != '':
-#     expanded = True
-# with st.expander(":material/visibility: View segmentations", expanded):
+            # # Add marker for selected mrid to each plot
+            # if st.session_state.sel_mrid != '':
+            #     for i, tmp_plot in enumerate(plots_arr):
+            #         utiltr.selid_trace(
+            #             df,
+            #             st.session_state.sel_mrid,
+            #             df_p.iloc[i].xvar,
+            #             df_p.iloc[i].yvar,
+            #             tmp_plot
+            #         )
 
-if show_img and st.session_state.sel_mrid != '':
+# Show mri image
+if flag_show_img:
 
     # Check if data point selected
-    flag_ready = True
     if st.session_state.sel_mrid == "":
-        flag_ready = False
         st.warning("Please select a subject on the plot!")
 
-    if flag_ready:
-        if not utilvi.check_images():
+    else:
+        if not utilvi.check_image_underlay() or not utilvi.check_image_overlay():
             utilvi.get_image_paths()
                 
-    if flag_ready:
+    if not st.session_state.sel_mrid == "":
         with st.spinner("Wait for it..."):
 
             # Get selected y var

@@ -34,135 +34,95 @@ def remove_plot(plot_id: str) -> None:
     df_p = df_p[df_p.pid != plot_id]
     st.session_state.plots = df_p
 
+def get_index_in_list(in_list, in_item):
+    '''
+    Returns the index of the item in list, or None if item not found
+    '''
+    if in_item not in in_list:
+        return None
+    else:
+        return in_list.index(in_item)
 
-def add_plot_tabs(df: pd.DataFrame, plot_id: str, show_settings: bool) -> pd.DataFrame:
+def add_plot_tabs(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
 
-    df_filt = df
-    trend = None
-    xvar = 'Age'
-    yvar = 'GM'
-    hind = 0
-    hvar = 'Sex'
-    centtype = 'none'
+    ptabs = st.tabs([":large_orange_circle:", ":large_yellow_circle:", ":large_green_circle:", ":x:"])
 
-    if show_settings:
-
-    # with st.container(border=True):
-        # Tabs for parameters
-        ptabs = st.tabs(
-            [
-                ":large_orange_circle:",
-                ":large_yellow_circle:",
-                ":large_green_circle:",
-                ":x:",
-            ]
+    # Tab 1: plotting parameters
+    with ptabs[0]:
+        st.selectbox(
+            "Plot Type", ["DistPlot", "RegPlot"], key=f"plot_type_{plot_id}"
         )
 
-        # Tab 0: to hide other tabs
+        # Get df columns
+        list_cols = df.columns.to_list()
 
-        # Tab 1: to set plotting parameters
-        with ptabs[0]:
-            st.selectbox(
-                "Plot Type", ["DistPlot", "RegPlot"], key=f"plot_type_{plot_id}"
-            )
+        # Select plot params from the user
+        xind = get_index_in_list(list_cols, st.session_state.plots.loc[plot_id].xvar)
+        xvar = st.selectbox(
+            "X Var", df.columns, key=f"plot_xvar_{plot_id}", index=xind
+        )
+        yind = get_index_in_list(list_cols, st.session_state.plots.loc[plot_id].yvar)
+        yvar = st.selectbox(
+            "Y Var", df.columns, key=f"plot_yvar_{plot_id}", index=yind
+        )
+        hind = get_index_in_list(list_cols, st.session_state.plots.loc[plot_id].hvar)
+        hvar = st.selectbox(
+            "Hue Var", df.columns, key=f"plot_hvar_{plot_id}", index=hind
+        )
+        tind = get_index_in_list(list_cols, st.session_state.plots.loc[plot_id].trend)
+        trend = st.selectbox(
+            "Trend Line", st.session_state.trend_types, key=f"trend_type_{plot_id}", index=tind,
+        )
 
-            # Get df columns
-            list_cols = df.columns.to_list()
+        # print(xind)
+        # print(yind)
+        # print(hind)
+        # print(tind)
+        # input()
 
-            # Get default plot params
-            if st.session_state.plots.loc[plot_id].xvar not in list_cols:
-                if st.session_state.plot_default_xvar in list_cols:
-                    st.session_state.plots.loc[plot_id].xvar = (
-                        st.session_state.plot_default_xvar
-                    )
-                else:
-                    st.session_state.plots.loc[plot_id].xvar = list_cols[1]
-
-            if st.session_state.plots.loc[plot_id].yvar not in list_cols:
-                if st.session_state.plot_default_yvar in list_cols:
-                    st.session_state.plots.loc[plot_id].yvar = (
-                        st.session_state.plot_default_yvar
-                    )
-                else:
-                    st.session_state.plots.loc[plot_id].yvar = list_cols[2]
-
-            if st.session_state.plots.loc[plot_id].hvar not in list_cols:
-                if st.session_state.plot_default_hvar in list_cols:
-                    st.session_state.plots.loc[plot_id].hvar = (
-                        st.session_state.plot_default_hvar
-                    )
-                else:
-                    st.session_state.plots.loc[plot_id].hvar = ""
-
-            xvar = st.session_state.plots.loc[plot_id].xvar
-            yvar = st.session_state.plots.loc[plot_id].yvar
-            hvar = st.session_state.plots.loc[plot_id].hvar
-            trend = st.session_state.plots.loc[plot_id].trend
-
-            # Select plot params from the user
-            xind = df.columns.get_loc(xvar)
-            yind = df.columns.get_loc(yvar)
-            if hvar != "":
-                hind = df.columns.get_loc(hvar)
-            else:
-                hind = None
-            tind = st.session_state.trend_types.index(trend)
-
-            xvar = st.selectbox(
-                "X Var", df.columns, key=f"plot_xvar_{plot_id}", index=xind
-            )
-            yvar = st.selectbox(
-                "Y Var", df.columns, key=f"plot_yvar_{plot_id}", index=yind
-            )
-            hvar = st.selectbox(
-                "Hue Var", df.columns, key=f"plot_hvar_{plot_id}", index=hind
-            )
-            trend = st.selectbox(
-                "Trend Line",
-                st.session_state.trend_types,
-                key=f"trend_type_{plot_id}",
-                index=tind,
-            )
-
-            # Set plot params to session_state
+        # Set plot params to session_state
+        if xvar is not None:
             st.session_state.plots.loc[plot_id].xvar = xvar
+        if yvar is not None:
             st.session_state.plots.loc[plot_id].yvar = yvar
+        if hvar is not None:
             st.session_state.plots.loc[plot_id].hvar = hvar
+        if trend is not None:
             st.session_state.plots.loc[plot_id].trend = trend
 
-        # Tab 2: to set data filtering parameters
-        with ptabs[1]:
-            df_filt = utilsdf.filter_dataframe(df, plot_id)
+    # Tab 2: to set data filtering parameters
+    with ptabs[1]:
+        df_filt = utilsdf.filter_dataframe(df, plot_id)
 
-        # Tab 3: to set centiles
-        with ptabs[2]:
+    # Tab 3: to set centiles
+    with ptabs[2]:
 
-            # Get plot params
-            centtype = st.session_state.plots.loc[plot_id].centtype
+        # Get plot params
+        centtype = st.session_state.plots.loc[plot_id].centtype
 
-            # Select plot params from the user
-            centind = st.session_state.cent_types.index(centtype)
+        # Select plot params from the user
+        centind = st.session_state.cent_types.index(centtype)
 
-            centtype = st.selectbox(
-                "Centile Type",
-                st.session_state.cent_types,
-                key=f"cent_type_{plot_id}",
-                index=centind,
-            )
+        centtype = st.selectbox(
+            "Centile Type",
+            st.session_state.cent_types,
+            key=f"cent_type_{plot_id}",
+            index=centind,
+        )
 
-            # Set plot params to session_state
-            st.session_state.plots.loc[plot_id].centtype = centtype
+        # Set plot params to session_state
+        st.session_state.plots.loc[plot_id].centtype = centtype
 
-        # Tab 4: to reset parameters or to delete plot
-        with ptabs[3]:
-            st.button(
-                "Delete Plot",
-                key=f"p_delete_{plot_id}",
-                on_click=remove_plot,
-                args=[plot_id],
-            )
+    # Tab 4: to reset parameters or to delete plot
+    with ptabs[3]:
+        st.button(
+            "Delete Plot",
+            key=f"p_delete_{plot_id}",
+            on_click=remove_plot,
+            args=[plot_id],
+        )
 
-    return df_filt, trend, xvar, yvar, hind, hvar, centtype
+    return df_filt
 
 
 def display_plot(
@@ -174,7 +134,6 @@ def display_plot(
     """
     Displays the plot with the plot_id
     """
-
     def callback_plot_clicked() -> None:
         """
         Set the active plot id to plot that was clicked
@@ -185,9 +144,23 @@ def display_plot(
     with st.container(border=True):
 
         # Tabs for plot parameters
-        df_filt, trend, xvar, yvar, hind, hvar, centtype = add_plot_tabs(df, plot_id, show_settings)
+        df_filt = df
+        if show_settings:
+            df_filt = add_plot_tabs(df, plot_id)
+
+        [xvar, yvar, hvar, trend, centtype] = st.session_state.plots.loc[plot_id][['xvar', 'yvar', 'hvar', 'trend', 'centtype']]
+
+
+        hind = get_index_in_list(df.columns.tolist(), hvar)
 
         # Main plot
+        print(df_filt)
+        print(plot_id)
+        print(st.session_state.plots)
+        print(xvar)
+        print(yvar)
+        print(hvar)
+
         if trend == "none":
             scatter_plot = px.scatter(df_filt, x=xvar, y=yvar, color=hvar)
         else:
@@ -233,5 +206,15 @@ def display_plot(
             st.session_state.sel_mrid = sel_mrid
             st.session_state.sel_roi = sel_roi
 
+            # print(f'AAAAAAA {sel_info}')
+            # print(f'BBBA {len(sel_info["selection"]["points"])}')
+            # input()
+
             st.sidebar.success("Selected subject: " + sel_mrid)
             st.sidebar.success("Selected ROI: " + sel_roi)
+
+            # print(f'cccAAAAAAA {sel_info}')
+            # print(f'BBBA {len(sel_info["selection"]["points"])}')
+            # input()
+
+        return scatter_plot

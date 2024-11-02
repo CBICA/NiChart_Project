@@ -147,18 +147,12 @@ if "instantiated" not in st.session_state:
     st.session_state.suff_t1img = "_T1.nii.gz"
     st.session_state.suff_seg = "_T1_DLMUSE.nii.gz"
 
-    # Default values for plotting parameters
-    st.session_state.plot_default_xvar = "Age"
-    st.session_state.plot_default_yvar = "GM"
-    st.session_state.plot_default_hvar = ""
-
+    # Plot variables
     st.session_state.plot_xvar = ""
     st.session_state.plot_yvar = ""
     st.session_state.plot_hvar = ""
-
     st.session_state.trend_types = ["none", "ols", "lowess"]
     st.session_state.plot_trend = "none"
-
     st.session_state.cent_types = ["none", "CN-All", "CN-F", "CN-M"]
     st.session_state.plot_centtype = "none"
 
@@ -206,12 +200,12 @@ with st.sidebar.expander('Flags'):
     else:
         st.session_state.debug_show_paths = False
 
-    if st.checkbox("Show flags?", value=False):
+    if st.checkbox("Show flags?", value=True):
         st.session_state.debug_show_flags = True
     else:
         st.session_state.debug_show_flags = False
 
-    if st.checkbox("Show all session state vars?", value=False):
+    if st.checkbox("Show all session state vars?", value=True):
         st.session_state.debug_show_state = True
     else:
         st.session_state.debug_show_state = False
