@@ -50,10 +50,11 @@ else:  # st.session_state.app_type == 'DESKTOP'
 # Input csv
 flag_disabled = not os.path.exists(st.session_state.paths['csv_plot'])
 
-df = pd.DataFrame()
+df = st.session_state.df_plot
 if os.path.exists(st.session_state.paths["csv_plot"]):
     # Read input csv
-    df = pd.read_csv(st.session_state.paths["csv_plot"])
+    if st.session_state.df_plot.shape[0] == 0:
+        st.session_state.df_plot = pd.read_csv(st.session_state.paths["csv_plot"])
 
     # Apply roi dict to rename columns
     try:
@@ -71,6 +72,38 @@ if os.path.exists(st.session_state.paths["csv_plot"]):
     except Exception:
         print("Could not rename columns using roi dict!")
 
+    df = st.session_state.df_plot
+
+# Panel for selecting variables
+flag_disabled = not st.session_state.flags['dset']
+with st.expander(":material/upload: Select Vars", expanded=False):  # type:ignore
+
+    var_cats = { 'CatA': ['MRID', 'Age', 'Sex'], 'CatB': ['GM', 'WM', ], 'CatC': ['Ventricles', 'SPAREAD'] }
+
+    # User selects a category to include
+    sel_cat = st.selectbox('Select category', list(var_cats.keys()), index = None)
+
+    if sel_cat is None:
+        sel_vars = []
+    else:
+        sel_vars = var_cats[sel_cat]
+
+    sel_vars = st.multiselect('Which ones to keep?', sel_vars, sel_vars)
+    if st.button('Add selected variables ...'):
+        sel_vars_uniq = [v for v in sel_vars if v not in st.session_state.plot_sel_vars]
+        st.session_state.plot_sel_vars += sel_vars_uniq
+
+    sel_vars_all = st.multiselect(
+        'Add variables',
+        st.session_state.plot_sel_vars,
+        st.session_state.plot_sel_vars
+    )
+
+    if st.button('Select variables ...'):
+        st.success(f'Selected variables: {sel_vars_all}')
+        st.session_state.df_plot = df[st.session_state.plot_sel_vars]
+
+        print(df)
 
 # Sidebar parameters
 with st.sidebar:

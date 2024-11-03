@@ -148,6 +148,8 @@ if "instantiated" not in st.session_state:
     st.session_state.suff_seg = "_T1_DLMUSE.nii.gz"
 
     # Plot variables
+    st.session_state.df_plot = pd.DataFrame()
+
     st.session_state.plot_xvar = ""
     st.session_state.plot_yvar = ""
     st.session_state.plot_hvar = ""
@@ -161,6 +163,9 @@ if "instantiated" not in st.session_state:
 
     # Variable selected by user
     st.session_state.sel_var = ""
+
+    # Variables selected by user
+    st.session_state.plot_sel_vars = []
 
     # Debugging variables
     st.session_state.debug_show_state = False
