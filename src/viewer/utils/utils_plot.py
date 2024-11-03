@@ -139,6 +139,7 @@ def display_plot(
         Set the active plot id to plot that was clicked
         """
         st.session_state.plot_active = plot_id
+        st.rerun()
 
     # Main container for the plot
     with st.container(border=True):

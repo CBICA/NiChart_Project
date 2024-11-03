@@ -97,6 +97,12 @@ with st.sidebar:
         )
         if yvar is not None:
             st.session_state.plot_yvar = yvar
+    if st.session_state.plot_hvar == '':
+        hvar = st.selectbox(
+            "Hue Var", df.columns, key="key_plot_hvar", index=None, disabled = flag_disabled
+        )
+        if hvar is not None:
+            st.session_state.plot_hvar = hvar
 
     # Checkbox to show/hide plot options
     flag_plot_settings = st.checkbox("Show plot settings", disabled = flag_disabled)
