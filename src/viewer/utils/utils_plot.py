@@ -139,7 +139,7 @@ def display_plot(
         Set the active plot id to plot that was clicked
         """
         st.session_state.plot_active = plot_id
-        st.rerun()
+        #st.rerun()
 
     # Main container for the plot
     with st.container(border=True):
@@ -217,5 +217,7 @@ def display_plot(
             # print(f'cccAAAAAAA {sel_info}')
             # print(f'BBBA {len(sel_info["selection"]["points"])}')
             # input()
+
+            st.rerun()
 
         return scatter_plot
