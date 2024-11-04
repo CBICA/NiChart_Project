@@ -260,7 +260,7 @@ def util_upload_file(
     key_uploader: str,
     flag_disabled: bool,
     label_visibility: str,
-) -> None:
+) -> bool:
     """
     Upload user data to target folder
     Input data is a single file
@@ -282,6 +282,9 @@ def util_upload_file(
     # Copy to target
     if not os.path.exists(out_file):
         utilio.copy_uploaded_file(in_file, out_file)
+        return true
+    
+    return false
 
 
 def util_select_folder(
@@ -327,7 +330,7 @@ def util_select_file(
     out_file: str,
     last_in_dir: str,
     flag_disabled: bool,
-) -> None:
+) -> bool:
     """
     Select user input file and copy to target file
     """
@@ -354,3 +357,6 @@ def util_select_file(
             os.makedirs(os.path.dirname(out_file))
         # Link user input dicoms
         os.system(f"cp {sel_file} {out_file}")
+        return True
+
+    return False

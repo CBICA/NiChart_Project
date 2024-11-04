@@ -74,12 +74,6 @@ def add_plot_tabs(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
             "Trend Line", st.session_state.trend_types, key=f"trend_type_{plot_id}", index=tind,
         )
 
-        # print(xind)
-        # print(yind)
-        # print(hind)
-        # print(tind)
-        # input()
-
         # Set plot params to session_state
         if xvar is not None:
             st.session_state.plots.loc[plot_id].xvar = xvar
@@ -155,13 +149,6 @@ def display_plot(
         hind = get_index_in_list(df.columns.tolist(), hvar)
 
         # Main plot
-        print(df_filt)
-        print(plot_id)
-        print(st.session_state.plots)
-        print(xvar)
-        print(yvar)
-        print(hvar)
-
         if trend == "none":
             scatter_plot = px.scatter(df_filt, x=xvar, y=yvar, color=hvar)
         else:
@@ -206,17 +193,6 @@ def display_plot(
 
             st.session_state.sel_mrid = sel_mrid
             st.session_state.sel_roi = sel_roi
-
-            # print(f'AAAAAAA {sel_info}')
-            # print(f'BBBA {len(sel_info["selection"]["points"])}')
-            # input()
-
-            st.sidebar.success("Selected subject: " + sel_mrid)
-            st.sidebar.success("Selected ROI: " + sel_roi)
-
-            # print(f'cccAAAAAAA {sel_info}')
-            # print(f'BBBA {len(sel_info["selection"]["points"])}')
-            # input()
 
             st.rerun()
 

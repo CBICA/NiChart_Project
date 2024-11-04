@@ -1,11 +1,22 @@
 import pandas as pd
 import streamlit as st
+import os
 from pandas.api.types import (
     is_categorical_dtype,
     is_datetime64_any_dtype,
     is_numeric_dtype,
 )
 
+@st.cache_data
+def read_dataframe(fname: str) -> pd.DataFrame:
+    if not os.path.exists(fname):
+        df = pd.DataFrame()
+        return df
+    try:
+        df = pd.read_csv(fname)
+    except:
+        df = pd.DataFrame()
+    return df
 
 def filter_dataframe(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
     """

@@ -73,7 +73,7 @@ if "instantiated" not in st.session_state:
         "csv_mlscores": "",
     }
 
-    # Flags for various input/output
+    # Flags to show if various input/output exist
     st.session_state.flags = {
         "dset": False,
         "Dicoms": False,
@@ -90,6 +90,13 @@ if "instantiated" not in st.session_state:
         "sel_img": False,
         "sel_mask": False
     }
+
+    # Flags to keep updates in user input/output
+    st.session_state.is_updated = {
+        "csv_plot": False,
+    }
+        
+
 
     # Paths for output
     st.session_state.paths["root"] = os.path.dirname(os.path.dirname(os.getcwd()))
@@ -117,13 +124,19 @@ if "instantiated" not in st.session_state:
     st.session_state.list_mods = ["T1", "T2", "FL", "DTI", "rMRI"]
 
     # Dictionaries
-    tmp_dir = os.path.join(st.session_state.paths["root"], "resources", "MUSE")
+    res_dir = os.path.join(st.session_state.paths["root"], "resources")
     st.session_state.dicts = {
-        "muse_derived": os.path.join(tmp_dir, "list_MUSE_mapping_derived.csv"),
-        "muse_all": os.path.join(tmp_dir, "list_MUSE_all.csv"),
-        # "muse_sel": os.path.join(tmp_dir, "list_MUSE_primary.csv"),
-        "muse_sel": os.path.join(tmp_dir, "list_MUSE_all.csv"),
+        "muse_derived": os.path.join(res_dir, "MUSE", "list_MUSE_mapping_derived.csv"),
+        "muse_all": os.path.join(res_dir, "MUSE", "list_MUSE_all.csv"),
+        # "muse_sel": os.path.join(res_dir, "MUSE", "list_MUSE_primary.csv"),
+        "muse_sel": os.path.join(res_dir, "MUSE", "list_MUSE_all.csv"),
     }
+    st.session_state.dict_categories = os.path.join(
+        res_dir,
+        'dictionaries',
+        'var_categories',
+        'dict_var_categories.json'
+    )
 
     # Current roi dictionary
     st.session_state.roi_dict = None
@@ -147,12 +160,23 @@ if "instantiated" not in st.session_state:
     st.session_state.suff_t1img = "_T1.nii.gz"
     st.session_state.suff_seg = "_T1_DLMUSE.nii.gz"
 
-    # Plot variables
     st.session_state.df_plot = pd.DataFrame()
+
+    # Variables for page plot_smri
+    st.session_state.page_plotsmri = {
+        'df' : pd.DataFrame(),
+        'xvar' : None,
+        'yvar' : None,
+        'hvar' : None,
+        'trend_types' : ['None', 'Linear', 'Smoothed Curve'],
+        'trend' : 'None',
+        'centile_types' : ['None', 'CN-All', 'CN-M', 'CN-F'],
+        'centile' : 'None'
+    }
 
     st.session_state.plot_xvar = ""
     st.session_state.plot_yvar = ""
-    st.session_state.plot_hvar = ""
+    st.session_state.plot_hvar = None
     st.session_state.trend_types = ["none", "ols", "lowess"]
     st.session_state.plot_trend = "none"
     st.session_state.cent_types = ["none", "CN-All", "CN-F", "CN-M"]
@@ -164,7 +188,7 @@ if "instantiated" not in st.session_state:
     # Variable selected by user
     st.session_state.sel_var = ""
 
-    # Variables selected by user
+    # Variables selected by userroi_dict
     st.session_state.plot_sel_vars = []
 
     # Debugging variables
