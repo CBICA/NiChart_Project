@@ -96,8 +96,6 @@ if "instantiated" not in st.session_state:
         "csv_plot": False,
     }
         
-
-
     # Paths for output
     st.session_state.paths["root"] = os.path.dirname(os.path.dirname(os.getcwd()))
     st.session_state.paths["init"] = st.session_state.paths["root"]
@@ -184,6 +182,7 @@ if "instantiated" not in st.session_state:
 
     # MRID selected by user
     st.session_state.sel_mrid = ""
+    st.session_state.sel_roi = ""
 
     # Variable selected by user
     st.session_state.sel_var = ""

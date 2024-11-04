@@ -64,6 +64,10 @@ if df.shape[0] == 0 or st.session_state.is_updated['csv_plot']:
     df = utildf.read_dataframe(st.session_state.paths["csv_plot"])
     st.session_state.is_updated['csv_plot'] = False
 
+print(st.session_state.paths["csv_plot"])
+print(df.shape)
+
+
 # Panel for renaming variables
 flag_disabled = df.shape[0] == 0
 with st.expander(":material/playlist_add: Rename Variables", expanded=False):  # type:ignore

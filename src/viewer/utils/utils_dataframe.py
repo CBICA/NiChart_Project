@@ -7,7 +7,6 @@ from pandas.api.types import (
     is_numeric_dtype,
 )
 
-@st.cache_data
 def read_dataframe(fname: str) -> pd.DataFrame:
     if not os.path.exists(fname):
         df = pd.DataFrame()
