@@ -173,7 +173,7 @@ def show_img3D(
 
 def util_panel_workingdir(app_type: str) -> None:
     # Panel for selecting the working dir
-    with st.expander(":material/folder_shared: Working Dir", expanded=False):
+    with st.expander(":material/folder_shared: Working Directory", expanded=False):
 
         curr_dir = st.session_state.paths["dset"]
 

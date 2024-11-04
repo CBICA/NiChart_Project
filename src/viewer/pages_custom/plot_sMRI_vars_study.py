@@ -24,7 +24,7 @@ if not os.path.exists(st.session_state.paths["csv_plot"]):
 flag_disabled = not st.session_state.flags['dset']
 
 if st.session_state.app_type == "CLOUD":
-    with st.expander(":material/upload: Upload data", expanded=False):  # type:ignore
+    with st.expander(":material/upload: Upload Data", expanded=False):  # type:ignore
         utilst.util_upload_file(
             st.session_state.paths["csv_plot"],
             "Input data csv file",
@@ -36,7 +36,7 @@ if st.session_state.app_type == "CLOUD":
             st.success(f"Data is ready ({st.session_state.paths["csv_plot"]})", icon=":material/thumb_up:")
 
 else:  # st.session_state.app_type == 'DESKTOP'
-    with st.expander(":material/upload: Select data", expanded=False):
+    with st.expander(":material/upload: Select Data", expanded=False):
         utilst.util_select_file(
             "selected_data_file",
             "Data csv",
@@ -76,22 +76,28 @@ if os.path.exists(st.session_state.paths["csv_plot"]):
 
 # Panel for selecting variables
 flag_disabled = not st.session_state.flags['dset']
-with st.expander(":material/upload: Select Vars", expanded=False):  # type:ignore
+with st.expander(":material/playlist_add: Select Variables", expanded=False):  # type:ignore
 
     var_cats = { 'CatA': ['MRID', 'Age', 'Sex'], 'CatB': ['GM', 'WM', ], 'CatC': ['Ventricles', 'SPAREAD'] }
 
     # User selects a category to include
-    sel_cat = st.selectbox('Select category', list(var_cats.keys()), index = None)
+
+    cols_tmp = st.columns((1,3,1), vertical_alignment="bottom")
+    with cols_tmp[0]:
+        sel_cat = st.selectbox('Select category', list(var_cats.keys()), index = None)
 
     if sel_cat is None:
         sel_vars = []
     else:
         sel_vars = var_cats[sel_cat]
 
-    sel_vars = st.multiselect('Which ones to keep?', sel_vars, sel_vars)
-    if st.button('Add selected variables ...'):
-        sel_vars_uniq = [v for v in sel_vars if v not in st.session_state.plot_sel_vars]
-        st.session_state.plot_sel_vars += sel_vars_uniq
+    with cols_tmp[1]:
+        sel_vars = st.multiselect('Which ones to keep?', sel_vars, sel_vars)
+
+    with cols_tmp[2]:
+        if st.button('Add selected variables ...'):
+            sel_vars_uniq = [v for v in sel_vars if v not in st.session_state.plot_sel_vars]
+            st.session_state.plot_sel_vars += sel_vars_uniq
 
     sel_vars_all = st.multiselect(
         'Add variables',
@@ -104,6 +110,13 @@ with st.expander(":material/upload: Select Vars", expanded=False):  # type:ignor
         st.session_state.df_plot = df[st.session_state.plot_sel_vars]
 
         print(df)
+
+# Panel for filtering variables
+flag_disabled = not st.session_state.flags['dset']
+with st.expander(":material/filter_alt: Filter Data", expanded=False):  # type:ignore
+
+    st.success(f'Selected variables:')
+
 
 # Sidebar parameters
 with st.sidebar:
@@ -150,6 +163,8 @@ with st.sidebar:
 
 # Panel for plots
 with st.expander(":material/monitoring: Plot data", expanded=False):
+
+    st.write('Plot')
 
     if not flag_disabled:
 
