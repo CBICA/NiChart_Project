@@ -10,8 +10,16 @@ if "instantiated" not in st.session_state:
     st.session_state.app_type = "CLOUD"
     st.session_state.app_type = "DESKTOP"
 
-    # State for expanders
-    st.session_state.state_expander_plotsmri_imgview = False
+    # Icons for dynamic buttons
+    st.session_state.icons_pm = {True: '➖', False: '➕'}
+    st.session_state.icons_cc = {True: '✅', False: '❌'}
+
+
+    # Flag to keep state for panels
+    st.session_state.flags_plotsmri = {
+        'panel_wdir_open': False,
+        'dset': False
+    }
 
     # Dataframe to keep plot ids
     st.session_state.plots = pd.DataFrame(
@@ -72,6 +80,13 @@ if "instantiated" not in st.session_state:
         "csv_roidict": "",
         "csv_mlscores": "",
     }
+
+    # Flags to hide/show panels
+    st.session_state.panel_visible = {
+        'working_dir': False,
+        'plot_in_data': False
+    }
+
 
     # Flags to show if various input/output exist
     st.session_state.flags = {

@@ -10,8 +10,8 @@ from stqdm import stqdm
 
 st.markdown(
     """
-    - NiChart sMRI segmentation pipeline using DLMUSE.
-    - DLMUSE segments raw T1 images into 145 regions of interest (ROIs) + 105 composite ROIs.
+    - Segmentation of T1-weighted MRI scans into anatomical regions of interest (ROIs)
+    - DLMUSE: Fast deep learning based segmentation into 145 ROIs + 105 composite ROIs
 
     ### Want to learn more?
     - Visit [DLMUSE GitHub](https://github.com/CBICA/NiChart_DLMUSE)

@@ -172,54 +172,54 @@ def show_img3D(
 
 
 def util_panel_workingdir(app_type: str) -> None:
-    # Panel for selecting the working dir
-    with st.expander(":material/folder_shared: Working Directory", expanded=False):
+    '''
+    Panel to read dataset name and output destination for the results
+    '''
+    curr_dir = st.session_state.paths["dset"]
 
-        curr_dir = st.session_state.paths["dset"]
+    # Read dataset name (used to create a folder where all results will be saved)
+    helpmsg = "Each study's results are organized in a dedicated folder named after the study"
+    st.session_state.dset = user_input_textfield(
+        "Study name", st.session_state.dset, helpmsg, False
+    )
 
-        # Read dataset name (used to create a folder where all results will be saved)
-        helpmsg = "Each study's results are organized in a dedicated folder named after the study"
-        st.session_state.dset = user_input_textfield(
-            "Study name", st.session_state.dset, helpmsg, False
+    if app_type == "DESKTOP":
+        # Read output folder from the user
+        helpmsg = "Results will be saved to the output folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
+        out_dir = user_input_foldername(
+            "Select folder",
+            "btn_sel_out_dir",
+            "Output folder",
+            st.session_state.paths["last_in_dir"],
+            st.session_state.paths["out"],
+            helpmsg,
+            False,
+        )
+        if out_dir != "":
+            st.session_state.paths["out"] = out_dir
+
+    if st.session_state.dset != "" and st.session_state.paths["out"] != "":
+        st.session_state.paths["dset"] = os.path.join(
+            st.session_state.paths["out"], st.session_state.dset
         )
 
-        if app_type == "DESKTOP":
-            # Read output folder from the user
-            helpmsg = "Results will be saved to the output folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
-            out_dir = user_input_foldername(
-                "Select folder",
-                "btn_sel_out_dir",
-                "Output folder",
-                st.session_state.paths["last_in_dir"],
-                st.session_state.paths["out"],
-                helpmsg,
-                False,
-            )
-            if out_dir != "":
-                st.session_state.paths["out"] = out_dir
+    # Dataset output folder name changed
+    if curr_dir != st.session_state.paths["dset"]:
 
-        if st.session_state.dset != "" and st.session_state.paths["out"] != "":
-            st.session_state.paths["dset"] = os.path.join(
-                st.session_state.paths["out"], st.session_state.dset
-            )
+        # Create output folder
+        if not os.path.exists(st.session_state.paths["dset"]):
+            os.makedirs(st.session_state.paths["dset"])
 
-        # Dataset output folder name changed
-        if curr_dir != st.session_state.paths["dset"]:
+        # Update paths for output subfolders
+        utilses.update_default_paths()
+        utilses.reset_flags()
 
-            # Create output folder
-            if not os.path.exists(st.session_state.paths["dset"]):
-                os.makedirs(st.session_state.paths["dset"])
-
-            # Update paths for output subfolders
-            utilses.update_default_paths()
-            utilses.reset_flags()
-
-        if os.path.exists(st.session_state.paths["dset"]):
-            st.success(
-                f"All results will be saved to: {st.session_state.paths['dset']}",
-                icon=":material/thumb_up:",
-            )
-            st.session_state.flags["dset"] = True
+    if os.path.exists(st.session_state.paths["dset"]):
+        st.success(
+            f"All results will be saved to: {st.session_state.paths['dset']}",
+            icon=":material/thumb_up:",
+        )
+        st.session_state.flags["dset"] = True
 
 
 def copy_uploaded_to_dir() -> None:

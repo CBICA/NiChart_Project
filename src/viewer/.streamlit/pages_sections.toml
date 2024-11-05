@@ -41,16 +41,11 @@ icon = ":file_folder:"
 
 [[pages]]
 path = "pages_custom/plot_sMRI_vars_study.py"
-name = "Study Data (sMRI)"
+name = "View Study Data (sMRI)"
 icon = ":black_small_square:"
 
 [[pages]]
 path = "pages_custom/plot_sMRI_vars_participant.py"
-name = "Participant Data (sMRI)"
-icon = ":black_small_square:"
-
-[[pages]]
-path = "pages_custom/view_sMRI_Seg.py"
-name = "View Images (sMRI)"
+name = "View Participant Data (sMRI)"
 icon = ":black_small_square:"
 

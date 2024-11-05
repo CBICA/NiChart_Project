@@ -6,10 +6,16 @@ import utils.utils_st as utilst
 
 st.markdown(
     """
-    NiChart sMRI ML pipeline using COMBAT harmonization, SPARE
-    scores, and SurrealGAN indices.
-    - Input data is a csv file with the DLMUSE ROI volumes and
-    a csv file with demographic info (Age, Sex, DX, Site).
+    - Pipeline for calculating machine learning (ML) based imaging biomarkers from DLMUSE ROIs
+    - ML imaging signatures quantify the progression of brain changes related to aging and disease
+    - Input data
+      - DLMUSE ROI volumes and demographic data
+    - Processing steps:
+      - COMBAT harmonization to reference data
+      - SPARE scores: Supervised ML models for disease prediction
+      - SurrealGAN indices: Semi-supervised ML models for disease subtype identification
+    - Output
+      - ML biomarker panel 
 
     ### Want to learn more?
     - Visit [SPARE GitHub](https://github.com/CBICA/spare_scores)

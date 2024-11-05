@@ -13,7 +13,7 @@ import utils.utils_plot as utilpl
 from stqdm import stqdm
 
 ## Alias for session state 
-flags = st.session_state.flags_plotsmri
+#ss = st.session_state
 
 st.markdown(
     """
@@ -26,16 +26,9 @@ st.markdown(
     """
 )
 
-# Panel for selecting the working dir
-btn_icon = st.session_state.icons_pm[flags['panel_wdir_open']]
-dset_icon = st.session_state.icons_cc[flags['dset']]
-if st.button(f":material/folder_shared: Working Directory {dset_icon}", icon = btn_icon):
-    flags['panel_wdir_open'] = not flags['panel_wdir_open']
-    st.rerun()
 
-if flags['panel_wdir_open']:
-    with st.container(border=True):
-        utilst.util_panel_workingdir(st.session_state.app_type)
+# Panel for output (dataset name + out_dir)
+utilst.util_panel_workingdir(st.session_state.app_type)
 
 # Select data csv from existing data files
 flag_update = False

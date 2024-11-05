@@ -114,6 +114,7 @@ Index,Code,Name
 343,MUSE_343,Temporal_Inferior_GM_R
 344,MUSE_344,Temporal_Lateral_GM_R
 345,MUSE_345,Temporal_Supratemporal_GM_R
+1,MUSE_1,CortCSF
 4,MUSE_4,3rdVentricle
 11,MUSE_11,4thVentricle
 23,MUSE_23,AccumbensArea_R
@@ -160,7 +161,7 @@ Index,Code,Name
 92,MUSE_92,AnteriorLimbInternalCapsule_L
 93,MUSE_93,PosteriorLimbInternalCapsule_R
 94,MUSE_94,PosteriorLimbInternalCapsule_L
-95,MUSE_95,CorpusCallosum
+95,MUSE_95,CorpCall
 100,MUSE_100,AnteriorCingulateGyrus_R
 101,MUSE_101,AnteriorCingulateGyrus_L
 102,MUSE_102,AnteriorInsula_R
