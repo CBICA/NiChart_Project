@@ -11,13 +11,13 @@ if "instantiated" not in st.session_state:
     st.session_state.app_type = "DESKTOP"
 
     # Icons for dynamic buttons
-    st.session_state.icons_pm = {True: '➖', False: '➕'}
-    st.session_state.icons_cc = {True: '✅', False: '❌'}
+    st.session_state.icons_cc = {True: ':closed_book:', False: ':green_book:'}
 
 
     # Flag to keep state for panels
     st.session_state.flags_plotsmri = {
         'panel_wdir_open': False,
+        'panel_ddir_open': False,
         'dset': False
     }
 
@@ -102,6 +102,7 @@ if "instantiated" not in st.session_state:
         "DLMUSE": False,
         "csv_dlmuse": False,
         "csv_mlscores": False,
+        "csv_plot": False,
         "sel_img": False,
         "sel_mask": False
     }
