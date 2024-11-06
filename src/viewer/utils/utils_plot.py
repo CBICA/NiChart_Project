@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 import utils.utils_dataframe as utilsdf
-import utils.utils_trace as utilstrace
+import utils.utils_trace as utiltr
 import plotly.graph_objs as go
 
 
@@ -148,13 +148,20 @@ def display_plot(
 
         hind = get_index_in_list(df.columns.tolist(), hvar)
 
+        #mode = 'markers'
+        #marker = dict(size=12, color='blue', opacity=0.7)
+        
+
         # Main plot
+        fig = go.Figure()
         if trend == "none":
-            scatter_plot = px.scatter(df_filt, x=xvar, y=yvar, color=hvar)
+            #trace_data = go.Scatter(x=df_filt[xvar], y=df_filt[yvar], mode = 'markers')
+            utiltr.scatter_plot(df_filt, xvar, yvar, hvar, fig)
         else:
-            scatter_plot = px.scatter(
+            scatter_plot = px.Scatter(
                 df_filt, x=xvar, y=yvar, color=hvar, trendline=trend
             )
+        #scatter_plot.add_traces(trace_data)
 
         # Add centile values
         if centtype != "none":
@@ -165,17 +172,17 @@ def display_plot(
                 f"centiles_{centtype}.csv",
             )
             df_cent = pd.read_csv(fcent)
-            utilstrace.percentile_trace(df_cent, xvar, yvar, scatter_plot)
+            utiltr.percentile_trace(df_cent, xvar, yvar, fig)
 
         # Highlight selected data point
         if sel_mrid != '':
-            utilstrace.selid_trace(df, sel_mrid, xvar, yvar, scatter_plot)
+            utiltr.selid_trace(df, sel_mrid, xvar, yvar, fig)
 
 
         # Catch clicks on plot
         # - on_select: when clicked it will rerun and return the info
         sel_info = st.plotly_chart(
-            scatter_plot, key=f"bubble_chart_{plot_id}", on_select=callback_plot_clicked
+            fig, key=f"bubble_chart_{plot_id}", on_select=callback_plot_clicked
         )
 
         # Detect MRID from the click info and save to session_state
@@ -196,4 +203,4 @@ def display_plot(
 
             st.rerun()
 
-        return scatter_plot
+        return fig

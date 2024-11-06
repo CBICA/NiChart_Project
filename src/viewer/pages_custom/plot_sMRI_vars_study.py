@@ -23,6 +23,8 @@ st.markdown(
     """
 )
 
+st.divider()
+
 # Panel for selecting the working dir
 show_panel_wdir = st.checkbox(
     f":material/folder_shared: Working Directory {st.session_state.icons['out_dir']}",
@@ -42,7 +44,8 @@ if show_panel_wdir:
 # Panel for selecting data csv
 show_panel_incsv = st.checkbox(
     f":material/upload: Select Data {st.session_state.icons['csv_plot']}",
-    disabled = not st.session_state.flags['out_dir']
+    disabled = not st.session_state.flags['out_dir'],
+    value = False
 )
 if show_panel_incsv:
     with st.container(border=True):
@@ -73,48 +76,54 @@ if show_panel_incsv:
             st.session_state.df_plot = utildf.read_dataframe(st.session_state.paths["csv_plot"])
             st.session_state.is_updated['csv_plot'] = False
 
-# # Panel for renaming variables
-# flag_disabled = df.shape[0] == 0
-# with st.expander(":material/new_label: Rename Variables", expanded=False):  # type:ignore
-#
-#     msg_help = 'OPTIONAL step to rename the columns of your data file (e.g. to rename numeric indices from a segmentation). \n\n If a dictionary is not provided for your data type please continue with the next step!'
-#
-#     sel_dict = st.selectbox('Select dictionary', ['muse_all'], None, help = msg_help)
-#     if sel_dict is not None:
-#         st.session_state.paths["csv_roidict"] = st.session_state.dicts[sel_dict]
-#
-#         if os.path.exists(st.session_state.paths["csv_roidict"]):
-#
-#             df_dict = pd.read_csv(st.session_state.paths["csv_roidict"])
-#
-#             dict_r1 = dict(
-#                 zip(df_dict["Index"].astype(str), df_dict["Name"].astype(str))
-#             )
-#             dict_r2 = dict(
-#                 zip(df_dict["Name"].astype(str), df_dict["Index"].astype(str))
-#             )
-#             st.session_state.roi_dict = dict_r1
-#             st.session_state.roi_dict_rev = dict_r2
-#
-#             # Get a list of columns that match the dict key
-#             df_tmp = df[df.columns[df.columns.isin(st.session_state.roi_dict.keys())]]
-#             df_tmp2 = df_tmp.rename(columns=st.session_state.roi_dict)
-#
-#             if df_tmp.shape[1] == 0:
-#                 st.warning('None of the variables were found in the dictionary!')
-#             else:
-#                 with st.container(border=True):
-#                     tmp_cols = st.columns(3)
-#                     with tmp_cols[0]:
-#                         st.selectbox('Initial ...', df_tmp.columns, 0)
-#                     with tmp_cols[1]:
-#                         st.selectbox('Renamed to ...', df_tmp2.columns, 0)
-#
-#                 if st.button('Approve renaming'):
-#                     df = df.rename(columns=st.session_state.roi_dict)
-#                     st.session_state.df_plot = df
-#                     st.success(f'Variables are renamed!')
-#
+# Panel for renaming variables
+show_panel_rename = st.checkbox(
+    f":material/new_label: Rename Variables {st.session_state.icons['out_dir']}",
+    disabled = not st.session_state.flags['csv_plot'],
+    value = False
+)
+if show_panel_rename:
+    with st.container(border=True):
+
+        msg_help = 'OPTIONAL step to rename the columns of your data file (e.g. to rename numeric indices from a segmentation). \n\n If a dictionary is not provided for your data type, please continue with the next step!'
+
+        sel_dict = st.selectbox('Select dictionary', ['muse_all'], None, help = msg_help)
+        if sel_dict is not None:
+            st.session_state.paths["csv_roidict"] = st.session_state.dicts[sel_dict]
+
+            if os.path.exists(st.session_state.paths["csv_roidict"]):
+
+                df_dict = pd.read_csv(st.session_state.paths["csv_roidict"])
+
+                dict_r1 = dict(
+                    zip(df_dict["Index"].astype(str), df_dict["Name"].astype(str))
+                )
+                dict_r2 = dict(
+                    zip(df_dict["Name"].astype(str), df_dict["Index"].astype(str))
+                )
+                st.session_state.roi_dict = dict_r1
+                st.session_state.roi_dict_rev = dict_r2
+
+                # Get a list of columns that match the dict key
+                df = st.session_state.df_plot
+                df_tmp = df[df.columns[df.columns.isin(st.session_state.roi_dict.keys())]]
+                df_tmp2 = df_tmp.rename(columns=st.session_state.roi_dict)
+                if df_tmp.shape[1] == 0:
+                    st.warning('None of the variables were found in the dictionary!')
+                else:
+                    with st.container(border=True):
+                        tmp_cols = st.columns(3)
+                        with tmp_cols[0]:
+                            st.selectbox('Initial ...', df_tmp.columns, 0)
+                        with tmp_cols[1]:
+                            st.selectbox('Renamed to ...', df_tmp2.columns, 0)
+
+                    if st.button('Approve renaming'):
+                        df = df.rename(columns=st.session_state.roi_dict)
+                        st.session_state.df_plot = df
+                        st.success(f'Variables are renamed!')
+                        st.session_state.df_plot = df
+
 # # Panel for selecting variables
 # flag_disabled = df.shape[0] == 0
 # with st.expander(":material/playlist_add: Select Variables", expanded=False):  # type:ignore
@@ -165,6 +174,8 @@ show_panel_plots = st.checkbox(
 )
 
 if show_panel_plots:
+    df = st.session_state.df_plot
+
     ################
     # Sidebar parameters
     with st.sidebar:
@@ -193,23 +204,25 @@ if show_panel_plots:
         )
 
         if st.session_state.sel_mrid != '':
-            st.sidebar.success("Selected subject: " + st.session_state.sel_mrid)
+            list_mrid = df.MRID.tolist()
+            sel_ind = list_mrid.index(st.session_state.sel_mrid)
+            st.session_state.sel_mrid = st.selectbox("Selected subject", list_mrid, sel_ind)
+            
 
         if st.session_state.sel_roi != '':
             st.sidebar.success("Selected ROI: " + st.session_state.sel_roi)
 
     ################
     # Show plots
-    df = st.session_state.df_plot
-    # Button to add a new plot
-    if btn_plots:
+
+    # Add a plot (either due to button click or to add a first plot by default)
+    if st.session_state.plots.shape[0] == 0 or btn_plots:
         # Select xvar and yvar, if not set yet
         num_cols = df.select_dtypes(include='number').columns
         if st.session_state.plot_xvar == '':
             st.session_state.plot_xvar = num_cols[0]
         if st.session_state.plot_yvar == '':
             st.session_state.plot_yvar = num_cols[1]
-
         utilpl.add_plot()
 
     # Read plot ids

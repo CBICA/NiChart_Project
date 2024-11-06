@@ -7,7 +7,19 @@ import plotly.graph_objs as go
 import statsmodels.api as sm
 from sklearn.linear_model import LinearRegression
 
+def scatter_plot(df, xvar, yvar, hvar, fig):
+    
+    #df['Sex'] = 'F'
+    #df.loc[0:300,'Sex'] = 'M'
+    #hvar = 'Sex'
+    hvar = None
 
+    if hvar is None:
+        fig.add_scatter(x=df[xvar], y=df[yvar], mode='markers', name = 'Data')
+    else:
+        for hname, dfh in df.groupby(hvar):
+            fig.add_scatter(x=dfh[xvar], y=dfh[yvar], name=hname, mode='markers')
+    
 def selid_trace(df: pd.DataFrame, sel_mrid: str, xvar: str, yvar: str, fig: Any) -> Any:
     df_tmp = df[df.MRID == sel_mrid]
     fig.add_trace(
@@ -16,9 +28,9 @@ def selid_trace(df: pd.DataFrame, sel_mrid: str, xvar: str, yvar: str, fig: Any)
             y=df_tmp[yvar],
             mode='markers',
             name='Selected',
-            marker=dict(color='rgba(135, 206, 250, 0.5)',
+            marker=dict(color='rgba(250, 50, 50, 0.5)',
                         size=12,
-                        line=dict(color='MediumPurple', width=2)
+                        line=dict(color='Red', width=3)
                         )
             )
     )
