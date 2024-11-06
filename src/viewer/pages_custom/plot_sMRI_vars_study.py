@@ -12,9 +12,6 @@ import utils.utils_viewimg as utilvi
 import utils.utils_plot as utilpl
 from stqdm import stqdm
 
-## Alias for session state 
-flags = st.session_state.flags_plotsmri
-
 st.markdown(
     """
     - Plot study data to visualize imaging variables
@@ -27,64 +24,54 @@ st.markdown(
 )
 
 # Panel for selecting the working dir
-data_icon = st.session_state.icons_cc[st.session_state.flags['dset']]
-show_dset_panel = st.checkbox(f":material/folder_shared: Working Directory {data_icon}")
-if show_dset_panel:
-    flags['panel_wdir_open'] = not flags['panel_wdir_open']
-
-if flags['panel_wdir_open']:
+show_panel_wdir = st.checkbox(
+    f":material/folder_shared: Working Directory {st.session_state.icons['out_dir']}"
+)
+if show_panel_wdir:
     with st.container(border=True):
         utilst.util_panel_workingdir(st.session_state.app_type)
+        if os.path.exists(st.session_state.paths["dset"]):
+            st.success(
+                f"All results will be saved to: {st.session_state.paths['dset']}",
+                icon=":material/thumb_up:",
+            )
+            st.session_state.flags["out_dir"] = True
+            st.session_state.icons['out_dir'] = ':material/thumb_up:'        
 
-# if not os.path.exists(st.session_state.paths["csv_plot"]):
-#     if os.path.exists(st.session_state.paths["csv_mlscores"]):
-#         st.session_state.paths["csv_plot"] = st.session_state.paths["csv_mlscores"]
-#     elif os.path.exists(st.session_state.paths["csv_dlmuse"]):
-#         st.session_state.paths["csv_plot"] = st.session_state.paths["csv_dlmuse"]
+# Panel for selecting data csv
+show_panel_incsv = st.checkbox(
+    f":material/upload: Select Data {st.session_state.icons['csv_plot']}",
+    disabled = not st.session_state.flags['out_dir']
+)
+if show_panel_incsv:
+    with st.container(border=True):
+        if st.session_state.app_type == "CLOUD":
+            st.session_state.is_updated['csv_plot'] = utilst.util_upload_file(
+                st.session_state.paths["csv_plot"],
+                "Input data csv file",
+                "key_in_csv",
+                st.session_state.flags['csv_plot'],
+                "visible"
+            )
+        else:  # st.session_state.app_type == 'DESKTOP'
+            st.session_state.is_updated['csv_plot'] = utilst.util_select_file(
+                "selected_data_file",
+                "Data csv",
+                st.session_state.paths["csv_plot"],
+                st.session_state.paths["last_in_dir"],
+                st.session_state.flags['csv_plot']
+            )
+            
+        if os.path.exists(st.session_state.paths["csv_plot"]):
+            st.success(f"Data is ready ({st.session_state.paths["csv_plot"]})", icon=":material/thumb_up:")
+            st.session_state.flags['csv_plot'] = True
+            st.session_state.icons['csv_plot'] = ':material/thumb_up:'
 
-# # Select data csv from existing data files
-# data_icon = st.session_state.icons_cc[st.session_state.flags['csv_plot']]
-# show_csv_panel = st.checkbox(f" | :material/upload: Select Data {data_icon}")
-# if show_csv_panel:
-#     flags['panel_ddir_open'] = not flags['panel_ddir_open']
-#     st.rerun()
-#
-# if flags['panel_ddir_open']:
-#     with st.container(border=True):
-#
-#         if st.session_state.app_type == "CLOUD":
-#             with st.expander(":material/upload: Upload Data", expanded=False):  # type:ignore
-#                 flag_update = utilst.util_upload_file(
-#                     st.session_state.paths["csv_plot"],
-#                     "Input data csv file",
-#                     "key_in_csv",
-#                     flag_disabled,
-#                     "visible",
-#                 )
-#                 # if not flag_disabled and os.path.exists(st.session_state.paths["csv_plot"]):
-#                 #     st.success(f"Data is ready ({st.session_state.paths["csv_plot"]})", icon=":material/thumb_up:")
-#
-#         else:  # st.session_state.app_type == 'DESKTOP'
-#             with st.expander(":material/upload: Select Data", expanded=False):
-#                 flag_update = utilst.util_select_file(
-#                     "selected_data_file",
-#                     "Data csv",
-#                     st.session_state.paths["csv_plot"],
-#                     st.session_state.paths["last_in_dir"],
-#                     flag_disabled,
-#                 )
-                # if not flag_disabled and os.path.exists(st.session_state.paths["csv_plot"]):
-                #     st.success(f"Data is ready ({st.session_state.paths["csv_plot"]})", icon=":material/thumb_up:")
+        # Read input csv
+        if st.session_state.is_updated['csv_plot']:
+            st.session_state.df_plot = utildf.read_dataframe(st.session_state.paths["csv_plot"])
+            st.session_state.is_updated['csv_plot'] = False
 
-# if flag_update:
-#     st.session_state.is_updated['csv_plot'] = True
-#
-# # Read input csv
-# df = st.session_state.df_plot
-# if df.shape[0] == 0 or st.session_state.is_updated['csv_plot']:
-#     df = utildf.read_dataframe(st.session_state.paths["csv_plot"])
-#     st.session_state.is_updated['csv_plot'] = False
-#
 # # Panel for renaming variables
 # flag_disabled = df.shape[0] == 0
 # with st.expander(":material/new_label: Rename Variables", expanded=False):  # type:ignore
@@ -169,77 +156,87 @@ if flags['panel_wdir_open']:
 # with st.expander(":material/filter_alt: Filter Data", expanded=False):  # type:ignore
 #     st.info('This is an optional step to filter the data')
 #     st.success(f'Selected variables:')
-#
-# # Sidebar parameters
-# with st.sidebar:
-#     # Slider to set number of plots in a row
-#     st.session_state.plots_per_row = st.slider(
-#         "Plots per row",
-#         1,
-#         st.session_state.max_plots_per_row,
-#         st.session_state.plots_per_row,
-#         key="a_per_page",
-#         disabled = flag_disabled
-#     )
-#
-#     # Checkbox to show/hide plot options
-#     flag_plot_settings = st.checkbox("Hide plot settings", disabled = flag_disabled)
-#
-#     # Checkbox to show/hide mri image
-#     flag_show_img = st.checkbox("Show image", disabled = flag_disabled)
-#
-#     if st.session_state.sel_mrid != '':
-#         st.sidebar.success("Selected subject: " + st.session_state.sel_mrid)
-#
-#     if st.session_state.sel_roi != '':
-#         st.sidebar.success("Selected ROI: " + st.session_state.sel_roi)
-#
-#
-# # Panel for plots
-# flag_disabled = df.shape[0] == 0
-# with st.expander(":material/monitoring: Plot data", expanded=False):
-#
-#     # Button to add a new plot
-#     if st.button("Add plot", disabled = flag_disabled):
-#
-#         # Select xvar and yvar, if not set yet
-#         num_cols = df.select_dtypes(include='number').columns
-#         if st.session_state.plot_xvar == '':
-#             st.session_state.plot_xvar = num_cols[0]
-#         if st.session_state.plot_yvar == '':
-#             st.session_state.plot_yvar = num_cols[1]
-#
-#         utilpl.add_plot()
-#
-#     # Read plot ids
-#     df_p = st.session_state.plots
-#     list_plots = df_p.index.tolist()
-#     plots_per_row = st.session_state.plots_per_row
-#
-#     # Render plots
-#     #  - iterates over plots;
-#     #  - for every "plots_per_row" plots, creates a new columns block, resets column index, and displays the plot
-#
-#     if df.shape[0] > 0:
-#         plots_arr = []
-#
-#         # FIXME: this created a bug ???
-#         #for i, plot_ind in stqdm(
-#             #enumerate(list_plots), desc="Rendering plots ...", total=len(list_plots)
-#         #):
-#         for i, plot_ind in enumerate(list_plots):
-#             column_no = i % plots_per_row
-#             if column_no == 0:
-#                 blocks = st.columns(plots_per_row)
-#             with blocks[column_no]:
-#
-#                 new_plot = utilpl.display_plot(
-#                     df,
-#                     plot_ind,
-#                     not flag_plot_settings,
-#                     st.session_state.sel_mrid
-#                 )
-#                 plots_arr.append(new_plot)
+
+# Sidebar parameters
+flag_disabled = not st.session_state.flags['csv_plot']
+with st.sidebar:
+    # Slider to set number of plots in a row
+    st.session_state.plots_per_row = st.slider(
+        "Plots per row",
+        1,
+        st.session_state.max_plots_per_row,
+        st.session_state.plots_per_row,
+        key="a_per_page",
+        disabled = flag_disabled
+    )
+
+    btn_plots = st.button("Add plot", disabled = flag_disabled)    
+
+    # Checkbox to show/hide plot options
+    flag_plot_settings = st.checkbox(
+        "Hide plot settings",
+        disabled = flag_disabled
+    )
+
+    # Checkbox to show/hide mri image
+    flag_show_img = st.checkbox(
+        "Show image",
+        disabled = flag_disabled
+    )
+
+    if st.session_state.sel_mrid != '':
+        st.sidebar.success("Selected subject: " + st.session_state.sel_mrid)
+
+    if st.session_state.sel_roi != '':
+        st.sidebar.success("Selected ROI: " + st.session_state.sel_roi)
+
+# Panel for plots
+show_panel_plots = st.checkbox(
+    f":material/folder_shared: Plot Data",
+    disabled = not st.session_state.flags['csv_plot']    
+)
+if show_panel_plots:
+    df = st.session_state.df_plot
+    # Button to add a new plot
+    if btn_plots:
+        # Select xvar and yvar, if not set yet
+        num_cols = df.select_dtypes(include='number').columns
+        if st.session_state.plot_xvar == '':
+            st.session_state.plot_xvar = num_cols[0]
+        if st.session_state.plot_yvar == '':
+            st.session_state.plot_yvar = num_cols[1]
+
+        utilpl.add_plot()
+
+    # Read plot ids
+    df_p = st.session_state.plots
+    list_plots = df_p.index.tolist()
+    plots_per_row = st.session_state.plots_per_row
+
+    # Render plots
+    #  - iterates over plots;
+    #  - for every "plots_per_row" plots, creates a new columns block, resets column index, and displays the plot
+
+    if df.shape[0] > 0:
+        plots_arr = []
+
+        # FIXME: this created a bug ???
+        #for i, plot_ind in stqdm(
+            #enumerate(list_plots), desc="Rendering plots ...", total=len(list_plots)
+        #):
+        for i, plot_ind in enumerate(list_plots):
+            column_no = i % plots_per_row
+            if column_no == 0:
+                blocks = st.columns(plots_per_row)
+            with blocks[column_no]:
+
+                new_plot = utilpl.display_plot(
+                    df,
+                    plot_ind,
+                    not flag_plot_settings,
+                    st.session_state.sel_mrid
+                )
+                plots_arr.append(new_plot)
 #
 # # Show mri image
 # if flag_show_img:
@@ -336,14 +333,14 @@ if flags['panel_wdir_open']:
 #
 #
 #
-# if st.session_state.debug_show_state:
-#     with st.expander("DEBUG: Session state - all variables"):
-#         st.write(st.session_state)
-#
-# if st.session_state.debug_show_paths:
-#     with st.expander("DEBUG: Session state - paths"):
-#         st.write(st.session_state.paths)
-#
-# if st.session_state.debug_show_flags:
-#     with st.expander("DEBUG: Session state - flags"):
-#         st.write(st.session_state.flags)
+if st.session_state.debug_show_state:
+    with st.expander("DEBUG: Session state - all variables"):
+        st.write(st.session_state)
+
+if st.session_state.debug_show_paths:
+    with st.expander("DEBUG: Session state - paths"):
+        st.write(st.session_state.paths)
+
+if st.session_state.debug_show_flags:
+    with st.expander("DEBUG: Session state - flags"):
+        st.write(st.session_state.flags)

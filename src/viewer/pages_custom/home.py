@@ -10,10 +10,6 @@ if "instantiated" not in st.session_state:
     st.session_state.app_type = "CLOUD"
     st.session_state.app_type = "DESKTOP"
 
-    # Icons for dynamic buttons
-    st.session_state.icons_cc = {True: ':closed_book:', False: ':green_book:'}
-
-
     # Flag to keep state for panels
     st.session_state.flags_plotsmri = {
         'panel_wdir_open': False,
@@ -30,6 +26,12 @@ if "instantiated" not in st.session_state:
 
     # Study name
     st.session_state.dset = ""
+
+    # Icons for panels
+    st.session_state.icons = {
+        'out_dir': ':material/thumb_down:',
+        'csv_plot': ':material/thumb_down:',
+    }
 
     # Predefined paths for different tasks in the final results
     # The path structure allows nested folders with two levels
@@ -57,7 +59,7 @@ if "instantiated" not in st.session_state:
         "target_dir": "",
         "target_file": "",
         "dset": "",
-        "out": "",
+        "out_dir": "",
         "Lists": "",
         "Nifti": "",
         "Dicoms": "",
@@ -91,6 +93,7 @@ if "instantiated" not in st.session_state:
     # Flags to show if various input/output exist
     st.session_state.flags = {
         "dset": False,
+        "out_dir": False,
         "Dicoms": False,
         "dicom_series": False,
         "Nifti": False,
@@ -125,12 +128,12 @@ if "instantiated" not in st.session_state:
     st.session_state.paths["last_in_dir"] = st.session_state.paths["init"]
 
     # FIXME: This sets the default out path to a folder inside the root folder for now
-    st.session_state.paths["out"] = os.path.join(
+    st.session_state.paths["out_dir"] = os.path.join(
         st.session_state.paths["root"],
         "output_folder"
     )
-    if not os.path.exists(st.session_state.paths["out"]):
-        os.makedirs(st.session_state.paths["out"])
+    if not os.path.exists(st.session_state.paths["out_dir"]):
+        os.makedirs(st.session_state.paths["out_dir"])
         
     #########################################
 

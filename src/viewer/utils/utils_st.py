@@ -173,7 +173,7 @@ def show_img3D(
 
 def util_panel_workingdir(app_type: str) -> None:
     '''
-    Panel to read dataset name and output destination for the results
+    Panel to set results folder name
     '''
     curr_dir = st.session_state.paths["dset"]
 
@@ -191,21 +191,21 @@ def util_panel_workingdir(app_type: str) -> None:
             "btn_sel_out_dir",
             "Output folder",
             st.session_state.paths["last_in_dir"],
-            st.session_state.paths["out"],
+            st.session_state.paths["out_dir"],
             helpmsg,
             False,
         )
         if out_dir != "":
-            st.session_state.paths["out"] = out_dir
+            st.session_state.paths["out_dir"] = out_dir
 
-    if st.session_state.dset != "" and st.session_state.paths["out"] != "":
+    # Create results folder
+    if st.session_state.dset != "" and st.session_state.paths["out_dir"] != "":
         st.session_state.paths["dset"] = os.path.join(
-            st.session_state.paths["out"], st.session_state.dset
+            st.session_state.paths["out_dir"], st.session_state.dset
         )
 
-    # Dataset output folder name changed
+    # Check if results folder name changed
     if curr_dir != st.session_state.paths["dset"]:
-
         # Create output folder
         if not os.path.exists(st.session_state.paths["dset"]):
             os.makedirs(st.session_state.paths["dset"])
@@ -213,14 +213,6 @@ def util_panel_workingdir(app_type: str) -> None:
         # Update paths for output subfolders
         utilses.update_default_paths()
         utilses.reset_flags()
-
-    if os.path.exists(st.session_state.paths["dset"]):
-        st.success(
-            f"All results will be saved to: {st.session_state.paths['dset']}",
-            icon=":material/thumb_up:",
-        )
-        st.session_state.flags["dset"] = True
-
 
 def copy_uploaded_to_dir() -> None:
     # Copies files to local storage
