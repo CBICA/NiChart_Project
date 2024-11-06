@@ -25,7 +25,8 @@ st.markdown(
 
 # Panel for selecting the working dir
 show_panel_wdir = st.checkbox(
-    f":material/folder_shared: Working Directory {st.session_state.icons['out_dir']}"
+    f":material/folder_shared: Working Directory {st.session_state.icons['out_dir']}",
+    value = False
 )
 if show_panel_wdir:
     with st.container(border=True):
@@ -157,45 +158,48 @@ if show_panel_incsv:
 #     st.info('This is an optional step to filter the data')
 #     st.success(f'Selected variables:')
 
-# Sidebar parameters
-flag_disabled = not st.session_state.flags['csv_plot']
-with st.sidebar:
-    # Slider to set number of plots in a row
-    st.session_state.plots_per_row = st.slider(
-        "Plots per row",
-        1,
-        st.session_state.max_plots_per_row,
-        st.session_state.plots_per_row,
-        key="a_per_page",
-        disabled = flag_disabled
-    )
-
-    btn_plots = st.button("Add plot", disabled = flag_disabled)    
-
-    # Checkbox to show/hide plot options
-    flag_plot_settings = st.checkbox(
-        "Hide plot settings",
-        disabled = flag_disabled
-    )
-
-    # Checkbox to show/hide mri image
-    flag_show_img = st.checkbox(
-        "Show image",
-        disabled = flag_disabled
-    )
-
-    if st.session_state.sel_mrid != '':
-        st.sidebar.success("Selected subject: " + st.session_state.sel_mrid)
-
-    if st.session_state.sel_roi != '':
-        st.sidebar.success("Selected ROI: " + st.session_state.sel_roi)
-
-# Panel for plots
+# Panel for displaying plots
 show_panel_plots = st.checkbox(
     f":material/folder_shared: Plot Data",
     disabled = not st.session_state.flags['csv_plot']    
 )
+
 if show_panel_plots:
+    ################
+    # Sidebar parameters
+    with st.sidebar:
+        # Slider to set number of plots in a row
+        st.session_state.plots_per_row = st.slider(
+            "Plots per row",
+            1,
+            st.session_state.max_plots_per_row,
+            st.session_state.plots_per_row,
+            key="a_per_page",
+            disabled = False
+        )
+
+        btn_plots = st.button("Add plot", disabled = False)
+
+        # Checkbox to show/hide plot options
+        flag_plot_settings = st.checkbox(
+            "Hide plot settings",
+            disabled = False
+        )
+
+        # Checkbox to show/hide mri image
+        flag_show_img = st.checkbox(
+            "Show image",
+            disabled = False
+        )
+
+        if st.session_state.sel_mrid != '':
+            st.sidebar.success("Selected subject: " + st.session_state.sel_mrid)
+
+        if st.session_state.sel_roi != '':
+            st.sidebar.success("Selected ROI: " + st.session_state.sel_roi)
+
+    ################
+    # Show plots
     df = st.session_state.df_plot
     # Button to add a new plot
     if btn_plots:
@@ -237,102 +241,100 @@ if show_panel_plots:
                     st.session_state.sel_mrid
                 )
                 plots_arr.append(new_plot)
-#
-# # Show mri image
-# if flag_show_img:
-#
-#     # Check if data point selected
-#     if st.session_state.sel_mrid == "":
-#         st.warning("Please select a subject on the plot!")
-#
-#     else:
-#         if not utilvi.check_image_underlay() or not utilvi.check_image_overlay():
-#             utilvi.get_image_paths()
-#
-#     if not st.session_state.sel_mrid == "":
-#         with st.spinner("Wait for it..."):
-#
-#             # Get selected y var
-#             sel_var = st.session_state.plots.loc[st.session_state.plot_active, "yvar"]
-#
-#             # If roi dictionary was used, detect index
-#             if st.session_state.roi_dict_rev is not None:
-#                 sel_var = st.session_state.roi_dict_rev[sel_var]
-#
-#             print(sel_var)
-#
-#             # Check if index exists in overlay mask
-#             is_in_mask = False
-#             if os.path.exists(st.session_state.paths["sel_seg"]):
-#                 is_in_mask = utilni.check_roi_index(st.session_state.paths["sel_seg"], sel_var)
-#
-#             if is_in_mask:
-#                 list_rois = [int(sel_var)]
-#
-#             else:
-#                 list_rois = utilmuse.get_derived_rois(
-#                     sel_var,
-#                     st.session_state.dicts["muse_derived"],
-#                 )
-#
-#             # Process image and mask to prepare final 3d matrix to display
-#             flag_files = 1
-#             if not os.path.exists(st.session_state.paths["sel_img"]):
-#                 flag_files = 0
-#                 warn_msg = (
-#                     f"Missing underlay image: {st.session_state.paths['sel_img']}"
-#                 )
-#             if not os.path.exists(st.session_state.paths["sel_seg"]):
-#                 flag_files = 0
-#                 warn_msg = (
-#                     f"Missing overlay image: {st.session_state.paths['sel_seg']}"
-#                 )
-#
-#             crop_to_mask = False
-#             is_show_overlay = True
-#             list_orient = utilni.img_views
-#
-#             if flag_files == 0:
-#                 st.warning(warn_msg)
-#             else:
-#                 img, mask, img_masked = utilni.prep_image_and_olay(
-#                     st.session_state.paths["sel_img"],
-#                     st.session_state.paths["sel_seg"],
-#                     list_rois,
-#                     crop_to_mask
-#                 )
-#
-#                 # Detect mask bounds and center in each view
-#                 mask_bounds = utilni.detect_mask_bounds(mask)
-#
-#                 # Show images
-#                 blocks = st.columns(len(list_orient))
-#                 for i, tmp_orient in enumerate(list_orient):
-#                     with blocks[i]:
-#                         ind_view = utilni.img_views.index(tmp_orient)
-#                         if not is_show_overlay:
-#                             utilst.show_img3D(
-#                                 img, ind_view, mask_bounds[ind_view, :], tmp_orient
-#                             )
-#                         else:
-#                             utilst.show_img3D(
-#                                 img_masked,
-#                                 ind_view,
-#                                 mask_bounds[ind_view, :],
-#                                 tmp_orient
-#                             )
-#
-#         # Create a list of checkbox options
-#         list_orient = st.multiselect("Select viewing planes:", utilni.img_views, utilni.img_views)
-#
-#         # View hide overlay
-#         is_show_overlay = st.checkbox("Show overlay", True)
-#
-#         # Crop to mask area
-#         crop_to_mask = st.checkbox("Crop to mask", True)
-#
-#
-#
+
+    ################
+    # Show images
+    if flag_show_img:
+        # Check if data point selected
+        if st.session_state.sel_mrid == "":
+            st.warning("Please select a subject on the plot!")
+
+        else:
+            if not utilvi.check_image_underlay() or not utilvi.check_image_overlay():
+                utilvi.get_image_paths()
+
+        if not st.session_state.sel_mrid == "":
+            with st.spinner("Wait for it..."):
+
+                # Get selected y var
+                sel_var = st.session_state.plots.loc[st.session_state.plot_active, "yvar"]
+
+                # If roi dictionary was used, detect index
+                if st.session_state.roi_dict_rev is not None:
+                    sel_var = st.session_state.roi_dict_rev[sel_var]
+
+                print(sel_var)
+
+                # Check if index exists in overlay mask
+                is_in_mask = False
+                if os.path.exists(st.session_state.paths["sel_seg"]):
+                    is_in_mask = utilni.check_roi_index(st.session_state.paths["sel_seg"], sel_var)
+
+                if is_in_mask:
+                    list_rois = [int(sel_var)]
+
+                else:
+                    list_rois = utilmuse.get_derived_rois(
+                        sel_var,
+                        st.session_state.dicts["muse_derived"],
+                    )
+
+                # Process image and mask to prepare final 3d matrix to display
+                flag_files = 1
+                if not os.path.exists(st.session_state.paths["sel_img"]):
+                    flag_files = 0
+                    warn_msg = (
+                        f"Missing underlay image: {st.session_state.paths['sel_img']}"
+                    )
+                if not os.path.exists(st.session_state.paths["sel_seg"]):
+                    flag_files = 0
+                    warn_msg = (
+                        f"Missing overlay image: {st.session_state.paths['sel_seg']}"
+                    )
+
+                crop_to_mask = False
+                is_show_overlay = True
+                list_orient = utilni.img_views
+
+                if flag_files == 0:
+                    st.warning(warn_msg)
+                else:
+                    img, mask, img_masked = utilni.prep_image_and_olay(
+                        st.session_state.paths["sel_img"],
+                        st.session_state.paths["sel_seg"],
+                        list_rois,
+                        crop_to_mask
+                    )
+
+                    # Detect mask bounds and center in each view
+                    mask_bounds = utilni.detect_mask_bounds(mask)
+
+                    # Show images
+                    blocks = st.columns(len(list_orient))
+                    for i, tmp_orient in enumerate(list_orient):
+                        with blocks[i]:
+                            ind_view = utilni.img_views.index(tmp_orient)
+                            if not is_show_overlay:
+                                utilst.show_img3D(
+                                    img, ind_view, mask_bounds[ind_view, :], tmp_orient
+                                )
+                            else:
+                                utilst.show_img3D(
+                                    img_masked,
+                                    ind_view,
+                                    mask_bounds[ind_view, :],
+                                    tmp_orient
+                                )
+
+            # Create a list of checkbox options
+            list_orient = st.multiselect("Select viewing planes:", utilni.img_views, utilni.img_views)
+
+            # View hide overlay
+            is_show_overlay = st.checkbox("Show overlay", True)
+
+            # Crop to mask area
+            crop_to_mask = st.checkbox("Crop to mask", True)
+        
 if st.session_state.debug_show_state:
     with st.expander("DEBUG: Session state - all variables"):
         st.write(st.session_state)
