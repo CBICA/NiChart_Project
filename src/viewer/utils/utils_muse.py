@@ -56,7 +56,7 @@ def get_derived_rois(sel_roi: str, list_derived: list) -> Any:
     print(f'aaa {df}')
 
     # Keep only selected ROI
-    df = df[df[1].astype(str) == sel_roi]
+    df = df[df[0].astype(str) == sel_roi]
 
     if df.shape[0] == 0:
         return []

@@ -216,6 +216,15 @@ if show_panel_plots:
             sel_ind = list_roi.index(st.session_state.sel_roi)
             st.session_state.sel_roi = st.selectbox("Selected ROI", list_roi, sel_ind)
 
+        # Create a list of checkbox options
+        list_orient = st.multiselect("Select viewing planes:", utilni.img_views, utilni.img_views)
+
+        # View hide overlay
+        is_show_overlay = st.checkbox("Show overlay", True)
+
+        # Crop to mask area
+        crop_to_mask = st.checkbox("Crop to mask", True)
+
     ################
     # Show plots
 
@@ -308,10 +317,6 @@ if show_panel_plots:
                         f"Missing overlay image: {st.session_state.paths['sel_seg']}"
                     )
 
-                crop_to_mask = False
-                is_show_overlay = True
-                list_orient = utilni.img_views
-
                 if flag_files == 0:
                     st.warning(warn_msg)
                 else:
@@ -341,15 +346,6 @@ if show_panel_plots:
                                     mask_bounds[ind_view, :],
                                     tmp_orient
                                 )
-
-            # Create a list of checkbox options
-            list_orient = st.multiselect("Select viewing planes:", utilni.img_views, utilni.img_views)
-
-            # View hide overlay
-            is_show_overlay = st.checkbox("Show overlay", True)
-
-            # Crop to mask area
-            crop_to_mask = st.checkbox("Crop to mask", True)
         
 if st.session_state.debug_show_state:
     with st.expander("DEBUG: Session state - all variables"):
