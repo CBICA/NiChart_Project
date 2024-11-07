@@ -18,9 +18,9 @@ def browse_file(path_init: str) -> Any:
     root = tk.Tk()
     root.withdraw()  # Hide the main window
     out_file = filedialog.askopenfilename(initialdir=path_init)
-    out_dir = os.path.dirname(out_file)
+    dir_out = os.path.dirname(out_file)
     root.destroy()
-    return out_file, out_dir
+    return out_file, dir_out
 
 
 def browse_folder(path_init: str) -> str:
@@ -57,9 +57,9 @@ def zip_folder(in_dir: str, f_out: str) -> Optional[bytes]:
         )
 
         with open(f"{f_out}.zip", "rb") as f:
-            out_zip = f.read()
+            dir_download = f.read()
 
-        return out_zip
+        return dir_download
 
 
 def unzip_zip_files(in_dir: str) -> None:

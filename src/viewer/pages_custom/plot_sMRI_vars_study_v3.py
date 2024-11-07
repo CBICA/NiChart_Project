@@ -27,7 +27,7 @@ st.markdown(
 )
 
 
-# Panel for output (dataset name + out_dir)
+# Panel for output (dataset name + dir_out)
 utilst.util_panel_workingdir(st.session_state.app_type)
 
 # Select data csv from existing data files
@@ -44,7 +44,7 @@ if flag_update:
 
 # Panel for selecting input csv
 flag_disabled = not st.session_state.flags['dset']
-if st.session_state.app_type == "CLOUD":
+if st.session_state.app_type == "cloud":
     with st.expander(":material/upload: Upload Data", expanded=False):  # type:ignore
         flag_update = utilst.util_upload_file(
             st.session_state.paths["csv_plot"],
@@ -56,7 +56,7 @@ if st.session_state.app_type == "CLOUD":
         if not flag_disabled and os.path.exists(st.session_state.paths["csv_plot"]):
             st.success(f"Data is ready ({st.session_state.paths["csv_plot"]})", icon=":material/thumb_up:")
 
-else:  # st.session_state.app_type == 'DESKTOP'
+else:  # st.session_state.app_type == 'desktop'
     with st.expander(":material/upload: Select Data", expanded=False):
         flag_update = utilst.util_select_file(
             "selected_data_file",

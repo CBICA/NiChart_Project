@@ -26,8 +26,9 @@ st.markdown(
 st.divider()
 
 # Panel for selecting the working dir
+icon = st.session_state.icon_thumb[st.session_state.flags['dir_out']]
 show_panel_wdir = st.checkbox(
-    f":material/folder_shared: Working Directory {st.session_state.icons['out_dir']}",
+    f":material/folder_shared: Working Directory {icon}",
     value = False
 )
 if show_panel_wdir:
@@ -38,13 +39,14 @@ if show_panel_wdir:
                 f"All results will be saved to: {st.session_state.paths['dset']}",
                 icon=":material/thumb_up:",
             )
-            st.session_state.flags["out_dir"] = True
-            st.session_state.icons['out_dir'] = ':material/thumb_up:'        
+            st.session_state.flags["dir_out"] = True
 
 # Panel for selecting data csv
+msg = st.session_state.app_config[st.session_state.app_type]['msg_infile']
+icon = st.session_state.icon_thumb[st.session_state.flags['dir_dicom']]
 show_panel_incsv = st.checkbox(
-    f":material/upload: Select Data {st.session_state.icons['csv_plot']}",
-    disabled = not st.session_state.flags['out_dir'],
+    f":material/upload: {msg} Data {icon}",
+    disabled = not st.session_state.flags['dir_out'],
     value = False
 )
 if show_panel_incsv:
@@ -57,7 +59,7 @@ if show_panel_incsv:
                 st.session_state.flags['csv_plot'],
                 "visible"
             )
-        else:  # st.session_state.app_type == 'DESKTOP'
+        else:  # st.session_state.app_type == 'desktop'
             st.session_state.is_updated['csv_plot'] = utilst.util_select_file(
                 "selected_data_file",
                 "Data csv",
@@ -69,7 +71,6 @@ if show_panel_incsv:
         if os.path.exists(st.session_state.paths["csv_plot"]):
             st.success(f"Data is ready ({st.session_state.paths["csv_plot"]})", icon=":material/thumb_up:")
             st.session_state.flags['csv_plot'] = True
-            st.session_state.icons['csv_plot'] = ':material/thumb_up:'
 
         # Read input csv
         if st.session_state.is_updated['csv_plot']:
@@ -77,8 +78,9 @@ if show_panel_incsv:
             st.session_state.is_updated['csv_plot'] = False
 
 # Panel for renaming variables
+icon = st.session_state.icon_thumb[st.session_state.flags['dir_out']]
 show_panel_rename = st.checkbox(
-    f":material/new_label: Rename Variables {st.session_state.icons['out_dir']}",
+    f":material/new_label: Rename Variables",
     disabled = not st.session_state.flags['csv_plot'],
     value = False
 )

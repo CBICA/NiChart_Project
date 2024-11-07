@@ -62,7 +62,7 @@ def display_plot(df: pd.DataFrame, sel_mrid: str) -> None:
         st.plotly_chart(fig)
 
 
-# Panel for output (dataset name + out_dir)
+# Panel for output (dataset name + dir_out)
 utilst.util_panel_workingdir(st.session_state.app_type)
 
 # Panel for selecting input data

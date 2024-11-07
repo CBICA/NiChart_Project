@@ -14,7 +14,7 @@ st.markdown(
     """
 )
 
-# Panel for output (dataset name + out_dir)
+# Panel for output (dataset name + dir_out)
 utilst.util_panel_workingdir(st.session_state.app_type)
 
 # Set default path for the data csv
@@ -26,7 +26,7 @@ elif os.path.exists(st.session_state.paths["csv_dlmuse"]):
 # Panel for selecting input csv
 flag_disabled = not st.session_state.flags['dset']
 
-if st.session_state.app_type == "CLOUD":
+if st.session_state.app_type == "cloud":
     with st.expander(":material/upload: Upload data", expanded=False):  # type:ignore
         utilst.util_upload_file(
             st.session_state.paths["csv_dlmuse"],
@@ -38,7 +38,7 @@ if st.session_state.app_type == "CLOUD":
         if not flag_disabled and os.path.exists(st.session_state.paths["csv_plot"]):
             st.success(f"Data is ready ({st.session_state.paths["csv_plot"]})", icon=":material/thumb_up:")
 
-else:  # st.session_state.app_type == 'DESKTOP'
+else:  # st.session_state.app_type == 'desktop'
     with st.expander(":material/upload: Select data", expanded=False):
         utilst.util_select_file(
             "selected_data_file",
@@ -71,16 +71,16 @@ else:  # st.session_state.app_type == 'DESKTOP'
         utilst.util_select_folder(
             "key_sel_dlmuse_folder_viewer",
             "T1 nifti image folder",
-            st.session_state.paths["DLMUSE"],
+            st.session_state.paths["dlmuse"],
             st.session_state.paths["last_in_dir"],
             flag_disabled,
         )
         if not flag_disabled:
-            fcount = utilio.get_file_count(st.session_state.paths["DLMUSE"])
+            fcount = utilio.get_file_count(st.session_state.paths["dlmuse"])
             if fcount > 0:
                 st.session_state.flags['DLMUSE'] = True
                 st.success(
-                    f"Data is ready ({st.session_state.paths["DLMUSE"]}, {fcount} files)",
+                    f"Data is ready ({st.session_state.paths["dlmuse"]}, {fcount} files)",
                     icon=":material/thumb_up:"
                 )
 
@@ -141,7 +141,7 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
                 st.session_state.paths["T1"], sel_mrid + st.session_state.suff_t1img
             )
             st.session_state.paths["sel_seg"] = os.path.join(
-                st.session_state.paths["DLMUSE"], sel_mrid + st.session_state.suff_seg
+                st.session_state.paths["dlmuse"], sel_mrid + st.session_state.suff_seg
             )
 
             flag_img = os.path.exists(st.session_state.paths["sel_img"]) and os.path.exists(

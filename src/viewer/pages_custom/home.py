@@ -6,9 +6,18 @@ import streamlit as st
 # Initiate Session State Values
 if "instantiated" not in st.session_state:
 
-    # App type ('DESKTOP' or 'CLOUD')
-    st.session_state.app_type = "CLOUD"
-    st.session_state.app_type = "DESKTOP"
+    # App type ('desktop' or 'cloud')
+    st.session_state.app_type = "cloud"
+    st.session_state.app_type = "desktop"
+    
+    st.session_state.app_config = {
+        'cloud': {
+            'msg_infile': 'Upload'
+        },
+        'desktop': {
+            'msg_infile': 'Select'
+        }
+    }
 
     # Flag to keep state for panels
     st.session_state.flags_plotsmri = {
@@ -27,34 +36,45 @@ if "instantiated" not in st.session_state:
     # Study name
     st.session_state.dset = ""
 
-    # Icons for panels
-    st.session_state.icons = {
-        'out_dir': ':material/thumb_down:',
-        'out_zip': ':material/thumb_down:',
-        'csv_plot': ':material/thumb_down:',
-        'dicom_dir': ':material/thumb_down:',
-        'dicom_series': ':material/thumb_down:',
-        'out_nifti': ':material/thumb_down:',
-        'csv_dlmuse': ':material/thumb_down:',
-        'mlscores': ':material/thumb_down:'
+    # Flags for various i/o
+    st.session_state.icon_thumb = {
+        False: ':material/thumb_down:',
+        True: ':material/thumb_up:'
+    }
+
+    # Flags for various i/o
+    st.session_state.flags = {
+        'dset': False,        
+        'dir_out': False,
+        'dir_dicom': False,
+        'dicom_series': False,
+        'dir_nifti': False,
+        'dir_t1': False,
+        'dir_dlmuse': False,
+        'csv_dlmuse': False,
+        'csv_demog': False,
+        'csv_dlmuse+demog': False,
+        'dir_download': False,
+        'csv_mlscores': False,
+        'csv_plot': False,
     }
 
     # Predefined paths for different tasks in the final results
     # The path structure allows nested folders with two levels
     # This should be good enough to keep results organized
     st.session_state.dict_paths = {
-        "Lists": ["", "Lists"],
-        "Dicoms": ["", "Dicoms"],
-        "Nifti": ["", "Nifti"],
+        "lists": ["", "Lists"],
+        "dicom": ["", "Dicoms"],
+        "nifti": ["", "Nifti"],
         "T1": ["Nifti", "T1"],
         "T2": ["Nifti", "T2"],
         "FL": ["Nifti", "FL"],
         "DTI": ["Nifti", "DTI"],
         "fMRI": ["Nifti", "fMRI"],
-        "DLMUSE": ["", "DLMUSE"],
-        "MLScores": ["", "MLScores"],
-        "Plots": ["", "Plots"],
-        "OutZipped": ["", "OutZipped"],
+        "dlmuse": ["", "DLMUSE"],
+        "mlscores": ["", "MLScores"],
+        "plots": ["", "Plots"],
+        "download": ["", "Download"],
     }
 
     # Paths to input/output files/folders
@@ -65,21 +85,21 @@ if "instantiated" not in st.session_state:
         "target_dir": "",
         "target_file": "",
         "dset": "",
-        "out_dir": "",
-        "Lists": "",
-        "Nifti": "",
-        "Dicoms": "",
-        "user_dicoms": "",
+        "dir_out": "",
+        "lists": "",
+        "dicom": "",
+        "nifti": "",
+        "user_dicom": "",
         "T1": "",
         "user_T1": "",
         "T2": "",
         "FL": "",
         "DTI": "",
         "fMRI": "",
-        "DLMUSE": "",
-        "MLScores": "",
-        "OutZipped": "",
-        "Plots": "",
+        "dlmuse": "",
+        "mlscores": "",
+        "download": "",
+        "plots": "",
         "sel_img": "",
         "sel_seg": "",
         "csv_demog": "",
@@ -96,25 +116,25 @@ if "instantiated" not in st.session_state:
     }
 
 
-    # Flags to show if various input/output exist
-    st.session_state.flags = {
-        "dset": False,
-        "out_dir": False,
-        "Dicoms": False,
-        "dicom_series": False,
-        "Nifti": False,
-        "T1": False,
-        "T2": False,
-        "FL": False,
-        "DTI": False,
-        "fMRI": False,
-        "DLMUSE": False,
-        "csv_dlmuse": False,
-        "csv_mlscores": False,
-        "csv_plot": False,
-        "sel_img": False,
-        "sel_mask": False
-    }
+    ## Flags to show if various input/output exist
+    #st.session_state.flags = {
+        #"dset": False,
+        #"dir_out": False,
+        #"dicoms": False,
+        #"dicom_series": False,
+        #"nifti": False,
+        #"T1": False,
+        #"T2": False,
+        #"FL": False,
+        #"DTI": False,
+        #"fMRI": False,
+        #"dlmuse": False,
+        #"csv_dlmuse": False,
+        #"csv_mlscores": False,
+        #"csv_plot": False,
+        #"sel_img": False,
+        #"sel_mask": False
+    #}
 
     # Flags to keep updates in user input/output
     st.session_state.is_updated = {
@@ -134,17 +154,17 @@ if "instantiated" not in st.session_state:
     st.session_state.paths["last_in_dir"] = st.session_state.paths["init"]
 
     # FIXME: This sets the default out path to a folder inside the root folder for now
-    st.session_state.paths["out_dir"] = os.path.join(
+    st.session_state.paths["dir_out"] = os.path.join(
         st.session_state.paths["root"],
         "output_folder"
     )
-    if not os.path.exists(st.session_state.paths["out_dir"]):
-        os.makedirs(st.session_state.paths["out_dir"])
+    if not os.path.exists(st.session_state.paths["dir_out"]):
+        os.makedirs(st.session_state.paths["dir_out"])
         
     #########################################
 
     # Image modalities
-    st.session_state.list_mods = ["T1", "T2", "FL", "DTI", "rMRI"]
+    st.session_state.list_mods = ["T1", "T2", "FL", "DTI", "fMRI"]
 
     # Dictionaries
     res_dir = os.path.join(st.session_state.paths["root"], "resources")
@@ -258,15 +278,15 @@ with st.sidebar.expander('Flags'):
     else:
         st.session_state.debug_show_flags = False
 
-    if st.checkbox("Show all session state vars?", value=True):
+    if st.checkbox("Show all session state vars?", value=False):
         st.session_state.debug_show_state = True
     else:
         st.session_state.debug_show_state = False
 
-    if st.checkbox("Switch to CLOUD?"):
-        st.session_state.app_type = 'CLOUD'
+    if st.checkbox("Switch to cloud?"):
+        st.session_state.app_type = 'cloud'
     else:
-        st.session_state.app_type = 'DESKTOP'
+        st.session_state.app_type = 'desktop'
 
 st.markdown(
     """

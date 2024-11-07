@@ -26,8 +26,9 @@ st.markdown(
 st.divider()
 
 # Panel for selecting the working dir
+icon = st.session_state.icon_thumb[st.session_state.flags['dir_out']]
 show_panel_wdir = st.checkbox(
-    f":material/folder_shared: Working Directory {st.session_state.icons['out_dir']}",
+    f":material/folder_shared: Working Directory {icon}",
     value = False
 )
 if show_panel_wdir:
@@ -38,18 +39,19 @@ if show_panel_wdir:
                 f"All results will be saved to: {st.session_state.paths['dset']}",
                 icon=":material/thumb_up:",
             )
-            st.session_state.flags["out_dir"] = True
-            st.session_state.icons['out_dir'] = ':material/thumb_up:'
+            st.session_state.flags["dir_out"] = True
 
 # Panel for uploading input data csv
+msg = st.session_state.app_config[st.session_state.app_type]['msg_infile']
+icon = st.session_state.icon_thumb[st.session_state.flags['csv_dlmuse+demog']]
 show_panel_indata = st.checkbox(
-    f":material/upload: Select/Upload Data {st.session_state.icons['csv_dlmuse']}",
-    disabled = not st.session_state.flags['out_dir'],
+    f":material/upload: {msg} Data {icon}",
+    disabled = not st.session_state.flags['dir_out'],
     value = False
 )
 if show_panel_indata:
     with st.container(border=True):
-        if st.session_state.app_type == "CLOUD":
+        if st.session_state.app_type == "cloud":
             utilst.util_upload_file(
                 st.session_state.paths["csv_dlmuse"],
                 "DLMUSE csv",
@@ -70,7 +72,7 @@ if show_panel_indata:
             if os.path.exists(st.session_state.paths["csv_demog"]):
                 st.success(f"Data is ready ({st.session_state.paths["csv_demog"]})", icon=":material/thumb_up:")
 
-        else:  # st.session_state.app_type == 'DESKTOP'
+        else:  # st.session_state.app_type == 'desktop'
             utilst.util_select_file(
                 "selected_dlmuse_file",
                 "DLMUSE csv",
@@ -93,27 +95,28 @@ if show_panel_indata:
                     f"Data is ready ({st.session_state.paths["csv_demog"]})",
                     icon=":material/thumb_up:"
                 )
-        if os.path.exists(st.session_state.paths["csv_demog"]) and os.path.exists(st.session_state.paths["csv_demog"]):
-            st.session_state.icons['csv_dlmuse'] = ':material/thumb_up:'
+        if os.path.exists(st.session_state.paths["csv_dlmuse"]) and os.path.exists(st.session_state.paths["csv_demog"]):
+            st.session_state.flags['csv_dlmuse+demog'] = True
 
 
 # Panel for running MLScore
+icon = st.session_state.icon_thumb[st.session_state.flags['csv_mlscores']]
 show_panel_runml = st.checkbox(
-    f":material/upload: Run MLScores {st.session_state.icons['mlscores']}",
-    disabled = not st.session_state.flags['csv_dlmuse'],
+    f":material/upload: Run MLScores {icon}",
+    disabled = not st.session_state.flags['csv_dlmuse+demog'],
     value = False
 )
 if show_panel_runml:
     with st.container(border=True):
 
-        btn_mlscore = st.button("Run MLScore", disabled = flag_disabled)
+        btn_mlscore = st.button("Run MLScore", disabled = False)
         if btn_mlscore:
             run_dir = os.path.join(
                 st.session_state.paths["root"], "src", "workflow", "workflows", "w_sMRI"
             )
 
-            if not os.path.exists(st.session_state.paths["MLScores"]):
-                os.makedirs(st.session_state.paths["MLScores"])
+            if not os.path.exists(st.session_state.paths["mlscores"]):
+                os.makedirs(st.session_state.paths["mlscores"])
 
             with st.spinner("Wait for it..."):
                 os.system(f"cd {run_dir}")
@@ -121,7 +124,7 @@ if show_panel_runml:
 
                 # cmd = f"python3 {run_dir}/call_snakefile.py --run_dir {run_dir} --dset_name {st.session_state.dset} --input_rois {csv_dlmuse} --input_demog {csv_demog} --dir_out {st.session_state.paths['MLScores']}"
 
-                cmd = f"python3 {run_dir}/workflow_mlscores.py --root_dir {st.session_state.paths['root']} --run_dir {run_dir} --dset_name {st.session_state.dset} --input_rois {st.session_state.paths['csv_dlmuse']} --input_demog {st.session_state.paths['csv_demog']} --dir_out {st.session_state.paths['MLScores']}"
+                cmd = f"python3 {run_dir}/workflow_mlscores.py --root_dir {st.session_state.paths['root']} --run_dir {run_dir} --dset_name {st.session_state.dset} --input_rois {st.session_state.paths['csv_dlmuse']} --input_demog {st.session_state.paths['csv_demog']} --dir_out {st.session_state.paths['mlscores']}"
                 print(f"About to run: {cmd}")
                 os.system(cmd)
 
@@ -131,12 +134,13 @@ if show_panel_runml:
                 f"Data is ready ({st.session_state.paths['csv_mlscores']})",
                 icon=":material/thumb_up:",
             )
+            st.session_state.flags['csv_mlscores'] = True
 
 # Panel for downloading results
-if st.session_state.app_type == "CLOUD":
+if st.session_state.app_type == "cloud":
     show_panel_download = st.checkbox(
-        f":material/new_label: Download Scans {st.session_state.icons['out_zip']}",
-        disabled = not st.session_state.flags['csv_plot'],
+        f":material/new_label: Download Scans",
+        disabled = not st.session_state.flags['csv_mlscores'],
         value = False
     )
     if show_panel_download:

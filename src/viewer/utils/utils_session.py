@@ -16,21 +16,21 @@ def update_default_paths() -> None:
         print(f"setting {st.session_state.paths[d_tmp]}")
 
     st.session_state.paths["csv_dlmuse"] = os.path.join(
-        st.session_state.paths["dset"], "DLMUSE", "DLMUSE_Volumes.csv"
+        st.session_state.paths["dset"], "dlmuse", "DLMUSE_Volumes.csv"
     )
 
     st.session_state.paths["csv_mlscores"] = os.path.join(
         st.session_state.paths["dset"],
-        "MLScores",
+        "mlscores",
         f"{st.session_state.dset}_DLMUSE+MLScores.csv",
     )
 
     st.session_state.paths["csv_demog"] = os.path.join(
-        st.session_state.paths["dset"], "Lists", "Demog.csv"
+        st.session_state.paths["dset"], "lists", "Demog.csv"
     )
 
     st.session_state.paths["csv_plot"] = os.path.join(
-        st.session_state.paths["dset"], "Plots", "Data.csv"
+        st.session_state.paths["dset"], "plots", "Data.csv"
     )
 
 

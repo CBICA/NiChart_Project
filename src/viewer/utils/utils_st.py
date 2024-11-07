@@ -183,25 +183,25 @@ def util_panel_workingdir(app_type: str) -> None:
         "Study name", st.session_state.dset, helpmsg, False
     )
 
-    if app_type == "DESKTOP":
+    if app_type == "desktop":
         # Read output folder from the user
         helpmsg = "Results will be saved to the output folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
-        out_dir = user_input_foldername(
+        dir_out = user_input_foldername(
             "Select folder",
-            "btn_sel_out_dir",
+            "btn_sel_dir_out",
             "Output folder",
             st.session_state.paths["last_in_dir"],
-            st.session_state.paths["out_dir"],
+            st.session_state.paths["dir_out"],
             helpmsg,
             False,
         )
-        if out_dir != "":
-            st.session_state.paths["out_dir"] = out_dir
+        if dir_out != "":
+            st.session_state.paths["dir_out"] = dir_out
 
     # Create results folder
-    if st.session_state.dset != "" and st.session_state.paths["out_dir"] != "":
+    if st.session_state.dset != "" and st.session_state.paths["dir_out"] != "":
         st.session_state.paths["dset"] = os.path.join(
-            st.session_state.paths["out_dir"], st.session_state.dset
+            st.session_state.paths["dir_out"], st.session_state.dset
         )
 
     # Check if results folder name changed
@@ -223,7 +223,7 @@ def copy_uploaded_to_dir() -> None:
 
 
 def util_upload_folder(
-    out_dir: str, title_txt: str, flag_disabled: bool, help_txt: str
+    dir_out: str, title_txt: str, flag_disabled: bool, help_txt: str
 ) -> None:
     """
     Upload user data to target folder
@@ -231,9 +231,9 @@ def util_upload_folder(
     """
     # Set target path
     if not flag_disabled:
-        if not os.path.exists(out_dir):
-            os.makedirs(out_dir)
-        st.session_state.paths["target_path"] = out_dir
+        if not os.path.exists(dir_out):
+            os.makedirs(dir_out)
+        st.session_state.paths["target_path"] = dir_out
 
     # Upload data
     st.file_uploader(
@@ -282,7 +282,7 @@ def util_upload_file(
 def util_select_folder(
     key_selector: str,
     title_txt: str,
-    out_dir: str,
+    dir_out: str,
     last_in_dir: str,
     flag_disabled: bool,
 ) -> None:
@@ -291,10 +291,10 @@ def util_select_folder(
     """
     # Check if out folder already exists
     curr_dir = ""
-    if os.path.exists(out_dir):
-        fcount = utilio.get_file_count(out_dir)
+    if os.path.exists(dir_out):
+        fcount = utilio.get_file_count(dir_out)
         if fcount > 0:
-            curr_dir = out_dir
+            curr_dir = dir_out
 
     # Upload data
     helpmsg = "Select input folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
@@ -308,12 +308,12 @@ def util_select_folder(
         flag_disabled,
     )
 
-    if not os.path.exists(out_dir) and os.path.exists(sel_dir):
+    if not os.path.exists(dir_out) and os.path.exists(sel_dir):
         # Create parent dir of output dir
-        if not os.path.exists(os.path.dirname(out_dir)):
-            os.makedirs(os.path.dirname(out_dir))
+        if not os.path.exists(os.path.dirname(dir_out)):
+            os.makedirs(os.path.dirname(dir_out))
         # Link user input dicoms
-        os.symlink(sel_dir, out_dir)
+        os.symlink(sel_dir, dir_out)
 
 
 def util_select_file(

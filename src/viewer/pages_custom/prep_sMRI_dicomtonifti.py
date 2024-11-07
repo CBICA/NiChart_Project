@@ -17,7 +17,7 @@ def progress(p: int, i: int, decoded: Any) -> None:
 st.markdown(
     """
     - Extracts raw DICOM files to NIFTI format.
-    - Automatically identifies and separates different imaging series.
+    - Automatically identifies different imaging series.
     - Allows users to select specific series for extraction.
     - Generates consistently named NIFTI files based on DICOM information.
     - Provides a visual review of extracted images.
@@ -27,8 +27,9 @@ st.markdown(
 st.divider()
 
 # Panel for selecting the working dir
+icon = st.session_state.icon_thumb[st.session_state.flags['dir_out']]
 show_panel_wdir = st.checkbox(
-    f":material/folder_shared: Working Directory {st.session_state.icons['out_dir']}",
+    f":material/folder_shared: Working Directory {icon}",
     value = False
 )
 if show_panel_wdir:
@@ -39,67 +40,67 @@ if show_panel_wdir:
                 f"All results will be saved to: {st.session_state.paths['dset']}",
                 icon=":material/thumb_up:",
             )
-            st.session_state.flags["out_dir"] = True
-            st.session_state.icons['out_dir'] = ':material/thumb_up:'
+            st.session_state.flags["dir_out"] = True
 
 # Panel for uploading input dicoms
+msg = st.session_state.app_config[st.session_state.app_type]['msg_infile']
+icon = st.session_state.icon_thumb[st.session_state.flags['dir_dicom']]
 show_panel_indicoms = st.checkbox(
-    f":material/upload: Select/Upload Dicoms {st.session_state.icons['dicom_dir']}",
-    disabled = not st.session_state.flags['out_dir'],
+    f":material/upload: {msg} Dicoms {icon}",
+    disabled = not st.session_state.flags['dir_out'],
     value = False
 )
 if show_panel_indicoms:
     with st.container(border=True):
-        if st.session_state.app_type == "CLOUD":
+        if st.session_state.app_type == "cloud":
             # Upload data
             utilst.util_upload_folder(
-                st.session_state.paths["Dicoms"],
+                st.session_state.paths["dicom"],
                 "Dicom files or folders",
                 False,
                 "Raw dicom files can be uploaded as a folder, multiple files, or a single zip file"
             )
-            fcount = utilio.get_file_count(st.session_state.paths["Dicoms"])
+            fcount = utilio.get_file_count(st.session_state.paths["dicom"])
             if fcount > 0:
-                st.session_state.flags['Dicoms'] = True
+                st.session_state.flags['dir_dicom'] = True
                 st.success(
-                    f"Data is ready ({st.session_state.paths["Dicoms"]}, {fcount} files)",
+                    f"Data is ready ({st.session_state.paths["dicom"]}, {fcount} files)",
                     icon=":material/thumb_up:"
                 )
-                st.session_state.icons['dicom_dir'] = ':material/thumb_up:'
 
-        else:  # st.session_state.app_type == 'DESKTOP'
+        else:  # st.session_state.app_type == 'desktop'
             utilst.util_select_folder(
                 "selected_dicom_folder",
                 "Dicom folder",
-                st.session_state.paths["Dicoms"],
+                st.session_state.paths["dicom"],
                 st.session_state.paths["last_in_dir"],
                 False,
             )
-            fcount = utilio.get_file_count(st.session_state.paths["Dicoms"])
+            fcount = utilio.get_file_count(st.session_state.paths["dicom"])
             if fcount > 0:
-                st.session_state.flags['Dicoms'] = True
+                st.session_state.flags['dir_dicom'] = True
                 st.success(
-                    f"Data is ready ({st.session_state.paths["Dicoms"]}, {fcount} files)",
+                    f"Data is ready ({st.session_state.paths["dicom"]}, {fcount} files)",
                     icon=":material/thumb_up:"
                 )
-                st.session_state.icons['dicom_dir'] = ':material/thumb_up:'
 
 # Panel for detecting dicom series
+icon = st.session_state.icon_thumb[st.session_state.flags['dicom_series']]
 show_panel_detect = st.checkbox(
-    f":material/new_label: Detect Dicom Series {st.session_state.icons['dicom_series']}",
-    disabled = not st.session_state.flags['Dicoms'],
+    f":material/manage_search: Detect Dicom Series {icon}",
+    disabled = not st.session_state.flags['dir_dicom'],
     value = False
 )
 if show_panel_detect:
     with st.container(border=True):
-        flag_disabled = not st.session_state.flags['Dicoms']
+        flag_disabled = not st.session_state.flags['dir_dicom']
 
         # Detect dicom series
         num_scans = 0
         btn_detect = st.button("Detect Series", disabled=flag_disabled)
         if btn_detect:
             with st.spinner("Wait for it..."):
-                df_dicoms = utildcm.detect_series(st.session_state.paths["Dicoms"])
+                df_dicoms = utildcm.detect_series(st.session_state.paths["dicom"])
                 list_series = df_dicoms.SeriesDesc.unique()
                 num_dicom_scans = (
                     df_dicoms[["PatientID", "StudyDate", "SeriesDesc"]]
@@ -116,12 +117,11 @@ if show_panel_detect:
                 f"Detected {st.session_state.num_dicom_scans} scans in {len(st.session_state.list_series)} series!",
                 icon=":material/thumb_up:"
             )
-            st.session_state.icons['dicom_series'] = ':material/thumb_up:'
-
 
 # Panel for selecting and extracting dicom series
+icon = st.session_state.icon_thumb[st.session_state.flags['dir_nifti']]
 show_panel_extract = st.checkbox(
-    f":material/new_label: Extract Scans {st.session_state.icons['out_nifti']}",
+    f":material/auto_awesome_motion: Extract Scans {icon}",
     disabled = not st.session_state.flags['dicom_series'],
     value = False
 )
@@ -169,19 +169,17 @@ if show_panel_extract:
             '.nii.gz'
         )
         if num_nifti > 0:
-            st.session_state.flags['Nifti'] = True
+            st.session_state.flags['dir_nifti'] = True
             st.session_state.flags[st.session_state.sel_mod] = True
             st.success(
                 f"Nifti images are ready ({st.session_state.paths[st.session_state.sel_mod]}, {num_nifti} scan(s))",
                 icon=":material/thumb_up:",
             )
-            st.session_state.icons['out_nifti'] = ':material/thumb_up:'
-
 
 # Panel for viewing extracted nifti images
 show_panel_view = st.checkbox(
-    f":material/new_label: View Scans",
-    disabled = not st.session_state.flags['Nifti'],
+    f":material/visibility: View Scans",
+    disabled = not st.session_state.flags['dir_nifti'],
     value = False
 )
 if show_panel_view:
@@ -254,17 +252,14 @@ if show_panel_view:
                         )
 
 # Panel for downloading extracted nifti images
-if st.session_state.app_type == "CLOUD":
+if st.session_state.app_type == "cloud":
     show_panel_view = st.checkbox(
-        f":material/new_label: Download Scans {st.session_state.icons['out_zip']}",
-        disabled = not st.session_state.flags['csv_plot'],
+        f":material/download: Download Scans",
+        disabled = not st.session_state.flags['dir_nifti'],
         value = False
     )
     if show_panel_view:
         with st.container(border=True):
-
-            flag_disabled = not st.session_state.flags['Nifti']
-
             # Selection of img modality
             sel_mod = utilst.user_input_select(
                 "Image Modality",
@@ -272,31 +267,28 @@ if st.session_state.app_type == "CLOUD":
                 ['All'] + st.session_state.list_mods,
                 None,
                 "Modality of the images to download",
-                flag_disabled
+                False
             )
 
             if sel_mod is not None:
                 st.session_state.sel_mod = sel_mod
                 if st.session_state.sel_mod == 'All':
-                    st.session_state.sel_mod = 'Nifti'
-
-            flag_disabled = not os.path.exists(st.session_state.paths[st.session_state.sel_mod])
+                    st.session_state.sel_mod = 'nifti'
 
             out_zip = bytes()
-            if not flag_disabled:
-                if not os.path.exists(st.session_state.paths["OutZipped"]):
-                    os.makedirs(st.session_state.paths["OutZipped"])
-                f_tmp = os.path.join(
-                    st.session_state.paths["OutZipped"],
-                    f"{st.session_state.sel_mod}"
-                )
-                out_zip = utilio.zip_folder(st.session_state.paths[st.session_state.sel_mod], f_tmp)
+            if not os.path.exists(st.session_state.paths["download"]):
+                os.makedirs(st.session_state.paths["download"])
+            f_tmp = os.path.join(
+                st.session_state.paths["download"],
+                f"{st.session_state.sel_mod}"
+            )
+            out_zip = utilio.zip_folder(st.session_state.paths[st.session_state.sel_mod], f_tmp)
 
             st.download_button(
                 "Download Extracted Scans",
                 out_zip,
                 file_name=f"{st.session_state.dset}_{st.session_state.sel_mod}.zip",
-                disabled = flag_disabled
+                disabled = False
             )
 
 if st.session_state.debug_show_state:

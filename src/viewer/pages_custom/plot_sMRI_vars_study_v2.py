@@ -9,7 +9,7 @@ import utils.utils_viewimg as utilvi
 import utils.utils_plot as utilpl
 from stqdm import stqdm
 
-# Panel for output (dataset name + out_dir)
+# Panel for output (dataset name + dir_out)
 utilst.util_panel_workingdir(st.session_state.app_type)
 
 # Set default path for the data csv
@@ -21,7 +21,7 @@ elif os.path.exists(st.session_state.paths["csv_dlmuse"]):
 # Panel for selecting input csv
 flag_disabled = not st.session_state.flags['dset']
 
-if st.session_state.app_type == "CLOUD":
+if st.session_state.app_type == "cloud":
     with st.expander(":material/upload: Upload data", expanded=False):  # type:ignore
         utilst.util_upload_file(
             st.session_state.paths["csv_plot"],
@@ -33,7 +33,7 @@ if st.session_state.app_type == "CLOUD":
         if not flag_disabled and os.path.exists(st.session_state.paths["csv_plot"]):
             st.success(f"Data is ready ({st.session_state.paths["csv_plot"]})", icon=":material/thumb_up:")
 
-else:  # st.session_state.app_type == 'DESKTOP'
+else:  # st.session_state.app_type == 'desktop'
     with st.expander(":material/upload: Select data", expanded=False):
         utilst.util_select_file(
             "selected_data_file",

@@ -44,7 +44,7 @@ def check_image_underlay() -> bool:
 
 def check_image_overlay() -> bool:
     sel_img = detect_image_path(
-        st.session_state.paths["DLMUSE"],
+        st.session_state.paths["dlmuse"],
         st.session_state.sel_mrid,
         st.session_state.suff_seg,
     )
@@ -59,7 +59,7 @@ def get_image_paths() -> None:
     """
     Reads image path and suffix info from the user
     """
-    if st.session_state.app_type == "CLOUD":
+    if st.session_state.app_type == "cloud":
         st.warning(
             "Sorry, there are no images to show! Uploading images for viewing purposes is not implemented in the cloud version!"
         )
@@ -93,7 +93,7 @@ def get_image_paths() -> None:
         utilst.util_select_folder(
             "selected_dlmuse_folder",
             "Overlay image folder",
-            st.session_state.paths["DLMUSE"],
+            st.session_state.paths["dlmuse"],
             st.session_state.paths["last_in_dir"],
             False,
         )

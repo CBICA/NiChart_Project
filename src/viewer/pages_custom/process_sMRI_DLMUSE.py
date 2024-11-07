@@ -21,8 +21,9 @@ st.markdown(
 st.divider()
 
 # Panel for selecting the working dir
+icon = st.session_state.icon_thumb[st.session_state.flags['dir_out']]
 show_panel_wdir = st.checkbox(
-    f":material/folder_shared: Working Directory {st.session_state.icons['out_dir']}",
+    f":material/folder_shared: Working Directory {icon}",
     value = False
 )
 if show_panel_wdir:
@@ -33,18 +34,19 @@ if show_panel_wdir:
                 f"All results will be saved to: {st.session_state.paths['dset']}",
                 icon=":material/thumb_up:",
             )
-            st.session_state.flags["out_dir"] = True
-            st.session_state.icons['out_dir'] = ':material/thumb_up:'
+            st.session_state.flags["dir_out"] = True
 
-# Panel for uploading input dicoms
-show_panel_indicoms = st.checkbox(
-    f":material/upload: Select/Upload Dicoms {st.session_state.icons['dicom_dir']}",
-    disabled = not st.session_state.flags['out_dir'],
+# Panel for uploading input t1 images
+msg =  st.session_state.app_config[st.session_state.app_type]['msg_infile']
+icon = st.session_state.icon_thumb[st.session_state.flags['dir_t1']]
+show_panel_int1 = st.checkbox(
+    f":material/upload: {msg} T1 Images {icon}",
+    disabled = not st.session_state.flags['dir_out'],
     value = False
 )
-if show_panel_indicoms:
+if show_panel_int1:
     with st.container(border=True):
-        if st.session_state.app_type == "CLOUD":
+        if st.session_state.app_type == "cloud":
             utilst.util_upload_folder(
                 st.session_state.paths["T1"], "T1 images", False,
                 "Nifti images can be uploaded as a folder, multiple files, or a single zip file"
@@ -57,7 +59,7 @@ if show_panel_indicoms:
                     icon=":material/thumb_up:"
                 )
 
-        else:  # st.session_state.app_type == 'DESKTOP'
+        else:  # st.session_state.app_type == 'desktop'
             utilst.util_select_folder(
                 "selected_img_folder",
                 "T1 nifti image folder",
@@ -67,16 +69,17 @@ if show_panel_indicoms:
             )
             fcount = utilio.get_file_count(st.session_state.paths["T1"])
             if fcount > 0:
-                st.session_state.flags['T1'] = True
+                st.session_state.flags['dir_t1'] = True
                 st.success(
                     f"Data is ready ({st.session_state.paths["T1"]}, {fcount} files)",
                     icon=":material/thumb_up:"
                 )
 
 # Panel for running DLMUSE
+icon = st.session_state.icon_thumb[st.session_state.flags['csv_dlmuse']]
 show_panel_rundlmuse = st.checkbox(
-    f":material/new_label: Run DLMUSE {st.session_state.icons['dicom_series']}",
-    disabled = not st.session_state.flags['Dicoms'],
+    f":material/new_label: Run DLMUSE {icon}",
+    disabled = not st.session_state.flags['dir_t1'],
     value = False
 )
 if show_panel_rundlmuse:
@@ -96,31 +99,31 @@ if show_panel_rundlmuse:
         btn_seg = st.button("Run DLMUSE", disabled = False)
         if btn_seg:
             run_dir = os.path.join(st.session_state.paths["root"], "src", "NiChart_DLMUSE")
-            if not os.path.exists(st.session_state.paths["DLMUSE"]):
-                os.makedirs(st.session_state.paths["DLMUSE"])
+            if not os.path.exists(st.session_state.paths["dlmuse"]):
+                os.makedirs(st.session_state.paths["dlmuse"])
 
             with st.spinner("Wait for it..."):
-                dlmuse_cmd = f"NiChart_DLMUSE -i {st.session_state.paths['T1']} -o {st.session_state.paths['DLMUSE']} -d {device} --cores 1"
+                dlmuse_cmd = f"NiChart_DLMUSE -i {st.session_state.paths['T1']} -o {st.session_state.paths['dlmuse']} -d {device} --cores 1"
                 st.info(f"Running: {dlmuse_cmd}", icon=":material/manufacturing:")
 
                 # FIXME : bypass dlmuse run
                 print(f"About to run: {dlmuse_cmd}")
                 os.system(dlmuse_cmd)
 
-        out_csv = f"{st.session_state.paths['DLMUSE']}/DLMUSE_Volumes.csv"
-        num_dlmuse = utilio.get_file_count(st.session_state.paths["DLMUSE"], '.nii.gz')
+        out_csv = f"{st.session_state.paths['dlmuse']}/DLMUSE_Volumes.csv"
+        num_dlmuse = utilio.get_file_count(st.session_state.paths["dlmuse"], '.nii.gz')
         if os.path.exists(out_csv):
             st.session_state.paths["csv_dlmuse"] = out_csv
             st.session_state.flags["csv_dlmuse"] = True
             st.success(
-                f"DLMUSE images are ready ({st.session_state.paths['DLMUSE']}, {num_dlmuse} scan(s))",
+                f"DLMUSE images are ready ({st.session_state.paths['dlmuse']}, {num_dlmuse} scan(s))",
                 icon=":material/thumb_up:",
         )
 
 # Panel for viewing DLMUSE images
 show_panel_view = st.checkbox(
     f":material/new_label: View Scans",
-    disabled = not st.session_state.flags['Nifti'],
+    disabled = not st.session_state.flags['csv_dlmuse'],
     value = False
 )
 if show_panel_view:
@@ -169,7 +172,7 @@ if show_panel_view:
                 st.session_state.paths["T1"], sel_mrid + st.session_state.suff_t1img
             )
             st.session_state.paths["sel_seg"] = os.path.join(
-                st.session_state.paths["DLMUSE"], sel_mrid + st.session_state.suff_seg
+                st.session_state.paths["dlmuse"], sel_mrid + st.session_state.suff_seg
             )
 
             flag_img = os.path.exists(st.session_state.paths["sel_img"]) and os.path.exists(
@@ -209,10 +212,10 @@ if show_panel_view:
                             )
 
 # Panel for downloading results
-if st.session_state.app_type == "CLOUD":
+if st.session_state.app_type == "cloud":
     show_panel_view = st.checkbox(
-        f":material/new_label: Download Scans {st.session_state.icons['out_zip']}",
-        disabled = not st.session_state.flags['csv_plot'],
+        f":material/new_label: Download Scans",
+        disabled = not st.session_state.flags['csv_dlmuse'],
         value = False
     )
     if show_panel_view:
@@ -221,10 +224,10 @@ if st.session_state.app_type == "CLOUD":
             # Zip results and download
             out_zip = bytes()
             if not False:
-                if not os.path.exists(st.session_state.paths["OutZipped"]):
-                    os.makedirs(st.session_state.paths["OutZipped"])
-                f_tmp = os.path.join(st.session_state.paths["OutZipped"], "DLMUSE.zip")
-                out_zip = utilio.zip_folder(st.session_state.paths["DLMUSE"], f_tmp)
+                if not os.path.exists(st.session_state.paths["download"]):
+                    os.makedirs(st.session_state.paths["download"])
+                f_tmp = os.path.join(st.session_state.paths["download"], "DLMUSE")
+                out_zip = utilio.zip_folder(st.session_state.paths["dlmuse"], f_tmp)
 
             st.download_button(
                 "Download DLMUSE results",
