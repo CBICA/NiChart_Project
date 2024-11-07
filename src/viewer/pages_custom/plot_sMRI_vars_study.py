@@ -160,7 +160,7 @@ if show_panel_rename:
 #     if st.button('Select variables ...'):
 #         st.success(f'Selected variables: {sel_vars_all}')
 #         df = df[st.session_state.plot_sel_vars]
-#
+
 # # Panel for filtering variables
 # flag_disabled = df.shape[0] == 0
 # with st.expander(":material/filter_alt: Filter Data", expanded=False):  # type:ignore
@@ -204,13 +204,15 @@ if show_panel_plots:
         )
 
         if st.session_state.sel_mrid != '':
-            list_mrid = df.MRID.tolist()
+            list_mrid = df.MRID.sort_values().tolist()
             sel_ind = list_mrid.index(st.session_state.sel_mrid)
             st.session_state.sel_mrid = st.selectbox("Selected subject", list_mrid, sel_ind)
             
 
         if st.session_state.sel_roi != '':
-            st.sidebar.success("Selected ROI: " + st.session_state.sel_roi)
+            list_roi = df.columns.sort_values().tolist()
+            sel_ind = list_roi.index(st.session_state.sel_roi)
+            st.session_state.sel_roi = st.selectbox("Selected ROI", list_roi, sel_ind)
 
     ################
     # Show plots
@@ -285,7 +287,6 @@ if show_panel_plots:
 
                 if is_in_mask:
                     list_rois = [int(sel_var)]
-
                 else:
                     list_rois = utilmuse.get_derived_rois(
                         sel_var,
