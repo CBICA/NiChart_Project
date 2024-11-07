@@ -11,10 +11,7 @@ from stqdm import stqdm
 st.markdown(
     """
     - Segmentation of T1-weighted MRI scans into anatomical regions of interest (ROIs)
-    - DLMUSE: Fast deep learning based segmentation into 145 ROIs + 105 composite ROIs
-
-    ### Want to learn more?
-    - Visit [DLMUSE GitHub](https://github.com/CBICA/NiChart_DLMUSE)
+    - [DLMUSE](https://github.com/CBICA/NiChart_DLMUSE): Fast deep learning based segmentation into 145 ROIs + 105 composite ROIs
         """
 )
 
