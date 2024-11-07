@@ -154,6 +154,12 @@ def display_plot(
 
         # Main plot
         fig = go.Figure()
+        
+        fig.update_layout(
+            xaxis_title = xvar,
+            yaxis_title = yvar,
+        )
+        
         if trend == "none":
             #trace_data = go.Scatter(x=df_filt[xvar], y=df_filt[yvar], mode = 'markers')
             utiltr.scatter_plot(df_filt, xvar, yvar, hvar, fig)
@@ -202,5 +208,6 @@ def display_plot(
             st.session_state.sel_roi = sel_roi
 
             st.rerun()
+
 
         return fig
