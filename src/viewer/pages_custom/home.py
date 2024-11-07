@@ -30,10 +30,13 @@ if "instantiated" not in st.session_state:
     # Icons for panels
     st.session_state.icons = {
         'out_dir': ':material/thumb_down:',
+        'out_zip': ':material/thumb_down:',
         'csv_plot': ':material/thumb_down:',
         'dicom_dir': ':material/thumb_down:',
         'dicom_series': ':material/thumb_down:',
-        'out_nifti': ':material/thumb_down:'
+        'out_nifti': ':material/thumb_down:',
+        'csv_dlmuse': ':material/thumb_down:',
+        'mlscores': ':material/thumb_down:'
     }
 
     # Predefined paths for different tasks in the final results

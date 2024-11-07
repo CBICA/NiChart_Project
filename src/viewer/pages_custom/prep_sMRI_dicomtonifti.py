@@ -253,10 +253,10 @@ if show_panel_view:
                             img, ind_view, img_bounds[ind_view, :], tmp_orient
                         )
 
-# Panel for viewing extracted nifti images
+# Panel for downloading extracted nifti images
 if st.session_state.app_type == "CLOUD":
     show_panel_view = st.checkbox(
-        f":material/new_label: Download Scans {st.session_state.icons['out_dir']}",
+        f":material/new_label: Download Scans {st.session_state.icons['out_zip']}",
         disabled = not st.session_state.flags['csv_plot'],
         value = False
     )
