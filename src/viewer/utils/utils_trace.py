@@ -35,7 +35,6 @@ def linreg_trace(df: pd.DataFrame, xvar: str, yvar: str, hvar: str, fig: Any) ->
             # showlegend=False,
             mode="lines",
             name=f'lin_{hname}',
-            line=dict(color="rgb(0,0,255)"),
             legendgroup=hname,
         )
         fig.add_trace(trace)  # plot in first row
