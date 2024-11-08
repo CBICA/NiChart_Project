@@ -12,7 +12,7 @@ def scatter_plot(df, xvar, yvar, hvar, fig):
     #df['Sex'] = 'F'
     #df.loc[0:300,'Sex'] = 'M'
     #hvar = 'Sex'
-    hvar = None
+    #hvar = None
 
     if hvar is None:
         fig.add_scatter(x=df[xvar], y=df[yvar], mode='markers', name = 'Data')
@@ -20,6 +20,8 @@ def scatter_plot(df, xvar, yvar, hvar, fig):
         for hname, dfh in df.groupby(hvar):
             fig.add_scatter(x=dfh[xvar], y=dfh[yvar], name=hname, mode='markers')
     
+
+
 def selid_trace(df: pd.DataFrame, sel_mrid: str, xvar: str, yvar: str, fig: Any) -> Any:
     df_tmp = df[df.MRID == sel_mrid]
     fig.add_trace(
@@ -106,12 +108,13 @@ def linreg_trace(df: pd.DataFrame, xvar: str, yvar: str, fig: Any) -> Any:
     trace = go.Scatter(
         x=df[xvar],
         y=y_hat,
-        showlegend=False,
+        # showlegend=False,
         mode="lines",
         name="linregfit",
         line=dict(color="rgb(0,0,255)"),
     )
-    fig.append_trace(trace, 1, 1)  # plot in first row
+    # fig.append_trace(trace, 1, 1)  # plot in first row
+    fig.add_trace(trace)  # plot in first row
     return fig
 
 

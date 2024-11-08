@@ -144,29 +144,20 @@ def display_plot(
             df_filt = add_plot_tabs(df, plot_id)
 
         [xvar, yvar, hvar, trend, centtype] = st.session_state.plots.loc[plot_id][['xvar', 'yvar', 'hvar', 'trend', 'centtype']]
-
-
         hind = get_index_in_list(df.columns.tolist(), hvar)
-
-        #mode = 'markers'
-        #marker = dict(size=12, color='blue', opacity=0.7)
-        
 
         # Main plot
         fig = go.Figure()
         
+        # Add axis labels
         fig.update_layout(
             xaxis_title = xvar,
             yaxis_title = yvar,
         )
         
-        if trend == "none":
-            #trace_data = go.Scatter(x=df_filt[xvar], y=df_filt[yvar], mode = 'markers')
-            utiltr.scatter_plot(df_filt, xvar, yvar, hvar, fig)
-        else:
-            scatter_plot = px.Scatter(
-                df_filt, x=xvar, y=yvar, color=hvar, trendline=trend
-            )
+        utiltr.scatter_plot(df_filt, xvar, yvar, hvar, fig)
+        if trend == 'Linear':
+            utiltr.linreg_trace(df_filt, xvar, yvar, fig)
         #scatter_plot.add_traces(trace_data)
 
         # Add centile values

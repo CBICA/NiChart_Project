@@ -220,7 +220,7 @@ if "instantiated" not in st.session_state:
     st.session_state.plot_xvar = ""
     st.session_state.plot_yvar = ""
     st.session_state.plot_hvar = None
-    st.session_state.trend_types = ["none", "ols", "lowess"]
+    st.session_state.trend_types = ["None", "Linear", "Smoothed Curve"]
     st.session_state.plot_trend = "none"
     st.session_state.cent_types = ["none", "CN-All", "CN-F", "CN-M"]
     st.session_state.plot_centtype = "none"
