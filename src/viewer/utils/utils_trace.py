@@ -7,18 +7,56 @@ import plotly.graph_objs as go
 import statsmodels.api as sm
 from sklearn.linear_model import LinearRegression
 
-def scatter_plot(df, xvar, yvar, hvar, fig):
-    
-    #df['Sex'] = 'F'
-    #df.loc[0:300,'Sex'] = 'M'
-    #hvar = 'Sex'
-    #hvar = None
-
+def scatter_trace(df, xvar, yvar, hvar, fig):
+    dft = df.copy()
     if hvar is None:
-        fig.add_scatter(x=df[xvar], y=df[yvar], mode='markers', name = 'Data')
-    else:
-        for hname, dfh in df.groupby(hvar):
-            fig.add_scatter(x=dfh[xvar], y=dfh[yvar], name=hname, mode='markers')
+        hvar = 'All'
+        dft['All'] = 1
+    for hname, dfh in dft.groupby(hvar):
+        trace = go.Scatter(
+            x=dfh[xvar],
+            y=dfh[yvar],
+            mode='markers',
+            name=hname,
+            legendgroup=hname,
+        )
+        fig.add_trace(trace)
+
+def linreg_trace(df: pd.DataFrame, xvar: str, yvar: str, hvar: str, fig: Any) -> Any:
+
+    for hname, dfh in df.groupby(hvar):
+        model = LinearRegression().fit(
+            np.array(dfh[xvar]).reshape(-1, 1), (np.array(dfh[yvar]))
+        )
+        y_hat = model.predict(np.array(df[xvar]).reshape(-1, 1))
+        trace = go.Scatter(
+            x=df[xvar],
+            y=y_hat,
+            # showlegend=False,
+            mode="lines",
+            name=f'lin_{hname}',
+            line=dict(color="rgb(0,0,255)"),
+            legendgroup=hname,
+        )
+        fig.add_trace(trace)  # plot in first row
+    return fig
+
+
+def lowess_trace(df: pd.DataFrame, xvar: str, yvar: str, fig: Any) -> Any:
+    lowess = sm.nonparametric.lowess
+
+    # y_hat = lowess(np.array(df[yvar], np.array(df[xvar], frac=1./3)
+    y_hat = lowess(df[yvar], df[xvar], frac=1.0 / 3)
+    trace = go.Scatter(
+        x=y_hat[:, 0],
+        y=y_hat[:, 1],
+        showlegend=False,
+        mode="lines",
+        name="lowessfit",
+        line=dict(color="rgb(0,255,0)"),
+    )
+    fig.append_trace(trace, 1, 1)  # plot in first row
+    return fig
     
 
 
@@ -100,36 +138,3 @@ def dots_trace(df: pd.DataFrame, xvar: str, yvar: str) -> Any:
     return trace
 
 
-def linreg_trace(df: pd.DataFrame, xvar: str, yvar: str, fig: Any) -> Any:
-    model = LinearRegression().fit(
-        np.array(df[xvar]).reshape(-1, 1), (np.array(df[yvar]))
-    )
-    y_hat = model.predict(np.array(df[xvar]).reshape(-1, 1))
-    trace = go.Scatter(
-        x=df[xvar],
-        y=y_hat,
-        # showlegend=False,
-        mode="lines",
-        name="linregfit",
-        line=dict(color="rgb(0,0,255)"),
-    )
-    # fig.append_trace(trace, 1, 1)  # plot in first row
-    fig.add_trace(trace)  # plot in first row
-    return fig
-
-
-def lowess_trace(df: pd.DataFrame, xvar: str, yvar: str, fig: Any) -> Any:
-    lowess = sm.nonparametric.lowess
-
-    # y_hat = lowess(np.array(df[yvar], np.array(df[xvar], frac=1./3)
-    y_hat = lowess(df[yvar], df[xvar], frac=1.0 / 3)
-    trace = go.Scatter(
-        x=y_hat[:, 0],
-        y=y_hat[:, 1],
-        showlegend=False,
-        mode="lines",
-        name="lowessfit",
-        line=dict(color="rgb(0,255,0)"),
-    )
-    fig.append_trace(trace, 1, 1)  # plot in first row
-    return fig

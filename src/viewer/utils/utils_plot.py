@@ -155,9 +155,9 @@ def display_plot(
             yaxis_title = yvar,
         )
         
-        utiltr.scatter_plot(df_filt, xvar, yvar, hvar, fig)
+        utiltr.scatter_trace(df_filt, xvar, yvar, hvar, fig)
         if trend == 'Linear':
-            utiltr.linreg_trace(df_filt, xvar, yvar, fig)
+            utiltr.linreg_trace(df_filt, xvar, yvar, hvar, fig)
         #scatter_plot.add_traces(trace_data)
 
         # Add centile values
@@ -190,6 +190,9 @@ def display_plot(
             if hind is None:
                 sel_mrid = df_filt.iloc[sind]["MRID"]
             else:
+                
+                print(f'AAA {sel_info}')
+                
                 lgroup = sel_info["selection"]["points"][0]["legendgroup"]
                 sel_mrid = df_filt[df_filt[hvar] == lgroup].iloc[sind]["MRID"]
 
