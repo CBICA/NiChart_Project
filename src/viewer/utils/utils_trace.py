@@ -9,7 +9,7 @@ from sklearn.linear_model import LinearRegression
 
 def scatter_trace(df, xvar, yvar, hvar, fig):
     dft = df.copy()
-    if hvar is None:
+    if hvar is '':
         hvar = 'All'
         dft['All'] = 1
     for hname, dfh in dft.groupby(hvar):
@@ -22,13 +22,10 @@ def scatter_trace(df, xvar, yvar, hvar, fig):
         )
         fig.add_trace(trace)
 
-def regression_trace(df: pd.DataFrame, xvar: str, yvar: str, hvar: str, trend: str, fig: Any) -> Any:
-
-    FRAC_LOWESS = 1.0 / 3
-    FRAC_LOWESS = 0.6
+def regression_trace(df: pd.DataFrame, xvar: str, yvar: str, hvar: str, hvals: Any, trend: str, lowess_s: Any, fig: Any) -> Any:
 
     dft = df.copy()
-    if hvar is None:
+    if hvar is '':
         hvar = 'All'
         dft['All'] = 1
 
@@ -46,7 +43,7 @@ def regression_trace(df: pd.DataFrame, xvar: str, yvar: str, hvar: str, trend: s
             print(trend)
 
             lowess = sm.nonparametric.lowess
-            pred = lowess(dfh[yvar], dfh[xvar], frac = FRAC_LOWESS)
+            pred = lowess(dfh[yvar], dfh[xvar], frac = lowess_s)
             x_hat = pred[:, 0]
             y_hat = pred[:, 1]
 

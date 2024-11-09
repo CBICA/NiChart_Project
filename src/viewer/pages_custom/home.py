@@ -26,9 +26,9 @@ if "instantiated" not in st.session_state:
         'dset': False
     }
 
-    # Dataframe to keep plot ids
+    # Dictionary with plot info
     st.session_state.plots = pd.DataFrame(
-        columns=["pid", "xvar", "yvar", "hvar", "trend", "centtype"]
+        columns=["pid", "xvar", "yvar", "hvar", "hvals", "trend", "lowess_s", "centtype"]
     )
     st.session_state.plot_index = 1
     st.session_state.plot_active = ""
@@ -115,27 +115,6 @@ if "instantiated" not in st.session_state:
         'plot_in_data': False
     }
 
-
-    ## Flags to show if various input/output exist
-    #st.session_state.flags = {
-        #"dset": False,
-        #"dir_out": False,
-        #"dicoms": False,
-        #"dicom_series": False,
-        #"nifti": False,
-        #"T1": False,
-        #"T2": False,
-        #"FL": False,
-        #"DTI": False,
-        #"fMRI": False,
-        #"dlmuse": False,
-        #"csv_dlmuse": False,
-        #"csv_mlscores": False,
-        #"csv_plot": False,
-        #"sel_img": False,
-        #"sel_mask": False
-    #}
-
     # Flags to keep updates in user input/output
     st.session_state.is_updated = {
         "csv_plot": False,
@@ -196,8 +175,12 @@ if "instantiated" not in st.session_state:
     st.session_state.sel_mod = "T1"
 
     # Default number of plots in a row
-    st.session_state.max_plots_per_row = 5
-    st.session_state.plots_per_row = 3
+    st.session_state.plotvars = {
+        'max_plots_per_row': 5,
+        'plots_per_row': 3,
+    }
+    st.session_state.max_plots_per_row = 5      ## FIXME will be redundant
+    st.session_state.plots_per_row = 3          ## FIXME will be redundant
 
     # Image suffixes
     st.session_state.suff_t1img = "_T1.nii.gz"
@@ -217,13 +200,16 @@ if "instantiated" not in st.session_state:
         'centile' : 'None'
     }
 
+    st.session_state.trend_types = ["", "Linear", "Smooth LOWESS Curve"]
+    st.session_state.cent_types = ["", "CN-All", "CN-F", "CN-M"]
+
     st.session_state.plot_xvar = ""
     st.session_state.plot_yvar = ""
-    st.session_state.plot_hvar = None
-    st.session_state.trend_types = ["None", "Linear", "Smooth LOWESS Curve"]
-    st.session_state.plot_trend = "none"
-    st.session_state.cent_types = ["none", "CN-All", "CN-F", "CN-M"]
-    st.session_state.plot_centtype = "none"
+    st.session_state.plot_hvar = ""
+    st.session_state.plot_hvals = []
+    st.session_state.plot_trend = ""
+    st.session_state.lowess_s = 0.5
+    st.session_state.plot_centtype = ""
 
     # MRID selected by user
     st.session_state.sel_mrid = ""

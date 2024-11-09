@@ -7,19 +7,25 @@ import utils.utils_dataframe as utilsdf
 import utils.utils_trace as utiltr
 import plotly.graph_objs as go
 
-
 def add_plot() -> None:
     """
     Adds a new plot (updates a dataframe with plot ids)
     """
     df_p = st.session_state.plots
     plot_id = f"Plot{st.session_state.plot_index}"
+
+    print('hhhh')
+    print(df_p)
+    input()
+
     df_p.loc[plot_id] = [
         plot_id,
         st.session_state.plot_xvar,
         st.session_state.plot_yvar,
         st.session_state.plot_hvar,
+        st.session_state.plot_hvals,
         st.session_state.plot_trend,
+        st.session_state.lowess_s,
         st.session_state.plot_centtype,
     ]
     st.session_state.plot_index += 1
@@ -53,47 +59,53 @@ def add_plot_tabs(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
             "Plot Type", ["Scatter Plot"], key=f"plot_type_{plot_id}"
         )
 
-    # Tab 2: to set data filtering parameters
+    # Tab 2: Plot settings
     with ptabs[1]:
         # Get df columns
         list_cols = df.columns.to_list()
+        list_cols_ext = [''] + list_cols
+        list_trends = st.session_state.trend_types
 
         # Set plotting variables
         xind = get_index_in_list(list_cols, st.session_state.plots.loc[plot_id].xvar)
         xvar = st.selectbox(
-            "X Var", df.columns, key=f"plot_xvar_{plot_id}", index=xind
+            "X Var", list_cols, key=f"plot_xvar_{plot_id}", index=xind
         )
         yind = get_index_in_list(list_cols, st.session_state.plots.loc[plot_id].yvar)
         yvar = st.selectbox(
-            "Y Var", df.columns, key=f"plot_yvar_{plot_id}", index=yind
+            "Y Var", list_cols, key=f"plot_yvar_{plot_id}", index=yind
         )
-        hind = get_index_in_list(list_cols, st.session_state.plots.loc[plot_id].hvar)
+        hind = get_index_in_list(list_cols_ext, st.session_state.plots.loc[plot_id].hvar)
         hvar = st.selectbox(
-            "Group by", df.columns, key=f"plot_hvar_{plot_id}", index=hind
+            "Group by", list_cols_ext, key=f"plot_hvar_{plot_id}", index=hind
         )
-        if hvar is not None:
+        if hvar is not '':
             vals_hue = df[hvar].unique().tolist()
-            st.multiselect('Select groups', vals_hue, vals_hue)
+            st.session_state.plots.loc[plot_id].hvals = st.multiselect(
+                'Select groups', vals_hue, vals_hue
+            )
 
-        tind = get_index_in_list(list_cols, st.session_state.plots.loc[plot_id].trend)
+        tind = get_index_in_list(list_trends, st.session_state.plots.loc[plot_id].trend)
         trend = st.selectbox(
-            "Trend Line", st.session_state.trend_types, key=f"trend_type_{plot_id}", index=tind,
+            "Trend Line", list_trends, key=f"trend_type_{plot_id}", index=tind,
         )
         if trend == 'Smooth LOWESS Curve':
-            st.slider('Smoothness', min_value=0.1, max_value=0.9, value=0.5, step=0.2)
+            st.session_state.plots.loc[plot_id, 'lowess_s'] = st.slider(
+                'Smoothness', min_value=0.4, max_value=1.0, value=0.7, step=0.1
+            )
 
         # Set plot params to session_state
         if xvar is not None:
-            st.session_state.plots.loc[plot_id].xvar = xvar
+            st.session_state.plots.loc[plot_id, 'xvar'] = xvar
         if yvar is not None:
-            st.session_state.plots.loc[plot_id].yvar = yvar
-        if hvar is not None:
-            st.session_state.plots.loc[plot_id].hvar = hvar
-        if trend is not None:
-            st.session_state.plots.loc[plot_id].trend = trend
+            st.session_state.plots.loc[plot_id, 'yvar'] = yvar
+        if hvar is not '':
+            st.session_state.plots.loc[plot_id, 'hvar'] = hvar
+        if trend is not '':
+            st.session_state.plots.loc[plot_id, 'trend'] = trend
 
 
-    # Tab 3: to set centiles
+    # Tab 3: Centiles
     with ptabs[2]:
 
         # Get plot params
@@ -110,9 +122,9 @@ def add_plot_tabs(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
         )
 
         # Set plot params to session_state
-        st.session_state.plots.loc[plot_id].centtype = centtype
+        st.session_state.plots.loc[plot_id, 'centtype'] = centtype
 
-    # Tab 4: to reset parameters or to delete plot
+    # Tab 4: Reset parameters and/or delete plot
     with ptabs[3]:
         st.button(
             "Delete Plot",
@@ -147,7 +159,7 @@ def display_plot(
         if show_settings:
             df_filt = add_plot_tabs(df, plot_id)
 
-        [xvar, yvar, hvar, trend, centtype] = st.session_state.plots.loc[plot_id][['xvar', 'yvar', 'hvar', 'trend', 'centtype']]
+        [xvar, yvar, hvar, hvals, trend, lowess_s, centtype] = st.session_state.plots.loc[plot_id][['xvar', 'yvar', 'hvar', 'hvals', 'trend', 'lowess_s', 'centtype']]
         hind = get_index_in_list(df.columns.tolist(), hvar)
 
         # Main plot
@@ -160,11 +172,11 @@ def display_plot(
         )
         
         utiltr.scatter_trace(df_filt, xvar, yvar, hvar, fig)
-        if trend is not 'None':
-            utiltr.regression_trace(df_filt, xvar, yvar, hvar, trend, fig)
+        if trend != '':
+            utiltr.regression_trace(df_filt, xvar, yvar, hvar, hvals, trend, lowess_s, fig)
 
         # Add centile values
-        if centtype != "none":
+        if centtype != '':
             fcent = os.path.join(
                 st.session_state.paths["root"],
                 "resources",
