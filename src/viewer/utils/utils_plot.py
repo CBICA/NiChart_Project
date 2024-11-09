@@ -163,7 +163,10 @@ def display_plot(
         hind = get_index_in_list(df.columns.tolist(), hvar)
 
         # Main plot
-        fig = go.Figure()
+        layout = go.Layout(
+            height=1000
+        )
+        fig = go.Figure(layout = layout)
         
         # Add axis labels
         fig.update_layout(
@@ -218,5 +221,16 @@ def display_plot(
 
             st.rerun()
 
+        # # Resize plot
+        # width = fig.layout.width
+        # height = fig.layout.height
+        #
+        # print(f'ddd {width}')
+        # print(f'ddd {height}')
+        #
+        # print(f'ddd {st.session_state.plot_height}')
+        # input()
+        #
+        # fig.update_layout(width, height * st.session_state.plot_height)
 
         return fig

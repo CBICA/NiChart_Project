@@ -182,6 +182,8 @@ if "instantiated" not in st.session_state:
     st.session_state.max_plots_per_row = 5      ## FIXME will be redundant
     st.session_state.plots_per_row = 3          ## FIXME will be redundant
 
+    st.session_state.plot_height = 1
+
     # Image suffixes
     st.session_state.suff_t1img = "_T1.nii.gz"
     st.session_state.suff_seg = "_T1_DLMUSE.nii.gz"
@@ -254,17 +256,17 @@ st.sidebar.success("Select a task above")
 
 with st.sidebar.expander('Flags'):
 
-    if st.checkbox("Show paths?", value=False):
+    if st.checkbox("Show paths?", value=True):
         st.session_state.debug_show_paths = True
     else:
         st.session_state.debug_show_paths = False
 
-    if st.checkbox("Show flags?", value=False):
+    if st.checkbox("Show flags?", value=True):
         st.session_state.debug_show_flags = True
     else:
         st.session_state.debug_show_flags = False
 
-    if st.checkbox("Show all session state vars?", value=False):
+    if st.checkbox("Show all session state vars?", value=True):
         st.session_state.debug_show_state = True
     else:
         st.session_state.debug_show_state = False

@@ -193,6 +193,10 @@ if show_panel_plots:
 
         btn_plots = st.button("Add plot", disabled = False)
 
+        st.session_state.plot_height = st.slider(
+            "Plot height", min_value=0.6, max_value=2.0, value=1.0, step=0.2, disabled = False
+        )
+
         # Checkbox to show/hide plot options
         flag_plot_settings = st.checkbox(
             "Hide plot settings",
@@ -266,6 +270,7 @@ if show_panel_plots:
                     not flag_plot_settings,
                     st.session_state.sel_mrid
                 )
+                print(f'QQQQQQQQQQQQQQQ {new_plot.layout.width}')
                 plots_arr.append(new_plot)
 
     ################
@@ -288,8 +293,6 @@ if show_panel_plots:
                 # If roi dictionary was used, detect index
                 if st.session_state.roi_dict_rev is not None:
                     sel_var = st.session_state.roi_dict_rev[sel_var]
-
-                print(sel_var)
 
                 # Check if index exists in overlay mask
                 is_in_mask = False
