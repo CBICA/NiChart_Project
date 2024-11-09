@@ -6,12 +6,15 @@ import pandas as pd
 import plotly.graph_objs as go
 import statsmodels.api as sm
 from sklearn.linear_model import LinearRegression
+import utils.utils_stats as utilstat
 
 def scatter_trace(df, xvar, yvar, hvar, fig):
+    # Add a tmp column if group var is not set
     dft = df.copy()
-    if hvar is '':
+    if hvar == '':
         hvar = 'All'
-        dft['All'] = 1
+        dft['All'] = 'Data'
+
     for hname, dfh in dft.groupby(hvar):
         trace = go.Scatter(
             x=dfh[xvar],
@@ -22,36 +25,24 @@ def scatter_trace(df, xvar, yvar, hvar, fig):
         )
         fig.add_trace(trace)
 
-def regression_trace(df: pd.DataFrame, xvar: str, yvar: str, hvar: str, hvals: Any, trend: str, lowess_s: Any, fig: Any) -> Any:
+def linreg_trace(
+    df: pd.DataFrame,
+    xvar: str,
+    yvar: str,
+    hvar: str,
+    hvals: Any,
+    fig: Any
+) -> Any:
+    '''
+    Add linear fit and confidence interval
+    '''
+    dict_fit = utilstat.linreg_model(df, xvar, yvar, hvar)
 
-    dft = df.copy()
-    if hvar is '':
-        hvar = 'All'
-        dft['All'] = 1
-
-    for hname, dfh in dft.groupby(hvar):
-
-        if trend == 'Linear':
-            x_hat = np.array(dfh[xvar])
-            model = LinearRegression().fit(
-                x_hat.reshape(-1, 1), np.array(dfh[yvar])
-            )
-            y_hat = model.predict(x_hat.reshape(-1, 1))
-
-        elif trend == 'Smooth LOWESS Curve':
-
-            print(trend)
-
-            lowess = sm.nonparametric.lowess
-            pred = lowess(dfh[yvar], dfh[xvar], frac = lowess_s)
-            x_hat = pred[:, 0]
-            y_hat = pred[:, 1]
-
-        print(x_hat)
-        print('aa')
-        print(y_hat)
-
-
+    # Add traces for the fit and confident intervals
+    for hname in dict_fit.keys():
+        x_hat = dict_fit[hname]['x_hat']
+        y_hat = dict_fit[hname]['y_hat']
+        conf_int = dict_fit[hname]['conf_int']
         trace = go.Scatter(
             x=x_hat,
             y=y_hat,
@@ -60,23 +51,61 @@ def regression_trace(df: pd.DataFrame, xvar: str, yvar: str, hvar: str, hvals: A
             name=f'lin_{hname}',
             legendgroup=hname,
         )
-        fig.add_trace(trace)  # plot in first row
+        fig.add_trace(trace)
+
+    for hname in dict_fit.keys():
+        x_hat = dict_fit[hname]['x_hat']
+        y_hat = dict_fit[hname]['y_hat']
+        conf_int = dict_fit[hname]['conf_int']
+        trace = go.Scatter(
+            x=np.concatenate([x_hat, x_hat[::-1]]),
+            y=np.concatenate([conf_int[:, 0], conf_int[:, 1][::-1]]),
+            # showlegend=False,
+            mode="lines",
+            name=f'lin_conf95_{hname}',
+            legendgroup=hname,
+        )
+        fig.add_trace(trace)
+
+        trace = go.Scatter(
+            x=np.concatenate([x_hat, x_hat[::-1]]),
+            y=np.concatenate([conf_int[:, 0], conf_int[:, 1][::-1]]),
+            fill='toself',
+            fillcolor='rgba(0,100,80,0.2)',
+            line=dict(color='rgba(255,255,255,0)'),
+            hoverinfo="skip",
+            showlegend=False
+        )
+        fig.add_trace(trace)
+
     return fig
 
 
-def lowess_trace(df: pd.DataFrame, xvar: str, yvar: str, fig: Any) -> Any:
-    trace = go.Scatter(
-        x=y_hat[:, 0],
-        y=y_hat[:, 1],
-        showlegend=False,
-        mode="lines",
-        name="lowessfit",
-        line=dict(color="rgb(0,255,0)"),
-    )
-    fig.append_trace(trace, 1, 1)  # plot in first row
-    return fig
-    
+def lowess_trace(
+    df: pd.DataFrame,
+    xvar: str,
+    yvar: str,
+    hvar: str,
+    hvals: str,
+    lowess_s: float,
+    fig: Any
+) -> Any:
 
+    dict_fit = utilstat.lowess_model(df, xvar, yvar, hvar, lowess_s)
+
+    # Add traces for the fit and confidence intervals
+    for hname in dict_fit.keys():
+        x_hat = dict_fit[hname]['x_hat']
+        y_hat = dict_fit[hname]['y_hat']
+        trace = go.Scatter(
+            x=x_hat,
+            y=y_hat,
+            # showlegend=False,
+            mode="lines",
+            name=f'lin_{hname}',
+            legendgroup=hname,
+        )
+        fig.add_trace(trace)
 
 def selid_trace(df: pd.DataFrame, sel_mrid: str, xvar: str, yvar: str, fig: Any) -> Any:
     df_tmp = df[df.MRID == sel_mrid]
@@ -92,7 +121,6 @@ def selid_trace(df: pd.DataFrame, sel_mrid: str, xvar: str, yvar: str, fig: Any)
                         )
             )
     )
-
 
 def percentile_trace(df: pd.DataFrame, xvar: str, yvar: str, fig: Any) -> Any:
 

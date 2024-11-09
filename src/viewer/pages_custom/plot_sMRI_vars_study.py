@@ -182,6 +182,8 @@ if show_panel_plots:
     # Sidebar parameters
     with st.sidebar:
         # Slider to set number of plots in a row
+        btn_plots = st.button("Add plot", disabled = False)
+
         st.session_state.plots_per_row = st.slider(
             "Plots per row",
             1,
@@ -191,9 +193,7 @@ if show_panel_plots:
             disabled = False
         )
 
-        btn_plots = st.button("Add plot", disabled = False)
-
-        st.session_state.plot_height = st.slider(
+        st.session_state.plot_height_coeff = st.slider(
             "Plot height", min_value=0.6, max_value=2.0, value=1.0, step=0.2, disabled = False
         )
 
@@ -209,25 +209,29 @@ if show_panel_plots:
             disabled = False
         )
 
-        if st.session_state.sel_mrid != '':
-            list_mrid = df.MRID.sort_values().tolist()
-            sel_ind = list_mrid.index(st.session_state.sel_mrid)
-            st.session_state.sel_mrid = st.selectbox("Selected subject", list_mrid, sel_ind)
-            
+        st.divider()
 
-        if st.session_state.sel_roi != '':
-            list_roi = df.columns.sort_values().tolist()
-            sel_ind = list_roi.index(st.session_state.sel_roi)
-            st.session_state.sel_roi = st.selectbox("Selected ROI", list_roi, sel_ind)
+        if flag_show_img:
 
-        # Create a list of checkbox options
-        list_orient = st.multiselect("Select viewing planes:", utilni.img_views, utilni.img_views)
+            if st.session_state.sel_mrid != '':
+                list_mrid = df.MRID.sort_values().tolist()
+                sel_ind = list_mrid.index(st.session_state.sel_mrid)
+                st.session_state.sel_mrid = st.selectbox("Selected subject", list_mrid, sel_ind)
 
-        # View hide overlay
-        is_show_overlay = st.checkbox("Show overlay", True)
 
-        # Crop to mask area
-        crop_to_mask = st.checkbox("Crop to mask", True)
+            if st.session_state.sel_roi != '':
+                list_roi = df.columns.sort_values().tolist()
+                sel_ind = list_roi.index(st.session_state.sel_roi)
+                st.session_state.sel_roi = st.selectbox("Selected ROI", list_roi, sel_ind)
+
+            # Create a list of checkbox options
+            list_orient = st.multiselect("Select viewing planes:", utilni.img_views, utilni.img_views)
+
+            # View hide overlay
+            is_show_overlay = st.checkbox("Show overlay", True)
+
+            # Crop to mask area
+            crop_to_mask = st.checkbox("Crop to mask", True)
 
     ################
     # Show plots

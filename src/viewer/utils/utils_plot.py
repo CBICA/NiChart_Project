@@ -14,10 +14,6 @@ def add_plot() -> None:
     df_p = st.session_state.plots
     plot_id = f"Plot{st.session_state.plot_index}"
 
-    print('hhhh')
-    print(df_p)
-    input()
-
     df_p.loc[plot_id] = [
         plot_id,
         st.session_state.plot_xvar,
@@ -79,7 +75,7 @@ def add_plot_tabs(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
         hvar = st.selectbox(
             "Group by", list_cols_ext, key=f"plot_hvar_{plot_id}", index=hind
         )
-        if hvar is not '':
+        if hvar != '':
             vals_hue = df[hvar].unique().tolist()
             st.session_state.plots.loc[plot_id].hvals = st.multiselect(
                 'Select groups', vals_hue, vals_hue
@@ -99,9 +95,9 @@ def add_plot_tabs(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
             st.session_state.plots.loc[plot_id, 'xvar'] = xvar
         if yvar is not None:
             st.session_state.plots.loc[plot_id, 'yvar'] = yvar
-        if hvar is not '':
+        if hvar != '':
             st.session_state.plots.loc[plot_id, 'hvar'] = hvar
-        if trend is not '':
+        if trend != '':
             st.session_state.plots.loc[plot_id, 'trend'] = trend
 
 
@@ -164,7 +160,9 @@ def display_plot(
 
         # Main plot
         layout = go.Layout(
-            height=1000
+            # height=st.session_state.plot_init_height
+            height=st.session_state.plot_init_height * st.session_state.plot_height_coeff,
+            margin=dict(l=20, r=20, t=20, b=20),
         )
         fig = go.Figure(layout = layout)
         
@@ -175,8 +173,10 @@ def display_plot(
         )
         
         utiltr.scatter_trace(df_filt, xvar, yvar, hvar, fig)
-        if trend != '':
-            utiltr.regression_trace(df_filt, xvar, yvar, hvar, hvals, trend, lowess_s, fig)
+        if trend == 'Linear':
+            utiltr.linreg_trace(df_filt, xvar, yvar, hvar, hvals, fig)
+        elif trend == 'Smooth LOWESS Curve':
+            utiltr.lowess_trace(df_filt, xvar, yvar, hvar, hvals, lowess_s, fig)
 
         # Add centile values
         if centtype != '':
@@ -220,17 +220,5 @@ def display_plot(
             st.session_state.sel_roi = sel_roi
 
             st.rerun()
-
-        # # Resize plot
-        # width = fig.layout.width
-        # height = fig.layout.height
-        #
-        # print(f'ddd {width}')
-        # print(f'ddd {height}')
-        #
-        # print(f'ddd {st.session_state.plot_height}')
-        # input()
-        #
-        # fig.update_layout(width, height * st.session_state.plot_height)
 
         return fig

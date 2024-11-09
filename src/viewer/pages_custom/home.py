@@ -177,12 +177,14 @@ if "instantiated" not in st.session_state:
     # Default number of plots in a row
     st.session_state.plotvars = {
         'max_plots_per_row': 5,
-        'plots_per_row': 3,
+        'plots_per_row': 2,
     }
     st.session_state.max_plots_per_row = 5      ## FIXME will be redundant
-    st.session_state.plots_per_row = 3          ## FIXME will be redundant
+    st.session_state.plots_per_row = 2          ## FIXME will be redundant
 
-    st.session_state.plot_height = 1
+    st.session_state.plot_init_height = 500
+    st.session_state.plot_height_coeff = 100
+    st.session_state.plot_active = ""
 
     # Image suffixes
     st.session_state.suff_t1img = "_T1.nii.gz"
