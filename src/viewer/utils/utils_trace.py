@@ -22,15 +22,41 @@ def scatter_trace(df, xvar, yvar, hvar, fig):
         )
         fig.add_trace(trace)
 
-def linreg_trace(df: pd.DataFrame, xvar: str, yvar: str, hvar: str, fig: Any) -> Any:
+def regression_trace(df: pd.DataFrame, xvar: str, yvar: str, hvar: str, trend: str, fig: Any) -> Any:
 
-    for hname, dfh in df.groupby(hvar):
-        model = LinearRegression().fit(
-            np.array(dfh[xvar]).reshape(-1, 1), (np.array(dfh[yvar]))
-        )
-        y_hat = model.predict(np.array(df[xvar]).reshape(-1, 1))
+    FRAC_LOWESS = 1.0 / 3
+    FRAC_LOWESS = 0.6
+
+    dft = df.copy()
+    if hvar is None:
+        hvar = 'All'
+        dft['All'] = 1
+
+    for hname, dfh in dft.groupby(hvar):
+
+        if trend == 'Linear':
+            x_hat = np.array(dfh[xvar])
+            model = LinearRegression().fit(
+                x_hat.reshape(-1, 1), np.array(dfh[yvar])
+            )
+            y_hat = model.predict(x_hat.reshape(-1, 1))
+
+        elif trend == 'Smooth LOWESS Curve':
+
+            print(trend)
+
+            lowess = sm.nonparametric.lowess
+            pred = lowess(dfh[yvar], dfh[xvar], frac = FRAC_LOWESS)
+            x_hat = pred[:, 0]
+            y_hat = pred[:, 1]
+
+        print(x_hat)
+        print('aa')
+        print(y_hat)
+
+
         trace = go.Scatter(
-            x=df[xvar],
+            x=x_hat,
             y=y_hat,
             # showlegend=False,
             mode="lines",
@@ -42,10 +68,6 @@ def linreg_trace(df: pd.DataFrame, xvar: str, yvar: str, hvar: str, fig: Any) ->
 
 
 def lowess_trace(df: pd.DataFrame, xvar: str, yvar: str, fig: Any) -> Any:
-    lowess = sm.nonparametric.lowess
-
-    # y_hat = lowess(np.array(df[yvar], np.array(df[xvar], frac=1./3)
-    y_hat = lowess(df[yvar], df[xvar], frac=1.0 / 3)
     trace = go.Scatter(
         x=y_hat[:, 0],
         y=y_hat[:, 1],

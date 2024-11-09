@@ -211,7 +211,7 @@ if "instantiated" not in st.session_state:
         'xvar' : None,
         'yvar' : None,
         'hvar' : None,
-        'trend_types' : ['None', 'Linear', 'Smoothed Curve'],
+        'trend_types' : ['None', 'Linear', 'Smooth LOWESS Curve'],
         'trend' : 'None',
         'centile_types' : ['None', 'CN-All', 'CN-M', 'CN-F'],
         'centile' : 'None'
@@ -220,7 +220,7 @@ if "instantiated" not in st.session_state:
     st.session_state.plot_xvar = ""
     st.session_state.plot_yvar = ""
     st.session_state.plot_hvar = None
-    st.session_state.trend_types = ["None", "Linear", "Smoothed Curve"]
+    st.session_state.trend_types = ["None", "Linear", "Smooth LOWESS Curve"]
     st.session_state.plot_trend = "none"
     st.session_state.cent_types = ["none", "CN-All", "CN-F", "CN-M"]
     st.session_state.plot_centtype = "none"

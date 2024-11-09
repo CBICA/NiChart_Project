@@ -45,18 +45,20 @@ def get_index_in_list(in_list, in_item):
 
 def add_plot_tabs(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
 
-    ptabs = st.tabs([":large_orange_circle:", ":large_yellow_circle:", ":large_green_circle:", ":x:"])
+    ptabs = st.tabs(["Plot Type", "Settings", "Layers", ":x:"])
 
-    # Tab 1: plotting parameters
+    # Tab 1: Plot type
     with ptabs[0]:
         st.selectbox(
-            "Plot Type", ["DistPlot", "RegPlot"], key=f"plot_type_{plot_id}"
+            "Plot Type", ["Scatter Plot"], key=f"plot_type_{plot_id}"
         )
 
+    # Tab 2: to set data filtering parameters
+    with ptabs[1]:
         # Get df columns
         list_cols = df.columns.to_list()
 
-        # Select plot params from the user
+        # Set plotting variables
         xind = get_index_in_list(list_cols, st.session_state.plots.loc[plot_id].xvar)
         xvar = st.selectbox(
             "X Var", df.columns, key=f"plot_xvar_{plot_id}", index=xind
@@ -67,12 +69,18 @@ def add_plot_tabs(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
         )
         hind = get_index_in_list(list_cols, st.session_state.plots.loc[plot_id].hvar)
         hvar = st.selectbox(
-            "Hue Var", df.columns, key=f"plot_hvar_{plot_id}", index=hind
+            "Group by", df.columns, key=f"plot_hvar_{plot_id}", index=hind
         )
+        if hvar is not None:
+            vals_hue = df[hvar].unique().tolist()
+            st.multiselect('Select groups', vals_hue, vals_hue)
+
         tind = get_index_in_list(list_cols, st.session_state.plots.loc[plot_id].trend)
         trend = st.selectbox(
             "Trend Line", st.session_state.trend_types, key=f"trend_type_{plot_id}", index=tind,
         )
+        if trend == 'Smooth LOWESS Curve':
+            st.slider('Smoothness', min_value=0.1, max_value=0.9, value=0.5, step=0.2)
 
         # Set plot params to session_state
         if xvar is not None:
@@ -84,9 +92,6 @@ def add_plot_tabs(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
         if trend is not None:
             st.session_state.plots.loc[plot_id].trend = trend
 
-    # Tab 2: to set data filtering parameters
-    with ptabs[1]:
-        df_filt = utilsdf.filter_dataframe(df, plot_id)
 
     # Tab 3: to set centiles
     with ptabs[2]:
@@ -115,8 +120,7 @@ def add_plot_tabs(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
             on_click=remove_plot,
             args=[plot_id],
         )
-
-    return df_filt
+    return df
 
 
 def display_plot(
@@ -156,9 +160,8 @@ def display_plot(
         )
         
         utiltr.scatter_trace(df_filt, xvar, yvar, hvar, fig)
-        if trend == 'Linear':
-            utiltr.linreg_trace(df_filt, xvar, yvar, hvar, fig)
-        #scatter_plot.add_traces(trace_data)
+        if trend is not 'None':
+            utiltr.regression_trace(df_filt, xvar, yvar, hvar, trend, fig)
 
         # Add centile values
         if centtype != "none":
