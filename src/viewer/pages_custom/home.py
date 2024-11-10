@@ -212,7 +212,8 @@ if "instantiated" not in st.session_state:
     st.session_state.plot_hvar = ""
     st.session_state.plot_hvals = []
     st.session_state.plot_trend = ""
-    st.session_state.lowess_s = 0.5
+    st.session_state.plot_lowess_s = 0.5
+    st.session_state.plot_traces = []
     st.session_state.plot_centtype = ""
 
     # MRID selected by user

@@ -21,7 +21,8 @@ def add_plot() -> None:
         st.session_state.plot_hvar,
         st.session_state.plot_hvals,
         st.session_state.plot_trend,
-        st.session_state.lowess_s,
+        st.session_state.plot_lowess_s,
+        st.session_state.plot_traces,
         st.session_state.plot_centtype,
     ]
     st.session_state.plot_index += 1
@@ -75,11 +76,6 @@ def add_plot_tabs(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
         hvar = st.selectbox(
             "Group by", list_cols_ext, key=f"plot_hvar_{plot_id}", index=hind
         )
-        if hvar != '':
-            vals_hue = df[hvar].unique().tolist()
-            st.session_state.plots.loc[plot_id].hvals = st.multiselect(
-                'Select groups', vals_hue, vals_hue
-            )
 
         tind = get_index_in_list(list_trends, st.session_state.plots.loc[plot_id].trend)
         trend = st.selectbox(
@@ -100,9 +96,21 @@ def add_plot_tabs(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
         if trend != '':
             st.session_state.plots.loc[plot_id, 'trend'] = trend
 
+        st.session_state.plots.at[plot_id, 'traces'] = ['Data', 'lin']
 
-    # Tab 3: Centiles
+    # Tab 3: Layers
     with ptabs[2]:
+
+        if hvar != '':
+            vals_hue = df[hvar].unique().tolist()
+            st.session_state.plots.at[plot_id, 'hvals'] = st.multiselect(
+                'Select groups', vals_hue, vals_hue
+            )
+
+        if trend == 'Linear':
+            st.session_state.plots.at[plot_id, 'traces'] = st.multiselect(
+                'Select traces', ['Data', 'lin', 'lin_conf95'], ['Data', 'lin', 'lin_conf95']
+            )
 
         # Get plot params
         centtype = st.session_state.plots.loc[plot_id].centtype
