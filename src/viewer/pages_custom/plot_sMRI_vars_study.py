@@ -176,6 +176,8 @@ show_panel_plots = st.checkbox(
 )
 
 if show_panel_plots:
+    if st.session_state.df_plot.shape[0] == 0:
+        st.session_state.df_plot = utildf.read_dataframe(st.session_state.paths["csv_plot"])
     df = st.session_state.df_plot
 
     ################
@@ -236,7 +238,7 @@ if show_panel_plots:
     ################
     # Show plots
 
-    # Add a plot (either due to button click or to add a first plot by default)
+    # Add a plot (a first plot is added by default; others at button click)
     if st.session_state.plots.shape[0] == 0 or btn_plots:
         # Select xvar and yvar, if not set yet
         num_cols = df.select_dtypes(include='number').columns

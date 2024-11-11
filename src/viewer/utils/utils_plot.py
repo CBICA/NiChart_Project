@@ -163,7 +163,7 @@ def display_plot(
         if show_settings:
             df_filt = add_plot_tabs(df, plot_id)
 
-        [xvar, yvar, hvar, hvals, trend, lowess_s, centtype] = st.session_state.plots.loc[plot_id][['xvar', 'yvar', 'hvar', 'hvals', 'trend', 'lowess_s', 'centtype']]
+        [xvar, yvar, hvar, hvals, trend, lowess_s, traces, centtype] = st.session_state.plots.loc[plot_id][['xvar', 'yvar', 'hvar', 'hvals', 'trend', 'lowess_s', 'traces', 'centtype']]
         hind = get_index_in_list(df.columns.tolist(), hvar)
 
         # Main plot
@@ -180,9 +180,9 @@ def display_plot(
             yaxis_title = yvar,
         )
         
-        utiltr.scatter_trace(df_filt, xvar, yvar, hvar, fig)
+        utiltr.scatter_trace(df_filt, xvar, yvar, hvar, hvals, traces, fig)
         if trend == 'Linear':
-            utiltr.linreg_trace(df_filt, xvar, yvar, hvar, hvals, fig)
+            utiltr.linreg_trace(df_filt, xvar, yvar, hvar, hvals, traces, fig)
         elif trend == 'Smooth LOWESS Curve':
             utiltr.lowess_trace(df_filt, xvar, yvar, hvar, hvals, lowess_s, fig)
 

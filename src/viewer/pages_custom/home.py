@@ -28,7 +28,7 @@ if "instantiated" not in st.session_state:
 
     # Dictionary with plot info
     st.session_state.plots = pd.DataFrame(
-        columns=["pid", "xvar", "yvar", "hvar", "hvals", "trend", "lowess_s", "centtype"]
+        columns=["pid", "xvar", "yvar", "hvar", "hvals", "trend", "lowess_s", "traces", "centtype"]
     )
     st.session_state.plot_index = 1
     st.session_state.plot_active = ""
@@ -228,6 +228,7 @@ if "instantiated" not in st.session_state:
 
     # Debugging variables
     st.session_state.debug_show_state = False
+    st.session_state.debug_show_plots = False
     st.session_state.debug_show_paths = False
     st.session_state.debug_show_flags = False
 
@@ -258,6 +259,11 @@ with st.sidebar.expander("Acknowledgments"):
 st.sidebar.success("Select a task above")
 
 with st.sidebar.expander('Flags'):
+
+    if st.checkbox("Show plots?", value=True):
+        st.session_state.debug_show_plots = True
+    else:
+        st.session_state.debug_show_plots = False
 
     if st.checkbox("Show paths?", value=True):
         st.session_state.debug_show_paths = True

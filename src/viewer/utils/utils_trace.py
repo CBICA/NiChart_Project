@@ -8,22 +8,24 @@ import statsmodels.api as sm
 from sklearn.linear_model import LinearRegression
 import utils.utils_stats as utilstat
 
-def scatter_trace(df, xvar, yvar, hvar, fig):
+def scatter_trace(df, xvar, yvar, hvar, hvals, traces, fig):
     # Add a tmp column if group var is not set
     dft = df.copy()
     if hvar == '':
         hvar = 'All'
         dft['All'] = 'Data'
 
-    for hname, dfh in dft.groupby(hvar):
-        trace = go.Scatter(
-            x=dfh[xvar],
-            y=dfh[yvar],
-            mode='markers',
-            name=hname,
-            legendgroup=hname,
-        )
-        fig.add_trace(trace)
+    if 'Data' in traces:
+        for hname, dfh in dft.groupby(hvar):
+            if hname in hvals:
+                trace = go.Scatter(
+                    x=dfh[xvar],
+                    y=dfh[yvar],
+                    mode='markers',
+                    name=hname,
+                    legendgroup=hname,
+                )
+                fig.add_trace(trace)
 
 def linreg_trace(
     df: pd.DataFrame,
@@ -31,6 +33,7 @@ def linreg_trace(
     yvar: str,
     hvar: str,
     hvals: Any,
+    traces: Any,
     fig: Any
 ) -> Any:
     '''
@@ -38,45 +41,39 @@ def linreg_trace(
     '''
     dict_fit = utilstat.linreg_model(df, xvar, yvar, hvar)
 
-    # Add traces for the fit and confident intervals
-    for hname in dict_fit.keys():
-        x_hat = dict_fit[hname]['x_hat']
-        y_hat = dict_fit[hname]['y_hat']
-        conf_int = dict_fit[hname]['conf_int']
-        trace = go.Scatter(
-            x=x_hat,
-            y=y_hat,
-            # showlegend=False,
-            mode="lines",
-            name=f'lin_{hname}',
-            legendgroup=hname,
-        )
-        fig.add_trace(trace)
+    # Add traces for the fit and confidence intervals
+    if 'lin' in traces:
+        for hname in hvals:
+            x_hat = dict_fit[hname]['x_hat']
+            y_hat = dict_fit[hname]['y_hat']
+            conf_int = dict_fit[hname]['conf_int']
+            trace = go.Scatter(
+                x=x_hat,
+                y=y_hat,
+                # showlegend=False,
+                mode="lines",
+                name=f'lin_{hname}',
+                legendgroup=hname,
+            )
+            fig.add_trace(trace)
 
-    for hname in dict_fit.keys():
-        x_hat = dict_fit[hname]['x_hat']
-        y_hat = dict_fit[hname]['y_hat']
-        conf_int = dict_fit[hname]['conf_int']
-        trace = go.Scatter(
-            x=np.concatenate([x_hat, x_hat[::-1]]),
-            y=np.concatenate([conf_int[:, 0], conf_int[:, 1][::-1]]),
-            # showlegend=False,
-            mode="lines",
-            name=f'lin_conf95_{hname}',
-            legendgroup=hname,
-        )
-        fig.add_trace(trace)
-
-        trace = go.Scatter(
-            x=np.concatenate([x_hat, x_hat[::-1]]),
-            y=np.concatenate([conf_int[:, 0], conf_int[:, 1][::-1]]),
-            fill='toself',
-            fillcolor='rgba(0,100,80,0.2)',
-            line=dict(color='rgba(255,255,255,0)'),
-            hoverinfo="skip",
-            showlegend=False
-        )
-        fig.add_trace(trace)
+    if 'lin_conf95' in traces:
+        for hname in hvals:
+            x_hat = dict_fit[hname]['x_hat']
+            y_hat = dict_fit[hname]['y_hat']
+            conf_int = dict_fit[hname]['conf_int']
+            trace = go.Scatter(
+                x=np.concatenate([x_hat, x_hat[::-1]]),
+                y=np.concatenate([conf_int[:, 0], conf_int[:, 1][::-1]]),
+                fill='toself',
+                fillcolor='rgba(0,100,80,0.2)',
+                line=dict(color='rgba(255,255,255,0)'),
+                hoverinfo="skip",
+                name=f'lin_conf95_{hname}',
+                legendgroup=hname,
+                # showlegend=False
+            )
+            fig.add_trace(trace)
 
     return fig
 
