@@ -16,14 +16,14 @@ def add_plot() -> None:
 
     df_p.loc[plot_id] = [
         plot_id,
-        st.session_state.plot_xvar,
-        st.session_state.plot_yvar,
-        st.session_state.plot_hvar,
-        st.session_state.plot_hvals,
-        st.session_state.plot_trend,
-        st.session_state.plot_lowess_s,
-        st.session_state.plot_traces,
-        st.session_state.plot_centtype,
+        st.session_state.plot_var['xvar'],
+        st.session_state.plot_var['yvar'],
+        st.session_state.plot_var['hvar'],
+        st.session_state.plot_var['hvals'],
+        st.session_state.plot_var['trend'],
+        st.session_state.plot_var['lowess_s'],
+        st.session_state.plot_var['traces'],
+        st.session_state.plot_var['centtype'],
     ]
     st.session_state.plot_index += 1
 
@@ -61,7 +61,7 @@ def add_plot_tabs(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
         # Get df columns
         list_cols = df.columns.to_list()
         list_cols_ext = [''] + list_cols
-        list_trends = st.session_state.trend_types
+        list_trends = st.session_state.plot_const['trend_types']
 
         # Set plotting variables
         xind = get_index_in_list(list_cols, st.session_state.plots.loc[plot_id].xvar)
@@ -116,11 +116,11 @@ def add_plot_tabs(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
         centtype = st.session_state.plots.loc[plot_id].centtype
 
         # Select plot params from the user
-        centind = st.session_state.cent_types.index(centtype)
+        centind = st.session_state.plot_var['centtype'].index(centtype)
 
         centtype = st.selectbox(
             "Centile Type",
-            st.session_state.cent_types,
+            st.session_state.plot_var['centtype'],
             key=f"cent_type_{plot_id}",
             index=centind,
         )
@@ -168,8 +168,8 @@ def display_plot(
 
         # Main plot
         layout = go.Layout(
-            # height=st.session_state.plot_init_height
-            height=st.session_state.plot_init_height * st.session_state.plot_height_coeff,
+            # height=st.session_state.plot_const['height_init']
+            height=st.session_state.plot_const['height_init'] * st.session_state.plot_height_coeff,
             margin=dict(l=20, r=20, t=20, b=20),
         )
         fig = go.Figure(layout = layout)

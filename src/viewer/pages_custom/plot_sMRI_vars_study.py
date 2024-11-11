@@ -74,7 +74,7 @@ if show_panel_incsv:
 
         # Read input csv
         if st.session_state.is_updated['csv_plot']:
-            st.session_state.df_plot = utildf.read_dataframe(st.session_state.paths["csv_plot"])
+            st.session_state.plot_var['df_data'] = utildf.read_dataframe(st.session_state.paths["csv_plot"])
             st.session_state.is_updated['csv_plot'] = False
 
 # Panel for renaming variables
@@ -107,7 +107,7 @@ if show_panel_rename:
                 st.session_state.roi_dict_rev = dict_r2
 
                 # Get a list of columns that match the dict key
-                df = st.session_state.df_plot
+                df = st.session_state.plot_var['df_data']
                 df_tmp = df[df.columns[df.columns.isin(st.session_state.roi_dict.keys())]]
                 df_tmp2 = df_tmp.rename(columns=st.session_state.roi_dict)
                 if df_tmp.shape[1] == 0:
@@ -122,9 +122,9 @@ if show_panel_rename:
 
                     if st.button('Approve renaming'):
                         df = df.rename(columns=st.session_state.roi_dict)
-                        st.session_state.df_plot = df
+                        st.session_state.plot_var['df_data'] = df
                         st.success(f'Variables are renamed!')
-                        st.session_state.df_plot = df
+                        st.session_state.plot_var['df_data'] = df
 
 # # Panel for selecting variables
 # flag_disabled = df.shape[0] == 0
@@ -176,9 +176,9 @@ show_panel_plots = st.checkbox(
 )
 
 if show_panel_plots:
-    if st.session_state.df_plot.shape[0] == 0:
-        st.session_state.df_plot = utildf.read_dataframe(st.session_state.paths["csv_plot"])
-    df = st.session_state.df_plot
+    if st.session_state.plot_var['df_data'].shape[0] == 0:
+        st.session_state.plot_var['df_data'] = utildf.read_dataframe(st.session_state.paths["csv_plot"])
+    df = st.session_state.plot_var['df_data']
 
     ################
     # Sidebar parameters
@@ -186,11 +186,11 @@ if show_panel_plots:
         # Slider to set number of plots in a row
         btn_plots = st.button("Add plot", disabled = False)
 
-        st.session_state.plots_per_row = st.slider(
+        st.session_state.plot_const['num_per_row'] = st.slider(
             "Plots per row",
             1,
-            st.session_state.max_plots_per_row,
-            st.session_state.plots_per_row,
+            st.session_state.plot_const['max_per_row'],
+            st.session_state.plot_const['num_per_row'],
             key="a_per_page",
             disabled = False
         )
@@ -242,16 +242,16 @@ if show_panel_plots:
     if st.session_state.plots.shape[0] == 0 or btn_plots:
         # Select xvar and yvar, if not set yet
         num_cols = df.select_dtypes(include='number').columns
-        if st.session_state.plot_xvar == '':
-            st.session_state.plot_xvar = num_cols[0]
-        if st.session_state.plot_yvar == '':
-            st.session_state.plot_yvar = num_cols[1]
+        if st.session_state.plot_var['xvar'] == '':
+            st.session_state.plot_var['xvar'] = num_cols[0]
+        if st.session_state.plot_var['yvar'] == '':
+            st.session_state.plot_var['yvar'] = num_cols[1]
         utilpl.add_plot()
 
     # Read plot ids
     df_p = st.session_state.plots
     list_plots = df_p.index.tolist()
-    plots_per_row = st.session_state.plots_per_row
+    plots_per_row = st.session_state.plot_const['num_per_row']
 
     # Render plots
     #  - iterates over plots;
@@ -276,7 +276,6 @@ if show_panel_plots:
                     not flag_plot_settings,
                     st.session_state.sel_mrid
                 )
-                print(f'QQQQQQQQQQQQQQQ {new_plot.layout.width}')
                 plots_arr.append(new_plot)
 
     ################

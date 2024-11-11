@@ -6,10 +6,11 @@ import streamlit as st
 # Initiate Session State Values
 if "instantiated" not in st.session_state:
 
+    ###################################
     # App type ('desktop' or 'cloud')
+    
     st.session_state.app_type = "cloud"
     st.session_state.app_type = "desktop"
-    
     st.session_state.app_config = {
         'cloud': {
             'msg_infile': 'Upload'
@@ -19,12 +20,8 @@ if "instantiated" not in st.session_state:
         }
     }
 
-    # Flag to keep state for panels
-    st.session_state.flags_plotsmri = {
-        'panel_wdir_open': False,
-        'panel_ddir_open': False,
-        'dset': False
-    }
+    ###################################
+    # Plotting
 
     # Dictionary with plot info
     st.session_state.plots = pd.DataFrame(
@@ -32,11 +29,37 @@ if "instantiated" not in st.session_state:
     )
     st.session_state.plot_index = 1
     st.session_state.plot_active = ""
+    
+    # Constant plot settings
+    st.session_state.plot_const = {
+        'trend_types' : ['None', 'Linear', 'Smooth LOWESS Curve'],
+        'centile_types' : ['None', 'CN-All', 'CN-M', 'CN-F'],
+        'max_per_row': 5,
+        'num_per_row': 3,
+        'height_init': 500,
+        'height_coeff': 100
+    }
 
+    # Plot variables
+    st.session_state.plot_var = {
+        'df_data': pd.DataFrame(),
+        'xvar': None,
+        'yvar': None,
+        'hvar': '',
+        'hvals': [],
+        'trend': '',
+        'traces': [],
+        'lowess_s': 0.5,
+        'centtype' : '',
+    }
+
+    ###################################
+    # General
+    
     # Study name
     st.session_state.dset = ""
 
-    # Flags for various i/o
+    # Icons for panels
     st.session_state.icon_thumb = {
         False: ':material/thumb_down:',
         True: ':material/thumb_up:'
@@ -109,38 +132,28 @@ if "instantiated" not in st.session_state:
         "csv_mlscores": "",
     }
 
-    # Flags to hide/show panels
-    st.session_state.panel_visible = {
-        'working_dir': False,
-        'plot_in_data': False
-    }
-
     # Flags to keep updates in user input/output
     st.session_state.is_updated = {
         "csv_plot": False,
     }
         
-    # Paths for output
+    # Set initial values for paths
     st.session_state.paths["root"] = os.path.dirname(os.path.dirname(os.getcwd()))
     st.session_state.paths["init"] = st.session_state.paths["root"]
-
-    #########################################
-    # FIXME : set to test folder outside repo
-    st.session_state.paths["init"] = os.path.join(
-        os.path.dirname(st.session_state.paths["root"]), "TestData"
-    )
-
-    st.session_state.paths["last_in_dir"] = st.session_state.paths["init"]
-
-    # FIXME: This sets the default out path to a folder inside the root folder for now
     st.session_state.paths["dir_out"] = os.path.join(
         st.session_state.paths["root"],
         "output_folder"
     )
     if not os.path.exists(st.session_state.paths["dir_out"]):
         os.makedirs(st.session_state.paths["dir_out"])
-        
-    #########################################
+
+    ############
+    # FIXME : set init folder to test folder outside repo
+    st.session_state.paths["init"] = os.path.join(
+        os.path.dirname(st.session_state.paths["root"]), "TestData"
+    )
+    st.session_state.paths["last_in_dir"] = st.session_state.paths["init"]
+    ############
 
     # Image modalities
     st.session_state.list_mods = ["T1", "T2", "FL", "DTI", "fMRI"]
@@ -174,47 +187,9 @@ if "instantiated" not in st.session_state:
     st.session_state.sel_series = []
     st.session_state.sel_mod = "T1"
 
-    # Default number of plots in a row
-    st.session_state.plotvars = {
-        'max_plots_per_row': 5,
-        'plots_per_row': 2,
-    }
-    st.session_state.max_plots_per_row = 5      ## FIXME will be redundant
-    st.session_state.plots_per_row = 2          ## FIXME will be redundant
-
-    st.session_state.plot_init_height = 500
-    st.session_state.plot_height_coeff = 100
-    st.session_state.plot_active = ""
-
     # Image suffixes
     st.session_state.suff_t1img = "_T1.nii.gz"
     st.session_state.suff_seg = "_T1_DLMUSE.nii.gz"
-
-    st.session_state.df_plot = pd.DataFrame()
-
-    # Variables for page plot_smri
-    st.session_state.page_plotsmri = {
-        'df' : pd.DataFrame(),
-        'xvar' : None,
-        'yvar' : None,
-        'hvar' : None,
-        'trend_types' : ['None', 'Linear', 'Smooth LOWESS Curve'],
-        'trend' : 'None',
-        'centile_types' : ['None', 'CN-All', 'CN-M', 'CN-F'],
-        'centile' : 'None'
-    }
-
-    st.session_state.trend_types = ["", "Linear", "Smooth LOWESS Curve"]
-    st.session_state.cent_types = ["", "CN-All", "CN-F", "CN-M"]
-
-    st.session_state.plot_xvar = ""
-    st.session_state.plot_yvar = ""
-    st.session_state.plot_hvar = ""
-    st.session_state.plot_hvals = []
-    st.session_state.plot_trend = ""
-    st.session_state.plot_lowess_s = 0.5
-    st.session_state.plot_traces = []
-    st.session_state.plot_centtype = ""
 
     # MRID selected by user
     st.session_state.sel_mrid = ""
@@ -231,9 +206,6 @@ if "instantiated" not in st.session_state:
     st.session_state.debug_show_plots = False
     st.session_state.debug_show_paths = False
     st.session_state.debug_show_flags = False
-
-    # Viewing variables
-
 
     st.session_state.instantiated = True
 
