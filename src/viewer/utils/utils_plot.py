@@ -163,8 +163,10 @@ def display_plot(
         if show_settings:
             df_filt = add_plot_tabs(df, plot_id)
 
-        [xvar, yvar, hvar, hvals, trend, lowess_s, traces, centtype] = st.session_state.plots.loc[plot_id][['xvar', 'yvar', 'hvar', 'hvals', 'trend', 'lowess_s', 'traces', 'centtype']]
-        hind = get_index_in_list(df.columns.tolist(), hvar)
+        #[xvar, yvar, hvar, hvals, trend, lowess_s, traces, centtype] = st.session_state.plots.loc[plot_id][['xvar', 'yvar', 'hvar', 'hvals', 'trend', 'lowess_s', 'traces', 'centtype']]
+
+        curr_plot = st.session_state.plots.loc[plot_id]
+        hind = get_index_in_list(df.columns.tolist(), curr_plot['hvar'])
 
         # Main plot
         layout = go.Layout(
@@ -176,18 +178,45 @@ def display_plot(
         
         # Add axis labels
         fig.update_layout(
-            xaxis_title = xvar,
-            yaxis_title = yvar,
+            xaxis_title = curr_plot['xvar'],
+            yaxis_title = curr_plot['yvar'],
         )
         
-        utiltr.scatter_trace(df_filt, xvar, yvar, hvar, hvals, traces, fig)
-        if trend == 'Linear':
-            utiltr.linreg_trace(df_filt, xvar, yvar, hvar, hvals, traces, fig)
-        elif trend == 'Smooth LOWESS Curve':
-            utiltr.lowess_trace(df_filt, xvar, yvar, hvar, hvals, lowess_s, fig)
+        # Add data scatter
+        utiltr.scatter_trace(
+            df_filt,
+            curr_plot['xvar'],
+            curr_plot['yvar'],
+            curr_plot['hvar'],
+            curr_plot['hvals'],
+            curr_plot['traces'],
+            fig
+        )
+        
+        # Add regression lines
+        if curr_plot['trend'] == 'Linear':
+            utiltr.linreg_trace(
+                df_filt,
+                curr_plot['xvar'],
+                curr_plot['yvar'],
+                curr_plot['hvar'],
+                curr_plot['hvals'],
+                curr_plot['traces'],
+                fig
+            )
+        elif curr_plot['trend'] == 'Smooth LOWESS Curve':
+            utiltr.lowess_trace(
+                df_filt,
+                curr_plot['xvar'],
+                curr_plot['yvar'],
+                curr_plot['hvar'],
+                curr_plot['hvals'],
+                curr_plot['lowess_s'],
+                fig
+            )
 
         # Add centile values
-        if centtype != '':
+        if curr_plot['centtype'] != '':
             fcent = os.path.join(
                 st.session_state.paths["root"],
                 "resources",
@@ -195,12 +224,22 @@ def display_plot(
                 f"centiles_{centtype}.csv",
             )
             df_cent = pd.read_csv(fcent)
-            utiltr.percentile_trace(df_cent, xvar, yvar, fig)
+            utiltr.percentile_trace(
+                df_cent,
+                curr_plot['xvar'],
+                curr_plot['yvar'],
+                fig
+            )
 
         # Highlight selected data point
         if sel_mrid != '':
-            utiltr.selid_trace(df, sel_mrid, xvar, yvar, fig)
-
+            utiltr.selid_trace(
+                df,
+                sel_mrid,
+                curr_plot['xvar'],
+                curr_plot['yvar'],
+                fig
+            )
 
         # Catch clicks on plot
         # - on_select: when clicked it will rerun and return the info
@@ -210,23 +249,15 @@ def display_plot(
 
         # Detect MRID from the click info and save to session_state
         if len(sel_info["selection"]["points"]) > 0:
-
             sind = sel_info["selection"]["point_indices"][0]
-
             if hind is None:
                 sel_mrid = df_filt.iloc[sind]["MRID"]
             else:
-                
-                print(f'AAA {sel_info}')
-                
                 lgroup = sel_info["selection"]["points"][0]["legendgroup"]
                 sel_mrid = df_filt[df_filt[hvar] == lgroup].iloc[sind]["MRID"]
-
             sel_roi = st.session_state.plots.loc[st.session_state.plot_active, "yvar"]
-
             st.session_state.sel_mrid = sel_mrid
             st.session_state.sel_roi = sel_roi
-
             st.rerun()
 
         return fig
