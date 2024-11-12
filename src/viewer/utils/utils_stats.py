@@ -75,7 +75,7 @@ def lowess_with_conf(x, y, f=1./3.):
 
 @st.cache_data()
 def lowess_model(df, xvar, yvar, hvar, lowess_s):
-    if hvar == '':
+    if hvar == 'None':
         dft = df[[xvar, yvar]].sort_values(xvar)
         hvar = 'All'
         dft['All'] = 'Data'
@@ -100,7 +100,7 @@ def lowess_model(df, xvar, yvar, hvar, lowess_s):
 
 @st.cache_data()
 def lowess2_model(df, xvar, yvar, hvar, lowess_s):
-    if hvar == '':
+    if hvar == 'None':
         dft = df[[xvar, yvar]].sort_values(xvar)
         hvar = 'All'
         dft['All'] = 'Data'

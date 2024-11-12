@@ -11,9 +11,11 @@ import utils.utils_stats as utilstat
 def scatter_trace(df, xvar, yvar, hvar, hvals, traces, fig):
     # Add a tmp column if group var is not set
     dft = df.copy()
-    if hvar == '':
+    if hvar == 'None':
         hvar = 'All'
         dft['All'] = 'Data'
+    if hvals == []:
+        hvals = dft[hvar].unique().tolist()
 
     if 'Data' in traces:
         for hname, dfh in dft.groupby(hvar):

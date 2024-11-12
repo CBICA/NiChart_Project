@@ -43,7 +43,7 @@ if show_panel_wdir:
 
 # Panel for selecting data csv
 msg = st.session_state.app_config[st.session_state.app_type]['msg_infile']
-icon = st.session_state.icon_thumb[st.session_state.flags['dir_dicom']]
+icon = st.session_state.icon_thumb[st.session_state.flags['csv_plot']]
 show_panel_incsv = st.checkbox(
     f":material/upload: {msg} Data {icon}",
     disabled = not st.session_state.flags['dir_out'],
@@ -188,52 +188,83 @@ if show_panel_plots:
 
         st.session_state.plot_const['num_per_row'] = st.slider(
             "Plots per row",
-            1,
+            st.session_state.plot_const['min_per_row'],
             st.session_state.plot_const['max_per_row'],
             st.session_state.plot_const['num_per_row'],
-            key="a_per_page",
             disabled = False
         )
 
-        st.session_state.plot_height_coeff = st.slider(
-            "Plot height", min_value=0.6, max_value=2.0, value=1.0, step=0.2, disabled = False
+        st.session_state.plot_h_coeff = st.slider(
+            "Plot height",
+            min_value=st.session_state.plot_const['h_coeff_min'],
+            max_value=st.session_state.plot_const['h_coeff_max'],
+            value=st.session_state.plot_const['h_coeff'],
+            step=st.session_state.plot_const['h_coeff_step'],
+            disabled = False
         )
 
         # Checkbox to show/hide plot options
-        flag_plot_settings = st.checkbox(
+        st.session_state.plot_var['hide_settings'] = st.checkbox(
             "Hide plot settings",
+            value=st.session_state.plot_var['hide_settings'],
+            disabled = False
+        )
+
+        # Checkbox to show/hide plot legend
+        st.session_state.plot_var['hide_legend']= st.checkbox(
+            "Hide legend",
+            value=st.session_state.plot_var['hide_legend'],
             disabled = False
         )
 
         # Checkbox to show/hide mri image
-        flag_show_img = st.checkbox(
+        st.session_state.plot_var['show_img']= st.checkbox(
             "Show image",
-            disabled = False
+            value=st.session_state.plot_var['show_img'],
+            disabled=False
         )
 
         st.divider()
 
-        if flag_show_img:
-
+        if st.session_state.plot_var['show_img']:
+            # Show mrid's
             if st.session_state.sel_mrid != '':
                 list_mrid = df.MRID.sort_values().tolist()
                 sel_ind = list_mrid.index(st.session_state.sel_mrid)
-                st.session_state.sel_mrid = st.selectbox("Selected subject", list_mrid, sel_ind)
+                st.session_state.sel_mrid = st.selectbox(
+                    "Selected subject",
+                    list_mrid,
+                    sel_ind
+                )
 
-
+            # Show roi's
             if st.session_state.sel_roi != '':
                 list_roi = df.columns.sort_values().tolist()
                 sel_ind = list_roi.index(st.session_state.sel_roi)
-                st.session_state.sel_roi = st.selectbox("Selected ROI", list_roi, sel_ind)
+                st.session_state.sel_roi = st.selectbox(
+                    "Selected ROI",
+                    list_roi,
+                    sel_ind
+                )
 
             # Create a list of checkbox options
-            list_orient = st.multiselect("Select viewing planes:", utilni.img_views, utilni.img_views)
+            list_orient = st.multiselect(
+                "Select viewing planes:",
+                utilni.img_views,
+                utilni.img_views
+            )
 
             # View hide overlay
-            is_show_overlay = st.checkbox("Show overlay", True)
+            is_show_overlay = st.checkbox(
+                "Show overlay",
+                True
+            )
 
             # Crop to mask area
-            crop_to_mask = st.checkbox("Crop to mask", True)
+            crop_to_mask = st.checkbox(
+                "Crop to mask",
+                True
+            )
 
     ################
     # Show plots
@@ -242,11 +273,17 @@ if show_panel_plots:
     if st.session_state.plots.shape[0] == 0 or btn_plots:
         # Select xvar and yvar, if not set yet
         num_cols = df.select_dtypes(include='number').columns
-        if st.session_state.plot_var['xvar'] == '':
-            st.session_state.plot_var['xvar'] = num_cols[0]
-        if st.session_state.plot_var['yvar'] == '':
-            st.session_state.plot_var['yvar'] = num_cols[1]
-        utilpl.add_plot()
+        if num_cols.shape[0] > 0:
+            if st.session_state.plot_var['xvar'] == '':
+                st.session_state.plot_var['xvar'] = num_cols[0]
+                if st.session_state.plot_var['yvar'] == '':
+                    if num_cols.shape[0] > 1:
+                        st.session_state.plot_var['yvar'] = num_cols[1]
+                    else:
+                        st.session_state.plot_var['yvar'] = num_cols[0]
+            utilpl.add_plot()
+        else:
+            st.warning('No numeric columns in data!')
 
     # Read plot ids
     df_p = st.session_state.plots
@@ -273,14 +310,14 @@ if show_panel_plots:
                 new_plot = utilpl.display_plot(
                     df,
                     plot_ind,
-                    not flag_plot_settings,
+                    not st.session_state.plot_var['hide_settings'],
                     st.session_state.sel_mrid
                 )
                 plots_arr.append(new_plot)
 
     ################
     # Show images
-    if flag_show_img:
+    if st.session_state.plot_var['show_img']:
         # Check if data point selected
         if st.session_state.sel_mrid == "":
             st.warning("Please select a subject on the plot!")
@@ -355,6 +392,11 @@ if show_panel_plots:
                                     tmp_orient
                                 )
         
+if st.session_state.debug_show_plots:
+    with st.expander("DEBUG: Session state - plots"):
+        st.write(st.session_state.plots)
+        st.write(st.session_state.plot_var)
+
 if st.session_state.debug_show_state:
     with st.expander("DEBUG: Session state - all variables"):
         st.write(st.session_state)

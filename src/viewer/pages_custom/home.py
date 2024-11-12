@@ -34,23 +34,31 @@ if "instantiated" not in st.session_state:
     st.session_state.plot_const = {
         'trend_types' : ['None', 'Linear', 'Smooth LOWESS Curve'],
         'centile_types' : ['None', 'CN-All', 'CN-M', 'CN-F'],
+        'min_per_row': 1,
         'max_per_row': 5,
         'num_per_row': 3,
-        'height_init': 500,
-        'height_coeff': 100
+        'margin': 20,
+        'h_init': 500,
+        'h_coeff': 1.0,
+        'h_coeff_max': 2.0,
+        'h_coeff_min': 0.6,
+        'h_coeff_step': 0.2,
     }
 
     # Plot variables
     st.session_state.plot_var = {
         'df_data': pd.DataFrame(),
-        'xvar': None,
-        'yvar': None,
-        'hvar': '',
+        'hide_settings': False,
+        'hide_legend': False,
+        'show_img': False,
+        'xvar': '',
+        'yvar': '',
+        'hvar': 'None',
         'hvals': [],
-        'trend': '',
-        'traces': [],
+        'trend': 'None',
+        'traces': ['Data'],
         'lowess_s': 0.5,
-        'centtype' : '',
+        'centtype' : 'None',
     }
 
     ###################################

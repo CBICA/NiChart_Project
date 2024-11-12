@@ -68,40 +68,40 @@ def add_plot_tabs(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
         xvar = st.selectbox(
             "X Var", list_cols, key=f"plot_xvar_{plot_id}", index=xind
         )
+        if xvar is not None:
+            st.session_state.plots.loc[plot_id, 'xvar'] = xvar
+
         yind = get_index_in_list(list_cols, st.session_state.plots.loc[plot_id].yvar)
         yvar = st.selectbox(
             "Y Var", list_cols, key=f"plot_yvar_{plot_id}", index=yind
         )
+        if yvar is not None:
+            st.session_state.plots.loc[plot_id, 'yvar'] = yvar
+
         hind = get_index_in_list(list_cols_ext, st.session_state.plots.loc[plot_id].hvar)
         hvar = st.selectbox(
             "Group by", list_cols_ext, key=f"plot_hvar_{plot_id}", index=hind
         )
+        if hvar is not None:
+            st.session_state.plots.loc[plot_id, 'hvar'] = hvar
 
         tind = get_index_in_list(list_trends, st.session_state.plots.loc[plot_id].trend)
         trend = st.selectbox(
             "Trend Line", list_trends, key=f"trend_type_{plot_id}", index=tind,
         )
+        if trend != '':
+            st.session_state.plots.loc[plot_id, 'trend'] = trend
+
         if trend == 'Smooth LOWESS Curve':
             st.session_state.plots.loc[plot_id, 'lowess_s'] = st.slider(
                 'Smoothness', min_value=0.4, max_value=1.0, value=0.7, step=0.1
             )
-
-        # Set plot params to session_state
-        if xvar is not None:
-            st.session_state.plots.loc[plot_id, 'xvar'] = xvar
-        if yvar is not None:
-            st.session_state.plots.loc[plot_id, 'yvar'] = yvar
-        if hvar != '':
-            st.session_state.plots.loc[plot_id, 'hvar'] = hvar
-        if trend != '':
-            st.session_state.plots.loc[plot_id, 'trend'] = trend
-
         st.session_state.plots.at[plot_id, 'traces'] = ['Data', 'lin']
 
     # Tab 3: Layers
     with ptabs[2]:
 
-        if hvar != '':
+        if st.session_state.plots.loc[plot_id, 'hvar'] != 'None':
             vals_hue = df[hvar].unique().tolist()
             st.session_state.plots.at[plot_id, 'hvals'] = st.multiselect(
                 'Select groups', vals_hue, vals_hue
@@ -109,7 +109,9 @@ def add_plot_tabs(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
 
         if trend == 'Linear':
             st.session_state.plots.at[plot_id, 'traces'] = st.multiselect(
-                'Select traces', ['Data', 'lin', 'lin_conf95'], ['Data', 'lin', 'lin_conf95']
+                'Select traces',
+                ['Data', 'lin', 'lin_conf95'],
+                ['Data', 'lin', 'lin_conf95']
             )
 
         # Get plot params
@@ -170,9 +172,14 @@ def display_plot(
 
         # Main plot
         layout = go.Layout(
-            # height=st.session_state.plot_const['height_init']
-            height=st.session_state.plot_const['height_init'] * st.session_state.plot_height_coeff,
-            margin=dict(l=20, r=20, t=20, b=20),
+            # height=st.session_state.plot_const['h_init']
+            height=st.session_state.plot_const['h_init'] * st.session_state.plot_h_coeff,
+            margin=dict(
+                l=st.session_state.plot_const['margin'],
+                r=st.session_state.plot_const['margin'],
+                t=st.session_state.plot_const['margin'],
+                b=st.session_state.plot_const['margin']
+            )
         )
         fig = go.Figure(layout = layout)
         
@@ -216,12 +223,12 @@ def display_plot(
             )
 
         # Add centile values
-        if curr_plot['centtype'] != '':
+        if curr_plot['centtype'] != 'None':
             fcent = os.path.join(
                 st.session_state.paths["root"],
                 "resources",
                 "centiles",
-                f"centiles_{centtype}.csv",
+                f"centiles_{curr_plot['centtype']}.csv",
             )
             df_cent = pd.read_csv(fcent)
             utiltr.percentile_trace(
