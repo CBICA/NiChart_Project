@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import streamlit as st
 import utils.utils_io as utilio
-import utils.utils_muse as utilmuse
+import utils.utils_roi as utilroi
 import utils.utils_nifti as utilni
 import utils.utils_st as utilst
 from stqdm import stqdm
@@ -134,7 +134,7 @@ if show_panel_view:
         sel_mrid = st.selectbox("MRID", list_mrid, key="selbox_mrid", index=None, disabled = False)
 
         # Create combo list for selecting target ROI
-        list_roi_names = utilmuse.get_roi_names(st.session_state.dicts["muse_sel"])
+        list_roi_names = utilroi.get_roi_names(st.session_state.dicts["muse_sel"])
         sel_var = st.selectbox(
             "ROI",
             list_roi_names,
@@ -158,7 +158,7 @@ if show_panel_view:
         crop_to_mask = st.checkbox("Crop to mask", True, disabled = False)
 
         # Detect list of ROI indices to display
-        list_sel_rois = utilmuse.get_derived_rois(
+        list_sel_rois = utilroi.muse_get_derived(
             sel_var, st.session_state.dicts["muse_derived"]
         )
 

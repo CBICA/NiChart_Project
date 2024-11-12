@@ -3,7 +3,7 @@ import glob
 import pandas as pd
 import json
 import streamlit as st
-import utils.utils_muse as utilmuse
+import utils.utils_rois as utilroi
 import utils.utils_nifti as utilni
 import utils.utils_trace as utiltr
 import utils.utils_st as utilst
@@ -89,18 +89,17 @@ if show_panel_rename:
 
         msg_help = 'Rename numeric ROI indices to ROI names. \n\n If a dictionary is not provided for your data type, please continue with the next step!'
 
-        sel_ind = st.session_state.rois['roi_options'].index(st.session_state.rois['sel_roi'])
         sel_dict = st.selectbox(
             'Select ROI dictionary',
-            st.session_state.rois['roi_options'],
-            sel_ind,
+            st.session_state.rois['roi_dict_options'],
+            index=None,
             help = msg_help
         )
-        if sel_dict != st.session_state.rois['sel_roi']:
-            st.session_state.rois['sel_roi'] = sel_dict
+        if sel_dict is not None:
+            st.session_state.rois['sel_roi_dict'] = sel_dict
             ssroi = st.session_state.rois
             df_tmp = pd.read_csv(
-                os.path.join(ssroi['path'], ssroi['roi_csvs'][ssroi['sel_roi']])
+                os.path.join(ssroi['path'], ssroi['roi_csvs'][ssroi['sel_roi_dict']])
             )
             dict1 = dict(zip(df_tmp["Index"].astype(str), df_tmp["Name"].astype(str)))
             dict2 = dict(zip(df_tmp["Name"].astype(str), df_tmp["Index"].astype(str)))
@@ -125,7 +124,6 @@ if show_panel_rename:
                     df = df.rename(columns=st.session_state.rois['roi_dict'])
                     st.session_state.plot_var['df_data'] = df
                     st.success(f'Variables are renamed!')
-                    st.session_state.plot_var['df_data'] = df
 
 # Panel for selecting variables
 icon = st.session_state.icon_thumb[st.session_state.flags['dir_out']]
@@ -230,6 +228,8 @@ if show_panel_plots:
             disabled = False
         )
 
+        st.divider()
+
         # Checkbox to show/hide mri image
         st.session_state.plot_var['show_img']= st.checkbox(
             "Show image",
@@ -237,28 +237,30 @@ if show_panel_plots:
             disabled=False
         )
 
-        st.divider()
+        # Selected id
+        if st.session_state.sel_mrid != '':
+            list_mrid = df.MRID.sort_values().tolist()
+            sel_ind = list_mrid.index(st.session_state.sel_mrid)
+            st.session_state.sel_mrid = st.selectbox(
+                "Selected subject",
+                list_mrid,
+                sel_ind,
+                help='Select a subject from the list, or by clicking on data points on the plots'
+            )
+
+        # Selected roi rois
+        if st.session_state.sel_roi != '':
+            list_roi = df.columns.sort_values().tolist()
+            sel_ind = list_roi.index(st.session_state.sel_roi)
+            st.session_state.sel_roi = st.selectbox(
+                "Selected ROI",
+                list_roi,
+                sel_ind,
+                help='Select an ROI from the list'
+            )
 
         if st.session_state.plot_var['show_img']:
-            # Show mrid's
-            if st.session_state.sel_mrid != '':
-                list_mrid = df.MRID.sort_values().tolist()
-                sel_ind = list_mrid.index(st.session_state.sel_mrid)
-                st.session_state.sel_mrid = st.selectbox(
-                    "Selected subject",
-                    list_mrid,
-                    sel_ind
-                )
-
-            # Show roi's
-            if st.session_state.sel_roi != '':
-                list_roi = df.columns.sort_values().tolist()
-                sel_ind = list_roi.index(st.session_state.sel_roi)
-                st.session_state.sel_roi = st.selectbox(
-                    "Selected ROI",
-                    list_roi,
-                    sel_ind
-                )
+            # Show mrids
 
             # Create a list of checkbox options
             list_orient = st.multiselect(
@@ -342,29 +344,36 @@ if show_panel_plots:
         if not st.session_state.sel_mrid == "":
             with st.spinner("Wait for it..."):
 
-                # Get selected y var
-                sel_var = st.session_state.plots.loc[st.session_state.plot_active, "yvar"]
+                # Get indices for the selected var
+                list_rois = utilroi.get_list_rois(
+                    st.session_state.plots.loc[st.session_state.plot_active, "yvar"],
+                    st.session_state.rois['roi_dict_inv'],
+                    st.session_state.rois['roi_dict_derived'],
+                )
+                
+                ## Get selected y var
+                #sel_var = st.session_state.plots.loc[st.session_state.plot_active, "yvar"]
 
-                print(f'AAAA {sel_var}')
+                #print(f'AAAA {sel_var}')
 
-                # If roi dictionary was used, detect index
-                if st.session_state.rois['roi_dict_inv'] is not None:
-                    sel_var = st.session_state.rois['roi_dict_inv'][sel_var]
+                ## If roi dictionary was used, detect index
+                #if st.session_state.rois['roi_dict_inv'] is not None:
+                    #sel_var = st.session_state.rois['roi_dict_inv'][sel_var]
 
-                print(f'AAAA {sel_var}')
+                #print(f'AAAA {sel_var}')
 
-                # Check if index exists in overlay mask
-                is_in_mask = False
-                if os.path.exists(st.session_state.paths["sel_seg"]):
-                    is_in_mask = utilni.check_roi_index(st.session_state.paths["sel_seg"], sel_var)
+                ## Check if index exists in overlay mask
+                #is_in_mask = False
+                #if os.path.exists(st.session_state.paths["sel_seg"]):
+                    #is_in_mask = utilni.check_roi_index(st.session_state.paths["sel_seg"], sel_var)
 
-                if is_in_mask:
-                    list_rois = [int(sel_var)]
-                else:
-                    list_rois = utilmuse.get_derived_rois(
-                        sel_var,
-                        st.session_state.dicts["muse_derived"],
-                    )
+                #if is_in_mask:
+                    #list_rois = [int(sel_var)]
+                #else:
+                    #list_rois = 
+                        #sel_var,
+                        #st.session_state.dicts["muse_derived"],
+                    #)
                     
                 # Process image and mask to prepare final 3d matrix to display
                 flag_files = 1

@@ -2,7 +2,7 @@ import os
 
 import pandas as pd
 import streamlit as st
-import utils.utils_muse as utilmuse
+import utils.utils_rois as utilroi
 
 # Initiate Session State Values
 if "instantiated" not in st.session_state:
@@ -187,24 +187,24 @@ if "instantiated" not in st.session_state:
     # List of roi names, indices, etc.
     st.session_state.rois = {
         'path': os.path.join(st.session_state.paths['root'], 'resources', 'lists'),
-        'roi_options': ['muse_rois', 'TMP_ROIs'], # This will be extended with additional roi dict.s 
+        'roi_dict_options': ['muse_rois', 'TMP_ROIs'], # This will be extended with additional roi dict.s 
         'roi_csvs': {
             'muse_rois': 'MUSE_listROIs.csv',
             'muse_derived': 'MUSE_mapping_derivedROIs.csv'
         },
-        'sel_roi': 'muse_rois',
-        'sel_derived': 'muse_derived'
+        'sel_roi_dict': 'muse_rois',
+        'sel_derived_dict': 'muse_derived'
     }
 
     # Read initial roi lists (default:MUSE) to dictionaries
     ssroi = st.session_state.rois
     df_tmp = pd.read_csv(
-        os.path.join(ssroi['path'], ssroi['roi_csvs'][ssroi['sel_roi']])
+        os.path.join(ssroi['path'], ssroi['roi_csvs'][ssroi['sel_roi_dict']])
     )
     dict1 = dict(zip(df_tmp["Index"].astype(str), df_tmp["Name"].astype(str)))
     dict2 = dict(zip(df_tmp["Name"].astype(str), df_tmp["Index"].astype(str)))
-    dict3 = utilmuse.derived_rois_to_dict(
-        os.path.join(ssroi['path'], ssroi['roi_csvs'][ssroi['sel_derived']])
+    dict3 = utilroi.muse_derived_to_dict(
+        os.path.join(ssroi['path'], ssroi['roi_csvs'][ssroi['sel_derived_dict']])
     )        
     st.session_state.rois['roi_dict'] = dict1
     st.session_state.rois['roi_dict_inv'] = dict2
