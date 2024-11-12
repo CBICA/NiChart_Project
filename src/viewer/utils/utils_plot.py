@@ -165,8 +165,6 @@ def display_plot(
         if show_settings:
             df_filt = add_plot_tabs(df, plot_id)
 
-        #[xvar, yvar, hvar, hvals, trend, lowess_s, traces, centtype] = st.session_state.plots.loc[plot_id][['xvar', 'yvar', 'hvar', 'hvals', 'trend', 'lowess_s', 'traces', 'centtype']]
-
         curr_plot = st.session_state.plots.loc[plot_id]
         hind = get_index_in_list(df.columns.tolist(), curr_plot['hvar'])
 

@@ -126,48 +126,60 @@ if show_panel_rename:
                         st.success(f'Variables are renamed!')
                         st.session_state.plot_var['df_data'] = df
 
-# # Panel for selecting variables
-# flag_disabled = df.shape[0] == 0
-# with st.expander(":material/playlist_add: Select Variables", expanded=False):  # type:ignore
-#     st.info('This is an optional step. Use it to select a subset of variables, or just skip to continue with all variables')
-#
-#     with open(st.session_state.dict_categories, 'r') as f:
-#         dict_categories = json.load(f)
-#
-#     # User selects a category to include
-#
-#     cols_tmp = st.columns((1,3,1), vertical_alignment="bottom")
-#     with cols_tmp[0]:
-#         sel_cat = st.selectbox('Select category', list(dict_categories.keys()), index = None)
-#
-#     if sel_cat is None:
-#         sel_vars = []
-#     else:
-#         sel_vars = dict_categories[sel_cat]
-#
-#     with cols_tmp[1]:
-#         sel_vars = st.multiselect('Which ones to keep?', sel_vars, sel_vars)
-#
-#     with cols_tmp[2]:
-#         if st.button('Add selected variables ...'):
-#             sel_vars_uniq = [v for v in sel_vars if v not in st.session_state.plot_sel_vars]
-#             st.session_state.plot_sel_vars += sel_vars_uniq
-#
-#     sel_vars_all = st.multiselect(
-#         'Add variables',
-#         st.session_state.plot_sel_vars,
-#         st.session_state.plot_sel_vars
-#     )
-#
-#     if st.button('Select variables ...'):
-#         st.success(f'Selected variables: {sel_vars_all}')
-#         df = df[st.session_state.plot_sel_vars]
+# Panel for selecting variables
+icon = st.session_state.icon_thumb[st.session_state.flags['dir_out']]
+show_panel_select = st.checkbox(
+    ":material/playlist_add: Select Variables",
+    disabled = not st.session_state.flags['csv_plot'],
+    value = False
+)
+if show_panel_select:
+    with st.container(border=True):
 
-# # Panel for filtering variables
-# flag_disabled = df.shape[0] == 0
-# with st.expander(":material/filter_alt: Filter Data", expanded=False):  # type:ignore
-#     st.info('This is an optional step to filter the data')
-#     st.success(f'Selected variables:')
+        with open(st.session_state.dict_categories, 'r') as f:
+            dict_categories = json.load(f)
+
+        # User selects a category to include
+
+        cols_tmp = st.columns((1,3,1), vertical_alignment="bottom")
+        with cols_tmp[0]:
+            sel_cat = st.selectbox('Select category', list(dict_categories.keys()), index = None)
+
+        if sel_cat is None:
+            sel_vars = []
+        else:
+            sel_vars = dict_categories[sel_cat]
+
+        with cols_tmp[1]:
+            sel_vars = st.multiselect('Which ones to keep?', sel_vars, sel_vars)
+
+        with cols_tmp[2]:
+            if st.button('Add selected variables ...'):
+                sel_vars_uniq = [v for v in sel_vars if v not in st.session_state.plot_sel_vars]
+                st.session_state.plot_sel_vars += sel_vars_uniq
+
+        sel_vars_all = st.multiselect(
+            'Add variables',
+            st.session_state.plot_sel_vars,
+            st.session_state.plot_sel_vars
+        )
+
+        if st.button('Select variables ...'):
+            st.success(f'Selected variables: {sel_vars_all}')
+            df = df[st.session_state.plot_sel_vars]
+
+# Panel for filtering variables
+icon = st.session_state.icon_thumb[st.session_state.flags['dir_out']]
+show_panel_filter = st.checkbox(
+    ":material/filter_alt: Filter Data",
+    disabled = not st.session_state.flags['csv_plot'],
+    value = False
+)
+if show_panel_filter:
+    df = st.session_state.plot_var['df_data']
+    with st.container(border=True):
+        df = utildf.filter_dataframe(df)
+
 
 # Panel for displaying plots
 show_panel_plots = st.checkbox(
