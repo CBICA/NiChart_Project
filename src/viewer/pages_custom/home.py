@@ -2,13 +2,13 @@ import os
 
 import pandas as pd
 import streamlit as st
+import utils.utils_muse as utilmuse
 
 # Initiate Session State Values
 if "instantiated" not in st.session_state:
 
     ###################################
     # App type ('desktop' or 'cloud')
-    
     st.session_state.app_type = "cloud"
     st.session_state.app_type = "desktop"
     st.session_state.app_config = {
@@ -19,51 +19,10 @@ if "instantiated" not in st.session_state:
             'msg_infile': 'Select'
         }
     }
-
     ###################################
-    # Plotting
-
-    # Dictionary with plot info
-    st.session_state.plots = pd.DataFrame(
-        columns=["pid", "xvar", "yvar", "hvar", "hvals", "trend", "lowess_s", "traces", "centtype"]
-    )
-    st.session_state.plot_index = 1
-    st.session_state.plot_active = ""
-    
-    # Constant plot settings
-    st.session_state.plot_const = {
-        'trend_types' : ['None', 'Linear', 'Smooth LOWESS Curve'],
-        'centile_types' : ['None', 'CN-All', 'CN-M', 'CN-F'],
-        'min_per_row': 1,
-        'max_per_row': 5,
-        'num_per_row': 3,
-        'margin': 20,
-        'h_init': 500,
-        'h_coeff': 1.0,
-        'h_coeff_max': 2.0,
-        'h_coeff_min': 0.6,
-        'h_coeff_step': 0.2,
-    }
-
-    # Plot variables
-    st.session_state.plot_var = {
-        'df_data': pd.DataFrame(),
-        'hide_settings': False,
-        'hide_legend': False,
-        'show_img': False,
-        'xvar': '',
-        'yvar': '',
-        'hvar': 'None',
-        'hvals': [],
-        'trend': 'None',
-        'traces': ['Data'],
-        'lowess_s': 0.5,
-        'centtype' : 'None',
-    }
 
     ###################################
     # General
-    
     # Study name
     st.session_state.dset = ""
 
@@ -180,6 +139,77 @@ if "instantiated" not in st.session_state:
         'var_categories',
         'dict_var_categories.json'
     )
+    ###################################
+
+    ###################################
+    # Plotting
+    # Dictionary with plot info
+    st.session_state.plots = pd.DataFrame(
+        columns=["pid", "xvar", "yvar", "hvar", "hvals", "trend", "lowess_s", "traces", "centtype"]
+    )
+    st.session_state.plot_index = 1
+    st.session_state.plot_active = ""
+    
+    # Constant plot settings
+    st.session_state.plot_const = {
+        'trend_types' : ['None', 'Linear', 'Smooth LOWESS Curve'],
+        'centile_types' : ['None', 'CN-All', 'CN-M', 'CN-F'],
+        'min_per_row': 1,
+        'max_per_row': 5,
+        'num_per_row': 3,
+        'margin': 20,
+        'h_init': 500,
+        'h_coeff': 1.0,
+        'h_coeff_max': 2.0,
+        'h_coeff_min': 0.6,
+        'h_coeff_step': 0.2,
+    }
+
+    # Plot variables
+    st.session_state.plot_var = {
+        'df_data': pd.DataFrame(),
+        'hide_settings': False,
+        'hide_legend': False,
+        'show_img': False,
+        'xvar': '',
+        'yvar': '',
+        'hvar': 'None',
+        'hvals': [],
+        'trend': 'None',
+        'traces': ['Data'],
+        'lowess_s': 0.5,
+        'centtype' : 'None',
+    }
+    ###################################
+
+    ###################################
+    # ROI dictionaries
+    # List of roi names, indices, etc.
+    st.session_state.rois = {
+        'path': os.path.join(st.session_state.paths['root'], 'resources', 'lists'),
+        'roi_options': ['muse_rois', 'TMP_ROIs'], # This will be extended with additional roi dict.s 
+        'roi_csvs': {
+            'muse_rois': 'MUSE_listROIs.csv',
+            'muse_derived': 'MUSE_mapping_derivedROIs.csv'
+        },
+        'sel_roi': 'muse_rois',
+        'sel_derived': 'muse_derived'
+    }
+
+    # Read initial roi lists (default:MUSE) to dictionaries
+    ssroi = st.session_state.rois
+    df_tmp = pd.read_csv(
+        os.path.join(ssroi['path'], ssroi['roi_csvs'][ssroi['sel_roi']])
+    )
+    dict1 = dict(zip(df_tmp["Index"].astype(str), df_tmp["Name"].astype(str)))
+    dict2 = dict(zip(df_tmp["Name"].astype(str), df_tmp["Index"].astype(str)))
+    dict3 = utilmuse.derived_rois_to_dict(
+        os.path.join(ssroi['path'], ssroi['roi_csvs'][ssroi['sel_derived']])
+    )        
+    st.session_state.rois['roi_dict'] = dict1
+    st.session_state.rois['roi_dict_inv'] = dict2
+    st.session_state.rois['roi_dict_derived'] = dict3
+    ###################################
 
     # Current roi dictionary
     st.session_state.roi_dict = None

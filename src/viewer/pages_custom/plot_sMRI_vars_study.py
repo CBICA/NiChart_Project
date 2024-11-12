@@ -80,56 +80,57 @@ if show_panel_incsv:
 # Panel for renaming variables
 icon = st.session_state.icon_thumb[st.session_state.flags['dir_out']]
 show_panel_rename = st.checkbox(
-    f":material/new_label: Rename Variables",
+    f":material/new_label: Rename Variables (optional)",
     disabled = not st.session_state.flags['csv_plot'],
     value = False
 )
 if show_panel_rename:
     with st.container(border=True):
 
-        msg_help = 'OPTIONAL step to rename the columns of your data file (e.g. to rename numeric indices from a segmentation). \n\n If a dictionary is not provided for your data type, please continue with the next step!'
+        msg_help = 'Rename numeric ROI indices to ROI names. \n\n If a dictionary is not provided for your data type, please continue with the next step!'
 
-        sel_dict = st.selectbox('Select dictionary', ['muse_all'], None, help = msg_help)
-        if sel_dict is not None:
-            st.session_state.paths["csv_roidict"] = st.session_state.dicts[sel_dict]
+        sel_ind = st.session_state.rois['roi_options'].index(st.session_state.rois['sel_roi'])
+        sel_dict = st.selectbox(
+            'Select ROI dictionary',
+            st.session_state.rois['roi_options'],
+            sel_ind,
+            help = msg_help
+        )
+        if sel_dict != st.session_state.rois['sel_roi']:
+            st.session_state.rois['sel_roi'] = sel_dict
+            ssroi = st.session_state.rois
+            df_tmp = pd.read_csv(
+                os.path.join(ssroi['path'], ssroi['roi_csvs'][ssroi['sel_roi']])
+            )
+            dict1 = dict(zip(df_tmp["Index"].astype(str), df_tmp["Name"].astype(str)))
+            dict2 = dict(zip(df_tmp["Name"].astype(str), df_tmp["Index"].astype(str)))
+            st.session_state.rois['roi_dict'] = dict1
+            st.session_state.rois['roi_dict_inv'] = dict2
 
-            if os.path.exists(st.session_state.paths["csv_roidict"]):
+            # Get a list of columns that match the dict key
+            df = st.session_state.plot_var['df_data']
+            df_tmp = df[df.columns[df.columns.isin(st.session_state.rois['roi_dict'].keys())]]
+            df_tmp2 = df_tmp.rename(columns=st.session_state.rois['roi_dict'])
+            if df_tmp.shape[1] == 0:
+                st.warning('None of the variables were found in the dictionary!')
+            else:
+                with st.container(border=True):
+                    tmp_cols = st.columns(3)
+                    with tmp_cols[0]:
+                        st.selectbox('Initial ...', df_tmp.columns, 0)
+                    with tmp_cols[1]:
+                        st.selectbox('Renamed to ...', df_tmp2.columns, 0)
 
-                df_dict = pd.read_csv(st.session_state.paths["csv_roidict"])
-
-                dict_r1 = dict(
-                    zip(df_dict["Index"].astype(str), df_dict["Name"].astype(str))
-                )
-                dict_r2 = dict(
-                    zip(df_dict["Name"].astype(str), df_dict["Index"].astype(str))
-                )
-                st.session_state.roi_dict = dict_r1
-                st.session_state.roi_dict_rev = dict_r2
-
-                # Get a list of columns that match the dict key
-                df = st.session_state.plot_var['df_data']
-                df_tmp = df[df.columns[df.columns.isin(st.session_state.roi_dict.keys())]]
-                df_tmp2 = df_tmp.rename(columns=st.session_state.roi_dict)
-                if df_tmp.shape[1] == 0:
-                    st.warning('None of the variables were found in the dictionary!')
-                else:
-                    with st.container(border=True):
-                        tmp_cols = st.columns(3)
-                        with tmp_cols[0]:
-                            st.selectbox('Initial ...', df_tmp.columns, 0)
-                        with tmp_cols[1]:
-                            st.selectbox('Renamed to ...', df_tmp2.columns, 0)
-
-                    if st.button('Approve renaming'):
-                        df = df.rename(columns=st.session_state.roi_dict)
-                        st.session_state.plot_var['df_data'] = df
-                        st.success(f'Variables are renamed!')
-                        st.session_state.plot_var['df_data'] = df
+                if st.button('Approve renaming'):
+                    df = df.rename(columns=st.session_state.rois['roi_dict'])
+                    st.session_state.plot_var['df_data'] = df
+                    st.success(f'Variables are renamed!')
+                    st.session_state.plot_var['df_data'] = df
 
 # Panel for selecting variables
 icon = st.session_state.icon_thumb[st.session_state.flags['dir_out']]
 show_panel_select = st.checkbox(
-    ":material/playlist_add: Select Variables",
+    ":material/playlist_add: Select Variables (optional)",
     disabled = not st.session_state.flags['csv_plot'],
     value = False
 )
@@ -171,7 +172,7 @@ if show_panel_select:
 # Panel for filtering variables
 icon = st.session_state.icon_thumb[st.session_state.flags['dir_out']]
 show_panel_filter = st.checkbox(
-    ":material/filter_alt: Filter Data",
+    ":material/filter_alt: Filter Data (optional)",
     disabled = not st.session_state.flags['csv_plot'],
     value = False
 )
@@ -183,7 +184,7 @@ if show_panel_filter:
 
 # Panel for displaying plots
 show_panel_plots = st.checkbox(
-    f":material/folder_shared: Plot Data",
+    f":material/bid_landscape: Plot Data",
     disabled = not st.session_state.flags['csv_plot']    
 )
 
@@ -344,9 +345,13 @@ if show_panel_plots:
                 # Get selected y var
                 sel_var = st.session_state.plots.loc[st.session_state.plot_active, "yvar"]
 
+                print(f'AAAA {sel_var}')
+
                 # If roi dictionary was used, detect index
-                if st.session_state.roi_dict_rev is not None:
-                    sel_var = st.session_state.roi_dict_rev[sel_var]
+                if st.session_state.rois['roi_dict_inv'] is not None:
+                    sel_var = st.session_state.rois['roi_dict_inv'][sel_var]
+
+                print(f'AAAA {sel_var}')
 
                 # Check if index exists in overlay mask
                 is_in_mask = False
@@ -360,7 +365,7 @@ if show_panel_plots:
                         sel_var,
                         st.session_state.dicts["muse_derived"],
                     )
-
+                    
                 # Process image and mask to prepare final 3d matrix to display
                 flag_files = 1
                 if not os.path.exists(st.session_state.paths["sel_img"]):
