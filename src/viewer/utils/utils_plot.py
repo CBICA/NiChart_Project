@@ -197,6 +197,7 @@ def display_plot(
             curr_plot['hvar'],
             curr_plot['hvals'],
             curr_plot['traces'],
+            st.session_state.plot_var['hide_legend'],
             fig
         )
         
@@ -209,6 +210,7 @@ def display_plot(
                 curr_plot['hvar'],
                 curr_plot['hvals'],
                 curr_plot['traces'],
+                st.session_state.plot_var['hide_legend'],
                 fig
             )
         elif curr_plot['trend'] == 'Smooth LOWESS Curve':
@@ -219,6 +221,7 @@ def display_plot(
                 curr_plot['hvar'],
                 curr_plot['hvals'],
                 curr_plot['lowess_s'],
+                st.session_state.plot_var['hide_legend'],
                 fig
             )
 
@@ -240,11 +243,12 @@ def display_plot(
 
         # Highlight selected data point
         if sel_mrid != '':
-            utiltr.selid_trace(
+            utiltr.dot_trace(
                 df,
                 sel_mrid,
                 curr_plot['xvar'],
                 curr_plot['yvar'],
+                st.session_state.plot_var['hide_legend'],
                 fig
             )
 
@@ -261,8 +265,8 @@ def display_plot(
                 sel_mrid = df_filt.iloc[sind]["MRID"]
             else:
                 lgroup = sel_info["selection"]["points"][0]["legendgroup"]
-                sel_mrid = df_filt[df_filt[hvar] == lgroup].iloc[sind]["MRID"]
-            sel_roi = st.session_state.plots.loc[st.session_state.plot_active, "yvar"]
+                sel_mrid = df_filt[df_filt[curr_plot['hvar']] == lgroup].iloc[sind]["MRID"]
+            sel_roi = st.session_state.plots.loc[st.session_state.plot_active, 'yvar']
             st.session_state.sel_mrid = sel_mrid
             st.session_state.sel_roi = sel_roi
             st.rerun()

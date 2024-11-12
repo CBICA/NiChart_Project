@@ -8,7 +8,16 @@ import statsmodels.api as sm
 from sklearn.linear_model import LinearRegression
 import utils.utils_stats as utilstat
 
-def scatter_trace(df, xvar, yvar, hvar, hvals, traces, fig):
+def scatter_trace(
+    df,
+    xvar,
+    yvar,
+    hvar,
+    hvals,
+    traces,
+    hide_legend,
+    fig
+):
     # Add a tmp column if group var is not set
     dft = df.copy()
     if hvar == 'None':
@@ -26,6 +35,7 @@ def scatter_trace(df, xvar, yvar, hvar, hvals, traces, fig):
                     mode='markers',
                     name=hname,
                     legendgroup=hname,
+                    showlegend=not hide_legend
                 )
                 fig.add_trace(trace)
 
@@ -36,6 +46,7 @@ def linreg_trace(
     hvar: str,
     hvals: Any,
     traces: Any,
+    hide_legend,
     fig: Any
 ) -> Any:
     '''
@@ -56,6 +67,7 @@ def linreg_trace(
                 mode="lines",
                 name=f'lin_{hname}',
                 legendgroup=hname,
+                showlegend=not hide_legend
             )
             fig.add_trace(trace)
 
@@ -73,7 +85,7 @@ def linreg_trace(
                 hoverinfo="skip",
                 name=f'lin_conf95_{hname}',
                 legendgroup=hname,
-                # showlegend=False
+                showlegend=not hide_legend
             )
             fig.add_trace(trace)
 
@@ -87,6 +99,7 @@ def lowess_trace(
     hvar: str,
     hvals: str,
     lowess_s: float,
+    hide_legend,
     fig: Any
 ) -> Any:
 
@@ -103,23 +116,32 @@ def lowess_trace(
             mode="lines",
             name=f'lin_{hname}',
             legendgroup=hname,
+            showlegend=not hide_legend
         )
         fig.add_trace(trace)
 
-def selid_trace(df: pd.DataFrame, sel_mrid: str, xvar: str, yvar: str, fig: Any) -> Any:
+def dot_trace(
+    df: pd.DataFrame,
+    sel_mrid: str,
+    xvar: str,
+    yvar: str,
+    hide_legend,
+    fig: Any
+) -> Any:
     df_tmp = df[df.MRID == sel_mrid]
-    fig.add_trace(
-        go.Scatter(
-            x=df_tmp[xvar],
-            y=df_tmp[yvar],
-            mode='markers',
-            name='Selected',
-            marker=dict(color='rgba(250, 50, 50, 0.5)',
-                        size=12,
-                        line=dict(color='Red', width=3)
-                        )
-            )
+    trace = go.Scatter(
+        x=df_tmp[xvar],
+        y=df_tmp[yvar],
+        mode='markers',
+        name='Selected',
+        marker=dict(
+            color='rgba(250, 50, 50, 0.5)',
+            size=12,
+            line=dict(color='Red', width=3)
+        ),
+        showlegend=not hide_legend
     )
+    fig.add_trace(trace)
 
 def percentile_trace(df: pd.DataFrame, xvar: str, yvar: str, fig: Any) -> Any:
 
