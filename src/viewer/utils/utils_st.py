@@ -6,6 +6,9 @@ import streamlit as st
 import utils.utils_io as utilio
 import utils.utils_session as utilses
 
+# from wfork_streamlit_profiler import Profiler
+# import pyinstrument
+
 COL_LEFT = 3
 COL_RIGHT_EMPTY = 0.01
 COL_RIGHT_BUTTON = 1
@@ -170,7 +173,7 @@ def show_img3D(
     else:
         st.image(img[:, :, slice_index], use_column_width=True)
 
-
+# @pyinstrument.profile()
 def util_panel_workingdir(app_type: str) -> None:
     '''
     Panel to set results folder name
@@ -275,7 +278,7 @@ def util_upload_file(
     if not os.path.exists(out_file):
         utilio.copy_uploaded_file(in_file, out_file)
         return true
-    
+
     return false
 
 

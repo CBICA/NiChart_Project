@@ -4,6 +4,10 @@ import pandas as pd
 import streamlit as st
 import utils.utils_rois as utilroi
 
+from wfork_streamlit_profiler import Profiler
+
+# with Profiler():
+
 # Initiate Session State Values
 if "instantiated" not in st.session_state:
 
@@ -34,7 +38,7 @@ if "instantiated" not in st.session_state:
 
     # Flags for various i/o
     st.session_state.flags = {
-        'dset': False,        
+        'dset': False,
         'dir_out': False,
         'dir_dicom': False,
         'dicom_series': False,
@@ -103,7 +107,7 @@ if "instantiated" not in st.session_state:
     st.session_state.is_updated = {
         "csv_plot": False,
     }
-        
+
     # Set initial values for paths
     st.session_state.paths["root"] = os.path.dirname(os.path.dirname(os.getcwd()))
     st.session_state.paths["init"] = st.session_state.paths["root"]
@@ -149,7 +153,7 @@ if "instantiated" not in st.session_state:
     )
     st.session_state.plot_index = 1
     st.session_state.plot_active = ""
-    
+
     # Constant plot settings
     st.session_state.plot_const = {
         'trend_types' : ['None', 'Linear', 'Smooth LOWESS Curve'],
@@ -187,7 +191,7 @@ if "instantiated" not in st.session_state:
     # List of roi names, indices, etc.
     st.session_state.rois = {
         'path': os.path.join(st.session_state.paths['root'], 'resources', 'lists'),
-        'roi_dict_options': ['muse_rois', 'TMP_ROIs'], # This will be extended with additional roi dict.s 
+        'roi_dict_options': ['muse_rois', 'TMP_ROIs'], # This will be extended with additional roi dict.s
         'roi_csvs': {
             'muse_rois': 'MUSE_listROIs.csv',
             'muse_derived': 'MUSE_mapping_derivedROIs.csv'
@@ -205,7 +209,7 @@ if "instantiated" not in st.session_state:
     dict2 = dict(zip(df_tmp["Name"].astype(str), df_tmp["Index"].astype(str)))
     dict3 = utilroi.muse_derived_to_dict(
         os.path.join(ssroi['path'], ssroi['roi_csvs'][ssroi['sel_derived_dict']])
-    )        
+    )
     st.session_state.rois['roi_dict'] = dict1
     st.session_state.rois['roi_dict_inv'] = dict2
     st.session_state.rois['roi_dict_derived'] = dict3
@@ -270,22 +274,22 @@ st.sidebar.success("Select a task above")
 
 with st.sidebar.expander('Flags'):
 
-    if st.checkbox("Show plots?", value=True):
+    if st.checkbox("Show plots?", value=False):
         st.session_state.debug_show_plots = True
     else:
         st.session_state.debug_show_plots = False
 
-    if st.checkbox("Show paths?", value=True):
+    if st.checkbox("Show paths?", value=False):
         st.session_state.debug_show_paths = True
     else:
         st.session_state.debug_show_paths = False
 
-    if st.checkbox("Show flags?", value=True):
+    if st.checkbox("Show flags?", value=False):
         st.session_state.debug_show_flags = True
     else:
         st.session_state.debug_show_flags = False
 
-    if st.checkbox("Show all session state vars?", value=True):
+    if st.checkbox("Show all session state vars?", value=False):
         st.session_state.debug_show_state = True
     else:
         st.session_state.debug_show_state = False

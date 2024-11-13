@@ -70,7 +70,7 @@ def get_derived_rois(sel_roi: str, list_derived: list) -> Any:
 
     # Read list
     df = pd.read_csv(list_derived, header=None)
-    
+
     # Keep only selected ROI
     df = df[df[0].astype(str) == sel_roi]
 

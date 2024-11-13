@@ -7,6 +7,7 @@ import utils.utils_dataframe as utilsdf
 import utils.utils_trace as utiltr
 import plotly.graph_objs as go
 
+
 def add_plot() -> None:
     """
     Adds a new plot (updates a dataframe with plot ids)
@@ -180,13 +181,13 @@ def display_plot(
             )
         )
         fig = go.Figure(layout = layout)
-        
+
         # Add axis labels
         fig.update_layout(
             xaxis_title = curr_plot['xvar'],
             yaxis_title = curr_plot['yvar'],
         )
-        
+
         # Add data scatter
         utiltr.scatter_trace(
             df_filt,
@@ -198,7 +199,7 @@ def display_plot(
             st.session_state.plot_var['hide_legend'],
             fig
         )
-        
+
         # Add regression lines
         if curr_plot['trend'] == 'Linear':
             utiltr.linreg_trace(

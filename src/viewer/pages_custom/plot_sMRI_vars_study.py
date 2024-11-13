@@ -12,14 +12,17 @@ import utils.utils_viewimg as utilvi
 import utils.utils_plot as utilpl
 from stqdm import stqdm
 
+# from wfork_streamlit_profiler import Profiler
+# with Profiler():
+
 st.markdown(
     """
     - Plot study data to visualize imaging variables
     - With options to:
-      - Select target variables to plot
-      - View reference distributions (centile values of the reference dataset)
-      - Filter data 
-      - View MRI images and segmentations for selected data points 
+    - Select target variables to plot
+    - View reference distributions (centile values of the reference dataset)
+    - Filter data
+    - View MRI images and segmentations for selected data points
     """
 )
 
@@ -67,7 +70,7 @@ if show_panel_incsv:
                 st.session_state.paths["last_in_dir"],
                 st.session_state.flags['csv_plot']
             )
-            
+
         if os.path.exists(st.session_state.paths["csv_plot"]):
             st.success(f"Data is ready ({st.session_state.paths["csv_plot"]})", icon=":material/thumb_up:")
             st.session_state.flags['csv_plot'] = True
@@ -183,8 +186,10 @@ if show_panel_filter:
 # Panel for displaying plots
 show_panel_plots = st.checkbox(
     f":material/bid_landscape: Plot Data",
-    disabled = not st.session_state.flags['csv_plot']    
+    disabled = not st.session_state.flags['csv_plot']
 )
+
+# with Profiler() as pr:
 
 if show_panel_plots:
     if st.session_state.plot_var['df_data'].shape[0] == 0:
@@ -350,7 +355,7 @@ if show_panel_plots:
                     st.session_state.rois['roi_dict_inv'],
                     st.session_state.rois['roi_dict_derived'],
                 )
-                
+
                 ## Get selected y var
                 #sel_var = st.session_state.plots.loc[st.session_state.plot_active, "yvar"]
 
@@ -370,11 +375,11 @@ if show_panel_plots:
                 #if is_in_mask:
                     #list_rois = [int(sel_var)]
                 #else:
-                    #list_rois = 
+                    #list_rois =
                         #sel_var,
                         #st.session_state.dicts["muse_derived"],
                     #)
-                    
+
                 # Process image and mask to prepare final 3d matrix to display
                 flag_files = 1
                 if not os.path.exists(st.session_state.paths["sel_img"]):
@@ -417,7 +422,7 @@ if show_panel_plots:
                                     mask_bounds[ind_view, :],
                                     tmp_orient
                                 )
-        
+
 if st.session_state.debug_show_plots:
     with st.expander("DEBUG: Session state - plots"):
         st.write(st.session_state.plots)
@@ -434,3 +439,4 @@ if st.session_state.debug_show_paths:
 if st.session_state.debug_show_flags:
     with st.expander("DEBUG: Session state - flags"):
         st.write(st.session_state.flags)
+
