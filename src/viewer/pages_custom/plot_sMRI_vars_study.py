@@ -199,8 +199,19 @@ if show_panel_plots:
     ################
     # Sidebar parameters
     with st.sidebar:
-        # Slider to set number of plots in a row
-        btn_plots = st.button("Add plot", disabled = False)
+        # Button to add plot
+        tmp_cols = st.columns((1,1), vertical_alignment='bottom')
+        with tmp_cols[0]:
+            plot_type = st.selectbox(
+                "Plot Type",
+                ["Scatter Plot", "Distribution Plot"],
+                index = 0
+            )
+            if plot_type is not None:
+                st.session_state.plot_var['plot_type'] = plot_type
+        
+        with tmp_cols[1]:
+            btn_plots = st.button("Add plot", disabled = False)
 
         st.session_state.plot_const['num_per_row'] = st.slider(
             "Plots per row",
@@ -326,13 +337,21 @@ if show_panel_plots:
             if column_no == 0:
                 blocks = st.columns(plots_per_row)
             with blocks[column_no]:
-
-                new_plot = utilpl.display_plot(
-                    df,
-                    plot_ind,
-                    not st.session_state.plot_var['hide_settings'],
-                    st.session_state.sel_mrid
-                )
+                plot_type = st.session_state.plots.loc[plot_ind, 'plot_type']
+                if plot_type == 'Scatter Plot':
+                    new_plot = utilpl.display_scatter_plot(
+                        df,
+                        plot_ind,
+                        not st.session_state.plot_var['hide_settings'],
+                        st.session_state.sel_mrid
+                    )
+                elif plot_type == 'Distribution Plot':
+                    new_plot = utilpl.display_dist_plot(
+                        df,
+                        plot_ind,
+                        not st.session_state.plot_var['hide_settings'],
+                        st.session_state.sel_mrid
+                    )                    
                 plots_arr.append(new_plot)
 
     ################
@@ -423,20 +442,5 @@ if show_panel_plots:
                                     tmp_orient
                                 )
 
-if st.session_state.debug_show_plots:
-    with st.expander("DEBUG: Session state - plots"):
-        st.write(st.session_state.plots)
-        st.write(st.session_state.plot_var)
-
-if st.session_state.debug_show_state:
-    with st.expander("DEBUG: Session state - all variables"):
-        st.write(st.session_state)
-
-if st.session_state.debug_show_paths:
-    with st.expander("DEBUG: Session state - paths"):
-        st.write(st.session_state.paths)
-
-if st.session_state.debug_show_flags:
-    with st.expander("DEBUG: Session state - flags"):
-        st.write(st.session_state.flags)
-
+# FIXME: For DEBUG
+utilst.add_debug_panel()

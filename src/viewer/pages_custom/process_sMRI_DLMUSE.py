@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import streamlit as st
 import utils.utils_io as utilio
-import utils.utils_roi as utilroi
+import utils.utils_rois as utilroi
 import utils.utils_nifti as utilni
 import utils.utils_st as utilst
 from stqdm import stqdm
@@ -233,14 +233,5 @@ if st.session_state.app_type == "cloud":
                 disabled=False,
             )
 
-if st.session_state.debug_show_state:
-    with st.expander("DEBUG: Session state - all variables"):
-        st.write(st.session_state)
-
-if st.session_state.debug_show_paths:
-    with st.expander("DEBUG: Session state - paths"):
-        st.write(st.session_state.paths)
-
-if st.session_state.debug_show_flags:
-    with st.expander("DEBUG: Session state - flags"):
-        st.write(st.session_state.flags)
+# FIXME: For DEBUG
+utilst.add_debug_panel()

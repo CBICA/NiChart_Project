@@ -3,9 +3,9 @@ import os
 import pandas as pd
 import streamlit as st
 import utils.utils_rois as utilroi
+import utils.utils_st as utilst
 
-from wfork_streamlit_profiler import Profiler
-
+#from wfork_streamlit_profiler import Profiler
 # with Profiler():
 
 # Initiate Session State Values
@@ -149,7 +149,11 @@ if "instantiated" not in st.session_state:
     # Plotting
     # Dictionary with plot info
     st.session_state.plots = pd.DataFrame(
-        columns=["pid", "xvar", "yvar", "hvar", "hvals", "trend", "lowess_s", "traces", "centtype"]
+        columns=[
+            "pid", "plot_type", "xvar", "yvar",
+            "hvar", "hvals", "trend",
+            "lowess_s", "traces", "centtype"
+        ]
     )
     st.session_state.plot_index = 1
     st.session_state.plot_active = ""
@@ -175,6 +179,7 @@ if "instantiated" not in st.session_state:
         'hide_settings': False,
         'hide_legend': False,
         'show_img': False,
+        'plot_type': 'Scatter Plot',
         'xvar': '',
         'yvar': '',
         'hvar': 'None',
@@ -244,10 +249,10 @@ if "instantiated" not in st.session_state:
     st.session_state.plot_sel_vars = []
 
     # Debugging variables
-    st.session_state.debug_show_state = False
-    st.session_state.debug_show_plots = False
-    st.session_state.debug_show_paths = False
-    st.session_state.debug_show_flags = False
+    st.session_state.debug_show_state = True
+    st.session_state.debug_show_plots = True
+    st.session_state.debug_show_paths = True
+    st.session_state.debug_show_flags = True
 
     st.session_state.instantiated = True
 
@@ -272,32 +277,8 @@ with st.sidebar.expander("Acknowledgments"):
 
 st.sidebar.success("Select a task above")
 
-with st.sidebar.expander('Flags'):
-
-    if st.checkbox("Show plots?", value=False):
-        st.session_state.debug_show_plots = True
-    else:
-        st.session_state.debug_show_plots = False
-
-    if st.checkbox("Show paths?", value=False):
-        st.session_state.debug_show_paths = True
-    else:
-        st.session_state.debug_show_paths = False
-
-    if st.checkbox("Show flags?", value=False):
-        st.session_state.debug_show_flags = True
-    else:
-        st.session_state.debug_show_flags = False
-
-    if st.checkbox("Show all session state vars?", value=False):
-        st.session_state.debug_show_state = True
-    else:
-        st.session_state.debug_show_state = False
-
-    if st.checkbox("Switch to cloud?"):
-        st.session_state.app_type = 'cloud'
-    else:
-        st.session_state.app_type = 'desktop'
+# FIXME: For DEBUG
+utilst.add_debug_panel()
 
 st.markdown(
     """

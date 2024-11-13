@@ -355,3 +355,26 @@ def util_select_file(
         return True
 
     return False
+
+def add_debug_panel():
+    '''
+    Displays vars used in dev phase
+    '''
+    st.sidebar.divider()
+    st.sidebar.write('*** Debugging Flags ***')
+    if st.sidebar.checkbox("Switch to cloud?"):
+        st.session_state.app_type = 'cloud'
+    else:
+        st.session_state.app_type = 'desktop'
+
+    list_vars = ['', 'plots', 'plot_var', 'rois']
+    #list_vars = st.session_state.keys()
+    sel_var = st.sidebar.selectbox(
+        "View session state vars",
+        list_vars,
+        index = 0
+    )
+    if sel_var is not '':
+        with st.expander("DEBUG: Session state", expanded = True):
+            st.write(st.session_state[sel_var])
+
