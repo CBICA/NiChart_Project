@@ -197,7 +197,7 @@ if "instantiated" not in st.session_state:
     # List of roi names, indices, etc.
     st.session_state.rois = {
         'path': os.path.join(st.session_state.paths['root'], 'resources', 'lists'),
-        'roi_dict_options': ['muse_rois', 'TMP_ROIs'], # This will be extended with additional roi dict.s
+        'roi_dict_options': ['', 'muse_rois'], # This will be extended with additional roi dict.s
         'roi_csvs': {
             'muse_rois': 'MUSE_listROIs.csv',
             'muse_derived': 'MUSE_mapping_derivedROIs.csv'

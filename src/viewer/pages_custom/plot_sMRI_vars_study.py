@@ -74,6 +74,8 @@ if show_panel_incsv:
         if os.path.exists(st.session_state.paths["csv_plot"]):
             st.success(f"Data is ready ({st.session_state.paths["csv_plot"]})", icon=":material/thumb_up:")
             st.session_state.flags['csv_plot'] = True
+            if st.session_state.plot_var['df_data'].shape[0] == 0:
+                st.session_state.is_updated['csv_plot'] = True
 
         # Read input csv
         if st.session_state.is_updated['csv_plot']:
@@ -98,7 +100,7 @@ if show_panel_rename:
             index=None,
             help = msg_help
         )
-        if sel_dict is not None:
+        if sel_dict is not None and sel_dict != '':
             st.session_state.rois['sel_roi_dict'] = sel_dict
             ssroi = st.session_state.rois
             df_tmp = pd.read_csv(
