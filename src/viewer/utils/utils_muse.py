@@ -44,25 +44,6 @@ def derived_list_to_dict(list_sel_rois: list, list_derived: list) -> Any:
     return dict_roi, dict_derived
 
 
-def derived_rois_to_dict(list_derived: list) -> Any:
-    """
-    Create a dictionary from derived roi list
-    """
-    # Read list
-    df = pd.read_csv(list_derived, header=None)
-
-    # Create dict of roi names and indices
-    dict_roi = dict(zip(df[1], df[0]))
-
-    # Create dict of roi indices and derived indices
-    dict_derived = {}
-    for i, tmp_ind in enumerate(df[0].values):
-        df_tmp = df[df[0] == tmp_ind].drop([0, 1], axis=1)
-        sel_vals = df_tmp.T.dropna().astype(int).values.flatten()
-        dict_derived[str(tmp_ind)] = list(sel_vals)
-
-
-
 def get_derived_rois(sel_roi: str, list_derived: list) -> Any:
     """
     Create a list of derived roi indices for the selected roi

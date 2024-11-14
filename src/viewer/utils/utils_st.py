@@ -173,15 +173,18 @@ def show_img3D(
     else:
         st.image(img[:, :, slice_index], use_column_width=True)
 
-# @pyinstrument.profile()
+
+## @pyinstrument.profile() # type:ignore
 def util_panel_workingdir(app_type: str) -> None:
-    '''
+    """
     Panel to set results folder name
-    '''
+    """
     curr_dir = st.session_state.paths["dset"]
 
     # Read dataset name (used to create a folder where all results will be saved)
-    helpmsg = "Each study's results are organized in a dedicated folder named after the study"
+    helpmsg = (
+        "Each study's results are organized in a dedicated folder named after the study"
+    )
     st.session_state.dset = user_input_textfield(
         "Study name", st.session_state.dset, helpmsg, False
     )
@@ -216,6 +219,7 @@ def util_panel_workingdir(app_type: str) -> None:
         # Update paths for output subfolders
         utilses.update_default_paths()
         utilses.reset_flags()
+
 
 def copy_uploaded_to_dir() -> None:
     # Copies files to local storage
@@ -277,9 +281,9 @@ def util_upload_file(
     # Copy to target
     if not os.path.exists(out_file):
         utilio.copy_uploaded_file(in_file, out_file)
-        return true
+        return True
 
-    return false
+    return False
 
 
 def util_select_folder(
@@ -356,25 +360,21 @@ def util_select_file(
 
     return False
 
-def add_debug_panel():
-    '''
+
+def add_debug_panel() -> None:
+    """
     Displays vars used in dev phase
-    '''
+    """
     st.sidebar.divider()
-    st.sidebar.write('*** Debugging Flags ***')
+    st.sidebar.write("*** Debugging Flags ***")
     if st.sidebar.checkbox("Switch to cloud?"):
-        st.session_state.app_type = 'cloud'
+        st.session_state.app_type = "cloud"
     else:
-        st.session_state.app_type = 'desktop'
+        st.session_state.app_type = "desktop"
 
-    list_vars = ['', 'plots', 'plot_var', 'rois']
-    #list_vars = st.session_state.keys()
-    sel_var = st.sidebar.selectbox(
-        "View session state vars",
-        list_vars,
-        index = 0
-    )
-    if sel_var is not '':
-        with st.expander("DEBUG: Session state", expanded = True):
+    list_vars = ["", "plots", "plot_var", "rois"]
+    # list_vars = st.session_state.keys()
+    sel_var = st.sidebar.selectbox("View session state vars", list_vars, index=0)
+    if sel_var != "":
+        with st.expander("DEBUG: Session state", expanded=True):
             st.write(st.session_state[sel_var])
-

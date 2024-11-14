@@ -27,6 +27,7 @@ def detect_image_path(img_dir: str, mrid: str, img_suff: str) -> Optional[str]:
 
     return None
 
+
 def check_image_underlay() -> bool:
     """
     Checks if underlay image exists
@@ -42,6 +43,7 @@ def check_image_underlay() -> bool:
         st.session_state.paths["sel_img"] = sel_img
         return True
 
+
 def check_image_overlay() -> bool:
     sel_img = detect_image_path(
         st.session_state.paths["dlmuse"],
@@ -54,7 +56,8 @@ def check_image_overlay() -> bool:
         st.session_state.paths["sel_seg"] = sel_img
         return True
 
-@st.dialog("Get input data")
+
+@st.dialog("Get input data") # type:ignore
 def get_image_paths() -> None:
     """
     Reads image path and suffix info from the user

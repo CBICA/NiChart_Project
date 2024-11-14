@@ -1,11 +1,13 @@
+import os
+
 import pandas as pd
 import streamlit as st
-import os
 from pandas.api.types import (
     is_categorical_dtype,
     is_datetime64_any_dtype,
     is_numeric_dtype,
 )
+
 
 def read_dataframe(fname: str) -> pd.DataFrame:
     if not os.path.exists(fname):
@@ -16,6 +18,7 @@ def read_dataframe(fname: str) -> pd.DataFrame:
     except:
         df = pd.DataFrame()
     return df
+
 
 def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -33,10 +36,8 @@ def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     # Create filters selected by the user
     modification_container = st.container()
     with modification_container:
-        to_filter_columns = st.multiselect(
-            "Filter dataframe on", df.columns
-        )
-        with st.container(border = True):
+        to_filter_columns = st.multiselect("Filter dataframe on", df.columns)
+        with st.container(border=True):
             for vno, column in enumerate(to_filter_columns):
                 # left, right = st.columns((1, 8))
                 # left.write(f":material/subdirectory_arrow_right:")

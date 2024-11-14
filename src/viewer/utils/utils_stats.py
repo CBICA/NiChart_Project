@@ -1,19 +1,17 @@
 # -*- coding: utf-8 -*-
 from typing import Any
 
-import streamlit as st
 import numpy as np
 import pandas as pd
-import plotly.graph_objs as go
 import statsmodels.api as sm
-from sklearn.linear_model import LinearRegression
 
-@st.cache_data()
-def linreg_model(df, xvar, yvar, hvar):
-    if hvar == '':
+
+@st.cache_data() # type:ignore
+def linreg_model(df: pd.DataFrame, xvar: str, yvar: str, hvar: str) -> Any:
+    if hvar == "":
         dft = df[[xvar, yvar]].sort_values(xvar)
-        hvar = 'All'
-        dft['All'] = 'Data'
+        hvar = "All"
+        dft["All"] = "Data"
     else:
         dft = df[[xvar, yvar, hvar]].sort_values(xvar)
 
@@ -24,12 +22,13 @@ def linreg_model(df, xvar, yvar, hvar):
         model = sm.OLS(dfh[yvar], x_ext).fit()
         pred = model.get_prediction(x_ext)
         dict_mdl = {
-          'x_hat': dfh[xvar],
-          'y_hat': model.fittedvalues,
-          'conf_int': pred.conf_int()
+            "x_hat": dfh[xvar],
+            "y_hat": model.fittedvalues,
+            "conf_int": pred.conf_int(),
         }
         dict_out[hname] = dict_mdl
     return dict_out
+
 
 # ## from: https://james-brennan.github.io/posts/lowess_conf
 # def lowess_with_conf(x, y, f=1./3.):
@@ -96,12 +95,15 @@ def linreg_model(df, xvar, yvar, hvar):
 #
 #     return dict_out
 
-@st.cache_data()
-def lowess_model(df, xvar, yvar, hvar, lowess_s):
-    if hvar == '':
+
+@st.cache_data() # type:ignore
+def lowess_model(
+    df: pd.DataFrame, xvar: str, yvar: str, hvar: str, lowess_s: float
+) -> Any:
+    if hvar == "":
         dft = df[[xvar, yvar]].sort_values(xvar)
-        hvar = 'All'
-        dft['All'] = 'Data'
+        hvar = "All"
+        dft["All"] = "Data"
     else:
         dft = df[[xvar, yvar, hvar]].sort_values(xvar)
 
@@ -109,14 +111,8 @@ def lowess_model(df, xvar, yvar, hvar, lowess_s):
     dict_out = {}
     for hname, dfh in dft.groupby(hvar):
         lowess = sm.nonparametric.lowess
-        pred = lowess(dfh[yvar], dfh[xvar], frac = lowess_s)
-        x_hat = pred[:, 0]
-        y_hat = pred[:, 1]
-        dict_mdl = {
-          'x_hat': pred[:, 0],
-          'y_hat': pred[:, 1],
-          'conf_int': []
-        }
+        pred = lowess(dfh[yvar], dfh[xvar], frac=lowess_s)
+        dict_mdl = {"x_hat": pred[:, 0], "y_hat": pred[:, 1], "conf_int": []}
         dict_out[hname] = dict_mdl
     return dict_out
 
@@ -157,5 +153,3 @@ def calc_subject_centiles(df_subj: pd.DataFrame, df_cent: pd.DataFrame) -> pd.Da
 
     df_out = pd.DataFrame(dict(ROI=sel_vars, Centiles=cent_subj))
     return df_out
-
-
