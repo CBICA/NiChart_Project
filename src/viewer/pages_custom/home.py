@@ -251,12 +251,6 @@ if "instantiated" not in st.session_state:
     # Variables selected by userroi_dict
     st.session_state.plot_sel_vars = []
 
-    # Debugging variables
-    st.session_state.debug_show_state = True
-    st.session_state.debug_show_plots = True
-    st.session_state.debug_show_paths = True
-    st.session_state.debug_show_flags = True
-
     st.session_state.instantiated = True
 
 st.sidebar.image("../resources/nichart1.png")
@@ -279,9 +273,6 @@ with st.sidebar.expander("Acknowledgments"):
     )
 
 st.sidebar.success("Select a task above")
-
-# FIXME: For DEBUG
-utilst.add_debug_panel()
 
 st.markdown(
     """
@@ -317,14 +308,5 @@ st.markdown(
             """
 )
 
-if st.session_state.debug_show_state:
-    with st.expander("DEBUG: Session state - all variables"):
-        st.write(st.session_state)
-
-if st.session_state.debug_show_paths:
-    with st.expander("DEBUG: Session state - paths"):
-        st.write(st.session_state.paths)
-
-if st.session_state.debug_show_flags:
-    with st.expander("DEBUG: Session state - flags"):
-        st.write(st.session_state.flags)
+# FIXME: For DEBUG
+utilst.add_debug_panel()
