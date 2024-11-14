@@ -372,7 +372,7 @@ def add_debug_panel() -> None:
     else:
         st.session_state.app_type = "desktop"
 
-    list_vars = ["", "plots", "plot_var", "rois"]
+    list_vars = ["", "plots", "plot_var", "rois", "paths"]
     # list_vars = st.session_state.keys()
     sel_var = st.sidebar.selectbox("View session state vars", list_vars, index=0)
     if sel_var != "":

@@ -375,30 +375,6 @@ if show_panel_plots:
                     st.session_state.rois['roi_dict_derived'],
                 )
 
-                ## Get selected y var
-                #sel_var = st.session_state.plots.loc[st.session_state.plot_active, "yvar"]
-
-                #print(f'AAAA {sel_var}')
-
-                ## If roi dictionary was used, detect index
-                #if st.session_state.rois['roi_dict_inv'] is not None:
-                    #sel_var = st.session_state.rois['roi_dict_inv'][sel_var]
-
-                #print(f'AAAA {sel_var}')
-
-                ## Check if index exists in overlay mask
-                #is_in_mask = False
-                #if os.path.exists(st.session_state.paths["sel_seg"]):
-                    #is_in_mask = utilni.check_roi_index(st.session_state.paths["sel_seg"], sel_var)
-
-                #if is_in_mask:
-                    #list_rois = [int(sel_var)]
-                #else:
-                    #list_rois =
-                        #sel_var,
-                        #st.session_state.dicts["muse_derived"],
-                    #)
-
                 # Process image and mask to prepare final 3d matrix to display
                 flag_files = 1
                 if not os.path.exists(st.session_state.paths["sel_img"]):

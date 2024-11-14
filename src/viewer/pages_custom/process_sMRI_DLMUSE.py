@@ -34,6 +34,8 @@ if show_panel_wdir:
             st.session_state.flags["dir_out"] = True
 
 # Panel for uploading input t1 images
+st.session_state.flags['dir_t1'] = os.path.exists(st.session_state.paths['T1'])
+
 msg =  st.session_state.app_config[st.session_state.app_type]['msg_infile']
 icon = st.session_state.icon_thumb[st.session_state.flags['dir_t1']]
 show_panel_int1 = st.checkbox(
@@ -157,10 +159,17 @@ if show_panel_view:
         # Crop to mask area
         crop_to_mask = st.checkbox("Crop to mask", True, disabled = False)
 
-        # Detect list of ROI indices to display
-        list_sel_rois = utilroi.muse_get_derived(
-            sel_var, st.session_state.dicts["muse_derived"]
+        # Get indices for the selected var
+        list_rois = utilroi.get_list_rois(
+            sel_var,
+            st.session_state.rois['roi_dict_inv'],
+            st.session_state.rois['roi_dict_derived'],
         )
+
+        ## Detect list of ROI indices to display
+        #list_sel_rois = utilroi.muse_get_derived(
+            #sel_var, st.session_state.dicts["muse_derived"]
+        #)
 
         # Select images
         flag_img = False
@@ -183,7 +192,7 @@ if show_panel_view:
                 img, mask, img_masked = utilni.prep_image_and_olay(
                     st.session_state.paths["sel_img"],
                     st.session_state.paths["sel_seg"],
-                    list_sel_rois,
+                    list_rois,
                     crop_to_mask,
                 )
 
