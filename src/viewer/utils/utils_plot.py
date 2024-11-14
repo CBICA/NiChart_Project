@@ -49,9 +49,11 @@ def get_index_in_list(in_list, in_item):
     else:
         return in_list.index(in_item)
 
-def add_plot_tabs(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
+def add_plot_tabs(df: pd.DataFrame, df_plots, plot_id: str) -> pd.DataFrame:
 
     ptabs = st.tabs(["Settings", "Layers", ":material/x:"])
+
+    curr_plot = st.session_state.plots.loc[plot_id]
 
     # Tab 1: Plot settings
     with ptabs[0]:
@@ -61,74 +63,96 @@ def add_plot_tabs(df: pd.DataFrame, plot_id: str) -> pd.DataFrame:
         list_trends = st.session_state.plot_const['trend_types']
 
         # Set plotting variables
-        xind = get_index_in_list(list_cols, st.session_state.plots.loc[plot_id].xvar)
+        xind = get_index_in_list(list_cols, df_plots.loc[plot_id, 'xvar'])
         xvar = st.selectbox(
             "X Var", list_cols, key=f"plot_xvar_{plot_id}", index=xind
         )
         if xvar is not None:
-            st.session_state.plots.loc[plot_id, 'xvar'] = xvar
+            df_plots.loc[plot_id, 'xvar'] = xvar
 
-        if st.session_state.plot_var['plot_type'] == 'Scatter Plot':
-            yind = get_index_in_list(list_cols, st.session_state.plots.loc[plot_id].yvar)
+        if df_plots.loc[plot_id, 'plot_type'] == 'Scatter Plot':
+            yind = get_index_in_list(list_cols, df_plots.loc[plot_id, 'yvar'])
             yvar = st.selectbox(
                 "Y Var", list_cols, key=f"plot_yvar_{plot_id}", index=yind
             )
             if yvar is not None:
-                st.session_state.plots.loc[plot_id, 'yvar'] = yvar
+                df_plots.loc[plot_id, 'yvar'] = yvar
 
-        hind = get_index_in_list(list_cols_ext, st.session_state.plots.loc[plot_id].hvar)
+        hind = get_index_in_list(list_cols_ext, df_plots.loc[plot_id, 'hvar'])
         hvar = st.selectbox(
             "Group by", list_cols_ext, key=f"plot_hvar_{plot_id}", index=hind
         )
         if hvar is not None:
-            st.session_state.plots.loc[plot_id, 'hvar'] = hvar
+            df_plots.loc[plot_id, 'hvar'] = hvar
 
-        if st.session_state.plot_var['plot_type'] == 'Scatter Plot':
-            tind = get_index_in_list(list_trends, st.session_state.plots.loc[plot_id].trend)
+        if df_plots.loc[plot_id, 'plot_type'] == 'Scatter Plot':
+            tind = get_index_in_list(list_trends, df_plots.loc[plot_id, 'trend'])
             trend = st.selectbox(
                 "Trend Line", list_trends, key=f"trend_type_{plot_id}", index=tind,
             )
-            if trend != '':
-                st.session_state.plots.loc[plot_id, 'trend'] = trend
+            if trend is not None:
+                df_plots.loc[plot_id, 'trend'] = trend
+
+            if trend == 'Linear':
+                df_plots.at[plot_id, 'traces'] = ['data', 'lin_fit']
+                # df_plots.at[plot_id, 'traces'] = ['data']
 
             if trend == 'Smooth LOWESS Curve':
-                st.session_state.plots.loc[plot_id, 'lowess_s'] = st.slider(
+                df_plots.loc[plot_id, 'lowess_s'] = st.slider(
                     'Smoothness', min_value=0.4, max_value=1.0, value=0.7, step=0.1
                 )
-            st.session_state.plots.at[plot_id, 'traces'] = ['Data', 'lin']
+
+        if df_plots.loc[plot_id, 'plot_type'] == 'Distribution Plot':
+            df_plots.at[plot_id, 'traces'] = ['density', 'rug']
+
 
     # Tab 2: Layers
     with ptabs[1]:
 
-        if st.session_state.plot_var['plot_type'] == 'Scatter Plot':
-            if st.session_state.plots.loc[plot_id, 'hvar'] != 'None':
-                vals_hue = df[hvar].unique().tolist()
-                st.session_state.plots.at[plot_id, 'hvals'] = st.multiselect(
-                    'Select groups', vals_hue, vals_hue
+        if df_plots.loc[plot_id, 'hvar'] != '':
+            vals_hue = df[hvar].unique().tolist()
+            df_plots.at[plot_id, 'hvals'] = st.multiselect(
+                'Select groups',
+                vals_hue,
+                vals_hue,
+                key=f'key_select_huevals_{plot_id}'
+            )
+
+        if df_plots.loc[plot_id, 'plot_type'] == 'Scatter Plot':
+            if df_plots.loc[plot_id, 'trend'] == 'Linear':
+                df_plots.at[plot_id, 'traces'] = st.multiselect(
+                    'Select traces',
+                    st.session_state.plot_const['linfit_trace_types'],
+                    df_plots.loc[plot_id, 'traces'],
+                    key = f'key_sel_trace_linfit_{plot_id}'
                 )
 
-            if trend == 'Linear':
-                st.session_state.plots.at[plot_id, 'traces'] = st.multiselect(
-                    'Select traces',
-                    ['Data', 'lin', 'lin_conf95'],
-                    ['Data', 'lin', 'lin_conf95']
-                )
 
             # Get plot params
-            centtype = st.session_state.plots.loc[plot_id].centtype
+            centtype = df_plots.loc[plot_id, 'centtype']
 
             # Select plot params from the user
-            centind = st.session_state.plot_var['centtype'].index(centtype)
+            centind = st.session_state.plot_const['centile_types'].index(centtype)
 
             centtype = st.selectbox(
                 "Centile Type",
-                st.session_state.plot_var['centtype'],
+                st.session_state.plot_const['centile_types'],
                 key=f"cent_type_{plot_id}",
                 index=centind,
             )
 
             # Set plot params to session_state
             st.session_state.plots.loc[plot_id, 'centtype'] = centtype
+
+
+        if df_plots.loc[plot_id, 'plot_type'] == 'Distribution Plot':
+            df_plots.at[plot_id, 'traces']  = st.multiselect(
+                'Select traces',
+                st.session_state.plot_const['distplot_trace_types'],
+                df_plots.loc[plot_id, 'traces'],
+                key = 'key_sel_trace_densityplot_{plot_id}'
+            )
+
 
     # Tab 3: Reset parameters and/or delete plot
     with ptabs[2]:
@@ -163,10 +187,9 @@ def display_scatter_plot(
         # Tabs for plot parameters
         df_filt = df
         if show_settings:
-            df_filt = add_plot_tabs(df, plot_id)
+            df_filt = add_plot_tabs(df, st.session_state.plots, plot_id)
 
         curr_plot = st.session_state.plots.loc[plot_id]
-        hind = get_index_in_list(df.columns.tolist(), curr_plot['hvar'])
 
         # Main plot
         layout = go.Layout(
@@ -224,7 +247,7 @@ def display_scatter_plot(
             )
 
         # Add centile values
-        if curr_plot['centtype'] != 'None':
+        if curr_plot['centtype'] != '':
             fcent = os.path.join(
                 st.session_state.paths["root"],
                 "resources",
@@ -257,6 +280,7 @@ def display_scatter_plot(
         )
 
         # Detect MRID from the click info and save to session_state
+        hind = get_index_in_list(df.columns.tolist(), curr_plot['hvar'])
         if len(sel_info["selection"]["points"]) > 0:
             sind = sel_info["selection"]["point_indices"][0]
             if hind is None:
@@ -287,7 +311,7 @@ def display_dist_plot(
         # Tabs for plot parameters
         df_filt = df
         if show_settings:
-            df_filt = add_plot_tabs(df, plot_id)
+            df_filt = add_plot_tabs(df, st.session_state.plots, plot_id)
 
         curr_plot = st.session_state.plots.loc[plot_id]
         hind = get_index_in_list(df.columns.tolist(), curr_plot['hvar'])
@@ -305,30 +329,18 @@ def display_dist_plot(
                 b=st.session_state.plot_const['margin']
             )
         )
-        #fig = go.Figure(layout = layout)
 
-        ## Add axis labels
-        #fig.update_layout(
-            #xaxis_title = curr_plot['xvar'],
-        #)
-        
-        #fig = px.histogram(
-            ##df_filt, x=curr_plot['xvar'], y="Age", color=curr_plot['hvar'],
-            #df_filt, x='Age', y=curr_plot['xvar'],
-            #marginal='box',
-            #hover_data=df_filt.columns
-        #)
-        
-        data = df_filt[xvar]
-        bin_edges = np.linspace(data.min(), data.max(), 20)
-        bin_indices = np.digitize(data, bin_edges)
-        bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
-        
-        print(bin_centers.shape)
-        print(bin_indices.max())
-        data_binned = bin_centers[bin_indices - 1]
+        fig = utiltr.dist_plot(
+            df_filt,
+            curr_plot['xvar'],
+            curr_plot['hvar'],
+            curr_plot['hvals'],
+            curr_plot['traces'],
+            st.session_state.plot_const['distplot_binnum'],
+            st.session_state.plot_var['hide_legend'],
+        )
 
-        fig = ff.create_distplot([data_binned], ['Data'])
+        # ff.create_distplot([data], ['Data'], show_hist=False)
 
         fig.update_layout(
             # height=st.session_state.plot_const['h_init']

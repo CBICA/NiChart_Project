@@ -98,7 +98,7 @@ def linreg_model(df, xvar, yvar, hvar):
 
 @st.cache_data()
 def lowess_model(df, xvar, yvar, hvar, lowess_s):
-    if hvar == 'None':
+    if hvar == '':
         dft = df[[xvar, yvar]].sort_values(xvar)
         hvar = 'All'
         dft['All'] = 'Data'

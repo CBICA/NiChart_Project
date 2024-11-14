@@ -1,12 +1,56 @@
 # -*- coding: utf-8 -*-
 from typing import Any
 
+import streamlit as st
 import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
 import statsmodels.api as sm
 from sklearn.linear_model import LinearRegression
 import utils.utils_stats as utilstat
+import plotly.figure_factory as ff
+
+def dist_plot(
+    df,
+    xvar,
+    hvar,
+    hvals,
+    traces,
+    binnum,
+    hide_legend,
+):
+    # Add a tmp column if group var is not set
+    dft = df.copy()
+    if hvar == '':
+        hvar = 'All'
+        dft['All'] = 'Data'
+    if hvals == []:
+        hvals = dft[hvar].unique().tolist()
+
+    data = []
+    for hname, dfh in dft.groupby(hvar):
+        if hname in hvals:
+            dtmp = dfh[xvar]
+            drange = dtmp.max() - dtmp.min()
+            bin_size = drange / binnum
+            data.append(dfh[xvar])
+
+    show_hist = 'histogram' in traces
+    show_curve = 'density' in traces
+    show_rug = 'rug' in traces
+
+    fig = ff.create_distplot(
+        data,
+        hvals,
+        histnorm='',
+        bin_size=bin_size,
+        show_hist=show_hist,
+        show_rug=show_rug,
+        show_curve=show_curve
+    )
+
+    return fig
+
 
 def scatter_trace(
     df,
@@ -20,13 +64,13 @@ def scatter_trace(
 ):
     # Add a tmp column if group var is not set
     dft = df.copy()
-    if hvar == 'None':
+    if hvar == '':
         hvar = 'All'
-        dft['All'] = 'Data'
+        dft['All'] = 'data'
     if hvals == []:
         hvals = dft[hvar].unique().tolist()
 
-    if 'Data' in traces:
+    if 'data' in traces:
         for hname, dfh in dft.groupby(hvar):
             if hname in hvals:
                 trace = go.Scatter(
@@ -55,8 +99,8 @@ def linreg_trace(
     dict_fit = utilstat.linreg_model(df, xvar, yvar, hvar)
 
     # Add traces for the fit and confidence intervals
-    if 'lin' in traces:
-        for hname in hvals:
+    if 'lin_fit' in traces:
+        for hname in dict_fit.keys():
             x_hat = dict_fit[hname]['x_hat']
             y_hat = dict_fit[hname]['y_hat']
             conf_int = dict_fit[hname]['conf_int']
@@ -71,8 +115,8 @@ def linreg_trace(
             )
             fig.add_trace(trace)
 
-    if 'lin_conf95' in traces:
-        for hname in hvals:
+    if 'conf_95%' in traces:
+        for hname in dict_fit.keys():
             x_hat = dict_fit[hname]['x_hat']
             y_hat = dict_fit[hname]['y_hat']
             conf_int = dict_fit[hname]['conf_int']
@@ -90,7 +134,6 @@ def linreg_trace(
             fig.add_trace(trace)
 
     return fig
-
 
 def lowess_trace(
     df: pd.DataFrame,

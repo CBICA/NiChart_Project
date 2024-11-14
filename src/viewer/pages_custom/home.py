@@ -160,8 +160,10 @@ if "instantiated" not in st.session_state:
 
     # Constant plot settings
     st.session_state.plot_const = {
-        'trend_types' : ['None', 'Linear', 'Smooth LOWESS Curve'],
-        'centile_types' : ['None', 'CN-All', 'CN-M', 'CN-F'],
+        'trend_types' : ['', 'Linear', 'Smooth LOWESS Curve'],
+        'centile_types' : ['', 'CN-All', 'CN-M', 'CN-F'],
+        'linfit_trace_types' : ['data', 'lin_fit', 'conf_95%'],
+        'distplot_trace_types' : ['histogram', 'density', 'rug'],
         'min_per_row': 1,
         'max_per_row': 5,
         'num_per_row': 3,
@@ -171,6 +173,7 @@ if "instantiated" not in st.session_state:
         'h_coeff_max': 2.0,
         'h_coeff_min': 0.6,
         'h_coeff_step': 0.2,
+        'distplot_binnum': 100
     }
 
     # Plot variables
@@ -182,12 +185,12 @@ if "instantiated" not in st.session_state:
         'plot_type': 'Scatter Plot',
         'xvar': '',
         'yvar': '',
-        'hvar': 'None',
+        'hvar': '',
         'hvals': [],
-        'trend': 'None',
-        'traces': ['Data'],
+        'trend': 'Linear',
+        'traces': ['data', 'lin'],
         'lowess_s': 0.5,
-        'centtype' : 'None',
+        'centtype' : '',
     }
     ###################################
 
