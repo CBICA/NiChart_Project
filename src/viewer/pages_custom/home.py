@@ -193,6 +193,20 @@ if "instantiated" not in st.session_state:
     ###################################
 
     ###################################
+    # MRI view
+    st.session_state.mriview_const = {
+        'img_views': ["axial", "coronal", "sagittal"]
+    }
+
+    st.session_state.mriview_var = {
+        'crop_to_mask': True,
+        'show_overlay': True,
+        'list_orient': ["axial", "coronal", "sagittal"]
+    }
+
+    ###################################
+
+    ###################################
     # ROI dictionaries
     # List of roi names, indices, etc.
     st.session_state.rois = {
