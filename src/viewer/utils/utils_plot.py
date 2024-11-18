@@ -281,6 +281,9 @@ def display_scatter_plot(
             sel_roi = st.session_state.plots.loc[st.session_state.plot_active, "yvar"]
             st.session_state.sel_mrid = sel_mrid
             st.session_state.sel_roi = sel_roi
+            st.session_state.sel_roi_img = sel_roi
+            st.session_state.paths["sel_img"] = ""
+            st.session_state.paths["sel_seg"] = ""
             st.rerun()
 
         return fig

@@ -226,18 +226,16 @@ def show_img():
     if not os.path.exists(st.session_state.paths["sel_img"]):
         if not utilvi.check_image_underlay():
             st.warning("I'm having trouble locating the underlay image!")
-            if st.button('Update underlay img path and suffix'):
+            if st.button('Select underlay img path and suffix'):
                 utilvi.update_ulay_image_path()
-                if not utilvi.check_image_underlay():
-                    return
+            return
 
     if not os.path.exists(st.session_state.paths["sel_seg"]):
         if not utilvi.check_image_overlay():
             st.warning("I'm having trouble locating the overlay image!")
-            if st.button('Update overlay img path and suffix'):
+            if st.button('Select overlay img path and suffix'):
                 utilvi.update_olay_image_path()
-                if not utilvi.check_image_overlay():
-                    return
+            return
 
     with st.spinner("Wait for it..."):
         # Get indices for the selected var
@@ -417,6 +415,8 @@ def panel_plot():
         )
         if sel_mrid is not None:
             st.session_state.sel_mrid = sel_mrid
+            st.session_state.paths["sel_img"] = ''
+            st.session_state.paths["sel_seg"] = ''
 
         st.divider()
 
@@ -431,18 +431,18 @@ def panel_plot():
 
             # Selected roi rois
             list_roi = df.columns.sort_values().tolist()
-            if st.session_state.sel_roi == '':
+            if st.session_state.sel_roi_img == '':
                 sel_ind = None
             else:
-                sel_ind = list_roi.index(st.session_state.sel_roi)
-            sel_roi = st.selectbox(
+                sel_ind = list_roi.index(st.session_state.sel_roi_img)
+            sel_roi_img = st.selectbox(
                 "Selected ROI",
                 list_roi,
                 sel_ind,
                 help='Select an ROI from the list'
             )
-            if sel_roi is not None:
-                st.session_state.sel_roi_img = sel_roi
+            if sel_roi_img is not None:
+                st.session_state.sel_roi_img = sel_roi_img
 
             # Create a list of checkbox options
             list_orient = st.multiselect(
@@ -458,7 +458,6 @@ def panel_plot():
                 "Show overlay",
                 True
             )
-            
 
             # Crop to mask area
             st.session_state.mriview_var['crop_to_mask'] = st.checkbox(

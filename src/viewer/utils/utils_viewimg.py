@@ -1,6 +1,7 @@
 import glob
 import os
 from typing import Optional
+import time
 
 import streamlit as st
 import utils.utils_st as utilst
@@ -91,9 +92,13 @@ def update_ulay_image_path() -> None:
     )
     st.session_state.suff_t1img = suff_t1img
 
-    if check_image_underlay():
-        st.success(f'Underlay image found! {st.session_state.paths["sel_img"]}')
-        st.rerun()
+    if st.button('Check underlay image'):
+        if check_image_underlay():
+            st.success(f'Image found! {st.session_state.paths["sel_img"]}')
+            time.sleep(1)
+            st.rerun()
+        else:
+            st.warning(f'Image not found!')
 
 @st.dialog("Get input data") # type:ignore
 def update_olay_image_path() -> None:
@@ -124,6 +129,10 @@ def update_olay_image_path() -> None:
     )
     st.session_state.suff_seg = suff_seg
 
-    if check_image_overlay():
-        st.success(f'Overlay image found! {st.session_state.paths["sel_seg"]}')
-        st.rerun()
+    if st.button('Check overlay image'):
+        if check_image_overlay():
+            st.success(f'Overlay image found! {st.session_state.paths["sel_seg"]}')
+            time.sleep(1)
+            st.rerun()
+        else:
+            st.warning(f'Image not found!')

@@ -45,6 +45,7 @@ def dist_plot(
         show_hist=show_hist,
         show_rug=show_rug,
         show_curve=show_curve,
+        #hide_legend=hide_legend  ## THIS IS NOT AVAILABLE IN FF
     )
 
     return fig
@@ -99,7 +100,7 @@ def linreg_trace(
 
     # Add traces for the fit and confidence intervals
     if "lin_fit" in traces:
-        for hname in dict_fit.keys():
+        for hname in hvals:
             x_hat = dict_fit[hname]["x_hat"]
             y_hat = dict_fit[hname]["y_hat"]
             conf_int = dict_fit[hname]["conf_int"]
