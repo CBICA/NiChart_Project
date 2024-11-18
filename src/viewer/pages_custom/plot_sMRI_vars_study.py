@@ -313,9 +313,7 @@ flag_disabled = (
 )
 
 if st.session_state.app_type == "CLOUD":
-    with st.expander(
-        ":material/upload: Upload input csv file", expanded=False
-    ):  # type:ignore
+    with st.expander(":material/upload: Upload input csv file", expanded=False):
         msg_txt = "Upload input csv file"
         utilst.util_upload_file(
             st.session_state.paths["csv_plot"],

@@ -263,7 +263,9 @@ def merge_dataframes_multi(out_csv: str, key_var: str, list_in_csv: Any) -> None
         df_out = df_out.merge(df_tmp, on=key_var, suffixes=["", "_tmpremovedupl"])
 
         # Remove duplicate columns
-        sel_cols = df_out.columns[df_out.columns.str.contains("_tmpremovedupl") == False]
+        sel_cols = df_out.columns[
+            df_out.columns.str.contains("_tmpremovedupl") is False
+        ]
         df_out = df_out[sel_cols]
 
     # Write out file

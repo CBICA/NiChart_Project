@@ -35,7 +35,7 @@ flag_disabled = (
 )
 
 if st.session_state.app_type == "CLOUD":
-    with st.expander(":material/upload: Upload data", expanded=False):  # type:ignore
+    with st.expander(":material/upload: Upload data", expanded=False):
         utilst.util_upload_folder(
             st.session_state.paths["Dicoms"],
             "Dicom files or folders",
@@ -44,7 +44,7 @@ if st.session_state.app_type == "CLOUD":
         )
 
 else:  # st.session_state.app_type == 'DESKTOP'
-    with st.expander(":material/upload: Select data", expanded=False):  # type:ignore
+    with st.expander(":material/upload: Select data", expanded=False):
         utilst.util_select_folder(
             "selected_dicom_folder",
             "Dicom folder",

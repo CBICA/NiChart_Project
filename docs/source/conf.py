@@ -22,8 +22,8 @@ release = "2024"
 
 extensions = ["sphinx.ext.autodoc", "sphinx.ext.napoleon"]
 
-templates_path = ["_templates"]
-exclude_patterns = []
+templates_path: list = ["_templates"]
+exclude_patterns: list = []
 
 
 # -- Options for HTML output -------------------------------------------------

@@ -27,13 +27,13 @@ flag_disabled = (
 )
 
 if st.session_state.app_type == "CLOUD":
-    with st.expander(":material/upload: Upload data", expanded=False):  # type:ignore
+    with st.expander(":material/upload: Upload data", expanded=False):
         utilst.util_upload_folder(
             st.session_state.paths["T1"], "T1 images", flag_disabled, "collapsed"
         )
 
 else:  # st.session_state.app_type == 'DESKTOP'
-    with st.expander(":material/upload: Select data", expanded=False):  # type:ignore
+    with st.expander(":material/upload: Select data", expanded=False):
         utilst.util_select_folder(
             "selected_img_folder",
             "T1 nifti image folder",
