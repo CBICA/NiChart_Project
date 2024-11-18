@@ -110,6 +110,11 @@ if show_panel_rundlwmls:
                 print(f"About to run: {dlwmls_cmd}")
                 os.system(dlwmls_cmd)
 
+                post_dlwmls_cmd = f"post_dlwmls.py -i {st.session_state.paths['FL']}"
+
+                print(f"About to run: {dlwmls_cmd}")
+                os.system(dlwmls_cmd)
+
         out_csv = f"{st.session_state.paths['dlwmls']}/DLWMLS_Volumes.csv"
         num_dlwmls = utilio.get_file_count(st.session_state.paths["dlwmls"], '.nii.gz')
         if os.path.exists(out_csv):
