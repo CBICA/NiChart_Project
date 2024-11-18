@@ -108,12 +108,16 @@ if show_panel_rundlwmls:
 
                 # FIXME : bypass dlwmls run
                 print(f"About to run: {dlwmls_cmd}")
-                os.system(dlwmls_cmd)
+                #os.system(dlwmls_cmd)
 
-                post_dlwmls_cmd = f"post_dlwmls.py -i {st.session_state.paths['FL']}"
-
-                print(f"About to run: {dlwmls_cmd}")
-                os.system(dlwmls_cmd)
+                run_scr = os.path.join(
+                    st.session_state.paths["root"], "src", "workflow", 
+                    "workflows", "w_DLWMLS", "wmls_post.py"
+                )                
+                post_dlwmls_cmd = f"python {run_scr} --in_dir {st.session_state.paths['dlwmls']} --in_suff _FL_WMLS.nii.gz --out_csv {os.path.join(st.session_state.paths['dlwmls'], 'DLWMLS_Volumes.csv')}"
+                print(f"About to run: {post_dlwmls_cmd}")
+                os.system(post_dlwmls_cmd)
+                print('all done')
 
         out_csv = f"{st.session_state.paths['dlwmls']}/DLWMLS_Volumes.csv"
         num_dlwmls = utilio.get_file_count(st.session_state.paths["dlwmls"], '.nii.gz')
@@ -141,16 +145,6 @@ if show_panel_view:
             list_mrid = [""]
         sel_mrid = st.selectbox("MRID", list_mrid, key="selbox_mrid", index=None, disabled = False)
 
-        # Create combo list for selecting target ROI
-        list_roi_names = utilroi.get_roi_names(st.session_state.dicts["muse_sel"])
-        sel_var = st.selectbox(
-            "ROI",
-            list_roi_names,
-            key="selbox_rois",
-            index=None,
-            disabled = False
-        )
-
         # Create a list of checkbox options
         list_orient = st.multiselect(
             "Select viewing planes:",
@@ -165,31 +159,20 @@ if show_panel_view:
         # Crop to mask area
         crop_to_mask = st.checkbox("Crop to mask", True, disabled = False)
 
-        # Get indices for the selected var
-        list_rois = utilroi.get_list_rois(
-            sel_var,
-            st.session_state.rois['roi_dict_inv'],
-            st.session_state.rois['roi_dict_derived'],
-        )
-
-        ## Detect list of ROI indices to display
-        #list_sel_rois = utilroi.muse_get_derived(
-            #sel_var, st.session_state.dicts["muse_derived"]
-        #)
-
         # Select images
         flag_img = False
         if sel_mrid is not None:
             st.session_state.paths["sel_img"] = os.path.join(
-                st.session_state.paths["T1"], sel_mrid + st.session_state.suff_t1img
+                st.session_state.paths["FL"], sel_mrid + st.session_state.suff_flimg
             )
             st.session_state.paths["sel_seg"] = os.path.join(
-                st.session_state.paths["dlwmls"], sel_mrid + st.session_state.suff_seg
+                st.session_state.paths["dlwmls"], sel_mrid + st.session_state.suff_dlwmls
             )
 
             flag_img = os.path.exists(st.session_state.paths["sel_img"]) and os.path.exists(
                 st.session_state.paths["sel_seg"]
             )
+            list_rois = [1]
 
         if flag_img:
             with st.spinner("Wait for it..."):

@@ -255,7 +255,9 @@ if "instantiated" not in st.session_state:
 
     # Image suffixes
     st.session_state.suff_t1img = "_T1.nii.gz"
+    st.session_state.suff_flimg = "_FL.nii.gz"
     st.session_state.suff_seg = "_T1_DLMUSE.nii.gz"
+    st.session_state.suff_dlwmls = "_FL_WMLS.nii.gz"
 
     # MRID selected by user
     st.session_state.sel_mrid = ""
