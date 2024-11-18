@@ -288,7 +288,6 @@ def display_scatter_plot(
 
         return fig
 
-
 def display_dist_plot(
     df: pd.DataFrame, plot_id: str, show_settings: bool, sel_mrid: str
 ) -> Any:

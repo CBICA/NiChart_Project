@@ -25,6 +25,11 @@ name = "DLMUSE (sMRI)"
 icon = ":black_small_square:"
 
 [[pages]]
+path = "pages_custom/process_sMRI_DLWMLS.py"
+name = "DLWMLS (sMRI)"
+icon = ":black_small_square:"
+
+[[pages]]
 name = "Data Analytics"
 is_section = true
 icon = ":file_folder:"
