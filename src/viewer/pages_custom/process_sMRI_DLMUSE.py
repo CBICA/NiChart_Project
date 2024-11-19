@@ -143,8 +143,19 @@ def panel_view():
             df = pd.read_csv(st.session_state.paths["csv_dlmuse"])
             list_mrid = df.MRID.tolist()
         except:
-            list_mrid = [""]
-        sel_mrid = st.selectbox("MRID", list_mrid, key="selbox_mrid", index=None, disabled = False)
+            list_mrid = []
+        if len(list_mrid) == 0:
+            return
+
+        sel_mrid = st.selectbox(
+            "MRID",
+            list_mrid,
+            key="selbox_mrid",
+            index=None,
+            disabled = False
+        )
+        if sel_mrid is None:
+            return
 
         # Create combo list for selecting target ROI
         list_roi_names = utilroi.get_roi_names(st.session_state.dicts["muse_sel"])
@@ -165,7 +176,7 @@ def panel_view():
             utilni.img_views,
             disabled = False
         )
-        if list_orient is None:
+        if list_orient is None or len(list_orient) == 0:
             return
 
         # View hide overlay
