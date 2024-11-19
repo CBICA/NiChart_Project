@@ -7,6 +7,7 @@ import utils.utils_rois as utilroi
 import utils.utils_nifti as utilni
 import utils.utils_st as utilst
 from stqdm import stqdm
+import re
 
 def panel_wdir():
     '''
@@ -75,6 +76,7 @@ def panel_int1():
                     icon=":material/thumb_up:"
                 )
 
+
 def panel_dlmuse():
     '''
     Panel for running dlmuse
@@ -89,7 +91,10 @@ def panel_dlmuse():
         return
 
     with st.container(border=True):
-        # Device type
+      # Device type
+      if st.session_state.app_type == "CLOUD":
+        device = 'cuda'
+      else:
         helpmsg = "Choose 'cuda' if your computer has an NVIDIA GPU, 'mps' if you have an Apple M-series chip, and 'cpu' if you have a standard CPU."
         device = utilst.user_input_select(
             "Device",
@@ -210,7 +215,22 @@ def panel_view():
         if not os.path.exists(st.session_state.paths["sel_seg"]):
             return
 
+
         with st.spinner("Wait for it..."):
+          # Select images
+          flag_img = False
+          ## FIXME: at least on cloud, can get here with multiple _T1 appended (see marked lines)
+          flag_img = False
+          if sel_mrid is not None:
+            st.session_state.paths["sel_img"] = os.path.join(
+                ## hardcoded fix for T1 suffix
+                st.session_state.paths["T1"], re.sub(r"_T1$", "", sel_mrid)  + st.session_state.suff_t1img
+            )
+            st.session_state.paths["sel_seg"] = os.path.join(
+                ## hardcoded fix for T1 suffix 
+                st.session_state.paths["DLMUSE"], re.sub(r"_T1$", "", sel_mrid) + st.session_state.suff_seg
+            )
+
 
             # Process image and mask to prepare final 3d matrix to display
             img, mask, img_masked = utilni.prep_image_and_olay(
