@@ -115,7 +115,7 @@ def panel_dlwmls():
 
                 # FIXME : bypass dlwmls run
                 print(f"About to run: {dlwmls_cmd}")
-                #os.system(dlwmls_cmd)
+                os.system(dlwmls_cmd)
 
                 run_scr = os.path.join(
                     st.session_state.paths["root"], "src", "workflow",

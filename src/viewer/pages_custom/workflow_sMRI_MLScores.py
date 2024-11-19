@@ -132,6 +132,16 @@ if show_panel_runml:
                 icon=":material/thumb_up:",
             )
             st.session_state.flags['csv_mlscores'] = True
+            
+            # Copy output to plots
+            if not os.path.exists(st.session_state.paths["plots"]):
+                os.makedirs(st.session_state.paths["plots"])
+            os.system(
+                f"cp {st.session_state.paths['csv_mlscores']} {st.session_state.paths['csv_plot']}"
+            )
+            st.session_state.flags['csv_plot'] = True
+            print(f'Data copied to {st.session_state.paths['csv_plot']}')
+
 
 # Panel for downloading results
 if st.session_state.app_type == "cloud":

@@ -156,6 +156,7 @@ def show_img3D(
     """
     Display a 3D img
     """
+    
     # Create a slider to select the slice index
     slice_index = st.slider(
         f"{img_name}",
@@ -166,12 +167,14 @@ def show_img3D(
     )
 
     # Extract the slice and display it
+    w_img = st.session_state.mriview_const['w_init'] * st.session_state.mriview_var['w_coeff']
     if scroll_axis == 0:
-        st.image(img[slice_index, :, :], use_column_width=True)
+        #st.image(img[slice_index, :, :], use_column_width=True)
+        st.image(img[slice_index, :, :], width=w_img)
     elif scroll_axis == 1:
-        st.image(img[:, slice_index, :], use_column_width=True)
+        st.image(img[:, slice_index, :], width=w_img)
     else:
-        st.image(img[:, :, slice_index], use_column_width=True)
+        st.image(img[:, :, slice_index], width=w_img)
 
 
 ## @pyinstrument.profile() # type:ignore

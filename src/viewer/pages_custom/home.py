@@ -193,19 +193,26 @@ if "instantiated" not in st.session_state:
         'traces': ['data', 'lin'],
         'lowess_s': 0.5,
         'centtype' : '',
+        'h_coeff': 1.0        
     }
     ###################################
 
     ###################################
     # MRI view
     st.session_state.mriview_const = {
-        'img_views': ["axial", "coronal", "sagittal"]
+        'img_views': ["axial", "coronal", "sagittal"],
+        'w_init': 500,
+        'w_coeff': 1.0,
+        'w_coeff_max': 2.0,
+        'w_coeff_min': 0.6,
+        'w_coeff_step': 0.2
     }
 
     st.session_state.mriview_var = {
         'crop_to_mask': True,
         'show_overlay': True,
-        'list_orient': ["axial", "coronal", "sagittal"]
+        'list_orient': ["axial", "coronal", "sagittal"],
+        'w_coeff': 1.0        
     }
 
     ###################################

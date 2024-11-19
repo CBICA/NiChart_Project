@@ -59,7 +59,7 @@ if show_panel_incsv:
                 st.session_state.paths["csv_plot"],
                 "Input data csv file",
                 "key_in_csv",
-                st.session_state.flags['csv_plot'],
+                False,
                 "visible"
             )
         else:  # st.session_state.app_type == 'desktop'
@@ -68,7 +68,7 @@ if show_panel_incsv:
                 "Data csv",
                 st.session_state.paths["csv_plot"],
                 st.session_state.paths["last_in_dir"],
-                st.session_state.flags['csv_plot']
+                False
             )
 
         if os.path.exists(st.session_state.paths["csv_plot"]):

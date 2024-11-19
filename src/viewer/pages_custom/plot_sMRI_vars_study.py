@@ -37,6 +37,9 @@ def panel_incsv():
     '''
     Panel for selecting the input csv
     '''
+    # Check input csv's in plots folder
+    
+    
     msg = st.session_state.app_config[st.session_state.app_type]['msg_infile']
     icon = st.session_state.icon_thumb[st.session_state.flags['csv_plot']]
     show_panel_incsv = st.checkbox(
@@ -53,7 +56,7 @@ def panel_incsv():
                 st.session_state.paths["csv_plot"],
                 "Input data csv file",
                 "key_in_csv",
-                st.session_state.flags['csv_plot'],
+                False,
                 "visible"
             )
         else:  # st.session_state.app_type == 'desktop'
@@ -62,7 +65,7 @@ def panel_incsv():
                 "Data csv",
                 st.session_state.paths["csv_plot"],
                 st.session_state.paths["last_in_dir"],
-                st.session_state.flags['csv_plot']
+                False
             )
 
         if os.path.exists(st.session_state.paths["csv_plot"]):
@@ -364,7 +367,7 @@ def panel_plot():
             disabled = False
         )
 
-        st.session_state.plot_h_coeff = st.slider(
+        st.session_state.plot_var['h_coeff'] = st.slider(
             "Plot height",
             min_value=st.session_state.plot_const['h_coeff_min'],
             max_value=st.session_state.plot_const['h_coeff_max'],
@@ -450,6 +453,16 @@ def panel_plot():
                 "Crop to mask",
                 True
             )
+            
+            st.session_state.mriview_var['w_coeff'] = st.slider(
+                "Img width",
+                min_value=st.session_state.mriview_const['w_coeff_min'],
+                max_value=st.session_state.mriview_const['w_coeff_max'],
+                value=st.session_state.mriview_const['w_coeff'],
+                step=st.session_state.mriview_const['w_coeff_step'],
+                disabled = False
+            )
+            
 
     # Show plot
     show_plots(df, btn_plots)

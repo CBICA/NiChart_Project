@@ -186,8 +186,7 @@ def display_scatter_plot(
         # Main plot
         layout = go.Layout(
             # height=st.session_state.plot_const['h_init']
-            height=st.session_state.plot_const["h_init"]
-            * st.session_state.plot_h_coeff,
+            height = st.session_state.plot_const['h_init'] * st.session_state.plot_var['h_coeff'],
             margin=dict(
                 l=st.session_state.plot_const["margin"],
                 r=st.session_state.plot_const["margin"],
