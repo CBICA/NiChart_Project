@@ -145,7 +145,7 @@ def add_plot_tabs(
                 "Select traces",
                 st.session_state.plot_const["distplot_trace_types"],
                 df_plots.loc[plot_id, "traces"],
-                key="key_sel_trace_densityplot_{plot_id}",
+                key=f"key_sel_trace_densityplot_{plot_id}",
             )
 
     # Tab 3: Reset parameters and/or delete plot
@@ -317,7 +317,7 @@ def display_dist_plot(
         fig.update_layout(
             # height=st.session_state.plot_const['h_init']
             height=st.session_state.plot_const["h_init"]
-            * st.session_state.plot_h_coeff,
+            * st.session_state.plot_var['h_coeff'],
             margin=dict(
                 l=st.session_state.plot_const["margin"],
                 r=st.session_state.plot_const["margin"],

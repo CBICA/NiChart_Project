@@ -96,6 +96,8 @@ def panel_rename():
 
         msg_help = 'Rename numeric ROI indices to ROI names. \n\n If a dictionary is not provided for your data type, please continue with the next step!'
 
+        df = st.session_state.plot_var['df_data']
+
         sel_dict = st.selectbox(
             'Select ROI dictionary',
             st.session_state.rois['roi_dict_options'],
@@ -116,7 +118,6 @@ def panel_rename():
         st.session_state.rois['roi_dict_inv'] = dict2
 
         # Get a list of columns that match the dict key
-        df = st.session_state.plot_var['df_data']
         df_tmp = df[df.columns[df.columns.isin(st.session_state.rois['roi_dict'].keys())]]
         df_tmp2 = df_tmp.rename(columns=st.session_state.rois['roi_dict'])
         if df_tmp.shape[1] == 0:
@@ -150,6 +151,8 @@ def panel_select():
 
     with st.container(border=True):
 
+        df = st.session_state.plot_var['df_data']
+
         with open(st.session_state.dict_categories, 'r') as f:
             dict_categories = json.load(f)
 
@@ -178,9 +181,14 @@ def panel_select():
             st.session_state.plot_sel_vars
         )
 
+        # Select the ones in current dataframe
+        sel_vars_all = [x for x in sel_vars_all if x in df.columns]
+        st.session_state.plot_sel_vars = sel_vars_all
+
         if st.button('Select variables ...'):
             st.success(f'Selected variables: {sel_vars_all}')
             df = df[st.session_state.plot_sel_vars]
+            st.session_state.plot_var['df_data'] = df
 
 def panel_filter():
     '''

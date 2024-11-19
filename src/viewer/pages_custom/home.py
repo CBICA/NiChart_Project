@@ -141,8 +141,7 @@ if "instantiated" not in st.session_state:
     }
     st.session_state.dict_categories = os.path.join(
         res_dir,
-        'dictionaries',
-        'var_categories',
+        'lists',
         'dict_var_categories.json'
     )
     ###################################
