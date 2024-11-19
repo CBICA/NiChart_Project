@@ -80,12 +80,12 @@ def panel_dlmuse():
     Panel for running dlmuse
     '''
     icon = st.session_state.icon_thumb[st.session_state.flags['csv_dlmuse']]
-    show_panel_rundlmuse = st.checkbox(
+    show_panel_dlmuse = st.checkbox(
         f":material/new_label: Run DLMUSE {icon}",
         disabled = not st.session_state.flags['dir_t1'],
         value = False
     )
-    if show_panel_rundlmuse:
+    if not show_panel_dlmuse:
         return
 
     with st.container(border=True):
@@ -281,7 +281,7 @@ st.markdown(
 st.divider()
 panel_wdir()
 panel_int1()
-show_panel_rundlmuse()
+panel_dlmuse()
 panel_view()
 if st.session_state.app_type == "cloud":
     panel_download()

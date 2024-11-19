@@ -38,12 +38,12 @@ def panel_infl():
 
     msg =  st.session_state.app_config[st.session_state.app_type]['msg_infile']
     icon = st.session_state.icon_thumb[st.session_state.flags['dir_fl']]
-    show_panel_int1 = st.checkbox(
+    show_panel_infl = st.checkbox(
         f":material/upload: {msg} FL Images {icon}",
         disabled = not st.session_state.flags['dir_out'],
         value = False
     )
-    if show_panel_infl:
+    if not show_panel_infl:
         return
 
     with st.container(border=True):
@@ -76,17 +76,17 @@ def panel_infl():
                     icon=":material/thumb_up:"
                 )
 
-def panel_dlmuse():
+def panel_dlwmls():
     '''
     Panel for running DLWMLS
     '''
     icon = st.session_state.icon_thumb[st.session_state.flags['csv_dlwmls']]
-    show_panel_rundlwmls = st.checkbox(
+    show_panel_dlwmls = st.checkbox(
         f":material/new_label: Run DLWMLS {icon}",
         disabled = not st.session_state.flags['dir_fl'],
         value = False
     )
-    if not show_panel_rundlwmls:
+    if not show_panel_dlwmls:
         return
 
     with st.container(border=True):
@@ -269,8 +269,8 @@ st.markdown(
 
 st.divider()
 panel_wdir()
-panel_int1()
-show_panel_rundlmuse()
+panel_infl()
+panel_dlwmls()
 panel_view()
 if st.session_state.app_type == "cloud":
     panel_download()
