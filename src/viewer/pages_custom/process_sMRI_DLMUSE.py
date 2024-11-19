@@ -8,22 +8,18 @@ import utils.utils_nifti as utilni
 import utils.utils_st as utilst
 from stqdm import stqdm
 
-st.markdown(
-    """
-    - Segmentation of T1-weighted MRI scans into anatomical regions of interest (ROIs)
-    - [DLMUSE](https://github.com/CBICA/NiChart_DLMUSE): Fast deep learning based segmentation into 145 ROIs + 105 composite ROIs
-        """
-)
+def panel_wdir():
+    '''
+    Panel for selecting the working dir
+    '''
+    icon = st.session_state.icon_thumb[st.session_state.flags['dir_out']]
+    show_panel_wdir = st.checkbox(
+        f":material/folder_shared: Working Directory {icon}",
+        value = False
+    )
+    if not show_panel_wdir:
+        return
 
-st.divider()
-
-# Panel for selecting the working dir
-icon = st.session_state.icon_thumb[st.session_state.flags['dir_out']]
-show_panel_wdir = st.checkbox(
-    f":material/folder_shared: Working Directory {icon}",
-    value = False
-)
-if show_panel_wdir:
     with st.container(border=True):
         utilst.util_panel_workingdir(st.session_state.app_type)
         if os.path.exists(st.session_state.paths["dset"]):
@@ -33,17 +29,22 @@ if show_panel_wdir:
             )
             st.session_state.flags["dir_out"] = True
 
-# Panel for uploading input t1 images
-st.session_state.flags['dir_t1'] = os.path.exists(st.session_state.paths['T1'])
+def panel_int1():
+    '''
+    Panel for uploading input t1 images
+    '''
+    st.session_state.flags['dir_t1'] = os.path.exists(st.session_state.paths['T1'])
 
-msg =  st.session_state.app_config[st.session_state.app_type]['msg_infile']
-icon = st.session_state.icon_thumb[st.session_state.flags['dir_t1']]
-show_panel_int1 = st.checkbox(
-    f":material/upload: {msg} T1 Images {icon}",
-    disabled = not st.session_state.flags['dir_out'],
-    value = False
-)
-if show_panel_int1:
+    msg =  st.session_state.app_config[st.session_state.app_type]['msg_infile']
+    icon = st.session_state.icon_thumb[st.session_state.flags['dir_t1']]
+    show_panel_int1 = st.checkbox(
+        f":material/upload: {msg} T1 Images {icon}",
+        disabled = not st.session_state.flags['dir_out'],
+        value = False
+    )
+    if not show_panel_int1:
+        return
+
     with st.container(border=True):
         if st.session_state.app_type == "cloud":
             utilst.util_upload_folder(
@@ -74,14 +75,19 @@ if show_panel_int1:
                     icon=":material/thumb_up:"
                 )
 
-# Panel for running DLMUSE
-icon = st.session_state.icon_thumb[st.session_state.flags['csv_dlmuse']]
-show_panel_rundlmuse = st.checkbox(
-    f":material/new_label: Run DLMUSE {icon}",
-    disabled = not st.session_state.flags['dir_t1'],
-    value = False
-)
-if show_panel_rundlmuse:
+def panel_dlmuse():
+    '''
+    Panel for running dlmuse
+    '''
+    icon = st.session_state.icon_thumb[st.session_state.flags['csv_dlmuse']]
+    show_panel_rundlmuse = st.checkbox(
+        f":material/new_label: Run DLMUSE {icon}",
+        disabled = not st.session_state.flags['dir_t1'],
+        value = False
+    )
+    if show_panel_rundlmuse:
+        return
+
     with st.container(border=True):
         # Device type
         helpmsg = "Choose 'cuda' if your computer has an NVIDIA GPU, 'mps' if you have an Apple M-series chip, and 'cpu' if you have a standard CPU."
@@ -119,13 +125,18 @@ if show_panel_rundlmuse:
                 icon=":material/thumb_up:",
         )
 
-# Panel for viewing DLMUSE images
-show_panel_view = st.checkbox(
-    f":material/new_label: View Scans",
-    disabled = not st.session_state.flags['csv_dlmuse'],
-    value = False
-)
-if show_panel_view:
+def panel_view():
+    '''
+    Panel for viewing images
+    '''
+    show_panel_view = st.checkbox(
+        f":material/new_label: View Scans",
+        disabled = not st.session_state.flags['csv_dlmuse'],
+        value = False
+    )
+    if not show_panel_view:
+        return
+
     with st.container(border=True):
         # Selection of MRID
         try:
@@ -144,6 +155,8 @@ if show_panel_view:
             index=None,
             disabled = False
         )
+        if sel_var is None:
+            return
 
         # Create a list of checkbox options
         list_orient = st.multiselect(
@@ -152,6 +165,8 @@ if show_panel_view:
             utilni.img_views,
             disabled = False
         )
+        if list_orient is None:
+            return
 
         # View hide overlay
         is_show_overlay = st.checkbox("Show overlay", True, disabled = False)
@@ -165,82 +180,100 @@ if show_panel_view:
             st.session_state.rois['roi_dict_inv'],
             st.session_state.rois['roi_dict_derived'],
         )
-
-        ## Detect list of ROI indices to display
-        #list_sel_rois = utilroi.muse_get_derived(
-            #sel_var, st.session_state.dicts["muse_derived"]
-        #)
+        if list_rois is None:
+            return
 
         # Select images
-        flag_img = False
-        if sel_mrid is not None:
-            st.session_state.paths["sel_img"] = os.path.join(
-                st.session_state.paths["T1"], sel_mrid + st.session_state.suff_t1img
+        if sel_mrid is None:
+            return
+
+        st.session_state.paths["sel_img"] = os.path.join(
+            st.session_state.paths["T1"], sel_mrid + st.session_state.suff_t1img
+        )
+        if not os.path.exists(st.session_state.paths["sel_img"]):
+            return
+
+        st.session_state.paths["sel_seg"] = os.path.join(
+            st.session_state.paths["dlmuse"], sel_mrid + st.session_state.suff_seg
+        )
+        if not os.path.exists(st.session_state.paths["sel_seg"]):
+            return
+
+        with st.spinner("Wait for it..."):
+
+            # Process image and mask to prepare final 3d matrix to display
+            img, mask, img_masked = utilni.prep_image_and_olay(
+                st.session_state.paths["sel_img"],
+                st.session_state.paths["sel_seg"],
+                list_rois,
+                crop_to_mask,
             )
-            st.session_state.paths["sel_seg"] = os.path.join(
-                st.session_state.paths["dlmuse"], sel_mrid + st.session_state.suff_seg
-            )
 
-            flag_img = os.path.exists(st.session_state.paths["sel_img"]) and os.path.exists(
-                st.session_state.paths["sel_seg"]
-            )
+            # Detect mask bounds and center in each view
+            mask_bounds = utilni.detect_mask_bounds(mask)
 
-        if flag_img:
-            with st.spinner("Wait for it..."):
+            # Show images
+            blocks = st.columns(len(list_orient))
+            for i, tmp_orient in stqdm(
+                enumerate(list_orient),
+                desc="Showing images ...",
+                total=len(list_orient),
+            ):
+                with blocks[i]:
+                    ind_view = utilni.img_views.index(tmp_orient)
+                    if is_show_overlay is False:
+                        utilst.show_img3D(
+                            img, ind_view, mask_bounds[ind_view, :], tmp_orient
+                        )
+                    else:
+                        utilst.show_img3D(
+                            img_masked, ind_view, mask_bounds[ind_view, :], tmp_orient
+                        )
 
-                # Process image and mask to prepare final 3d matrix to display
-                img, mask, img_masked = utilni.prep_image_and_olay(
-                    st.session_state.paths["sel_img"],
-                    st.session_state.paths["sel_seg"],
-                    list_rois,
-                    crop_to_mask,
-                )
+def panel_download():
+    '''
+    Panel for downloading results
+    '''
+    if st.session_state.app_type == "cloud":
+        show_panel_view = st.checkbox(
+            f":material/new_label: Download Scans",
+            disabled = not st.session_state.flags['csv_dlmuse'],
+            value = False
+        )
+        if not show_panel_view:
+            return
 
-                # Detect mask bounds and center in each view
-                mask_bounds = utilni.detect_mask_bounds(mask)
+    with st.container(border=True):
 
-                # Show images
-                blocks = st.columns(len(list_orient))
-                for i, tmp_orient in stqdm(
-                    enumerate(list_orient),
-                    desc="Showing images ...",
-                    total=len(list_orient),
-                ):
-                    with blocks[i]:
-                        ind_view = utilni.img_views.index(tmp_orient)
-                        if is_show_overlay is False:
-                            utilst.show_img3D(
-                                img, ind_view, mask_bounds[ind_view, :], tmp_orient
-                            )
-                        else:
-                            utilst.show_img3D(
-                                img_masked, ind_view, mask_bounds[ind_view, :], tmp_orient
-                            )
+        # Zip results and download
+        out_zip = bytes()
+        if not False:
+            if not os.path.exists(st.session_state.paths["download"]):
+                os.makedirs(st.session_state.paths["download"])
+            f_tmp = os.path.join(st.session_state.paths["download"], "DLMUSE")
+            out_zip = utilio.zip_folder(st.session_state.paths["dlmuse"], f_tmp)
 
-# Panel for downloading results
+        st.download_button(
+            "Download DLMUSE results",
+            out_zip,
+            file_name=f"{st.session_state.dset}_DLMUSE.zip",
+            disabled=False,
+        )
+
+st.markdown(
+    """
+    - Segmentation of T1-weighted MRI scans into anatomical regions of interest (ROIs)
+    - [DLMUSE](https://github.com/CBICA/NiChart_DLMUSE): Fast deep learning based segmentation into 145 ROIs + 105 composite ROIs
+        """
+)
+
+st.divider()
+panel_wdir()
+panel_int1()
+show_panel_rundlmuse()
+panel_view()
 if st.session_state.app_type == "cloud":
-    show_panel_view = st.checkbox(
-        f":material/new_label: Download Scans",
-        disabled = not st.session_state.flags['csv_dlmuse'],
-        value = False
-    )
-    if show_panel_view:
-        with st.container(border=True):
-
-            # Zip results and download
-            out_zip = bytes()
-            if not False:
-                if not os.path.exists(st.session_state.paths["download"]):
-                    os.makedirs(st.session_state.paths["download"])
-                f_tmp = os.path.join(st.session_state.paths["download"], "DLMUSE")
-                out_zip = utilio.zip_folder(st.session_state.paths["dlmuse"], f_tmp)
-
-            st.download_button(
-                "Download DLMUSE results",
-                out_zip,
-                file_name=f"{st.session_state.dset}_DLMUSE.zip",
-                disabled=False,
-            )
+    panel_download()
 
 # FIXME: For DEBUG
 utilst.add_debug_panel()

@@ -12,20 +12,6 @@ import utils.utils_viewimg as utilvi
 import utils.utils_plot as utilpl
 from stqdm import stqdm
 
-# from wfork_streamlit_profiler import Profiler
-# with Profiler():
-
-st.markdown(
-    """
-    - Plot study data to visualize imaging variables
-    - With options to:
-    - Select target variables to plot
-    - View reference distributions (centile values of the reference dataset)
-    - Filter data
-    - View MRI images and segmentations for selected data points
-    """
-)
-
 def panel_wdir():
     '''
     Panel for selecting the working dir
@@ -467,7 +453,18 @@ def panel_plot():
 
     # Show plot
     show_plots(df, btn_plots)
-            
+
+st.markdown(
+    """
+    - Plot study data to visualize imaging variables
+    - With options to:
+    - Select target variables to plot
+    - View reference distributions (centile values of the reference dataset)
+    - Filter data
+    - View MRI images and segmentations for selected data points
+    """
+)
+
 # Call all steps
 st.divider()
 panel_wdir()
