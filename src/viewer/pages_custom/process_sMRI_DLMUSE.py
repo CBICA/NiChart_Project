@@ -150,6 +150,7 @@ def panel_view():
         except:
             list_mrid = []
         if len(list_mrid) == 0:
+            st.warning('Result file is empty!')            
             return
 
         sel_mrid = st.selectbox(
@@ -160,6 +161,7 @@ def panel_view():
             disabled = False
         )
         if sel_mrid is None:
+            st.warning('Please select the MRID!')            
             return
 
         # Create combo list for selecting target ROI
@@ -172,6 +174,7 @@ def panel_view():
             disabled = False
         )
         if sel_var is None:
+            st.warning('Please select the ROI!')
             return
 
         # Create a list of checkbox options
@@ -181,7 +184,9 @@ def panel_view():
             utilni.img_views,
             disabled = False
         )
+        
         if list_orient is None or len(list_orient) == 0:
+            st.warning('Please select the viewing plane!')            
             return
 
         # View hide overlay
@@ -196,23 +201,31 @@ def panel_view():
             st.session_state.rois['roi_dict_inv'],
             st.session_state.rois['roi_dict_derived'],
         )
+        
+        print('aAA')
+        print(list_rois)
+        
         if list_rois is None:
+            st.warning('ROI list is empty!')            
             return
 
         # Select images
         if sel_mrid is None:
+            st.warning('Please select the MRID!')            
             return
 
         st.session_state.paths["sel_img"] = os.path.join(
             st.session_state.paths["T1"], sel_mrid + st.session_state.suff_t1img
         )
         if not os.path.exists(st.session_state.paths["sel_img"]):
+            st.warning(f'Could not locate underlay image: {st.session_state.paths["sel_img"]}')
             return
 
         st.session_state.paths["sel_seg"] = os.path.join(
             st.session_state.paths["dlmuse"], sel_mrid + st.session_state.suff_seg
         )
         if not os.path.exists(st.session_state.paths["sel_seg"]):
+            st.warning(f'Could not locate overlay image: {st.session_state.paths["sel_seg"]}')
             return
 
 

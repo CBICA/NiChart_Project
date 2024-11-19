@@ -29,6 +29,7 @@ if args.cloud:
 
 # Initiate Session State Values
 if "instantiated" not in st.session_state:
+
     ###################################
     # App type ('desktop' or 'cloud')
     st.session_state.app_type = "cloud"
@@ -42,8 +43,6 @@ if "instantiated" not in st.session_state:
         }
     }
     ###################################
-
-    st.session_state.pipeline = None
 
     ###################################
     # General
@@ -296,23 +295,6 @@ if "instantiated" not in st.session_state:
     st.session_state.plot_sel_vars = []
 
     st.session_state.instantiated = True
-
-
-## Select pipeline
-#nav = get_nav_from_toml("../.streamlit/pages_sections_home.toml")
-#p_sel = st.sidebar.selectbox(
-    #'Select pipeline',
-    #['a', 'b', 'c'],
-    #None
-#)
-#if p_sel != None:
-    #st.session_state.pipeline = p_sel
-#if st.session_state.pipeline == 'b':
-    #nav = get_nav_from_toml(".streamlit/pages_sections.toml")
-#pg = st.navigation(nav)
-#add_page_title(pg)
-#pg.run()
-
 
 st.sidebar.image("../resources/nichart1.png")
 
