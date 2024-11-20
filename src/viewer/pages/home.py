@@ -2,7 +2,6 @@ import streamlit as st
 import utils.utils_menu as utilmenu
 import utils.utils_st as utilst
 import utils.utils_session as utilss
-from init_session_state import init_session_state
 from PIL import Image
 
 def set_pipeline():

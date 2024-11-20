@@ -6,9 +6,6 @@ import streamlit as st
 import utils.utils_rois as utilroi
 import utils.utils_st as utilst
 
-from menu import menu
-from init_session_state import init_session_state
-
 from st_pages import add_page_title, get_nav_from_toml
 
 from PIL import Image
