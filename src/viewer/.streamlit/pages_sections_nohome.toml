@@ -1,0 +1,51 @@
+
+[[pages]]
+name = "MRI Preparation"
+is_section = true
+icon = ":file_folder:"
+
+[[pages]]
+path = "pages_custom/prep_sMRI_dicomtonifti.py"
+name = "Dicom to Nifti (sMRI, DTI, fMRI)"
+icon = ":black_small_square:"
+
+[[pages]]
+name = "Image Processing"
+is_section = true
+icon = ":file_folder:"
+
+[[pages]]
+path = "pages_custom/process_sMRI_DLMUSE.py"
+name = "DLMUSE (sMRI)"
+icon = ":black_small_square:"
+
+[[pages]]
+path = "pages_custom/process_sMRI_DLWMLS.py"
+name = "DLWMLS (sMRI)"
+icon = ":black_small_square:"
+
+[[pages]]
+name = "Data Analytics"
+is_section = true
+icon = ":file_folder:"
+
+[[pages]]
+path = "pages_custom/workflow_sMRI_MLScores.py"
+name = "ML Biomarkers (sMRI)"
+icon = ":black_small_square:"
+
+[[pages]]
+name = "Visualizations"
+is_section = true
+icon = ":file_folder:"
+
+[[pages]]
+path = "pages_custom/plot_sMRI_vars_study.py"
+name = "View Study (sMRI)"
+icon = ":black_small_square:"
+
+[[pages]]
+path = "pages_custom/plot_sMRI_vars_participant.py"
+name = "View Participant (sMRI)"
+icon = ":black_small_square:"
+

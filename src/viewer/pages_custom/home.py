@@ -6,9 +6,7 @@ import streamlit as st
 import utils.utils_rois as utilroi
 import utils.utils_st as utilst
 
-
-#from wfork_streamlit_profiler import Profiler
-# with Profiler():
+from st_pages import add_page_title, get_nav_from_toml
 
 
 parser = argparse.ArgumentParser(description='NiChart Application Server')
@@ -313,7 +311,6 @@ if "instantiated" not in st.session_state:
 #add_page_title(pg)
 #pg.run()
 
-
 st.sidebar.image("../resources/nichart1.png")
 
 st.write("# Welcome to NiChart Project!")
@@ -369,6 +366,14 @@ st.markdown(
             You can always find more options at our documentation
             """
 )
+
+if st.checkbox('Go to pipe'):
+    nav = get_nav_from_toml(".streamlit/pages_sections.toml")
+
+    pg = st.navigation(nav)
+    add_page_title(pg)
+    pg.run()
+
 
 # FIXME: For DEBUG
 utilst.add_debug_panel()
