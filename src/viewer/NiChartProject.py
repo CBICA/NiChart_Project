@@ -1,6 +1,17 @@
+import argparse
+import os
+
+import pandas as pd
 import streamlit as st
-from PIL import Image
+import utils.utils_rois as utilroi
+import utils.utils_st as utilst
+
+from menu import menu
+from init_session_state import init_session_state
+
 from st_pages import add_page_title, get_nav_from_toml
+
+from PIL import Image
 
 nicon = Image.open("../resources/nichart1.png")
 st.set_page_config(
@@ -15,25 +26,19 @@ st.set_page_config(
     },
 )
 
-# If you want to use the no-sections version, this
-# defaults to looking in .streamlit/pages.toml, so you can
-# just call `get_nav_from_toml()`
+# Read user arg to select cloud / desktop
+parser = argparse.ArgumentParser(description='NiChart Application Server')
+parser.add_argument('--cloud', action='store_true', default=False,
+                    help="If passed, set the session type to cloud")
+try:
+    args = parser.parse_args()
+except SystemExit as e:
+    # This exception will be raised if --help or invalid command line arguments
+    # are used. Currently streamlit prevents the program from exiting normally
+    # so we have to do a hard exit.
+    os._exit(e.code)
+if args.cloud:
+    st.session_state.app_type = "CLOUD"
 
-st.session_state.pipeline = st.sidebar.selectbox(
-    'Pipelines',
-    ['Home', 'Structural MRI', 'Lesion Segmentation'],
-    0
-)
-
-print(st.session_state.pipeline)
-
-if st.session_state.pipeline  == 'Home':
-    nav = get_nav_from_toml(".streamlit/pages_sections_home.toml")
-elif st.session_state.pipeline  == 'Structural MRI':
-    nav = get_nav_from_toml(".streamlit/pages_sections_dlmuse.toml")
-elif st.session_state.pipeline  == 'Lesion Segmentation':
-    nav = get_nav_from_toml(".streamlit/pages_sections_dlwmls.toml")
-
-pg = st.navigation(nav)
-add_page_title(pg)
-pg.run()
+# Initialize session state variables
+st.switch_page("pages/home.py")

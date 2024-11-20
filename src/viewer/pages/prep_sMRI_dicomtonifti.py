@@ -1,5 +1,6 @@
 import os
 from typing import Any
+from menu import menu
 
 import streamlit as st
 import utils.utils_dicom as utildcm
@@ -9,6 +10,8 @@ import utils.utils_st as utilst
 from stqdm import stqdm
 
 result_holder = st.empty()
+
+menu()
 
 def progress(p: int, i: int, decoded: Any) -> None:
     with result_holder.container():
