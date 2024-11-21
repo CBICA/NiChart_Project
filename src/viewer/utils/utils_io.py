@@ -18,10 +18,10 @@ def browse_file(path_init: str) -> Any:
     root = tk.Tk()
     root.withdraw()  # Hide the main window
     out_file = filedialog.askopenfilename(initialdir=path_init)
-    dir_out = os.path.dirname(out_file)
+    if len(out_file) == 0:
+        out_file = None
     root.destroy()
-    return out_file, dir_out
-
+    return out_file
 
 def browse_folder(path_init: str) -> str:
     """
@@ -31,6 +31,8 @@ def browse_folder(path_init: str) -> str:
     root = tk.Tk()
     root.withdraw()  # Hide the main window
     out_path = filedialog.askdirectory(initialdir=path_init)
+    if len(out_path) == 0:
+        out_path = None
     root.destroy()
     return out_path
 

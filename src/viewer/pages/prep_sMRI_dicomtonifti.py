@@ -77,7 +77,7 @@ def panel_indicoms():
                 "selected_dicom_folder",
                 "Dicom folder",
                 st.session_state.paths["dicom"],
-                st.session_state.paths["last_in_dir"],
+                st.session_state.paths["file_search_dir"],
                 False,
             )
             fcount = utilio.get_file_count(st.session_state.paths["dicom"])

@@ -76,7 +76,7 @@ def panel_infl():
                 "selected_img_folder",
                 "FL nifti image folder",
                 st.session_state.paths["FL"],
-                st.session_state.paths["last_in_dir"],
+                st.session_state.paths["file_search_dir"],
                 False,
             )
             fcount = utilio.get_file_count(st.session_state.paths["FL"])

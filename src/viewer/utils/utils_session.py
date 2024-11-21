@@ -85,7 +85,7 @@ def init_session_state() -> None:
         st.session_state.paths = {
             "root": "",
             "init": "",
-            "last_in_dir": "",
+            "file_search_dir": "",
             "target_dir": "",
             "target_file": "",
             "dset": "",
@@ -133,7 +133,7 @@ def init_session_state() -> None:
         st.session_state.paths["init"] = os.path.join(
             os.path.dirname(st.session_state.paths["root"]), "TestData"
         )
-        st.session_state.paths["last_in_dir"] = st.session_state.paths["init"]
+        st.session_state.paths["file_search_dir"] = st.session_state.paths["init"]
         ############
 
         # Image modalities

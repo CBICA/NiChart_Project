@@ -44,7 +44,7 @@ else:  # st.session_state.app_type == 'desktop'
             "selected_data_file",
             "Data csv",
             st.session_state.paths["csv_dlmuse"],
-            st.session_state.paths["last_in_dir"],
+            st.session_state.paths["file_search_dir"],
             flag_disabled,
         )
         if not flag_disabled and os.path.exists(st.session_state.paths["csv_dlmuse"]):
@@ -55,7 +55,7 @@ else:  # st.session_state.app_type == 'desktop'
             "key_sel_img_folder_viewer",
             "T1 nifti image folder",
             st.session_state.paths["T1"],
-            st.session_state.paths["last_in_dir"],
+            st.session_state.paths["file_search_dir"],
             flag_disabled,
         )
         if not flag_disabled:
@@ -72,7 +72,7 @@ else:  # st.session_state.app_type == 'desktop'
             "key_sel_dlmuse_folder_viewer",
             "T1 nifti image folder",
             st.session_state.paths["dlmuse"],
-            st.session_state.paths["last_in_dir"],
+            st.session_state.paths["file_search_dir"],
             flag_disabled,
         )
         if not flag_disabled:

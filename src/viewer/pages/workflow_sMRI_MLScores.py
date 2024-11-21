@@ -72,8 +72,7 @@ if show_panel_indata:
                 "selected_dlmuse_file",
                 "DLMUSE csv",
                 st.session_state.paths["csv_dlmuse"],
-                st.session_state.paths["last_in_dir"],
-                False,
+                st.session_state.paths["file_search_dir"],
             )
             if os.path.exists(st.session_state.paths["csv_dlmuse"]):
                 st.success(f"Data is ready ({st.session_state.paths["csv_dlmuse"]})", icon=":material/thumb_up:")
@@ -82,8 +81,7 @@ if show_panel_indata:
                 "selected_demog_file",
                 "Demographics csv",
                 st.session_state.paths["csv_demog"],
-                st.session_state.paths["last_in_dir"],
-                False,
+                st.session_state.paths["file_search_dir"],
             )
             if os.path.exists(st.session_state.paths["csv_demog"]):
                 st.success(

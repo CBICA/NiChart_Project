@@ -67,7 +67,7 @@ if show_panel_incsv:
                 "selected_data_file",
                 "Data csv",
                 st.session_state.paths["csv_plot"],
-                st.session_state.paths["last_in_dir"],
+                st.session_state.paths["file_search_dir"],
                 False
             )
 

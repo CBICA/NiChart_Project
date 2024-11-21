@@ -79,7 +79,7 @@ def update_ulay_image_path() -> None:
         "selected_t1_folder",
         "Underlay image folder",
         st.session_state.paths["T1"],
-        st.session_state.paths["last_in_dir"],
+        st.session_state.paths["file_search_dir"],
         False,
     )
 
@@ -116,7 +116,7 @@ def update_olay_image_path() -> None:
         "selected_dlmuse_folder",
         "Overlay image folder",
         st.session_state.paths["dlmuse"],
-        st.session_state.paths["last_in_dir"],
+        st.session_state.paths["file_search_dir"],
         False,
     )
 
