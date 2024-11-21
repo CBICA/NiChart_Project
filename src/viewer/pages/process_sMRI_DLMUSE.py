@@ -6,8 +6,20 @@ import utils.utils_io as utilio
 import utils.utils_rois as utilroi
 import utils.utils_nifti as utilni
 import utils.utils_st as utilst
+import utils.utils_menu as utilmenu
 from stqdm import stqdm
 import re
+
+utilmenu.menu()
+
+st.write("# Segmentation of Anatomical Regions of Interest")
+
+st.markdown(
+    """
+    - Segmentation of T1-weighted MRI scans into anatomical regions of interest (ROIs)
+    - [DLMUSE](https://github.com/CBICA/NiChart_DLMUSE): Fast deep learning based segmentation into 145 ROIs + 105 composite ROIs
+        """
+)
 
 def panel_wdir():
     '''
@@ -303,13 +315,6 @@ def panel_download():
             file_name=f"{st.session_state.dset}_DLMUSE.zip",
             disabled=False,
         )
-
-st.markdown(
-    """
-    - Segmentation of T1-weighted MRI scans into anatomical regions of interest (ROIs)
-    - [DLMUSE](https://github.com/CBICA/NiChart_DLMUSE): Fast deep learning based segmentation into 145 ROIs + 105 composite ROIs
-        """
-)
 
 st.divider()
 panel_wdir()

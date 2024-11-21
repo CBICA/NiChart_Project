@@ -4,10 +4,14 @@ def menu():
     if st.session_state.pipeline == 'Home':
         st.sidebar.page_link("pages/home.py", label="Home")
         
-    if st.session_state.pipeline == 'DLMUSE':
+    if st.session_state.pipeline == 'sMRI Biomarkers (T1)':
         st.sidebar.page_link(
             "pages/home.py",
             label="Home"
+        )
+        st.sidebar.page_link(
+            "pages/pipeline_dlmuse.py",
+            label=":material/arrow_forward: Description"
         )
         st.sidebar.page_link(
             "pages/prep_sMRI_dicomtonifti.py",
@@ -15,21 +19,25 @@ def menu():
         )
         st.sidebar.page_link(
             "pages/process_sMRI_DLMUSE.py",
-            label=":material/arrow_forward: DLMUSE"
+            label=":material/arrow_forward: DLMUSE Segmentation"
         )
         st.sidebar.page_link(
             "pages/workflow_sMRI_MLScores.py",
-            label=":material/arrow_forward: MLScores"
+            label=":material/arrow_forward: Machine Learning Biomarkers"
         )
         st.sidebar.page_link(
             "pages/plot_sMRI_vars_study.py",
-            label=":material/arrow_forward: View"
+            label=":material/arrow_forward: View Data"
         )
         
-    if st.session_state.pipeline == 'DLWMLS':
+    if st.session_state.pipeline == 'WM Lesion Segmentation (FL)':
         st.sidebar.page_link(
             "pages/home.py",
             label="Home"
+        )
+        st.sidebar.page_link(
+            "pages/pipeline_dlwmls.py",
+            label=":material/arrow_forward: Description"
         )
         st.sidebar.page_link(
             "pages/prep_sMRI_dicomtonifti.py",
@@ -39,9 +47,25 @@ def menu():
             "pages/process_sMRI_DLWMLS.py",
             label=":material/arrow_forward: DLWMLS"
         )
+
+    if st.session_state.pipeline == 'DTI Biomarkers (DTI)':
         st.sidebar.page_link(
-            "pages/plot_sMRI_vars_study.py",
-            label=":material/arrow_forward: View"
+            "pages/home.py",
+            label="Home"
+        )
+        st.sidebar.page_link(
+            "pages/pipeline_dti.py",
+            label=":material/arrow_forward: Description"
+        )
+
+    if st.session_state.pipeline == 'Resting State fMRI Biomarkers (rsfMRI)':
+        st.sidebar.page_link(
+            "pages/home.py",
+            label="Home"
+        )
+        st.sidebar.page_link(
+            "pages/pipeline_fmri.py",
+            label=":material/arrow_forward: Description"
         )
 
 def menu_selection():

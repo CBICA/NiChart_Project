@@ -22,7 +22,13 @@ def init_session_state() -> None:
         }
         ###################################
 
-        st.session_state.pipelines = ['Home', 'DLMUSE', 'DLWMLS']
+        st.session_state.pipelines = [
+            'Home',
+            'sMRI Biomarkers (T1)',
+            'WM Lesion Segmentation (FL)',
+            'DTI Biomarkers (DTI)',
+            'Resting State fMRI Biomarkers (rsfMRI)',
+        ]
         st.session_state.pipeline = 'Home'
         st.session_state._pipeline = st.session_state.pipeline
 

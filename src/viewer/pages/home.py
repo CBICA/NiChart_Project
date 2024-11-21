@@ -36,56 +36,55 @@ st.markdown(
     """
 )
 
-# Pipeline selection
-st.markdown(
-    """
-    :point_down: **Please select a pipeline!**
-    """
-)
-st.selectbox(
-    "Select pipeline:",
-    st.session_state.pipelines,
-    index=0,
-    key="_pipeline",
-    on_change=set_pipeline,
-    label_visibility="collapsed"
-)
-utilmenu.menu()
-st.markdown(
-    """
-    :point_left: **And select a task from the sidebar to process, analyze and visualize your data!**
-    """
-)
-
-st.divider()
-
-st.markdown(
-    """
-    ### Want to learn more?
-    - Check out [NiChart Web page](https://neuroimagingchart.com)
-    - Visit [NiChart GitHub](https://github.com/CBICA/NiChart_Project)
-    - Jump into our [documentation](https://github.com/CBICA/NiChart_Project)
-    - Ask a question in our [community
-        forums](https://github.com/CBICA/NiChart_Project)
+with st.container(border=True):
+    # Pipeline selection
+    st.markdown(
         """
-)
+        :point_down: **Please select a pipeline!**
+        """
+    )
+    st.selectbox(
+        "Select pipeline:",
+        st.session_state.pipelines,
+        index=0,
+        key="_pipeline",
+        on_change=set_pipeline,
+        label_visibility="collapsed"
+    )
+    utilmenu.menu()
+    st.markdown(
+        """
+        :point_left: **And select a task from the sidebar to process, analyze and visualize your data!**
+        """
+    )
 
-st.markdown(
-    """
-    You can try NiChart manually via our github
-    ```bash
-    git clone https://github.com/CBICA/NiChart_Project
-    git submodule update --init --recursive --remote
-    pip install -r requirements.txt
-    ```
+with st.expander('Want to learn more?', expanded=False):
+    st.markdown(
+        """
+        - Check out [NiChart Web page](https://neuroimagingchart.com)
+        - Visit [NiChart GitHub](https://github.com/CBICA/NiChart_Project)
+        - Jump into our [documentation](https://github.com/CBICA/NiChart_Project)
+        - Ask a question in our [community
+            forums](https://github.com/CBICA/NiChart_Project)
+            """
+    )
 
-    And to run the workflows, just run:
-    ```bash
-    python3 run.py --dir_input input folder --dir_output output_folder --studies 1 --version my_version --cores 4 --conda 0
-    ```
+    st.markdown(
+        """
+        You can try NiChart manually via our github
+        ```bash
+        git clone https://github.com/CBICA/NiChart_Project
+        git submodule update --init --recursive --remote
+        pip install -r requirements.txt
+        ```
 
-    You can always find more options at our documentation
-    """
+        And to run the workflows, just run:
+        ```bash
+        python3 run.py --dir_input input folder --dir_output output_folder --studies 1 --version my_version --cores 4 --conda 0
+        ```
+
+        You can always find more options at our documentation
+        """
 )
 
 st.sidebar.image("../resources/nichart1.png")

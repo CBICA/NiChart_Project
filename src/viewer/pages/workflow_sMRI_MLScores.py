@@ -3,19 +3,17 @@ import os
 import streamlit as st
 import utils.utils_io as utilio
 import utils.utils_st as utilst
+import utils.utils_menu as utilmenu
+
+utilmenu.menu()
+
+st.write("# Machine Learning (ML)-Based Imaging Biomarkers")
 
 st.markdown(
     """
-    - Pipeline for calculating machine learning (ML) based imaging biomarkers ([SPARE Scores](https://github.com/CBICA/spare_scores)) from DLMUSE ROIs
-    - ML imaging signatures quantify the progression of brain changes related to aging and disease
-    - Input data
-      - DLMUSE ROI volumes and demographic data
-    - Processing steps:
-      - COMBAT harmonization to reference data
-      - SPARE scores: Supervised ML models for disease prediction
-      - SurrealGAN indices: Semi-supervised ML models for disease subtype identification
-    - Output
-      - ML biomarker panel
+    - Application of pre-trained  machine learning (ML) models to derive imaging biomarkers.
+    - ML biomarkers quantify brain changes related to aging and disease. 
+    - ML models were trained on ISTAGING reference data using DLMUSE ROIs after statistical harmonization with COMBAT.
     """
 )
 

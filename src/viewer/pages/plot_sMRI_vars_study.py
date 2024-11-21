@@ -10,7 +10,24 @@ import utils.utils_st as utilst
 import utils.utils_dataframe as utildf
 import utils.utils_viewimg as utilvi
 import utils.utils_plot as utilpl
+import utils.utils_menu as utilmenu
+
 from stqdm import stqdm
+
+utilmenu.menu()
+
+st.write("# View Data")
+
+st.markdown(
+    """
+    - Plot study data to visualize imaging variables
+    - With options to:
+        - Select target variables to plot
+        - View reference distributions (centile values of the reference dataset)
+        - Filter data
+        - View MRI images and segmentations for selected data points
+    """
+)
 
 def panel_wdir():
     '''
@@ -474,17 +491,6 @@ def panel_plot():
 
     # Show plot
     show_plots(df, btn_plots)
-
-st.markdown(
-    """
-    - Plot study data to visualize imaging variables
-    - With options to:
-    - Select target variables to plot
-    - View reference distributions (centile values of the reference dataset)
-    - Filter data
-    - View MRI images and segmentations for selected data points
-    """
-)
 
 # Call all steps
 st.divider()

@@ -6,8 +6,19 @@ import utils.utils_io as utilio
 import utils.utils_rois as utilroi
 import utils.utils_nifti as utilni
 import utils.utils_st as utilst
+import utils.utils_menu as utilmenu
 from stqdm import stqdm
 
+utilmenu.menu()
+
+st.write("# Segmentation of White Matter Lesions")
+
+st.markdown(
+    """
+    - Segmentation of WM Lesions on FL scan
+    - [DLWMLS](https://github.com/CBICA/NiChart_DLWMLS): Fast deep learning based segmentation of WM lesions
+    """
+)
 
 def panel_wdir():
     '''
@@ -259,13 +270,6 @@ def panel_download():
                 file_name=f"{st.session_state.dset}_DLWMLS.zip",
                 disabled=False,
             )
-
-st.markdown(
-    """
-    - Segmentation of WM Lesions on FL scan
-    - [DLWMLS](https://github.com/CBICA/NiChart_DLWMLS): Fast deep learning based segmentation of WM lesions
-        """
-)
 
 st.divider()
 panel_wdir()
