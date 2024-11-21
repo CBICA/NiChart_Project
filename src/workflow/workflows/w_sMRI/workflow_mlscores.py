@@ -77,48 +77,61 @@ def run_workflow(root_dir: Any, dict_config: Any) -> None:
     f_sel = os.path.join(out_dir, f"{dset_name}_sel.csv")
     utilw.select_vars(f_comb, dict_csv, dict_var, covars, f_sel)
 
-    # Check that sample has age range consistent with the model
-    var_name = "Age"
-    min_val = 50
-    max_val = 95
-    f_filt = os.path.join(out_dir, f"{dset_name}_filt.csv")
-    utilw.filter_num_var(f_sel, var_name, min_val, max_val, f_filt)
+    ## Check that sample has age range consistent with the model
+    #var_name = "Age"
+    #min_val = 50
+    #max_val = 95
+    #f_filt = os.path.join(out_dir, f"{dset_name}_filt.csv")
+    #utilw.filter_num_var(f_sel, var_name, min_val, max_val, f_filt)
 
-    # Apply combat
-    mdl = os.path.join("src", "workflow", model_combat)
-    f_combat1 = os.path.join(out_dir, f"{dset_name}_COMBAT_single.csv")
-    utilw.apply_combat(f_filt, mdl, "MRID", "_HARM", f_combat1)
+    ## Apply combat
+    #mdl = os.path.join("src", "workflow", model_combat)
+    #f_combat1 = os.path.join(out_dir, f"{dset_name}_COMBAT_single.csv")
+    #utilw.apply_combat(f_filt, mdl, "MRID", "_HARM", f_combat1)
 
-    # Calculate derived ROIs from harmonized data
-    in_dict = os.path.join("src", "workflow", derived_rois)
-    key_var = "MRID"
-    # roi_prefix = "MUSE_"
-    f_combat2 = os.path.join(out_dir, f"{dset_name}_COMBAT_all.csv")
-    utilw.combine_rois(f_combat1, in_dict, f_combat2)
+    ## Calculate derived ROIs from harmonized data
+    #in_dict = os.path.join("src", "workflow", derived_rois)
+    #key_var = "MRID"
+    ## roi_prefix = "MUSE_"
+    #f_combat2 = os.path.join(out_dir, f"{dset_name}_COMBAT_all.csv")
+    #utilw.combine_rois(f_combat1, in_dict, f_combat2)
 
-    # Merge covars to ROIs
-    key_var = "MRID"
-    f_combat3 = os.path.join(out_dir, f"{dset_name}_COMBAT_withcovar.csv")
-    utilw.merge_dataframes(input_demog, f_combat2, key_var, f_combat3)
+    ## Merge covars to ROIs
+    #key_var = "MRID"
+    #f_combat3 = os.path.join(out_dir, f"{dset_name}_COMBAT_withcovar.csv")
+    #utilw.merge_dataframes(input_demog, f_combat2, key_var, f_combat3)
 
-    # Select variables for harmonization
-    dict_var = "Code"
-    covars = "MRID,Age,Sex,DLICV"
-    f_combat4 = os.path.join(out_dir, f"{dset_name}_COMBAT.csv")
-    utilw.select_vars(f_combat3, dict_csv, dict_var, covars, f_combat4)
+    ## Select variables for harmonization
+    #dict_var = "Code"
+    #covars = "MRID,Age,Sex,DLICV"
+    #f_combat4 = os.path.join(out_dir, f"{dset_name}_COMBAT.csv")
+    #utilw.select_vars(f_combat3, dict_csv, dict_var, covars, f_combat4)
 
-    # spare apply
-    list_spare = []
-    for SPARETYPE in spare_types:
-        mdl = os.path.join(bdir, dict_config[f"model_SPARE-{SPARETYPE}"])
-        f_spare = os.path.join(out_dir, f"{dset_name}_SPARE_{SPARETYPE}.csv")
-        utilw.apply_spare(f_combat4, mdl, SPARETYPE, f_spare)
-        list_spare.append(f_spare)
+    ## spare apply
+    #list_spare = []
+    #for SPARETYPE in spare_types:
+        #mdl = os.path.join(bdir, dict_config[f"model_SPARE-{SPARETYPE}"])
+        #f_spare = os.path.join(out_dir, f"{dset_name}_SPARE_{SPARETYPE}.csv")
+        #utilw.apply_spare(f_combat4, mdl, SPARETYPE, f_spare)
+        #list_spare.append(f_spare)
 
-    # merge spare
-    f_spares = os.path.join(out_dir, f"{dset_name}_SPARE-ALL.csv")
-    utilw.merge_dataframes_multi(f_spares, "MRID", list_spare)
+    ## merge spare
+    #f_spares = os.path.join(out_dir, f"{dset_name}_SPARE-ALL.csv")
+    #utilw.merge_dataframes_multi(f_spares, "MRID", list_spare)
 
+    ## Select variables for SurrealGAN
+    #dict_var = "Code"
+    #covars = "MRID,Age,Sex,DLICV"
+    #f_surrealgan_input = os.path.join(out_dir, f"{dset_name}_SurrealGAN_input.csv")
+    #utilw.select_vars(f_comb, dict_csv, dict_var, covars, f_surrealgan_input)
+
+    # Apply SurrealGAN index prediction
+    f_surrealgan = os.path.join(out_dir, f"{dset_name}_SurrealGAN.csv")
+    utilw.surrealgan_scores(f_comb, dict_csv, f_surrealgan)
+
+
+    input('Hello!')
+    
     # Merge all
     f_all = os.path.join(dir_output, f"{dset_name}_DLMUSE+MLScores.csv")
     utilw.combine_all(

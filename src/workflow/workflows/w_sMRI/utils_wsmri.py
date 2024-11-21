@@ -5,6 +5,33 @@ from typing import Any
 import pandas as pd
 
 
+def surrealgan_scores(
+    in_csv: str, in_dict: str, out_csv: str
+) -> None:
+    """
+    Calculate surrealgan R indices
+    """
+    # Read input files
+    df = pd.read_csv(in_csv, dtype={"MRID": str})
+    dfd = pd.read_csv(in_dict)
+
+    # Rename DLICV
+    df = df.rename(columns={'MUSE_702':'DLICV'})
+
+    # Select data
+    sel_cols = ['MRID', 'Age', 'Sex', 'DLICV'] + dfd.Code.tolist()
+    df = df[sel_cols]
+            
+    # Write selected data
+    out_tmp = in_csv[0:-4] + '_surrealgan_input.csv'
+    df.to_csv(out_tmp, index=False)
+            
+    # Run prediction
+    cmd = f'PredCRD -i {out_tmp} -o {out_csv}' 
+    print(f'About to run {cmd}')
+    os.system(cmd)
+   
+
 def rename_df_columns(
     in_csv: str, in_dict: str, var_from: str, var_to: str, out_csv: str
 ) -> None:
