@@ -1,27 +1,17 @@
 import argparse
 import os
-
 import pandas as pd
 import streamlit as st
 import utils.utils_rois as utilroi
 import utils.utils_st as utilst
+import utils.utils_session as utilss
 
 from st_pages import add_page_title, get_nav_from_toml
 
 from PIL import Image
 
-nicon = Image.open("../resources/nichart1.png")
-st.set_page_config(
-    page_title="NiChart",
-    page_icon=nicon,
-    layout="wide",
-    #layout="centered",
-    menu_items={
-        "Get help": "https://neuroimagingchart.com/",
-        "Report a bug": "https://neuroimagingchart.com/",
-        "About": "https://neuroimagingchart.com/",
-    },
-)
+st.session_state.nicon = Image.open("../resources/nichart1.png")
+utilss.config_page()
 
 # Read user arg to select cloud / desktop
 parser = argparse.ArgumentParser(description='NiChart Application Server')

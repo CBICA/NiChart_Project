@@ -4,28 +4,15 @@ import utils.utils_st as utilst
 import utils.utils_session as utilss
 from PIL import Image
 
+# Page config should be called for each page
+utilss.config_page()
+
 def set_pipeline():
     # Callback function to save the pipeline selection to Session State
     st.session_state.pipeline = st.session_state._pipeline
 
 # Initialize session state
 utilss.init_session_state()
-
-# Set icon
-nicon = Image.open("../resources/nichart1.png")
-
-# Config page
-st.set_page_config(
-    page_title="NiChart",
-    page_icon=nicon,
-    layout="wide",
-    #layout="centered",
-    menu_items={
-        "Get help": "https://neuroimagingchart.com/",
-        "Report a bug": "https://neuroimagingchart.com/",
-        "About": "https://neuroimagingchart.com/",
-    },
-)
 
 st.write("# Welcome to NiChart Project!")
 

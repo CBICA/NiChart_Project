@@ -8,6 +8,10 @@ import utils.utils_nifti as utilni
 import utils.utils_st as utilst
 import utils.utils_menu as utilmenu
 from stqdm import stqdm
+import utils.utils_session as utilss
+
+# Page config should be called for each page
+utilss.config_page()
 
 utilmenu.menu()
 

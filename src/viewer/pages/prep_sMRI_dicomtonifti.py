@@ -8,6 +8,10 @@ import utils.utils_io as utilio
 import utils.utils_nifti as utilni
 import utils.utils_st as utilst
 from stqdm import stqdm
+import utils.utils_session as utilss
+
+# Page config should be called for each page
+utilss.config_page()
 
 result_holder = st.empty()
 

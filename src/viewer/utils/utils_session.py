@@ -5,6 +5,19 @@ import streamlit as st
 import utils.utils_rois as utilroi
 import utils.utils_st as utilst
 
+def config_page():
+    st.set_page_config(
+        page_title="NiChart",
+        page_icon=st.session_state.nicon,
+        layout="wide",
+        #layout="centered",
+        menu_items={
+            "Get help": "https://neuroimagingchart.com/",
+            "Report a bug": "https://neuroimagingchart.com/",
+            "About": "https://neuroimagingchart.com/",
+        },
+    )
+
 def init_session_state() -> None:
     # Initiate Session State Values
     if "instantiated" not in st.session_state:
@@ -170,7 +183,7 @@ def init_session_state() -> None:
         # Constant plot settings
         st.session_state.plot_const = {
             'trend_types' : ['', 'Linear', 'Smooth LOWESS Curve'],
-            'centile_types' : ['', 'CN-All', 'CN-M', 'CN-F'],
+            'centile_types' : ['', 'CN', 'CN_Males', 'CN_Females'],
             'linfit_trace_types' : ['data', 'lin_fit', 'conf_95%'],
             'distplot_trace_types' : ['histogram', 'density', 'rug'],
             'min_per_row': 1,
