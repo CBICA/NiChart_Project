@@ -187,9 +187,9 @@ def percentile_trace(df: pd.DataFrame, xvar: str, yvar: str, fig: Any) -> Any:
     cline = [
         "rgba(255, 255, 255, 0.8)",
         "rgba(255, 225, 225, 0.8)",
-        "rgba(255, 187, 187, 0.8)",
+        #"rgba(255, 187, 187, 0.8)",
         "rgba(255, 0, 0, 0.8)",
-        "rgba(255, 187, 187, 0.8)",
+        #"rgba(255, 187, 187, 0.8)",
         "rgba(255, 225, 225, 0.8)",
         "rgba(255, 255, 255, 0.8)",
     ]
@@ -197,14 +197,14 @@ def percentile_trace(df: pd.DataFrame, xvar: str, yvar: str, fig: Any) -> Any:
     cfan = [
         "rgba(255, 225, 225, 0.3)",
         "rgba(255, 225, 225, 0.3)",
-        "rgba(255, 187, 187, 0.3)",
+        #"rgba(255, 187, 187, 0.3)",
         "rgba(255, 0, 0, 0.3)",
-        "rgba(255, 0, 0, 0.3)",
+        #"rgba(255, 0, 0, 0.3)",
         "rgba(255, 187, 187, 0.3)",
         "rgba(255, 225, 225, 0.3)",
     ]
 
-    df_tmp = df[df.ROI == yvar]
+    df_tmp = df[df.VarName == yvar]
 
     # Create line traces
     for i, cvar in enumerate(df.columns[2:]):
@@ -227,7 +227,7 @@ def percentile_trace(df: pd.DataFrame, xvar: str, yvar: str, fig: Any) -> Any:
                 fillcolor=cfan[i],
             )
 
-        fig.append_trace(ctrace, 1, 1)  # plot in first row
+        fig.add_trace(ctrace)  # plot in first row
 
     return fig
 

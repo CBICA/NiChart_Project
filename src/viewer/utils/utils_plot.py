@@ -21,6 +21,7 @@ def add_plot() -> None:
         st.session_state.plot_var["yvar"],
         st.session_state.plot_var["hvar"],
         st.session_state.plot_var["hvals"],
+        st.session_state.plot_var["corr_icv"],        
         st.session_state.plot_var["trend"],
         st.session_state.plot_var["lowess_s"],
         st.session_state.plot_var["traces"],
@@ -82,6 +83,13 @@ def add_plot_tabs(
         )
         if hvar is not None:
             df_plots.loc[plot_id, "hvar"] = hvar
+
+        if 'ICV' in list_cols:
+            df_plots.loc[plot_id, "corr_icv"] = st.checkbox(
+                'Correct ICV',
+                value = df_plots.loc[plot_id, "corr_icv"],
+                help = 'Correct regional volumes using the intra-cranial volume to account for differences in head size'
+            )
 
         if df_plots.loc[plot_id, "plot_type"] == "Scatter Plot":
             tind = get_index_in_list(list_trends, df_plots.loc[plot_id, "trend"])
@@ -196,17 +204,23 @@ def display_scatter_plot(
         )
         fig = go.Figure(layout=layout)
 
+        # If user selected to use ICV corrected data        
+        yvar = curr_plot["yvar"]
+        if curr_plot['corr_icv']:
+            df_filt[f'{yvar}_corrICV'] = df_filt[yvar] /  df_filt['ICV'] * st.session_state.mean_icv
+            yvar = f'{yvar}_corrICV'
+
         # Add axis labels
         fig.update_layout(
             xaxis_title=curr_plot["xvar"],
-            yaxis_title=curr_plot["yvar"],
+            yaxis_title=yvar,
         )
 
         # Add data scatter
         utiltr.scatter_trace(
             df_filt,
             curr_plot["xvar"],
-            curr_plot["yvar"],
+            yvar,
             curr_plot["hvar"],
             curr_plot["hvals"],
             curr_plot["traces"],
@@ -219,7 +233,7 @@ def display_scatter_plot(
             utiltr.linreg_trace(
                 df_filt,
                 curr_plot["xvar"],
-                curr_plot["yvar"],
+                yvar,
                 curr_plot["hvar"],
                 curr_plot["hvals"],
                 curr_plot["traces"],
@@ -230,7 +244,7 @@ def display_scatter_plot(
             utiltr.lowess_trace(
                 df_filt,
                 curr_plot["xvar"],
-                curr_plot["yvar"],
+                yvar,
                 curr_plot["hvar"],
                 curr_plot["hvals"],
                 curr_plot["lowess_s"],
@@ -244,7 +258,8 @@ def display_scatter_plot(
                 st.session_state.paths["root"],
                 "resources",
                 "centiles",
-                f"centiles_{curr_plot['centtype']}.csv",
+                #f"centiles_{curr_plot['centtype']}.csv",
+                f"istag_centiles_{curr_plot['centtype']}.csv",
             )
             df_cent = pd.read_csv(fcent)
             utiltr.percentile_trace(df_cent, curr_plot["xvar"], curr_plot["yvar"], fig)

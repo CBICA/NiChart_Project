@@ -21,6 +21,7 @@ def config_page():
 def init_session_state() -> None:
     # Initiate Session State Values
     if "instantiated" not in st.session_state:
+
         ###################################
         # App type ('desktop' or 'cloud')
         st.session_state.app_type = "cloud"
@@ -35,6 +36,8 @@ def init_session_state() -> None:
         }
         ###################################
 
+        ###################################
+        # Pipelines
         st.session_state.pipelines = [
             'Home',
             'sMRI Biomarkers (T1)',
@@ -44,7 +47,7 @@ def init_session_state() -> None:
         ]
         st.session_state.pipeline = 'Home'
         st.session_state._pipeline = st.session_state.pipeline
-
+        ###################################
 
         ###################################
         # General
@@ -165,6 +168,10 @@ def init_session_state() -> None:
             'lists',
             'dict_var_categories.json'
         )
+        
+        # Average ICV estimated from a large sample
+        # IMPORTANT: Used in NiChart Engine for normalization!
+        st.session_state.mean_icv = 1430000      
         ###################################
 
         ###################################
@@ -173,7 +180,7 @@ def init_session_state() -> None:
         st.session_state.plots = pd.DataFrame(
             columns=[
                 "pid", "plot_type", "xvar", "yvar",
-                "hvar", "hvals", "trend",
+                "hvar", "hvals", "corr_icv", "trend",
                 "lowess_s", "traces", "centtype"
             ]
         )
@@ -183,7 +190,7 @@ def init_session_state() -> None:
         # Constant plot settings
         st.session_state.plot_const = {
             'trend_types' : ['', 'Linear', 'Smooth LOWESS Curve'],
-            'centile_types' : ['', 'CN', 'CN_Males', 'CN_Females'],
+            'centile_types' : ['', 'CN', 'CN_Males', 'CN_Females', 'CN_ICV_Corrected'],
             'linfit_trace_types' : ['data', 'lin_fit', 'conf_95%'],
             'distplot_trace_types' : ['histogram', 'density', 'rug'],
             'min_per_row': 1,
@@ -209,6 +216,7 @@ def init_session_state() -> None:
             'yvar': '',
             'hvar': '',
             'hvals': [],
+            'corr_icv': False,
             'trend': 'Linear',
             'traces': ['data', 'lin'],
             'lowess_s': 0.5,
