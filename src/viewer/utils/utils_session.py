@@ -230,8 +230,31 @@ def init_session_state() -> None:
         # Color maps for plots
         st.session_state.plot_colors = {
             'data': px.colors.qualitative.Set1,
-            'fitline': ['red', 'green', 'blue', 'purple', 'orange']
+            'centile': [
+                "rgba(0, 0, 120, 0.5)",
+                "rgba(0, 0, 90, 0.7)",
+                "rgba(0, 0, 60, 0.9)",
+                "rgba(0, 0, 90, 0.7)",
+                "rgba(0, 0, 120, 0.5)"
+            ]
         }
+        #cfan = [
+            #"rgba(255, 225, 225, 0.3)",
+            #"rgba(255, 225, 225, 0.3)",
+            ##"rgba(255, 187, 187, 0.3)",
+            #"rgba(255, 0, 0, 0.3)",#"rgba(255, 0, 0, 0.3)",
+            #"rgba(255, 187, 187, 0.3)",
+            #"rgba(255, 225, 225, 0.3)",
+        #]
+        #cline = [
+            #"rgba(255, 255, 255, 0.8)",
+            #"rgba(255, 225, 225, 0.8)",
+            ##"rgba(255, 187, 187, 0.8)",
+            #"rgba(255, 0, 0, 0.8)",
+            ##"rgba(255, 187, 187, 0.8)",
+            #"rgba(255, 225, 225, 0.8)",
+            #"rgba(255, 255, 255, 0.8)",
+        #]
 
 
         ###################################

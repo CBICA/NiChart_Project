@@ -167,11 +167,25 @@ def lowess_trace(
     hide_legend: bool,
     fig: Any,
 ) -> Any:
+    # Set colormap
+    colors = st.session_state.plot_colors['data']
+    
+    # Add a tmp column if group var is not set
+    dft = df.copy()
+    if hvar == "":
+        hvar = "All"
+        dft["All"] = "data"
+        vals_hue_all = ["All"]
+
+    vals_hue_all = sorted(dft[hvar].unique())
+    if hvals == []:
+        hvals = vals_hue_all
 
     dict_fit = utilstat.lowess_model(df, xvar, yvar, hvar, lowess_s)
 
     # Add traces for the fit and confidence intervals
     for hname in hvals:
+        col_ind = vals_hue_all.index(hname)     # Select index of colour for the category
         x_hat = dict_fit[hname]["x_hat"]
         y_hat = dict_fit[hname]["y_hat"]
         trace = go.Scatter(
@@ -179,7 +193,8 @@ def lowess_trace(
             y=y_hat,
             # showlegend=False,
             mode="lines",
-            name=f"lin_{hname}",
+            line = {'color' : colors[col_ind]},            
+            name=f"lowess_{hname}",
             legendgroup=hname,
             showlegend=not hide_legend,
         )
@@ -204,26 +219,10 @@ def dot_trace(
 
 
 def percentile_trace(df: pd.DataFrame, xvar: str, yvar: str, fig: Any) -> Any:
-    cline = [
-        "rgba(255, 255, 255, 0.8)",
-        "rgba(255, 225, 225, 0.8)",
-        #"rgba(255, 187, 187, 0.8)",
-        "rgba(255, 0, 0, 0.8)",
-        #"rgba(255, 187, 187, 0.8)",
-        "rgba(255, 225, 225, 0.8)",
-        "rgba(255, 255, 255, 0.8)",
-    ]
+    # Set colormap
+    colors = st.session_state.plot_colors['centile']
 
-    cfan = [
-        "rgba(255, 225, 225, 0.3)",
-        "rgba(255, 225, 225, 0.3)",
-        #"rgba(255, 187, 187, 0.3)",
-        "rgba(255, 0, 0, 0.3)",
-        #"rgba(255, 0, 0, 0.3)",
-        "rgba(255, 187, 187, 0.3)",
-        "rgba(255, 225, 225, 0.3)",
-    ]
-
+    # Get centile values for the selected roi
     df_tmp = df[df.VarName == yvar]
 
     # Create line traces
@@ -251,7 +250,8 @@ def percentile_trace(df: pd.DataFrame, xvar: str, yvar: str, fig: Any) -> Any:
             y=df_tmp[cvar],
             mode="lines",
             name=cvar,
-            line=dict(color=cline[i]),
+            legendgroup='centiles',
+            line=dict(color=colors[i]),
         )
 
         fig.add_trace(ctrace)  # plot in first row
