@@ -116,7 +116,7 @@ def linreg_trace(
         hvals = vals_hue_all
 
     # Calculate fit
-    dict_fit = utilstat.linreg_model(df, xvar, yvar, hvar)
+    dict_fit = utilstat.linreg_model(dft, xvar, yvar, hvar)
 
     # Add traces for the fit and confidence intervals
     if "lin_fit" in traces:
