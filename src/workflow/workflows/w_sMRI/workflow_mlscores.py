@@ -23,7 +23,8 @@ dict_config = {
     "model_SPARE-Hypertension": "models/vISTAG1/SPARE/combined_DLMUSE_raw_COMBAT_SPARE-Hypertension_Model.pkl.gz",
     "model_SPARE-Obesity": "models/vISTAG1/SPARE/combined_DLMUSE_raw_COMBAT_SPARE-Obesity_Model.pkl.gz",
     "model_SPARE-Smoking": "models/vISTAG1/SPARE/combined_DLMUSE_raw_COMBAT_SPARE-Smoking_Model.pkl.gz",
-    "SPARE_types": ["AD", "Age"],
+    #"SPARE_types": ["AD", "Age"],
+    "SPARE_types": ["AD", "Age", "Diabetes", "Hyperlipidemia", "Hypertension", "Obesity", "Smoking"],
     "seg_types": ["DLMUSE"],
 }
 
