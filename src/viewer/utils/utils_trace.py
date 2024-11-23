@@ -69,7 +69,7 @@ def scatter_trace(
         dft["All"] = "data"
         vals_hue_all = ["All"]
 
-    vals_hue_all = sorted(df[hvar].unique())
+    vals_hue_all = sorted(dft[hvar].unique())
     if hvals == []:
         hvals = vals_hue_all
 
@@ -111,7 +111,7 @@ def linreg_trace(
         dft["All"] = "data"
         vals_hue_all = ["All"]
 
-    vals_hue_all = sorted(df[hvar].unique())
+    vals_hue_all = sorted(dft[hvar].unique())
     if hvals == []:
         hvals = vals_hue_all
 
