@@ -4,6 +4,7 @@ import pandas as pd
 import streamlit as st
 import utils.utils_rois as utilroi
 import utils.utils_st as utilst
+import plotly.express as px
 
 def config_page():
     st.set_page_config(
@@ -223,6 +224,16 @@ def init_session_state() -> None:
             'centtype' : '',
             'h_coeff': 1.0        
         }
+        ###################################
+
+        ###################################
+        # Color maps for plots
+        st.session_state.plot_colors = {
+            'data': px.colors.qualitative.Set1,
+            'fitline': ['red', 'green', 'blue', 'purple', 'orange']
+        }
+
+
         ###################################
 
         ###################################

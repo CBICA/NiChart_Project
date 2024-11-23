@@ -118,7 +118,7 @@ def add_plot_tabs(
     with ptabs[1]:
 
         if df_plots.loc[plot_id, "hvar"] != "":
-            vals_hue = df[hvar].unique().tolist()
+            vals_hue = sorted(df[hvar].unique())
             df_plots.at[plot_id, "hvals"] = st.multiselect(
                 "Select groups", vals_hue, vals_hue, key=f"key_select_huevals_{plot_id}"
             )
