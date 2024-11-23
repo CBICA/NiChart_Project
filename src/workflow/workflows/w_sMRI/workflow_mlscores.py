@@ -119,15 +119,15 @@ def run_workflow(root_dir: Any, dict_config: Any) -> None:
     f_spares = os.path.join(out_dir, f"{dset_name}_SPARE-ALL.csv")
     utilw.merge_dataframes_multi(f_spares, "MRID", list_spare)
 
-    ## Select variables for SurrealGAN
-    #dict_var = "Code"
-    #covars = "MRID,Age,Sex,DLICV"
-    #f_surrealgan_input = os.path.join(out_dir, f"{dset_name}_SurrealGAN_input.csv")
-    #utilw.select_vars(f_comb, dict_csv, dict_var, covars, f_surrealgan_input)
+    # Select variables for SurrealGAN
+    dict_var = "Code"
+    covars = "MRID,Age,Sex,DLICV"
+    f_surrealgan_input = os.path.join(out_dir, f"{dset_name}_SurrealGAN_input.csv")
+    utilw.select_vars(f_comb, dict_csv, dict_var, covars, f_surrealgan_input)
 
-    ## Apply SurrealGAN index prediction
-    #f_surrealgan = os.path.join(out_dir, f"{dset_name}_SurrealGAN.csv")
-    #utilw.surrealgan_scores(f_comb, dict_csv, f_surrealgan)
+    # Apply SurrealGAN index prediction
+    f_surrealgan = os.path.join(out_dir, f"{dset_name}_SurrealGAN.csv")
+    utilw.surrealgan_scores(f_comb, dict_csv, f_surrealgan)
     
     # Merge all
     f_all = os.path.join(dir_output, f"{dset_name}_DLMUSE+MLScores.csv")
@@ -135,7 +135,7 @@ def run_workflow(root_dir: Any, dict_config: Any) -> None:
         #f_all, [input_demog, rois_sel, f_raw, f_corr, f_combat2, f_spares]
     #)
     utilw.combine_demog_hroi_ml(
-        f_all, [input_demog, rois_sel, f_raw, f_combat2, f_spares]
+        f_all, [input_demog, rois_sel, f_raw, f_combat2, f_spares, f_surrealgan]
     )
 
 

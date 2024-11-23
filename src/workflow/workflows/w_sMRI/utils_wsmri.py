@@ -301,31 +301,33 @@ def combine_demog_hroi_ml(out_csv: str, list_in_csv: Any) -> None:
     """
     Combines final output files
     """
-
+    # Read in put csv files (demog, roi list, roi data, roi harmonized, ML files)
     df_demog = pd.read_csv(list_in_csv[0])
-
     df_roi = pd.read_csv(list_in_csv[1])
     df_roi = df_roi[df_roi.Name != "ICV"]
     df_rdata = pd.read_csv(list_in_csv[2])
     df_hdata = pd.read_csv(list_in_csv[3])
-    df_spare = pd.read_csv(list_in_csv[4])
-
-    df_icv = df_rdata[["MRID", "MUSE_702"]]
-    df_icv.columns = ["MRID", "ICV"]
-
-    print([['MRID'] +  df_roi.Code.to_list()])
-    input()
-
+    
+    # Get harmonized roi values
     df_roi = df_roi[df_roi.Code.isin(df_hdata.columns.tolist())]
-
     df_out = df_hdata.rename(columns=dict(zip(df_roi.Code, df_roi.Name)))
     df_out = df_out[["MRID"] + df_roi.Name.to_list()]
 
-    print(f'  d   size {df_out.shape}')
-
+    # Add ICV
+    df_icv = df_rdata[["MRID", "MUSE_702"]]
+    df_icv.columns = ["MRID", "ICV"]
     df_out = df_icv.merge(df_out, on="MRID")
-    df_out = df_out.merge(df_spare, on="MRID")
 
+    # Add ML scores
+    if len(list_in_csv) > 4:
+        df_spare = pd.read_csv(list_in_csv[4])
+        df_out = df_out.merge(df_spare, on="MRID")
+        
+    if len(list_in_csv) > 5:
+        df_sgan = pd.read_csv(list_in_csv[5])
+        df_out = df_out.merge(df_sgan, on="MRID")
+
+    # Add demog
     df_out = df_demog.merge(df_out, on="MRID")
 
     # Write out file
