@@ -23,8 +23,8 @@ dict_config = {
     "model_SPARE-Hypertension": "models/vISTAG1/SPARE/combined_DLMUSE_raw_COMBAT_SPARE-Hypertension_Model.pkl.gz",
     "model_SPARE-Obesity": "models/vISTAG1/SPARE/combined_DLMUSE_raw_COMBAT_SPARE-Obesity_Model.pkl.gz",
     "model_SPARE-Smoking": "models/vISTAG1/SPARE/combined_DLMUSE_raw_COMBAT_SPARE-Smoking_Model.pkl.gz",
-    #"SPARE_types": ["AD", "Age"],
-    "SPARE_types": ["AD", "Age", "Diabetes", "Hyperlipidemia", "Hypertension", "Obesity", "Smoking"],
+    "SPARE_types": ["AD", "Age"],   ## FIXME : short version during tests
+    #"SPARE_types": ["AD", "Age", "Diabetes", "Hyperlipidemia", "Hypertension", "Obesity", "Smoking"],
     "seg_types": ["DLMUSE"],
 }
 
@@ -52,6 +52,9 @@ def run_workflow(root_dir: Any, dict_config: Any) -> None:
 
     print(dict_config)
 
+    #######################################################################################
+    # Prep combat
+
     # Rename MUSE roi indices to roi codes
     out_dir = os.path.join(dir_output, "working_dir")
     f_raw = os.path.join(out_dir, f"{dset_name}_raw.csv")
@@ -59,12 +62,12 @@ def run_workflow(root_dir: Any, dict_config: Any) -> None:
         os.makedirs(out_dir)
     utilw.rename_df_columns(input_rois, list_rois, "Index", "Code", f_raw)
 
-    # Normalize ROIs. Values are scaled either by a constant factor (NormICV) or 100 (PercICV)
-    icv_var = "MUSE_702"
-    exclude_vars = "MRID"
-    suffix = "NONE"
-    f_corr = os.path.join(out_dir, f"{dset_name}_{corr_type}.csv")
-    utilw.corr_icv(f_raw, corr_type, icv_var, exclude_vars, suffix, f_corr)
+    ## Normalize ROIs. Values are scaled either by a constant factor (NormICV) or 100 (PercICV)
+    #icv_var = "MUSE_702"
+    #exclude_vars = "MRID"
+    #suffix = "NONE"
+    #f_corr = os.path.join(out_dir, f"{dset_name}_{corr_type}.csv")
+    #utilw.corr_icv(f_raw, corr_type, icv_var, exclude_vars, suffix, f_corr)
 
     # Merge covars to ROIs
     key_var = "MRID"
@@ -102,7 +105,10 @@ def run_workflow(root_dir: Any, dict_config: Any) -> None:
     f_combat3 = os.path.join(out_dir, f"{dset_name}_COMBAT_withcovar.csv")
     utilw.merge_dataframes(input_demog, f_combat2, key_var, f_combat3)
 
-    # Select variables for harmonization
+    #######################################################################################
+    # Prep spare scores
+
+    # Select variables for spare
     dict_var = "Code"
     covars = "MRID,Age,Sex,DLICV"
     f_combat4 = os.path.join(out_dir, f"{dset_name}_COMBAT.csv")
@@ -120,6 +126,9 @@ def run_workflow(root_dir: Any, dict_config: Any) -> None:
     f_spares = os.path.join(out_dir, f"{dset_name}_SPARE-ALL.csv")
     utilw.merge_dataframes_multi(f_spares, "MRID", list_spare)
 
+    #######################################################################################
+    # Prep surrealgan scores
+
     # Select variables for SurrealGAN
     dict_var = "Code"
     covars = "MRID,Age,Sex,DLICV"
@@ -130,13 +139,39 @@ def run_workflow(root_dir: Any, dict_config: Any) -> None:
     f_surrealgan = os.path.join(out_dir, f"{dset_name}_SurrealGAN.csv")
     utilw.surrealgan_scores(f_comb, dict_csv, f_surrealgan)
     
+    #######################################################################################
+    # Prep zscored centile values
+    
+    # Normalize ROIs
+    icv_var = "MUSE_702"
+    roi_pref = "MUSE"
+    suffix = "NONE"
+    f_corr = os.path.join(out_dir, f"{dset_name}_COMBAT_normICV.csv")
+    utilw.corr_icv(f_combat3, f_raw, 'normICV', icv_var, roi_pref, suffix, f_corr)
+    
+    # Merge covars to normalized ROIs
+    key_var = "MRID"
+    f_combat5 = os.path.join(out_dir, f"{dset_name}_COMBAT_normICV_withcovar.csv")
+    utilw.merge_dataframes(input_demog, f_corr, key_var, f_combat5)
+
+    # find subject centile values
+    cent_csv = '/home/guraylab/GitHub/CBICA/NiChart_Project/resources/centiles/istag_centiles_CN_ICV_Corrected.csv'
+    f_centiles = os.path.join(out_dir, f"{dset_name}_COMBAT_normICV_centiles.csv")
+    utilw.calc_subject_centiles(f_combat5, cent_csv, list_rois, f_centiles)
+
+    #######################################################################################
+    # Combine data
+
     # Merge all
     f_all = os.path.join(dir_output, f"{dset_name}_DLMUSE+MLScores.csv")
     #utilw.combine_all(
         #f_all, [input_demog, rois_sel, f_raw, f_corr, f_combat2, f_spares]
     #)
-    utilw.combine_demog_hroi_ml(
-        f_all, [input_demog, rois_sel, f_raw, f_combat2, f_spares, f_surrealgan]
+    #utilw.combine_demog_hroi_ml(
+        #f_all, [input_demog, rois_sel, f_raw, f_combat2, f_spares, f_surrealgan]
+    #)
+    utilw.combine_demog_hroi_ml_cent(
+        f_all, [input_demog, rois_sel, f_raw, f_combat2, f_centiles, f_spares, f_surrealgan]
     )
 
 

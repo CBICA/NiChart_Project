@@ -3,7 +3,7 @@ import os
 from typing import Any
 
 import pandas as pd
-
+import numpy as np
 
 def surrealgan_scores(
     in_csv: str, in_dict: str, out_csv: str
@@ -31,7 +31,6 @@ def surrealgan_scores(
     print(f'About to run {cmd}')
     os.system(cmd)
    
-
 def rename_df_columns(
     in_csv: str, in_dict: str, var_from: str, var_to: str, out_csv: str
 ) -> None:
@@ -59,9 +58,10 @@ def rename_df_columns(
 
 def corr_icv(
     in_csv: str,
+    in_icv: str,
     corr_type: str,
     icv_var: str,
-    exclude_vars: str,
+    roi_pref: str,
     suffix: str,
     out_csv: str,
 ) -> None:
@@ -71,16 +71,14 @@ def corr_icv(
 
     # Read input file
     df = pd.read_csv(in_csv)
+    df_icv = pd.read_csv(in_icv)
 
-    # Get var groups
-    list_exclude = exclude_vars.split(",") + [icv_var]
+    # Get roi vars
+    list_target = df.columns[df.columns.str.contains(roi_pref)]
 
-    print(df.columns)
-    print(list_exclude)
+    # Merge icv
+    df = df_icv[['MRID', icv_var]].merge(df, on='MRID')
 
-    list_target = [x for x in df.columns if x not in list_exclude]
-
-    df_p1 = df[list_exclude]
     df_p2 = df[list_target]
     val_icv = df[icv_var]
 
@@ -99,7 +97,7 @@ def corr_icv(
     df_p2 = df_p2.div(val_icv, axis=0) * corr_val
 
     # Combine vars
-    df_out = pd.concat([df_p1, df_p2], axis=1)
+    df_out = pd.concat([df[['MRID']], df_p2], axis=1)
 
     # Write out file
     df_out.to_csv(out_csv, index=False)
@@ -333,6 +331,62 @@ def combine_demog_hroi_ml(out_csv: str, list_in_csv: Any) -> None:
     # Write out file
     df_out.to_csv(out_csv, index=False)
 
+def combine_demog_hroi_ml_cent(out_csv: str, list_in_csv: Any) -> None:
+    """
+    Combines final output files
+    """
+    # Read in put csv files (demog, roi list, roi data, roi harmonized, ML files)
+    df_demog = pd.read_csv(list_in_csv[0])
+    df_roi = pd.read_csv(list_in_csv[1])
+    df_roi = df_roi[df_roi.Name != "ICV"]
+    df_rdata = pd.read_csv(list_in_csv[2])
+    df_hdata = pd.read_csv(list_in_csv[3])
+    df_cdata = pd.read_csv(list_in_csv[4])
+    
+    # Get harmonized roi values
+    df_roi = df_roi[df_roi.Code.isin(df_hdata.columns.tolist())]
+    df_out = df_hdata.rename(columns=dict(zip(df_roi.Code, df_roi.Name)))
+    df_out = df_out[["MRID"] + df_roi.Name.to_list()]
+
+    # Add ICV
+    df_icv = df_rdata[["MRID", "MUSE_702"]]
+    df_icv.columns = ["MRID", "ICV"]
+    df_out = df_icv.merge(df_out, on="MRID")
+
+    # Get centile roi values
+    df_roi = df_roi[df_roi.Code.isin(df_cdata.columns.tolist())]  
+    df_cdata = df_cdata.rename(columns=dict(zip(df_roi.Code, df_roi.Name)))
+    df_cdata = df_cdata[["MRID"] + df_roi.Name.to_list()]
+    cols_new = df_cdata.columns[1:]
+    cols_new = [col + '_centile' for col in cols_new]
+    df_cdata.columns = ['MRID'] + cols_new
+    
+    print('wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww')
+    print(df_cdata.columns)
+    df_out = df_out.merge(df_cdata, on='MRID')
+
+    # Add ML scores
+    if len(list_in_csv) > 5:
+        df_spare = pd.read_csv(list_in_csv[5])
+        df_out = df_out.merge(df_spare, on="MRID")
+        
+    if len(list_in_csv) > 6:
+        df_sgan = pd.read_csv(list_in_csv[6])
+        d_sgan = {
+            'R1':'SurrealGAN_R1',
+            'R2':'SurrealGAN_R2',
+            'R3':'SurrealGAN_R3',
+            'R4':'SurrealGAN_R4',
+            'R5':'SurrealGAN_R5'
+        }
+        df_sgan = df_sgan.rename(columns = d_sgan)
+        df_out = df_out.merge(df_sgan, on="MRID")
+
+    # Add demog
+    df_out = df_demog.merge(df_out, on="MRID")
+
+    # Write out file
+    df_out.to_csv(out_csv, index=False)
 
 def combine_all(out_csv: str, list_in_csv: Any) -> None:
     """
@@ -377,47 +431,57 @@ def combine_all(out_csv: str, list_in_csv: Any) -> None:
     df_out.to_csv(out_csv, index=False)
 
 
-def calc_subject_centiles(in_csv: str, cent_csv: str, out_csv: str):
+def calc_subject_centiles(in_csv: str, cent_csv: str, list_rois: str, out_csv: str):
     """
     Calculate subject specific centile values
     """
     df_in = pd.read_csv(in_csv)
     df_cent = pd.read_csv(cent_csv)
+    df_dict = pd.read_csv(list_rois)
+    
+    # Rename centiles roi names
+    rdict = dict(zip(df_dict['Name'], df_dict['Code']))
+    df_cent['VarName'] = df_cent['VarName'].replace(rdict)
+    
+    # Get age bin
+    df_in['Age'] = df_in.Age.round(0)
+    df_in.loc[df_in['Age']>df_cent.Age.max(), 'Age'] = df_cent.Age.max()
+    df_in.loc[df_in['Age']<df_cent.Age.min(), 'Age'] = df_cent.Age.min()
+
+    # Find ROIs
+    sel_vars = df_in.columns[df_in.columns.isin(df_cent.VarName.unique())].tolist()
 
     # For each subject find the centile value of each roi
-    for tmp_ind in df_in.index:
-        df_subj = df_in.loc[tmp_ind]
+    cent_subj_all = np.zeros([df_in.shape[0], len(sel_vars)])
+    for i, tmp_ind in enumerate(df_in.index):
+        df_subj = df_in.loc[[tmp_ind]]
+        df_cent_sel = df_cent[df_cent.Age == df_subj.Age.values[0]]
 
 
+        df_cent_sel = df_cent_sel.drop_duplicates(subset=['VarName'])
+        df_cent_sel = df_cent_sel[df_cent_sel.VarName.isin(sel_vars)].drop(
+            ["VarName", "Age"], axis=1
+        )
 
-    # Filter centiles to subject's age
-    tmp_ind = (df_cent.Age - df_subj.Age[0]).abs().idxmin()
-    sel_age = df_cent.loc[tmp_ind, "Age"]
-    df_cent_sel = df_cent[df_cent.Age == sel_age]
+        cent = df_cent_sel.columns.str.replace("centile_", "").astype(int).values
+        vals_cent = df_cent_sel.values
+        vals_subj = df_subj[sel_vars].values.flatten()
 
-    # Find ROIs in subj data that are included in the centiles file
-    sel_vars = df_subj.columns[df_subj.columns.isin(df_cent_sel.ROI.unique())].tolist()
-    df_cent_sel = df_cent_sel[df_cent_sel.ROI.isin(sel_vars)].drop(
-        ["ROI", "Age"], axis=1
-    )
+        for j, sval in enumerate(vals_subj):
+            # Find nearest x values
+            sval = np.min([vals_cent[j,-1], np.max([vals_cent[j,0], sval])])
+            ind1 = np.where(sval <= vals_cent[j,:])[0][0] -1
+            if ind1 == -1:
+                ind1 = 0
+            ind2 = ind1 + 1
 
-    cent = df_cent_sel.columns.str.replace("centile_", "").astype(int).values
-    vals_cent = df_cent_sel.values
-    vals_subj = df_subj.loc[0, sel_vars]
+            # Calculate slope
+            slope = (cent[ind2] - cent[ind1]) / (vals_cent[j,ind2] - vals_cent[j,ind1])
 
-    cent_subj = np.zeros(vals_subj.shape[0])
-    for i, sval in enumerate(vals_subj):
-        # Find nearest x values
-        ind1 = np.where(vals_subj[i] < vals_cent[i, :])[0][0] - 1
-        ind2 = ind1 + 1
-
-        print(ind1)
-
-        # Calculate slope
-        slope = (cent[ind2] - cent[ind1]) / (vals_cent[i, ind2] - vals_cent[i, ind1])
-
-        # Estimate subj centile
-        cent_subj[i] = cent[ind1] + slope * (vals_subj[i] - vals_cent[i, ind1])
-
-    df_out = pd.DataFrame(dict(ROI=sel_vars, Centiles=cent_subj))
-    return df_out
+            # Estimate subj centile
+            cent_subj_all[i,j] = cent[ind1] + slope * (sval - vals_cent[j,ind1])
+            
+    # Create and save output data
+    df_out = pd.DataFrame(columns=sel_vars, data=cent_subj_all)
+    df_out = pd.concat([df_in[['MRID']], df_out], axis=1)
+    df_out.to_csv(out_csv, index=False)
