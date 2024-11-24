@@ -433,12 +433,19 @@ def calc_subject_centiles(in_csv: str, cent_csv: str, list_rois: str, out_csv: s
     Calculate subject specific centile values
     """
     df_in = pd.read_csv(in_csv)
+    
+    df_in = df_in.head(10)
+    
     df_cent = pd.read_csv(cent_csv)
     df_dict = pd.read_csv(list_rois)
-    
+
+    #df_dict = df_dict.head(12)
+
     # Rename centiles roi names
     rdict = dict(zip(df_dict['Name'], df_dict['Code']))
     df_cent['VarName'] = df_cent['VarName'].replace(rdict)
+    
+    cent = df_cent.columns[2:].str.replace("centile_", "").astype(int).values
     
     # Get age bin
     df_in['Age'] = df_in.Age.round(0)
@@ -447,36 +454,34 @@ def calc_subject_centiles(in_csv: str, cent_csv: str, list_rois: str, out_csv: s
 
     # Find ROIs
     sel_vars = df_in.columns[df_in.columns.isin(df_cent.VarName.unique())].tolist()
-
+    
     # For each subject find the centile value of each roi
     cent_subj_all = np.zeros([df_in.shape[0], len(sel_vars)])
     for i, tmp_ind in enumerate(df_in.index):
         df_subj = df_in.loc[[tmp_ind]]
         df_cent_sel = df_cent[df_cent.Age == df_subj.Age.values[0]]
 
+        for j,tmp_var in enumerate(sel_vars):
+            # Get centile values
+            vals_cent = df_cent_sel[df_cent_sel.VarName==tmp_var].values[0][2:]
 
-        df_cent_sel = df_cent_sel.drop_duplicates(subset=['VarName'])
-        df_cent_sel = df_cent_sel[df_cent_sel.VarName.isin(sel_vars)].drop(
-            ["VarName", "Age"], axis=1
-        )
+            # Get subject value
+            sval = df_subj[tmp_var].values[0]
 
-        cent = df_cent_sel.columns.str.replace("centile_", "").astype(int).values
-        vals_cent = df_cent_sel.values
-        vals_subj = df_subj[sel_vars].values.flatten()
+            print(sval)
 
-        for j, sval in enumerate(vals_subj):
             # Find nearest x values
-            sval = np.min([vals_cent[j,-1], np.max([vals_cent[j,0], sval])])
-            ind1 = np.where(sval <= vals_cent[j,:])[0][0] -1
+            sval = np.min([vals_cent[-1], np.max([vals_cent[0], sval])])
+            ind1 = np.where(sval <= vals_cent)[0][0] -1
             if ind1 == -1:
                 ind1 = 0
             ind2 = ind1 + 1
 
             # Calculate slope
-            slope = (cent[ind2] - cent[ind1]) / (vals_cent[j,ind2] - vals_cent[j,ind1])
+            slope = (cent[ind2] - cent[ind1]) / (vals_cent[ind2] - vals_cent[ind1])
 
             # Estimate subj centile
-            cent_subj_all[i,j] = cent[ind1] + slope * (sval - vals_cent[j,ind1])
+            cent_subj_all[i,j] = cent[ind1] + slope * (sval - vals_cent[ind1])
             
     # Create and save output data
     df_out = pd.DataFrame(columns=sel_vars, data=cent_subj_all)
