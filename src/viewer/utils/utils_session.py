@@ -181,7 +181,7 @@ def init_session_state() -> None:
         st.session_state.plots = pd.DataFrame(
             columns=[
                 "pid", "plot_type", "xvar", "yvar",
-                "hvar", "hvals", "corr_icv", "trend",
+                "hvar", "hvals", "corr_icv", "plot_centiles", "trend",
                 "lowess_s", "traces", "centtype"
             ]
         )
@@ -218,6 +218,7 @@ def init_session_state() -> None:
             'hvar': '',
             'hvals': [],
             'corr_icv': False,
+            'plot_centiles': False,
             'trend': 'Linear',
             'traces': ['data', 'lin'],
             'lowess_s': 0.5,

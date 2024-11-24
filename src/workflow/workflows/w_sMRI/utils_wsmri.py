@@ -360,9 +360,6 @@ def combine_demog_hroi_ml_cent(out_csv: str, list_in_csv: Any) -> None:
     cols_new = df_cdata.columns[1:]
     cols_new = [col + '_centile' for col in cols_new]
     df_cdata.columns = ['MRID'] + cols_new
-    
-    print('wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww')
-    print(df_cdata.columns)
     df_out = df_out.merge(df_cdata, on='MRID')
 
     # Add ML scores

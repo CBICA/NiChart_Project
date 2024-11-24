@@ -22,6 +22,7 @@ def add_plot() -> None:
         st.session_state.plot_var["hvar"],
         st.session_state.plot_var["hvals"],
         st.session_state.plot_var["corr_icv"],        
+        st.session_state.plot_var["plot_centiles"],        
         st.session_state.plot_var["trend"],
         st.session_state.plot_var["lowess_s"],
         st.session_state.plot_var["traces"],
@@ -90,6 +91,12 @@ def add_plot_tabs(
                 value = df_plots.loc[plot_id, "corr_icv"],
                 help = 'Correct regional volumes using the intra-cranial volume to account for differences in head size'
             )
+
+        df_plots.loc[plot_id, "plot_centiles"] = st.checkbox(
+            'Plot Centiles',
+            value = df_plots.loc[plot_id, "plot_centiles"],
+            help = 'Show centile values for the ROI'
+        )
 
         if df_plots.loc[plot_id, "plot_type"] == "Scatter Plot":
             tind = get_index_in_list(list_trends, df_plots.loc[plot_id, "trend"])
@@ -209,6 +216,10 @@ def display_scatter_plot(
         if curr_plot['corr_icv']:
             df_filt[f'{yvar}_corrICV'] = df_filt[yvar] /  df_filt['ICV'] * st.session_state.mean_icv
             yvar = f'{yvar}_corrICV'
+
+        # If user selected to plot centiles
+        if curr_plot['plot_centiles']:
+            yvar = f'{curr_plot["yvar"]}_centile'
 
         # Add axis labels
         fig.update_layout(
