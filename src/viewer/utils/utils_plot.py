@@ -277,11 +277,16 @@ def display_scatter_plot(
 
         # Highlight selected data point
         if sel_mrid != "":
+            yvar = curr_plot['yvar']
+            if curr_plot["plot_centiles"]:
+                yvar = f'{curr_plot['yvar']}_centile'
+            if curr_plot["corr_icv"]:
+                yvar = f'{curr_plot['yvar']}_corrICV'
             utiltr.dot_trace(
                 df,
                 sel_mrid,
                 curr_plot["xvar"],
-                curr_plot["yvar"],
+                yvar,
                 st.session_state.plot_var["hide_legend"],
                 fig,
             )

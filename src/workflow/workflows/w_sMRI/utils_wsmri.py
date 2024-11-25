@@ -433,13 +433,8 @@ def calc_subject_centiles(in_csv: str, cent_csv: str, list_rois: str, out_csv: s
     Calculate subject specific centile values
     """
     df_in = pd.read_csv(in_csv)
-    
-    df_in = df_in.head(10)
-    
     df_cent = pd.read_csv(cent_csv)
     df_dict = pd.read_csv(list_rois)
-
-    #df_dict = df_dict.head(12)
 
     # Rename centiles roi names
     rdict = dict(zip(df_dict['Name'], df_dict['Code']))
@@ -467,8 +462,6 @@ def calc_subject_centiles(in_csv: str, cent_csv: str, list_rois: str, out_csv: s
 
             # Get subject value
             sval = df_subj[tmp_var].values[0]
-
-            print(sval)
 
             # Find nearest x values
             sval = np.min([vals_cent[-1], np.max([vals_cent[0], sval])])

@@ -28,8 +28,96 @@ dict_config = {
     "seg_types": ["DLMUSE"],
 }
 
-
 def run_workflow(root_dir: Any, dict_config: Any) -> None:
+
+    def step_combat():
+        # Rename MUSE roi indices to roi codes
+        utilw.rename_df_columns(input_rois, list_rois, "Index", "Code", f_raw)
+
+        # Merge covars to ROIs
+        key_var = "MRID"
+        utilw.merge_dataframes(input_demog, f_raw, key_var, f_comb)
+
+        # Select variables for harmonization
+        dict_var = "Code"
+        covars = "MRID,Age,Sex,SITE,MUSE_702"
+        f_sel = os.path.join(out_dir, f"{dset_name}_sel.csv")
+        utilw.select_vars(f_comb, dict_csv, dict_var, covars, f_sel)
+
+        # Check that sample has age range consistent with the model
+        var_name = "Age"
+        min_val = 50
+        max_val = 95
+        f_filt = os.path.join(out_dir, f"{dset_name}_filt.csv")
+        utilw.filter_num_var(f_sel, var_name, min_val, max_val, f_filt)
+
+        # Apply combat
+        mdl = os.path.join("src", "workflow", model_combat)
+        f_combat1 = os.path.join(out_dir, f"{dset_name}_COMBAT_single.csv")
+        utilw.apply_combat(f_filt, mdl, "MRID", "_HARM", f_combat1)
+
+        # Calculate derived ROIs from harmonized data
+        in_dict = os.path.join("src", "workflow", derived_rois)
+        key_var = "MRID"
+        # roi_prefix = "MUSE_"
+        utilw.combine_rois(f_combat1, in_dict, f_combat_wderived)
+
+        # Merge covars to ROIs
+        key_var = "MRID"
+        utilw.merge_dataframes(input_demog, f_combat_wderived, key_var, f_combat_wcovar)
+
+    def step_spare():
+        # Select variables for spare
+        dict_var = "Code"
+        covars = "MRID,Age,Sex,DLICV"
+        utilw.select_vars(f_combat_wcovar, dict_csv, dict_var, covars, f_spare_input)
+
+        # spare apply
+        list_spare = []
+        for SPARETYPE in spare_types:
+            mdl = os.path.join(bdir, dict_config[f"model_SPARE-{SPARETYPE}"])
+            f_spare = os.path.join(out_dir, f"{dset_name}_SPARE_{SPARETYPE}.csv")
+            utilw.apply_spare(f_spare_input, mdl, SPARETYPE, f_spare)
+            list_spare.append(f_spare)
+
+        # merge spare
+        utilw.merge_dataframes_multi(f_spares, "MRID", list_spare)
+
+    def step_surrealgan():
+        # Select variables for SurrealGAN
+        dict_var = "Code"
+        covars = "MRID,Age,Sex,DLICV"
+        utilw.select_vars(f_comb, dict_csv, dict_var, covars, f_surrealgan_input)
+
+        # Apply SurrealGAN index prediction
+        utilw.surrealgan_scores(f_comb, dict_csv, f_surrealgan)
+        
+    def step_centiles():
+        # Normalize ROIs
+        icv_var = "MUSE_702"
+        roi_pref = "MUSE"
+        suffix = "NONE"
+        utilw.corr_icv(f_combat_wcovar, f_raw, 'normICV', icv_var, roi_pref, suffix, f_combat_normicv)
+        
+        # Merge covars to normalized ROIs
+        key_var = "MRID"
+        utilw.merge_dataframes(input_demog, f_combat_normicv, key_var, f_combat_normicv_wcover)
+
+        # find subject centile values
+        cent_csv = '/home/guraylab/GitHub/CBICA/NiChart_Project/resources/centiles/istag_centiles_CN_ICV_Corrected.csv'
+        utilw.calc_subject_centiles(f_combat_normicv_wcover, cent_csv, list_rois, f_centiles)
+
+    def step_combine():
+        # Merge all
+        #utilw.combine_all(
+            #f_results, [input_demog, rois_sel, f_raw, f_combat_normicv, f_combat_wderived, f_spares]
+        #)
+        #utilw.combine_demog_hroi_ml(
+            #f_results, [input_demog, rois_sel, f_raw, f_combat_wderived, f_spares, f_surrealgan]
+        #)
+        utilw.combine_demog_hroi_ml_cent(
+            f_results, [input_demog, rois_sel, f_raw, f_combat_wderived, f_centiles, f_spares, f_surrealgan]
+        )
 
     bdir = os.path.join(root_dir, "src", "workflow")
 
@@ -46,134 +134,35 @@ def run_workflow(root_dir: Any, dict_config: Any) -> None:
     model_combat = os.path.join(bdir, dict_config["model_combat"])
     # seg_types = dict_config["seg_types"]
     corr_type = dict_config["corr_type"]
+    dict_csv = os.path.join("src", "workflow", rois_single)
 
     # Set output file name
     # OUT_FILE = f"{dir_output}/{dset_name}_DLMUSE+MLScores.csv"
 
     print(dict_config)
 
-    #######################################################################################
-    # Prep combat
-
-    # Rename MUSE roi indices to roi codes
     out_dir = os.path.join(dir_output, "working_dir")
-    f_raw = os.path.join(out_dir, f"{dset_name}_raw.csv")
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
-    utilw.rename_df_columns(input_rois, list_rois, "Index", "Code", f_raw)
-
-    ## Normalize ROIs. Values are scaled either by a constant factor (NormICV) or 100 (PercICV)
-    #icv_var = "MUSE_702"
-    #exclude_vars = "MRID"
-    #suffix = "NONE"
-    #f_corr = os.path.join(out_dir, f"{dset_name}_{corr_type}.csv")
-    #utilw.corr_icv(f_raw, corr_type, icv_var, exclude_vars, suffix, f_corr)
-
-    # Merge covars to ROIs
-    key_var = "MRID"
+    
+    f_raw = os.path.join(out_dir, f"{dset_name}_raw.csv")
     f_comb = os.path.join(out_dir, f"{dset_name}_comb.csv")
-    utilw.merge_dataframes(input_demog, f_raw, key_var, f_comb)
-
-    # Select variables for harmonization
-    dict_csv = os.path.join("src", "workflow", rois_single)
-    dict_var = "Code"
-    covars = "MRID,Age,Sex,SITE,MUSE_702"
-    f_sel = os.path.join(out_dir, f"{dset_name}_sel.csv")
-    utilw.select_vars(f_comb, dict_csv, dict_var, covars, f_sel)
-
-    # Check that sample has age range consistent with the model
-    var_name = "Age"
-    min_val = 50
-    max_val = 95
-    f_filt = os.path.join(out_dir, f"{dset_name}_filt.csv")
-    utilw.filter_num_var(f_sel, var_name, min_val, max_val, f_filt)
-
-    # Apply combat
-    mdl = os.path.join("src", "workflow", model_combat)
-    f_combat1 = os.path.join(out_dir, f"{dset_name}_COMBAT_single.csv")
-    utilw.apply_combat(f_filt, mdl, "MRID", "_HARM", f_combat1)
-
-    # Calculate derived ROIs from harmonized data
-    in_dict = os.path.join("src", "workflow", derived_rois)
-    key_var = "MRID"
-    # roi_prefix = "MUSE_"
-    f_combat2 = os.path.join(out_dir, f"{dset_name}_COMBAT_all.csv")
-    utilw.combine_rois(f_combat1, in_dict, f_combat2)
-
-    # Merge covars to ROIs
-    key_var = "MRID"
-    f_combat3 = os.path.join(out_dir, f"{dset_name}_COMBAT_withcovar.csv")
-    utilw.merge_dataframes(input_demog, f_combat2, key_var, f_combat3)
-
-    #######################################################################################
-    # Prep spare scores
-
-    # Select variables for spare
-    dict_var = "Code"
-    covars = "MRID,Age,Sex,DLICV"
-    f_combat4 = os.path.join(out_dir, f"{dset_name}_COMBAT.csv")
-    utilw.select_vars(f_combat3, dict_csv, dict_var, covars, f_combat4)
-
-    # spare apply
-    list_spare = []
-    for SPARETYPE in spare_types:
-        mdl = os.path.join(bdir, dict_config[f"model_SPARE-{SPARETYPE}"])
-        f_spare = os.path.join(out_dir, f"{dset_name}_SPARE_{SPARETYPE}.csv")
-        utilw.apply_spare(f_combat4, mdl, SPARETYPE, f_spare)
-        list_spare.append(f_spare)
-
-    # merge spare
+    f_combat_wderived = os.path.join(out_dir, f"{dset_name}_COMBAT_all.csv")
+    f_combat_wcovar = os.path.join(out_dir, f"{dset_name}_COMBAT_withcovar.csv")
+    f_spare_input = os.path.join(out_dir, f"{dset_name}_spare_input.csv")
     f_spares = os.path.join(out_dir, f"{dset_name}_SPARE-ALL.csv")
-    utilw.merge_dataframes_multi(f_spares, "MRID", list_spare)
-
-    #######################################################################################
-    # Prep surrealgan scores
-
-    # Select variables for SurrealGAN
-    dict_var = "Code"
-    covars = "MRID,Age,Sex,DLICV"
-    f_surrealgan_input = os.path.join(out_dir, f"{dset_name}_SurrealGAN_input.csv")
-    utilw.select_vars(f_comb, dict_csv, dict_var, covars, f_surrealgan_input)
-
-    # Apply SurrealGAN index prediction
+    f_surrealgan_input = os.path.join(out_dir, f"{dset_name}_surrealgan_input.csv")
     f_surrealgan = os.path.join(out_dir, f"{dset_name}_SurrealGAN.csv")
-    utilw.surrealgan_scores(f_comb, dict_csv, f_surrealgan)
-    
-    #######################################################################################
-    # Prep zscored centile values
-    
-    # Normalize ROIs
-    icv_var = "MUSE_702"
-    roi_pref = "MUSE"
-    suffix = "NONE"
-    f_corr = os.path.join(out_dir, f"{dset_name}_COMBAT_normICV.csv")
-    utilw.corr_icv(f_combat3, f_raw, 'normICV', icv_var, roi_pref, suffix, f_corr)
-    
-    # Merge covars to normalized ROIs
-    key_var = "MRID"
-    f_combat5 = os.path.join(out_dir, f"{dset_name}_COMBAT_normICV_withcovar.csv")
-    utilw.merge_dataframes(input_demog, f_corr, key_var, f_combat5)
-
-    # find subject centile values
-    cent_csv = '/home/guraylab/GitHub/CBICA/NiChart_Project/resources/centiles/istag_centiles_CN_ICV_Corrected.csv'
+    f_combat_normicv = os.path.join(out_dir, f"{dset_name}_COMBAT_normICV.csv")
+    f_combat_normicv_wcover = os.path.join(out_dir, f"{dset_name}_COMBAT_normICV_withcovar.csv")
     f_centiles = os.path.join(out_dir, f"{dset_name}_COMBAT_normICV_centiles.csv")
-    utilw.calc_subject_centiles(f_combat5, cent_csv, list_rois, f_centiles)
+    f_results = os.path.join(dir_output, f"{dset_name}_DLMUSE+MLScores.csv")
 
-    #######################################################################################
-    # Combine data
-
-    # Merge all
-    f_all = os.path.join(dir_output, f"{dset_name}_DLMUSE+MLScores.csv")
-    #utilw.combine_all(
-        #f_all, [input_demog, rois_sel, f_raw, f_corr, f_combat2, f_spares]
-    #)
-    #utilw.combine_demog_hroi_ml(
-        #f_all, [input_demog, rois_sel, f_raw, f_combat2, f_spares, f_surrealgan]
-    #)
-    utilw.combine_demog_hroi_ml_cent(
-        f_all, [input_demog, rois_sel, f_raw, f_combat2, f_centiles, f_spares, f_surrealgan]
-    )
-
+    step_combat()
+    step_spare()
+    step_surrealgan()
+    step_centiles()
+    step_combine()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
