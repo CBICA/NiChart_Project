@@ -91,5 +91,15 @@ with st.sidebar.expander("Acknowledgments"):
         """
     )
 
+with st.container(border=True):
+
+    st.markdown("**NiChart Surveys:**")
+    st.markdown("😊 Your opinion matters! Kindly take a moment to complete these two brief surveys!")
+
+    st.markdown('<a href=" https://forms.office.com/r/mM1kx1XsgS" target="_blank" style="color: blue; font-size: 16px; font-weight: bold;">NiChart User Experience</a>', unsafe_allow_html=True)
+
+    st.markdown('<a href="https://forms.office.com/r/acwgn2WCc4" target="_blank" style="color: blue; font-size: 16px; font-weight: bold;">Shaping the Future of NiChart</a>', unsafe_allow_html=True)
+
+
 # FIXME: For DEBUG
 utilst.add_debug_panel()
