@@ -89,13 +89,15 @@ def add_plot_tabs(
             df_plots.loc[plot_id, "corr_icv"] = st.checkbox(
                 'Correct ICV',
                 value = df_plots.loc[plot_id, "corr_icv"],
-                help = 'Correct regional volumes using the intra-cranial volume to account for differences in head size'
+                help = 'Correct regional volumes using the intra-cranial volume to account for differences in head size',
+                key=f'key_check_icv_{plot_id}'
             )
 
         df_plots.loc[plot_id, "plot_centiles"] = st.checkbox(
             'Plot Centiles',
             value = df_plots.loc[plot_id, "plot_centiles"],
-            help = 'Show centile values for the ROI'
+            help = 'Show centile values for the ROI',
+            key=f'key_check_centiles_{plot_id}'            
         )
 
         if df_plots.loc[plot_id, "plot_type"] == "Scatter Plot":
