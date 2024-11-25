@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 from typing import Any
-import streamlit as st
+
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
+import streamlit as st
 
 
-@st.cache_data() # type:ignore
+@st.cache_data()  # type:ignore
 def linreg_model(df: pd.DataFrame, xvar: str, yvar: str, hvar: str) -> Any:
     if hvar == "":
         dft = df[[xvar, yvar]].sort_values(xvar)
@@ -96,7 +97,7 @@ def linreg_model(df: pd.DataFrame, xvar: str, yvar: str, hvar: str) -> Any:
 #     return dict_out
 
 
-@st.cache_data() # type:ignore
+@st.cache_data()  # type:ignore
 def lowess_model(
     df: pd.DataFrame, xvar: str, yvar: str, hvar: str, lowess_s: float
 ) -> Any:

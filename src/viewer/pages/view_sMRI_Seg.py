@@ -1,8 +1,8 @@
 import os
 
-import numpy as np
 import pandas as pd
 import streamlit as st
+import utils.utils_io as utilio
 import utils.utils_muse as utilmuse
 import utils.utils_nifti as utilni
 import utils.utils_st as utilst
@@ -24,10 +24,10 @@ elif os.path.exists(st.session_state.paths["csv_dlmuse"]):
     st.session_state.paths["csv_plot"] = st.session_state.paths["csv_dlmuse"]
 
 # Panel for selecting input csv
-flag_disabled = not st.session_state.flags['dset']
+flag_disabled = not st.session_state.flags["dset"]
 
 if st.session_state.app_type == "cloud":
-    with st.expander(":material/upload: Upload data", expanded=False):  # type:ignore
+    with st.expander(":material/upload: Upload data", expanded=False):
         utilst.util_upload_file(
             st.session_state.paths["csv_dlmuse"],
             "Input data csv file",
@@ -36,7 +36,8 @@ if st.session_state.app_type == "cloud":
             "visible",
         )
         if not flag_disabled and os.path.exists(st.session_state.paths["csv_plot"]):
-            st.success(f"Data is ready ({st.session_state.paths["csv_plot"]})", icon=":material/thumb_up:")
+            p_plot = st.session_state.paths["csv_plot"]
+            st.success(f"Data is ready ({p_plot})", icon=":material/thumb_up:")
 
 else:  # st.session_state.app_type == 'desktop'
     with st.expander(":material/upload: Select data", expanded=False):
@@ -48,9 +49,10 @@ else:  # st.session_state.app_type == 'desktop'
             flag_disabled,
         )
         if not flag_disabled and os.path.exists(st.session_state.paths["csv_dlmuse"]):
-            st.success(f"Data is ready ({st.session_state.paths["csv_dlmuse"]})", icon=":material/thumb_up:")
+            p_dlmuse = st.session_state.paths["csv_dlmuse"]
+            st.success(f"Data is ready ({p_dlmuse})", icon=":material/thumb_up:")
 
-    with st.expander(":material/upload: Select data", expanded=False):  # type:ignore
+    with st.expander(":material/upload: Select data", expanded=False):
         utilst.util_select_folder(
             "key_sel_img_folder_viewer",
             "T1 nifti image folder",
@@ -61,13 +63,14 @@ else:  # st.session_state.app_type == 'desktop'
         if not flag_disabled:
             fcount = utilio.get_file_count(st.session_state.paths["T1"])
             if fcount > 0:
-                st.session_state.flags['T1'] = True
+                st.session_state.flags["T1"] = True
+                p_t1 = st.session_state.paths["T1"]
                 st.success(
-                    f"Data is ready ({st.session_state.paths["T1"]}, {fcount} files)",
-                    icon=":material/thumb_up:"
+                    f"Data is ready ({p_t1}, {fcount} files)",
+                    icon=":material/thumb_up:",
                 )
 
-    with st.expander(":material/upload: Select data", expanded=False):  # type:ignore
+    with st.expander(":material/upload: Select data", expanded=False):
         utilst.util_select_folder(
             "key_sel_dlmuse_folder_viewer",
             "T1 nifti image folder",
@@ -78,28 +81,32 @@ else:  # st.session_state.app_type == 'desktop'
         if not flag_disabled:
             fcount = utilio.get_file_count(st.session_state.paths["dlmuse"])
             if fcount > 0:
-                st.session_state.flags['DLMUSE'] = True
+                st.session_state.flags["DLMUSE"] = True
+                p_dlmuse = st.session_state.paths["dlmuse"]
                 st.success(
-                    f"Data is ready ({st.session_state.paths["dlmuse"]}, {fcount} files)",
-                    icon=":material/thumb_up:"
+                    f"Data is ready ({p_dlmuse}, {fcount} files)",
+                    icon=":material/thumb_up:",
                 )
 
     # T1 suffix
     suff_t1img = utilst.user_input_textfield(
-        "T1 img suffix", st.session_state.suff_t1img, 'T1 img suffix', flag_disabled
+        "T1 img suffix", st.session_state.suff_t1img, "T1 img suffix", flag_disabled
     )
     st.session_state.suff_t1img = suff_t1img
 
     # DLMUSE suffix
     suff_seg = utilst.user_input_textfield(
-        "DLMUSE image suffix", st.session_state.suff_seg, 'DLMUSE img suffix', flag_disabled
+        "DLMUSE image suffix",
+        st.session_state.suff_seg,
+        "DLMUSE img suffix",
+        flag_disabled,
     )
     st.session_state.suff_seg = suff_seg
 
 # Panel for viewing DLMUSE images
 with st.expander(":material/visibility: View segmentations", expanded=False):
 
-    flag_disabled = not st.session_state.flags['csv_dlmuse']
+    flag_disabled = not st.session_state.flags["csv_dlmuse"]
 
     # Selection of MRID
     try:
@@ -107,25 +114,29 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
         list_mrid = df.MRID.tolist()
     except:
         list_mrid = [""]
-    sel_mrid = st.selectbox("MRID", list_mrid, key="selbox_mrid", index=None, disabled = flag_disabled)
+    sel_mrid = st.selectbox(
+        "MRID", list_mrid, key="selbox_mrid", index=None, disabled=flag_disabled
+    )
 
     # Create combo list for selecting target ROI
     list_roi_names = utilmuse.get_roi_names(st.session_state.dicts["muse_sel"])
-    sel_var = st.selectbox("ROI", list_roi_names, key="selbox_rois", index=None, disabled = flag_disabled)
+    sel_var = st.selectbox(
+        "ROI", list_roi_names, key="selbox_rois", index=None, disabled=flag_disabled
+    )
 
     # Create a list of checkbox options
     list_orient = st.multiselect(
         "Select viewing planes:",
         utilni.img_views,
         utilni.img_views,
-        disabled = flag_disabled
+        disabled=flag_disabled,
     )
 
     # View hide overlay
-    is_show_overlay = st.checkbox("Show overlay", True, disabled = flag_disabled)
+    is_show_overlay = st.checkbox("Show overlay", True, disabled=flag_disabled)
 
     # Crop to mask area
-    crop_to_mask = st.checkbox("Crop to mask", True, disabled = flag_disabled)
+    crop_to_mask = st.checkbox("Crop to mask", True, disabled=flag_disabled)
 
     if not flag_disabled:
 
@@ -144,9 +155,9 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
                 st.session_state.paths["dlmuse"], sel_mrid + st.session_state.suff_seg
             )
 
-            flag_img = os.path.exists(st.session_state.paths["sel_img"]) and os.path.exists(
-                st.session_state.paths["sel_seg"]
-            )
+            flag_img = os.path.exists(
+                st.session_state.paths["sel_img"]
+            ) and os.path.exists(st.session_state.paths["sel_seg"])
 
         if flag_img:
             with st.spinner("Wait for it..."):
@@ -177,5 +188,8 @@ with st.expander(":material/visibility: View segmentations", expanded=False):
                             )
                         else:
                             utilst.show_img3D(
-                                img_masked, ind_view, mask_bounds[ind_view, :], tmp_orient
+                                img_masked,
+                                ind_view,
+                                mask_bounds[ind_view, :],
+                                tmp_orient,
                             )

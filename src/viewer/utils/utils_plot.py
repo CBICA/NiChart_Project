@@ -21,8 +21,8 @@ def add_plot() -> None:
         st.session_state.plot_var["yvar"],
         st.session_state.plot_var["hvar"],
         st.session_state.plot_var["hvals"],
-        st.session_state.plot_var["corr_icv"],        
-        st.session_state.plot_var["plot_centiles"],        
+        st.session_state.plot_var["corr_icv"],
+        st.session_state.plot_var["plot_centiles"],
         st.session_state.plot_var["trend"],
         st.session_state.plot_var["lowess_s"],
         st.session_state.plot_var["traces"],
@@ -85,19 +85,19 @@ def add_plot_tabs(
         if hvar is not None:
             df_plots.loc[plot_id, "hvar"] = hvar
 
-        if 'ICV' in list_cols:
+        if "ICV" in list_cols:
             df_plots.loc[plot_id, "corr_icv"] = st.checkbox(
-                'Correct ICV',
-                value = df_plots.loc[plot_id, "corr_icv"],
-                help = 'Correct regional volumes using the intra-cranial volume to account for differences in head size',
-                key=f'key_check_icv_{plot_id}'
+                "Correct ICV",
+                value=df_plots.loc[plot_id, "corr_icv"],
+                help="Correct regional volumes using the intra-cranial volume to account for differences in head size",
+                key=f"key_check_icv_{plot_id}",
             )
 
         df_plots.loc[plot_id, "plot_centiles"] = st.checkbox(
-            'Plot Centiles',
-            value = df_plots.loc[plot_id, "plot_centiles"],
-            help = 'Show centile values for the ROI',
-            key=f'key_check_centiles_{plot_id}'            
+            "Plot Centiles",
+            value=df_plots.loc[plot_id, "plot_centiles"],
+            help="Show centile values for the ROI",
+            key=f"key_check_centiles_{plot_id}",
         )
 
         if df_plots.loc[plot_id, "plot_type"] == "Scatter Plot":
@@ -203,7 +203,8 @@ def display_scatter_plot(
         # Main plot
         layout = go.Layout(
             # height=st.session_state.plot_const['h_init']
-            height = st.session_state.plot_const['h_init'] * st.session_state.plot_var['h_coeff'],
+            height=st.session_state.plot_const["h_init"]
+            * st.session_state.plot_var["h_coeff"],
             margin=dict(
                 l=st.session_state.plot_const["margin"],
                 r=st.session_state.plot_const["margin"],
@@ -213,14 +214,16 @@ def display_scatter_plot(
         )
         fig = go.Figure(layout=layout)
 
-        # If user selected to use ICV corrected data        
+        # If user selected to use ICV corrected data
         yvar = curr_plot["yvar"]
-        if curr_plot['corr_icv']:
-            df_filt[f'{yvar}_corrICV'] = df_filt[yvar] /  df_filt['ICV'] * st.session_state.mean_icv
-            yvar = f'{yvar}_corrICV'
+        if curr_plot["corr_icv"]:
+            df_filt[f"{yvar}_corrICV"] = (
+                df_filt[yvar] / df_filt["ICV"] * st.session_state.mean_icv
+            )
+            yvar = f"{yvar}_corrICV"
 
         # If user selected to plot centiles
-        if curr_plot['plot_centiles']:
+        if curr_plot["plot_centiles"]:
             yvar = f'{curr_plot["yvar"]}_centile'
 
         # Add axis labels
@@ -271,7 +274,7 @@ def display_scatter_plot(
                 st.session_state.paths["root"],
                 "resources",
                 "centiles",
-                #f"centiles_{curr_plot['centtype']}.csv",
+                # f"centiles_{curr_plot['centtype']}.csv",
                 f"istag_centiles_{curr_plot['centtype']}.csv",
             )
             df_cent = pd.read_csv(fcent)
@@ -279,11 +282,11 @@ def display_scatter_plot(
 
         # Highlight selected data point
         if sel_mrid != "":
-            yvar = curr_plot['yvar']
+            yvar = curr_plot["yvar"]
             if curr_plot["plot_centiles"]:
-                yvar = f'{curr_plot['yvar']}_centile'
-            if curr_plot["corr_icv"]:
-                yvar = f'{curr_plot['yvar']}_corrICV'
+                yvar = f"{yvar}_centile"
+            elif curr_plot["corr_icv"]:
+                yvar = f"{yvar}_corrICV"
             utiltr.dot_trace(
                 df,
                 sel_mrid,
@@ -320,6 +323,7 @@ def display_scatter_plot(
 
         return fig
 
+
 def display_dist_plot(
     df: pd.DataFrame, plot_id: str, show_settings: bool, sel_mrid: str
 ) -> Any:
@@ -350,7 +354,7 @@ def display_dist_plot(
         fig.update_layout(
             # height=st.session_state.plot_const['h_init']
             height=st.session_state.plot_const["h_init"]
-            * st.session_state.plot_var['h_coeff'],
+            * st.session_state.plot_var["h_coeff"],
             margin=dict(
                 l=st.session_state.plot_const["margin"],
                 r=st.session_state.plot_const["margin"],

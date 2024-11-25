@@ -87,11 +87,8 @@ def user_input_filename(
     path_dir = path_last
     tmpcol = st.columns((COL_LEFT, COL_RIGHT_BUTTON), vertical_alignment="bottom")
     with tmpcol[1]:
-        if st.button(
-            label_btn,
-            key=f"key_btn_{key_st}"
-        ):
-            #path_curr, path_dir = utilio.browse_file(path_dir)
+        if st.button(label_btn, key=f"key_btn_{key_st}"):
+            # path_curr, path_dir = utilio.browse_file(path_dir)
             out_file = utilio.browse_file(path_dir)
             if out_file is not None and os.path.exists(out_file):
                 path_curr = os.path.abspath(out_file)
@@ -115,13 +112,13 @@ def user_input_foldername(
     path_last: str,
     path_curr: str,
     help_msg: str,
-) -> str:
+) -> Any:
     """
     Text field in left and button in right to read an input folder path
     """
     out_str = None
     tmpcol = st.columns((COL_LEFT, COL_RIGHT_BUTTON), vertical_alignment="bottom")
-    
+
     # Button to select folder
     with tmpcol[1]:
         if st.button(label_btn, key=f"btn_{key_st}"):
@@ -129,22 +126,18 @@ def user_input_foldername(
                 out_str = utilio.browse_folder(path_curr)
             else:
                 out_str = utilio.browse_folder(path_last)
-    
+
     if out_str is not None and os.path.exists(out_str):
         out_str = os.path.abspath(out_str)
         path_curr = os.path.abspath(out_str)
-    
-    print(f'AAA {path_curr}   BBBB {out_str}')
 
+    print(f"AAA {path_curr}   BBBB {out_str}")
 
     # Text field to select folder
     with tmpcol[0]:
         if os.path.exists(path_curr):
             out_str = st.text_input(
-                label_txt,
-                key=f"txt2_{key_st}",
-                value=path_curr,
-                help=help_msg
+                label_txt, key=f"txt2_{key_st}", value=path_curr, help=help_msg
             )
         else:
             out_str = st.text_input(
@@ -155,7 +148,7 @@ def user_input_foldername(
             )
 
     if os.path.exists(out_str):
-        out_str = os.path.abspath(out_str) 
+        out_str = os.path.abspath(out_str)
         path_curr = out_str
 
     return out_str
@@ -167,7 +160,7 @@ def show_img3D(
     """
     Display a 3D img
     """
-    
+
     # Create a slider to select the slice index
     slice_index = st.slider(
         f"{img_name}",
@@ -178,9 +171,12 @@ def show_img3D(
     )
 
     # Extract the slice and display it
-    w_img = st.session_state.mriview_const['w_init'] * st.session_state.mriview_var['w_coeff']
+    w_img = (
+        st.session_state.mriview_const["w_init"]
+        * st.session_state.mriview_var["w_coeff"]
+    )
     if scroll_axis == 0:
-        #st.image(img[slice_index, :, :], use_column_width=True)
+        # st.image(img[slice_index, :, :], use_column_width=True)
         st.image(img[slice_index, :, :], width=w_img)
     elif scroll_axis == 1:
         st.image(img[:, slice_index, :], width=w_img)
@@ -188,7 +184,6 @@ def show_img3D(
         st.image(img[:, :, slice_index], width=w_img)
 
 
-## @pyinstrument.profile() # type:ignore
 def util_panel_workingdir(app_type: str) -> None:
     """
     Panel to set results folder name
@@ -214,7 +209,7 @@ def util_panel_workingdir(app_type: str) -> None:
             st.session_state.paths["dir_out"],
             helpmsg,
         )
-        
+
         if dir_out != "":
             st.session_state.paths["dir_out"] = dir_out
 
@@ -327,9 +322,9 @@ def util_select_folder(
         curr_dir,
         helpmsg,
     )
-    
-    print(f'sss {sel_dir}')
-    
+
+    print(f"sss {sel_dir}")
+
     if sel_dir is not None:
         if not os.path.exists(dir_out) and os.path.exists(sel_dir):
             # Create parent dir of output dir

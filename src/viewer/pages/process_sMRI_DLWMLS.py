@@ -3,12 +3,11 @@ import os
 import pandas as pd
 import streamlit as st
 import utils.utils_io as utilio
-import utils.utils_rois as utilroi
-import utils.utils_nifti as utilni
-import utils.utils_st as utilst
 import utils.utils_menu as utilmenu
-from stqdm import stqdm
+import utils.utils_nifti as utilni
 import utils.utils_session as utilss
+import utils.utils_st as utilst
+from stqdm import stqdm
 
 # Page config should be called for each page
 utilss.config_page()
@@ -24,14 +23,14 @@ st.markdown(
     """
 )
 
-def panel_wdir():
-    '''
+
+def panel_wdir() -> None:
+    """
     Panel for selecting the working dir
-    '''
-    icon = st.session_state.icon_thumb[st.session_state.flags['dir_out']]
+    """
+    icon = st.session_state.icon_thumb[st.session_state.flags["dir_out"]]
     show_panel_wdir = st.checkbox(
-        f":material/folder_shared: Working Directory {icon}",
-        value = False
+        f":material/folder_shared: Working Directory {icon}", value=False
     )
     if not show_panel_wdir:
         return
@@ -45,18 +44,19 @@ def panel_wdir():
             )
             st.session_state.flags["dir_out"] = True
 
-def panel_infl():
-    '''
-    Panel for uploading input t1 images
-    '''
-    st.session_state.flags['dir_fl'] = os.path.exists(st.session_state.paths['FL'])
 
-    msg =  st.session_state.app_config[st.session_state.app_type]['msg_infile']
-    icon = st.session_state.icon_thumb[st.session_state.flags['dir_fl']]
+def panel_infl() -> None:
+    """
+    Panel for uploading input t1 images
+    """
+    st.session_state.flags["dir_fl"] = os.path.exists(st.session_state.paths["FL"])
+
+    msg = st.session_state.app_config[st.session_state.app_type]["msg_infile"]
+    icon = st.session_state.icon_thumb[st.session_state.flags["dir_fl"]]
     show_panel_infl = st.checkbox(
         f":material/upload: {msg} FL Images {icon}",
-        disabled = not st.session_state.flags['dir_out'],
-        value = False
+        disabled=not st.session_state.flags["dir_out"],
+        value=False,
     )
     if not show_panel_infl:
         return
@@ -64,15 +64,18 @@ def panel_infl():
     with st.container(border=True):
         if st.session_state.app_type == "cloud":
             utilst.util_upload_folder(
-                st.session_state.paths["FL"], "FL images", False,
-                "Nifti images can be uploaded as a folder, multiple files, or a single zip file"
+                st.session_state.paths["FL"],
+                "FL images",
+                False,
+                "Nifti images can be uploaded as a folder, multiple files, or a single zip file",
             )
             fcount = utilio.get_file_count(st.session_state.paths["FL"])
             if fcount > 0:
-                st.session_state.flags['FL'] = True
+                st.session_state.flags["FL"] = True
+                path_fl = st.session_state.paths["FL"]
                 st.success(
-                    f"Data is ready ({st.session_state.paths["FL"]}, {fcount} files)",
-                    icon=":material/thumb_up:"
+                    f"Data is ready ({path_fl}, {fcount} files)",
+                    icon=":material/thumb_up:",
                 )
 
         else:  # st.session_state.app_type == 'desktop'
@@ -85,21 +88,23 @@ def panel_infl():
             )
             fcount = utilio.get_file_count(st.session_state.paths["FL"])
             if fcount > 0:
-                st.session_state.flags['dir_fl'] = True
+                st.session_state.flags["dir_fl"] = True
+                path_fl = st.session_state.paths["FL"]
                 st.success(
-                    f"Data is ready ({st.session_state.paths["FL"]}, {fcount} files)",
-                    icon=":material/thumb_up:"
+                    f"Data is ready ({path_fl}, {fcount} files)",
+                    icon=":material/thumb_up:",
                 )
 
-def panel_dlwmls():
-    '''
+
+def panel_dlwmls() -> None:
+    """
     Panel for running DLWMLS
-    '''
-    icon = st.session_state.icon_thumb[st.session_state.flags['csv_dlwmls']]
+    """
+    icon = st.session_state.icon_thumb[st.session_state.flags["csv_dlwmls"]]
     show_panel_dlwmls = st.checkbox(
         f":material/new_label: Run DLWMLS {icon}",
-        disabled = not st.session_state.flags['dir_fl'],
-        value = False
+        disabled=not st.session_state.flags["dir_fl"],
+        value=False,
     )
     if not show_panel_dlwmls:
         return
@@ -108,19 +113,12 @@ def panel_dlwmls():
         # Device type
         helpmsg = "Choose 'cuda' if your computer has an NVIDIA GPU, 'mps' if you have an Apple M-series chip, and 'cpu' if you have a standard CPU."
         device = utilst.user_input_select(
-            "Device",
-            "key_select_device",
-            ["cuda", "cpu", "mps"],
-            None,
-            helpmsg,
-            False
+            "Device", "key_select_device", ["cuda", "cpu", "mps"], None, helpmsg, False
         )
 
         # Button to run DLWMLS
-        btn_seg = st.button("Run DLWMLS", disabled = False)
+        btn_seg = st.button("Run DLWMLS", disabled=False)
         if btn_seg:
-            run_dir = os.path.join(st.session_state.paths["root"], "src", "NiChart_DLWMLS")
-
             if not os.path.exists(st.session_state.paths["dlwmls"]):
                 os.makedirs(st.session_state.paths["dlwmls"])
 
@@ -133,32 +131,37 @@ def panel_dlwmls():
                 os.system(dlwmls_cmd)
 
                 run_scr = os.path.join(
-                    st.session_state.paths["root"], "src", "workflow",
-                    "workflows", "w_DLWMLS", "wmls_post.py"
+                    st.session_state.paths["root"],
+                    "src",
+                    "workflow",
+                    "workflows",
+                    "w_DLWMLS",
+                    "wmls_post.py",
                 )
                 post_dlwmls_cmd = f"python {run_scr} --in_dir {st.session_state.paths['dlwmls']} --in_suff _FL_WMLS.nii.gz --out_csv {os.path.join(st.session_state.paths['dlwmls'], 'DLWMLS_Volumes.csv')}"
                 print(f"About to run: {post_dlwmls_cmd}")
                 os.system(post_dlwmls_cmd)
-                print('all done')
+                print("all done")
 
         out_csv = f"{st.session_state.paths['dlwmls']}/DLWMLS_Volumes.csv"
-        num_dlwmls = utilio.get_file_count(st.session_state.paths["dlwmls"], '.nii.gz')
+        num_dlwmls = utilio.get_file_count(st.session_state.paths["dlwmls"], ".nii.gz")
         if os.path.exists(out_csv):
             st.session_state.paths["csv_dlwmls"] = out_csv
             st.session_state.flags["csv_dlwmls"] = True
             st.success(
                 f"DLWMLS images are ready ({st.session_state.paths['dlwmls']}, {num_dlwmls} scan(s))",
                 icon=":material/thumb_up:",
-        )
+            )
 
-def panel_view():
-    '''
+
+def panel_view() -> None:
+    """
     Panel for viewing images
-    '''
+    """
     show_panel_view = st.checkbox(
-        f":material/new_label: View Scans",
-        disabled = not st.session_state.flags['csv_dlwmls'],
-        value = False
+        ":material/new_label: View Scans",
+        disabled=not st.session_state.flags["csv_dlwmls"],
+        value=False,
     )
     if not show_panel_view:
         return
@@ -174,30 +177,23 @@ def panel_view():
             return
 
         sel_mrid = st.selectbox(
-            "MRID",
-            list_mrid,
-            key="selbox_mrid",
-            index=None,
-            disabled = False
+            "MRID", list_mrid, key="selbox_mrid", index=None, disabled=False
         )
         if sel_mrid is None:
             return
 
         # Create a list of checkbox options
         list_orient = st.multiselect(
-            "Select viewing planes:",
-            utilni.img_views,
-            utilni.img_views,
-            disabled = False
+            "Select viewing planes:", utilni.img_views, utilni.img_views, disabled=False
         )
         if list_orient is None or len(list_orient) == 0:
             return
 
         # View hide overlay
-        is_show_overlay = st.checkbox("Show overlay", True, disabled = False)
+        is_show_overlay = st.checkbox("Show overlay", True, disabled=False)
 
         # Crop to mask area
-        crop_to_mask = st.checkbox("Crop to mask", True, disabled = False)
+        crop_to_mask = st.checkbox("Crop to mask", True, disabled=False)
 
         # Select images
         st.session_state.paths["sel_img"] = os.path.join(
@@ -245,15 +241,16 @@ def panel_view():
                             img_masked, ind_view, mask_bounds[ind_view, :], tmp_orient
                         )
 
-def panel_download():
-    '''
+
+def panel_download() -> None:
+    """
     Panel for downloading results
-    '''
+    """
     if st.session_state.app_type == "cloud":
         show_panel_view = st.checkbox(
-            f":material/new_label: Download Scans",
-            disabled = not st.session_state.flags['csv_dlwmls'],
-            value = False
+            ":material/new_label: Download Scans",
+            disabled=not st.session_state.flags["csv_dlwmls"],
+            value=False,
         )
         if not show_panel_view:
             return
@@ -274,6 +271,7 @@ def panel_download():
                 file_name=f"{st.session_state.dset}_DLWMLS.zip",
                 disabled=False,
             )
+
 
 st.divider()
 panel_wdir()

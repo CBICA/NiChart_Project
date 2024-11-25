@@ -1,15 +1,16 @@
 import streamlit as st
 import utils.utils_menu as utilmenu
-import utils.utils_st as utilst
 import utils.utils_session as utilss
-from PIL import Image
+import utils.utils_st as utilst
 
 # Page config should be called for each page
 utilss.config_page()
 
-def set_pipeline():
+
+def set_pipeline() -> None:
     # Callback function to save the pipeline selection to Session State
     st.session_state.pipeline = st.session_state._pipeline
+
 
 # Initialize session state
 utilss.init_session_state()
@@ -36,7 +37,7 @@ with st.container(border=True):
         index=0,
         key="_pipeline",
         on_change=set_pipeline,
-        label_visibility="collapsed"
+        label_visibility="collapsed",
     )
     utilmenu.menu()
     st.markdown(
@@ -45,7 +46,7 @@ with st.container(border=True):
         """
     )
 
-with st.expander('Want to learn more?', expanded=False):
+with st.expander("Want to learn more?", expanded=False):
     st.markdown(
         """
         - Check out [NiChart Web page](https://neuroimagingchart.com)
@@ -72,7 +73,7 @@ with st.expander('Want to learn more?', expanded=False):
 
         You can always find more options at our documentation
         """
-)
+    )
 
 st.sidebar.image("../resources/nichart1.png")
 st.sidebar.info(
@@ -92,4 +93,3 @@ with st.sidebar.expander("Acknowledgments"):
 
 # FIXME: For DEBUG
 utilst.add_debug_panel()
-

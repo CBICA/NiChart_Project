@@ -1,7 +1,7 @@
 import glob
 import os
-from typing import Optional
 import time
+from typing import Optional
 
 import streamlit as st
 import utils.utils_st as utilst
@@ -63,7 +63,7 @@ def check_image_overlay() -> bool:
         return True
 
 
-@st.dialog("Get input data") # type:ignore
+@st.dialog("Get input data")  # type:ignore
 def update_ulay_image_path() -> None:
     """
     Reads image path and suffix info from the user
@@ -72,7 +72,7 @@ def update_ulay_image_path() -> None:
         st.warning(
             "Sorry, uploading images for viewing purposes is not implemented in the cloud version!"
         )
-        return;
+        return
 
     # Select image dir
     utilst.util_select_folder(
@@ -92,15 +92,16 @@ def update_ulay_image_path() -> None:
     )
     st.session_state.suff_t1img = suff_t1img
 
-    if st.button('Check underlay image'):
+    if st.button("Check underlay image"):
         if check_image_underlay():
             st.success(f'Image found! {st.session_state.paths["sel_img"]}')
             time.sleep(1)
             st.rerun()
         else:
-            st.warning(f'Image not found!')
+            st.warning("Image not found!")
 
-@st.dialog("Get input data") # type:ignore
+
+@st.dialog("Get input data")  # type:ignore
 def update_olay_image_path() -> None:
     """
     Reads image path and suffix info from the user
@@ -109,7 +110,7 @@ def update_olay_image_path() -> None:
         st.warning(
             "Sorry, uploading images for viewing purposes is not implemented in the cloud version!"
         )
-        return;
+        return
 
     # Select image dir
     utilst.util_select_folder(
@@ -129,10 +130,10 @@ def update_olay_image_path() -> None:
     )
     st.session_state.suff_seg = suff_seg
 
-    if st.button('Check overlay image'):
+    if st.button("Check overlay image"):
         if check_image_overlay():
             st.success(f'Overlay image found! {st.session_state.paths["sel_seg"]}')
             time.sleep(1)
             st.rerun()
         else:
-            st.warning(f'Image not found!')
+            st.warning("Image not found!")
