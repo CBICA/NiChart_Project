@@ -143,10 +143,6 @@ def prep_image_and_olay(
     Read images from files and create 3D matrices for display
     """
 
-    print("AAAAAAAAaa")
-    print(f_img)
-    print(f_mask)
-
     # Read nifti
     nii_img = nib.load(f_img)
     nii_mask = nib.load(f_mask)

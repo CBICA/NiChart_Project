@@ -1,10 +1,11 @@
 import os
-
+import sys
 import streamlit as st
 import utils.utils_io as utilio
 import utils.utils_menu as utilmenu
 import utils.utils_session as utilss
 import utils.utils_st as utilst
+import pandas as pd
 
 # Page config should be called for each page
 utilss.config_page()
@@ -111,22 +112,41 @@ if show_panel_runml:
         btn_mlscore = st.button("Run MLScore", disabled=False)
         if btn_mlscore:
             run_dir = os.path.join(
-                st.session_state.paths["root"], "src", "workflow", "workflows", "w_sMRI"
+                st.session_state.paths["root"], "src", "workflows", "w_sMRI"
             )
 
             if not os.path.exists(st.session_state.paths["mlscores"]):
                 os.makedirs(st.session_state.paths["mlscores"])
 
+            # Check flag for harmonization
+            flag_harmonize = True
+            df_tmp = pd.read_csv(st.session_state.paths['csv_demog'])
+            if df_tmp.shape[0] < st.session_state.harm_min_samples:
+                flag_harmonize = False
+                st.warning('Sample size is small. The data will not be harmonized!')
+
             with st.spinner("Wait for it..."):
-                os.system(f"cd {run_dir}")
                 st.info("Running: mlscores_workflow ", icon=":material/manufacturing:")
-
-                # cmd=f"python3 {run_dir}/call_snakefile.py --run_dir {run_dir} --dset_name {st.session_state.dset} --input_rois {csv_dlmuse} --input_demog {csv_demog} --dir_out {st.session_state.paths['MLScores']}"
-
-                cmd = f"python3 {run_dir}/workflow_mlscores.py --root_dir {st.session_state.paths['root']} --run_dir {run_dir} --dset_name {st.session_state.dset} --input_rois {st.session_state.paths['csv_dlmuse']} --input_demog {st.session_state.paths['csv_demog']} --dir_out {st.session_state.paths['mlscores']}"
-                print(f"About to run: {cmd}")
-                os.system(cmd)
-
+                sys.path.append(run_dir)
+                import w_mlscores as w_mlscores
+                
+                if flag_harmonize:
+                    w_mlscores.run_workflow(
+                        st.session_state.dset,
+                        st.session_state.paths['root'],
+                        st.session_state.paths['csv_dlmuse'],
+                        st.session_state.paths['csv_demog'],
+                        st.session_state.paths['mlscores'],
+                    )
+                else:
+                    w_mlscores.run_workflow_noharmonization(
+                        st.session_state.dset,
+                        st.session_state.paths['root'],
+                        st.session_state.paths['csv_dlmuse'],
+                        st.session_state.paths['csv_demog'],
+                        st.session_state.paths['mlscores'],
+                    )
+                    
         # Check out file
         if os.path.exists(st.session_state.paths["csv_mlscores"]):
             st.success(

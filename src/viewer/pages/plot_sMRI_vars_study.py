@@ -496,9 +496,9 @@ def panel_plot() -> None:
 st.divider()
 panel_wdir()
 panel_incsv()
-panel_rename()
+#panel_rename()
 panel_select()
-panel_filter()
+#panel_filter()
 panel_plot()
 
 # FIXME: For DEBUG

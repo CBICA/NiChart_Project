@@ -77,7 +77,8 @@ def corr_icv(
     list_target = df.columns[df.columns.str.contains(roi_pref)]
 
     # Merge icv
-    df = df_icv[['MRID', icv_var]].merge(df, on='MRID')
+    if icv_var not in df.columns:
+        df = df_icv[['MRID', icv_var]].merge(df, on='MRID')
 
     df_p2 = df[list_target]
     val_icv = df[icv_var]
@@ -335,7 +336,7 @@ def combine_demog_hroi_ml_cent(out_csv: str, list_in_csv: Any) -> None:
     """
     Combines final output files
     """
-    # Read in put csv files (demog, roi list, roi data, roi harmonized, ML files)
+    # Read input csv files (demog, roi list, roi data, roi harmonized, ML files)
     df_demog = pd.read_csv(list_in_csv[0])
     df_roi = pd.read_csv(list_in_csv[1])
     df_roi = df_roi[df_roi.Name != "ICV"]
@@ -347,6 +348,62 @@ def combine_demog_hroi_ml_cent(out_csv: str, list_in_csv: Any) -> None:
     df_roi = df_roi[df_roi.Code.isin(df_hdata.columns.tolist())]
     df_out = df_hdata.rename(columns=dict(zip(df_roi.Code, df_roi.Name)))
     df_out = df_out[["MRID"] + df_roi.Name.to_list()]
+
+    # Add ICV
+    df_icv = df_rdata[["MRID", "MUSE_702"]]
+    df_icv.columns = ["MRID", "ICV"]
+    df_out = df_icv.merge(df_out, on="MRID")
+
+    # Get centile roi values
+    df_roi = df_roi[df_roi.Code.isin(df_cdata.columns.tolist())]  
+    df_cdata = df_cdata.rename(columns=dict(zip(df_roi.Code, df_roi.Name)))
+    df_cdata = df_cdata[["MRID"] + df_roi.Name.to_list()]
+    cols_new = df_cdata.columns[1:]
+    cols_new = [col + '_centile' for col in cols_new]
+    df_cdata.columns = ['MRID'] + cols_new
+    df_out = df_out.merge(df_cdata, on='MRID')
+
+    # Add ML scores
+    if len(list_in_csv) > 5:
+        df_spare = pd.read_csv(list_in_csv[5])
+        df_out = df_out.merge(df_spare, on="MRID")
+        
+    if len(list_in_csv) > 6:
+        df_sgan = pd.read_csv(list_in_csv[6])
+        d_sgan = {
+            'R1':'SurrealGAN_R1',
+            'R2':'SurrealGAN_R2',
+            'R3':'SurrealGAN_R3',
+            'R4':'SurrealGAN_R4',
+            'R5':'SurrealGAN_R5'
+        }
+        df_sgan = df_sgan.rename(columns = d_sgan)
+        df_out = df_out.merge(df_sgan, on="MRID")
+
+    # Add demog
+    df_out = df_demog.merge(df_out, on="MRID")
+
+    # Write out file
+    df_out.to_csv(out_csv, index=False)
+
+def combine_demog_roi_ml_cent(out_csv: str, list_in_csv: Any) -> None:
+    """
+    Combines final output files
+    """
+    # Read in put csv files (demog, roi list, roi data, roi harmonized, ML files)
+    df_demog = pd.read_csv(list_in_csv[0])
+    df_roi = pd.read_csv(list_in_csv[1])
+    df_roi = df_roi[df_roi.Name != "ICV"]
+    df_rdata = pd.read_csv(list_in_csv[2])
+    df_cdata = pd.read_csv(list_in_csv[3])
+    
+    # Get roi values
+    df_roi = df_roi[df_roi.Code.isin(df_hdata.columns.tolist())]
+    df_out = df_rdata.rename(columns=dict(zip(df_roi.Code, df_roi.Name)))
+    df_out = df_out[["MRID"] + df_roi.Name.to_list()]
+
+    print(df_out)
+    input()
 
     # Add ICV
     df_icv = df_rdata[["MRID", "MUSE_702"]]

@@ -109,12 +109,6 @@ def run_workflow(root_dir: Any, dict_config: Any) -> None:
 
     def step_combine():
         # Merge all
-        #utilw.combine_all(
-            #f_results, [input_demog, rois_sel, f_raw, f_combat_normicv, f_combat_wderived, f_spares]
-        #)
-        #utilw.combine_demog_hroi_ml(
-            #f_results, [input_demog, rois_sel, f_raw, f_combat_wderived, f_spares, f_surrealgan]
-        #)
         utilw.combine_demog_hroi_ml_cent(
             f_results, [input_demog, rois_sel, f_raw, f_combat_wderived, f_centiles, f_spares, f_surrealgan]
         )

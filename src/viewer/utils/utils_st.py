@@ -131,8 +131,6 @@ def user_input_foldername(
         out_str = os.path.abspath(out_str)
         path_curr = os.path.abspath(out_str)
 
-    print(f"AAA {path_curr}   BBBB {out_str}")
-
     # Text field to select folder
     with tmpcol[0]:
         if os.path.exists(path_curr):
