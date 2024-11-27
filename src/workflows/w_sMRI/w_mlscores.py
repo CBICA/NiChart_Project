@@ -56,9 +56,9 @@ def calc_subject_centiles(df_in: str, df_cent: str, df_dict: str):
     # Rename centiles roi names
     rdict = dict(zip(df_dict['Name'], df_dict['Code']))
     df_cent['VarName'] = df_cent['VarName'].replace(rdict)
-    
+
     cent = df_cent.columns[2:].str.replace("centile_", "").astype(int).values
-    
+
     # Get age bin
     df_in['Age'] = df_in.Age.round(0)
     df_in.loc[df_in['Age']>df_cent.Age.max(), 'Age'] = df_cent.Age.max()
@@ -66,7 +66,7 @@ def calc_subject_centiles(df_in: str, df_cent: str, df_dict: str):
 
     # Find ROIs
     sel_vars = df_in.columns[df_in.columns.isin(df_cent.VarName.unique())].tolist()
-    
+
     # For each subject find the centile value of each roi
     cent_subj_all = np.zeros([df_in.shape[0], len(sel_vars)])
     for i, tmp_ind in enumerate(df_in.index):
@@ -92,7 +92,7 @@ def calc_subject_centiles(df_in: str, df_cent: str, df_dict: str):
 
             # Estimate subj centile
             cent_subj_all[i,j] = cent[ind1] + slope * (sval - vals_cent[ind1])
-            
+
     # Create and save output data
     df_out = pd.DataFrame(columns=sel_vars, data=cent_subj_all)
     df_out = pd.concat([df_in[['MRID']], df_out], axis=1)
@@ -112,7 +112,7 @@ def run_workflow(
     max_age=95
     suff_combat='_HARM'
     spare_types=['AD', 'Age']
-    icv_ref_val=1430000  
+    icv_ref_val=1430000
     cent_csv=os.path.join(
         bdir, 'resources', 'centiles', 'istag_centiles_CN_ICV_Corrected.csv'
     )
@@ -182,7 +182,7 @@ def run_workflow(
         # Read input
         f_in=os.path.join(out_wdir, f"{dset_name}_combat.csv")
         df_in=pd.read_csv(f_in, dtype={"MRID": str})
-        
+
         # Normalize ROIs
         df_icvcorr=df_in.copy()
         var_muse=df_icvcorr.columns[df_icvcorr.columns.str.contains('MUSE')]
@@ -208,7 +208,7 @@ def run_workflow(
 
         # Apply spare
         df_spare=df_in[['MRID']]
-        for spare_type in spare_types:        
+        for spare_type in spare_types:
             spare_mdl=os.path.join(spare_dir, f'{spare_pref}{spare_type}{suff}')
             f_spare_out=os.path.join(out_wdir, f'{dset_name}_combat_spare_{spare_type}.csv')
             os.system(f"spare_score -a test -i {f_in} -m {spare_mdl} -o {f_spare_out}")
@@ -227,20 +227,20 @@ def run_workflow(
         # Read input
         f_in=os.path.join(out_wdir, f"{dset_name}_rois_init.csv")
         df_in=pd.read_csv(f_in, dtype={"MRID": str})
-        
+
         # Select input
         sel_covars=['MRID', 'Age', 'Sex', 'DLICV']
         sel_vars=sel_covars + list_muse_single
         df_sel=df_in[sel_vars]
         f_sgan_in=os.path.join(out_wdir, f"{dset_name}_sgan_in.csv")
         df_sel.to_csv(f_sgan_in, index=False)
-        
+
         # Run prediction
         f_sgan_out=os.path.join(out_wdir, f"{dset_name}_sgan_init.csv")
-        cmd = f'PredCRD -i {f_sgan_in} -o {f_sgan_out}' 
+        cmd = f'PredCRD -i {f_sgan_in} -o {f_sgan_out}'
         print(f'About to run {cmd}')
         os.system(cmd)
-        
+
         # Edit columns
         df_sgan=pd.read_csv(f_sgan_out)
         df_sgan.columns=['MRID'] + df_sgan.add_prefix('SurrealGAN_').columns[1:].tolist()
@@ -257,26 +257,26 @@ def run_workflow(
     # Read roi lists
     df_tmp=pd.read_csv(csv_muse_single)
     list_muse_single=df_tmp.Code.tolist()
-    
+
     # Read data
     df = pd.read_csv(in_csv, dtype={"MRID": str})
     df.columns = df.columns.astype(str)
-       
+
     # Rename ROIs
     df_roidict = pd.read_csv(csv_muse_all)
     df_roidict.Index = df_roidict.Index.astype(str)
     vdict = df_roidict.set_index('Index')['Code'].to_dict()
     df=df.rename(columns=vdict)
-   
+
     # Keep DLICV in a separate df
     df_icv=df[['MRID', 'MUSE_702']]
     df_icv.columns=['MRID', 'DLICV']
     df=df.drop(columns=['MUSE_702'])
-   
+
     # Add DLICV to demog
     df_demog = pd.read_csv(in_demog, dtype={"MRID": str})
     df_demog = df_demog.merge(df_icv, on='MRID')
-    
+
     # Add covars
     df_raw=df.merge(df_demog, on=key_var)
     f_raw=os.path.join(out_wdir, f"{dset_name}_rois_init.csv")
@@ -289,13 +289,15 @@ def run_workflow(
         'SPARE index calculation',
         'SurrealGAN index calculation'
     ]
-    
-    for i, sel_func in stqdm(
-        enumerate(list_func),
-        desc=f"Running step ...",
+
+    idx = 0
+    for sel_func in stqdm(
+        list_func,
+        desc=f"Running {list_fnames[idx]}",
         total=len(list_func),
     ):
         sel_func()
+        idx += 1
 
     # Combine results
 
@@ -313,15 +315,15 @@ def run_workflow(
     f_spare=os.path.join(out_wdir, f"{dset_name}_combat_spare-all.csv")
     df_spare=pd.read_csv(f_spare, dtype={"MRID": str})
     df_out=df_out.merge(df_spare, on='MRID')
-    
+
     f_sgan=os.path.join(out_wdir, f"{dset_name}_sgan.csv")
     df_sgan=pd.read_csv(f_sgan, dtype={"MRID": str})
     df_out=df_out.merge(df_sgan, on='MRID')
-    
+
     # Write out file
     f_results = os.path.join(out_dir, f"{dset_name}_DLMUSE+MLScores.csv")
     df_out.to_csv(f_results, index=False)
-    
+
 
 def run_workflow_noharmonization(
     dset_name,
@@ -359,7 +361,7 @@ def run_workflow_noharmonization(
         # Read input
         f_in=os.path.join(out_wdir, f"{dset_name}_rois_init.csv")
         df_in=pd.read_csv(f_in, dtype={"MRID": str})
-        
+
         # Normalize ROIs
         df_icvcorr=df_in.copy()
         var_muse=df_icvcorr.columns[df_icvcorr.columns.str.contains('MUSE')]
@@ -385,7 +387,7 @@ def run_workflow_noharmonization(
 
         # Apply spare
         df_spare=df_in[['MRID']]
-        for spare_type in spare_types:        
+        for spare_type in spare_types:
             spare_mdl=os.path.join(spare_dir, f'{spare_pref}{spare_type}{spare_suff}')
             f_spare_out=os.path.join(out_wdir, f'{dset_name}_spare_{spare_type}.csv')
             os.system(f"spare_score -a test -i {f_in} -m {spare_mdl} -o {f_spare_out}")
@@ -404,20 +406,20 @@ def run_workflow_noharmonization(
         # Read input
         f_in=os.path.join(out_wdir, f"{dset_name}_rois_init.csv")
         df_in=pd.read_csv(f_in, dtype={"MRID": str})
-        
+
         # Select input
         sel_covars=['MRID', 'Age', 'Sex', 'DLICV']
         sel_vars=sel_covars + list_muse_single
         df_sel=df_in[sel_vars]
         f_sgan_in=os.path.join(out_wdir, f"{dset_name}_sgan_in.csv")
         df_sel.to_csv(f_sgan_in, index=False)
-        
+
         # Run prediction
         f_sgan_out=os.path.join(out_wdir, f"{dset_name}_sgan_init.csv")
-        cmd = f'PredCRD -i {f_sgan_in} -o {f_sgan_out}' 
+        cmd = f'PredCRD -i {f_sgan_in} -o {f_sgan_out}'
         print(f'About to run {cmd}')
         os.system(cmd)
-        
+
         # Edit columns
         df_sgan=pd.read_csv(f_sgan_out)
         df_sgan.columns=['MRID'] + df_sgan.add_prefix('SurrealGAN_').columns[1:].tolist()
@@ -434,26 +436,26 @@ def run_workflow_noharmonization(
     # Read roi lists
     df_tmp=pd.read_csv(csv_muse_single)
     list_muse_single=df_tmp.Code.tolist()
-    
+
     # Read data
     df = pd.read_csv(in_csv, dtype={"MRID": str})
     df.columns = df.columns.astype(str)
-       
+
     # Rename ROIs
     df_roidict = pd.read_csv(csv_muse_all)
     df_roidict.Index = df_roidict.Index.astype(str)
     vdict = df_roidict.set_index('Index')['Code'].to_dict()
     df=df.rename(columns=vdict)
-   
+
     # Keep DLICV in a separate df
     df_icv=df[['MRID', 'MUSE_702']]
     df_icv.columns=['MRID', 'DLICV']
     df=df.drop(columns=['MUSE_702'])
-   
+
     # Add DLICV to demog
     df_demog = pd.read_csv(in_demog, dtype={"MRID": str})
     df_demog = df_demog.merge(df_icv, on='MRID')
-    
+
     # Add covars
     df_raw=df.merge(df_demog, on=key_var)
     f_raw=os.path.join(out_wdir, f"{dset_name}_rois_init.csv")
@@ -465,7 +467,7 @@ def run_workflow_noharmonization(
         'SPARE index calculation',
         'SurrealGAN index calculation'
     ]
-    
+
     for i, sel_func in stqdm(
         enumerate(list_func),
         desc=f"Running step ...",
@@ -489,11 +491,11 @@ def run_workflow_noharmonization(
     f_spare=os.path.join(out_wdir, f"{dset_name}_spare-all.csv")
     df_spare=pd.read_csv(f_spare, dtype={"MRID": str})
     df_out=df_out.merge(df_spare, on='MRID')
-    
+
     f_sgan=os.path.join(out_wdir, f"{dset_name}_sgan.csv")
     df_sgan=pd.read_csv(f_sgan, dtype={"MRID": str})
     df_out=df_out.merge(df_sgan, on='MRID')
-    
+
     # Write out file
     f_results = os.path.join(out_dir, f"{dset_name}_DLMUSE+MLScores.csv")
     df_out.to_csv(f_results, index=False)
