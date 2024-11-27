@@ -44,7 +44,7 @@ st.markdown(
     """
 )
 f_img=os.path.join(st.session_state.paths['root'], 'resources', 'images', 'sparead+age.png')
-st.image(f_img, width=800, caption='Source: https://pubmed.ncbi.nlm.nih.gov/32920988')
+st.image(f_img, width=800, caption="Habes et. al. Alzheimer's & Dementia 2021")
 
 st.divider()
 
@@ -54,7 +54,7 @@ st.markdown(
     """
 )
 f_img=os.path.join(st.session_state.paths['root'], 'resources', 'images', 'sparecvr.png')
-st.image(f_img, width=800, caption='Govindarajan, S.T., et. al., Machine-learning based MRI neuro-anatomical signatures associated with cardiovascular and metabolic risk factors. JAMA')
+st.image(f_img, width=800, caption='Govindarajan, S.T., et. al., Nature Communications, 2024')
 
 st.divider()
 

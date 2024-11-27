@@ -321,8 +321,6 @@ def util_select_folder(
         helpmsg,
     )
 
-    print(f"sss {sel_dir}")
-
     if sel_dir is not None:
         if not os.path.exists(dir_out) and os.path.exists(sel_dir):
             # Create parent dir of output dir
