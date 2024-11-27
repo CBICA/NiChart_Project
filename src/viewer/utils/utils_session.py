@@ -189,7 +189,7 @@ def init_session_state() -> None:
                 "hvar",
                 "hvals",
                 "corr_icv",
-                "plot_centiles",
+                "plot_cent_normalized",
                 "trend",
                 "lowess_s",
                 "traces",
@@ -203,7 +203,8 @@ def init_session_state() -> None:
         st.session_state.plot_const = {
             "trend_types": ["", "Linear", "Smooth LOWESS Curve"],
             "centile_types": ["", "CN", "CN_Males", "CN_Females", "CN_ICV_Corrected"],
-            "linfit_trace_types": ["data", "lin_fit", "conf_95%"],
+            "linfit_trace_types": ["lin_fit", "conf_95%"],
+            "centile_trace_types": ["5%", "25%", "50%", "75%", "95%"],
             "distplot_trace_types": ["histogram", "density", "rug"],
             "min_per_row": 1,
             "max_per_row": 5,
@@ -229,7 +230,7 @@ def init_session_state() -> None:
             "hvar": "",
             "hvals": [],
             "corr_icv": False,
-            "plot_centiles": False,
+            "plot_cent_normalized": False,
             "trend": "Linear",
             "traces": ["data", "lin"],
             "lowess_s": 0.5,
@@ -327,6 +328,7 @@ def init_session_state() -> None:
         # MRID selected by user
         st.session_state.sel_mrid = ""
         st.session_state.sel_roi = ""
+        st.session_state.sel_roi_img = ""
 
         # Variable selected by user
         st.session_state.sel_var = ""

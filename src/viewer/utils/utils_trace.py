@@ -18,6 +18,9 @@ def dist_plot(
     binnum: int,
     hide_legend: bool,
 ) -> Any:
+    # Set colormap
+    colors = st.session_state.plot_colors["data"]
+    
     # Add a tmp column if group var is not set
     dft = df.copy()
     if hvar == "":
@@ -31,14 +34,18 @@ def dist_plot(
 
     data = []
     bin_sizes = []
+    colors_sel = []
     for hname in hvals:
-        # col_ind = vals_hue_all.index(hname)  # Select index of colour for the category
+        col_ind = vals_hue_all.index(
+            hname
+        )  # Select index of colour for the category
         dfh = dft[dft[hvar] == hname]
         x_tmp = dfh[xvar]
         x_range = x_tmp.max() - x_tmp.min()
         bin_size = x_range / binnum
         bin_sizes.append(bin_size)
         data.append(x_tmp)
+        colors_sel.append(colors[col_ind])
 
     show_hist = "histogram" in traces
     show_curve = "density" in traces
@@ -49,6 +56,7 @@ def dist_plot(
         hvals,
         histnorm="",
         bin_size=bin_sizes,
+        colors=colors_sel,
         show_hist=show_hist,
         show_rug=show_rug,
         show_curve=show_curve,
@@ -243,24 +251,6 @@ def percentile_trace(df: pd.DataFrame, xvar: str, yvar: str, fig: Any) -> Any:
 
     # Create line traces
     for i, cvar in enumerate(df_tmp.columns[2:]):
-        # if i == 0:
-        # ctrace = go.Scatter(
-        # x=df_tmp[xvar],
-        # y=df_tmp[cvar],
-        # mode="lines",
-        # name=cvar,
-        # line=dict(color=cline[i]),
-        # )
-        # else:
-        # ctrace = go.Scatter(
-        # x=df_tmp[xvar],
-        # y=df_tmp[cvar],
-        # mode="lines",
-        # name=cvar,
-        # line=dict(color=cline[i]),
-        # fill="tonexty",
-        # fillcolor=cfan[i],
-        # )
         ctrace = go.Scatter(
             x=df_tmp[xvar],
             y=df_tmp[cvar],

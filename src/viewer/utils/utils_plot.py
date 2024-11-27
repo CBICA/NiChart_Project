@@ -22,7 +22,7 @@ def add_plot() -> None:
         st.session_state.plot_var["hvar"],
         st.session_state.plot_var["hvals"],
         st.session_state.plot_var["corr_icv"],
-        st.session_state.plot_var["plot_centiles"],
+        st.session_state.plot_var["plot_cent_normalized"],
         st.session_state.plot_var["trend"],
         st.session_state.plot_var["lowess_s"],
         st.session_state.plot_var["traces"],
@@ -93,14 +93,14 @@ def add_plot_tabs(
                 key=f"key_check_icv_{plot_id}",
             )
 
-        df_plots.loc[plot_id, "plot_centiles"] = st.checkbox(
-            "Plot Centiles",
-            value=df_plots.loc[plot_id, "plot_centiles"],
-            help="Show centile values for the ROI",
-            key=f"key_check_centiles_{plot_id}",
-        )
-
         if df_plots.loc[plot_id, "plot_type"] == "Scatter Plot":
+            df_plots.loc[plot_id, "plot_cent_normalized"] = st.checkbox(
+                "Plot ROIs normalized by centiles",
+                value=df_plots.loc[plot_id, "plot_cent_normalized"],
+                help="Show ROI values normalized by reference centiles",
+                key=f"key_check_centiles_{plot_id}",
+            )
+
             tind = get_index_in_list(list_trends, df_plots.loc[plot_id, "trend"])
             trend = st.selectbox(
                 "Trend Line",
@@ -133,10 +133,19 @@ def add_plot_tabs(
             )
 
         if df_plots.loc[plot_id, "plot_type"] == "Scatter Plot":
+            list_traces = ['data']
             if df_plots.loc[plot_id, "trend"] == "Linear":
+                list_traces = list_traces + st.session_state.plot_const["linfit_trace_types"]
+            if df_plots.loc[plot_id, "centtype"] != "":
+                list_traces = list_traces + st.session_state.plot_const["centile_trace_types"]
+            
+            if len(list_traces)>1:
+                # Update current list of traces
+                df_plots.at[plot_id, "traces"] = [x for x in df_plots.loc[plot_id, "traces"] if x in list_traces]
+                # Read user selection
                 df_plots.at[plot_id, "traces"] = st.multiselect(
                     "Select traces",
-                    st.session_state.plot_const["linfit_trace_types"],
+                    list_traces,
                     df_plots.loc[plot_id, "traces"],
                     key=f"key_sel_trace_linfit_{plot_id}",
                 )
@@ -223,7 +232,7 @@ def display_scatter_plot(
             yvar = f"{yvar}_corrICV"
 
         # If user selected to plot centiles
-        if curr_plot["plot_centiles"]:
+        if curr_plot["plot_cent_normalized"]:
             yvar = f'{curr_plot["yvar"]}_centile'
 
         # Add axis labels
@@ -283,7 +292,7 @@ def display_scatter_plot(
         # Highlight selected data point
         if sel_mrid != "":
             yvar = curr_plot["yvar"]
-            if curr_plot["plot_centiles"]:
+            if curr_plot["plot_cent_normalized"]:
                 yvar = f"{yvar}_centile"
             elif curr_plot["corr_icv"]:
                 yvar = f"{yvar}_corrICV"
