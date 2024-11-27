@@ -11,6 +11,6 @@ st.write("# Diffusion-Weighted MRI Biomarkers")
 
 st.markdown(
     """
-    :open_hands: Integration of DTI processing pipeline (DTIPrep) and ML analytics for biomarker extraction is **Work in Progress**
+    :open_hands: Integration of DTI processing pipeline [QSIPrep](https://qsiprep.readthedocs.io) and ML analytics for biomarker extraction is **Work in Progress**
     """
 )

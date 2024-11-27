@@ -7,10 +7,26 @@ utilss.config_page()
 
 utilmenu.menu()
 
-st.write("# White Matter Lesion Segmentation")
+st.markdown(
+    """
+    # White Matter Lesion Segmentation
+    ### Neuroimaging pipeline for segmentation of white matter lesions on FL scans
+    """
+)
+
+st.divider()
 
 st.markdown(
     """
-    Neuroimaging pipeline for segmentation of white matter lesions on FL scans
+    - [DLWMLS](https://neuroimagingchart.com/components/#Image%20Processing): Rapid and accurate segmentation of ***white matter lesions**
+    """
+)
+st.image('/home/guraylab/Desktop/images/dlwmls_segmask.png', width=300)
+
+st.divider()
+
+
+st.markdown(
+    """
     """
 )
