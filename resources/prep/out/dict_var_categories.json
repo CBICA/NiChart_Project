@@ -1,0 +1,24 @@
+{
+    "Demographic": [
+        "MRID",
+        "Age",
+        "Sex"
+    ],
+    "Diagnosis": [
+        "DX_AD",
+        "DX_CVD"
+    ],
+    "MUSE-Primary": [
+        "ICV",
+        "TotalBrain",
+        "GM",
+        "WM",
+        "Ventricles",
+        "CorpusCallosum",
+        "Cerebellum",
+        "Frontal_GM",
+        "Temporal_GM",
+        "Hippocampus_R",
+        "Hippocampus_L"
+    ]
+}

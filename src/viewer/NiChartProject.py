@@ -1,25 +1,31 @@
+import argparse
+import os
+import pandas as pd
 import streamlit as st
-from PIL import Image
+import utils.utils_rois as utilroi
+import utils.utils_st as utilst
+import utils.utils_session as utilss
+
 from st_pages import add_page_title, get_nav_from_toml
 
-nicon = Image.open("../resources/nichart1.png")
-st.set_page_config(
-    page_title="NiChart",
-    page_icon=nicon,
-    layout="wide",
-    #layout="centered",
-    menu_items={
-        "Get help": "https://neuroimagingchart.com/",
-        "Report a bug": "https://neuroimagingchart.com/",
-        "About": "https://neuroimagingchart.com/",
-    },
-)
+from PIL import Image
 
-# If you want to use the no-sections version, this
-# defaults to looking in .streamlit/pages.toml, so you can
-# just call `get_nav_from_toml()`
-nav = get_nav_from_toml(".streamlit/pages_sections.toml")
+st.session_state.nicon = Image.open("../resources/nichart1.png")
+utilss.config_page()
 
-pg = st.navigation(nav)
-add_page_title(pg)
-pg.run()
+# Read user arg to select cloud / desktop
+parser = argparse.ArgumentParser(description='NiChart Application Server')
+parser.add_argument('--cloud', action='store_true', default=False,
+                    help="If passed, set the session type to cloud")
+try:
+    args = parser.parse_args()
+except SystemExit as e:
+    # This exception will be raised if --help or invalid command line arguments
+    # are used. Currently streamlit prevents the program from exiting normally
+    # so we have to do a hard exit.
+    os._exit(e.code)
+if args.cloud:
+    st.session_state.app_type = "CLOUD"
+
+# Initialize session state variables
+st.switch_page("pages/home.py")

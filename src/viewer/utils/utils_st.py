@@ -6,6 +6,9 @@ import streamlit as st
 import utils.utils_io as utilio
 import utils.utils_session as utilses
 
+# from wfork_streamlit_profiler import Profiler
+# import pyinstrument
+
 COL_LEFT = 3
 COL_RIGHT_EMPTY = 0.01
 COL_RIGHT_BUTTON = 1
@@ -75,28 +78,30 @@ def user_input_filename(
     path_last: str,
     init_path_curr: str,
     help_msg: str,
-    disabled: bool,
 ) -> Any:
     """
     Text field next to a button to read an input file path
     """
+    out_file = None
     path_curr = init_path_curr
     path_dir = path_last
     tmpcol = st.columns((COL_LEFT, COL_RIGHT_BUTTON), vertical_alignment="bottom")
     with tmpcol[1]:
-        if st.button(label_btn, key=f"key_btn_{key_st}", disabled=disabled):
-            path_curr, path_dir = utilio.browse_file(path_dir)
+        if st.button(label_btn, key=f"key_btn_{key_st}"):
+            # path_curr, path_dir = utilio.browse_file(path_dir)
+            out_file = utilio.browse_file(path_dir)
+            if out_file is not None and os.path.exists(out_file):
+                path_curr = os.path.abspath(out_file)
 
     with tmpcol[0]:
-        tmp_sel = st.text_input(
+        out_sel = st.text_input(
             label_txt,
             key=f"key_txt_{key_st}",
             value=path_curr,
             help=help_msg,
-            disabled=disabled,
         )
-        if os.path.exists(tmp_sel):
-            path_curr = tmp_sel
+        if os.path.exists(out_sel):
+            path_curr = out_sel
     return path_curr, path_dir
 
 
@@ -107,44 +112,44 @@ def user_input_foldername(
     path_last: str,
     path_curr: str,
     help_msg: str,
-    disabled: bool,
-) -> str:
+) -> Any:
     """
     Text field in left and button in right to read an input folder path
     """
+    out_str = None
     tmpcol = st.columns((COL_LEFT, COL_RIGHT_BUTTON), vertical_alignment="bottom")
-    with tmpcol[1]:
-        if st.button(label_btn, key=f"btn_{key_st}", disabled=disabled):
-            if os.path.exists(path_curr):
-                path_curr = utilio.browse_folder(path_curr)
-            else:
-                path_curr = utilio.browse_folder(path_last)
 
+    # Button to select folder
+    with tmpcol[1]:
+        if st.button(label_btn, key=f"btn_{key_st}"):
+            if os.path.exists(path_curr):
+                out_str = utilio.browse_folder(path_curr)
+            else:
+                out_str = utilio.browse_folder(path_last)
+
+    if out_str is not None and os.path.exists(out_str):
+        out_str = os.path.abspath(out_str)
+        path_curr = os.path.abspath(out_str)
+
+    # Text field to select folder
     with tmpcol[0]:
         if os.path.exists(path_curr):
-            path_curr = st.text_input(
-                label_txt,
-                key=f"txt2_{key_st}",
-                value=path_curr,
-                help=help_msg,
-                disabled=disabled,
+            out_str = st.text_input(
+                label_txt, key=f"txt2_{key_st}", value=path_curr, help=help_msg
             )
         else:
-            path_curr = st.text_input(
+            out_str = st.text_input(
                 label_txt,
                 key=f"txt2_{key_st}",
                 value="",
                 help=help_msg,
-                disabled=disabled,
             )
 
-    if path_curr != "":
-        try:
-            path_curr = os.path.abspath(path_curr)
-        except:
-            path_curr = ""
+    if os.path.exists(out_str):
+        out_str = os.path.abspath(out_str)
+        path_curr = out_str
 
-    return path_curr
+    return out_str
 
 
 def show_img3D(
@@ -153,6 +158,7 @@ def show_img3D(
     """
     Display a 3D img
     """
+
     # Create a slider to select the slice index
     slice_index = st.slider(
         f"{img_name}",
@@ -163,63 +169,63 @@ def show_img3D(
     )
 
     # Extract the slice and display it
+    w_img = (
+        st.session_state.mriview_const["w_init"]
+        * st.session_state.mriview_var["w_coeff"]
+    )
     if scroll_axis == 0:
-        st.image(img[slice_index, :, :], use_column_width=True)
+        # st.image(img[slice_index, :, :], use_column_width=True)
+        st.image(img[slice_index, :, :], width=w_img)
     elif scroll_axis == 1:
-        st.image(img[:, slice_index, :], use_column_width=True)
+        st.image(img[:, slice_index, :], width=w_img)
     else:
-        st.image(img[:, :, slice_index], use_column_width=True)
+        st.image(img[:, :, slice_index], width=w_img)
 
 
 def util_panel_workingdir(app_type: str) -> None:
-    # Panel for selecting the working dir
-    with st.expander(":material/folder_shared: Working Dir", expanded=False):
+    """
+    Panel to set results folder name
+    """
+    curr_dir = st.session_state.paths["dset"]
 
-        curr_dir = st.session_state.paths["dset"]
+    # Read dataset name (used to create a folder where all results will be saved)
+    helpmsg = (
+        "Each study's results are organized in a dedicated folder named after the study"
+    )
+    st.session_state.dset = user_input_textfield(
+        "Study name", st.session_state.dset, helpmsg, False
+    )
 
-        # Read dataset name (used to create a folder where all results will be saved)
-        helpmsg = "Each study's results are organized in a dedicated folder named after the study"
-        st.session_state.dset = user_input_textfield(
-            "Study name", st.session_state.dset, helpmsg, False
+    if app_type == "desktop":
+        # Read output folder from the user
+        helpmsg = "Results will be saved to the output folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
+        dir_out = user_input_foldername(
+            "Select folder",
+            "btn_sel_dir_out",
+            "Output folder",
+            st.session_state.paths["file_search_dir"],
+            st.session_state.paths["dir_out"],
+            helpmsg,
         )
 
-        if app_type == "DESKTOP":
-            # Read output folder from the user
-            helpmsg = "Results will be saved to the output folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
-            out_dir = user_input_foldername(
-                "Select folder",
-                "btn_sel_out_dir",
-                "Output folder",
-                st.session_state.paths["last_in_dir"],
-                st.session_state.paths["out"],
-                helpmsg,
-                False,
-            )
-            if out_dir != "":
-                st.session_state.paths["out"] = out_dir
+        if dir_out != "":
+            st.session_state.paths["dir_out"] = dir_out
 
-        if st.session_state.dset != "" and st.session_state.paths["out"] != "":
-            st.session_state.paths["dset"] = os.path.join(
-                st.session_state.paths["out"], st.session_state.dset
-            )
+    # Create results folder
+    if st.session_state.dset != "" and st.session_state.paths["dir_out"] != "":
+        st.session_state.paths["dset"] = os.path.join(
+            st.session_state.paths["dir_out"], st.session_state.dset
+        )
 
-        # Dataset output folder name changed
-        if curr_dir != st.session_state.paths["dset"]:
+    # Check if results folder name changed
+    if curr_dir != st.session_state.paths["dset"]:
+        # Create output folder
+        if not os.path.exists(st.session_state.paths["dset"]):
+            os.makedirs(st.session_state.paths["dset"])
 
-            # Create output folder
-            if not os.path.exists(st.session_state.paths["dset"]):
-                os.makedirs(st.session_state.paths["dset"])
-
-            # Update paths for output subfolders
-            utilses.update_default_paths()
-            utilses.reset_flags()
-
-        if os.path.exists(st.session_state.paths["dset"]):
-            st.success(
-                f"All results will be saved to: {st.session_state.paths['dset']}",
-                icon=":material/thumb_up:",
-            )
-            st.session_state.flags["dset"] = True
+        # Update paths for output subfolders
+        utilses.update_default_paths()
+        utilses.reset_flags()
 
 
 def copy_uploaded_to_dir() -> None:
@@ -231,7 +237,7 @@ def copy_uploaded_to_dir() -> None:
 
 
 def util_upload_folder(
-    out_dir: str, title_txt: str, flag_disabled: bool, help_txt: str
+    dir_out: str, title_txt: str, flag_disabled: bool, help_txt: str
 ) -> None:
     """
     Upload user data to target folder
@@ -239,9 +245,9 @@ def util_upload_folder(
     """
     # Set target path
     if not flag_disabled:
-        if not os.path.exists(out_dir):
-            os.makedirs(out_dir)
-        st.session_state.paths["target_path"] = out_dir
+        if not os.path.exists(dir_out):
+            os.makedirs(dir_out)
+        st.session_state.paths["target_path"] = dir_out
 
     # Upload data
     st.file_uploader(
@@ -260,7 +266,7 @@ def util_upload_file(
     key_uploader: str,
     flag_disabled: bool,
     label_visibility: str,
-) -> None:
+) -> bool:
     """
     Upload user data to target folder
     Input data is a single file
@@ -282,13 +288,16 @@ def util_upload_file(
     # Copy to target
     if not os.path.exists(out_file):
         utilio.copy_uploaded_file(in_file, out_file)
+        return True
+
+    return False
 
 
 def util_select_folder(
     key_selector: str,
     title_txt: str,
-    out_dir: str,
-    last_in_dir: str,
+    dir_out: str,
+    file_search_dir: str,
     flag_disabled: bool,
 ) -> None:
     """
@@ -296,10 +305,10 @@ def util_select_folder(
     """
     # Check if out folder already exists
     curr_dir = ""
-    if os.path.exists(out_dir):
-        fcount = utilio.get_file_count(out_dir)
+    if os.path.exists(dir_out):
+        fcount = utilio.get_file_count(dir_out)
         if fcount > 0:
-            curr_dir = out_dir
+            curr_dir = dir_out
 
     # Upload data
     helpmsg = "Select input folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
@@ -307,45 +316,45 @@ def util_select_folder(
         "Select folder",
         f"btn_{key_selector}",
         title_txt,
-        last_in_dir,
+        file_search_dir,
         curr_dir,
         helpmsg,
-        flag_disabled,
     )
 
-    if not os.path.exists(out_dir) and os.path.exists(sel_dir):
-        # Create parent dir of output dir
-        if not os.path.exists(os.path.dirname(out_dir)):
-            os.makedirs(os.path.dirname(out_dir))
-        # Link user input dicoms
-        os.symlink(sel_dir, out_dir)
+    print(f"sss {sel_dir}")
+
+    if sel_dir is not None:
+        if not os.path.exists(dir_out) and os.path.exists(sel_dir):
+            # Create parent dir of output dir
+            if not os.path.exists(os.path.dirname(dir_out)):
+                os.makedirs(os.path.dirname(dir_out))
+            # Link user input dicoms
+            os.symlink(sel_dir, dir_out)
 
 
 def util_select_file(
     key_selector: str,
     title_txt: str,
     out_file: str,
-    last_in_dir: str,
-    flag_disabled: bool,
-) -> None:
+    file_search_dir: str,
+) -> bool:
     """
     Select user input file and copy to target file
     """
-    # Check if out folder already exists
+    # Check if out file already exists
     curr_file = ""
     if os.path.exists(out_file):
         curr_file = out_file
 
     # Select file
     helpmsg = "Select input file.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
-    sel_file, last_in_dir = user_input_filename(
+    sel_file, file_search_dir = user_input_filename(
         "Select file",
         f"btn_{key_selector}",
         title_txt,
-        last_in_dir,
+        file_search_dir,
         curr_file,
         helpmsg,
-        flag_disabled,
     )
 
     if not os.path.exists(out_file) and os.path.exists(sel_file):
@@ -354,3 +363,28 @@ def util_select_file(
             os.makedirs(os.path.dirname(out_file))
         # Link user input dicoms
         os.system(f"cp {sel_file} {out_file}")
+        return True
+
+    return False
+
+
+def add_debug_panel() -> None:
+    """
+    Displays vars used in dev phase
+    """
+    st.sidebar.divider()
+    st.sidebar.write("*** Debugging Flags ***")
+    if st.sidebar.checkbox("Switch to cloud?"):
+        st.session_state.app_type = "cloud"
+    else:
+        st.session_state.app_type = "desktop"
+
+    list_vars = ["", "All", "plots", "plot_var", "rois", "paths"]
+    # list_vars = st.session_state.keys()
+    sel_var = st.sidebar.selectbox("View session state vars", list_vars, index=0)
+    if sel_var != "":
+        with st.expander("DEBUG: Session state", expanded=True):
+            if sel_var == "All":
+                st.write(st.session_state)
+            else:
+                st.write(st.session_state[sel_var])

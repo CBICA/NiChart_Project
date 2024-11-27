@@ -39,7 +39,7 @@ def derived_list_to_dict(list_sel_rois: list, list_derived: list) -> Any:
     ):
         df_tmp = df[df[0] == tmp_ind].drop([0, 1], axis=1)
         sel_vals = df_tmp.T.dropna().astype(int).values.flatten()
-        dict_derived[tmp_ind] = sel_vals
+        dict_derived[str(tmp_ind)] = sel_vals
 
     return dict_roi, dict_derived
 
@@ -53,7 +53,7 @@ def get_derived_rois(sel_roi: str, list_derived: list) -> Any:
     df = pd.read_csv(list_derived, header=None)
 
     # Keep only selected ROI
-    df = df[df[1] == sel_roi]
+    df = df[df[0].astype(str) == sel_roi]
 
     if df.shape[0] == 0:
         return []

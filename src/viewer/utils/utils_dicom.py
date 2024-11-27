@@ -173,7 +173,7 @@ def select_series(df_dicoms: pd.DataFrame, dict_series: pd.Series) -> Any:
 
 def convert_single_series(
     list_files: list,
-    out_dir: str,
+    dir_out: str,
     out_suff: str,
     compression: bool = True,
     reorient: bool = True,
@@ -227,9 +227,9 @@ def convert_single_series(
             print("--------------------------------------------")
             print(f"Start converting {base_filename}")
             if compression:
-                nifti_file = os.path.join(out_dir, base_filename + out_suff)
+                nifti_file = os.path.join(dir_out, base_filename + out_suff)
             else:
-                nifti_file = os.path.join(out_dir, base_filename + out_suff)
+                nifti_file = os.path.join(dir_out, base_filename + out_suff)
             convert_dicom.dicom_array_to_nifti(dicom_input, nifti_file, reorient)
             gc.collect()
         except:  # Explicitly capturing app exceptions here to be able to continue processing
@@ -238,7 +238,7 @@ def convert_single_series(
 
 
 def convert_sel_series(
-    df_dicoms: pd.DataFrame, sel_series: pd.Series, out_dir: str, out_suff: str
+    df_dicoms: pd.DataFrame, sel_series: pd.Series, dir_out: str, out_suff: str
 ) -> None:
     # Convert all images for each selected series
     for _, stmp in stqdm(
@@ -249,11 +249,11 @@ def convert_sel_series(
         print(list_files)
 
         convert_single_series(
-            list_files, out_dir, out_suff, compression=True, reorient=True
+            list_files, dir_out, out_suff, compression=True, reorient=True
         )
 
 
-# def convert_dicoms_to_nifti(in_dir, out_dir):
+# def convert_dicoms_to_nifti(in_dir, dir_out):
 # Detect files
 # filesandirs = glob(os.path.join(in_dir, '**', '*'), recursive=True)
 # files = [f for f in filesandirs if os.path.isfile(f)]

@@ -25,6 +25,11 @@ name = "DLMUSE (sMRI)"
 icon = ":black_small_square:"
 
 [[pages]]
+path = "pages_custom/process_sMRI_DLWMLS.py"
+name = "DLWMLS (sMRI)"
+icon = ":black_small_square:"
+
+[[pages]]
 name = "Data Analytics"
 is_section = true
 icon = ":file_folder:"
@@ -41,16 +46,11 @@ icon = ":file_folder:"
 
 [[pages]]
 path = "pages_custom/plot_sMRI_vars_study.py"
-name = "Study Data (sMRI)"
+name = "View Study (sMRI)"
 icon = ":black_small_square:"
 
 [[pages]]
 path = "pages_custom/plot_sMRI_vars_participant.py"
-name = "Participant Data (sMRI)"
-icon = ":black_small_square:"
-
-[[pages]]
-path = "pages_custom/view_sMRI_Seg.py"
-name = "View Images (sMRI)"
+name = "View Participant (sMRI)"
 icon = ":black_small_square:"
 

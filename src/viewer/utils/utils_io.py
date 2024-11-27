@@ -18,12 +18,13 @@ def browse_file(path_init: str) -> Any:
     root = tk.Tk()
     root.withdraw()  # Hide the main window
     out_file = filedialog.askopenfilename(initialdir=path_init)
-    out_dir = os.path.dirname(out_file)
     root.destroy()
-    return out_file, out_dir
+    if len(out_file) == 0:
+        return None
+    return out_file
 
 
-def browse_folder(path_init: str) -> str:
+def browse_folder(path_init: str) -> Any:
     """
     Folder selector
     Returns the folder name selected by the user
@@ -32,6 +33,8 @@ def browse_folder(path_init: str) -> str:
     root.withdraw()  # Hide the main window
     out_path = filedialog.askdirectory(initialdir=path_init)
     root.destroy()
+    if len(out_path) == 0:
+        return None
     return out_path
 
 
@@ -57,9 +60,9 @@ def zip_folder(in_dir: str, f_out: str) -> Optional[bytes]:
         )
 
         with open(f"{f_out}.zip", "rb") as f:
-            out_zip = f.read()
+            dir_download = f.read()
 
-        return out_zip
+        return dir_download
 
 
 def unzip_zip_files(in_dir: str) -> None:
