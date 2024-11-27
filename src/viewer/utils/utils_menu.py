@@ -10,7 +10,8 @@ def menu() -> Any:
     if st.session_state.pipeline == "sMRI Biomarkers (T1)":
         st.sidebar.page_link("pages/home.py", label="Home")
         st.sidebar.page_link(
-            "pages/pipeline_dlmuse.py", label=":material/arrow_forward: Pipeline Overview"
+            "pages/pipeline_dlmuse.py",
+            label=":material/arrow_forward: Pipeline Overview",
         )
         st.sidebar.page_link(
             "pages/prep_sMRI_dicomtonifti.py",
@@ -31,7 +32,8 @@ def menu() -> Any:
     if st.session_state.pipeline == "WM Lesion Segmentation (FL)":
         st.sidebar.page_link("pages/home.py", label="Home")
         st.sidebar.page_link(
-            "pages/pipeline_dlwmls.py", label=":material/arrow_forward: Pipeline Overview"
+            "pages/pipeline_dlwmls.py",
+            label=":material/arrow_forward: Pipeline Overview",
         )
         st.sidebar.page_link(
             "pages/prep_sMRI_dicomtonifti.py",

@@ -32,7 +32,7 @@ def dist_plot(
     data = []
     bin_sizes = []
     for hname in hvals:
-        col_ind = vals_hue_all.index(hname)  # Select index of colour for the category
+        # col_ind = vals_hue_all.index(hname)  # Select index of colour for the category
         dfh = dft[dft[hvar] == hname]
         x_tmp = dfh[xvar]
         x_range = x_tmp.max() - x_tmp.min()

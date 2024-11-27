@@ -21,7 +21,7 @@ st.markdown(
     - [DLWMLS](https://neuroimagingchart.com/components/#Image%20Processing): Rapid and accurate segmentation of ***white matter lesions**
     """
 )
-st.image('/home/guraylab/Desktop/images/dlwmls_segmask.png', width=300)
+st.image("/home/guraylab/Desktop/images/dlwmls_segmask.png", width=300)
 
 st.divider()
 

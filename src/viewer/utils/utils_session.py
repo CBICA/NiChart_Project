@@ -167,15 +167,14 @@ def init_session_state() -> None:
         )
 
         # Various parameters
-        
+
         # Average ICV estimated from a large sample
         # IMPORTANT: Used in NiChart Engine for normalization!
         st.session_state.mean_icv = 1430000
-        
+
         # Min number of samples to run harmonization
         st.session_state.harm_min_samples = 30
-        
-        
+
         ###################################
 
         ###################################
