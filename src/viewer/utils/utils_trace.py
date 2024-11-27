@@ -23,15 +23,22 @@ def dist_plot(
     if hvar == "":
         hvar = "All"
         dft["All"] = "Data"
+        vals_hue_all = ["All"]
+
+    vals_hue_all = sorted(dft[hvar].unique())
     if hvals == []:
-        hvals = dft[hvar].unique().tolist()
+        hvals = vals_hue_all
 
     data = []
-    for hname, dfh in hvals:
-        dtmp = dfh[xvar]
-        drange = dtmp.max() - dtmp.min()
-        bin_size = drange / binnum
-        data.append(dfh[xvar])
+    bin_sizes = []
+    for hname in hvals:
+        col_ind = vals_hue_all.index(hname)  # Select index of colour for the category
+        dfh = dft[dft[hvar] == hname]
+        x_tmp = dfh[xvar]
+        x_range = x_tmp.max() - x_tmp.min()
+        bin_size = x_range / binnum
+        bin_sizes.append(bin_size)
+        data.append(x_tmp)
 
     show_hist = "histogram" in traces
     show_curve = "density" in traces
@@ -41,7 +48,7 @@ def dist_plot(
         data,
         hvals,
         histnorm="",
-        bin_size=bin_size,
+        bin_size=bin_sizes,
         show_hist=show_hist,
         show_rug=show_rug,
         show_curve=show_curve,
