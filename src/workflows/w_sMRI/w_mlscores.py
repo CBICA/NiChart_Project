@@ -113,14 +113,28 @@ def run_workflow(
     suff_combat='_HARM'
     spare_types=['AD', 'Age']
     icv_ref_val=1430000  
-    cent_csv=os.path.join(bdir, 'resources', 'centiles', 'istag_centiles_CN_ICV_Corrected.csv')
-    csv_muse_all=os.path.join(bdir, 'src', 'workflow', 'MUSE', 'list_MUSE_all.csv')
-    csv_muse_single=os.path.join(bdir, 'src', 'workflow', 'MUSE', 'list_MUSE_single.csv')
-    csv_muse_derived=os.path.join(bdir, 'src', 'workflow', 'MUSE', 'list_MUSE_mapping_derived.csv')
-    csv_muse_single='/home/guraylab/GitHub/CBICA/NiChart_Project/src/workflow/MUSE/list_MUSE_single.csv'
-    model_combat=os.path.join(
-        bdir, 'src', 'workflow', 'models', 'vISTAG1', 'COMBAT', 'combined_DLMUSE_raw_COMBATModel.pkl.gz'
+    cent_csv=os.path.join(
+        bdir, 'resources', 'centiles', 'istag_centiles_CN_ICV_Corrected.csv'
     )
+    csv_muse_all=os.path.join(
+        bdir, 'src', 'workflows', 'w_sMRI', 'lists', 'list_MUSE_all.csv'
+    )
+    csv_muse_single=os.path.join(
+        bdir, 'src', 'workflows', 'w_sMRI', 'lists', 'list_MUSE_single.csv'
+    )
+    csv_muse_derived=os.path.join(
+        bdir, 'src', 'workflows', 'w_sMRI', 'lists', 'list_MUSE_mapping_derived.csv'
+    )
+    model_combat=os.path.join(
+        bdir, 'src', 'workflows', 'w_sMRI', 'models', 'vISTAG1',
+        'COMBAT', 'combined_DLMUSE_raw_COMBATModel.pkl.gz'
+    )
+    spare_dir=os.path.join(
+        bdir, 'src', 'workflows', 'w_sMRI', 'models', 'vISTAG1', 'SPARE'
+    )
+    spare_pref='combined_DLMUSE_raw_COMBAT_SPARE-'
+    spare_suff='_Model.pkl.gz'
+
     # Print args
     print(f'About to run: run_workflow {dset_name} {bdir} {in_csv} {in_demog} {out_dir}')
 
@@ -193,12 +207,9 @@ def run_workflow(
         df_in=pd.read_csv(f_in, dtype={"MRID": str})
 
         # Apply spare
-        bdir='/home/guraylab/GitHub/CBICA/NiChart_Project/src/workflow/models/vISTAG1/SPARE'
-        pref='combined_DLMUSE_raw_COMBAT_SPARE-'
-        suff='_Model.pkl.gz'
         df_spare=df_in[['MRID']]
         for spare_type in spare_types:        
-            spare_mdl=os.path.join(bdir, f'{pref}{spare_type}{suff}')
+            spare_mdl=os.path.join(spare_dir, f'{spare_pref}{spare_type}{suff}')
             f_spare_out=os.path.join(out_wdir, f'{dset_name}_combat_spare_{spare_type}.csv')
             os.system(f"spare_score -a test -i {f_in} -m {spare_mdl} -o {f_spare_out}")
 
@@ -322,12 +333,25 @@ def run_workflow_noharmonization(
     # Fixed params
     key_var="MRID"
     spare_types=['AD', 'Age']
-    icv_ref_val=1430000  
-    cent_csv=os.path.join(bdir, 'resources', 'centiles', 'istag_centiles_CN_ICV_Corrected.csv')
-    csv_muse_all=os.path.join(bdir, 'src', 'workflow', 'MUSE', 'list_MUSE_all.csv')
-    csv_muse_single=os.path.join(bdir, 'src', 'workflow', 'MUSE', 'list_MUSE_single.csv')
-    csv_muse_derived=os.path.join(bdir, 'src', 'workflow', 'MUSE', 'list_MUSE_mapping_derived.csv')
-    csv_muse_single='/home/guraylab/GitHub/CBICA/NiChart_Project/src/workflow/MUSE/list_MUSE_single.csv'
+    icv_ref_val=1430000
+    cent_csv=os.path.join(
+        bdir, 'resources', 'centiles', 'istag_centiles_CN_ICV_Corrected.csv'
+    )
+    csv_muse_all=os.path.join(
+        bdir, 'src', 'workflows', 'w_sMRI', 'lists', 'list_MUSE_all.csv'
+    )
+    csv_muse_single=os.path.join(
+        bdir, 'src', 'workflows', 'w_sMRI', 'lists', 'list_MUSE_single.csv'
+    )
+    csv_muse_derived=os.path.join(
+        bdir, 'src', 'workflows', 'w_sMRI', 'lists', 'list_MUSE_mapping_derived.csv'
+    )
+    spare_dir=os.path.join(
+        bdir, 'src', 'workflows', 'w_sMRI', 'models', 'vISTAG1', 'SPARE'
+    )
+    spare_pref='combined_DLMUSE_raw_COMBAT_SPARE-'
+    spare_suff='_Model.pkl.gz'
+
     # Print args
     print(f'About to run: run_workflow {dset_name} {bdir} {in_csv} {in_demog} {out_dir}')
 
@@ -360,12 +384,9 @@ def run_workflow_noharmonization(
         df_in=pd.read_csv(f_in, dtype={"MRID": str})
 
         # Apply spare
-        bdir='/home/guraylab/GitHub/CBICA/NiChart_Project/src/workflow/models/vISTAG1/SPARE'
-        pref='combined_DLMUSE_raw_COMBAT_SPARE-'
-        suff='_Model.pkl.gz'
         df_spare=df_in[['MRID']]
         for spare_type in spare_types:        
-            spare_mdl=os.path.join(bdir, f'{pref}{spare_type}{suff}')
+            spare_mdl=os.path.join(spare_dir, f'{spare_pref}{spare_type}{spare_suff}')
             f_spare_out=os.path.join(out_wdir, f'{dset_name}_spare_{spare_type}.csv')
             os.system(f"spare_score -a test -i {f_in} -m {spare_mdl} -o {f_spare_out}")
 

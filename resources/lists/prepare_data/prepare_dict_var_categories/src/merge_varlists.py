@@ -2,7 +2,9 @@ import pandas as pd
 import json
 import os
 
-list_cat = ['Demog', 'MUSE-Primary']
+list_cat = [
+    'Demog', 'Scan', 'Diagnosis', 'MUSE-Essential', 'MUSE-Single', 'MUSE-Composite', 'SPARE', 'SurrealGAN'
+]
 
 dict_cat = {}
 for tmp_cat in list_cat:
@@ -12,6 +14,10 @@ for tmp_cat in list_cat:
 if not os.path.exists('../output'):
     os.makedirs('../output')
 
+# Convert the dictionary to a JSON string with indentation
+out_json = json.dumps(dict_cat, indent=4)
+
+# Write the JSON string to a file
 if not os.path.exists('../output/dict_var_categories.json'):
     with open('../output/dict_var_categories.json', 'w') as f:
-        json.dump(dict_cat, f)
+        f.write(out_json)
