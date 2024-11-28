@@ -126,19 +126,19 @@ def panel_dlmuse() -> None:
                 False,
             )
 
-            # # Button to run DLMUSE
-            # btn_seg = st.button("Run DLMUSE", disabled=False)
-            # if btn_seg:
-            #     if not os.path.exists(st.session_state.paths["dlmuse"]):
-            #         os.makedirs(st.session_state.paths["dlmuse"])
-            #
-            #     with st.spinner("Wait for it..."):
-            #         dlmuse_cmd = f"NiChart_DLMUSE -i {st.session_state.paths['T1']} -o {st.session_state.paths['dlmuse']} -d {device} --cores 1"
-            #         st.info(f"Running: {dlmuse_cmd}", icon=":material/manufacturing:")
-            #
-            #         # FIXME : bypass dlmuse run
-            #         print(f"About to run: {dlmuse_cmd}")
-            #         os.system(dlmuse_cmd)
+            # Button to run DLMUSE
+            btn_seg = st.button("Run DLMUSE", disabled=False)
+            if btn_seg:
+                if not os.path.exists(st.session_state.paths["dlmuse"]):
+                    os.makedirs(st.session_state.paths["dlmuse"])
+
+                with st.spinner("Wait for it..."):
+                    dlmuse_cmd = f"NiChart_DLMUSE -i {st.session_state.paths['T1']} -o {st.session_state.paths['dlmuse']} -d {device} --cores 1"
+                    st.info(f"Running: {dlmuse_cmd}", icon=":material/manufacturing:")
+
+                    # FIXME : bypass dlmuse run
+                    print(f"About to run: {dlmuse_cmd}")
+                    os.system(dlmuse_cmd)
 
             out_csv = f"{st.session_state.paths['dlmuse']}/DLMUSE_Volumes.csv"
             num_dlmuse = utilio.get_file_count(
