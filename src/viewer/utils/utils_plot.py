@@ -84,23 +84,62 @@ def get_index_in_list(in_list: list, in_item: str) -> Optional[int]:
     else:
         return in_list.index(in_item)
 
+def set_x_bounds(
+    df: pd.DataFrame,
+    df_plots: pd.DataFrame,
+    plot_id: str,
+) -> list:
+    # Set x and y min/max if not set
+    # Values include some margin added for viewing purposes
+    xvar=df_plots.loc[plot_id, "xvar"]
+    
+    xmin=df[xvar].min()
+    xmax=df[xvar].max()
+    dx=xmax-xmin
+    if dx==0:       # Margin defined based on the value if delta is 0
+        xmin = xmin - xmin/8
+        xmax = xmax + xmax/8
+    else:           # Margin defined based on the delta otherwise
+        xmin = xmin - dx/5
+        xmax = xmax + dx/5
+
+    df_plots.loc[plot_id, "xmax"]=xmax
+    df_plots.loc[plot_id, "xmin"]=xmin
+    
+def set_y_bounds(
+    df: pd.DataFrame,
+    df_plots: pd.DataFrame,
+    plot_id: str,
+) -> list:
+    # Set x and y min/max if not set
+    # Values include some margin added for viewing purposes
+    yvar=df_plots.loc[plot_id, "yvar"]
+    
+    ymin=df[yvar].min()
+    ymax=df[yvar].max()
+    dy=ymax-ymin
+    if dy==0:       # Margin defined based on the value if delta is 0
+        ymin = ymin - ymin/8
+        ymax = ymax + ymax/8
+    else:           # Margin defined based on the delta otherwise
+        ymin = ymin - dy/5
+        ymax = ymax + dy/5
+
+    df_plots.loc[plot_id, "ymax"]=ymax
+    df_plots.loc[plot_id, "ymin"]=ymin
 
 def add_plot_tabs(
     df: pd.DataFrame, df_plots: pd.DataFrame, plot_id: str
 ) -> pd.DataFrame:
 
+    # Set xy bounds initially to make plots consistent
+    if df_plots.loc[plot_id, "xmin"]==-1:
+        set_x_bounds(df, df_plots, plot_id)
+    if df_plots.loc[plot_id, "ymin"]==-1:
+        set_y_bounds(df, df_plots, plot_id)
+    
     ptabs = st.tabs(["Settings", "Layers", ":material/x:"])
     
-    # Set x and y min/max if not set
-    if df_plots.loc[plot_id, "xmin"]==-1:
-        df_plots.loc[plot_id, "xmin"]=df[df_plots.loc[plot_id, "xvar"]].min()
-    if df_plots.loc[plot_id, "xmax"]==-1:
-        df_plots.loc[plot_id, "xmax"]=df[df_plots.loc[plot_id, "xvar"]].max()
-    if df_plots.loc[plot_id, "ymin"]==-1:
-        df_plots.loc[plot_id, "ymin"]=df[df_plots.loc[plot_id, "yvar"]].min()
-    if df_plots.loc[plot_id, "ymax"]==-1:
-        df_plots.loc[plot_id, "ymax"]=df[df_plots.loc[plot_id, "yvar"]].max()    
-
     # Tab 1: Plot settings
     with ptabs[0]:
         # Get df columns
@@ -114,8 +153,9 @@ def add_plot_tabs(
             key=f"plot_xvar_{plot_id}"
             sel_val=st.session_state[key]
             df_plots.loc[plot_id, "xvar"]=sel_val
-            df_plots.loc[plot_id, "xmin"]=df[sel_val].min()
-            df_plots.loc[plot_id, "xmax"]=df[sel_val].max()
+            
+            # Update x bounds
+            set_x_bounds(df, df_plots, plot_id)
             
         xind = get_index_in_list(list_cols, df_plots.loc[plot_id, "xvar"])        
         st.selectbox(
@@ -132,8 +172,9 @@ def add_plot_tabs(
                 key=f"plot_yvar_{plot_id}"
                 sel_val=st.session_state[key]
                 df_plots.loc[plot_id, "yvar"]=sel_val
-                df_plots.loc[plot_id, "ymin"]=df[sel_val].min()
-                df_plots.loc[plot_id, "ymax"]=df[sel_val].max()
+
+                # Update y bounds
+                set_y_bounds(df, df_plots, plot_id)
                 
             yind = get_index_in_list(list_cols, df_plots.loc[plot_id, "yvar"])
             st.selectbox(
@@ -426,7 +467,11 @@ def display_scatter_plot(
             utiltr.lowess_trace(
                 df_filt,
                 curr_plot["xvar"],
+                curr_plot["xmin"],
+                curr_plot["xmax"],
                 yvar,
+                curr_plot["ymin"],
+                curr_plot["ymax"],
                 curr_plot["hvar"],
                 curr_plot["hvals"],
                 curr_plot["lowess_s"],
@@ -447,9 +492,15 @@ def display_scatter_plot(
             utiltr.percentile_trace(
                 df_cent,
                 curr_plot["xvar"],
-                curr_plot["yvar"],
+                curr_plot["xmin"],
+                curr_plot["xmax"],
+                yvar,
+                curr_plot["ymin"],
+                curr_plot["ymax"],
                 curr_plot['traces'],
-                fig)
+                st.session_state.plot_var["hide_legend"],
+                fig
+            )
 
         # Highlight selected data point
         if sel_mrid != "":

@@ -195,7 +195,11 @@ def linreg_trace(
 def lowess_trace(
     df: pd.DataFrame,
     xvar: str,
+    xmin: float,
+    xmax: float,
     yvar: str,
+    ymin: float,
+    ymax: float,
     hvar: str,
     hvals: list,
     lowess_s: float,
@@ -235,6 +239,8 @@ def lowess_trace(
         )
         fig.add_trace(trace)
 
+    fig.update_layout(xaxis_range=[xmin, xmax])
+    fig.update_layout(yaxis_range=[ymin, ymax])
 
 def dot_trace(
     df: pd.DataFrame, sel_mrid: str, xvar: str, yvar: str, hide_legend: bool, fig: Any
@@ -253,7 +259,18 @@ def dot_trace(
     fig.add_trace(trace)
 
 
-def percentile_trace(df: pd.DataFrame, xvar: str, yvar: str, traces, fig: Any) -> Any:
+def percentile_trace(
+    df: pd.DataFrame,
+    xvar: str,
+    xmin: float,
+    xmax: float,
+    yvar: str,
+    ymin: float,
+    ymax: float,
+    traces: list,
+    hide_legend: bool,
+    fig: Any
+) -> Any:
 
     # Set colormap
     colors = st.session_state.plot_colors["centile"]
@@ -271,14 +288,22 @@ def percentile_trace(df: pd.DataFrame, xvar: str, yvar: str, traces, fig: Any) -
                 name=cvar,
                 legendgroup="centiles",
                 line=dict(color=colors[i]),
+                showlegend=not hide_legend,
             )
 
             fig.add_trace(ctrace)  # plot in first row
 
+    fig.update_layout(xaxis_range=[xmin, xmax])
+    fig.update_layout(yaxis_range=[ymin, ymax])
+
     return fig
 
 
-def dots_trace(df: pd.DataFrame, xvar: str, yvar: str) -> Any:
+def dots_trace(
+    df: pd.DataFrame,
+    xvar: str,
+    yvar: str
+) -> Any:
     trace = go.Scatter(
         x=df[xvar],
         y=df[yvar],
