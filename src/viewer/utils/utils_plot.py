@@ -88,11 +88,10 @@ def set_x_bounds(
     df: pd.DataFrame,
     df_plots: pd.DataFrame,
     plot_id: str,
+    xvar: str
 ) -> list:
     # Set x and y min/max if not set
-    # Values include some margin added for viewing purposes
-    xvar=df_plots.loc[plot_id, "xvar"]
-    
+    # Values include some margin added for viewing purposes    
     xmin=df[xvar].min()
     xmax=df[xvar].max()
     dx=xmax-xmin
@@ -110,11 +109,10 @@ def set_y_bounds(
     df: pd.DataFrame,
     df_plots: pd.DataFrame,
     plot_id: str,
+    yvar: str
 ) -> list:
     # Set x and y min/max if not set
-    # Values include some margin added for viewing purposes
-    yvar=df_plots.loc[plot_id, "yvar"]
-    
+    # Values include some margin added for viewing purposes    
     ymin=df[yvar].min()
     ymax=df[yvar].max()
     dy=ymax-ymin
@@ -134,9 +132,9 @@ def add_plot_tabs(
 
     # Set xy bounds initially to make plots consistent
     if df_plots.loc[plot_id, "xmin"]==-1:
-        set_x_bounds(df, df_plots, plot_id)
+        set_x_bounds(df, df_plots, plot_id, df_plots.loc[plot_id, "xvar"])
     if df_plots.loc[plot_id, "ymin"]==-1:
-        set_y_bounds(df, df_plots, plot_id)
+        set_y_bounds(df, df_plots, plot_id, df_plots.loc[plot_id, "yvar"])
     
     ptabs = st.tabs(["Settings", "Layers", ":material/x:"])
     
@@ -155,7 +153,7 @@ def add_plot_tabs(
             df_plots.loc[plot_id, "xvar"]=sel_val
             
             # Update x bounds
-            set_x_bounds(df, df_plots, plot_id)
+            set_x_bounds(df, df_plots, plot_id, df_plots.loc[plot_id, "xvar"])
             
         xind = get_index_in_list(list_cols, df_plots.loc[plot_id, "xvar"])        
         st.selectbox(
@@ -174,7 +172,10 @@ def add_plot_tabs(
                 df_plots.loc[plot_id, "yvar"]=sel_val
 
                 # Update y bounds
-                set_y_bounds(df, df_plots, plot_id)
+                if df_plots.loc[plot_id, "plot_cent_normalized"]:
+                    set_y_bounds(df, df_plots, plot_id, df_plots.loc[plot_id, "yvar"]+'_centiles')
+                else:
+                    set_y_bounds(df, df_plots, plot_id, df_plots.loc[plot_id, "yvar"])
                 
             yind = get_index_in_list(list_cols, df_plots.loc[plot_id, "yvar"])
             st.selectbox(
@@ -221,6 +222,10 @@ def add_plot_tabs(
                 key=f"key_check_centiles_{plot_id}"
                 sel_val=st.session_state[key]
                 df_plots.loc[plot_id, "plot_cent_normalized"]=sel_val
+                if sel_val:
+                    set_y_bounds(df, df_plots, plot_id, df_plots.loc[plot_id, "yvar"] + '_centiles')
+                else:
+                    set_y_bounds(df, df_plots, plot_id, df_plots.loc[plot_id, "yvar"])
                 
             st.checkbox(
                 "Plot ROIs normalized by centiles",
@@ -423,7 +428,10 @@ def display_scatter_plot(
 
         # If user selected to plot centiles
         if curr_plot["plot_cent_normalized"]:
-            yvar = f'{curr_plot["yvar"]}_centile'
+            yvar = f'{curr_plot["yvar"]}_centiles'
+            if yvar not in df.columns:
+                st.warning(f'Centile values not available for variable: {curr_plot["yvar"]}')
+                yvar=curr_plot["yvar"]
 
         # Add axis labels
         fig.update_layout(

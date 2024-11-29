@@ -15,6 +15,7 @@ def read_dataframe(fname: str) -> pd.DataFrame:
         return df
     try:
         df = pd.read_csv(fname)
+        df = df.rename(columns={'DLICV':'ICV'}) # FIXME: this will be resolved in a more systematic way
     except:
         df = pd.DataFrame()
     return df
