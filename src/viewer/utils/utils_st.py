@@ -5,6 +5,7 @@ import numpy as np
 import streamlit as st
 import utils.utils_io as utilio
 import utils.utils_session as utilses
+import shutil
 
 # from wfork_streamlit_profiler import Profiler
 # import pyinstrument
@@ -321,13 +322,18 @@ def util_select_folder(
         helpmsg,
     )
 
-    if sel_dir is not None:
-        if not os.path.exists(dir_out) and os.path.exists(sel_dir):
-            # Create parent dir of output dir
-            if not os.path.exists(os.path.dirname(dir_out)):
-                os.makedirs(os.path.dirname(dir_out))
-            # Link user input dicoms
-            os.symlink(sel_dir, dir_out)
+    if sel_dir is not None and os.path.exists(sel_dir):
+        # Remove existing output folder
+        if os.path.exists(dir_out):
+            st.warning(f"Out folder {dir_out} exists, would you want to replace it?")
+            if st.button("Confirm Deletion"):
+                shutil.rmtree(dir_out)
+            
+        # Create parent dir of output dir
+        if not os.path.exists(os.path.dirname(dir_out)):
+            os.makedirs(os.path.dirname(dir_out))
+        # Link user input dicoms
+        os.symlink(sel_dir, dir_out)
 
 
 def util_select_file(
