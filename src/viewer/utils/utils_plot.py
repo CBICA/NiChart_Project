@@ -48,7 +48,11 @@ def add_plot() -> None:
         plot_id,
         st.session_state.plot_var["plot_type"],
         st.session_state.plot_var["xvar"],
+        st.session_state.plot_var["xmin"],
+        st.session_state.plot_var["xmax"],
         st.session_state.plot_var["yvar"],
+        st.session_state.plot_var["ymin"],
+        st.session_state.plot_var["ymax"],
         st.session_state.plot_var["hvar"],
         st.session_state.plot_var["hvals"],
         st.session_state.plot_var["corr_icv"],
@@ -86,6 +90,16 @@ def add_plot_tabs(
 ) -> pd.DataFrame:
 
     ptabs = st.tabs(["Settings", "Layers", ":material/x:"])
+    
+    # Set x and y min/max if not set
+    if df_plots.loc[plot_id, "xmin"]==-1:
+        df_plots.loc[plot_id, "xmin"]=df[df_plots.loc[plot_id, "xvar"]].min()
+    if df_plots.loc[plot_id, "xmax"]==-1:
+        df_plots.loc[plot_id, "xmax"]=df[df_plots.loc[plot_id, "xvar"]].max()
+    if df_plots.loc[plot_id, "ymin"]==-1:
+        df_plots.loc[plot_id, "ymin"]=df[df_plots.loc[plot_id, "yvar"]].min()
+    if df_plots.loc[plot_id, "ymax"]==-1:
+        df_plots.loc[plot_id, "ymax"]=df[df_plots.loc[plot_id, "yvar"]].max()    
 
     # Tab 1: Plot settings
     with ptabs[0]:
@@ -100,6 +114,8 @@ def add_plot_tabs(
             key=f"plot_xvar_{plot_id}"
             sel_val=st.session_state[key]
             df_plots.loc[plot_id, "xvar"]=sel_val
+            df_plots.loc[plot_id, "xmin"]=df[sel_val].min()
+            df_plots.loc[plot_id, "xmax"]=df[sel_val].max()
             
         xind = get_index_in_list(list_cols, df_plots.loc[plot_id, "xvar"])        
         st.selectbox(
@@ -116,6 +132,8 @@ def add_plot_tabs(
                 key=f"plot_yvar_{plot_id}"
                 sel_val=st.session_state[key]
                 df_plots.loc[plot_id, "yvar"]=sel_val
+                df_plots.loc[plot_id, "ymin"]=df[sel_val].min()
+                df_plots.loc[plot_id, "ymax"]=df[sel_val].max()
                 
             yind = get_index_in_list(list_cols, df_plots.loc[plot_id, "yvar"])
             st.selectbox(
@@ -376,7 +394,11 @@ def display_scatter_plot(
         utiltr.scatter_trace(
             df_filt,
             curr_plot["xvar"],
+            curr_plot["xmin"],
+            curr_plot["xmax"],
             yvar,
+            curr_plot["ymin"],
+            curr_plot["ymax"],
             curr_plot["hvar"],
             curr_plot["hvals"],
             curr_plot["traces"],
@@ -389,7 +411,11 @@ def display_scatter_plot(
             utiltr.linreg_trace(
                 df_filt,
                 curr_plot["xvar"],
+                curr_plot["xmin"],
+                curr_plot["xmax"],
                 yvar,
+                curr_plot["ymin"],
+                curr_plot["ymax"],
                 curr_plot["hvar"],
                 curr_plot["hvals"],
                 curr_plot["traces"],

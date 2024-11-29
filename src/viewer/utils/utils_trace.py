@@ -69,7 +69,11 @@ def dist_plot(
 def scatter_trace(
     df: pd.DataFrame,
     xvar: str,
+    xmin: float,
+    xmax: float,
     yvar: str,
+    ymin: float,
+    ymax: float,
     hvar: str,
     hvals: list,
     traces: list,
@@ -106,12 +110,18 @@ def scatter_trace(
                 showlegend=not hide_legend,
             )
             fig.add_trace(trace)
+        fig.update_layout(xaxis_range=[xmin, xmax])
+        fig.update_layout(yaxis_range=[ymin, ymax])
 
 
 def linreg_trace(
     df: pd.DataFrame,
     xvar: str,
+    xmin: float,
+    xmax: float,
     yvar: str,
+    ymin: float,
+    ymax: float,
     hvar: str,
     hvals: list,
     traces: list,
@@ -177,7 +187,8 @@ def linreg_trace(
                 showlegend=not hide_legend,
             )
             fig.add_trace(trace)
-
+    fig.update_layout(xaxis_range=[xmin, xmax])
+    fig.update_layout(yaxis_range=[ymin, ymax])
     return fig
 
 
