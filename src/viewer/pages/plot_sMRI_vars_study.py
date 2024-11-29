@@ -32,7 +32,6 @@ st.markdown(
     """
 )
 
-
 def panel_wdir() -> None:
     """
     Panel for selecting the working dir
