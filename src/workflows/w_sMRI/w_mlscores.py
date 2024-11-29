@@ -115,7 +115,7 @@ def run_workflow(
     min_age = 50
     max_age = 95
     suff_combat = "_HARM"
-    spare_types = ["AD", "Age"]
+    spare_types = ["AD", "Age", "Hypertension", "Diabetes", "Hyperlipidemia", "Obesity", "Smoking"]
     icv_ref_val = 1430000
     cent_csv = os.path.join(
         bdir, "resources", "centiles", "istag_centiles_CN_ICV_Corrected.csv"

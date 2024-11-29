@@ -123,10 +123,7 @@ def user_input_foldername(
     # Button to select folder
     with tmpcol[1]:
         if st.button(label_btn, key=f"btn_{key_st}"):
-            if os.path.exists(path_curr):
-                out_str = utilio.browse_folder(path_curr)
-            else:
-                out_str = utilio.browse_folder(path_last)
+            out_str = utilio.browse_folder(path_last)
 
     if out_str is not None and os.path.exists(out_str):
         out_str = os.path.abspath(out_str)
@@ -325,8 +322,10 @@ def util_select_folder(
     if sel_dir is not None and os.path.exists(sel_dir):
         # Remove existing output folder
         if os.path.exists(dir_out) and dir_out != sel_dir:
-            st.warning(f"Out folder {dir_out} exists, would you want to replace it?")
-            shutil.rmtree(dir_out)
+            if os.path.islink(dir_out):
+                os.unlink(dir_out)
+            else:
+                shutil.rmtree(dir_out)
             
         # Create parent dir of output dir
         if not os.path.exists(os.path.dirname(dir_out)):
