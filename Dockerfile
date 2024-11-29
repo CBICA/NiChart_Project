@@ -46,8 +46,9 @@ USER root
 RUN apt-get update && apt-get install -y python3-tk git
 USER $MAMBA_USER
 RUN pip install --verbose -r /tmp/requirements.txt && pip uninstall -y torch && pip install --verbose torch==2.3.1 --index-url https://download.pytorch.org/whl/cu${CUDA_VERSION}
-RUN git clone https://github.com/CBICA/PredCRD.git && cd PredCRD && pip install -e .
 RUN mkdir ~/dummyinput && mkdir ~/dummyoutput
+RUN git clone https://github.com/CBICA/PredCRD.git && cd PredCRD && pip install -e .
+RUN git clone https://github.com/CBICA/DLWMLS.git && cd DLWMLS && pip install -e . && DLWMLS -i ~/dummyinput -o ~/dummyoutput
 ## Cache DLMUSE and DLICV models with an empty job so no download is needed later
 RUN DLMUSE -i ~/dummyinput -o ~/dummyoutput && DLICV -i ~/dummyinput -o ~/dummyoutput
 USER root
