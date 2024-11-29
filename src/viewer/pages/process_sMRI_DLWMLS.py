@@ -133,7 +133,6 @@ def panel_dlwmls() -> None:
                 run_scr = os.path.join(
                     st.session_state.paths["root"],
                     "src",
-                    "workflow",
                     "workflows",
                     "w_DLWMLS",
                     "wmls_post.py",
