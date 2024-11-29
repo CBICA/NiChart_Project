@@ -508,9 +508,6 @@ def run_workflow_noharmonization(
     df_out = pd.read_csv(f_raw, dtype={"MRID": str})
     df_out = df_out.rename(columns=dict(zip(df_roidict.Code, df_roidict.Name)))
 
-    print(df_out.columns)
-    input('aa')
-
     f_centiles = os.path.join(out_wdir, f"{dset_name}_icvcorr_centiles.csv")
     df_centiles = pd.read_csv(f_centiles, dtype={"MRID": str})
     df_tmp = df_centiles[
@@ -519,9 +516,6 @@ def run_workflow_noharmonization(
     ]
     df_tmp = df_tmp.rename(columns=dict(zip(df_roidict.Code, df_roidict.Name)))
     df_out = df_out.merge(df_tmp, on="MRID", suffixes=["", "_centiles"])
-
-    print(df_out.columns)
-    input('bb')
 
     f_spare = os.path.join(out_wdir, f"{dset_name}_spare-all.csv")
     df_spare = pd.read_csv(f_spare, dtype={"MRID": str})

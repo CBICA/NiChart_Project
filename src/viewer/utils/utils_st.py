@@ -326,8 +326,7 @@ def util_select_folder(
         # Remove existing output folder
         if os.path.exists(dir_out) and dir_out != sel_dir:
             st.warning(f"Out folder {dir_out} exists, would you want to replace it?")
-            if st.button("Confirm Deletion"):
-                shutil.rmtree(dir_out)
+            shutil.rmtree(dir_out)
             
         # Create parent dir of output dir
         if not os.path.exists(os.path.dirname(dir_out)):
