@@ -324,7 +324,7 @@ def util_select_folder(
 
     if sel_dir is not None and os.path.exists(sel_dir):
         # Remove existing output folder
-        if os.path.exists(dir_out):
+        if os.path.exists(dir_out) and dir_out != sel_dir:
             st.warning(f"Out folder {dir_out} exists, would you want to replace it?")
             if st.button("Confirm Deletion"):
                 shutil.rmtree(dir_out)
@@ -332,8 +332,10 @@ def util_select_folder(
         # Create parent dir of output dir
         if not os.path.exists(os.path.dirname(dir_out)):
             os.makedirs(os.path.dirname(dir_out))
+        
         # Link user input dicoms
-        os.symlink(sel_dir, dir_out)
+        if not os.path.exists(dir_out):
+            os.symlink(sel_dir, dir_out)
 
 
 def util_select_file(

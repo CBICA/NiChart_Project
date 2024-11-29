@@ -180,7 +180,7 @@ if st.session_state.app_type == "cloud":
             if not os.path.exists(st.session_state.paths["download"]):
                 os.makedirs(st.session_state.paths["download"])
             f_tmp = os.path.join(st.session_state.paths["download"], "MLScores.zip")
-            out_zip = utilio.zip_folder(st.session_state.paths["MLScores"], f_tmp)
+            out_zip = utilio.zip_folder(st.session_state.paths["mlscores"], f_tmp)
 
             st.download_button(
                 "Download ML Scores",
