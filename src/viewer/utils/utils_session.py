@@ -204,7 +204,9 @@ def init_session_state() -> None:
             "trend_types": ["", "Linear", "Smooth LOWESS Curve"],
             "centile_types": ["", "CN", "CN_Males", "CN_Females", "CN_ICV_Corrected"],
             "linfit_trace_types": ["lin_fit", "conf_95%"],
-            "centile_trace_types": ["5%", "25%", "50%", "75%", "95%"],
+            "centile_trace_types": [
+                "centile_5", "centile_25", "centile_50", "centile_75", "centile_95"
+            ],
             "distplot_trace_types": ["histogram", "density", "rug"],
             "min_per_row": 1,
             "max_per_row": 5,
@@ -232,7 +234,7 @@ def init_session_state() -> None:
             "corr_icv": False,
             "plot_cent_normalized": False,
             "trend": "Linear",
-            "traces": ["data", "lin"],
+            "traces": ["data", "lin_fit"],
             "lowess_s": 0.5,
             "centtype": "",
             "h_coeff": 1.0,

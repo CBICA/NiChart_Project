@@ -97,7 +97,7 @@ def linreg_model(df: pd.DataFrame, xvar: str, yvar: str, hvar: str) -> Any:
 #     return dict_out
 
 
-@st.cache_data()  # type:ignore
+#@st.cache_data()  # type:ignore
 def lowess_model(
     df: pd.DataFrame, xvar: str, yvar: str, hvar: str, lowess_s: float
 ) -> Any:

@@ -205,7 +205,7 @@ def lowess_trace(
     if hvals == []:
         hvals = vals_hue_all
 
-    dict_fit = utilstat.lowess_model(df, xvar, yvar, hvar, lowess_s)
+    dict_fit = utilstat.lowess_model(dft, xvar, yvar, hvar, lowess_s)
 
     # Add traces for the fit and confidence intervals
     for hname in hvals:
@@ -242,7 +242,8 @@ def dot_trace(
     fig.add_trace(trace)
 
 
-def percentile_trace(df: pd.DataFrame, xvar: str, yvar: str, fig: Any) -> Any:
+def percentile_trace(df: pd.DataFrame, xvar: str, yvar: str, traces, fig: Any) -> Any:
+
     # Set colormap
     colors = st.session_state.plot_colors["centile"]
 
@@ -251,16 +252,17 @@ def percentile_trace(df: pd.DataFrame, xvar: str, yvar: str, fig: Any) -> Any:
 
     # Create line traces
     for i, cvar in enumerate(df_tmp.columns[2:]):
-        ctrace = go.Scatter(
-            x=df_tmp[xvar],
-            y=df_tmp[cvar],
-            mode="lines",
-            name=cvar,
-            legendgroup="centiles",
-            line=dict(color=colors[i]),
-        )
+        if cvar in traces:
+            ctrace = go.Scatter(
+                x=df_tmp[xvar],
+                y=df_tmp[cvar],
+                mode="lines",
+                name=cvar,
+                legendgroup="centiles",
+                line=dict(color=colors[i]),
+            )
 
-        fig.add_trace(ctrace)  # plot in first row
+            fig.add_trace(ctrace)  # plot in first row
 
     return fig
 
