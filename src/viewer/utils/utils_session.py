@@ -4,9 +4,11 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 import utils.utils_rois as utilroi
+from PIL import Image
 
 
 def config_page() -> None:
+    st.session_state.nicon = Image.open("../resources/nichart1.png")
     st.set_page_config(
         page_title="NiChart",
         page_icon=st.session_state.nicon,
@@ -26,8 +28,13 @@ def init_session_state() -> None:
 
         ###################################
         # App type ('desktop' or 'cloud')
-        st.session_state.app_type = "cloud"
-        st.session_state.app_type = "desktop"
+        if os.getenv("NICHART_FORCE_CLOUD", "0") == "1":
+            st.session_state.forced_cloud = True
+            st.session_state.app_type = "cloud"
+        else:
+            st.session_state.forced_cloud = False
+            st.session_state.app_type = "desktop"
+
         st.session_state.app_config = {
             "cloud": {"msg_infile": "Upload"},
             "desktop": {"msg_infile": "Select"},

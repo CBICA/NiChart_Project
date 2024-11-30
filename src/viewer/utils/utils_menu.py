@@ -4,6 +4,10 @@ import streamlit as st
 
 
 def menu() -> Any:
+    ## Force redirect to the home page if anything is not properly instantiated.
+    if 'instantiated' not in st.session_state:
+        print("Redirected to home page as a required instantiation variable was missing.")
+        st.switch_page('pages/home.py')
     if st.session_state.pipeline == "Home":
         st.sidebar.page_link("pages/home.py", label="Home")
 
