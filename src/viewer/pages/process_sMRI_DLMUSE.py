@@ -252,7 +252,7 @@ def panel_view() -> None:
                 )
                 st.session_state.paths["sel_seg"] = os.path.join(
                     # hardcoded fix for T1 suffix
-                    st.session_state.paths["DLMUSE"],
+                    st.session_state.paths["dlmuse"],
                     re.sub(r"_T1$", "", sel_mrid) + st.session_state.suff_seg,
                 )
 

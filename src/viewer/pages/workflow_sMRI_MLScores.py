@@ -1,11 +1,12 @@
 import os
 import sys
+
+import pandas as pd
 import streamlit as st
 import utils.utils_io as utilio
 import utils.utils_menu as utilmenu
 import utils.utils_session as utilss
 import utils.utils_st as utilst
-import pandas as pd
 
 # Page config should be called for each page
 utilss.config_page()
@@ -120,33 +121,33 @@ if show_panel_runml:
 
             # Check flag for harmonization
             flag_harmonize = True
-            df_tmp = pd.read_csv(st.session_state.paths['csv_demog'])
+            df_tmp = pd.read_csv(st.session_state.paths["csv_demog"])
             if df_tmp.shape[0] < st.session_state.harm_min_samples:
                 flag_harmonize = False
-                st.warning('Sample size is small. The data will not be harmonized!')
+                st.warning("Sample size is small. The data will not be harmonized!")
 
             with st.spinner("Wait for it..."):
                 st.info("Running: mlscores_workflow ", icon=":material/manufacturing:")
                 sys.path.append(run_dir)
                 import w_mlscores as w_mlscores
-                
+
                 if flag_harmonize:
                     w_mlscores.run_workflow(
                         st.session_state.dset,
-                        st.session_state.paths['root'],
-                        st.session_state.paths['csv_dlmuse'],
-                        st.session_state.paths['csv_demog'],
-                        st.session_state.paths['mlscores'],
+                        st.session_state.paths["root"],
+                        st.session_state.paths["csv_dlmuse"],
+                        st.session_state.paths["csv_demog"],
+                        st.session_state.paths["mlscores"],
                     )
                 else:
                     w_mlscores.run_workflow_noharmonization(
                         st.session_state.dset,
-                        st.session_state.paths['root'],
-                        st.session_state.paths['csv_dlmuse'],
-                        st.session_state.paths['csv_demog'],
-                        st.session_state.paths['mlscores'],
+                        st.session_state.paths["root"],
+                        st.session_state.paths["csv_dlmuse"],
+                        st.session_state.paths["csv_demog"],
+                        st.session_state.paths["mlscores"],
                     )
-                    
+
         # Check out file
         if os.path.exists(st.session_state.paths["csv_mlscores"]):
             st.success(
@@ -176,10 +177,10 @@ if st.session_state.app_type == "cloud":
     if show_panel_download:
         with st.container(border=True):
             out_zip = bytes()
-            if not os.path.exists(st.session_state.paths["OutZipped"]):
-                os.makedirs(st.session_state.paths["OutZipped"])
-            f_tmp = os.path.join(st.session_state.paths["OutZipped"], "MLScores.zip")
-            out_zip = utilio.zip_folder(st.session_state.paths["MLScores"], f_tmp)
+            if not os.path.exists(st.session_state.paths["download"]):
+                os.makedirs(st.session_state.paths["download"])
+            f_tmp = os.path.join(st.session_state.paths["download"], "MLScores.zip")
+            out_zip = utilio.zip_folder(st.session_state.paths["mlscores"], f_tmp)
 
             st.download_button(
                 "Download ML Scores",

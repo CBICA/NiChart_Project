@@ -6,6 +6,36 @@ import plotly.graph_objs as go
 import streamlit as st
 import utils.utils_trace as utiltr
 
+def add_items_to_list(my_list, items_to_add):
+  """Adds multiple items to a list, avoiding duplicates.
+
+  Args:
+    my_list: The list to add items to.
+    items_to_add: A list of items to add.
+
+  Returns:
+    The modified list.
+  """
+  for item in items_to_add:
+    if item not in my_list:
+      my_list.append(item)
+  return my_list
+
+def remove_items_from_list(my_list, items_to_remove):
+  """Removes multiple items from a list.
+
+  Args:
+    my_list: The list to remove items from.
+    items_to_remove: A list of items to remove.
+
+  Returns:
+    The modified list.
+  """
+  out_list=[]
+  for item in my_list:
+    if item not in items_to_remove:
+      out_list.append(item)
+  return out_list
 
 def add_plot() -> None:
     """
@@ -18,11 +48,15 @@ def add_plot() -> None:
         plot_id,
         st.session_state.plot_var["plot_type"],
         st.session_state.plot_var["xvar"],
+        st.session_state.plot_var["xmin"],
+        st.session_state.plot_var["xmax"],
         st.session_state.plot_var["yvar"],
+        st.session_state.plot_var["ymin"],
+        st.session_state.plot_var["ymax"],
         st.session_state.plot_var["hvar"],
         st.session_state.plot_var["hvals"],
         st.session_state.plot_var["corr_icv"],
-        st.session_state.plot_var["plot_centiles"],
+        st.session_state.plot_var["plot_cent_normalized"],
         st.session_state.plot_var["trend"],
         st.session_state.plot_var["lowess_s"],
         st.session_state.plot_var["traces"],
@@ -50,13 +84,60 @@ def get_index_in_list(in_list: list, in_item: str) -> Optional[int]:
     else:
         return in_list.index(in_item)
 
+def set_x_bounds(
+    df: pd.DataFrame,
+    df_plots: pd.DataFrame,
+    plot_id: str,
+    xvar: str
+) -> list:
+    # Set x and y min/max if not set
+    # Values include some margin added for viewing purposes    
+    xmin=df[xvar].min()
+    xmax=df[xvar].max()
+    dx=xmax-xmin
+    if dx==0:       # Margin defined based on the value if delta is 0
+        xmin = xmin - xmin/8
+        xmax = xmax + xmax/8
+    else:           # Margin defined based on the delta otherwise
+        xmin = xmin - dx/5
+        xmax = xmax + dx/5
+
+    df_plots.loc[plot_id, "xmax"]=xmax
+    df_plots.loc[plot_id, "xmin"]=xmin
+    
+def set_y_bounds(
+    df: pd.DataFrame,
+    df_plots: pd.DataFrame,
+    plot_id: str,
+    yvar: str
+) -> list:
+    # Set x and y min/max if not set
+    # Values include some margin added for viewing purposes    
+    ymin=df[yvar].min()
+    ymax=df[yvar].max()
+    dy=ymax-ymin
+    if dy==0:       # Margin defined based on the value if delta is 0
+        ymin = ymin - ymin/8
+        ymax = ymax + ymax/8
+    else:           # Margin defined based on the delta otherwise
+        ymin = ymin - dy/5
+        ymax = ymax + dy/5
+
+    df_plots.loc[plot_id, "ymax"]=ymax
+    df_plots.loc[plot_id, "ymin"]=ymin
 
 def add_plot_tabs(
     df: pd.DataFrame, df_plots: pd.DataFrame, plot_id: str
 ) -> pd.DataFrame:
 
+    # Set xy bounds initially to make plots consistent
+    if df_plots.loc[plot_id, "xmin"]==-1:
+        set_x_bounds(df, df_plots, plot_id, df_plots.loc[plot_id, "xvar"])
+    if df_plots.loc[plot_id, "ymin"]==-1:
+        set_y_bounds(df, df_plots, plot_id, df_plots.loc[plot_id, "yvar"])
+    
     ptabs = st.tabs(["Settings", "Layers", ":material/x:"])
-
+    
     # Tab 1: Plot settings
     with ptabs[0]:
         # Get df columns
@@ -64,60 +145,135 @@ def add_plot_tabs(
         list_cols_ext = [""] + list_cols
         list_trends = st.session_state.plot_const["trend_types"]
 
-        # Set plotting variables
-        xind = get_index_in_list(list_cols, df_plots.loc[plot_id, "xvar"])
-        xvar = st.selectbox("X Var", list_cols, key=f"plot_xvar_{plot_id}", index=xind)
-        if xvar is not None:
-            df_plots.loc[plot_id, "xvar"] = xvar
-
-        if df_plots.loc[plot_id, "plot_type"] == "Scatter Plot":
-            yind = get_index_in_list(list_cols, df_plots.loc[plot_id, "yvar"])
-            yvar = st.selectbox(
-                "Y Var", list_cols, key=f"plot_yvar_{plot_id}", index=yind
-            )
-            if yvar is not None:
-                df_plots.loc[plot_id, "yvar"] = yvar
-
-        hind = get_index_in_list(list_cols_ext, df_plots.loc[plot_id, "hvar"])
-        hvar = st.selectbox(
-            "Group by", list_cols_ext, key=f"plot_hvar_{plot_id}", index=hind
+      
+        # Set x var
+        def on_xvar_change():
+            key=f"plot_xvar_{plot_id}"
+            sel_val=st.session_state[key]
+            df_plots.loc[plot_id, "xvar"]=sel_val
+            
+            # Update x bounds
+            set_x_bounds(df, df_plots, plot_id, df_plots.loc[plot_id, "xvar"])
+            
+        xind = get_index_in_list(list_cols, df_plots.loc[plot_id, "xvar"])        
+        st.selectbox(
+            "X Var",
+            list_cols,
+            key=f"plot_xvar_{plot_id}",
+            index=xind,
+            on_change=on_xvar_change
         )
-        if hvar is not None:
-            df_plots.loc[plot_id, "hvar"] = hvar
+        
+        if df_plots.loc[plot_id, "plot_type"] == "Scatter Plot":
+            # Set y var
+            def on_yvar_change():
+                key=f"plot_yvar_{plot_id}"
+                sel_val=st.session_state[key]
+                df_plots.loc[plot_id, "yvar"]=sel_val
+
+                # Update y bounds
+                if df_plots.loc[plot_id, "plot_cent_normalized"]:
+                    set_y_bounds(df, df_plots, plot_id, df_plots.loc[plot_id, "yvar"]+'_centiles')
+                else:
+                    set_y_bounds(df, df_plots, plot_id, df_plots.loc[plot_id, "yvar"])
+                
+            yind = get_index_in_list(list_cols, df_plots.loc[plot_id, "yvar"])
+            st.selectbox(
+                "Y Var",
+                list_cols,
+                key=f"plot_yvar_{plot_id}",
+                index=yind,
+                on_change=on_yvar_change
+            )
+
+        # Set hvar
+        def on_hvar_change():
+            key=f"plot_hvar_{plot_id}"
+            sel_val=st.session_state[key]
+            df_plots.loc[plot_id, "hvar"]=sel_val
+            
+        hind = get_index_in_list(list_cols_ext, df_plots.loc[plot_id, "hvar"])
+        st.selectbox(
+            "Group by",
+            list_cols_ext,
+            key=f"plot_hvar_{plot_id}",
+            index=hind,
+            on_change=on_hvar_change
+        )
 
         if "ICV" in list_cols:
-            df_plots.loc[plot_id, "corr_icv"] = st.checkbox(
+            # Set icv corr flag
+            def on_check_icvcorr_change():
+                key=f"key_check_icv_{plot_id}"
+                sel_val=st.session_state[key]
+                df_plots.loc[plot_id, "corr_icv"]=sel_val
+                
+            st.checkbox(
                 "Correct ICV",
                 value=df_plots.loc[plot_id, "corr_icv"],
                 help="Correct regional volumes using the intra-cranial volume to account for differences in head size",
                 key=f"key_check_icv_{plot_id}",
+                on_change=on_check_icvcorr_change
             )
 
-        df_plots.loc[plot_id, "plot_centiles"] = st.checkbox(
-            "Plot Centiles",
-            value=df_plots.loc[plot_id, "plot_centiles"],
-            help="Show centile values for the ROI",
-            key=f"key_check_centiles_{plot_id}",
-        )
-
         if df_plots.loc[plot_id, "plot_type"] == "Scatter Plot":
-            tind = get_index_in_list(list_trends, df_plots.loc[plot_id, "trend"])
-            trend = st.selectbox(
+            # Set view cent norm data flag
+            def on_check_centnorm_change():
+                key=f"key_check_centiles_{plot_id}"
+                sel_val=st.session_state[key]
+                df_plots.loc[plot_id, "plot_cent_normalized"]=sel_val
+                if sel_val:
+                    set_y_bounds(df, df_plots, plot_id, df_plots.loc[plot_id, "yvar"] + '_centiles')
+                else:
+                    set_y_bounds(df, df_plots, plot_id, df_plots.loc[plot_id, "yvar"])
+                
+            st.checkbox(
+                "Plot ROIs normalized by centiles",
+                value=df_plots.loc[plot_id, "plot_cent_normalized"],
+                help="Show ROI values normalized by reference centiles",
+                key=f"key_check_centiles_{plot_id}",
+                on_change=on_check_centnorm_change
+            )
+
+            # Select trend
+            def on_trend_sel_change():
+                key=f"trend_type_{plot_id}"
+                sel_val=st.session_state[key]
+                df_plots.loc[plot_id, "trend"]=sel_val
+                if sel_val == "Linear":
+                    df_plots.at[plot_id, "traces"] = add_items_to_list(
+                        df_plots.loc[plot_id, "traces"], ["lin_fit"]
+                    )
+                else:
+                    df_plots.at[plot_id, "traces"] = remove_items_from_list(
+                        df_plots.loc[plot_id, "traces"], ["lin_fit", "conf_95%"]
+                    )
+                # df_plots.at[plot_id, 'traces'] = ['data']
+
+            tind = get_index_in_list(list_trends, df_plots.loc[plot_id, "trend"])            
+            st.selectbox(
                 "Trend Line",
                 list_trends,
                 key=f"trend_type_{plot_id}",
                 index=tind,
+                on_change=on_trend_sel_change
             )
-            if trend is not None:
-                df_plots.loc[plot_id, "trend"] = trend
 
-            if trend == "Linear":
-                df_plots.at[plot_id, "traces"] = ["data", "lin_fit"]
-                # df_plots.at[plot_id, 'traces'] = ['data']
-
-            if trend == "Smooth LOWESS Curve":
-                df_plots.loc[plot_id, "lowess_s"] = st.slider(
-                    "Smoothness", min_value=0.4, max_value=1.0, value=0.7, step=0.1
+            # Select lowess smoothness            
+            if df_plots.loc[plot_id, "trend"]=="Smooth LOWESS Curve":
+                def on_sel_lowessval_change():
+                    key=f"lowess_sm_{plot_id}"
+                    sel_val=st.session_state[key]
+                    df_plots.loc[plot_id, "lowess_s"]=sel_val
+                
+                st.slider(
+                    "Smoothness",
+                    min_value=0.4,
+                    max_value=1.0,
+                    value=0.7,
+                    step=0.1,
+                    key=f"lowess_sm_{plot_id}",
+                    on_change=on_sel_lowessval_change
                 )
 
         if df_plots.loc[plot_id, "plot_type"] == "Distribution Plot":
@@ -126,43 +282,91 @@ def add_plot_tabs(
     # Tab 2: Layers
     with ptabs[1]:
 
-        if df_plots.loc[plot_id, "hvar"] != "":
-            vals_hue = sorted(df[hvar].unique())
-            df_plots.at[plot_id, "hvals"] = st.multiselect(
-                "Select groups", vals_hue, vals_hue, key=f"key_select_huevals_{plot_id}"
-            )
-
         if df_plots.loc[plot_id, "plot_type"] == "Scatter Plot":
-            if df_plots.loc[plot_id, "trend"] == "Linear":
-                df_plots.at[plot_id, "traces"] = st.multiselect(
-                    "Select traces",
-                    st.session_state.plot_const["linfit_trace_types"],
-                    df_plots.loc[plot_id, "traces"],
-                    key=f"key_sel_trace_linfit_{plot_id}",
-                )
-
-            # Get plot params
+            
+            # Select centile type
+            def on_centile_sel_change():
+                # Set centile selection to plot var
+                key=f"cent_type_{plot_id}"
+                sel_val=st.session_state[key]
+                df_plots.loc[plot_id, "centtype"]=sel_val
+                if sel_val == "":
+                    df_plots.at[plot_id, "traces"] = remove_items_from_list(
+                        df_plots.loc[plot_id, "traces"],
+                        st.session_state.plot_const['centile_trace_types']
+                    )
+                else:
+                    df_plots.at[plot_id, "traces"] = add_items_to_list(
+                        df_plots.loc[plot_id, "traces"],
+                        st.session_state.plot_const['centile_trace_types']
+                    )
+                
             centtype = df_plots.loc[plot_id, "centtype"]
-
-            # Select plot params from the user
             centind = st.session_state.plot_const["centile_types"].index(centtype)
-
-            centtype = st.selectbox(
+            sel_options = st.selectbox(
                 "Centile Type",
                 st.session_state.plot_const["centile_types"],
                 key=f"cent_type_{plot_id}",
                 index=centind,
+                on_change=on_centile_sel_change
             )
 
-            # Set plot params to session_state
-            st.session_state.plots.loc[plot_id, "centtype"] = centtype
+        # Select group (hue) values
+        hvar=df_plots.loc[plot_id, "hvar"]
+        if hvar != "":
+            def on_hvals_change():
+                key=f"key_select_hvals_{plot_id}"
+                sel_val=st.session_state[key]
+                df_plots.at[plot_id, "hvals"]=sel_val
+                #if sel_val != '':
+            
+            vals_hue = sorted(df[hvar].unique())
+            df_plots.at[plot_id, "hvals"] = st.multiselect(
+                "Select groups",
+                vals_hue,
+                vals_hue,
+                key=f"key_select_hvals_{plot_id}",
+                on_change=on_hvals_change
+            )
+
+        if df_plots.loc[plot_id, "plot_type"] == "Scatter Plot":
+
+            ## Update current list of traces
+            #df_plots.at[plot_id, "traces"] = [x for x in df_plots.loc[plot_id, "traces"] if x in list_traces]
+
+            # Read user selection for traces
+            def on_scatter_trace_sel_change():
+                key=f"key_sel_traces_scatter_{plot_id}"
+                sel_trace=st.session_state[key]
+                df_plots.at[plot_id, "traces"]=sel_trace
+
+            list_traces = ['data']
+            if df_plots.loc[plot_id, "trend"] == "Linear":
+                list_traces = list_traces + st.session_state.plot_const["linfit_trace_types"]
+            if df_plots.loc[plot_id, "centtype"] != "":
+                list_traces = list_traces + st.session_state.plot_const["centile_trace_types"]
+
+            sel_trace = st.multiselect(
+                "Select traces",
+                list_traces,
+                df_plots.loc[plot_id, "traces"],
+                key=f"key_sel_traces_scatter_{plot_id}",
+                on_change=on_scatter_trace_sel_change
+            )
 
         if df_plots.loc[plot_id, "plot_type"] == "Distribution Plot":
+            # Read user selection for traces
+            def on_dist_trace_sel_change():
+                key=f"key_sel_trace_dist_{plot_id}"
+                sel_trace=st.session_state[key]
+                df_plots.at[plot_id, "traces"]=sel_trace
+
             df_plots.at[plot_id, "traces"] = st.multiselect(
                 "Select traces",
                 st.session_state.plot_const["distplot_trace_types"],
                 df_plots.loc[plot_id, "traces"],
-                key=f"key_sel_trace_densityplot_{plot_id}",
+                key=f"key_sel_trace_dist_{plot_id}",
+                on_change=on_dist_trace_sel_change
             )
 
     # Tab 3: Reset parameters and/or delete plot
@@ -223,8 +427,11 @@ def display_scatter_plot(
             yvar = f"{yvar}_corrICV"
 
         # If user selected to plot centiles
-        if curr_plot["plot_centiles"]:
-            yvar = f'{curr_plot["yvar"]}_centile'
+        if curr_plot["plot_cent_normalized"]:
+            yvar = f'{curr_plot["yvar"]}_centiles'
+            if yvar not in df.columns:
+                st.warning(f'Centile values not available for variable: {curr_plot["yvar"]}')
+                yvar=curr_plot["yvar"]
 
         # Add axis labels
         fig.update_layout(
@@ -236,7 +443,11 @@ def display_scatter_plot(
         utiltr.scatter_trace(
             df_filt,
             curr_plot["xvar"],
+            curr_plot["xmin"],
+            curr_plot["xmax"],
             yvar,
+            curr_plot["ymin"],
+            curr_plot["ymax"],
             curr_plot["hvar"],
             curr_plot["hvals"],
             curr_plot["traces"],
@@ -249,7 +460,11 @@ def display_scatter_plot(
             utiltr.linreg_trace(
                 df_filt,
                 curr_plot["xvar"],
+                curr_plot["xmin"],
+                curr_plot["xmax"],
                 yvar,
+                curr_plot["ymin"],
+                curr_plot["ymax"],
                 curr_plot["hvar"],
                 curr_plot["hvals"],
                 curr_plot["traces"],
@@ -260,7 +475,11 @@ def display_scatter_plot(
             utiltr.lowess_trace(
                 df_filt,
                 curr_plot["xvar"],
+                curr_plot["xmin"],
+                curr_plot["xmax"],
                 yvar,
+                curr_plot["ymin"],
+                curr_plot["ymax"],
                 curr_plot["hvar"],
                 curr_plot["hvals"],
                 curr_plot["lowess_s"],
@@ -278,12 +497,23 @@ def display_scatter_plot(
                 f"istag_centiles_{curr_plot['centtype']}.csv",
             )
             df_cent = pd.read_csv(fcent)
-            utiltr.percentile_trace(df_cent, curr_plot["xvar"], curr_plot["yvar"], fig)
+            utiltr.percentile_trace(
+                df_cent,
+                curr_plot["xvar"],
+                curr_plot["xmin"],
+                curr_plot["xmax"],
+                yvar,
+                curr_plot["ymin"],
+                curr_plot["ymax"],
+                curr_plot['traces'],
+                st.session_state.plot_var["hide_legend"],
+                fig
+            )
 
         # Highlight selected data point
         if sel_mrid != "":
             yvar = curr_plot["yvar"]
-            if curr_plot["plot_centiles"]:
+            if curr_plot["plot_cent_normalized"]:
                 yvar = f"{yvar}_centile"
             elif curr_plot["corr_icv"]:
                 yvar = f"{yvar}_corrICV"

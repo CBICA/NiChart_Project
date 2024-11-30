@@ -1,5 +1,6 @@
 import json
 import os
+
 import pandas as pd
 import streamlit as st
 import utils.utils_dataframe as utildf
@@ -30,7 +31,6 @@ st.markdown(
         - View MRI images and segmentations for selected data points
     """
 )
-
 
 def panel_wdir() -> None:
     """
@@ -183,8 +183,10 @@ def panel_select() -> None:
         cols_tmp = st.columns((1, 3, 1), vertical_alignment="bottom")
         with cols_tmp[0]:
             sel_cat = st.selectbox(
-                "Select variable category", list(dict_categories.keys()), index=None,
-                help='Variable categories group together related variables to facilitate selection of a subset of all data variables.'
+                "Select variable category",
+                list(dict_categories.keys()),
+                index=None,
+                help="Variable categories group together related variables to facilitate selection of a subset of all data variables.",
             )
 
         if sel_cat is None:
@@ -198,13 +200,11 @@ def panel_select() -> None:
                 "Select variables from this category",
                 sel_vars,
                 sel_vars,
-                help='The list shows variables that are present in the data file! If the list is empty, it means that none of the variables in this category are present in the data file.'
+                help="The list shows variables that are present in the data file! If the list is empty, it means that none of the variables in this category are present in the data file.",
             )
 
         with cols_tmp[2]:
-            if st.button(
-                "Add selected variables"
-            ):
+            if st.button("Add selected variables"):
                 sel_vars_uniq = [
                     v for v in sel_vars if v not in st.session_state.plot_sel_vars
                 ]
@@ -221,9 +221,11 @@ def panel_select() -> None:
         st.session_state.plot_sel_vars = sel_vars_all
 
         if st.button("Select variables"):
-            if 'MRID' not in st.session_state.plot_sel_vars:
-                st.session_state.plot_sel_vars = ['MRID'] + st.session_state.plot_sel_vars
-            sel_vars=st.session_state.plot_sel_vars
+            if "MRID" not in st.session_state.plot_sel_vars:
+                st.session_state.plot_sel_vars = [
+                    "MRID"
+                ] + st.session_state.plot_sel_vars
+            sel_vars = st.session_state.plot_sel_vars
             st.success(f"Selected variables: {sel_vars}")
             df = df[st.session_state.plot_sel_vars]
             st.session_state.plot_var["df_data"] = df
@@ -233,7 +235,7 @@ def panel_select() -> None:
                 st.session_state.paths["csv_plot"]
             )
             st.session_state.is_updated["csv_plot"] = False
-            st.session_state.plot_sel_vars=[]
+            st.session_state.plot_sel_vars = []
 
 
 def panel_filter() -> None:
@@ -513,9 +515,9 @@ def panel_plot() -> None:
 st.divider()
 panel_wdir()
 panel_incsv()
-#panel_rename()
+# panel_rename()
 panel_select()
-#panel_filter()
+# panel_filter()
 panel_plot()
 
 # FIXME: For DEBUG

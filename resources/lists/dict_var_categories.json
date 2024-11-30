@@ -1,9 +1,26 @@
 {
-    "Demog": [
+    "Demographic": [
+        "MRID",
         "Age",
         "Sex",
         "Race",
         "Education"
+    ],
+    "Diagnosis": [
+        "DX",
+        "DX_AD",
+        "DX_Depression",
+        "DX_CVD",
+        "DX_Diabetes",
+        "DX_SCZ"
+    ],
+    "Cognitive": [
+        "MMSE",
+        "MOCA",
+        "ADAS",
+        "RAVLT",
+        "CVLY",
+        "CDR"
     ],
     "Scan": [
         "PID",
@@ -13,14 +30,7 @@
         "ScannerManufacturer",
         "FieldStrength"
     ],
-    "Diagnosis": [
-        "DX",
-        "DX_AD",
-        "DX_Depression",
-        "DX_CVD",
-        "DX_Diabates"
-    ],
-    "MUSE-Essential": [
+    "MUSE-TopPicks": [
         "DLICV",
         "TotalBrain",
         "GM",
@@ -37,7 +47,7 @@
         "Putamen_L",
         "ThalamusProper_L"
     ],
-    "MUSE-Single": [
+    "MUSE-SingleROIs": [
         "3rdVentricle",
         "4thVentricle",
         "AccumbensArea_R",
@@ -184,7 +194,7 @@
         "TransverseTemporalGyrus_R",
         "TransverseTemporalGyrus_L"
     ],
-    "MUSE-Composite": [
+    "MUSE-CompositeROIs": [
         "DLICV",
         "TotalBrain",
         "GM",

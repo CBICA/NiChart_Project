@@ -1,6 +1,7 @@
 import streamlit as st
 import utils.utils_menu as utilmenu
 import utils.utils_session as utilss
+import os
 
 # Page config should be called for each page
 utilss.config_page()
@@ -21,7 +22,10 @@ st.markdown(
     - [DLWMLS](https://neuroimagingchart.com/components/#Image%20Processing): Rapid and accurate segmentation of ***white matter lesions**
     """
 )
-st.image('/home/guraylab/Desktop/images/dlwmls_segmask.png', width=300)
+f_img = os.path.join(
+    st.session_state.paths["root"], "resources", "images", "dlwmls_segmask.png"
+)
+st.image(f_img, width=300)
 
 st.divider()
 

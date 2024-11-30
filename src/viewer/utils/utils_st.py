@@ -5,6 +5,7 @@ import numpy as np
 import streamlit as st
 import utils.utils_io as utilio
 import utils.utils_session as utilses
+import shutil
 
 # from wfork_streamlit_profiler import Profiler
 # import pyinstrument
@@ -122,10 +123,7 @@ def user_input_foldername(
     # Button to select folder
     with tmpcol[1]:
         if st.button(label_btn, key=f"btn_{key_st}"):
-            if os.path.exists(path_curr):
-                out_str = utilio.browse_folder(path_curr)
-            else:
-                out_str = utilio.browse_folder(path_last)
+            out_str = utilio.browse_folder(path_last)
 
     if out_str is not None and os.path.exists(out_str):
         out_str = os.path.abspath(out_str)
@@ -321,14 +319,20 @@ def util_select_folder(
         helpmsg,
     )
 
-    print(f"sss {sel_dir}")
-
-    if sel_dir is not None:
-        if not os.path.exists(dir_out) and os.path.exists(sel_dir):
-            # Create parent dir of output dir
-            if not os.path.exists(os.path.dirname(dir_out)):
-                os.makedirs(os.path.dirname(dir_out))
-            # Link user input dicoms
+    if sel_dir is not None and os.path.exists(sel_dir):
+        # Remove existing output folder
+        if os.path.exists(dir_out) and dir_out != sel_dir:
+            if os.path.islink(dir_out):
+                os.unlink(dir_out)
+            else:
+                shutil.rmtree(dir_out)
+            
+        # Create parent dir of output dir
+        if not os.path.exists(os.path.dirname(dir_out)):
+            os.makedirs(os.path.dirname(dir_out))
+        
+        # Link user input dicoms
+        if not os.path.exists(dir_out):
             os.symlink(sel_dir, dir_out)
 
 
@@ -372,19 +376,21 @@ def add_debug_panel() -> None:
     """
     Displays vars used in dev phase
     """
-    st.sidebar.divider()
-    st.sidebar.write("*** Debugging Flags ***")
-    if st.sidebar.checkbox("Switch to cloud?"):
-        st.session_state.app_type = "cloud"
-    else:
-        st.session_state.app_type = "desktop"
+    if not st.session_state.forced_cloud:
+        st.sidebar.divider()
+        st.sidebar.write("*** Debugging Flags ***")
+        is_cloud_mode = (st.session_state.app_type == "cloud")
+        if st.sidebar.checkbox("Switch to cloud?", value=is_cloud_mode):
+            st.session_state.app_type = "cloud"
+        else:
+            st.session_state.app_type = "desktop"
 
-    list_vars = ["", "All", "plots", "plot_var", "rois", "paths"]
-    # list_vars = st.session_state.keys()
-    sel_var = st.sidebar.selectbox("View session state vars", list_vars, index=0)
-    if sel_var != "":
-        with st.expander("DEBUG: Session state", expanded=True):
-            if sel_var == "All":
-                st.write(st.session_state)
-            else:
-                st.write(st.session_state[sel_var])
+        list_vars = ["", "All", "plots", "plot_var", "rois", "paths"]
+        # list_vars = st.session_state.keys()
+        sel_var = st.sidebar.selectbox("View session state vars", list_vars, index=0)
+        if sel_var != "":
+            with st.expander("DEBUG: Session state", expanded=True):
+                if sel_var == "All":
+                    st.write(st.session_state)
+                else:
+                    st.write(st.session_state[sel_var])

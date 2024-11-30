@@ -1,0 +1,64 @@
+name: Deploy static content to Pages
+on:
+  push:
+    branches: ["main", "spiros-dev", "ge-dev"]
+  workflow_dispatch:
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+      - name: Set-up miniconda for macos and ubuntu
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: 3.12
+          miniconda-version: "latest"
+      - name: Create conda env
+        run: conda create -n NCP python=3.12
+      - name: Install pip
+        run: conda run -n NCP conda install pip
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install setuptools
+          pip install sphinx sphinx_rtd_theme sphinx-tabs sphinx_toolbox
+      - name: Sphinx build
+        run: |
+          sphinx-apidoc -o docs2 src/
+          cd docs2/
+          make html
+          cd ..
+
+      - name: Upload pages artifact
+        uses: actions/upload-pages-artifact@v3
+
+        with:
+          path: docs/_build/html
+          retention-days: 90
+
+  deploy-docs:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    needs: build-docs
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.output.page_url }}
+
+    concurrency:
+      group: "pages"
+      cancel-in-progress: true
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy artifact to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

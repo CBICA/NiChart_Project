@@ -4,9 +4,11 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 import utils.utils_rois as utilroi
+from PIL import Image
 
 
 def config_page() -> None:
+    st.session_state.nicon = Image.open("../resources/nichart1.png")
     st.set_page_config(
         page_title="NiChart",
         page_icon=st.session_state.nicon,
@@ -26,8 +28,13 @@ def init_session_state() -> None:
 
         ###################################
         # App type ('desktop' or 'cloud')
-        st.session_state.app_type = "cloud"
-        st.session_state.app_type = "desktop"
+        if os.getenv("NICHART_FORCE_CLOUD", "0") == "1":
+            st.session_state.forced_cloud = True
+            st.session_state.app_type = "cloud"
+        else:
+            st.session_state.forced_cloud = False
+            st.session_state.app_type = "desktop"
+
         st.session_state.app_config = {
             "cloud": {"msg_infile": "Upload"},
             "desktop": {"msg_infile": "Select"},
@@ -144,7 +151,7 @@ def init_session_state() -> None:
         ############
         # FIXME : set init folder to test folder outside repo
         st.session_state.paths["init"] = os.path.join(
-            os.path.dirname(st.session_state.paths["root"]), "TestData"
+            st.session_state.paths["root"], "TestData"
         )
         st.session_state.paths["file_search_dir"] = st.session_state.paths["init"]
         ############
@@ -167,15 +174,14 @@ def init_session_state() -> None:
         )
 
         # Various parameters
-        
+
         # Average ICV estimated from a large sample
         # IMPORTANT: Used in NiChart Engine for normalization!
         st.session_state.mean_icv = 1430000
-        
+
         # Min number of samples to run harmonization
         st.session_state.harm_min_samples = 30
-        
-        
+
         ###################################
 
         ###################################
@@ -186,11 +192,15 @@ def init_session_state() -> None:
                 "pid",
                 "plot_type",
                 "xvar",
+                "xmin",
+                "xmax",
                 "yvar",
+                "ymin",
+                "ymax",
                 "hvar",
                 "hvals",
                 "corr_icv",
-                "plot_centiles",
+                "plot_cent_normalized",
                 "trend",
                 "lowess_s",
                 "traces",
@@ -204,7 +214,10 @@ def init_session_state() -> None:
         st.session_state.plot_const = {
             "trend_types": ["", "Linear", "Smooth LOWESS Curve"],
             "centile_types": ["", "CN", "CN_Males", "CN_Females", "CN_ICV_Corrected"],
-            "linfit_trace_types": ["data", "lin_fit", "conf_95%"],
+            "linfit_trace_types": ["lin_fit", "conf_95%"],
+            "centile_trace_types": [
+                "centile_5", "centile_25", "centile_50", "centile_75", "centile_95"
+            ],
             "distplot_trace_types": ["histogram", "density", "rug"],
             "min_per_row": 1,
             "max_per_row": 5,
@@ -226,13 +239,17 @@ def init_session_state() -> None:
             "show_img": False,
             "plot_type": "Scatter Plot",
             "xvar": "",
+            "xmin": -1.0,
+            "xmax": -1.0,
             "yvar": "",
+            "ymin": -1.0,
+            "ymax": -1.0,
             "hvar": "",
             "hvals": [],
             "corr_icv": False,
-            "plot_centiles": False,
+            "plot_cent_normalized": False,
             "trend": "Linear",
-            "traces": ["data", "lin"],
+            "traces": ["data", "lin_fit"],
             "lowess_s": 0.5,
             "centtype": "",
             "h_coeff": 1.0,
@@ -328,6 +345,7 @@ def init_session_state() -> None:
         # MRID selected by user
         st.session_state.sel_mrid = ""
         st.session_state.sel_roi = ""
+        st.session_state.sel_roi_img = ""
 
         # Variable selected by user
         st.session_state.sel_var = ""
