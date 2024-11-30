@@ -2,6 +2,7 @@ name: Deploy static content to Pages
 on:
   push:
     branches: ["main", "spiros-dev", "ge-dev"]
+  workflow_dispatch:
 
 jobs:
   build-docs:
