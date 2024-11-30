@@ -28,8 +28,8 @@ jobs:
           pip install sphinx sphinx_rtd_theme sphinx-tabs sphinx_toolbox
       - name: Sphinx build
         run: |
-          sphinx-apidoc -o docs src/
-          cd docs/
+          sphinx-apidoc -o docs2 src/
+          cd docs2/
           make html
           cd ..
 
