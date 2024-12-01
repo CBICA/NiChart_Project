@@ -226,6 +226,13 @@ def panel_view() -> None:
         st.session_state.paths["sel_img"] = os.path.join(
             st.session_state.paths["T1"], sel_mrid + st.session_state.suff_t1img
         )
+        if sel_mrid is not None:
+            st.session_state.paths["sel_img"] = os.path.join(
+                # hardcoded fix for T1 suffix
+                st.session_state.paths["T1"],
+                re.sub(r"_T1$", "", sel_mrid) + st.session_state.suff_t1img,
+            )
+
         if not os.path.exists(st.session_state.paths["sel_img"]):
             st.warning(
                 f'Could not locate underlay image: {st.session_state.paths["sel_img"]}'
@@ -233,8 +240,9 @@ def panel_view() -> None:
             return
 
         st.session_state.paths["sel_seg"] = os.path.join(
-            st.session_state.paths["dlmuse"], sel_mrid + st.session_state.suff_seg
+            st.session_state.paths["dlmuse"],  re.sub(r"_T1$", "", sel_mrid) + st.session_state.suff_seg
         )
+
         if not os.path.exists(st.session_state.paths["sel_seg"]):
             st.warning(
                 f'Could not locate overlay image: {st.session_state.paths["sel_seg"]}'
