@@ -4,6 +4,7 @@ NiChartHarmonize
 DLICV
 DLMUSE
 NiChart_DLMUSE
+DLWMLS @ git+https://github.com/CBICA/DLWMLS
 
 # general python dependencies
 torch>=2.2.1,<=2.3.1
