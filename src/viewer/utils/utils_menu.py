@@ -14,6 +14,10 @@ def menu() -> Any:
             label=":material/arrow_forward: Pipeline Overview",
         )
         st.sidebar.page_link(
+            "pages/tutorial_dlmuse.py",
+            label=":material/arrow_forward: Tutorial",
+        )
+        st.sidebar.page_link(
             "pages/prep_sMRI_dicomtonifti.py",
             label=":material/arrow_forward: Dicom to Nifti",
         )

@@ -12,7 +12,7 @@ utilmenu.menu()
 st.markdown(
     """
     # Structural MRI Biomarkers
-    ### Neuroimaging pipeline for computing AI biomarkers of disease and aging from T1-weighted MRI scan
+    ### Neuroimaging pipeline for computing AI biomarkers of disease and aging from T1-weighted MRI scans
     """
 )
 
