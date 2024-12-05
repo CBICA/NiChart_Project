@@ -113,7 +113,7 @@ def panel_dlmuse() -> None:
 
     with st.container(border=True):
         # Device type
-        if st.session_state.app_type == "CLOUD":
+        if st.session_state.app_type == "cloud":
             device = "cuda"
         else:
             helpmsg = "Choose 'cuda' if your computer has an NVIDIA GPU, 'mps' if you have an Apple M-series chip, and 'cpu' if you have a standard CPU."

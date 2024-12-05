@@ -126,6 +126,10 @@ if show_panel_runml:
                 flag_harmonize = False
                 st.warning("Sample size is small. The data will not be harmonized!")
 
+            if 'SITE' not in df_tmp.columns:
+                st.warning("SITE column missing, assuming all samples are from the same site!")
+                df_tmp['SITE'] = 'SITE1'
+
             with st.spinner("Wait for it..."):
                 st.info("Running: mlscores_workflow ", icon=":material/manufacturing:")
                 sys.path.append(run_dir)
@@ -151,7 +155,7 @@ if show_panel_runml:
         # Check out file
         if os.path.exists(st.session_state.paths["csv_mlscores"]):
             st.success(
-                f"Data is ready ({st.session_state.paths['csv_mlscores']})",
+                f"Data is ready ({st.session_state.paths['csv_mlscores']}).\n\n Output data includes harmonized ROIs, SPARE scores (AD, Age, Diabetes, Hyperlipidemia, Hypertension, Obesity, Smoking) and SurrealGAN subtype indices (R1-R5)",
                 icon=":material/thumb_up:",
             )
             st.session_state.flags["csv_mlscores"] = True

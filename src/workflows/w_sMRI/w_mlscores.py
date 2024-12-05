@@ -155,6 +155,10 @@ def run_workflow(
         f_in = os.path.join(out_wdir, f"{dset_name}_rois_init.csv")
         df_in = pd.read_csv(f_in, dtype={"MRID": str})
 
+        # Check SITE column
+        if 'SITE' not in df_in.columns:
+            df_in['SITE'] = 'SITE1'
+
         # Select variables for harmonization
         muse_vars = df_in.columns[df_in.columns.str.contains("MUSE")].tolist()
         other_vars = ["MRID", "Age", "Sex", "SITE", "DLICV"]

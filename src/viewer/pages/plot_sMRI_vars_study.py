@@ -70,7 +70,7 @@ def panel_incsv() -> None:
         return
 
     with st.container(border=True):
-        if st.session_state.app_type == "CLOUD":
+        if st.session_state.app_type == "cloud":
             st.session_state.is_updated["csv_plot"] = utilst.util_upload_file(
                 st.session_state.paths["csv_plot"],
                 "Input data csv file",
