@@ -155,7 +155,7 @@ if show_panel_runml:
         # Check out file
         if os.path.exists(st.session_state.paths["csv_mlscores"]):
             st.success(
-                f"Data is ready ({st.session_state.paths['csv_mlscores']})",
+                f"Data is ready ({st.session_state.paths['csv_mlscores']}).\n\n Output data includes harmonized ROIs, SPARE scores (AD, Age, Diabetes, Hyperlipidemia, Hypertension, Obesity, Smoking) and SurrealGAN subtype indices (R1-R5)",
                 icon=":material/thumb_up:",
             )
             st.session_state.flags["csv_mlscores"] = True
