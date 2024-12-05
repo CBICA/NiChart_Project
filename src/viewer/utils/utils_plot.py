@@ -59,12 +59,11 @@ def add_plot() -> None:
         st.session_state.plot_var["plot_cent_normalized"],
         st.session_state.plot_var["trend"],
         st.session_state.plot_var["lowess_s"],
-        st.session_state.plot_var["traces"],
+        st.session_state.plot_var["traces"].copy(),
         st.session_state.plot_var["centtype"],
     ]
     st.session_state.plot_index += 1
-
-
+    
 # Remove a plot
 def remove_plot(plot_id: str) -> None:
     """
@@ -248,8 +247,7 @@ def add_plot_tabs(
                     df_plots.at[plot_id, "traces"] = remove_items_from_list(
                         df_plots.loc[plot_id, "traces"], ["lin_fit", "conf_95%"]
                     )
-                # df_plots.at[plot_id, 'traces'] = ['data']
-
+                    
             tind = get_index_in_list(list_trends, df_plots.loc[plot_id, "trend"])            
             st.selectbox(
                 "Trend Line",
