@@ -1,5 +1,6 @@
 import json
 import os
+import re
 
 import pandas as pd
 import streamlit as st
@@ -277,6 +278,19 @@ def show_img() -> None:
     if st.session_state.sel_roi_img == "":
         st.warning("Please select an ROI!")
         return
+    
+    ## Insert duplicate suffix fix
+    sel_mrid = st.session_state.sel_mrid
+    if sel_mrid is not None:
+        st.session_state.paths["sel_img"] = os.path.join(
+            # hardcoded fix for T1 suffix
+            st.session_state.paths["T1"],
+            re.sub(r"_T1$", "", sel_mrid) + st.session_state.suff_t1img,
+        )
+        
+        st.session_state.paths["sel_seg"] = os.path.join(
+            st.session_state.paths["dlmuse"],  re.sub(r"_T1$", "", sel_mrid) + st.session_state.suff_seg
+        )
 
     if not os.path.exists(st.session_state.paths["sel_img"]):
         if not utilvi.check_image_underlay():

@@ -3,9 +3,7 @@ import os
 
 import streamlit as st
 import utils.utils_session as utilss
-from PIL import Image
 
-st.session_state.nicon = Image.open("../resources/nichart1.png")
 utilss.config_page()
 
 # Read user arg to select cloud / desktop
@@ -25,6 +23,7 @@ except SystemExit as e:
     os._exit(e.code)
 if args.cloud:
     st.session_state.app_type = "CLOUD"
+    st.session_state.forced_cloud = True
 
 # Initialize session state variables
 st.switch_page("pages/home.py")

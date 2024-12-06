@@ -4,9 +4,14 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 import utils.utils_rois as utilroi
+from PIL import Image
+
+from streamlit.web.server.websocket_headers import _get_websocket_headers
+import jwt
 
 
 def config_page() -> None:
+    st.session_state.nicon = Image.open("../resources/nichart1.png")
     st.set_page_config(
         page_title="NiChart",
         page_icon=st.session_state.nicon,
@@ -14,9 +19,25 @@ def config_page() -> None:
         # layout="centered",
         menu_items={
             "Get help": "https://neuroimagingchart.com/",
-            "Report a bug": "https://neuroimagingchart.com/",
+            "Report a bug": "https://github.com/CBICA/NiChart_Project/issues/new?assignees=&labels=&projects=&template=bug_report.md&title=%5BBUG%5D+",
             "About": "https://neuroimagingchart.com/",
         },
+    )
+
+## Function to parse AWS login (if available)
+def process_session_token():
+    '''
+    WARNING: We use unsupported features of Streamlit
+             However, this is quite fast and works well with
+             the latest version of Streamlit (1.27)
+             Also, this does not verify the session token's
+             authenticity. It only decodes the token.
+    '''
+    headers = _get_websocket_headers()
+    if not headers or "X-Amzn-Oidc-Data" not in headers:
+        return {}
+    return jwt.decode(
+        headers["X-Amzn-Oidc-Data"], algorithms=["ES256"], options={"verify_signature": False}
     )
 
 
@@ -26,12 +47,28 @@ def init_session_state() -> None:
 
         ###################################
         # App type ('desktop' or 'cloud')
-        st.session_state.app_type = "cloud"
-        st.session_state.app_type = "desktop"
+        if os.getenv("NICHART_FORCE_CLOUD", "0") == "1":
+            st.session_state.forced_cloud = True
+            st.session_state.app_type = "cloud"
+        else:
+            st.session_state.forced_cloud = False
+            st.session_state.app_type = "desktop"
+
         st.session_state.app_config = {
             "cloud": {"msg_infile": "Upload"},
             "desktop": {"msg_infile": "Select"},
         }
+        
+        # Store user session info for later retrieval
+        if st.session_state.app_type == 'cloud':
+            st.session_state.cloud_session_token = process_session_token()
+            if st.session_state.cloud_session_token:
+                st.session_state.has_cloud_session = True
+            else:
+                st.session_state.has_cloud_session = False
+        else:
+            st.session_state.has_cloud_session = False
+                
         ###################################
 
         ###################################

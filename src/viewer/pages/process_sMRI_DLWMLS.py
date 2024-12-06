@@ -112,9 +112,12 @@ def panel_dlwmls() -> None:
     with st.container(border=True):
         # Device type
         helpmsg = "Choose 'cuda' if your computer has an NVIDIA GPU, 'mps' if you have an Apple M-series chip, and 'cpu' if you have a standard CPU."
-        device = utilst.user_input_select(
-            "Device", "key_select_device", ["cuda", "cpu", "mps"], None, helpmsg, False
-        )
+        if st.session_state.app_type != 'cloud':
+            device = utilst.user_input_select(
+                "Device", "key_select_device", ["cuda", "cpu", "mps"], None, helpmsg, False
+            )
+        else:
+            device = 'cuda'
 
         # Button to run DLWMLS
         btn_seg = st.button("Run DLWMLS", disabled=False)
