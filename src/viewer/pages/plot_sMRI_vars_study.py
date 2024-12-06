@@ -228,6 +228,16 @@ def panel_select() -> None:
                 ] + st.session_state.plot_sel_vars
             sel_vars = st.session_state.plot_sel_vars
             st.success(f"Selected variables: {sel_vars}")
+            
+            vars_cent = []
+            for tmp_var in sel_vars:
+                if tmp_var + '_centiles' in df.columns:
+                    vars_cent.append(tmp_var + '_centiles')
+            sel_vars = sel_vars + vars_cent
+            st.session_state.plot_sel_vars = sel_vars
+            
+            print(f'sss {vars_cent}   nnnn {sel_vars}')
+                        
             df = df[st.session_state.plot_sel_vars]
             st.session_state.plot_var["df_data"] = df
 

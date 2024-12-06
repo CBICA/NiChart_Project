@@ -361,13 +361,17 @@ def util_select_file(
         helpmsg,
     )
 
-    if not os.path.exists(out_file) and os.path.exists(sel_file):
-        # Create parent dir of out file
-        if not os.path.exists(os.path.dirname(out_file)):
-            os.makedirs(os.path.dirname(out_file))
-        # Link user input dicoms
-        os.system(f"cp {sel_file} {out_file}")
-        return True
+    if out_file != sel_file:
+        if os.path.exists(sel_file):
+            # Remove existing output file
+            if os.path.exists(out_file):
+                os.remove(out_file)
+            # Create parent dir of out file
+            if not os.path.exists(os.path.dirname(out_file)):
+                os.makedirs(os.path.dirname(out_file))
+            # Copy selected input file to destination
+            os.system(f"cp {sel_file} {out_file}")
+            return True
 
     return False
 

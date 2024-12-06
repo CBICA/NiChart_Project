@@ -46,7 +46,7 @@ st.markdown(
 st.markdown(
     """
     ### Show me an example 🤔
-    - We prepared examples to illustrate the workflow. Please see the videos below:
+    - Example datasets are provided for your convenience. Please watch the videos below for a step-by-step guide.
     """
 )
 
@@ -60,10 +60,9 @@ if st.button(':material/play_circle: ROIs to Biomarkers (larger n, pre-computed 
 
 st.markdown(
     """
-    - We recommend to replicate the examples before running the pipeline on your own data.
-    - The data is provided in the folder TestData 
-    - If you are using the desktop version, it's the default search path for file/folder selection
-    - If you are using the cloud version, you can download the test data from "https://github.com/CBICA/NiChart_Project/tree/ge-dev/TestData"
+    - Before applying the pipeline to your own data, we recommend replicating the provided examples.
+    - Example datasets are provided in the folder "test_data". If you are using the desktop version, test_data folder is already in the default search path for file/folder selection.
+    - If you are using the cloud version, you can download the test_data from "https://github.com/CBICA/NiChart_Project/test_data".
     """    
 )
 

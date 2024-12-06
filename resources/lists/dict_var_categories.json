@@ -31,7 +31,7 @@
         "FieldStrength"
     ],
     "MUSE-TopPicks": [
-        "DLICV",
+        "ICV",
         "TotalBrain",
         "GM",
         "WM",
@@ -195,7 +195,7 @@
         "TransverseTemporalGyrus_L"
     ],
     "MUSE-CompositeROIs": [
-        "DLICV",
+        "ICV",
         "TotalBrain",
         "GM",
         "WM",
