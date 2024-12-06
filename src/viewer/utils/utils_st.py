@@ -188,10 +188,10 @@ def util_panel_workingdir(app_type: str) -> None:
 
     # Read dataset name (used to create a folder where all results will be saved)
     helpmsg = (
-        "Each study's results are organized in a dedicated folder named after the study"
+        "Please provide a unique identifier for your experiment.\n\n A dedicated folder with this name will be created to store all input and output data associated with the analysis.\n\n The identifier can be any descriptive label; it doesn't need to match the input study or dataset name.\n\n Switch between experiments to run different pipelines or analyze new datasets."
     )
     st.session_state.dset = user_input_textfield(
-        "Study name", st.session_state.dset, helpmsg, False
+        "Experiment Identifier", st.session_state.dset, helpmsg, False
     )
 
     if app_type == "desktop":
