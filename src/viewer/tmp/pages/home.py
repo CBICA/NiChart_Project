@@ -23,7 +23,7 @@ st.set_page_config(
     #layout="centered",
     menu_items={
         "Get help": "https://neuroimagingchart.com/",
-        "Report a bug": "https://neuroimagingchart.com/",
+        "Report a bug": "https://github.com/CBICA/NiChart_Project/issues/new?assignees=&labels=&projects=&template=bug_report.md&title=%5BBUG%5D+",
         "About": "https://neuroimagingchart.com/",
     },
 )

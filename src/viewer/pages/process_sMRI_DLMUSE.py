@@ -1,6 +1,7 @@
 import os
 import re
 
+import NiChart_DLMUSE as ncd
 import pandas as pd
 import streamlit as st
 import utils.utils_io as utilio
@@ -113,9 +114,7 @@ def panel_dlmuse() -> None:
 
     with st.container(border=True):
         # Device type
-        if st.session_state.app_type == "cloud":
-            device = "cuda"
-        else:
+        if st.session_state.app_type != 'cloud':
             helpmsg = "Choose 'cuda' if your computer has an NVIDIA GPU, 'mps' if you have an Apple M-series chip, and 'cpu' if you have a standard CPU."
             device = utilst.user_input_select(
                 "Device",
@@ -125,32 +124,41 @@ def panel_dlmuse() -> None:
                 helpmsg,
                 False,
             )
+        else:
+            device = 'cuda'
 
-            # Button to run DLMUSE
-            btn_seg = st.button("Run DLMUSE", disabled=False)
-            if btn_seg:
-                if not os.path.exists(st.session_state.paths["dlmuse"]):
-                    os.makedirs(st.session_state.paths["dlmuse"])
+        # Button to run DLMUSE
+        btn_seg = st.button("Run DLMUSE", disabled=False)
+        if btn_seg:
+            if not os.path.exists(st.session_state.paths["dlmuse"]):
+                os.makedirs(st.session_state.paths["dlmuse"])
 
-                with st.spinner("Wait for it..."):
-                    dlmuse_cmd = f"NiChart_DLMUSE -i {st.session_state.paths['T1']} -o {st.session_state.paths['dlmuse']} -d {device} --cores 1"
-                    st.info(f"Running: {dlmuse_cmd}", icon=":material/manufacturing:")
+            with st.spinner("Wait for it..."):
+                fcount = utilio.get_file_count(st.session_state.paths["T1"])
+                progress_bar = stqdm(total=9, desc="Current step", position=0)
+                progress_bar.set_description("Starting...")
+                
+                ncd.run_pipeline(st.session_state.paths['T1'], st.session_state.paths['dlmuse'],
+                                 device, progress_bar=progress_bar)
+                   
+                #dlmuse_cmd = f"NiChart_DLMUSE -i {st.session_state.paths['T1']} -o {st.session_state.paths['dlmuse']} -d {device} --cores 1"
+                #st.info(f"Running: {dlmuse_cmd}", icon=":material/manufacturing:")
 
-                    # FIXME : bypass dlmuse run
-                    print(f"About to run: {dlmuse_cmd}")
-                    os.system(dlmuse_cmd)
+                # FIXME : bypass dlmuse run
+                #print(f"About to run: {dlmuse_cmd}")
+                #os.system(dlmuse_cmd)
 
-            out_csv = f"{st.session_state.paths['dlmuse']}/DLMUSE_Volumes.csv"
-            num_dlmuse = utilio.get_file_count(
-                st.session_state.paths["dlmuse"], ".nii.gz"
+        out_csv = f"{st.session_state.paths['dlmuse']}/DLMUSE_Volumes.csv"
+        num_dlmuse = utilio.get_file_count(
+            st.session_state.paths["dlmuse"], ".nii.gz"
+        )
+        if os.path.exists(out_csv):
+            st.session_state.paths["csv_dlmuse"] = out_csv
+            st.session_state.flags["csv_dlmuse"] = True
+            st.success(
+                f"DLMUSE images are ready ({st.session_state.paths['dlmuse']}, {num_dlmuse} scan(s))",
+                icon=":material/thumb_up:",
             )
-            if os.path.exists(out_csv):
-                st.session_state.paths["csv_dlmuse"] = out_csv
-                st.session_state.flags["csv_dlmuse"] = True
-                st.success(
-                    f"DLMUSE images are ready ({st.session_state.paths['dlmuse']}, {num_dlmuse} scan(s))",
-                    icon=":material/thumb_up:",
-                )
 
 
 def panel_view() -> None:
@@ -232,16 +240,16 @@ def panel_view() -> None:
                 st.session_state.paths["T1"],
                 re.sub(r"_T1$", "", sel_mrid) + st.session_state.suff_t1img,
             )
+        
+        st.session_state.paths["sel_seg"] = os.path.join(
+            st.session_state.paths["dlmuse"],  re.sub(r"_T1$", "", sel_mrid) + st.session_state.suff_seg
+        )
 
         if not os.path.exists(st.session_state.paths["sel_img"]):
             st.warning(
                 f'Could not locate underlay image: {st.session_state.paths["sel_img"]}'
             )
             return
-
-        st.session_state.paths["sel_seg"] = os.path.join(
-            st.session_state.paths["dlmuse"],  re.sub(r"_T1$", "", sel_mrid) + st.session_state.suff_seg
-        )
 
         if not os.path.exists(st.session_state.paths["sel_seg"]):
             st.warning(
