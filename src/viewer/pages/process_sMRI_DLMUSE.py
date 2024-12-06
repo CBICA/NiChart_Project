@@ -139,7 +139,7 @@ def panel_dlmuse() -> None:
                 progress_bar.set_description("Starting...")
                 
                 ncd.run_pipeline(st.session_state.paths['T1'], st.session_state.paths['dlmuse'],
-                                 device, progress_bar=progress_bar)
+                                 device, dlmuse_extra_args='-nps 1 -npp 1', dlicv_extra_args='-nps 1 -npp 1', progress_bar=progress_bar)
                    
                 #dlmuse_cmd = f"NiChart_DLMUSE -i {st.session_state.paths['T1']} -o {st.session_state.paths['dlmuse']} -d {device} --cores 1"
                 #st.info(f"Running: {dlmuse_cmd}", icon=":material/manufacturing:")
