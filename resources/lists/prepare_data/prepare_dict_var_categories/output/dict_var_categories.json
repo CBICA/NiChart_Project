@@ -21,7 +21,7 @@
         "DX_Diabates"
     ],
     "MUSE-Essential": [
-        "DLICV",
+        "ICV",
         "TotalBrain",
         "GM",
         "WM",
@@ -185,7 +185,7 @@
         "TransverseTemporalGyrus_L"
     ],
     "MUSE-Composite": [
-        "DLICV",
+        "ICV",
         "TotalBrain",
         "GM",
         "WM",

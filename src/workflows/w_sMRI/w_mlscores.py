@@ -231,6 +231,9 @@ def run_workflow(
         # Merge covars to harmonized ROIs
         df_combat = df_demog.merge(df_combat, on=key_var)
 
+        # Change DLICV to ICV
+        df_combat = df_combat.rename(columns={'DLICV':'ICV'})
+
         # Write out file
         f_combat_out = os.path.join(out_wdir, f"{dset_name}_combat.csv")
         df_combat.to_csv(f_combat_out, index=False)
@@ -244,8 +247,8 @@ def run_workflow(
         df_icvcorr = df_in.copy()
         var_muse = df_icvcorr.columns[df_icvcorr.columns.str.contains("MUSE")]
         df_tmp = df_icvcorr[var_muse]
-        df_tmp = df_tmp.div(df_in["DLICV"], axis=0) * icv_ref_val
-        # df_tmp=df_tmp.div(df_icvcorr['DLICV'], axis=0) * 100
+        df_tmp = df_tmp.div(df_in["ICV"], axis=0) * icv_ref_val
+        # df_tmp=df_tmp.div(df_icvcorr['ICV'], axis=0) * 100
         df_icvcorr[var_muse] = df_tmp.values
 
         # Calculate centiles
@@ -364,14 +367,18 @@ def run_workflow(
     f_combat = os.path.join(out_wdir, f"{dset_name}_combat.csv")
     df_out = pd.read_csv(f_combat, dtype={"MRID": str})
     df_out = df_out.rename(columns=dict(zip(df_roidict.Code, df_roidict.Name)))
+    df_out = df_out.loc[:,~df_out.columns.duplicated()]
+    df_out = df_out.rename(columns={'DLICV':'ICV'})
 
     f_centiles = os.path.join(out_wdir, f"{dset_name}_combat_icvcorr_centiles.csv")
     df_centiles = pd.read_csv(f_centiles, dtype={"MRID": str})
     df_tmp = df_centiles[
-        ["MRID", "DLICV"]
+        ["MRID"]
         + df_centiles.columns[df_centiles.columns.str.contains("MUSE")].tolist()
     ]
+    df_tmp = df_tmp.rename(columns={'DLICV':'ICV'})
     df_tmp = df_tmp.rename(columns=dict(zip(df_roidict.Code, df_roidict.Name)))
+    df_tmp = df_tmp.loc[:,~df_tmp.columns.duplicated()]
     df_out = df_out.merge(df_tmp, on="MRID", suffixes=["", "_centiles"])
 
     f_spare = os.path.join(out_wdir, f"{dset_name}_combat_spare-all.csv")
@@ -548,6 +555,8 @@ def run_workflow_noharmonization(
     f_raw = os.path.join(out_wdir, f"{dset_name}_rois_init.csv")
     df_out = pd.read_csv(f_raw, dtype={"MRID": str})
     df_out = df_out.rename(columns=dict(zip(df_roidict.Code, df_roidict.Name)))
+    df_out = df_out.loc[:,~df_out.columns.duplicated()]
+    df_out = df_out.rename(columns={'DLICV':'ICV'})
 
     f_centiles = os.path.join(out_wdir, f"{dset_name}_icvcorr_centiles.csv")
     df_centiles = pd.read_csv(f_centiles, dtype={"MRID": str})
@@ -556,6 +565,8 @@ def run_workflow_noharmonization(
         + df_centiles.columns[df_centiles.columns.str.contains("MUSE")].tolist()
     ]
     df_tmp = df_tmp.rename(columns=dict(zip(df_roidict.Code, df_roidict.Name)))
+    df_tmp = df_tmp.loc[:,~df_tmp.columns.duplicated()]
+    df_tmp = df_tmp.rename(columns={'DLICV':'ICV'})    
     df_out = df_out.merge(df_tmp, on="MRID", suffixes=["", "_centiles"])
 
     f_spare = os.path.join(out_wdir, f"{dset_name}_spare-all.csv")
