@@ -144,7 +144,7 @@ def init_session_state() -> None:
         ############
         # FIXME : set init folder to test folder outside repo
         st.session_state.paths["init"] = os.path.join(
-            st.session_state.paths["root"], "TestData"
+            st.session_state.paths["root"], "test_data"
         )
         st.session_state.paths["file_search_dir"] = st.session_state.paths["init"]
         ############

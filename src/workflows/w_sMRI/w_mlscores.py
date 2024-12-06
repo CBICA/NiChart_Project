@@ -6,7 +6,44 @@ import numpy as np
 import pandas as pd
 from stqdm import stqdm
 
-
+def check_input(
+    in_csv: str,
+    in_demog: str,
+) -> list:
+    # Read input csv
+    try:
+        df_in = pd.read_csv(in_csv, dtype={"MRID": str})
+    except:
+        return [-1, 'Could not read data file']
+    
+    # Read input csv
+    try:
+        df_demog = pd.read_csv(in_demog, dtype={"MRID": str})
+    except:
+        return [-1, 'Could not read demographics file']
+    
+    # Check required columns
+    for sel_col in ['MRID']:
+        if sel_col not in df_in.columns:
+            return [-1, f'Required column missing in data file: {sel_col}']
+    for sel_col in ['MRID', 'Age', 'Sex']:
+        if sel_col not in df_demog.columns:
+            return [-1, f'Required column missing in demographics file: {sel_col}']
+    
+    # Merge data files
+    try:
+        df = df_demog.merge(df_in, on='MRID')
+    except:
+        return [-1, 'Could not merge data and demographics files']
+    
+    # Check data size
+    if df.shape[0] == 0:
+        return [-1, 'No matching MRIDs found between data and demographics files']
+    
+    return [0, 'Data verification Successful']
+    
+    
+    
 def combine_rois(
     df_in: pd.DataFrame,
     csv_roi_dict: str,

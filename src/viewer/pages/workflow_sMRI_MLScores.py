@@ -8,6 +8,10 @@ import utils.utils_menu as utilmenu
 import utils.utils_session as utilss
 import utils.utils_st as utilst
 
+run_dir = os.path.join(st.session_state.paths["root"], "src", "workflows", "w_sMRI")
+sys.path.append(run_dir)
+import w_mlscores as w_mlscores
+
 # Page config should be called for each page
 utilss.config_page()
 
@@ -94,11 +98,19 @@ if show_panel_indata:
             if os.path.exists(st.session_state.paths["csv_demog"]):
                 p_demog = st.session_state.paths["csv_demog"]
                 st.success(f"Data is ready ({p_demog})", icon=":material/thumb_up:")
-        if os.path.exists(st.session_state.paths["csv_dlmuse"]) and os.path.exists(
-            st.session_state.paths["csv_demog"]
-        ):
-            st.session_state.flags["csv_dlmuse+demog"] = True
-
+        
+        # Check the input data
+        if st.button('Verify input data'):
+            [f_check, m_check] = w_mlscores.check_input(
+                st.session_state.paths["csv_dlmuse"],
+                st.session_state.paths["csv_demog"],
+            )
+            if f_check == 0:
+                st.session_state.flags["csv_dlmuse+demog"] = True
+                st.success(m_check, icon=":material/thumb_up:")
+            else:
+                st.session_state.flags["csv_dlmuse+demog"] = False
+                st.error(m_check, icon=":material/thumb_down:")
 
 # Panel for running MLScore
 icon = st.session_state.icon_thumb[st.session_state.flags["csv_mlscores"]]
@@ -112,9 +124,6 @@ if show_panel_runml:
 
         btn_mlscore = st.button("Run MLScore", disabled=False)
         if btn_mlscore:
-            run_dir = os.path.join(
-                st.session_state.paths["root"], "src", "workflows", "w_sMRI"
-            )
 
             if not os.path.exists(st.session_state.paths["mlscores"]):
                 os.makedirs(st.session_state.paths["mlscores"])
@@ -132,8 +141,6 @@ if show_panel_runml:
 
             with st.spinner("Wait for it..."):
                 st.info("Running: mlscores_workflow ", icon=":material/manufacturing:")
-                sys.path.append(run_dir)
-                import w_mlscores as w_mlscores
 
                 if flag_harmonize:
                     w_mlscores.run_workflow(
