@@ -45,6 +45,19 @@ def panel_wdir() -> None:
             )
             st.session_state.flags["dir_out"] = True
 
+    def help_input_data():
+        st.markdown(
+            """
+            ### Working Directory:
+            This is a .
+            """
+        )
+        st.write('Example MUSE data file:')
+        st.dataframe(df_muse)
+
+    if st.button('I need help 🤔'):
+        help_input_data()
+
 
 def panel_indicoms() -> None:
     """

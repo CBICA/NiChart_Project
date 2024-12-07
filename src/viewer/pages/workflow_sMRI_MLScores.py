@@ -100,54 +100,6 @@ if show_panel_indata:
                 st.success(f"Data is ready ({p_demog})", icon=":material/thumb_up:")
         
         # Check the input data
-        @st.dialog("Input data requirements")  # type:ignore
-        def help_input_data():
-            df_muse = pd.DataFrame(
-                columns=['MRID', '702', '701', '600', '601', '...'],
-                data=[
-                    ['Subj1', '...', '...', '...', '...', '...'], 
-                    ['Subj2', '...', '...', '...', '...', '...'], 
-                    ['Subj3', '...', '...', '...', '...', '...'], 
-                    ['...', '...', '...', '...', '...', '...']
-                ]
-            )
-            st.markdown(
-                """
-                ### DLMUSE File: 
-                The DLMUSE CSV file contains volumes of ROIs (Regions of Interest) segmented by the DLMUSE algorithm. This file is generated as output when DLMUSE is applied to a set of images.
-                """
-            )
-            st.write('Example MUSE data file:')
-            st.dataframe(df_muse)
-
-            df_demog = pd.DataFrame(
-                columns=['MRID', 'Age', 'Sex'],
-                data=[
-                    ['Subj1', '57', 'F'], 
-                    ['Subj2', '65', 'M'], 
-                    ['Subj3', '44', 'F'], 
-                    ['...', '...', '...']
-                ]
-            )
-            st.markdown(
-                """
-                ### Demographics File: 
-                The DEMOGRAPHICS CSV file contains demographic information for each subject in the study.
-                - **Required Columns:**
-                    - **MRID:** Unique subject identifier.
-                    - **Age:** Age of the subject.
-                    - **Sex:** Sex of the subject (e.g., M, F).
-                - **Matching MRIDs:** Ensure the MRID values in this file match the corresponding MRIDs in the DLMUSE file for merging the data files.
-                """
-            )
-            st.write('Example demographic data file:')
-            st.dataframe(df_demog)
-
-        
-        if st.button('I need help 🤔'):
-            help_input_data()
-
-        # Check the input data
         if st.button('Verify input data'):
             [f_check, m_check] = w_mlscores.check_input(
                 st.session_state.paths["csv_dlmuse"],
@@ -159,6 +111,54 @@ if show_panel_indata:
             else:
                 st.session_state.flags["csv_dlmuse+demog"] = False
                 st.error(m_check, icon=":material/thumb_down:")
+
+        # Check the input data
+        @st.dialog("Input data requirements")  # type:ignore
+        def help_input_data():
+            df_muse = pd.DataFrame(
+                columns=['MRID', '702', '701', '600', '601', '...'],
+                data=[
+                    ['Subj1', '...', '...', '...', '...', '...'],
+                    ['Subj2', '...', '...', '...', '...', '...'],
+                    ['Subj3', '...', '...', '...', '...', '...'],
+                    ['...', '...', '...', '...', '...', '...']
+                ]
+            )
+            st.markdown(
+                """
+                ### DLMUSE File:
+                The DLMUSE CSV file contains volumes of ROIs (Regions of Interest) segmented by the DLMUSE algorithm. This file is generated as output when DLMUSE is applied to a set of images.
+                """
+            )
+            st.write('Example MUSE data file:')
+            st.dataframe(df_muse)
+
+            df_demog = pd.DataFrame(
+                columns=['MRID', 'Age', 'Sex'],
+                data=[
+                    ['Subj1', '57', 'F'],
+                    ['Subj2', '65', 'M'],
+                    ['Subj3', '44', 'F'],
+                    ['...', '...', '...']
+                ]
+            )
+            st.markdown(
+                """
+                ### Demographics File:
+                The DEMOGRAPHICS CSV file contains demographic information for each subject in the study.
+                - **Required Columns:**
+                    - **MRID:** Unique subject identifier.
+                    - **Age:** Age of the subject.
+                    - **Sex:** Sex of the subject (e.g., M, F).
+                - **Matching MRIDs:** Ensure the MRID values in this file match the corresponding MRIDs in the DLMUSE file for merging the data files.
+                """
+            )
+            st.write('Example demographic data file:')
+            st.dataframe(df_demog)
+
+
+        if st.button('I need help 🤔'):
+            help_input_data()
 
 # Panel for running MLScore
 icon = st.session_state.icon_thumb[st.session_state.flags["csv_mlscores"]]
