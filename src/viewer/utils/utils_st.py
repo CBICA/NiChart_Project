@@ -186,14 +186,7 @@ def util_panel_workingdir(app_type: str) -> None:
     """
     curr_dir = st.session_state.paths["dset"]
 
-    # Read dataset name (used to create a folder where all results will be saved)
-    helpmsg = (
-        "Please provide a unique identifier for your experiment.\n\n A dedicated folder with this name will be created to store all input and output data associated with the analysis.\n\n The identifier can be any descriptive label; it doesn't need to match the input study or dataset name.\n\n Switch between experiments to run different pipelines or analyze new datasets."
-    )
-    st.session_state.dset = user_input_textfield(
-        "Experiment Identifier", st.session_state.dset, helpmsg, False
-    )
-
+    # Read output folder
     if app_type == "desktop":
         # Read output folder from the user
         helpmsg = "Results will be saved to the output folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
@@ -208,6 +201,14 @@ def util_panel_workingdir(app_type: str) -> None:
 
         if dir_out != "":
             st.session_state.paths["dir_out"] = dir_out
+
+    # Read dataset name (used to create a folder where all results will be saved)
+    helpmsg = (
+        "Please provide a name for your task.\n\n A dedicated folder with this name will be created to store all input and output data associated with the analysis.\n\n The identifier can be any descriptive label; it doesn't need to match the input study or dataset name.\n\n Switch between tasks to run different pipelines or analyze new datasets."
+    )
+    st.session_state.dset = user_input_textfield(
+        "Task Identifier", st.session_state.dset, helpmsg, False
+    )
 
     # Create results folder
     if st.session_state.dset != "" and st.session_state.paths["dir_out"] != "":
