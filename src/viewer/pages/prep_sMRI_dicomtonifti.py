@@ -202,12 +202,15 @@ def panel_extract() -> None:
         btn_convert = st.button("Convert Series", disabled=flag_disabled)
         if btn_convert:
             with st.spinner("Wait for it..."):
-                utildcm.convert_sel_series(
-                    st.session_state.df_dicoms,
-                    st.session_state.sel_series,
-                    st.session_state.paths[st.session_state.sel_mod],
-                    f"_{st.session_state.sel_mod}.nii.gz",
-                )
+                try:
+                    utildcm.convert_sel_series(
+                        st.session_state.df_dicoms,
+                        st.session_state.sel_series,
+                        st.session_state.paths[st.session_state.sel_mod],
+                        f"_{st.session_state.sel_mod}.nii.gz",
+                    )
+                except:
+                    st.warning(':material/thumb_up: Nifti conversion failed!')
 
         num_nifti = utilio.get_file_count(
             st.session_state.paths[st.session_state.sel_mod], ".nii.gz"
@@ -363,12 +366,15 @@ def panel_download() -> None:
             st.session_state.paths[st.session_state.sel_mod], f_tmp
         )
 
-        st.download_button(
-            "Download Extracted Scans",
-            out_zip,
-            file_name=f"{st.session_state.dset}_{st.session_state.sel_mod}.zip",
-            disabled=False,
-        )
+        if os.path.exists(st.session_state.paths[st.session_state.sel_mod]):
+            st.download_button(
+                "Download Extracted Scans",
+                out_zip,
+                file_name=f"{st.session_state.dset}_{st.session_state.sel_mod}.zip",
+                disabled=False,
+            )
+        else:
+            st.warning(':material/thumb_down: No images found for download!')
 
 
 st.markdown(
