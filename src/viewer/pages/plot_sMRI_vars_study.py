@@ -101,6 +101,9 @@ def panel_incsv() -> None:
             )
             st.session_state.is_updated["csv_plot"] = False
 
+            # Show input data
+            st.dataframe(st.session_state.plot_var["df_data"])
+
 
 def panel_rename() -> None:
     """

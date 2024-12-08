@@ -169,6 +169,9 @@ def panel_detect() -> None:
                 icon=":material/thumb_up:",
             )
 
+        with st.expander('Show dicom metadata', expanded=False):
+            st.dataframe(st.session_state.df_dicoms)
+
         @st.dialog("DICOM Series Detection")  # type:ignore
         def help_detect_series():
             st.markdown(
@@ -237,6 +240,11 @@ def panel_extract() -> None:
         num_nifti = utilio.get_file_count(
             st.session_state.paths[st.session_state.sel_mod], ".nii.gz"
         )
+
+        df_files = utilio.get_file_names(
+            st.session_state.paths[st.session_state.sel_mod], ".nii.gz"
+        )
+        num_nifti=df_files.shape[0]
         if num_nifti > 0:
             st.session_state.flags["dir_nifti"] = True
             st.session_state.flags[st.session_state.sel_mod] = True
@@ -244,6 +252,9 @@ def panel_extract() -> None:
                 f"Nifti images are ready ({st.session_state.paths[st.session_state.sel_mod]}, {num_nifti} scan(s))",
                 icon=":material/thumb_up:",
             )
+
+            with st.expander('View NIFTI image list'):
+                st.dataframe(df_files)
 
         @st.dialog("DICOM to Nifti Conversion")  # type:ignore
         def help_extract_nifti():
