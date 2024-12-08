@@ -47,6 +47,7 @@ def panel_wdir() -> None:
             )
             st.session_state.flags["dir_out"] = True
 
+        utilst.util_workingdir_get_help()
 
 def panel_int1() -> None:
     """
@@ -97,6 +98,20 @@ def panel_int1() -> None:
                     f"Data is ready ({p_t1}, {fcount} files)",
                     icon=":material/thumb_up:",
                 )
+
+        s_title="Input T1 Scans"
+        s_text="""
+        - Upload or select input T1 scans. DLMUSE can be directly applied to raw T1 scans. Nested folders are not supported.
+
+        - The result file with segmented ROI volumes includes an **"MRID"** column that uniquely identifies each scan. **MRID** is extracted from image file names by removing the common suffix to all images. Using consistent input image names is **strongly recommended**
+
+        - On the desktop app, a symbolic link named **"Nifti/T1"** will be created in the **working directory**, pointing to your input T1 images folder.
+
+        - On the cloud platform, you can directly drag and drop your T1 image files or folder and they will be uploaded to the **"Nifti/T1"** folder within the **working directory**.
+
+        - On the cloud, **we strongly recommend** compressing your DICOM data into a single ZIP archive before uploading. The system will automatically extract the contents of the ZIP file into the **"Nifti/T1"** folder upon upload.
+        """
+        utilst.util_get_help(s_title, s_text)
 
 
 def panel_dlmuse() -> None:
@@ -159,6 +174,17 @@ def panel_dlmuse() -> None:
                 f"DLMUSE images are ready ({st.session_state.paths['dlmuse']}, {num_dlmuse} scan(s))",
                 icon=":material/thumb_up:",
             )
+
+            with st.expander('View DLMUSE volumes'):
+                df_dlmuse=pd.read_csv(st.session_state.paths["csv_dlmuse"])
+                st.dataframe(df_files)
+
+        s_title="DLMUSE Segmentation"
+        s_text="""
+        - Raw T1 images are segmented into anatomical regions of interest (ROIs) using DLMUSE.
+        - The output folder (**"DLMUSE"**) will contain the segmentation mask for each scan, and a single CSV file with volumes of all ROIs. The result file will include single ROIs (segmented regions) and composite ROIs (obtained by merging single ROIs within a tree structure).
+        """
+        utilst.util_get_help(s_title, s_text)
 
 
 def panel_view() -> None:
@@ -292,9 +318,10 @@ def panel_view() -> None:
                 ):
                     with blocks[i]:
                         ind_view = utilni.img_views.index(tmp_orient)
+                        size_auto = True
                         if is_show_overlay is False:
                             utilst.show_img3D(
-                                img, ind_view, mask_bounds[ind_view, :], tmp_orient
+                                img, ind_view, mask_bounds[ind_view, :], tmp_orient, size_auto
                             )
                         else:
                             utilst.show_img3D(
@@ -302,6 +329,7 @@ def panel_view() -> None:
                                 ind_view,
                                 mask_bounds[ind_view, :],
                                 tmp_orient,
+                                size_auto = True
                             )
 
 

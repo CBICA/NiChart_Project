@@ -327,7 +327,6 @@ def panel_view() -> None:
                         img, ind_view, img_bounds[ind_view, :], tmp_orient, size_auto
                     )
 
-
 def panel_download() -> None:
     """
     Panel for viewing extracted nifti images
