@@ -249,9 +249,9 @@ def panel_extract() -> None:
         def help_extract_nifti():
             st.markdown(
                 """
-                - Series selected by the user will be converted to Nifti images.
-                - The modality of the Nifti image is not determined automatically. We let the user to select series for the desired modality.
-                - Output Nifti images will be renamed using the dicom fields and the selected modality type in the following format: **{PatientID}\_{StudyDate}\_{modality}.nii.gz**
+                - The user specifies the desired modality and selects the associated series.
+                - Selected series are converted into Nifti image format.
+                - Nifti images are renamed with the following format: **{PatientID}\_{StudyDate}\_{modality}.nii.gz**
                 """
             )
 
