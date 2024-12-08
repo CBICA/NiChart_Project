@@ -156,8 +156,7 @@ if show_panel_indata:
             st.write('Example demographic data file:')
             st.dataframe(df_demog)
 
-
-        if st.button('I need help 🤔'):
+        if st.button('Get help 🤔'):
             help_input_data()
 
 # Panel for running MLScore

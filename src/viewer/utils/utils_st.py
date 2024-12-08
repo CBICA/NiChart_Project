@@ -189,11 +189,11 @@ def util_panel_workingdir(app_type: str) -> None:
     # Read output folder
     if app_type == "desktop":
         # Read output folder from the user
-        helpmsg = "Results will be saved to the output folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
+        helpmsg = "Results will be saved to a dedicated folder at the output path.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
         dir_out = user_input_foldername(
             "Select folder",
             "btn_sel_dir_out",
-            "Output folder",
+            "Output path",
             st.session_state.paths["file_search_dir"],
             st.session_state.paths["dir_out"],
             helpmsg,
@@ -204,10 +204,10 @@ def util_panel_workingdir(app_type: str) -> None:
 
     # Read dataset name (used to create a folder where all results will be saved)
     helpmsg = (
-        "Please provide a name for your task.\n\n A dedicated folder with this name will be created to store all input and output data associated with the analysis.\n\n The identifier can be any descriptive label; it doesn't need to match the input study or dataset name.\n\n Switch between tasks to run different pipelines or analyze new datasets."
+        "Please provide a unique name for your data/analysis (example: MyStudy1).\n\n A dedicated folder with this name will be created to store all input and output data associated with the analysis."
     )
     st.session_state.dset = user_input_textfield(
-        "Task Identifier", st.session_state.dset, helpmsg, False
+        "Dataset Name", st.session_state.dset, helpmsg, False
     )
 
     # Create results folder
