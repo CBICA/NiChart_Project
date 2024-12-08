@@ -49,7 +49,7 @@ def panel_wdir() -> None:
         def help_working_dir():
             st.markdown(
                 """
-                - A NiChart pipeline executes a series of steps, with input/output files organized in a predefined folder structure, the **"working directory"**.
+                - A NiChart pipeline executes a series of steps, with input/output files organized in a predefined folder structure (**"working directory"**).
 
                 - Set an **"output path"** (desktop app only) and a **"dataset name"** to define the **working directory** for your analysis. You only need to set the working directory once.
 
@@ -169,6 +169,19 @@ def panel_detect() -> None:
                 icon=":material/thumb_up:",
             )
 
+        @st.dialog("DICOM Series Detection")  # type:ignore
+        def help_detect_series():
+            st.markdown(
+                """
+                - The system verifies all files within the DICOM folder.
+                - Valid DICOM files are processed to extract the DICOM header information, which is used to identify and group images into their respective series
+                - Specifically, the DICOM field **"SeriesDesc"** is used to select series
+                """
+            )
+
+        if st.button('Get help 🤔', key='key_btn_help_detect_series'):
+            help_detect_series()
+
 
 def panel_extract() -> None:
     """
@@ -231,6 +244,19 @@ def panel_extract() -> None:
                 f"Nifti images are ready ({st.session_state.paths[st.session_state.sel_mod]}, {num_nifti} scan(s))",
                 icon=":material/thumb_up:",
             )
+
+        @st.dialog("DICOM to Nifti Conversion")  # type:ignore
+        def help_extract_nifti():
+            st.markdown(
+                """
+                - Series selected by the user will be converted to Nifti images.
+                - The modality of the Nifti image is not determined automatically. We let the user to select series for the desired modality.
+                - Output Nifti images will be renamed using the dicom fields and the selected modality type in the following format: **{PatientID}\_{StudyDate}\_{modality}.nii.gz**
+                """
+            )
+
+        if st.button('Get help 🤔', key='key_btn_help_extract_nifti'):
+            help_extract_nifti()
 
 
 def panel_view() -> None:
