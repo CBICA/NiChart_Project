@@ -191,6 +191,36 @@ def show_img3D(
         else:
             st.image(img[:, :, slice_index], width=w_img)
 
+def util_get_help(s_title, s_text) -> None:
+    @st.dialog(s_title)  # type:ignore
+    def help_working_dir():
+        st.markdown(s_text)
+    col1, col2 = st.columns([0.5, 0.1])
+    with col2:
+        if st.button('Get help 🤔', key='key_btn_help_' + s_title, use_container_width=True):
+            help_working_dir()
+
+def util_workingdir_get_help() -> None:
+    @st.dialog("Working Directory")  # type:ignore
+    def help_working_dir():
+        st.markdown(
+            """
+            - A NiChart pipeline executes a series of steps, with input/output files organized in a predefined folder structure (**"working directory"**).
+
+            - Set an **"output path"** (desktop app only) and a **"dataset name"** to define the **working directory** for your analysis. You only need to set the working directory once.
+
+            - The **dataset name** can be any identifier that describes your analysis or data; it does not need to match the input study or data folder name.
+
+            - On the desktop app, you can initiate a NiChart pipeline by selecting the **working directory** from a previously completed task.
+
+            - On the cloud app, the results are deleted in regular intervals, so they may not be available.
+            """
+        )
+    col1, col2 = st.columns([0.5, 0.1])
+    with col2:
+        if st.button('Get help 🤔', key='key_btn_help_working_dir', use_container_width=True):
+            help_working_dir()
+
 
 def util_panel_workingdir(app_type: str) -> None:
     """

@@ -45,26 +45,7 @@ def panel_wdir() -> None:
             )
             st.session_state.flags["dir_out"] = True
 
-        @st.dialog("Working Directory")  # type:ignore
-        def help_working_dir():
-            st.markdown(
-                """
-                - A NiChart pipeline executes a series of steps, with input/output files organized in a predefined folder structure (**"working directory"**).
-
-                - Set an **"output path"** (desktop app only) and a **"dataset name"** to define the **working directory** for your analysis. You only need to set the working directory once.
-
-                - The **dataset name** can be any identifier that describes your analysis or data; it does not need to match the input study or data folder name.
-
-                - On the desktop app, you can initiate a NiChart pipeline by selecting the **working directory** from a previously completed task.
-
-                - On the cloud app, the results are deleted in regular intervals, so they may not be available.
-                """
-            )
-
-        col1, col2 = st.columns([0.5, 0.1])
-        with col2:
-            if st.button('Get help 🤔', key='key_btn_working_dir', use_container_width=True):
-                help_working_dir()
+        utilst.util_workingdir_get_help()
 
 def panel_indicoms() -> None:
     """
@@ -115,24 +96,17 @@ def panel_indicoms() -> None:
                     icon=":material/thumb_up:",
                 )
 
-        @st.dialog("DICOM Data")  # type:ignore
-        def help_in_dicoms():
-            st.markdown(
-                """
-                - Upload or select the input DICOM folder containing all DICOM files. Nested folders are supported.
+        s_title="DICOM Data"
+        s_text="""
+        - Upload or select the input DICOM folder containing all DICOM files. Nested folders are supported.
 
-                - On the desktop app, a symbolic link named **"Dicoms"** will be created in the **working directory**, pointing to your input DICOM folder.
+        - On the desktop app, a symbolic link named **"Dicoms"** will be created in the **working directory**, pointing to your input DICOM folder.
 
-                - On the cloud platform, you can directly drag and drop your DICOM files or folders and they will be uploaded to the **"Dicoms"** folder within the **working directory**.
+        - On the cloud platform, you can directly drag and drop your DICOM files or folders and they will be uploaded to the **"Dicoms"** folder within the **working directory**.
 
-                - On the cloud, **we strongly recommend** compressing your DICOM data into a single ZIP archive before uploading. The system will automatically extract the contents of the ZIP file into the **"Dicoms"** folder upon upload.
-                """
-            )
-
-        col1, col2 = st.columns([0.5, 0.1])
-        with col2:
-            if st.button('Get help 🤔', key='key_btn_help_in_dicoms', use_container_width=True):
-                help_in_dicoms()
+        - On the cloud, **we strongly recommend** compressing your DICOM data into a single ZIP archive before uploading. The system will automatically extract the contents of the ZIP file into the **"Dicoms"** folder upon upload.
+        """
+        utilst.util_get_help(s_title, s_text)
 
 def panel_detect() -> None:
     """
@@ -175,20 +149,13 @@ def panel_detect() -> None:
         with st.expander('Show dicom metadata', expanded=False):
             st.dataframe(st.session_state.df_dicoms)
 
-        @st.dialog("DICOM Series Detection")  # type:ignore
-        def help_detect_series():
-            st.markdown(
-                """
-                - The system verifies all files within the DICOM folder.
-                - Valid DICOM files are processed to extract the DICOM header information, which is used to identify and group images into their respective series
-                - Specifically, the DICOM field **"SeriesDesc"** is used to select series
-                """
-            )
-
-        col1, col2 = st.columns([0.5, 0.1])
-        with col2:
-            if st.button('Get help 🤔', key='key_btn_help_detect_series', use_container_width=True):
-                help_detect_series()
+        s_title="DICOM Series"
+        s_text="""
+        - The system verifies all files within the DICOM folder.
+        - Valid DICOM files are processed to extract the DICOM header information, which is used to identify and group images into their respective series
+        - The DICOM field **"SeriesDesc"** is used to identify series
+        """
+        utilst.util_get_help(s_title, s_text)
 
 
 def panel_extract() -> None:
@@ -261,21 +228,13 @@ def panel_extract() -> None:
             with st.expander('View NIFTI image list'):
                 st.dataframe(df_files)
 
-        @st.dialog("DICOM to Nifti Conversion")  # type:ignore
-        def help_extract_nifti():
-            st.markdown(
-                """
-                - The user specifies the desired modality and selects the associated series.
-                - Selected series are converted into Nifti image format.
-                - Nifti images are renamed with the following format: **{PatientID}\_{StudyDate}\_{modality}.nii.gz**
-                """
-            )
-
-        col1, col2 = st.columns([0.5, 0.1])
-        with col2:
-            if st.button('Get help 🤔', key='key_btn_help_extract_nifti', use_container_width=True):
-                help_extract_nifti()
-
+        s_title="Nifti Conversion"
+        s_text="""
+        - The user specifies the desired modality and selects the associated series.
+        - Selected series are converted into Nifti image format.
+        - Nifti images are renamed with the following format: **{PatientID}\_{StudyDate}\_{modality}.nii.gz**
+        """
+        utilst.util_get_help(s_title, s_text)
 
 def panel_view() -> None:
     """
