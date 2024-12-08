@@ -61,9 +61,10 @@ def panel_wdir() -> None:
                 """
             )
 
-        if st.button('Get help 🤔', key='key_btn_working_dir'):
-            help_working_dir()
-
+        col1, col2 = st.columns([0.5, 0.1])
+        with col2:
+            if st.button('Get help 🤔', key='key_btn_working_dir', use_container_width=True):
+                help_working_dir()
 
 def panel_indicoms() -> None:
     """
@@ -128,8 +129,10 @@ def panel_indicoms() -> None:
                 """
             )
 
-        if st.button('Get help 🤔', key='key_btn_help_in_dicoms'):
-            help_in_dicoms()
+        col1, col2 = st.columns([0.5, 0.1])
+        with col2:
+            if st.button('Get help 🤔', key='key_btn_help_in_dicoms', use_container_width=True):
+                help_in_dicoms()
 
 def panel_detect() -> None:
     """
@@ -182,8 +185,10 @@ def panel_detect() -> None:
                 """
             )
 
-        if st.button('Get help 🤔', key='key_btn_help_detect_series'):
-            help_detect_series()
+        col1, col2 = st.columns([0.5, 0.1])
+        with col2:
+            if st.button('Get help 🤔', key='key_btn_help_detect_series', use_container_width=True):
+                help_detect_series()
 
 
 def panel_extract() -> None:
@@ -266,8 +271,10 @@ def panel_extract() -> None:
                 """
             )
 
-        if st.button('Get help 🤔', key='key_btn_help_extract_nifti'):
-            help_extract_nifti()
+        col1, col2 = st.columns([0.5, 0.1])
+        with col2:
+            if st.button('Get help 🤔', key='key_btn_help_extract_nifti', use_container_width=True):
+                help_extract_nifti()
 
 
 def panel_view() -> None:
@@ -353,8 +360,9 @@ def panel_view() -> None:
             ):
                 with blocks[i]:
                     ind_view = utilni.img_views.index(tmp_orient)
+                    size_auto = True
                     utilst.show_img3D(
-                        img, ind_view, img_bounds[ind_view, :], tmp_orient
+                        img, ind_view, img_bounds[ind_view, :], tmp_orient, size_auto
                     )
 
 

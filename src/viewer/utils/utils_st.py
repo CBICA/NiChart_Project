@@ -10,7 +10,7 @@ import shutil
 # from wfork_streamlit_profiler import Profiler
 # import pyinstrument
 
-COL_LEFT = 3
+COL_LEFT = 5
 COL_RIGHT_EMPTY = 0.01
 COL_RIGHT_BUTTON = 1
 
@@ -88,7 +88,7 @@ def user_input_filename(
     path_dir = path_last
     tmpcol = st.columns((COL_LEFT, COL_RIGHT_BUTTON), vertical_alignment="bottom")
     with tmpcol[1]:
-        if st.button(label_btn, key=f"key_btn_{key_st}"):
+        if st.button(label_btn, key=f"key_btn_{key_st}", use_container_width=True):
             # path_curr, path_dir = utilio.browse_file(path_dir)
             out_file = utilio.browse_file(path_dir)
             if out_file is not None and os.path.exists(out_file):
@@ -122,7 +122,7 @@ def user_input_foldername(
 
     # Button to select folder
     with tmpcol[1]:
-        if st.button(label_btn, key=f"btn_{key_st}"):
+        if st.button(label_btn, key=f"btn_{key_st}", use_container_width=True):
             out_str = utilio.browse_folder(path_last)
 
     if out_str is not None and os.path.exists(out_str):
@@ -151,7 +151,11 @@ def user_input_foldername(
 
 
 def show_img3D(
-    img: np.ndarray, scroll_axis: Any, sel_axis_bounds: Any, img_name: str
+    img: np.ndarray,
+    scroll_axis: Any,
+    sel_axis_bounds: Any,
+    img_name: str,
+    size_auto: bool,
 ) -> None:
     """
     Display a 3D img
@@ -167,17 +171,25 @@ def show_img3D(
     )
 
     # Extract the slice and display it
-    w_img = (
-        st.session_state.mriview_const["w_init"]
-        * st.session_state.mriview_var["w_coeff"]
-    )
-    if scroll_axis == 0:
-        # st.image(img[slice_index, :, :], use_column_width=True)
-        st.image(img[slice_index, :, :], width=w_img)
-    elif scroll_axis == 1:
-        st.image(img[:, slice_index, :], width=w_img)
+    if size_auto:
+        if scroll_axis == 0:
+            st.image(img[slice_index, :, :], use_column_width=True)
+        elif scroll_axis == 1:
+            st.image(img[:, slice_index, :], use_column_width=True)
+        else:
+            st.image(img[:, :, slice_index], use_column_width=True)
     else:
-        st.image(img[:, :, slice_index], width=w_img)
+        w_img = (
+            st.session_state.mriview_const["w_init"]
+            * st.session_state.mriview_var["w_coeff"]
+        )
+        if scroll_axis == 0:
+            # st.image(img[slice_index, :, :], use_column_width=True)
+            st.image(img[slice_index, :, :], width=w_img)
+        elif scroll_axis == 1:
+            st.image(img[:, slice_index, :], width=w_img)
+        else:
+            st.image(img[:, :, slice_index], width=w_img)
 
 
 def util_panel_workingdir(app_type: str) -> None:
