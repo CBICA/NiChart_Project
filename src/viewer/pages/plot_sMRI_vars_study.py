@@ -53,6 +53,7 @@ def panel_wdir() -> None:
             )
             st.session_state.flags["dir_out"] = True
 
+        utilst.util_workingdir_get_help()
 
 def panel_incsv() -> None:
     """
@@ -102,7 +103,14 @@ def panel_incsv() -> None:
             st.session_state.is_updated["csv_plot"] = False
 
             # Show input data
-            st.dataframe(st.session_state.plot_var["df_data"])
+            with st.expander('Show input data', expanded=False):
+                st.dataframe(st.session_state.plot_var["df_data"])
+
+        s_title="Input Data"
+        s_text="""
+        - Choose a CSV file. Primarily designed for DLMUSE and ML score data, but also supports other files with numeric values.
+        """
+        utilst.util_get_help(s_title, s_text)
 
 
 def panel_rename() -> None:
@@ -244,13 +252,22 @@ def panel_select() -> None:
             df = df[st.session_state.plot_sel_vars]
             st.session_state.plot_var["df_data"] = df
 
-        if st.button("Reload initial dataframe"):
-            st.session_state.plot_var["df_data"] = utildf.read_dataframe(
-                st.session_state.paths["csv_plot"]
-            )
-            st.session_state.is_updated["csv_plot"] = False
-            st.session_state.plot_sel_vars = []
+        col1, col2 = st.columns([0.5, 0.1])
+        with col2:
+            if st.button("Reload initial dataframe", use_container_width=True):
+                st.session_state.plot_var["df_data"] = utildf.read_dataframe(
+                    st.session_state.paths["csv_plot"]
+                )
+                st.session_state.is_updated["csv_plot"] = False
+                st.session_state.plot_sel_vars = []
 
+        s_title="Variable Selection"
+        s_text="""
+        - This step allows you to optionally select a subset of variables for analysis.
+        - Variables are grouped into categories.
+        - Select the categories of interest. You can further refine your selection by choosing specific variables within each chosen category.
+        """
+        utilst.util_get_help(s_title, s_text)
 
 def panel_filter() -> None:
     """
