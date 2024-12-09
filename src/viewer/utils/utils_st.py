@@ -213,7 +213,7 @@ def util_workingdir_get_help() -> None:
 
             - On the desktop app, you can initiate a NiChart pipeline by selecting the **working directory** from a previously completed task.
 
-            - On the cloud app, the results are deleted in regular intervals, so they may not be available.
+            - On the cloud app, the results are deleted in regular intervals, so they may not be available if you come back later.
             """
         )
     col1, col2 = st.columns([0.5, 0.1])

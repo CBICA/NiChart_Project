@@ -3,7 +3,7 @@ spare-scores
 NiChartHarmonize
 DLICV
 DLMUSE
-NiChart_DLMUSE
+NiChart_DLMUSE>=1.0.9
 DLWMLS @ git+https://github.com/CBICA/DLWMLS
 
 # general python dependencies

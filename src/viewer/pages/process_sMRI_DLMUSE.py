@@ -177,7 +177,7 @@ def panel_dlmuse() -> None:
 
             with st.expander('View DLMUSE volumes'):
                 df_dlmuse=pd.read_csv(st.session_state.paths["csv_dlmuse"])
-                st.dataframe(df_files)
+                st.dataframe(df_dlmuse)
 
         s_title="DLMUSE Segmentation"
         s_text="""

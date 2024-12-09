@@ -70,8 +70,6 @@ def init_session_state() -> None:
         else:
             st.session_state.has_cloud_session = False
         
-        ## REMOVE THIS   
-        st.write(st.session_state.cloud_session_token)
                 
         ###################################
 
