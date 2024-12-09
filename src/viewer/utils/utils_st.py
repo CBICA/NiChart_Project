@@ -268,7 +268,6 @@ def util_panel_workingdir(app_type: str) -> None:
         utilses.update_default_paths()
         utilses.reset_flags()
 
-
 def copy_uploaded_to_dir() -> None:
     # Copies files to local storage
     if len(st.session_state["uploaded_input"]) > 0:
@@ -312,11 +311,6 @@ def util_upload_file(
     Upload user data to target folder
     Input data is a single file
     """
-    # Set target path
-    if not flag_disabled:
-        if not os.path.exists(os.path.dirname(out_file)):
-            os.makedirs(os.path.dirname(out_file))
-
     # Upload input
     in_file = st.file_uploader(
         title_txt,
@@ -325,14 +319,18 @@ def util_upload_file(
         disabled=flag_disabled,
         label_visibility=label_visibility,
     )
+    if in_file is None:
+        return False
 
-    # Copy to target
-    if not os.path.exists(out_file):
-        utilio.copy_uploaded_file(in_file, out_file)
-        return True
-
-    return False
-
+    # Create parent dir of out file
+    if not os.path.exists(os.path.dirname(out_file)):
+        os.makedirs(os.path.dirname(out_file))
+    # Remove existing output file
+    if os.path.exists(out_file):
+        os.remove(out_file)
+    # Copy selected input file to destination
+    utilio.copy_uploaded_file(in_file, out_file)
+    return True
 
 def util_select_folder(
     key_selector: str,

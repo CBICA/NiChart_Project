@@ -88,6 +88,8 @@ def panel_incsv() -> None:
                 st.session_state.paths["file_search_dir"],
             )
 
+        print(f'aaaa {st.session_state.is_updated["csv_plot"]}')
+
         if os.path.exists(st.session_state.paths["csv_plot"]):
             p_plot = st.session_state.paths["csv_plot"]
             st.success(f"Data is ready ({p_plot})", icon=":material/thumb_up:")
@@ -103,6 +105,7 @@ def panel_incsv() -> None:
             st.session_state.is_updated["csv_plot"] = False
 
             # Show input data
+        if os.path.exists(st.session_state.paths["csv_plot"]):
             with st.expander('Show input data', expanded=False):
                 st.dataframe(st.session_state.plot_var["df_data"])
 
@@ -188,6 +191,10 @@ def panel_select() -> None:
 
         df = st.session_state.plot_var["df_data"]
 
+        if 'MRID' not in df.columns:
+            st.warning('The data file does not contain the required "MRID" column. The operation cannot proceed.')
+            return
+
         with open(st.session_state.dict_categories, "r") as f:
             dict_categories = json.load(f)
 
@@ -247,10 +254,12 @@ def panel_select() -> None:
             sel_vars = sel_vars + vars_cent
             st.session_state.plot_sel_vars = sel_vars
             
-            print(f'sss {vars_cent}   nnnn {sel_vars}')
-                        
             df = df[st.session_state.plot_sel_vars]
             st.session_state.plot_var["df_data"] = df
+
+            with st.expander('Show selected data', expanded=False):
+                st.dataframe(st.session_state.plot_var["df_data"])
+
 
         col1, col2 = st.columns([0.5, 0.1])
         with col2:
