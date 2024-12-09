@@ -27,15 +27,29 @@ st.markdown(
     """
 )
 
+# Update status of checkboxes
+if '_check_ml_wdir' in st.session_state:
+    st.session_state.checkbox['ml_wdir'] = st.session_state._check_ml_wdir
+if '_check_ml_in' in st.session_state:
+    st.session_state.checkbox['ml_in'] = st.session_state._check_ml_in
+if '_check_ml_run' in st.session_state:
+    st.session_state.checkbox['ml_run'] = st.session_state._check_ml_run
+if '_check_ml_download' in st.session_state:
+    st.session_state.checkbox['ml_download'] = st.session_state._check_ml_download
 
-st.divider()
+def panel_wdir() -> None:
+    """
+    Panel for selecting the working dir
+    """
+    icon = st.session_state.icon_thumb[st.session_state.flags["dir_out"]]
+    show_panel_wdir = st.checkbox(
+        f":material/folder_shared: Working Directory {icon}",
+        key='_check_ml_wdir',
+        value=st.session_state.checkbox['ml_wdir']
+    )
+    if not st.session_state._check_ml_wdir:
+        return
 
-# Panel for selecting the working dir
-icon = st.session_state.icon_thumb[st.session_state.flags["dir_out"]]
-show_panel_wdir = st.checkbox(
-    f":material/folder_shared: Working Directory {icon}", value=False
-)
-if show_panel_wdir:
     with st.container(border=True):
         utilst.util_panel_workingdir(st.session_state.app_type)
         if os.path.exists(st.session_state.paths["dset"]):
@@ -47,15 +61,30 @@ if show_panel_wdir:
 
         utilst.util_workingdir_get_help()
 
-# Panel for uploading input data csv
-msg = st.session_state.app_config[st.session_state.app_type]["msg_infile"]
-icon = st.session_state.icon_thumb[st.session_state.flags["csv_dlmuse+demog"]]
-show_panel_indata = st.checkbox(
-    f":material/upload: {msg} Data {icon}",
-    disabled=not st.session_state.flags["dir_out"],
-    value=False,
-)
-if show_panel_indata:
+def panel_indata() -> None:
+    """
+    Panel for uploading input files
+    """
+    msg = st.session_state.app_config[st.session_state.app_type]["msg_infile"]
+    icon = st.session_state.icon_thumb[st.session_state.flags["csv_dlmuse+demog"]]
+    show_panel_indata = st.checkbox(
+        f":material/upload: {msg} Data {icon}",
+        disabled=not st.session_state.flags["dir_out"],
+        key='_check_ml_in',        
+        value=st.session_state.checkbox['ml_in']
+    )
+    if not st.session_state._check_ml_in:
+        return
+
+    show_panel_int1 = st.checkbox(
+        f":material/upload: {msg} T1 Images {icon}",
+        disabled=not st.session_state.flags["dir_out"],
+        key='_check_ml_in',
+        value=st.session_state.checkbox['ml_in']
+    )
+    if not st.session_state._check_ml_in:
+        return
+
     with st.container(border=True):
         if st.session_state.app_type == "cloud":
             utilst.util_upload_file(
@@ -163,14 +192,21 @@ if show_panel_indata:
             if st.button('Get help 🤔', key='key_btn_help_mlinput', use_container_width=True):
                 help_input_data()
 
-# Panel for running MLScore
-icon = st.session_state.icon_thumb[st.session_state.flags["csv_mlscores"]]
-show_panel_runml = st.checkbox(
-    f":material/upload: Run MLScores {icon}",
-    disabled=not st.session_state.flags["csv_dlmuse+demog"],
-    value=False,
-)
-if show_panel_runml:
+
+def panel_run() -> None:
+    """
+    Panel for running ml score calculation
+    """
+    icon = st.session_state.icon_thumb[st.session_state.flags["csv_mlscores"]]
+    st.checkbox(
+        f":material/new_label: Run DLMUSE {icon}",
+        disabled=not st.session_state.flags["dir_t1"],
+        key='_check_ml_run',
+        value=st.session_state.checkbox['ml_run']
+    )
+    if not st.session_state._check_ml_run:
+        return
+
     with st.container(border=True):
 
         btn_mlscore = st.button("Run MLScore", disabled=False)
@@ -244,27 +280,39 @@ if show_panel_runml:
         """
         utilst.util_get_help(s_title, s_text)
 
-# Panel for downloading results
-if st.session_state.app_type == "cloud":
-    show_panel_download = st.checkbox(
+def panel_download() -> None:
+    """
+    Panel for downloading results
+    """
+    st.checkbox(
         ":material/new_label: Download Scans",
         disabled=not st.session_state.flags["csv_mlscores"],
-        value=False,
+        key='_check_ml_download',
+        value=st.session_state.checkbox['ml_download']
     )
-    if show_panel_download:
-        with st.container(border=True):
-            out_zip = bytes()
-            if not os.path.exists(st.session_state.paths["download"]):
-                os.makedirs(st.session_state.paths["download"])
-            f_tmp = os.path.join(st.session_state.paths["download"], "MLScores.zip")
-            out_zip = utilio.zip_folder(st.session_state.paths["mlscores"], f_tmp)
+    if not st.session_state._check_ml_download:
+        return
 
-            st.download_button(
-                "Download ML Scores",
-                out_zip,
-                file_name=f"{st.session_state.dset}_MLScores.zip",
-                disabled=False,
-            )
+    with st.container(border=True):
+        out_zip = bytes()
+        if not os.path.exists(st.session_state.paths["download"]):
+            os.makedirs(st.session_state.paths["download"])
+        f_tmp = os.path.join(st.session_state.paths["download"], "MLScores.zip")
+        out_zip = utilio.zip_folder(st.session_state.paths["mlscores"], f_tmp)
+
+        st.download_button(
+            "Download ML Scores",
+            out_zip,
+            file_name=f"{st.session_state.dset}_MLScores.zip",
+            disabled=False,
+        )
+
+st.divider()
+panel_wdir()
+panel_indata()
+panel_run()
+if st.session_state.app_type == "cloud":
+    panel_download()
 
 # FIXME: For DEBUG
 utilst.add_debug_panel()

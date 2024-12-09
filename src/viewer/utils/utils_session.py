@@ -95,6 +95,29 @@ def init_session_state() -> None:
             True: ":material/thumb_up:",
         }
 
+        # Flags for checkbox states
+        st.session_state.checkbox = {
+            "dicoms_wdir": False,
+            "dicoms_in": False,
+            "dicoms_series": False,
+            "dicoms_run": False,
+            "dicoms_view": False,
+            "dicoms_download": False,
+            "dlmuse_wdir": False,
+            "dlmuse_in": False,
+            "dlmuse_run": False,
+            "dlmuse_view": False,
+            "dlmuse_download": False,
+            "ml_wdir": False,
+            "ml_in": False,
+            "ml_run": False,
+            "ml_download": False,
+            "view_wdir": False,
+            "view_in": False,
+            "view_select": False,
+            "view_plot": False
+        }
+
         # Flags for various i/o
         st.session_state.flags = {
             "dset": False,
@@ -414,6 +437,9 @@ def update_default_paths() -> None:
     st.session_state.paths["csv_plot"] = os.path.join(
         st.session_state.paths["plots"], "Data.csv"
     )
+    # Reset plot data
+    st.session_state.plot_var["df_data"] = pd.DataFrame()
+
 
 
 def reset_flags() -> None:

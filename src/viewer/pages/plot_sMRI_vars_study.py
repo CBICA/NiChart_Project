@@ -33,15 +33,28 @@ st.markdown(
     """
 )
 
+# Update status of checkboxes
+if '_check_view_wdir' in st.session_state:
+    st.session_state.checkbox['view_wdir'] = st.session_state._check_view_wdir
+if '_check_view_in' in st.session_state:
+    st.session_state.checkbox['view_in'] = st.session_state._check_view_in
+if '_check_view_select' in st.session_state:
+    st.session_state.checkbox['view_select'] = st.session_state._check_view_select
+if '_check_view_plot' in st.session_state:
+    st.session_state.checkbox['view_plot'] = st.session_state._check_view_plot
+
+
 def panel_wdir() -> None:
     """
     Panel for selecting the working dir
     """
     icon = st.session_state.icon_thumb[st.session_state.flags["dir_out"]]
     show_panel_wdir = st.checkbox(
-        f":material/folder_shared: Working Directory {icon}", value=False
+        f":material/folder_shared: Working Directory {icon}",
+        key='_check_view_wdir',
+        value=st.session_state.checkbox['view_wdir']
     )
-    if not show_panel_wdir:
+    if not st.session_state._check_view_wdir:
         return
 
     with st.container(border=True):
@@ -66,10 +79,15 @@ def panel_incsv() -> None:
     show_panel_incsv = st.checkbox(
         f":material/upload: {msg} Data {icon}",
         disabled=not st.session_state.flags["dir_out"],
-        value=False,
+        key='_check_view_in',
+        value=st.session_state.checkbox['view_in']
     )
-    if not show_panel_incsv:
+    if not st.session_state._check_view_in:
         return
+
+    ## Reset plots if dataframe is empty
+    #if st.session_state.plot_var["df_data"].shape[0]==0:
+        
 
     with st.container(border=True):
         if st.session_state.app_type == "cloud":
@@ -87,8 +105,6 @@ def panel_incsv() -> None:
                 st.session_state.paths["csv_plot"],
                 st.session_state.paths["file_search_dir"],
             )
-
-        print(f'aaaa {st.session_state.is_updated["csv_plot"]}')
 
         if os.path.exists(st.session_state.paths["csv_plot"]):
             p_plot = st.session_state.paths["csv_plot"]
@@ -182,9 +198,10 @@ def panel_select() -> None:
     show_panel_select = st.checkbox(
         ":material/playlist_add: Select Variables (optional)",
         disabled=not st.session_state.flags["csv_plot"],
-        value=False,
+        key='_check_view_select',
+        value=st.session_state.checkbox['view_select']
     )
-    if not show_panel_select:
+    if not st.session_state._check_view_select:
         return
 
     with st.container(border=True):
@@ -376,7 +393,6 @@ def show_plots(df: pd.DataFrame, btn_plots: bool) -> None:
     """
     Display plots
     """
-
     # Add a plot (a first plot is added by default; others at button click)
     if st.session_state.plots.shape[0] == 0 or btn_plots:
         # Select xvar and yvar, if not set yet
@@ -442,9 +458,10 @@ def panel_plot() -> None:
     show_panel_plots = st.checkbox(
         ":material/bid_landscape: Plot Data",
         disabled=not st.session_state.flags["csv_plot"],
+        key='_check_view_plot',
+        value=st.session_state.checkbox['view_plot']
     )
-
-    if not show_panel_plots:
+    if not st.session_state._check_view_plot:
         return
 
     # Read dataframe
@@ -453,6 +470,9 @@ def panel_plot() -> None:
             st.session_state.paths["csv_plot"]
         )
     df = st.session_state.plot_var["df_data"]
+    
+    if df.shape[0] == 0:
+        return
 
     # Add sidebar parameters
     with st.sidebar:

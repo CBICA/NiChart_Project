@@ -19,21 +19,36 @@ utilmenu.menu()
 
 st.write("# Dicom to Nifti Conversion")
 
+# Update status of checkboxes
+if '_check_dicoms_wdir' in st.session_state:
+    st.session_state.checkbox['dicoms_wdir'] = st.session_state._check_dicoms_wdir
+if '_check_dicoms_in' in st.session_state:
+    st.session_state.checkbox['dicoms_in'] = st.session_state._check_dicoms_in
+if '_check_dicoms_series' in st.session_state:
+    st.session_state.checkbox['dicoms_series'] = st.session_state._check_dicoms_series
+if '_check_dicoms_run' in st.session_state:
+    st.session_state.checkbox['dicoms_run'] = st.session_state._check_dicoms_run
+if '_check_dicoms_view' in st.session_state:
+    st.session_state.checkbox['dicoms_view'] = st.session_state._check_dicoms_view
+if '_check_dicoms_download' in st.session_state:
+    st.session_state.checkbox['dicoms_download'] = st.session_state._check_dicoms_download
+
 
 def progress(p: int, i: int, decoded: Any) -> None:
     with result_holder.container():
         st.progress(p, f"Progress: Token position={i}")
-
 
 def panel_wdir() -> None:
     """
     Panel for selecting the working dir
     """
     icon = st.session_state.icon_thumb[st.session_state.flags["dir_out"]]
-    show_panel_wdir = st.checkbox(
-        f":material/folder_shared: Working Directory {icon}", value=False
+    st.checkbox(
+        f":material/folder_shared: Working Directory {icon}", 
+        key='_check_dicoms_wdir',
+        value=st.session_state.checkbox['dicoms_wdir']
     )
-    if not show_panel_wdir:
+    if not st.session_state._check_dicoms_wdir:
         return
 
     with st.container(border=True):
@@ -53,12 +68,13 @@ def panel_indicoms() -> None:
     """
     msg = st.session_state.app_config[st.session_state.app_type]["msg_infile"]
     icon = st.session_state.icon_thumb[st.session_state.flags["dir_dicom"]]
-    show_panel_indicoms = st.checkbox(
+    st.checkbox(
         f":material/upload: {msg} Dicoms {icon}",
         disabled=not st.session_state.flags["dir_out"],
-        value=False,
+        key='_check_dicoms_in',
+        value=st.session_state.checkbox['dicoms_in']
     )
-    if not show_panel_indicoms:
+    if not st.session_state._check_dicoms_in:
         return
 
     with st.container(border=True):
@@ -113,12 +129,13 @@ def panel_detect() -> None:
     Panel for detecting dicom series
     """
     icon = st.session_state.icon_thumb[st.session_state.flags["dicom_series"]]
-    show_panel_detect = st.checkbox(
+    st.checkbox(
         f":material/manage_search: Detect Dicom Series {icon}",
         disabled=not st.session_state.flags["dir_dicom"],
-        value=False,
+        key='_check_dicoms_series',
+        value=st.session_state.checkbox['dicoms_series']
     )
-    if not show_panel_detect:
+    if not st.session_state._check_dicoms_series:
         return
 
     with st.container(border=True):
@@ -163,12 +180,13 @@ def panel_extract() -> None:
     Panel for extracting dicoms
     """
     icon = st.session_state.icon_thumb[st.session_state.flags["dir_nifti"]]
-    show_panel_extract = st.checkbox(
+    st.checkbox(
         f":material/auto_awesome_motion: Extract Scans {icon}",
         disabled=not st.session_state.flags["dicom_series"],
-        value=False,
+        key='_check_dicoms_run',
+        value=st.session_state.checkbox['dicoms_run']
     )
-    if not show_panel_extract:
+    if not st.session_state._check_dicoms_run:
         return
 
     with st.container(border=True):
@@ -243,13 +261,13 @@ def panel_view() -> None:
     """
     Panel for viewing extracted nifti images
     """
-
-    show_panel_view = st.checkbox(
+    st.checkbox(
         ":material/visibility: View Scans",
         disabled=not st.session_state.flags["dir_nifti"],
-        value=False,
+        key='_check_dicoms_view',
+        value=st.session_state.checkbox['dicoms_view']
     )
-    if not show_panel_view:
+    if not st.session_state._check_dicoms_view:
         return
 
     with st.container(border=True):
@@ -329,14 +347,15 @@ def panel_view() -> None:
 
 def panel_download() -> None:
     """
-    Panel for viewing extracted nifti images
+    Panel for downloading extracted nifti images
     """
-    show_panel_view = st.checkbox(
+    st.checkbox(
         ":material/download: Download Scans",
         disabled=not st.session_state.flags["dir_nifti"],
-        value=False,
+        key='_check_dicoms_download',
+        value=st.session_state.checkbox['dicoms_download']
     )
-    if not show_panel_view:
+    if not st.session_state._check_dicoms_download:
         return
 
     with st.container(border=True):
