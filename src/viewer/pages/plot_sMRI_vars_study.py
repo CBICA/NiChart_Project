@@ -53,6 +53,7 @@ def panel_wdir() -> None:
             )
             st.session_state.flags["dir_out"] = True
 
+        utilst.util_workingdir_get_help()
 
 def panel_incsv() -> None:
     """
@@ -87,6 +88,8 @@ def panel_incsv() -> None:
                 st.session_state.paths["file_search_dir"],
             )
 
+        print(f'aaaa {st.session_state.is_updated["csv_plot"]}')
+
         if os.path.exists(st.session_state.paths["csv_plot"]):
             p_plot = st.session_state.paths["csv_plot"]
             st.success(f"Data is ready ({p_plot})", icon=":material/thumb_up:")
@@ -100,6 +103,17 @@ def panel_incsv() -> None:
                 st.session_state.paths["csv_plot"]
             )
             st.session_state.is_updated["csv_plot"] = False
+
+            # Show input data
+        if os.path.exists(st.session_state.paths["csv_plot"]):
+            with st.expander('Show input data', expanded=False):
+                st.dataframe(st.session_state.plot_var["df_data"])
+
+        s_title="Input Data"
+        s_text="""
+        - Choose a CSV file. Primarily designed for DLMUSE and ML score data, but also supports other files with numeric values.
+        """
+        utilst.util_get_help(s_title, s_text)
 
 
 def panel_rename() -> None:
@@ -177,6 +191,10 @@ def panel_select() -> None:
 
         df = st.session_state.plot_var["df_data"]
 
+        if 'MRID' not in df.columns:
+            st.warning('The data file does not contain the required "MRID" column. The operation cannot proceed.')
+            return
+
         with open(st.session_state.dict_categories, "r") as f:
             dict_categories = json.load(f)
 
@@ -236,18 +254,31 @@ def panel_select() -> None:
             sel_vars = sel_vars + vars_cent
             st.session_state.plot_sel_vars = sel_vars
             
-            print(f'sss {vars_cent}   nnnn {sel_vars}')
-                        
             df = df[st.session_state.plot_sel_vars]
             st.session_state.plot_var["df_data"] = df
 
-        if st.button("Reload initial dataframe"):
-            st.session_state.plot_var["df_data"] = utildf.read_dataframe(
-                st.session_state.paths["csv_plot"]
-            )
-            st.session_state.is_updated["csv_plot"] = False
-            st.session_state.plot_sel_vars = []
+            with st.expander('Show selected data', expanded=False):
+                st.dataframe(st.session_state.plot_var["df_data"])
 
+
+        col1, col2 = st.columns([0.5, 0.1])
+        with col2:
+            if st.button("Revert to initial data", use_container_width=True):
+                st.session_state.plot_var["df_data"] = utildf.read_dataframe(
+                    st.session_state.paths["csv_plot"]
+                )
+                st.session_state.is_updated["csv_plot"] = False
+                st.session_state.plot_sel_vars = []
+
+        s_title="Variable Selection"
+        s_text="""
+        - This step allows you to optionally select a subset of variables for analysis.
+        - Variables are grouped into categories.
+        - Select a category. The selection box displays variables from that category that are present in your data. An empty selection box signifies no overlap between the selected category and your dataset.
+        - You can further refine your selection by choosing specific variables within each chosen category.
+        - You can revert back to the initial data at any point.
+        """
+        utilst.util_get_help(s_title, s_text)
 
 def panel_filter() -> None:
     """

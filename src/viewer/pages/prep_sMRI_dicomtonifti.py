@@ -45,6 +45,7 @@ def panel_wdir() -> None:
             )
             st.session_state.flags["dir_out"] = True
 
+        utilst.util_workingdir_get_help()
 
 def panel_indicoms() -> None:
     """
@@ -95,6 +96,17 @@ def panel_indicoms() -> None:
                     icon=":material/thumb_up:",
                 )
 
+        s_title="DICOM Data"
+        s_text="""
+        - Upload or select the input DICOM folder containing all DICOM files. Nested folders are supported.
+
+        - On the desktop app, a symbolic link named **"Dicoms"** will be created in the **working directory**, pointing to your input DICOM folder.
+
+        - On the cloud platform, you can directly drag and drop your DICOM files or folders and they will be uploaded to the **"Dicoms"** folder within the **working directory**.
+
+        - On the cloud, **we strongly recommend** compressing your DICOM data into a single ZIP archive before uploading. The system will automatically extract the contents of the ZIP file into the **"Dicoms"** folder upon upload.
+        """
+        utilst.util_get_help(s_title, s_text)
 
 def panel_detect() -> None:
     """
@@ -133,6 +145,17 @@ def panel_detect() -> None:
                 f"Detected {st.session_state.num_dicom_scans} scans in {len(st.session_state.list_series)} series!",
                 icon=":material/thumb_up:",
             )
+
+        with st.expander('Show dicom metadata', expanded=False):
+            st.dataframe(st.session_state.df_dicoms)
+
+        s_title="DICOM Series"
+        s_text="""
+        - The system verifies all files within the DICOM folder.
+        - Valid DICOM files are processed to extract the DICOM header information, which is used to identify and group images into their respective series
+        - The DICOM field **"SeriesDesc"** is used to identify series
+        """
+        utilst.util_get_help(s_title, s_text)
 
 
 def panel_extract() -> None:
@@ -179,16 +202,24 @@ def panel_extract() -> None:
         btn_convert = st.button("Convert Series", disabled=flag_disabled)
         if btn_convert:
             with st.spinner("Wait for it..."):
-                utildcm.convert_sel_series(
-                    st.session_state.df_dicoms,
-                    st.session_state.sel_series,
-                    st.session_state.paths[st.session_state.sel_mod],
-                    f"_{st.session_state.sel_mod}.nii.gz",
-                )
+                try:
+                    utildcm.convert_sel_series(
+                        st.session_state.df_dicoms,
+                        st.session_state.sel_series,
+                        st.session_state.paths[st.session_state.sel_mod],
+                        f"_{st.session_state.sel_mod}.nii.gz",
+                    )
+                except:
+                    st.warning(':material/thumb_up: Nifti conversion failed!')
 
         num_nifti = utilio.get_file_count(
             st.session_state.paths[st.session_state.sel_mod], ".nii.gz"
         )
+
+        df_files = utilio.get_file_names(
+            st.session_state.paths[st.session_state.sel_mod], ".nii.gz"
+        )
+        num_nifti=df_files.shape[0]
         if num_nifti > 0:
             st.session_state.flags["dir_nifti"] = True
             st.session_state.flags[st.session_state.sel_mod] = True
@@ -197,6 +228,16 @@ def panel_extract() -> None:
                 icon=":material/thumb_up:",
             )
 
+            with st.expander('View NIFTI image list'):
+                st.dataframe(df_files)
+
+        s_title="Nifti Conversion"
+        s_text="""
+        - The user specifies the desired modality and selects the associated series.
+        - Selected series are converted into Nifti image format.
+        - Nifti images are renamed with the following format: **{PatientID}\_{StudyDate}\_{modality}.nii.gz**
+        """
+        utilst.util_get_help(s_title, s_text)
 
 def panel_view() -> None:
     """
@@ -281,10 +322,10 @@ def panel_view() -> None:
             ):
                 with blocks[i]:
                     ind_view = utilni.img_views.index(tmp_orient)
+                    size_auto = True
                     utilst.show_img3D(
-                        img, ind_view, img_bounds[ind_view, :], tmp_orient
+                        img, ind_view, img_bounds[ind_view, :], tmp_orient, size_auto
                     )
-
 
 def panel_download() -> None:
     """
@@ -324,12 +365,15 @@ def panel_download() -> None:
             st.session_state.paths[st.session_state.sel_mod], f_tmp
         )
 
-        st.download_button(
-            "Download Extracted Scans",
-            out_zip,
-            file_name=f"{st.session_state.dset}_{st.session_state.sel_mod}.zip",
-            disabled=False,
-        )
+        if os.path.exists(st.session_state.paths[st.session_state.sel_mod]):
+            st.download_button(
+                "Download Extracted Scans",
+                out_zip,
+                file_name=f"{st.session_state.dset}_{st.session_state.sel_mod}.zip",
+                disabled=False,
+            )
+        else:
+            st.warning(':material/thumb_down: No images found for download!')
 
 
 st.markdown(

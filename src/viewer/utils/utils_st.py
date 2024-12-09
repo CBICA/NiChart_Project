@@ -10,7 +10,7 @@ import shutil
 # from wfork_streamlit_profiler import Profiler
 # import pyinstrument
 
-COL_LEFT = 3
+COL_LEFT = 5
 COL_RIGHT_EMPTY = 0.01
 COL_RIGHT_BUTTON = 1
 
@@ -88,7 +88,7 @@ def user_input_filename(
     path_dir = path_last
     tmpcol = st.columns((COL_LEFT, COL_RIGHT_BUTTON), vertical_alignment="bottom")
     with tmpcol[1]:
-        if st.button(label_btn, key=f"key_btn_{key_st}"):
+        if st.button(label_btn, key=f"key_btn_{key_st}", use_container_width=True):
             # path_curr, path_dir = utilio.browse_file(path_dir)
             out_file = utilio.browse_file(path_dir)
             if out_file is not None and os.path.exists(out_file):
@@ -122,7 +122,7 @@ def user_input_foldername(
 
     # Button to select folder
     with tmpcol[1]:
-        if st.button(label_btn, key=f"btn_{key_st}"):
+        if st.button(label_btn, key=f"btn_{key_st}", use_container_width=True):
             out_str = utilio.browse_folder(path_last)
 
     if out_str is not None and os.path.exists(out_str):
@@ -151,7 +151,11 @@ def user_input_foldername(
 
 
 def show_img3D(
-    img: np.ndarray, scroll_axis: Any, sel_axis_bounds: Any, img_name: str
+    img: np.ndarray,
+    scroll_axis: Any,
+    sel_axis_bounds: Any,
+    img_name: str,
+    size_auto: bool,
 ) -> None:
     """
     Display a 3D img
@@ -167,17 +171,55 @@ def show_img3D(
     )
 
     # Extract the slice and display it
-    w_img = (
-        st.session_state.mriview_const["w_init"]
-        * st.session_state.mriview_var["w_coeff"]
-    )
-    if scroll_axis == 0:
-        # st.image(img[slice_index, :, :], use_column_width=True)
-        st.image(img[slice_index, :, :], width=w_img)
-    elif scroll_axis == 1:
-        st.image(img[:, slice_index, :], width=w_img)
+    if size_auto:
+        if scroll_axis == 0:
+            st.image(img[slice_index, :, :], use_column_width=True)
+        elif scroll_axis == 1:
+            st.image(img[:, slice_index, :], use_column_width=True)
+        else:
+            st.image(img[:, :, slice_index], use_column_width=True)
     else:
-        st.image(img[:, :, slice_index], width=w_img)
+        w_img = (
+            st.session_state.mriview_const["w_init"]
+            * st.session_state.mriview_var["w_coeff"]
+        )
+        if scroll_axis == 0:
+            # st.image(img[slice_index, :, :], use_column_width=True)
+            st.image(img[slice_index, :, :], width=w_img)
+        elif scroll_axis == 1:
+            st.image(img[:, slice_index, :], width=w_img)
+        else:
+            st.image(img[:, :, slice_index], width=w_img)
+
+def util_get_help(s_title, s_text) -> None:
+    @st.dialog(s_title)  # type:ignore
+    def help_working_dir():
+        st.markdown(s_text)
+    col1, col2 = st.columns([0.5, 0.1])
+    with col2:
+        if st.button('Get help 🤔', key='key_btn_help_' + s_title, use_container_width=True):
+            help_working_dir()
+
+def util_workingdir_get_help() -> None:
+    @st.dialog("Working Directory")  # type:ignore
+    def help_working_dir():
+        st.markdown(
+            """
+            - A NiChart pipeline executes a series of steps, with input/output files organized in a predefined folder structure (**"working directory"**).
+
+            - Set an **"output path"** (desktop app only) and a **"dataset name"** to define the **working directory** for your analysis. You only need to set the working directory once.
+
+            - The **dataset name** can be any identifier that describes your analysis or data; it does not need to match the input study or data folder name.
+
+            - On the desktop app, you can initiate a NiChart pipeline by selecting the **working directory** from a previously completed task.
+
+            - On the cloud app, the results are deleted in regular intervals, so they may not be available.
+            """
+        )
+    col1, col2 = st.columns([0.5, 0.1])
+    with col2:
+        if st.button('Get help 🤔', key='key_btn_help_working_dir', use_container_width=True):
+            help_working_dir()
 
 
 def util_panel_workingdir(app_type: str) -> None:
@@ -186,21 +228,14 @@ def util_panel_workingdir(app_type: str) -> None:
     """
     curr_dir = st.session_state.paths["dset"]
 
-    # Read dataset name (used to create a folder where all results will be saved)
-    helpmsg = (
-        "Each study's results are organized in a dedicated folder named after the study"
-    )
-    st.session_state.dset = user_input_textfield(
-        "Study name", st.session_state.dset, helpmsg, False
-    )
-
+    # Read output folder
     if app_type == "desktop":
         # Read output folder from the user
-        helpmsg = "Results will be saved to the output folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
+        helpmsg = "Results will be saved to a dedicated folder at the output path.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
         dir_out = user_input_foldername(
             "Select folder",
             "btn_sel_dir_out",
-            "Output folder",
+            "Output path",
             st.session_state.paths["file_search_dir"],
             st.session_state.paths["dir_out"],
             helpmsg,
@@ -208,6 +243,14 @@ def util_panel_workingdir(app_type: str) -> None:
 
         if dir_out != "":
             st.session_state.paths["dir_out"] = dir_out
+
+    # Read dataset name (used to create a folder where all results will be saved)
+    helpmsg = (
+        "Please provide a unique name for your data/analysis (example: MyStudy1).\n\n A dedicated folder with this name will be created to store all input and output data associated with the analysis."
+    )
+    st.session_state.dset = user_input_textfield(
+        "Dataset Name", st.session_state.dset, helpmsg, False
+    )
 
     # Create results folder
     if st.session_state.dset != "" and st.session_state.paths["dir_out"] != "":
@@ -224,7 +267,6 @@ def util_panel_workingdir(app_type: str) -> None:
         # Update paths for output subfolders
         utilses.update_default_paths()
         utilses.reset_flags()
-
 
 def copy_uploaded_to_dir() -> None:
     # Copies files to local storage
@@ -269,11 +311,6 @@ def util_upload_file(
     Upload user data to target folder
     Input data is a single file
     """
-    # Set target path
-    if not flag_disabled:
-        if not os.path.exists(os.path.dirname(out_file)):
-            os.makedirs(os.path.dirname(out_file))
-
     # Upload input
     in_file = st.file_uploader(
         title_txt,
@@ -282,14 +319,18 @@ def util_upload_file(
         disabled=flag_disabled,
         label_visibility=label_visibility,
     )
+    if in_file is None:
+        return False
 
-    # Copy to target
-    if not os.path.exists(out_file):
-        utilio.copy_uploaded_file(in_file, out_file)
-        return True
-
-    return False
-
+    # Create parent dir of out file
+    if not os.path.exists(os.path.dirname(out_file)):
+        os.makedirs(os.path.dirname(out_file))
+    # Remove existing output file
+    if os.path.exists(out_file):
+        os.remove(out_file)
+    # Copy selected input file to destination
+    utilio.copy_uploaded_file(in_file, out_file)
+    return True
 
 def util_select_folder(
     key_selector: str,

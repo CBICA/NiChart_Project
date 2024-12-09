@@ -45,6 +45,8 @@ if show_panel_wdir:
             )
             st.session_state.flags["dir_out"] = True
 
+        utilst.util_workingdir_get_help()
+
 # Panel for uploading input data csv
 msg = st.session_state.app_config[st.session_state.app_type]["msg_infile"]
 icon = st.session_state.icon_thumb[st.session_state.flags["csv_dlmuse+demog"]]
@@ -112,6 +114,55 @@ if show_panel_indata:
                 st.session_state.flags["csv_dlmuse+demog"] = False
                 st.error(m_check, icon=":material/thumb_down:")
 
+        # Check the input data
+        @st.dialog("Input data requirements")  # type:ignore
+        def help_input_data():
+            df_muse = pd.DataFrame(
+                columns=['MRID', '702', '701', '600', '601', '...'],
+                data=[
+                    ['Subj1', '...', '...', '...', '...', '...'],
+                    ['Subj2', '...', '...', '...', '...', '...'],
+                    ['Subj3', '...', '...', '...', '...', '...'],
+                    ['...', '...', '...', '...', '...', '...']
+                ]
+            )
+            st.markdown(
+                """
+                ### DLMUSE File:
+                The DLMUSE CSV file contains volumes of ROIs (Regions of Interest) segmented by the DLMUSE algorithm. This file is generated as output when DLMUSE is applied to a set of images.
+                """
+            )
+            st.write('Example MUSE data file:')
+            st.dataframe(df_muse)
+
+            df_demog = pd.DataFrame(
+                columns=['MRID', 'Age', 'Sex'],
+                data=[
+                    ['Subj1', '57', 'F'],
+                    ['Subj2', '65', 'M'],
+                    ['Subj3', '44', 'F'],
+                    ['...', '...', '...']
+                ]
+            )
+            st.markdown(
+                """
+                ### Demographics File:
+                The DEMOGRAPHICS CSV file contains demographic information for each subject in the study.
+                - **Required Columns:**
+                    - **MRID:** Unique subject identifier.
+                    - **Age:** Age of the subject.
+                    - **Sex:** Sex of the subject (e.g., M, F).
+                - **Matching MRIDs:** Ensure the MRID values in this file match the corresponding MRIDs in the DLMUSE file for merging the data files.
+                """
+            )
+            st.write('Example demographic data file:')
+            st.dataframe(df_demog)
+
+        col1, col2 = st.columns([0.5, 0.1])
+        with col2:
+            if st.button('Get help 🤔', key='key_btn_help_mlinput', use_container_width=True):
+                help_input_data()
+
 # Panel for running MLScore
 icon = st.session_state.icon_thumb[st.session_state.flags["csv_mlscores"]]
 show_panel_runml = st.checkbox(
@@ -142,22 +193,25 @@ if show_panel_runml:
             with st.spinner("Wait for it..."):
                 st.info("Running: mlscores_workflow ", icon=":material/manufacturing:")
 
-                if flag_harmonize:
-                    w_mlscores.run_workflow(
-                        st.session_state.dset,
-                        st.session_state.paths["root"],
-                        st.session_state.paths["csv_dlmuse"],
-                        st.session_state.paths["csv_demog"],
-                        st.session_state.paths["mlscores"],
-                    )
-                else:
-                    w_mlscores.run_workflow_noharmonization(
-                        st.session_state.dset,
-                        st.session_state.paths["root"],
-                        st.session_state.paths["csv_dlmuse"],
-                        st.session_state.paths["csv_demog"],
-                        st.session_state.paths["mlscores"],
-                    )
+                try:
+                    if flag_harmonize:
+                        w_mlscores.run_workflow(
+                            st.session_state.dset,
+                            st.session_state.paths["root"],
+                            st.session_state.paths["csv_dlmuse"],
+                            st.session_state.paths["csv_demog"],
+                            st.session_state.paths["mlscores"],
+                        )
+                    else:
+                        w_mlscores.run_workflow_noharmonization(
+                            st.session_state.dset,
+                            st.session_state.paths["root"],
+                            st.session_state.paths["csv_dlmuse"],
+                            st.session_state.paths["csv_demog"],
+                            st.session_state.paths["mlscores"],
+                        )
+                except:
+                    st.warning(':material/thumb_up: ML scores calculation failed!')
 
         # Check out file
         if os.path.exists(st.session_state.paths["csv_mlscores"]):
@@ -177,6 +231,18 @@ if show_panel_runml:
             p_plot = st.session_state.paths["csv_plot"]
             print(f"Data copied to {p_plot}")
 
+            with st.expander('View output data with ROIs and ML scores'):
+                df_ml=pd.read_csv(st.session_state.paths["csv_mlscores"])
+                st.dataframe(df_ml)
+
+        s_title="ML Biomarkers"
+        s_text="""
+        - DLMUSE ROI volumes are harmonized to reference data.
+        - SPARE scores are calculated using harmonized ROI values and pre-trained models
+        - SurrealGAN scores are calculated using harmonized ROI values and pre-trained models
+        - Final results, ROI values and ML scores, are saved in the result csv file
+        """
+        utilst.util_get_help(s_title, s_text)
 
 # Panel for downloading results
 if st.session_state.app_type == "cloud":
