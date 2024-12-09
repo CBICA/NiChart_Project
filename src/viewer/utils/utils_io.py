@@ -141,3 +141,11 @@ def get_file_list(folder_path: str, file_suff: str = "") -> List:
         if f.endswith(file_suff):
             list_nifti.append(f)
     return list_nifti
+
+def get_image_path(folder_path: str, file_pref: str, file_suff_list: list) -> str:
+    if not os.path.exists(folder_path):
+        return ""
+    for tmp_suff in file_suff_list:
+        for f in os.listdir(folder_path):
+            if f.startswith(file_pref) and f.endswith(tmp_suff):
+                return os.path.join(folder_path, f)
