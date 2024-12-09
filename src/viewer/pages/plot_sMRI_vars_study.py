@@ -254,7 +254,7 @@ def panel_select() -> None:
 
         col1, col2 = st.columns([0.5, 0.1])
         with col2:
-            if st.button("Reload initial dataframe", use_container_width=True):
+            if st.button("Revert to initial data", use_container_width=True):
                 st.session_state.plot_var["df_data"] = utildf.read_dataframe(
                     st.session_state.paths["csv_plot"]
                 )
@@ -265,7 +265,9 @@ def panel_select() -> None:
         s_text="""
         - This step allows you to optionally select a subset of variables for analysis.
         - Variables are grouped into categories.
-        - Select the categories of interest. You can further refine your selection by choosing specific variables within each chosen category.
+        - Select a category. The selection box displays variables from that category that are present in your data. An empty selection box signifies no overlap between the selected category and your dataset.
+        - You can further refine your selection by choosing specific variables within each chosen category.
+        - You can revert back to the initial data at any point.
         """
         utilst.util_get_help(s_title, s_text)
 
