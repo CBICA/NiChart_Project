@@ -26,19 +26,19 @@ def config_page() -> None:
 
 ## Function to parse AWS login (if available)
 def process_session_token():
-    '''
-    WARNING: We use unsupported features of Streamlit
-             However, this is quite fast and works well with
-             the latest version of Streamlit (1.27)
-             Also, this does not verify the session token's
-             authenticity. It only decodes the token.
-    '''
-    headers = _get_websocket_headers()
+    #headers = _get_websocket_headers()
+    headers = st.context.headers
     if not headers or "X-Amzn-Oidc-Data" not in headers:
         return {}
     return jwt.decode(
         headers["X-Amzn-Oidc-Data"], algorithms=["ES256"], options={"verify_signature": False}
     )
+    
+def process_session_user_id():
+    headers = st.context.headers
+    if not headers or "X-Amzn-Oidc-Identity" not in headers:
+        return "NO_USER_FOUND"
+    return headers["X-Amzn-Oidc-Identity"]
 
 
 def init_session_state() -> None:
@@ -64,10 +64,14 @@ def init_session_state() -> None:
             st.session_state.cloud_session_token = process_session_token()
             if st.session_state.cloud_session_token:
                 st.session_state.has_cloud_session = True
+                st.session_state.cloud_user_id = process_session_user_id()
             else:
                 st.session_state.has_cloud_session = False
         else:
             st.session_state.has_cloud_session = False
+        
+        ## REMOVE THIS   
+        st.write(st.session_state.cloud_session_token)
                 
         ###################################
 
@@ -172,9 +176,17 @@ def init_session_state() -> None:
         # Set initial values for paths
         st.session_state.paths["root"] = os.path.dirname(os.path.dirname(os.getcwd()))
         st.session_state.paths["init"] = st.session_state.paths["root"]
-        st.session_state.paths["dir_out"] = os.path.join(
-            st.session_state.paths["root"], "output_folder"
-        )
+        if st.session_state.has_cloud_session:
+            user_id = st.session_state.cloud_user_id
+            st.session_state.paths["dir_out"] = os.path.join(
+                st.session_state.paths["root"], "output_folder", user_id
+            )
+        else:
+            st.session_state.paths["dir_out"] = os.path.join(
+                st.session_state.paths["root"], "output_folder"
+            )
+            
+            
         if not os.path.exists(st.session_state.paths["dir_out"]):
             os.makedirs(st.session_state.paths["dir_out"])
 
