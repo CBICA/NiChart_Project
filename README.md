@@ -35,6 +35,19 @@ For recommended system configuration, please refer to: [nnUNet hardware requirem
    pip install -r requirements.txt
    ```
 
+3. Install the proper PyTorch version for your device
+   Numpy and PyTorch have some compatibility issues which have changed variously on different platforms. To avoid frustration with these issues, please install PyTorch as noted below.
+
+   After installing all other requirements, uninstall Torch:
+   ```
+   pip uninstall torch
+   ```
+
+   Then install PyTorch using the following command. Make sure to use the correct index url for your CUDA version as specified on the [PyTorch getting started page](https://pytorch.org/get-started/locally/).
+   On Linux, version 2.3.1 is sufficient. On Windows, 2.5.1 is known to work.
+   ```
+   pip install torch==2.3.1 --index-url https://download.pytorch.org/whl/cu121
+   ```
 ## Run NiChart Locally (GUI)
 ```bash
 cd src/viewer/
