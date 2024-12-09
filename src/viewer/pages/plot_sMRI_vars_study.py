@@ -361,13 +361,14 @@ def show_img() -> None:
         for i, tmp_orient in enumerate(list_orient):
             with blocks[i]:
                 ind_view = utilni.img_views.index(tmp_orient)
+                size_auto = True
                 if not st.session_state.mriview_var["show_overlay"]:
                     utilst.show_img3D(
-                        img, ind_view, mask_bounds[ind_view, :], tmp_orient
+                        img, ind_view, mask_bounds[ind_view, :], tmp_orient, size_auto
                     )
                 else:
                     utilst.show_img3D(
-                        img_masked, ind_view, mask_bounds[ind_view, :], tmp_orient
+                        img_masked, ind_view, mask_bounds[ind_view, :], tmp_orient, size_auto
                     )
 
 

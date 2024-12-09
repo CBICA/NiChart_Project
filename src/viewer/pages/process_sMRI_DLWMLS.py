@@ -234,13 +234,14 @@ def panel_view() -> None:
             ):
                 with blocks[i]:
                     ind_view = utilni.img_views.index(tmp_orient)
+                    size_auto = True
                     if is_show_overlay is False:
                         utilst.show_img3D(
-                            img, ind_view, mask_bounds[ind_view, :], tmp_orient
+                            img, ind_view, mask_bounds[ind_view, :], tmp_orient, size_auto
                         )
                     else:
                         utilst.show_img3D(
-                            img_masked, ind_view, mask_bounds[ind_view, :], tmp_orient
+                            img_masked, ind_view, mask_bounds[ind_view, :], tmp_orient, size_auto
                         )
 
 

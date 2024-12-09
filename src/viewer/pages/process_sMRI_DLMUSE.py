@@ -329,7 +329,7 @@ def panel_view() -> None:
                                 ind_view,
                                 mask_bounds[ind_view, :],
                                 tmp_orient,
-                                size_auto = True
+                                size_auto
                             )
 
 
