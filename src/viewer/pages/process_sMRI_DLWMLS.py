@@ -44,6 +44,7 @@ def panel_wdir() -> None:
             )
             st.session_state.flags["dir_out"] = True
 
+        utilst.util_workingdir_get_help()
 
 def panel_infl() -> None:
     """
@@ -95,6 +96,19 @@ def panel_infl() -> None:
                     icon=":material/thumb_up:",
                 )
 
+        s_title="Input FL Scans"
+        s_text="""
+        - Upload or select input FL scans. DLWMLS can be directly applied to raw FL scans. Nested folders are not supported.
+
+        - The result file with total segmented WMLS volume includes an **"MRID"** column that uniquely identifies each scan. **MRID** is extracted from image file names by removing the common suffix to all images. Using consistent input image names is **strongly recommended**
+
+        - On the desktop app, a symbolic link named **"Nifti/FL"** will be created in the **working directory**, pointing to your input FL images folder.
+
+        - On the cloud platform, you can directly drag and drop your FL image files or folder and they will be uploaded to the **"Nifti/FL"** folder within the **working directory**.
+
+        - On the cloud, **we strongly recommend** compressing your input images into a single ZIP archive before uploading. The system will automatically extract the contents of the ZIP file into the **"Nifti/T1"** folder upon upload.
+        """
+        utilst.util_get_help(s_title, s_text)
 
 def panel_dlwmls() -> None:
     """

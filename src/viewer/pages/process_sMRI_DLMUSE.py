@@ -109,7 +109,7 @@ def panel_int1() -> None:
 
         - On the cloud platform, you can directly drag and drop your T1 image files or folder and they will be uploaded to the **"Nifti/T1"** folder within the **working directory**.
 
-        - On the cloud, **we strongly recommend** compressing your DICOM data into a single ZIP archive before uploading. The system will automatically extract the contents of the ZIP file into the **"Nifti/T1"** folder upon upload.
+        - On the cloud, **we strongly recommend** compressing your input images into a single ZIP archive before uploading. The system will automatically extract the contents of the ZIP file into the **"Nifti/T1"** folder upon upload.
         """
         utilst.util_get_help(s_title, s_text)
 
@@ -257,80 +257,64 @@ def panel_view() -> None:
             st.warning("Please select the MRID!")
             return
 
-        st.session_state.paths["sel_img"] = os.path.join(
-            st.session_state.paths["T1"], sel_mrid + st.session_state.suff_t1img
+        st.session_state.paths["sel_img"] = utilio.get_image_path(
+            st.session_state.paths["T1"],
+            sel_mrid,
+            ["nii.gz", ".nii"]
         )
-        if sel_mrid is not None:
-            st.session_state.paths["sel_img"] = os.path.join(
-                # hardcoded fix for T1 suffix
-                st.session_state.paths["T1"],
-                re.sub(r"_T1$", "", sel_mrid) + st.session_state.suff_t1img,
-            )
-        
-        st.session_state.paths["sel_seg"] = os.path.join(
-            st.session_state.paths["dlmuse"],  re.sub(r"_T1$", "", sel_mrid) + st.session_state.suff_seg
+
+        st.session_state.paths["sel_seg"] = utilio.get_image_path(
+            st.session_state.paths["dlmuse"],
+            sel_mrid,
+            ["nii.gz", ".nii"]
         )
 
         if not os.path.exists(st.session_state.paths["sel_img"]):
             st.warning(
-                f'Could not locate underlay image: {st.session_state.paths["sel_img"]}'
+                'Could not locate underlay image!'
             )
             return
 
         if not os.path.exists(st.session_state.paths["sel_seg"]):
             st.warning(
-                f'Could not locate overlay image: {st.session_state.paths["sel_seg"]}'
+                'Could not locate overlay image!'
             )
             return
 
         with st.spinner("Wait for it..."):
-            # Select images
-            # FIXME: at least on cloud, can get here with multiple _T1 appended (see marked lines)
-            if sel_mrid is not None:
-                st.session_state.paths["sel_img"] = os.path.join(
-                    # hardcoded fix for T1 suffix
-                    st.session_state.paths["T1"],
-                    re.sub(r"_T1$", "", sel_mrid) + st.session_state.suff_t1img,
-                )
-                st.session_state.paths["sel_seg"] = os.path.join(
-                    # hardcoded fix for T1 suffix
-                    st.session_state.paths["dlmuse"],
-                    re.sub(r"_T1$", "", sel_mrid) + st.session_state.suff_seg,
-                )
+            # Process image and mask to prepare final 3d matrix to display
+            img, mask, img_masked = utilni.prep_image_and_olay(
+                st.session_state.paths["sel_img"],
+                st.session_state.paths["sel_seg"],
+                list_rois,
+                crop_to_mask,
+            )
 
-                # Process image and mask to prepare final 3d matrix to display
-                img, mask, img_masked = utilni.prep_image_and_olay(
-                    st.session_state.paths["sel_img"],
-                    st.session_state.paths["sel_seg"],
-                    list_rois,
-                    crop_to_mask,
-                )
+            # Detect mask bounds and center in each view
+            mask_bounds = utilni.detect_mask_bounds(mask)
 
-                # Detect mask bounds and center in each view
-                mask_bounds = utilni.detect_mask_bounds(mask)
-
-                # Show images
-                blocks = st.columns(len(list_orient))
-                for i, tmp_orient in stqdm(
-                    enumerate(list_orient),
-                    desc="Showing images ...",
-                    total=len(list_orient),
-                ):
-                    with blocks[i]:
-                        ind_view = utilni.img_views.index(tmp_orient)
-                        size_auto = True
-                        if is_show_overlay is False:
-                            utilst.show_img3D(
-                                img, ind_view, mask_bounds[ind_view, :], tmp_orient, size_auto
-                            )
-                        else:
-                            utilst.show_img3D(
-                                img_masked,
-                                ind_view,
-                                mask_bounds[ind_view, :],
-                                tmp_orient,
-                                size_auto
-                            )
+            # Show images
+            blocks = st.columns(len(list_orient))
+            for i, tmp_orient in stqdm(
+                enumerate(list_orient),
+                desc="Showing images ...",
+                total=len(list_orient),
+            ):
+                with blocks[i]:
+                    ind_view = utilni.img_views.index(tmp_orient)
+                    size_auto = True
+                    if is_show_overlay is False:
+                        utilst.show_img3D(
+                            img, ind_view, mask_bounds[ind_view, :], tmp_orient, size_auto
+                        )
+                    else:
+                        utilst.show_img3D(
+                            img_masked,
+                            ind_view,
+                            mask_bounds[ind_view, :],
+                            tmp_orient,
+                            size_auto
+                        )
 
 
 def panel_download() -> None:
