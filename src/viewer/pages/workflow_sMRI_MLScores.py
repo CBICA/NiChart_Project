@@ -278,7 +278,7 @@ def panel_download() -> None:
     Panel for downloading results
     """
     st.checkbox(
-        ":material/new_label: Download Scans",
+        ":material/new_label: Download Results",
         disabled=not st.session_state.flags["csv_mlscores"],
         key='_check_ml_download',
         value=st.session_state.checkbox['ml_download']
