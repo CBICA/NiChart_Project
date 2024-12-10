@@ -328,25 +328,28 @@ def panel_view() -> None:
 
         with st.spinner("Wait for it..."):
 
-            # Prepare final 3d matrix to display
-            img = utilni.prep_image(st.session_state.paths["sel_img"])
+            try: 
+                # Prepare final 3d matrix to display
+                img = utilni.prep_image(st.session_state.paths["sel_img"])
 
-            # Detect mask bounds and center in each view
-            img_bounds = utilni.detect_img_bounds(img)
+                # Detect mask bounds and center in each view
+                img_bounds = utilni.detect_img_bounds(img)
 
-            # Show images
-            blocks = st.columns(len(list_orient))
-            for i, tmp_orient in stqdm(
-                enumerate(list_orient),
-                desc="Showing images ...",
-                total=len(list_orient),
-            ):
-                with blocks[i]:
-                    ind_view = utilni.img_views.index(tmp_orient)
-                    size_auto = True
-                    utilst.show_img3D(
-                        img, ind_view, img_bounds[ind_view, :], tmp_orient, size_auto
-                    )
+                # Show images
+                blocks = st.columns(len(list_orient))
+                for i, tmp_orient in stqdm(
+                    enumerate(list_orient),
+                    desc="Showing images ...",
+                    total=len(list_orient),
+                ):
+                    with blocks[i]:
+                        ind_view = utilni.img_views.index(tmp_orient)
+                        size_auto = True
+                        utilst.show_img3D(
+                            img, ind_view, img_bounds[ind_view, :], tmp_orient, size_auto
+                        )
+            except:
+                st.warning(':material/thumb_down: Image parsing failed. Please confirm that the image file represents a 3D volume using an external tool.')
 
 def panel_download() -> None:
     """
