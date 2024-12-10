@@ -97,6 +97,29 @@ def init_session_state() -> None:
             True: ":material/thumb_up:",
         }
 
+        # Flags for checkbox states
+        st.session_state.checkbox = {
+            "dicoms_wdir": False,
+            "dicoms_in": False,
+            "dicoms_series": False,
+            "dicoms_run": False,
+            "dicoms_view": False,
+            "dicoms_download": False,
+            "dlmuse_wdir": False,
+            "dlmuse_in": False,
+            "dlmuse_run": False,
+            "dlmuse_view": False,
+            "dlmuse_download": False,
+            "ml_wdir": False,
+            "ml_in": False,
+            "ml_run": False,
+            "ml_download": False,
+            "view_wdir": False,
+            "view_in": False,
+            "view_select": False,
+            "view_plot": False
+        }
+
         # Flags for various i/o
         st.session_state.flags = {
             "dset": False,
@@ -424,6 +447,9 @@ def update_default_paths() -> None:
     st.session_state.paths["csv_plot"] = os.path.join(
         st.session_state.paths["plots"], "Data.csv"
     )
+    # Reset plot data
+    st.session_state.plot_var["df_data"] = pd.DataFrame()
+
 
 
 def reset_flags() -> None:
@@ -433,3 +459,31 @@ def reset_flags() -> None:
     for tmp_key in st.session_state.flags.keys():
         st.session_state.flags[tmp_key] = False
     st.session_state.flags["dset"] = True
+
+def reset_plots() -> None:
+    """
+    Reset plot variables when data file changes
+    """
+    st.session_state.plots = pd.DataFrame(columns=st.session_state.plots.columns)
+    st.session_state.checkbox['view_select']=False
+    st.session_state.checkbox['view_plot']=False
+    st.session_state.plot_sel_vars = []
+    st.session_state.plot_var['hide_settings'] = False
+    st.session_state.plot_var['hide_legend'] = False
+    st.session_state.plot_var['show_img'] = False
+    st.session_state.plot_var['plot_type'] = False
+    st.session_state.plot_var['xvar'] = ''
+    st.session_state.plot_var['xmin'] = -1.0
+    st.session_state.plot_var['xmax'] = -1.0
+    st.session_state.plot_var['yvar'] = ''
+    st.session_state.plot_var['ymin'] = -1.0
+    st.session_state.plot_var['ymax'] = -1.0
+    st.session_state.plot_var['hvar'] = ''
+    st.session_state.plot_var['hvals'] = []
+    st.session_state.plot_var['corr_icv'] = False
+    st.session_state.plot_var['plot_cent_normalized'] = False
+    st.session_state.plot_var['trend'] = 'Linear'
+    st.session_state.plot_var['traces'] = ["data", "lin_fit"]
+    st.session_state.plot_var['lowess_s'] = 0.5
+    st.session_state.plot_var['centtype'] = ''
+    st.session_state.plot_var['h_coeff'] = 1.0

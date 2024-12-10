@@ -196,6 +196,7 @@ def add_plot_tabs(
             key=f"plot_hvar_{plot_id}"
             sel_val=st.session_state[key]
             df_plots.loc[plot_id, "hvar"]=sel_val
+            df_plots.at[plot_id, "hvals"]=[]
             
         hind = get_index_in_list(list_cols_ext, df_plots.loc[plot_id, "hvar"])
         st.selectbox(

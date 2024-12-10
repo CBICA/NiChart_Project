@@ -33,15 +33,28 @@ st.markdown(
     """
 )
 
+# Update status of checkboxes
+if '_check_view_wdir' in st.session_state:
+    st.session_state.checkbox['view_wdir'] = st.session_state._check_view_wdir
+if '_check_view_in' in st.session_state:
+    st.session_state.checkbox['view_in'] = st.session_state._check_view_in
+if '_check_view_select' in st.session_state:
+    st.session_state.checkbox['view_select'] = st.session_state._check_view_select
+if '_check_view_plot' in st.session_state:
+    st.session_state.checkbox['view_plot'] = st.session_state._check_view_plot
+
+
 def panel_wdir() -> None:
     """
     Panel for selecting the working dir
     """
     icon = st.session_state.icon_thumb[st.session_state.flags["dir_out"]]
     show_panel_wdir = st.checkbox(
-        f":material/folder_shared: Working Directory {icon}", value=False
+        f":material/folder_shared: Working Directory {icon}",
+        key='_check_view_wdir',
+        value=st.session_state.checkbox['view_wdir']
     )
-    if not show_panel_wdir:
+    if not st.session_state._check_view_wdir:
         return
 
     with st.container(border=True):
@@ -66,10 +79,19 @@ def panel_incsv() -> None:
     show_panel_incsv = st.checkbox(
         f":material/upload: {msg} Data {icon}",
         disabled=not st.session_state.flags["dir_out"],
-        value=False,
+        key='_check_view_in',
+        value=st.session_state.checkbox['view_in']
     )
-    if not show_panel_incsv:
+    if not st.session_state._check_view_in:
         return
+
+    # Read data if working dir changed
+    if st.session_state.plot_var["df_data"].shape[0] == 0:
+        st.session_state.plot_var["df_data"] = utildf.read_dataframe(
+            st.session_state.paths["csv_plot"]
+        )
+        utilss.reset_plots()
+        st.session_state.is_updated["csv_plot"] = False
 
     with st.container(border=True):
         if st.session_state.app_type == "cloud":
@@ -88,8 +110,6 @@ def panel_incsv() -> None:
                 st.session_state.paths["file_search_dir"],
             )
 
-        print(f'aaaa {st.session_state.is_updated["csv_plot"]}')
-
         if os.path.exists(st.session_state.paths["csv_plot"]):
             p_plot = st.session_state.paths["csv_plot"]
             st.success(f"Data is ready ({p_plot})", icon=":material/thumb_up:")
@@ -102,6 +122,7 @@ def panel_incsv() -> None:
             st.session_state.plot_var["df_data"] = utildf.read_dataframe(
                 st.session_state.paths["csv_plot"]
             )
+            utilss.reset_plots()
             st.session_state.is_updated["csv_plot"] = False
 
             # Show input data
@@ -182,9 +203,10 @@ def panel_select() -> None:
     show_panel_select = st.checkbox(
         ":material/playlist_add: Select Variables (optional)",
         disabled=not st.session_state.flags["csv_plot"],
-        value=False,
+        key='_check_view_select',
+        value=st.session_state.checkbox['view_select']
     )
-    if not show_panel_select:
+    if not st.session_state._check_view_select:
         return
 
     with st.container(border=True):
@@ -209,35 +231,35 @@ def panel_select() -> None:
             )
 
         if sel_cat is None:
-            sel_vars = []
+            sel_vars_cat = []
         else:
-            sel_vars = dict_categories[sel_cat]
-            sel_vars = [x for x in sel_vars if x in df.columns]
+            sel_vars_cat = dict_categories[sel_cat]
+            sel_vars_cat = [x for x in sel_vars_cat if x in df.columns]
 
         with cols_tmp[1]:
-            sel_vars = st.multiselect(
+            sel_vars_cat = st.multiselect(
                 "Select variables from this category",
-                sel_vars,
-                sel_vars,
+                sel_vars_cat,
+                sel_vars_cat,
                 help="The list shows variables that are present in the data file! If the list is empty, it means that none of the variables in this category are present in the data file.",
             )
 
         with cols_tmp[2]:
             if st.button("Add selected variables"):
-                sel_vars_uniq = [
-                    v for v in sel_vars if v not in st.session_state.plot_sel_vars
+                sel_vars_cat_uniq = [
+                    v for v in sel_vars_cat if v not in st.session_state.plot_sel_vars
                 ]
-                st.session_state.plot_sel_vars += sel_vars_uniq
+                st.session_state.plot_sel_vars += sel_vars_cat_uniq
 
-        sel_vars_all = st.multiselect(
+        sel_vars_final = st.multiselect(
             "Select final variables to keep",
             st.session_state.plot_sel_vars,
             st.session_state.plot_sel_vars,
         )
 
         # Select the ones in current dataframe
-        sel_vars_all = [x for x in sel_vars_all if x in df.columns]
-        st.session_state.plot_sel_vars = sel_vars_all
+        sel_vars_final = [x for x in sel_vars_final if x in df.columns]
+        st.session_state.plot_sel_vars = sel_vars_final
 
         if st.button("Select variables"):
             if "MRID" not in st.session_state.plot_sel_vars:
@@ -247,14 +269,15 @@ def panel_select() -> None:
             sel_vars = st.session_state.plot_sel_vars
             st.success(f"Selected variables: {sel_vars}")
             
+            # Add centile vars
             vars_cent = []
             for tmp_var in sel_vars:
-                if tmp_var + '_centiles' in df.columns:
-                    vars_cent.append(tmp_var + '_centiles')
-            sel_vars = sel_vars + vars_cent
-            st.session_state.plot_sel_vars = sel_vars
-            
-            df = df[st.session_state.plot_sel_vars]
+                c_var=tmp_var + '_centiles'
+                if c_var in df.columns and c_var not in sel_vars:
+                    vars_cent.append(c_var)
+            sel_vars_wcent = sel_vars + vars_cent
+                       
+            df = df[sel_vars_wcent]
             st.session_state.plot_var["df_data"] = df
 
             with st.expander('Show selected data', expanded=False):
@@ -267,8 +290,10 @@ def panel_select() -> None:
                 st.session_state.plot_var["df_data"] = utildf.read_dataframe(
                     st.session_state.paths["csv_plot"]
                 )
+                utilss.reset_plots()
                 st.session_state.is_updated["csv_plot"] = False
                 st.session_state.plot_sel_vars = []
+                st.rerun()
 
         s_title="Variable Selection"
         s_text="""
@@ -376,7 +401,6 @@ def show_plots(df: pd.DataFrame, btn_plots: bool) -> None:
     """
     Display plots
     """
-
     # Add a plot (a first plot is added by default; others at button click)
     if st.session_state.plots.shape[0] == 0 or btn_plots:
         # Select xvar and yvar, if not set yet
@@ -442,17 +466,21 @@ def panel_plot() -> None:
     show_panel_plots = st.checkbox(
         ":material/bid_landscape: Plot Data",
         disabled=not st.session_state.flags["csv_plot"],
+        key='_check_view_plot',
+        value=st.session_state.checkbox['view_plot']
     )
-
-    if not show_panel_plots:
+    if not st.session_state._check_view_plot:
         return
 
     # Read dataframe
-    if st.session_state.plot_var["df_data"].shape[0] == 0:
-        st.session_state.plot_var["df_data"] = utildf.read_dataframe(
-            st.session_state.paths["csv_plot"]
-        )
+    # if st.session_state.plot_var["df_data"].shape[0] == 0:
+    #     st.session_state.plot_var["df_data"] = utildf.read_dataframe(
+    #         st.session_state.paths["csv_plot"]
+    #     )
     df = st.session_state.plot_var["df_data"]
+    if df.shape[0] == 0:
+        st.warning('Dataframe has 0 rows!')
+        return
 
     # Add sidebar parameters
     with st.sidebar:
