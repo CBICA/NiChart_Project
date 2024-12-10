@@ -228,7 +228,7 @@ def panel_extract() -> None:
                         f"_{st.session_state.sel_mod}.nii.gz",
                     )
                 except:
-                    st.warning(':material/thumb_up: Nifti conversion failed!')
+                    st.warning(':material/thumb_down: Nifti conversion failed!')
 
         num_nifti = utilio.get_file_count(
             st.session_state.paths[st.session_state.sel_mod], ".nii.gz"
@@ -238,7 +238,10 @@ def panel_extract() -> None:
             st.session_state.paths[st.session_state.sel_mod], ".nii.gz"
         )
         num_nifti=df_files.shape[0]
-        if num_nifti > 0:
+        
+        if num_nifti == 0:
+            st.warning(':material/thumb_down: Nifti conversion failed!')
+        else:
             st.session_state.flags["dir_nifti"] = True
             st.session_state.flags[st.session_state.sel_mod] = True
             st.success(
@@ -325,25 +328,28 @@ def panel_view() -> None:
 
         with st.spinner("Wait for it..."):
 
-            # Prepare final 3d matrix to display
-            img = utilni.prep_image(st.session_state.paths["sel_img"])
+            try: 
+                # Prepare final 3d matrix to display
+                img = utilni.prep_image(st.session_state.paths["sel_img"])
 
-            # Detect mask bounds and center in each view
-            img_bounds = utilni.detect_img_bounds(img)
+                # Detect mask bounds and center in each view
+                img_bounds = utilni.detect_img_bounds(img)
 
-            # Show images
-            blocks = st.columns(len(list_orient))
-            for i, tmp_orient in stqdm(
-                enumerate(list_orient),
-                desc="Showing images ...",
-                total=len(list_orient),
-            ):
-                with blocks[i]:
-                    ind_view = utilni.img_views.index(tmp_orient)
-                    size_auto = True
-                    utilst.show_img3D(
-                        img, ind_view, img_bounds[ind_view, :], tmp_orient, size_auto
-                    )
+                # Show images
+                blocks = st.columns(len(list_orient))
+                for i, tmp_orient in stqdm(
+                    enumerate(list_orient),
+                    desc="Showing images ...",
+                    total=len(list_orient),
+                ):
+                    with blocks[i]:
+                        ind_view = utilni.img_views.index(tmp_orient)
+                        size_auto = True
+                        utilst.show_img3D(
+                            img, ind_view, img_bounds[ind_view, :], tmp_orient, size_auto
+                        )
+            except:
+                st.warning(':material/thumb_down: Image parsing failed. Please confirm that the image file represents a 3D volume using an external tool.')
 
 def panel_download() -> None:
     """
