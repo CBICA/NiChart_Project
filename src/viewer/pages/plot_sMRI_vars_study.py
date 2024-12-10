@@ -293,6 +293,7 @@ def panel_select() -> None:
                 utilss.reset_plots()
                 st.session_state.is_updated["csv_plot"] = False
                 st.session_state.plot_sel_vars = []
+                st.rerun()
 
         s_title="Variable Selection"
         s_text="""
