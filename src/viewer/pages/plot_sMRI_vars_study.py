@@ -85,9 +85,13 @@ def panel_incsv() -> None:
     if not st.session_state._check_view_in:
         return
 
-    ## Reset plots if dataframe is empty
-    #if st.session_state.plot_var["df_data"].shape[0]==0:
-        
+    # Read data if working dir changed
+    if st.session_state.plot_var["df_data"].shape[0] == 0:
+        st.session_state.plot_var["df_data"] = utildf.read_dataframe(
+            st.session_state.paths["csv_plot"]
+        )
+        utilss.reset_plots()
+        st.session_state.is_updated["csv_plot"] = False
 
     with st.container(border=True):
         if st.session_state.app_type == "cloud":
@@ -118,6 +122,7 @@ def panel_incsv() -> None:
             st.session_state.plot_var["df_data"] = utildf.read_dataframe(
                 st.session_state.paths["csv_plot"]
             )
+            utilss.reset_plots()
             st.session_state.is_updated["csv_plot"] = False
 
             # Show input data
@@ -284,8 +289,9 @@ def panel_select() -> None:
                 st.session_state.plot_var["df_data"] = utildf.read_dataframe(
                     st.session_state.paths["csv_plot"]
                 )
+                utilss.reset_plots()
                 st.session_state.is_updated["csv_plot"] = False
-                st.session_state.plot_sel_vars = []
+
 
         s_title="Variable Selection"
         s_text="""
@@ -465,13 +471,13 @@ def panel_plot() -> None:
         return
 
     # Read dataframe
-    if st.session_state.plot_var["df_data"].shape[0] == 0:
-        st.session_state.plot_var["df_data"] = utildf.read_dataframe(
-            st.session_state.paths["csv_plot"]
-        )
+    # if st.session_state.plot_var["df_data"].shape[0] == 0:
+    #     st.session_state.plot_var["df_data"] = utildf.read_dataframe(
+    #         st.session_state.paths["csv_plot"]
+    #     )
     df = st.session_state.plot_var["df_data"]
-    
     if df.shape[0] == 0:
+        st.warning('Dataframe has 0 rows!')
         return
 
     # Add sidebar parameters
