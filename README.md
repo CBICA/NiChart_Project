@@ -18,7 +18,7 @@ For recommended system configuration, please refer to: [nnUNet hardware requirem
 
 ## Installation Instructions
 
-1. Mamba installation
+1. (Optional but recommended for environment management) Mamba installation
     [Mamba Installation Guide (Official)](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html)
 
     Example (Linux x86):
@@ -26,10 +26,10 @@ For recommended system configuration, please refer to: [nnUNet hardware requirem
     wget https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh
 
     bash Mambaforge-Linux-x86_64.sh
-    mamba create -c conda-forge -c bioconda -n NCP_env python=3.12 snakemake
+    mamba create -c conda-forge -c bioconda -n NCP_env python=3.12 
     mamba activate NCP_env
     ```
-2. Manual installation
+2. Install NiChart_Project into the environment
    ```bash
    git clone https://github.com/CBICA/NiChart_Project.git
    pip install -r requirements.txt
@@ -44,7 +44,7 @@ For recommended system configuration, please refer to: [nnUNet hardware requirem
    ```
 
    Then install PyTorch using the following command. Make sure to use the correct index url for your CUDA version as specified on the [PyTorch getting started page](https://pytorch.org/get-started/locally/).
-   On Linux, version 2.3.1 is sufficient. On Windows, 2.5.1 is known to work.
+   On Linux, use version 2.3.1. On Windows, 2.5.1 is known to work.
    ```
    pip install torch==2.3.1 --index-url https://download.pytorch.org/whl/cu121
    ```
