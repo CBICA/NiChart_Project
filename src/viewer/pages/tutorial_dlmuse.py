@@ -46,16 +46,34 @@ st.markdown(
 st.markdown(
     """
     ### Show me an example 🤔
-    - Example datasets are provided for your convenience. Please watch the videos below for a step-by-step guide.
+    Please watch the videos below for a step-by-step guide. Example datasets are provided for your convenience.
+    
+    **Note:** These videos are currently under development and will be updated with newer versions as they become available.
     """
 )
 
-if st.button(':material/play_circle: DICOMs to Biomarkers (small n, complete pipeline)'):
-    f_video=os.path.join(st.session_state.paths['root'], 'resources', 'videos', 'tutorial_smri_1.webm')
+st.markdown(
+    """
+    **Video tutorial 1:**
+    - DLMUSE segmentation on a small dataset provided as raw dicom files
+    - Data: /test_data/dicoms.zip 
+    """
+)
+
+if st.button(':material/play_circle: DICOMs to Biomarkers'):
+    f_video=os.path.join(st.session_state.paths['root'], 'resources', 'videos', 'nichart_vtutorial_smri_1.webm')
     show_video(f_video)
 
-if st.button(':material/play_circle: ROIs to Biomarkers (larger n, pre-computed ROIs)'):
-    f_video=os.path.join(st.session_state.paths['root'], 'resources', 'videos', 'tutorial_smri_1.webm')
+st.markdown(
+    """
+    **Video tutorial 2:**
+    - Calculation of ML scores and visualization of data on a larger dataset using pre-computed DLMUSE values
+    - Data: /test_data/processed/IXI
+    """
+)
+
+if st.button(':material/play_circle: ROIs to Biomarkers'):
+    f_video=os.path.join(st.session_state.paths['root'], 'resources', 'videos', 'nichart_vtutorial_smri_2.webm')
     show_video(f_video)
 
 st.markdown(
