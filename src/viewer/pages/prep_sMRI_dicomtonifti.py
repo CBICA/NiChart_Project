@@ -228,7 +228,7 @@ def panel_extract() -> None:
                         f"_{st.session_state.sel_mod}.nii.gz",
                     )
                 except:
-                    st.warning(':material/thumb_up: Nifti conversion failed!')
+                    st.warning(':material/thumb_down: Nifti conversion failed!')
 
         num_nifti = utilio.get_file_count(
             st.session_state.paths[st.session_state.sel_mod], ".nii.gz"
@@ -238,7 +238,10 @@ def panel_extract() -> None:
             st.session_state.paths[st.session_state.sel_mod], ".nii.gz"
         )
         num_nifti=df_files.shape[0]
-        if num_nifti > 0:
+        
+        if num_nifti == 0:
+            st.warning(':material/thumb_down: Nifti conversion failed!')
+        else:
             st.session_state.flags["dir_nifti"] = True
             st.session_state.flags[st.session_state.sel_mod] = True
             st.success(
