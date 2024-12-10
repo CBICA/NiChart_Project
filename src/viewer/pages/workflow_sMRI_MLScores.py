@@ -76,15 +76,6 @@ def panel_indata() -> None:
     if not st.session_state._check_ml_in:
         return
 
-    show_panel_int1 = st.checkbox(
-        f":material/upload: {msg} T1 Images {icon}",
-        disabled=not st.session_state.flags["dir_out"],
-        key='_check_ml_in',
-        value=st.session_state.checkbox['ml_in']
-    )
-    if not st.session_state._check_ml_in:
-        return
-
     with st.container(border=True):
         if st.session_state.app_type == "cloud":
             utilst.util_upload_file(
@@ -139,9 +130,11 @@ def panel_indata() -> None:
             if f_check == 0:
                 st.session_state.flags["csv_dlmuse+demog"] = True
                 st.success(m_check, icon=":material/thumb_up:")
+                st.session_state.flags["csv_mlscores"] = True
             else:
                 st.session_state.flags["csv_dlmuse+demog"] = False
                 st.error(m_check, icon=":material/thumb_down:")
+                st.session_state.flags["csv_mlscores"] = False
 
         # Check the input data
         @st.dialog("Input data requirements")  # type:ignore
@@ -199,8 +192,8 @@ def panel_run() -> None:
     """
     icon = st.session_state.icon_thumb[st.session_state.flags["csv_mlscores"]]
     st.checkbox(
-        f":material/new_label: Run DLMUSE {icon}",
-        disabled=not st.session_state.flags["dir_t1"],
+        f":material/new_label: Run MLScores {icon}",
+        disabled=not st.session_state.flags["csv_mlscores"],
         key='_check_ml_run',
         value=st.session_state.checkbox['ml_run']
     )

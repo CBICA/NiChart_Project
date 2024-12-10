@@ -231,35 +231,35 @@ def panel_select() -> None:
             )
 
         if sel_cat is None:
-            sel_vars = []
+            sel_vars_cat = []
         else:
-            sel_vars = dict_categories[sel_cat]
-            sel_vars = [x for x in sel_vars if x in df.columns]
+            sel_vars_cat = dict_categories[sel_cat]
+            sel_vars_cat = [x for x in sel_vars_cat if x in df.columns]
 
         with cols_tmp[1]:
-            sel_vars = st.multiselect(
+            sel_vars_cat = st.multiselect(
                 "Select variables from this category",
-                sel_vars,
-                sel_vars,
+                sel_vars_cat,
+                sel_vars_cat,
                 help="The list shows variables that are present in the data file! If the list is empty, it means that none of the variables in this category are present in the data file.",
             )
 
         with cols_tmp[2]:
             if st.button("Add selected variables"):
-                sel_vars_uniq = [
-                    v for v in sel_vars if v not in st.session_state.plot_sel_vars
+                sel_vars_cat_uniq = [
+                    v for v in sel_vars_cat if v not in st.session_state.plot_sel_vars
                 ]
-                st.session_state.plot_sel_vars += sel_vars_uniq
+                st.session_state.plot_sel_vars += sel_vars_cat_uniq
 
-        sel_vars_all = st.multiselect(
+        sel_vars_final = st.multiselect(
             "Select final variables to keep",
             st.session_state.plot_sel_vars,
             st.session_state.plot_sel_vars,
         )
 
         # Select the ones in current dataframe
-        sel_vars_all = [x for x in sel_vars_all if x in df.columns]
-        st.session_state.plot_sel_vars = sel_vars_all
+        sel_vars_final = [x for x in sel_vars_final if x in df.columns]
+        st.session_state.plot_sel_vars = sel_vars_final
 
         if st.button("Select variables"):
             if "MRID" not in st.session_state.plot_sel_vars:
@@ -269,14 +269,15 @@ def panel_select() -> None:
             sel_vars = st.session_state.plot_sel_vars
             st.success(f"Selected variables: {sel_vars}")
             
+            # Add centile vars
             vars_cent = []
             for tmp_var in sel_vars:
-                if tmp_var + '_centiles' in df.columns:
-                    vars_cent.append(tmp_var + '_centiles')
-            sel_vars = sel_vars + vars_cent
-            st.session_state.plot_sel_vars = sel_vars
-            
-            df = df[st.session_state.plot_sel_vars]
+                c_var=tmp_var + '_centiles'
+                if c_var in df.columns and c_var not in sel_vars:
+                    vars_cent.append(c_var)
+            sel_vars_wcent = sel_vars + vars_cent
+                       
+            df = df[sel_vars_wcent]
             st.session_state.plot_var["df_data"] = df
 
             with st.expander('Show selected data', expanded=False):
@@ -291,7 +292,7 @@ def panel_select() -> None:
                 )
                 utilss.reset_plots()
                 st.session_state.is_updated["csv_plot"] = False
-
+                st.session_state.plot_sel_vars = []
 
         s_title="Variable Selection"
         s_text="""
