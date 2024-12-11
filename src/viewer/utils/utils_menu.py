@@ -16,6 +16,7 @@ def menu() -> Any:
         email = st.session_state.cloud_session_token['email']
         logout_url = "https://cbica-nichart.auth.us-east-1.amazoncognito.com/logout?client_id=4shr6mm2h0p0i4o9uleqpu33fj&response_type=code&scope=email+openid+phone&redirect_uri=https://cbica-nichart-alb-272274500.us-east-1.elb.amazonaws.com/oauth2/idpresponse"
         st.sidebar.info(f"Logged in as {email}.")
+        st.sidebar.info(f"User ID: {st.session_state.cloud_user_id}")
         ## TODO: Make this button also delete user data automatically
         st.sidebar.button("Log out", on_click=redirect, args=(logout_url,))
     if st.session_state.pipeline == "Home":

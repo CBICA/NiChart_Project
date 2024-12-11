@@ -42,10 +42,11 @@ ARG MAMBA_DOCKERFILE_ACTIVATE=1
 ARG CUDA_VERSION
 
 COPY --chown=$MAMBA_USER:$MAMBA_USER requirements.txt /tmp/requirements.txt
+RUN grep -v -E '^(torch)' /tmp/requirements.txt > /tmp/requirements2.txt
 USER root
 RUN apt-get update && apt-get install -y python3-tk git
 USER $MAMBA_USER
-RUN pip install --verbose -r /tmp/requirements.txt && pip uninstall -y torch && pip install --verbose torch==2.3.1 --index-url https://download.pytorch.org/whl/cu${CUDA_VERSION}
+RUN pip install --verbose -r /tmp/requirements2.txt && pip uninstall -y torch && pip install --verbose torch==2.3.1 --index-url https://download.pytorch.org/whl/cu${CUDA_VERSION}
 RUN mkdir ~/dummyinput && mkdir ~/dummyoutput
 RUN git clone https://github.com/CBICA/PredCRD.git && cd PredCRD && pip install -e .
 RUN git clone https://github.com/CBICA/DLWMLS.git && cd DLWMLS && pip install -e . && DLWMLS -i ~/dummyinput -o ~/dummyoutput
