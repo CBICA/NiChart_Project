@@ -59,12 +59,11 @@ def add_plot() -> None:
         st.session_state.plot_var["plot_cent_normalized"],
         st.session_state.plot_var["trend"],
         st.session_state.plot_var["lowess_s"],
-        st.session_state.plot_var["traces"],
+        st.session_state.plot_var["traces"].copy(),
         st.session_state.plot_var["centtype"],
     ]
     st.session_state.plot_index += 1
-
-
+    
 # Remove a plot
 def remove_plot(plot_id: str) -> None:
     """
@@ -141,7 +140,7 @@ def add_plot_tabs(
     # Tab 1: Plot settings
     with ptabs[0]:
         # Get df columns
-        list_cols = df.columns.to_list()
+        list_cols = df.columns[df.columns.str.contains('_centiles')==False].to_list()
         list_cols_ext = [""] + list_cols
         list_trends = st.session_state.plot_const["trend_types"]
 
@@ -171,6 +170,12 @@ def add_plot_tabs(
                 sel_val=st.session_state[key]
                 df_plots.loc[plot_id, "yvar"]=sel_val
 
+                # Check if centile value exists
+                if df_plots.loc[plot_id, "plot_cent_normalized"]:
+                    y_new=df_plots.loc[plot_id, "yvar"] + '_centiles'
+                    if y_new not in df.columns:
+                        df_plots.loc[plot_id, "plot_cent_normalized"] = False
+
                 # Update y bounds
                 if df_plots.loc[plot_id, "plot_cent_normalized"]:
                     set_y_bounds(df, df_plots, plot_id, df_plots.loc[plot_id, "yvar"]+'_centiles')
@@ -191,6 +196,7 @@ def add_plot_tabs(
             key=f"plot_hvar_{plot_id}"
             sel_val=st.session_state[key]
             df_plots.loc[plot_id, "hvar"]=sel_val
+            df_plots.at[plot_id, "hvals"]=[]
             
         hind = get_index_in_list(list_cols_ext, df_plots.loc[plot_id, "hvar"])
         st.selectbox(
@@ -226,14 +232,16 @@ def add_plot_tabs(
                     set_y_bounds(df, df_plots, plot_id, df_plots.loc[plot_id, "yvar"] + '_centiles')
                 else:
                     set_y_bounds(df, df_plots, plot_id, df_plots.loc[plot_id, "yvar"])
-                
-            st.checkbox(
-                "Plot ROIs normalized by centiles",
-                value=df_plots.loc[plot_id, "plot_cent_normalized"],
-                help="Show ROI values normalized by reference centiles",
-                key=f"key_check_centiles_{plot_id}",
-                on_change=on_check_centnorm_change
-            )
+
+            y_new=df_plots.loc[plot_id, "yvar"] + '_centiles'
+            if y_new in df.columns:
+                st.checkbox(
+                    "Plot ROIs normalized by centiles",
+                    value=df_plots.loc[plot_id, "plot_cent_normalized"],
+                    help="Show ROI values normalized by reference centiles",
+                    key=f"key_check_centiles_{plot_id}",
+                    on_change=on_check_centnorm_change
+                )
 
             # Select trend
             def on_trend_sel_change():
@@ -248,8 +256,7 @@ def add_plot_tabs(
                     df_plots.at[plot_id, "traces"] = remove_items_from_list(
                         df_plots.loc[plot_id, "traces"], ["lin_fit", "conf_95%"]
                     )
-                # df_plots.at[plot_id, 'traces'] = ['data']
-
+                    
             tind = get_index_in_list(list_trends, df_plots.loc[plot_id, "trend"])            
             st.selectbox(
                 "Trend Line",
@@ -514,7 +521,7 @@ def display_scatter_plot(
         if sel_mrid != "":
             yvar = curr_plot["yvar"]
             if curr_plot["plot_cent_normalized"]:
-                yvar = f"{yvar}_centile"
+                yvar = f"{yvar}_centiles"
             elif curr_plot["corr_icv"]:
                 yvar = f"{yvar}_corrICV"
             utiltr.dot_trace(

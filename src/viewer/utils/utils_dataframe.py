@@ -15,7 +15,8 @@ def read_dataframe(fname: str) -> pd.DataFrame:
         return df
     try:
         df = pd.read_csv(fname)
-        df = df.rename(columns={'DLICV':'ICV'}) # FIXME: this will be resolved in a more systematic way
+        # FIXME: this will be resolved in a more systematic way
+        df = df.rename(columns={'DLICV':'ICV', 'DLICV_centiles':'ICV_centiles'}) 
     except:
         df = pd.DataFrame()
     return df

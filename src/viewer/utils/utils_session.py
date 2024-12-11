@@ -6,6 +6,9 @@ import streamlit as st
 import utils.utils_rois as utilroi
 from PIL import Image
 
+from streamlit.web.server.websocket_headers import _get_websocket_headers
+import jwt
+
 
 def config_page() -> None:
     st.session_state.nicon = Image.open("../resources/nichart1.png")
@@ -16,10 +19,26 @@ def config_page() -> None:
         # layout="centered",
         menu_items={
             "Get help": "https://neuroimagingchart.com/",
-            "Report a bug": "https://neuroimagingchart.com/",
+            "Report a bug": "https://github.com/CBICA/NiChart_Project/issues/new?assignees=&labels=&projects=&template=bug_report.md&title=%5BBUG%5D+",
             "About": "https://neuroimagingchart.com/",
         },
     )
+
+## Function to parse AWS login (if available)
+def process_session_token():
+    #headers = _get_websocket_headers()
+    headers = st.context.headers
+    if not headers or "X-Amzn-Oidc-Data" not in headers:
+        return {}
+    return jwt.decode(
+        headers["X-Amzn-Oidc-Data"], algorithms=["ES256"], options={"verify_signature": False}
+    )
+    
+def process_session_user_id():
+    headers = st.context.headers
+    if not headers or "X-Amzn-Oidc-Identity" not in headers:
+        return "NO_USER_FOUND"
+    return headers["X-Amzn-Oidc-Identity"]
 
 
 def init_session_state() -> None:
@@ -39,6 +58,19 @@ def init_session_state() -> None:
             "cloud": {"msg_infile": "Upload"},
             "desktop": {"msg_infile": "Select"},
         }
+        
+        # Store user session info for later retrieval
+        if st.session_state.app_type == 'cloud':
+            st.session_state.cloud_session_token = process_session_token()
+            if st.session_state.cloud_session_token:
+                st.session_state.has_cloud_session = True
+                st.session_state.cloud_user_id = process_session_user_id()
+            else:
+                st.session_state.has_cloud_session = False
+        else:
+            st.session_state.has_cloud_session = False
+        
+                
         ###################################
 
         ###################################
@@ -63,6 +95,29 @@ def init_session_state() -> None:
         st.session_state.icon_thumb = {
             False: ":material/thumb_down:",
             True: ":material/thumb_up:",
+        }
+
+        # Flags for checkbox states
+        st.session_state.checkbox = {
+            "dicoms_wdir": False,
+            "dicoms_in": False,
+            "dicoms_series": False,
+            "dicoms_run": False,
+            "dicoms_view": False,
+            "dicoms_download": False,
+            "dlmuse_wdir": False,
+            "dlmuse_in": False,
+            "dlmuse_run": False,
+            "dlmuse_view": False,
+            "dlmuse_download": False,
+            "ml_wdir": False,
+            "ml_in": False,
+            "ml_run": False,
+            "ml_download": False,
+            "view_wdir": False,
+            "view_in": False,
+            "view_select": False,
+            "view_plot": False
         }
 
         # Flags for various i/o
@@ -142,16 +197,24 @@ def init_session_state() -> None:
         # Set initial values for paths
         st.session_state.paths["root"] = os.path.dirname(os.path.dirname(os.getcwd()))
         st.session_state.paths["init"] = st.session_state.paths["root"]
-        st.session_state.paths["dir_out"] = os.path.join(
-            st.session_state.paths["root"], "output_folder"
-        )
+        if st.session_state.has_cloud_session:
+            user_id = st.session_state.cloud_user_id
+            st.session_state.paths["dir_out"] = os.path.join(
+                st.session_state.paths["root"], "output_folder", user_id
+            )
+        else:
+            st.session_state.paths["dir_out"] = os.path.join(
+                st.session_state.paths["root"], "output_folder"
+            )
+            
+            
         if not os.path.exists(st.session_state.paths["dir_out"]):
             os.makedirs(st.session_state.paths["dir_out"])
 
         ############
         # FIXME : set init folder to test folder outside repo
         st.session_state.paths["init"] = os.path.join(
-            st.session_state.paths["root"], "TestData"
+            st.session_state.paths["root"], "test_data"
         )
         st.session_state.paths["file_search_dir"] = st.session_state.paths["init"]
         ############
@@ -384,6 +447,9 @@ def update_default_paths() -> None:
     st.session_state.paths["csv_plot"] = os.path.join(
         st.session_state.paths["plots"], "Data.csv"
     )
+    # Reset plot data
+    st.session_state.plot_var["df_data"] = pd.DataFrame()
+
 
 
 def reset_flags() -> None:
@@ -393,3 +459,31 @@ def reset_flags() -> None:
     for tmp_key in st.session_state.flags.keys():
         st.session_state.flags[tmp_key] = False
     st.session_state.flags["dset"] = True
+
+def reset_plots() -> None:
+    """
+    Reset plot variables when data file changes
+    """
+    st.session_state.plots = pd.DataFrame(columns=st.session_state.plots.columns)
+    st.session_state.checkbox['view_select']=False
+    st.session_state.checkbox['view_plot']=False
+    st.session_state.plot_sel_vars = []
+    st.session_state.plot_var['hide_settings'] = False
+    st.session_state.plot_var['hide_legend'] = False
+    st.session_state.plot_var['show_img'] = False
+    st.session_state.plot_var['plot_type'] = False
+    st.session_state.plot_var['xvar'] = ''
+    st.session_state.plot_var['xmin'] = -1.0
+    st.session_state.plot_var['xmax'] = -1.0
+    st.session_state.plot_var['yvar'] = ''
+    st.session_state.plot_var['ymin'] = -1.0
+    st.session_state.plot_var['ymax'] = -1.0
+    st.session_state.plot_var['hvar'] = ''
+    st.session_state.plot_var['hvals'] = []
+    st.session_state.plot_var['corr_icv'] = False
+    st.session_state.plot_var['plot_cent_normalized'] = False
+    st.session_state.plot_var['trend'] = 'Linear'
+    st.session_state.plot_var['traces'] = ["data", "lin_fit"]
+    st.session_state.plot_var['lowess_s'] = 0.5
+    st.session_state.plot_var['centtype'] = ''
+    st.session_state.plot_var['h_coeff'] = 1.0

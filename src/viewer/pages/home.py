@@ -108,6 +108,5 @@ with st.container(border=True):
         unsafe_allow_html=True,
     )
 
-
 # FIXME: For DEBUG
 utilst.add_debug_panel()
