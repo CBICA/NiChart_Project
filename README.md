@@ -1,46 +1,11 @@
 # NiChart: Neuro-imaging Chart
 
-NiChart is a comprehensive framework designed to revolutionize neuroimaging research. It offers large-scale neuroimaging capabilities, sophisticated analysis methods, and user-friendly tools, all seamlessly integrated into a local installation version and the [AWS Cloud](https://neuroimagingchart.com/portal/).
+NiChart is a novel AI-powered neuroimaging platform with tools for computing a dimensional chart from multi-modal MRI data. NiChart provides end-to-end pipelines from raw DICOM data to advanced
+AI biomarkers, allowing to map a subject’s MRI images into personalized measurements, along with
+reference distributions for comparison to a broader population.
 
-## Components
-
-1. **Image Processing**: Utilizes tools like [DLMUSE](https://github.com/CBICA/NiChart_DLMUSE), [fMRIPrep](https://github.com/nipreps/fmriprep) [XCEPengine](https://github.com/PennLINC/xcp_d), and [QSIPrep](https://github.com/PennLINC/qsiprep) for effective image analytics.
-2. **Reference Data Curation**: Houses ISTAGING, 70000 Scans, and 14 individual studies to provide curated reference data.
-3. **Data Harmonization**: Employs [neuroharmonize](https://github.com/rpomponio/neuroHarmonize) and [Combat](https://github.com/Zheng206/ComBatFam_Pipeline) for ensuring consistent data standards.
-4. **Machine Learning Models**: Provides Supervised, Semi-supervised, and DL Models for advanced neuroimaging analysis including [SpareScore](https://github.com/CBICA/spare_score).
-5. **Data Visualization**: Features like Centile curves, direct image linking, and reference values for comprehensive data visualization.
-6. **Deployment**: Supports open-source Github components and Docker container compatibility deployed in a local environment & [AWS Cloud](https://aws.amazon.com/).
-
-
-## System Requirements
-
-For recommended system configuration, please refer to: [nnUNet hardware requirements](https://github.com/MIC-DKFZ/nnUNet/blob/master/documentation/installation_instructions.md#hardware-requirements).
-
-## Installation Instructions
-
-1. Mamba installation
-    [Mamba Installation Guide (Official)](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html)
-
-    Example (Linux x86):
-    ```bash
-    wget https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh
-
-    bash Mambaforge-Linux-x86_64.sh
-    mamba create -c conda-forge -c bioconda -n NCP_env python=3.12 snakemake
-    mamba activate NCP_env
-    ```
-2. Manual installation
-   ```bash
-   git clone https://github.com/CBICA/NiChart_Project.git
-   pip install -r requirements.txt
-   ```
-
-## Run NiChart Locally (GUI)
-```bash
-cd src/viewer/
-streamlit run NiChartProject.py
-```
-The app will start in your localhost.
+We provide both locally deployable software and a cloud application. [NiChart cloud application](https://neuroimagingchart.com/portal), hosted via Amazon Web Services (AWS), deploys
+scalable infrastructure which hosts the NiChart tools as a standard web application accessible via the user’s web browser. The cloud and desktop applications are unified at the code level through the use of the Python library [Streamlit](https://streamlit.io/). Consequently, the user experience is nearly identical between the cloud and desktop applications.
 
 ## Quick Links
 
