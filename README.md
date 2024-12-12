@@ -4,6 +4,8 @@ NiChart is a novel AI-powered neuroimaging platform with tools for computing a d
 AI biomarkers, allowing to map a subject’s MRI images into personalized measurements, along with
 reference distributions for comparison to a broader population.
 
+![NiChart flowchart](resources/images/NiChart_Flowchart_v2.png)
+
 We provide both locally deployable software and a cloud application. [NiChart cloud application](https://neuroimagingchart.com/portal), hosted via Amazon Web Services (AWS), deploys
 scalable infrastructure which hosts the NiChart tools as a standard web application accessible via the user’s web browser. The cloud and desktop applications are unified at the code level through the use of the Python library [Streamlit](https://streamlit.io/). Consequently, the user experience is nearly completely identical between the cloud and desktop applications.
 
