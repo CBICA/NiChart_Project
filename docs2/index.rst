@@ -9,6 +9,8 @@ Contents
 
    installation
    usage
+   components
    contributors
    api
    help
+   license

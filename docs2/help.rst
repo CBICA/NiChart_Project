@@ -2,7 +2,7 @@
 Getting help
 ############
 
-If you have a problem or would like to ask a question about the inner workings of **NiChart DLMUSE** you can directly
+If you have a question about **NiChart Project** you can directly
 message our maintaners via email.
 
 .. note::

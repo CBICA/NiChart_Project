@@ -1,7 +1,7 @@
-NiChart_DLMUSE
+NiChart_Project
 ==============
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
 
-   NiChart_DLMUSE
+   NiChart_Project
