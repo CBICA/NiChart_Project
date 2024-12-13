@@ -2,6 +2,7 @@ NiChart: Neuro-imaging Chart
 ============================
 
 Full documentation at `NiChart Documentation <https://cbica.github.io/NiChart_Project>`_
+NiChart Package at `NiChart GitHub <https://github.com/CBICA/NiChart_Project>_
 
 About
 -----
@@ -33,9 +34,9 @@ Running NiChart
 
 We provide both a locally installable **desktop application** and a **cloud-based application**. 
 
-For the desktop application please see [FIXME: link to readthedocs and Github]. 
+For the desktop application please see https://github.com/CBICA/NiChart_Project .
 
-[NiChart cloud application](https://neuroimagingchart.com/portal), hosted via Amazon Web Services (AWS), deploys scalable infrastructure which hosts the *NiChart* tools as a standard web application accessible via the user’s web browser. 
+`NiChart cloud application <https://neuroimagingchart.com/portal>`, hosted via Amazon Web Services (AWS), deploys scalable infrastructure which hosts the *NiChart* tools as a standard web application accessible via the user’s web browser. 
 
 The cloud and desktop applications are unified at the code level through the use of the Python library [Streamlit](https://streamlit.io/). Consequently, the user experience is nearly identical between the cloud and desktop applications.
 
