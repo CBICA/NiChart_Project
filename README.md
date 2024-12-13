@@ -22,8 +22,13 @@ The development of nichart is guided by several core principles:
 
 ## Running NiChart:
 
-We provide both a locally deployable desktop application and a cloud application. For the desktop application please see [FIXME: link to readthedocs and Github]. [NiChart cloud application](https://neuroimagingchart.com/portal), hosted via Amazon Web Services (AWS), deploys
-scalable infrastructure which hosts the NiChart tools as a standard web application accessible via the user’s web browser. The cloud and desktop applications are unified at the code level through the use of the Python library [Streamlit](https://streamlit.io/). Consequently, the user experience is nearly completely identical between the cloud and desktop applications.
+We provide both a locally installable desktop application and a cloud-based application. 
+
+For the desktop application please see [FIXME: link to readthedocs and Github]. 
+
+[NiChart cloud application](https://neuroimagingchart.com/portal), hosted via Amazon Web Services (AWS), deploys scalable infrastructure which hosts the NiChart tools as a standard web application accessible via the user’s web browser. 
+
+The cloud and desktop applications are unified at the code level through the use of the Python library [Streamlit](https://streamlit.io/). Consequently, the user experience is nearly completely identical between the cloud and desktop applications.
 
 ## Quick Links
 
