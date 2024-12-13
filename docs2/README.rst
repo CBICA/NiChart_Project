@@ -1,9 +1,18 @@
 NiChart: Neuro-imaging Chart
 ============================
 
-Documentation at: `NiChart Documentation <https://cbica.github.io/NiChart_Project>`_
+.. Documentation at: `NiChart Documentation <https://cbica.github.io/NiChart_Project>`_
+.. NiChart Package at: `NiChart GitHub <https://github.com/CBICA/NiChart_Project>`_
 
-NiChart Package at: `NiChart GitHub <https://github.com/CBICA/NiChart_Project>`_
+.. image:: https://img.shields.io/badge/Full_Documentation-blue
+    :target: https://cbica.github.io/NiChart_Project
+
+.. image:: https://img.shields.io/badge/Website-blue
+    :target: https://neuroimagingchart.com
+    
+.. image:: https://img.shields.io/badge/GitHub-CBICA/NiChart_Project-blue
+    :target: https://github.com/CBICA/NiChart_Project
+
 
 About
 -----
@@ -44,15 +53,11 @@ The cloud and desktop applications are unified at the code level through the use
 Quick Links
 -----------
 
-.. image:: https://img.shields.io/badge/-Website-blue?style=for-the-badge&logo=world&logoColor=white
-    :target: https://neuroimagingchart.com
-    :alt: NiChart Website & Cloud
-    
-.. image:: https://img.shields.io/badge/GitHub-CBICA/NiChart_Project-blue
-    :target: https://github.com/CBICA/NiChart_Project
-    :alt: NiChart Package
+.. .. image:: https://img.shields.io/badge/-Website-blue?style=for-the-badge&logo=world&logoColor=white
+..     :target: https://neuroimagingchart.com
+..     :alt: NiChart Website & Cloud
   
-.. image:: https://img.shields.io/badge/-Research-blue?style=for-the-badge&logo=google-scholar&logoColor=white
+.. image:: https://img.shields.io/badge/Research-AIBIL-blue
     :target: https://aibil.med.upenn.edu/research
     :alt: AIBIL Research
 
