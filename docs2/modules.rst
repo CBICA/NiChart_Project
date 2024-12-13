@@ -1,5 +1,5 @@
 NiChart_Project
-==============
+===============
 
 .. toctree::
    :maxdepth: 2
