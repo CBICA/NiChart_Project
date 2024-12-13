@@ -1,7 +1,9 @@
 NiChart: Neuro-imaging Chart
 ============================
 
-Full documentation at https://cbica.github.io/NiChart_Project
+Documentation at: `NiChart Documentation <https://cbica.github.io/NiChart_Project>`_
+
+NiChart Package at: `NiChart GitHub <https://github.com/CBICA/NiChart_Project>`_
 
 About
 -----
@@ -33,21 +35,21 @@ Running NiChart
 
 We provide both a locally installable **desktop application** and a **cloud-based application**. 
 
-For the desktop application please see our documentation (https://cbica.github.io/NiChart_Project) and our GitHub page (https://github.com/CBICA/NiChart_Project/). 
+For the desktop application please see `NiChart GitHub <https://github.com/CBICA/NiChart_Project>`_.
 
-[NiChart cloud application](https://neuroimagingchart.com/portal), hosted via Amazon Web Services (AWS), deploys scalable infrastructure which hosts the *NiChart* tools as a standard web application accessible via the user’s web browser. 
+`NiChart cloud application <https://neuroimagingchart.com/portal>`_, hosted via Amazon Web Services (AWS), deploys scalable infrastructure which hosts the *NiChart* tools as a standard web application accessible via the user’s web browser. 
 
-The cloud and desktop applications are unified at the code level through the use of the Python library [Streamlit](https://streamlit.io/). Consequently, the user experience is nearly identical between the cloud and desktop applications.
+The cloud and desktop applications are unified at the code level through the use of the Python library `Streamlit <https://streamlit.io>`_. Consequently, the user experience is nearly identical between the cloud and desktop applications.
 
 Quick Links
 -----------
 
-`NiChart Website & Cloud <https://neuroimagingchart.com>` 
+`NiChart Website & Cloud <https://neuroimagingchart.com>`_ 
 
-`AIBIL Research <https://aibil.med.upenn.edu/research>`
+`AIBIL Research <https://aibil.med.upenn.edu/research>`_
 
-`YouTube <https://www.youtube.com/@NiChart-UPenn>`
+`YouTube <https://www.youtube.com/@NiChart-UPenn>`_
 
-`Twitter <https://x.com/NiChart_AIBIL>`
+`Twitter <https://x.com/NiChart_AIBIL>`_
 
 © 2024 CBICA. All Rights Reserved.
