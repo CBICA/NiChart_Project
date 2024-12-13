@@ -10,15 +10,15 @@ reference distributions for comparison to a broader population.
 
 The development of nichart is guided by several core principles:
 
-1. Enabling near real-time image processing and analysis through advanced methods.
+1. Enabling **near real-time image processing and analysis** through advanced methods.
 
-2. Integrating cutting-edge methods and enabling the continuous integration of new processing and analysis techniques to extract meaningful AI biomarkers from multi-modal neuroimaging data.
+2. Enabling the **continuous integration of cutting-edge processing and analysis methods** to extract meaningful AI biomarkers from multi-modal neuroimaging data.
 
-3. Ensuring robust and reliable results through extensive data training and validation on large and diverse training datasets.
+3. Ensuring robust and reliable results through **extensive data training and validation** on large and diverse training datasets.
 
-4. Providing user-friendly tools for result visualization and reporting.
+4. Providing user-friendly tools for result **visualization and reporting**.
 
-5. Developing a deployment strategy that enables easy access for users with varying technical expertise and hardware resources.
+5. Developing a deployment strategy that enables **easy access for users with varying technical expertise and hardware resources**.
 
 ## Running NiChart:
 
