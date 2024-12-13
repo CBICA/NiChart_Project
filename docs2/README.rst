@@ -1,9 +1,9 @@
 NiChart: Neuro-imaging Chart
 ============================
 
-Full documentation at `NiChart Documentation <https://cbica.github.io/NiChart_Project>`_
+Documentation at: `NiChart Documentation <https://cbica.github.io/NiChart_Project>`_
 
-NiChart Package at `NiChart GitHub <https://github.com/CBICA/NiChart_Project>_
+NiChart Package at: `NiChart GitHub <https://github.com/CBICA/NiChart_Project>`_
 
 About
 -----
@@ -35,21 +35,29 @@ Running NiChart
 
 We provide both a locally installable **desktop application** and a **cloud-based application**. 
 
-For the desktop application please see https://github.com/CBICA/NiChart_Project .
+For the desktop application please see `NiChart GitHub <https://github.com/CBICA/NiChart_Project>`_.
 
-`NiChart cloud application <https://neuroimagingchart.com/portal>`, hosted via Amazon Web Services (AWS), deploys scalable infrastructure which hosts the *NiChart* tools as a standard web application accessible via the user’s web browser. 
+`NiChart cloud application <https://neuroimagingchart.com/portal>`_, hosted via Amazon Web Services (AWS), deploys scalable infrastructure which hosts the *NiChart* tools as a standard web application accessible via the user’s web browser. 
 
-The cloud and desktop applications are unified at the code level through the use of the Python library [Streamlit](https://streamlit.io/). Consequently, the user experience is nearly identical between the cloud and desktop applications.
+The cloud and desktop applications are unified at the code level through the use of the Python library `Streamlit <https://streamlit.io>`_. Consequently, the user experience is nearly identical between the cloud and desktop applications.
 
 Quick Links
 -----------
 
-`NiChart Website & Cloud <https://neuroimagingchart.com>` 
+.. image:: https://img.shields.io/badge/-Website-blue?style=for-the-badge&logo=world&logoColor=white
+    :target: https://neuroimagingchart.com
+    :alt: NiChart Website & Cloud
 
-`AIBIL Research <https://aibil.med.upenn.edu/research>`
+.. image:: https://img.shields.io/badge/-Research-blue?style=for-the-badge&logo=google-scholar&logoColor=white
+    :target: https://aibil.med.upenn.edu/research
+    :alt: AIBIL Research
 
-`YouTube <https://www.youtube.com/@NiChart-UPenn>`
+.. image:: https://img.shields.io/badge/YouTube-%23FF0000.svg?style=for-the-badge&logo=YouTube&logoColor=white
+    :target: https://www.youtube.com/@NiChart-UPenn
+    :alt: YouTube
 
-`Twitter <https://x.com/NiChart_AIBIL>`
+.. image:: https://img.shields.io/twitter/url/https/twitter.com/NiChart_AIBIL.svg?style=social&label=Follow%20%40NiChart_AIBIL
+    :target: https://x.com/NiChart_AIBIL
+    :alt: Twitter
 
 © 2024 CBICA. All Rights Reserved.
