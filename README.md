@@ -6,7 +6,7 @@ reference distributions for comparison to a broader population.
 
 ![NiChart flowchart](resources/images/NiChart_Flowchart_v2.svg)
 
-## Core Principles:
+## The Basics:
 
 The development of nichart is guided by several core principles:
 
