@@ -45,8 +45,8 @@ Quick Links
 -----------
 
 .. image:: https://img.shields.io/badge/-Website-blue?style=for-the-badge&logo=world&logoColor=white
-    :target https://neuroimagingchart.com
-    :alt NiChart Website & Cloud
+    :target: https://neuroimagingchart.com
+    :alt: NiChart Website & Cloud
 
 .. `NiChart Website & Cloud <https://neuroimagingchart.com>`_ 
 .. 
