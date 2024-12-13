@@ -48,12 +48,16 @@ Quick Links
     :target: https://neuroimagingchart.com
     :alt: NiChart Website & Cloud
 
-.. `NiChart Website & Cloud <https://neuroimagingchart.com>`_ 
-.. 
-.. `AIBIL Research <https://aibil.med.upenn.edu/research>`_
-.. 
-.. `YouTube <https://www.youtube.com/@NiChart-UPenn>`_
-.. 
-.. `Twitter <https://x.com/NiChart_AIBIL>`_
+.. image:: https://img.shields.io/badge/-Research-blue?style=for-the-badge&logo=google-scholar&logoColor=white
+    :target: https://aibil.med.upenn.edu/research
+    :alt: AIBIL Research
+
+.. image:: https://img.shields.io/badge/YouTube-%23FF0000.svg?style=for-the-badge&logo=YouTube&logoColor=white
+    :target: https://www.youtube.com/@NiChart-UPenn
+    :alt: YouTube
+
+.. image:: https://img.shields.io/twitter/url/https/twitter.com/NiChart_AIBIL.svg?style=social&label=Follow%20%40NiChart_AIBIL
+    :target: https://x.com/NiChart_AIBIL
+    :alt: Twitter
 
 © 2024 CBICA. All Rights Reserved.
