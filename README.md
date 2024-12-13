@@ -24,7 +24,7 @@ The development of nichart is guided by several core principles:
 
 We provide both a locally installable desktop application and a cloud-based application. 
 
-For the desktop application please see [FIXME: link to readthedocs and Github]. 
+For the desktop application please see our [documentation](https://cbica.github.io/NiChart_Project/) and [our GitHub page](https://github.com/CBICA/NiChart_Project/). 
 
 [NiChart cloud application](https://neuroimagingchart.com/portal), hosted via Amazon Web Services (AWS), deploys scalable infrastructure which hosts the NiChart tools as a standard web application accessible via the user’s web browser. 
 
