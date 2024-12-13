@@ -47,7 +47,11 @@ Quick Links
 .. image:: https://img.shields.io/badge/-Website-blue?style=for-the-badge&logo=world&logoColor=white
     :target: https://neuroimagingchart.com
     :alt: NiChart Website & Cloud
-
+    
+.. image:: https://img.shields.io/badge/GitHub-CBICA/NiChart_Project-blue
+    :target: https://github.com/CBICA/NiChart_Project
+    :alt: NiChart Package
+  
 .. image:: https://img.shields.io/badge/-Research-blue?style=for-the-badge&logo=google-scholar&logoColor=white
     :target: https://aibil.med.upenn.edu/research
     :alt: AIBIL Research
