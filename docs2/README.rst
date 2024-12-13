@@ -1,9 +1,8 @@
 NiChart: Neuro-imaging Chart
 ============================
 
-Full documentation at `NiChart Documentation<https://cbica.github.io/NiChart_Project>`
-
-GitHub page at https://github.com/CBICA/NiChart_Project
+Full documentation at `NiChart Documentation <https://cbica.github.io/NiChart_Project>`_
+NiChart Package at `NiChart GitHub <https://github.com/CBICA/NiChart_Project>_
 
 About
 -----
