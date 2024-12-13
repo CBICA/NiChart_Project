@@ -44,12 +44,16 @@ The cloud and desktop applications are unified at the code level through the use
 Quick Links
 -----------
 
-`NiChart Website & Cloud <https://neuroimagingchart.com>`_ 
+.. image:: https://img.shields.io/badge/-Website-blue?style=for-the-badge&logo=world&logoColor=white
+    :target https://neuroimagingchart.com
+    :alt NiChart Website & Cloud
 
-`AIBIL Research <https://aibil.med.upenn.edu/research>`_
-
-`YouTube <https://www.youtube.com/@NiChart-UPenn>`_
-
-`Twitter <https://x.com/NiChart_AIBIL>`_
+.. `NiChart Website & Cloud <https://neuroimagingchart.com>`_ 
+.. 
+.. `AIBIL Research <https://aibil.med.upenn.edu/research>`_
+.. 
+.. `YouTube <https://www.youtube.com/@NiChart-UPenn>`_
+.. 
+.. `Twitter <https://x.com/NiChart_AIBIL>`_
 
 © 2024 CBICA. All Rights Reserved.
