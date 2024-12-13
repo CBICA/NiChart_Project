@@ -30,8 +30,10 @@ st.markdown(
 # Update status of checkboxes
 if '_check_ml_wdir' in st.session_state:
     st.session_state.checkbox['ml_wdir'] = st.session_state._check_ml_wdir
-if '_check_ml_in' in st.session_state:
-    st.session_state.checkbox['ml_in'] = st.session_state._check_ml_in
+if '_check_ml_inrois' in st.session_state:
+    st.session_state.checkbox['ml_inrois'] = st.session_state._check_ml_inrois
+if '_check_ml_indemog' in st.session_state:
+    st.session_state.checkbox['ml_indemog'] = st.session_state._check_ml_indemog
 if '_check_ml_run' in st.session_state:
     st.session_state.checkbox['ml_run'] = st.session_state._check_ml_run
 if '_check_ml_download' in st.session_state:
@@ -61,19 +63,19 @@ def panel_wdir() -> None:
 
         utilst.util_workingdir_get_help()
 
-def panel_indata() -> None:
+def panel_inrois() -> None:
     """
-    Panel for uploading input files
+    Panel for uploading input rois
     """
     msg = st.session_state.app_config[st.session_state.app_type]["msg_infile"]
-    icon = st.session_state.icon_thumb[st.session_state.flags["csv_dlmuse+demog"]]
-    show_panel_indata = st.checkbox(
-        f":material/upload: {msg} Data {icon}",
+    icon = st.session_state.icon_thumb[st.session_state.flags["csv_dlmuse"]]
+    st.checkbox(
+        f":material/upload: {msg} ROIs {icon}",
         disabled=not st.session_state.flags["dir_out"],
-        key='_check_ml_in',        
-        value=st.session_state.checkbox['ml_in']
+        key='_check_ml_inrois', 
+        value=st.session_state.checkbox['ml_inrois']
     )
-    if not st.session_state._check_ml_in:
+    if not st.session_state._check_ml_inrois:
         return
 
     with st.container(border=True):
@@ -85,20 +87,6 @@ def panel_indata() -> None:
                 False,
                 "visible",
             )
-            if os.path.exists(st.session_state.paths["csv_dlmuse"]):
-                p_dlmuse = st.session_state.paths["csv_dlmuse"]
-                st.success(f"Data is ready ({p_dlmuse})", icon=":material/thumb_up:")
-
-            utilst.util_upload_file(
-                st.session_state.paths["csv_demog"],
-                "Demographics csv",
-                "uploaded_demog_file",
-                False,
-                "visible",
-            )
-            if os.path.exists(st.session_state.paths["csv_demog"]):
-                p_demog = st.session_state.paths["csv_dlmuse"]
-                st.success(f"Data is ready ({p_demog})", icon=":material/thumb_up:")
 
         else:  # st.session_state.app_type == 'desktop'
             utilst.util_select_file(
@@ -107,38 +95,19 @@ def panel_indata() -> None:
                 st.session_state.paths["csv_dlmuse"],
                 st.session_state.paths["file_search_dir"],
             )
-            if os.path.exists(st.session_state.paths["csv_dlmuse"]):
-                p_dlmuse = st.session_state.paths["csv_dlmuse"]
-                st.success(f"Data is ready ({p_dlmuse})", icon=":material/thumb_up:")
 
-            utilst.util_select_file(
-                "selected_demog_file",
-                "Demographics csv",
-                st.session_state.paths["csv_demog"],
-                st.session_state.paths["file_search_dir"],
-            )
-            if os.path.exists(st.session_state.paths["csv_demog"]):
-                p_demog = st.session_state.paths["csv_demog"]
-                st.success(f"Data is ready ({p_demog})", icon=":material/thumb_up:")
-        
-        # Check the input data
-        if st.button('Verify input data'):
-            [f_check, m_check] = w_mlscores.check_input(
-                st.session_state.paths["csv_dlmuse"],
-                st.session_state.paths["csv_demog"],
-            )
-            if f_check == 0:
-                st.session_state.flags["csv_dlmuse+demog"] = True
-                st.success(m_check, icon=":material/thumb_up:")
-                st.session_state.flags["csv_mlscores"] = True
-            else:
-                st.session_state.flags["csv_dlmuse+demog"] = False
-                st.error(m_check, icon=":material/thumb_down:")
-                st.session_state.flags["csv_mlscores"] = False
+        if os.path.exists(st.session_state.paths["csv_dlmuse"]):
+            p_dlmuse = st.session_state.paths["csv_dlmuse"]            
+            st.session_state.flags["csv_dlmuse"] = True
+            st.success(f"Data is ready ({p_dlmuse})", icon=":material/thumb_up:")
 
+            df_rois = pd.read_csv(st.session_state.paths["csv_dlmuse"])
+            with st.expander('Show ROIs', expanded=False):
+                st.dataframe(df_rois)
+            
         # Check the input data
         @st.dialog("Input data requirements")  # type:ignore
-        def help_input_data():
+        def help_inrois_data():
             df_muse = pd.DataFrame(
                 columns=['MRID', '702', '701', '600', '601', '...'],
                 data=[
@@ -157,6 +126,92 @@ def panel_indata() -> None:
             st.write('Example MUSE data file:')
             st.dataframe(df_muse)
 
+        col1, col2 = st.columns([0.5, 0.1])
+        with col2:
+            if st.button('Get help 🤔', key='key_btn_help_mlinrois', use_container_width=True):
+                help_inrois_data()            
+
+def panel_indemog() -> None:
+    """
+    Panel for uploading demographics
+    """
+    msg = st.session_state.app_config[st.session_state.app_type]["msg_infile"]
+    icon = st.session_state.icon_thumb[st.session_state.flags["csv_demog"]]
+    
+
+    st.checkbox(
+        f":material/upload: {msg} Demographics {icon}",
+        disabled=not st.session_state.flags["csv_dlmuse"],
+        key='_check_ml_indemog',
+        value=st.session_state.checkbox['ml_indemog']
+    )
+    if not st.session_state._check_ml_indemog:
+        return
+
+    with st.container(border=True):
+        flag_manual = st.checkbox(
+            'Enter data manually',
+            False
+        )
+        if flag_manual:
+            st.info('Please enter values for your sample')
+            df_rois = pd.read_csv(st.session_state.paths["csv_dlmuse"])
+            df_tmp = pd.DataFrame({'MRID': df_rois['MRID'], 'Age': None, 'Sex': None}) 
+            df_user = st.data_editor(df_tmp)
+
+            if st.button('Save data'):
+                if not os.path.exists(os.path.dirname(st.session_state.paths["csv_demog"])):
+                    os.makedirs(os.path.dirname(st.session_state.paths["csv_demog"]))
+
+                df_user.to_csv(st.session_state.paths["csv_demog"], index=False)
+                st.success(f"Data saved to {st.session_state.paths['csv_demog']}")
+        
+        else:
+            if st.session_state.app_type == "cloud":
+                utilst.util_upload_file(
+                    st.session_state.paths["csv_demog"],
+                    "Demographics csv",
+                    "uploaded_demog_file",
+                    False,
+                    "visible",
+                )
+
+            else:  # st.session_state.app_type == 'desktop'
+                utilst.util_select_file(
+                    "selected_demog_file",
+                    "Demographics csv",
+                    st.session_state.paths["csv_demog"],
+                    st.session_state.paths["file_search_dir"],
+                )
+                
+        if os.path.exists(st.session_state.paths["csv_demog"]):
+            p_demog = st.session_state.paths["csv_demog"]
+            st.session_state.flags["csv_demog"] = True            
+            st.success(f"Data is ready ({p_demog})", icon=":material/thumb_up:")
+
+            df_demog = pd.read_csv(st.session_state.paths["csv_demog"])
+            with st.expander('Show demographics data', expanded=False):
+                st.dataframe(df_demog)
+
+        # Check the input data
+        if os.path.exists(st.session_state.paths["csv_demog"]):        
+            if st.button('Verify input data'):
+                [f_check, m_check] = w_mlscores.check_input(
+                    st.session_state.paths["csv_dlmuse"],
+                    st.session_state.paths["csv_demog"],
+                )
+                if f_check == 0:
+                    st.session_state.flags["csv_dlmuse+demog"] = True
+                    st.success(m_check, icon=":material/thumb_up:")
+                    st.session_state.flags["csv_mlscores"] = True
+                else:
+                    st.session_state.flags["csv_dlmuse+demog"] = False
+                    st.error(m_check, icon=":material/thumb_down:")
+                    st.session_state.flags["csv_mlscores"] = False
+
+        # Help
+        @st.dialog("Input data requirements")  # type:ignore
+        def help_indemog_data():
             df_demog = pd.DataFrame(
                 columns=['MRID', 'Age', 'Sex'],
                 data=[
@@ -182,8 +237,8 @@ def panel_indata() -> None:
 
         col1, col2 = st.columns([0.5, 0.1])
         with col2:
-            if st.button('Get help 🤔', key='key_btn_help_mlinput', use_container_width=True):
-                help_input_data()
+            if st.button('Get help 🤔', key='key_btn_help_mlindemog', use_container_width=True):
+                help_indemog_data()
 
 
 def panel_run() -> None:
@@ -302,7 +357,8 @@ def panel_download() -> None:
 
 st.divider()
 panel_wdir()
-panel_indata()
+panel_inrois()
+panel_indemog()
 panel_run()
 if st.session_state.app_type == "cloud":
     panel_download()
