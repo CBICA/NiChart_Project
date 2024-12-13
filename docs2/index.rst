@@ -1,4 +1,4 @@
-.. include:: ../README.rst
+.. include:: README.rst
 
 ########
 Contents
@@ -9,6 +9,8 @@ Contents
 
    installation
    usage
+   components
    contributors
    api
    help
+   license
