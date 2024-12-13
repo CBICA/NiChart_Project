@@ -2,6 +2,8 @@
 
 Full documentation at https://cbica.github.io/NiChart_Project
 
+GitHub page at https://github.com/CBICA/NiChart_Project
+
 ## About
 
 NiChart is a novel AI-powered neuroimaging platform with tools for computing a dimensional chart from multi-modal MRI data. NiChart provides end-to-end pipelines from raw DICOM data to advanced
