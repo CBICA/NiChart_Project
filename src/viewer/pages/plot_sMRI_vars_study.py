@@ -87,8 +87,12 @@ def panel_incsv() -> None:
 
     # Read data if working dir changed
     if st.session_state.plot_var["df_data"].shape[0] == 0:
-        st.session_state.plot_var["df_data"] = utildf.read_dataframe(
+        df_tmp = utildf.read_dataframe(
             st.session_state.paths["csv_plot"]
+        )
+        st.session_state.plot_var["df_data"] = utildf.rename_rois(
+            df_tmp,
+            st.session_state.rois["roi_dict"]
         )
         utilss.reset_plots()
         st.session_state.is_updated["csv_plot"] = False
@@ -119,8 +123,12 @@ def panel_incsv() -> None:
 
         # Read input csv
         if st.session_state.is_updated["csv_plot"]:
-            st.session_state.plot_var["df_data"] = utildf.read_dataframe(
+            df_tmp = utildf.read_dataframe(
                 st.session_state.paths["csv_plot"]
+            )
+            st.session_state.plot_var["df_data"] = utildf.rename_rois(
+                df_tmp,
+                st.session_state.rois["roi_dict"]
             )
             utilss.reset_plots()
             st.session_state.is_updated["csv_plot"] = False
@@ -194,6 +202,12 @@ def panel_rename() -> None:
             df = df.rename(columns=st.session_state.rois["roi_dict"])
             st.session_state.plot_var["df_data"] = df
             st.success("Variables are renamed!")
+
+        s_title="Rename Data Columns"
+        s_text="""
+        - If your data includes numeric columns
+        """
+        utilst.util_get_help(s_title, s_text)
 
 
 def panel_select() -> None:
