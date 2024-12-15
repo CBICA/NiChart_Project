@@ -291,32 +291,35 @@ def add_plot_tabs(
 
         if df_plots.loc[plot_id, "plot_type"] == "Scatter Plot":
             
-            # Select centile type
-            def on_centile_sel_change():
-                # Set centile selection to plot var
-                key=f"cent_type_{plot_id}"
-                sel_val=st.session_state[key]
-                df_plots.loc[plot_id, "centtype"]=sel_val
-                if sel_val == "":
-                    df_plots.at[plot_id, "traces"] = remove_items_from_list(
-                        df_plots.loc[plot_id, "traces"],
-                        st.session_state.plot_const['centile_trace_types']
-                    )
-                else:
-                    df_plots.at[plot_id, "traces"] = add_items_to_list(
-                        df_plots.loc[plot_id, "traces"],
-                        st.session_state.plot_const['centile_trace_types']
-                    )
-                
-            centtype = df_plots.loc[plot_id, "centtype"]
-            centind = st.session_state.plot_const["centile_types"].index(centtype)
-            sel_options = st.selectbox(
-                "Centile Type",
-                st.session_state.plot_const["centile_types"],
-                key=f"cent_type_{plot_id}",
-                index=centind,
-                on_change=on_centile_sel_change
-            )
+            if df_plots.loc[plot_id, "xvar"] != 'Age':
+                st.warning('To view data centiles please select the "Age" as the x axis variable!')
+            else:
+                # Select centile type
+                def on_centile_sel_change():
+                    # Set centile selection to plot var
+                    key=f"cent_type_{plot_id}"
+                    sel_val=st.session_state[key]
+                    df_plots.loc[plot_id, "centtype"]=sel_val
+                    if sel_val == "":
+                        df_plots.at[plot_id, "traces"] = remove_items_from_list(
+                            df_plots.loc[plot_id, "traces"],
+                            st.session_state.plot_const['centile_trace_types']
+                        )
+                    else:
+                        df_plots.at[plot_id, "traces"] = add_items_to_list(
+                            df_plots.loc[plot_id, "traces"],
+                            st.session_state.plot_const['centile_trace_types']
+                        )
+
+                centtype = df_plots.loc[plot_id, "centtype"]
+                centind = st.session_state.plot_const["centile_types"].index(centtype)
+                sel_options = st.selectbox(
+                    "Centile Type",
+                    st.session_state.plot_const["centile_types"],
+                    key=f"cent_type_{plot_id}",
+                    index=centind,
+                    on_change=on_centile_sel_change
+                )
 
         # Select group (hue) values
         hvar=df_plots.loc[plot_id, "hvar"]
