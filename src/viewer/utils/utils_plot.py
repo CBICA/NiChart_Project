@@ -153,7 +153,15 @@ def add_plot_tabs(
             
             # Update x bounds
             set_x_bounds(df, df_plots, plot_id, df_plots.loc[plot_id, "xvar"])
-            
+
+            # Reset centiles if x is not Age
+            if sel_val != 'Age':
+                df_plots.loc[plot_id, "centtype"]=''
+                df_plots.at[plot_id, "traces"] = remove_items_from_list(
+                    df_plots.loc[plot_id, "traces"],
+                    st.session_state.plot_const['centile_trace_types']
+                )
+
         xind = get_index_in_list(list_cols, df_plots.loc[plot_id, "xvar"])        
         st.selectbox(
             "X Var",
