@@ -19,9 +19,21 @@ st.write("# Segmentation of White Matter Lesions")
 st.markdown(
     """
     - Segmentation of WM Lesions on FL scan
-    - [DLWMLS](https://github.com/CBICA/NiChart_DLWMLS): Fast deep learning based segmentation of WM lesions
+    - [DLWMLS](https://github.com/CBICA/DLWMLS): Fast deep learning based segmentation of WM lesions
     """
 )
+
+# Update status of checkboxes
+if '_check_dlwmls_wdir' in st.session_state:
+    st.session_state.checkbox['dlwmls_wdir'] = st.session_state._check_dlwmls_wdir
+if '_check_dlwmls_in' in st.session_state:
+    st.session_state.checkbox['dlwmls_in'] = st.session_state._check_dlwmls_in
+if '_check_dlwmls_run' in st.session_state:
+    st.session_state.checkbox['dlwmls_run'] = st.session_state._check_dlwmls_run
+if '_check_dlwmls_view' in st.session_state:
+    st.session_state.checkbox['dlwmls_view'] = st.session_state._check_dlwmls_view
+if '_check_dlwmls_download' in st.session_state:
+    st.session_state.checkbox['dlwmls_download'] = st.session_state._check_dlwmls_download
 
 
 def panel_wdir() -> None:
@@ -29,10 +41,12 @@ def panel_wdir() -> None:
     Panel for selecting the working dir
     """
     icon = st.session_state.icon_thumb[st.session_state.flags["dir_out"]]
-    show_panel_wdir = st.checkbox(
-        f":material/folder_shared: Working Directory {icon}", value=False
+    st.checkbox(
+        f":material/folder_shared: Working Directory {icon}",
+        key='_check_dlwmls_wdir',
+        value=st.session_state.checkbox['dlwmls_wdir']
     )
-    if not show_panel_wdir:
+    if not st.session_state._check_dlwmls_wdir:
         return
 
     with st.container(border=True):
@@ -54,12 +68,13 @@ def panel_infl() -> None:
 
     msg = st.session_state.app_config[st.session_state.app_type]["msg_infile"]
     icon = st.session_state.icon_thumb[st.session_state.flags["dir_fl"]]
-    show_panel_infl = st.checkbox(
+    st.checkbox(
         f":material/upload: {msg} FL Images {icon}",
         disabled=not st.session_state.flags["dir_out"],
-        value=False,
+        key='_check_dlwmls_in',
+        value=st.session_state.checkbox['dlwmls_in']
     )
-    if not show_panel_infl:
+    if not st.session_state._check_dlwmls_in:
         return
 
     with st.container(border=True):
@@ -118,9 +133,10 @@ def panel_dlwmls() -> None:
     show_panel_dlwmls = st.checkbox(
         f":material/new_label: Run DLWMLS {icon}",
         disabled=not st.session_state.flags["dir_fl"],
-        value=False,
+        key='_check_dlwmls_run',
+        value=st.session_state.checkbox['dlwmls_run']
     )
-    if not show_panel_dlwmls:
+    if not st.session_state._check_dlwmls_run:
         return
 
     with st.container(border=True):
@@ -143,7 +159,6 @@ def panel_dlwmls() -> None:
                 dlwmls_cmd = f"DLWMLS -i {st.session_state.paths['FL']} -o {st.session_state.paths['dlwmls']} -d {device}"
                 st.info(f"Running: {dlwmls_cmd}", icon=":material/manufacturing:")
 
-                # FIXME : bypass dlwmls run
                 print(f"About to run: {dlwmls_cmd}")
                 os.system(dlwmls_cmd)
 
@@ -160,7 +175,9 @@ def panel_dlwmls() -> None:
                 print("all done")
 
         out_csv = f"{st.session_state.paths['dlwmls']}/DLWMLS_Volumes.csv"
-        num_dlwmls = utilio.get_file_count(st.session_state.paths["dlwmls"], ".nii.gz")
+        num_dlwmls = utilio.get_file_count(
+            st.session_state.paths["dlwmls"], ".nii.gz"
+        )
         if os.path.exists(out_csv):
             st.session_state.paths["csv_dlwmls"] = out_csv
             st.session_state.flags["csv_dlwmls"] = True
@@ -169,6 +186,16 @@ def panel_dlwmls() -> None:
                 icon=":material/thumb_up:",
             )
 
+            with st.expander('View WM lesion volumes'):
+                df_dlwmls=pd.read_csv(st.session_state.paths["csv_dlwmls"])
+                st.dataframe(df_dlwmls)
+
+        s_title="WM Lesion Segmentation"
+        s_text="""
+        - WM lesions are segmented on raw FL images using DLWMLS.
+        - The output folder (**"DLWMLS"**) will contain the segmentation mask for each scan, and a single CSV file with WML volumes.
+        """
+        utilst.util_get_help(s_title, s_text)
 
 def panel_view() -> None:
     """
@@ -177,9 +204,10 @@ def panel_view() -> None:
     show_panel_view = st.checkbox(
         ":material/new_label: View Scans",
         disabled=not st.session_state.flags["csv_dlwmls"],
-        value=False,
+        key='_check_dlwmls_view',
+        value=st.session_state.checkbox['dlwmls_view']
     )
-    if not show_panel_view:
+    if not st.session_state._check_dlwmls_view:
         return
 
     with st.container(border=True):
@@ -267,10 +295,11 @@ def panel_download() -> None:
         show_panel_view = st.checkbox(
             ":material/new_label: Download Scans",
             disabled=not st.session_state.flags["csv_dlwmls"],
-            value=False,
-        )
-        if not show_panel_view:
-            return
+        key='_check_dlwmls_download',
+        value=st.session_state.checkbox['dlwmls_download']
+    )
+    if not st.session_state._check_dlwmls_download:
+        return
 
         with st.container(border=True):
 
