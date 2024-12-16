@@ -54,11 +54,19 @@ def panel_wdir() -> None:
 
     with st.container(border=True):
         utilst.util_panel_workingdir(st.session_state.app_type)
+
         if os.path.exists(st.session_state.paths["dset"]):
+            list_subdir = utilio.get_subfolders(
+                st.session_state.paths["dset"]
+            )
             st.success(
-                f"All results will be saved to: {st.session_state.paths['dset']}",
+                f"Working directory is set to: {st.session_state.paths['dset']}",
                 icon=":material/thumb_up:",
             )
+            if len(list_subdir) > 0:
+                st.info(
+                    'Working directory already includes the following folders: ' + ', '.join(list_subdir)
+                )
             st.session_state.flags["dir_out"] = True
 
         utilst.util_workingdir_get_help()

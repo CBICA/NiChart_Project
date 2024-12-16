@@ -119,6 +119,14 @@ def get_file_count(folder_path: str, file_suff: str = "") -> int:
                         count += 1
     return count
 
+def get_subfolders(path: str) -> list:
+    subdirs = []
+    for item in os.listdir(path):
+        item_path = os.path.join(path, item)
+        if os.path.isdir(item_path):
+            subdirs.append(item)
+    return subdirs
+
 def get_file_names(folder_path: str, file_suff: str = "") -> pd.DataFrame:
     f_names = []
     if os.path.exists(folder_path):
