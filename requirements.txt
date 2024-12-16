@@ -19,6 +19,7 @@ streamlit==1.39.0
 st_pages==1.0.1
 streamlit_plotly_events
 streamlit-base-extras
+streamlit-extras
 chart_studio
 Jinja2
 plotly-express

@@ -9,7 +9,8 @@ Users can install **NiChart Project** with pip: ::
 Alternatively, the package can be installed from source: ::
 
     git clone https://github.com/CBICA/NiChart_Project
-    cd NiChart_Project && python3 -m pip install -e .
+    cd NiChart_Project
+    pip install -r requirements.txt
 
 We release our latest stable version on PyPI; accordingly, **we strongly recommend pip installation**.
 
