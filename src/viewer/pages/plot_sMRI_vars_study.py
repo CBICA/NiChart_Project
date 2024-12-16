@@ -7,6 +7,7 @@ import streamlit as st
 import utils.utils_dataframe as utildf
 import utils.utils_menu as utilmenu
 import utils.utils_nifti as utilni
+import utils.utils_io as utilio
 import utils.utils_plot as utilpl
 import utils.utils_rois as utilroi
 import utils.utils_session as utilss
@@ -59,11 +60,19 @@ def panel_wdir() -> None:
 
     with st.container(border=True):
         utilst.util_panel_workingdir(st.session_state.app_type)
+
         if os.path.exists(st.session_state.paths["dset"]):
+            list_subdir = utilio.get_subfolders(
+                st.session_state.paths["dset"]
+            )
             st.success(
-                f"All results will be saved to: {st.session_state.paths['dset']}",
+                f"Working directory is set to: {st.session_state.paths['dset']}",
                 icon=":material/thumb_up:",
             )
+            if len(list_subdir) > 0:
+                st.info(
+                    'Working directory already includes the following folders: ' + ', '.join(list_subdir)
+                )
             st.session_state.flags["dir_out"] = True
 
         utilst.util_workingdir_get_help()
@@ -87,8 +96,12 @@ def panel_incsv() -> None:
 
     # Read data if working dir changed
     if st.session_state.plot_var["df_data"].shape[0] == 0:
-        st.session_state.plot_var["df_data"] = utildf.read_dataframe(
+        df_tmp = utildf.read_dataframe(
             st.session_state.paths["csv_plot"]
+        )
+        st.session_state.plot_var["df_data"] = utildf.rename_rois(
+            df_tmp,
+            st.session_state.rois["roi_dict"]
         )
         utilss.reset_plots()
         st.session_state.is_updated["csv_plot"] = False
@@ -119,8 +132,12 @@ def panel_incsv() -> None:
 
         # Read input csv
         if st.session_state.is_updated["csv_plot"]:
-            st.session_state.plot_var["df_data"] = utildf.read_dataframe(
+            df_tmp = utildf.read_dataframe(
                 st.session_state.paths["csv_plot"]
+            )
+            st.session_state.plot_var["df_data"] = utildf.rename_rois(
+                df_tmp,
+                st.session_state.rois["roi_dict"]
             )
             utilss.reset_plots()
             st.session_state.is_updated["csv_plot"] = False
@@ -194,6 +211,12 @@ def panel_rename() -> None:
             df = df.rename(columns=st.session_state.rois["roi_dict"])
             st.session_state.plot_var["df_data"] = df
             st.success("Variables are renamed!")
+
+        s_title="Rename Data Columns"
+        s_text="""
+        - If your data includes numeric columns
+        """
+        utilst.util_get_help(s_title, s_text)
 
 
 def panel_select() -> None:

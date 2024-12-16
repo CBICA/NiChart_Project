@@ -2,6 +2,8 @@ import streamlit as st
 import utils.utils_menu as utilmenu
 import utils.utils_session as utilss
 import utils.utils_st as utilst
+from streamlit_extras.stylable_container import stylable_container
+import webbrowser
 
 # Page config should be called for each page
 utilss.config_page()
@@ -51,27 +53,28 @@ with st.expander("Want to learn more?", expanded=False):
         """
         - Check out [NiChart Web page](https://neuroimagingchart.com)
         - Visit [NiChart GitHub](https://github.com/CBICA/NiChart_Project)
-        - Jump into our [documentation](https://github.com/CBICA/NiChart_Project)
-        - Ask a question in our [community
-            forums](https://github.com/CBICA/NiChart_Project)
+        - Jump into [our documentation](https://cbica.github.io/NiChart_Project)
+        - Ask a question in [our community discussions](https://github.com/CBICA/NiChart_Project/discussions)
             """
     )
 
     st.markdown(
         """
-        You can try NiChart manually via our github
-        ```bash
-        git clone https://github.com/CBICA/NiChart_Project
-        git submodule update --init --recursive --remote
-        pip install -r requirements.txt
+        You can install NiChart Project desktop
+        ```
+        pip install NiChart_Project
         ```
 
-        And to run the workflows, just run:
-        ```bash
-        python3 run.py --dir_input input folder --dir_output output_folder --studies 1 --version my_version --cores 4 --conda 0
+        and run the application
+        ```
+        cd src/viewer
+        streamlit run NiChartProject.py
         ```
 
-        You can always find more options at our documentation
+        Alternatively, the cloud app can be launched at
+        ```
+        https://cloud.neuroimagingchart.com
+        ```
         """
     )
 
@@ -91,22 +94,52 @@ with st.sidebar.expander("Acknowledgments"):
         """
     )
 
+#st.markdown("""
+#<style>
+    #.st-bb {
+        #background-color: #4CAF50; /* Green */
+        #color: white;
+    #}
+#</style>
+#""", unsafe_allow_html=True)
+
 with st.container(border=True):
 
-    st.markdown("**NiChart Surveys:**")
+    st.markdown("### NiChart Surveys")
     st.markdown(
         "😊 Your opinion matters! Kindly take a moment to complete these two brief surveys!"
     )
 
-    st.markdown(
-        '<a href=" https://forms.office.com/r/mM1kx1XsgS" target="_blank" style="color: blue; font-size: 16px; font-weight: bold;">NiChart User Experience</a>',
-        unsafe_allow_html=True,
-    )
+    with stylable_container(
+        key="my_button_container", 
+        css_styles="""
+            button {
+                background-color: #FF7944;
+                color: white;
+                border-radius: 20px;
+            }
+            """
+    ):
+        if st.button(
+            '📝 NiChart User Experience',
+        ):
+            webbrowser.open_new_tab('https://forms.office.com/r/mM1kx1XsgS')
 
-    st.markdown(
-        '<a href="https://forms.office.com/r/acwgn2WCc4" target="_blank" style="color: blue; font-size: 16px; font-weight: bold;">Shaping the Future of NiChart</a>',
-        unsafe_allow_html=True,
-    )
+        if st.button(
+            '📝 Shaping the Future of NiChart',
+        ):
+            webbrowser.open_new_tab('https://forms.office.com/r/acwgn2WCc4')
+
+    ### Bg color on link_button was not supported in styllable container
+    #st.link_button(
+        #'📝 NiChart User Experience',
+        #'https://forms.office.com/r/mM1kx1XsgS',
+    #)
+
+    #st.link_button(
+        #'📝 Shaping the Future of NiChart',
+        #'https://forms.office.com/r/acwgn2WCc4',
+    #)
 
 # FIXME: For DEBUG
 utilst.add_debug_panel()

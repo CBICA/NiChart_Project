@@ -19,7 +19,17 @@ def read_dataframe(fname: str) -> pd.DataFrame:
         df = df.rename(columns={'DLICV':'ICV', 'DLICV_centiles':'ICV_centiles'}) 
     except:
         df = pd.DataFrame()
+
     return df
+
+def rename_rois(df: pd.DataFrame, roi_dict: dict) -> pd.DataFrame:
+    df_out = df.rename(columns=roi_dict)
+
+    print(f'AAAA  {df_out.shape}')
+    duplicate_columns = df_out.columns.duplicated()==False
+    print(f'bbbAAAA  {df_out.columns.duplicated().sum()}')
+    df_out = df_out.loc[:, duplicate_columns]
+    return df_out
 
 
 def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:

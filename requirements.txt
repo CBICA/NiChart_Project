@@ -7,7 +7,7 @@ NiChart_DLMUSE>=1.0.9
 DLWMLS @ git+https://github.com/CBICA/DLWMLS
 
 # general python dependencies
-torch==2.3.1
+torch==2.2.1
 argparse
 nibabel
 pulp==2.7.0
