@@ -209,15 +209,22 @@ def util_workingdir_get_help() -> None:
     def help_working_dir():
         st.markdown(
             """
-            - A NiChart pipeline executes a series of steps, with input/output files organized in a predefined folder structure (**"working directory"**).
+            - A NiChart pipeline executes a series of steps, with input/output files organized in a predefined folder structure.
+            
+            - Results for an **experiment** (a new analysis on a new dataset) are kept in a dedicated **working directory**.
+ 
+            - Set an **"output path"** (desktop app only) and an **"experiment name"** to define the **working directory** for your analysis. You only need to set the working directory once.
 
-            - Set an **"output path"** (desktop app only) and a **"dataset name"** to define the **working directory** for your analysis. You only need to set the working directory once.
+            - The **experiment name** can be any identifier that describes your analysis or data; it does not need to match the input study or data folder name.
 
-            - The **dataset name** can be any identifier that describes your analysis or data; it does not need to match the input study or data folder name.
-
-            - On the desktop app, you can initiate a NiChart pipeline by selecting the **working directory** from a previously completed task.
-
-            - On the cloud app, the results are deleted in regular intervals, so they may not be available if you come back later.
+            - You can initiate a NiChart pipeline by selecting the **working directory** from a previously completed experiment.
+            """
+        )
+        st.warning(
+            """
+            On the cloud app, uploaded data and results of experiments are deleted in regular intervals!
+            
+            Accordingly, the data for a previous experiment may not be available.
             """
         )
     col1, col2 = st.columns([0.5, 0.1])
@@ -249,12 +256,35 @@ def util_panel_workingdir(app_type: str) -> None:
             st.session_state.paths["dir_out"] = dir_out
 
     # Read dataset name (used to create a folder where all results will be saved)
-    helpmsg = (
-        "Please provide a unique name for your data/analysis (example: MyStudy1).\n\n A dedicated folder with this name will be created to store all input and output data associated with the analysis."
-    )
-    st.session_state.dset = user_input_textfield(
-        "Dataset Name", st.session_state.dset, helpmsg, False
-    )
+    st.write("Experiment name")
+    tmp_cols = st.columns(2)
+    with tmp_cols[0]:
+        helpmsg = (
+            "Will set the working directory to an existing experiment, with all the data previously uploaded or generated."
+        )
+        list_exp = [''] + utilio.get_subfolders(
+            st.session_state.paths["dir_out"]
+        )
+        sel_ind = list_exp.index(st.session_state.dset)
+        sel_tmp = st.selectbox(
+            'Select existing',
+            list_exp,
+            sel_ind,
+            help=helpmsg
+        )
+        if sel_tmp is not None and sel_tmp != '':
+            st.session_state.dset = sel_tmp
+
+    with tmp_cols[1]:
+        helpmsg = (
+            "Will create a dedicated working directory for a new experiment. All input and output data associated with the analysis will be stored in the new working directory."
+        )
+        st.session_state.dset = st.text_input(
+            "Create new",
+            st.session_state.dset,
+            help=helpmsg
+        )
+
 
     # Create results folder
     if st.session_state.dset != "" and st.session_state.paths["dir_out"] != "":
