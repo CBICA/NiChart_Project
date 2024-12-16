@@ -7,6 +7,7 @@ import streamlit as st
 import utils.utils_dataframe as utildf
 import utils.utils_menu as utilmenu
 import utils.utils_nifti as utilni
+import utils.utils_io as utilio
 import utils.utils_plot as utilpl
 import utils.utils_rois as utilroi
 import utils.utils_session as utilss

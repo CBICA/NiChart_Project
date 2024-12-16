@@ -265,10 +265,11 @@ def util_panel_workingdir(app_type: str) -> None:
         list_exp = [''] + utilio.get_subfolders(
             st.session_state.paths["dir_out"]
         )
+        sel_ind = list_exp.index(st.session_state.dset)
         sel_tmp = st.selectbox(
             'Select existing',
             list_exp,
-            0,
+            sel_ind,
             help=helpmsg
         )
         if sel_tmp is not None and sel_tmp != '':
