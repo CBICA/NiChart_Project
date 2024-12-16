@@ -54,7 +54,7 @@ RUN git clone https://github.com/CBICA/DLWMLS.git && cd DLWMLS && pip install -e
 RUN DLMUSE -i ~/dummyinput -o ~/dummyoutput && DLICV -i ~/dummyinput -o ~/dummyoutput
 USER root
 COPY . /app/
-RUN useradd -s /bin/bash streamlit && mkdir /app/output_folder && \
+RUN useradd -s /bin/bash streamlit && \
     chmod a+w /app/output_folder && chmod a-rw / && chmod a-w /app && touch /app/src/viewer/pipeline.log && \
     chmod a+rw /app/src/viewer/pipeline.log
 USER streamlit
