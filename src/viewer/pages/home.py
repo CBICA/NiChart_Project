@@ -2,6 +2,8 @@ import streamlit as st
 import utils.utils_menu as utilmenu
 import utils.utils_session as utilss
 import utils.utils_st as utilst
+from streamlit_extras.stylable_container import stylable_container
+import webbrowser
 
 # Page config should be called for each page
 utilss.config_page()
@@ -92,16 +94,52 @@ with st.sidebar.expander("Acknowledgments"):
         """
     )
 
+#st.markdown("""
+#<style>
+    #.st-bb {
+        #background-color: #4CAF50; /* Green */
+        #color: white;
+    #}
+#</style>
+#""", unsafe_allow_html=True)
+
 with st.container(border=True):
 
-    st.markdown("**NiChart Surveys:**")
+    st.markdown("### NiChart Surveys")
     st.markdown(
         "😊 Your opinion matters! Kindly take a moment to complete these two brief surveys!"
     )
 
-    st.link_button('📝 NiChart User Experience', 'https://forms.office.com/r/mM1kx1XsgS')
+    with stylable_container(
+        key="my_button_container", 
+        css_styles="""
+            button {
+                background-color: #FF7944;
+                color: white;
+                border-radius: 20px;
+            }
+            """
+    ):
+        if st.button(
+            '📝 NiChart User Experience',
+        ):
+            webbrowser.open_new_tab('https://forms.office.com/r/mM1kx1XsgS')
 
-    st.link_button('📝 Shaping the Future of NiChart', 'https://forms.office.com/r/acwgn2WCc4')
+        if st.button(
+            '📝 Shaping the Future of NiChart',
+        ):
+            webbrowser.open_new_tab('https://forms.office.com/r/acwgn2WCc4')
+
+    ### Bg color on link_button was not supported in styllable container
+    #st.link_button(
+        #'📝 NiChart User Experience',
+        #'https://forms.office.com/r/mM1kx1XsgS',
+    #)
+
+    #st.link_button(
+        #'📝 Shaping the Future of NiChart',
+        #'https://forms.office.com/r/acwgn2WCc4',
+    #)
 
 # FIXME: For DEBUG
 utilst.add_debug_panel()
