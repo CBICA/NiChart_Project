@@ -2,7 +2,6 @@
 .git
 test
 test_data
-output_folder
 **/*.nii.gz
 build
 **/build
