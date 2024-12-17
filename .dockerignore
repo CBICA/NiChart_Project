@@ -2,8 +2,15 @@
 .git
 test
 test_data
+output_folder/**
+!output_folder/NiChart_sMRI_Demo1
+!output_folder/NiChart_sMRI_Demo2
 **/*.nii.gz
 build
 **/build
 src/NiChart_Website
 cloud-config.json
+
+# Ignore hidden files and directories
+.*
+
