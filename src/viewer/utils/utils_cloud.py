@@ -9,7 +9,7 @@ def load_cloud_config(config_file: str):
     try:
         with open(config_file, "r") as f:
             config = json.load(f)
-            return config.get("lambda_urls", {})
+            return config
     except FileNotFoundError:
         raise FileNotFoundError(f"Configuration file '{config_file}' not found.")
     except json.JSONDecodeError:
@@ -26,7 +26,10 @@ def update_stats_db(user_id, job_type, count):
     config_file = os.path.join(repo_root, "cloud-config.json")
     cloud_config = load_cloud_config(config_file)
 
-    lambda_urls = cloud_config["lambda_urls"]
+    lambda_urls = cloud_config.get("lambda_urls", None)
+    if lambda_urls is None:
+        print("Lambda URL not provided in cloud config!")
+
     update_stats_url = lambda_urls["update_stats"]
     
     payload = {
