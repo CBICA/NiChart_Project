@@ -41,7 +41,7 @@ def update_stats_db(user_id, job_type, count):
 
     try:
         response = requests.post(update_stats_url, json=payload, headers=headers)
-        response.raise_for_status()
+        #response.raise_for_status()
         print("Success:", response.json())
     except requests.exceptions.RequestException as e:
         print("Error:", e)
