@@ -8,6 +8,7 @@ import utils.utils_menu as utilmenu
 import utils.utils_nifti as utilni
 import utils.utils_session as utilss
 import utils.utils_st as utilst
+import utils.utils_cloud as utilcloud
 from stqdm import stqdm
 
 # Page config should be called for each page
@@ -249,6 +250,8 @@ def panel_extract() -> None:
         if num_nifti == 0:
             st.warning(':material/thumb_down: Nifti conversion failed!')
         else:
+            if st.session_state.has_cloud_session:
+                utilcloud.update_stats_db(st.session_state.cloud_user_id, "NIFTIfromDICOM", num_nifti)
             st.session_state.flags["dir_nifti"] = True
             st.session_state.flags[st.session_state.sel_mod] = True
             st.success(

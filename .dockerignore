@@ -6,3 +6,4 @@ test_data
 build
 **/build
 src/NiChart_Website
+cloud-config.json
