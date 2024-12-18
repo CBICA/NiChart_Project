@@ -430,7 +430,7 @@ def display_scatter_plot(
             st.session_state.sel_roi_img = sel_roi
             st.session_state.paths["sel_img"] = ""
             st.session_state.paths["sel_seg"] = ""
-            st.rerun()
+            #st.rerun()
 
     # Main container for the plot
     with st.container(border=True):
