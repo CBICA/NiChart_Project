@@ -6,6 +6,7 @@ import streamlit as st
 import utils.utils_rois as utilroi
 import utils.utils_io as utilio
 from PIL import Image
+import shutil
 
 from streamlit.web.server.websocket_headers import _get_websocket_headers
 import jwt
@@ -212,6 +213,19 @@ def init_session_state() -> None:
             
         if not os.path.exists(st.session_state.paths["dir_out"]):
             os.makedirs(st.session_state.paths["dir_out"])
+        
+        # Copy demo folders into user folders as needed
+        if st.session_state.has_cloud_session:
+            ## Copy demo dirs to user folder (TODO: make this less hardcoded)
+            demo_dir_paths = [os.path.join(st.session_state.paths["root"], "output_folder", "NiChart_sMRI_Demo1" ),
+                              os.path.join(st.session_state.paths["root"], "output_folder", "NiChart_sMRI_Demo2" )
+                            ]
+            for demo in demo_dir_paths:
+                demo_name = os.path.basename(demo)
+                destination_path = os.path.join(st.session_state.paths["dir_out"], demo_name)
+                if os.path.exists(destination_path):
+                    shutil.rmtree(destination_path)
+                shutil.copytree(demo, destination_path, dirs_exist_ok=True)
 
         ############
         # FIXME : set init folder to test folder outside repo

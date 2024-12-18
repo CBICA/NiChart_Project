@@ -3,7 +3,7 @@ import utils.utils_menu as utilmenu
 import utils.utils_session as utilss
 import utils.utils_st as utilst
 from streamlit_extras.stylable_container import stylable_container
-import webbrowser
+from streamlitextras.webutils import stxs_javascript
 
 # Page config should be called for each page
 utilss.config_page()
@@ -123,12 +123,16 @@ with st.container(border=True):
         if st.button(
             '📝 NiChart User Experience',
         ):
-            webbrowser.open_new_tab('https://forms.office.com/r/mM1kx1XsgS')
+            ## This code only works locally, not on a container or server.
+            #webbrowser.open_new_tab('https://forms.office.com/r/mM1kx1XsgS')
+            stxs_javascript('''window.open('https://forms.office.com/r/mM1kx1XsgS', '_blank').focus()''')
 
         if st.button(
             '📝 Shaping the Future of NiChart',
         ):
-            webbrowser.open_new_tab('https://forms.office.com/r/acwgn2WCc4')
+            ## This code only works locally, not on a container or server.
+            #webbrowser.open_new_tab('https://forms.office.com/r/acwgn2WCc4')
+            stxs_javascript('''window.open('https://forms.office.com/r/acwgn2WCc4', '_blank').focus()''')
 
     ### Bg color on link_button was not supported in styllable container
     #st.link_button(

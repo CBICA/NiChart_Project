@@ -10,6 +10,7 @@ import utils.utils_nifti as utilni
 import utils.utils_rois as utilroi
 import utils.utils_session as utilss
 import utils.utils_st as utilst
+import utils.utils_cloud as utilcloud
 from stqdm import stqdm
 
 # Page config should be called for each page
@@ -174,6 +175,9 @@ def panel_dlmuse() -> None:
 
             with st.spinner("Wait for it..."):
                 fcount = utilio.get_file_count(st.session_state.paths["T1"])
+                if st.session_state.has_cloud_session:
+                    utilcloud.update_stats_db(st.session_state.cloud_user_id, "DLMUSE", fcount)
+
                 progress_bar = stqdm(total=9, desc="Current step", position=0)
                 progress_bar.set_description("Starting...")
                 

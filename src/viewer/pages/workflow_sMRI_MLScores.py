@@ -7,6 +7,7 @@ import utils.utils_io as utilio
 import utils.utils_menu as utilmenu
 import utils.utils_session as utilss
 import utils.utils_st as utilst
+import utils.utils_cloud as utilcloud
 
 run_dir = os.path.join(st.session_state.paths["root"], "src", "workflows", "w_sMRI")
 sys.path.append(run_dir)
@@ -284,6 +285,9 @@ def panel_run() -> None:
 
             with st.spinner("Wait for it..."):
                 st.info("Running: mlscores_workflow ", icon=":material/manufacturing:")
+                fcount = df_tmp.shape[0]
+                if st.session_state.has_cloud_session:
+                    utilcloud.update_stats_db(st.session_state.cloud_user_id, "MLScores", fcount)
 
                 try:
                     if flag_harmonize:

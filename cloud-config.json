@@ -1,0 +1,5 @@
+{
+    "lambda_urls": {
+        "update_stats": "https://gpzw2o0kxd.execute-api.us-east-1.amazonaws.com/default/cbica-nichart-updatestats"
+    }
+}

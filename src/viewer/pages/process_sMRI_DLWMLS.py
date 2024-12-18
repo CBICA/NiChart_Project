@@ -7,6 +7,7 @@ import utils.utils_menu as utilmenu
 import utils.utils_nifti as utilni
 import utils.utils_session as utilss
 import utils.utils_st as utilst
+import utils.utils_cloud as utilcloud
 from stqdm import stqdm
 
 # Page config should be called for each page
@@ -164,6 +165,10 @@ def panel_dlwmls() -> None:
                 os.makedirs(st.session_state.paths["dlwmls"])
 
             with st.spinner("Wait for it..."):
+                fcount = utilio.get_file_count(st.session_state.paths["FL"])
+                if st.session_state.has_cloud_session:
+                    utilcloud.update_stats_db(st.session_state.cloud_user_id, "DLWMLS", fcount)
+
                 dlwmls_cmd = f"DLWMLS -i {st.session_state.paths['FL']} -o {st.session_state.paths['dlwmls']} -d {device}"
                 st.info(f"Running: {dlwmls_cmd}", icon=":material/manufacturing:")
 
