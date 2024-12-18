@@ -4,6 +4,7 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 import utils.utils_rois as utilroi
+import utils.utils_io as utilio
 from PIL import Image
 import shutil
 
@@ -474,6 +475,12 @@ def reset_flags() -> None:
     for tmp_key in st.session_state.flags.keys():
         st.session_state.flags[tmp_key] = False
     st.session_state.flags["dset"] = True
+    
+    # Check dicom folder
+    fcount = utilio.get_file_count(st.session_state.paths["dicom"])
+    if fcount > 0:
+        st.session_state.flags["dir_dicom"] = True
+
 
 def reset_plots() -> None:
     """
