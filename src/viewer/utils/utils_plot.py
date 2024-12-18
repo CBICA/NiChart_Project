@@ -410,7 +410,27 @@ def display_scatter_plot(
         Set the active plot id to plot that was clicked
         """
         st.session_state.plot_active = plot_id
-        # st.rerun()
+
+        # Detect MRID from the click info and save to session_state
+        hind = get_index_in_list(df.columns.tolist(), curr_plot["hvar"])
+        
+        sel_info = st.session_state[f'bubble_chart_{plot_id}']
+        if len(sel_info["selection"]["points"]) > 0:
+            sind = sel_info["selection"]["point_indices"][0]
+            if hind is None:
+                sel_mrid = df_filt.iloc[sind]["MRID"]
+            else:
+                lgroup = sel_info["selection"]["points"][0]["legendgroup"]
+                sel_mrid = df_filt[df_filt[curr_plot["hvar"]] == lgroup].iloc[sind][
+                    "MRID"
+                ]
+            sel_roi = st.session_state.plots.loc[st.session_state.plot_active, "yvar"]
+            st.session_state.sel_mrid = sel_mrid
+            st.session_state.sel_roi = sel_roi
+            st.session_state.sel_roi_img = sel_roi
+            st.session_state.paths["sel_img"] = ""
+            st.session_state.paths["sel_seg"] = ""
+            #st.rerun()
 
     # Main container for the plot
     with st.container(border=True):
@@ -550,27 +570,7 @@ def display_scatter_plot(
             fig, key=f"bubble_chart_{plot_id}", on_select=callback_plot_clicked
         )
 
-        # Detect MRID from the click info and save to session_state
-        hind = get_index_in_list(df.columns.tolist(), curr_plot["hvar"])
-        if len(sel_info["selection"]["points"]) > 0:
-            sind = sel_info["selection"]["point_indices"][0]
-            if hind is None:
-                sel_mrid = df_filt.iloc[sind]["MRID"]
-            else:
-                lgroup = sel_info["selection"]["points"][0]["legendgroup"]
-                sel_mrid = df_filt[df_filt[curr_plot["hvar"]] == lgroup].iloc[sind][
-                    "MRID"
-                ]
-            sel_roi = st.session_state.plots.loc[st.session_state.plot_active, "yvar"]
-            st.session_state.sel_mrid = sel_mrid
-            st.session_state.sel_roi = sel_roi
-            st.session_state.sel_roi_img = sel_roi
-            st.session_state.paths["sel_img"] = ""
-            st.session_state.paths["sel_seg"] = ""
-            st.rerun()
-
         return fig
-
 
 def display_dist_plot(
     df: pd.DataFrame, plot_id: str, show_settings: bool, sel_mrid: str

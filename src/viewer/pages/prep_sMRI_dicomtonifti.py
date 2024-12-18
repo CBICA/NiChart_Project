@@ -237,18 +237,18 @@ def panel_extract() -> None:
                 except:
                     st.warning(':material/thumb_down: Nifti conversion failed!')
 
-        num_nifti = utilio.get_file_count(
-            st.session_state.paths[st.session_state.sel_mod], ".nii.gz"
-        )
+            num_nifti = utilio.get_file_count(
+                st.session_state.paths[st.session_state.sel_mod], ".nii.gz"
+            )
+            if num_nifti == 0:
+                st.warning(':material/thumb_down: The extraction process did not produce any Nifti images!')
 
         df_files = utilio.get_file_names(
             st.session_state.paths[st.session_state.sel_mod], ".nii.gz"
         )
         num_nifti=df_files.shape[0]
         
-        if num_nifti == 0:
-            st.warning(':material/thumb_down: Nifti conversion failed!')
-        else:
+        if num_nifti > 0:
             st.session_state.flags["dir_nifti"] = True
             st.session_state.flags[st.session_state.sel_mod] = True
             st.success(
