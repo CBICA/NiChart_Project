@@ -63,14 +63,9 @@ st.markdown(
 )
 
 if st.button(":material/play_circle: DICOMs to Biomarkers"):
-    f_video = os.path.join(
-        st.session_state.paths["root"],
-        "resources",
-        "videos",
-        "nichart_vtutorial_smri_1.webm",
-    )
     url_video="https://youtu.be/RrnibCrNiHA"
-    show_video(url_video)
+    st.video(url_video)
+    
 
 st.markdown(
     """
@@ -81,14 +76,8 @@ st.markdown(
 )
 
 if st.button(":material/play_circle: ROIs to Biomarkers"):
-    f_video = os.path.join(
-        st.session_state.paths["root"],
-        "resources",
-        "videos",
-        "nichart_vtutorial_smri_2.webm",
-    )
     url_video="https://youtu.be/aw5AK0UQtgo"
-    show_video(url_video)
+    st.video(url_video)
 
 st.markdown(
     """
