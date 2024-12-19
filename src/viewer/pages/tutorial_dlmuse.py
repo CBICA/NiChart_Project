@@ -69,7 +69,8 @@ if st.button(":material/play_circle: DICOMs to Biomarkers"):
         "videos",
         "nichart_vtutorial_smri_1.webm",
     )
-    show_video(f_video)
+    url_video="https://youtu.be/RrnibCrNiHA"
+    show_video(url_video)
 
 st.markdown(
     """
@@ -86,7 +87,8 @@ if st.button(":material/play_circle: ROIs to Biomarkers"):
         "videos",
         "nichart_vtutorial_smri_2.webm",
     )
-    show_video(f_video)
+    url_video="https://youtu.be/aw5AK0UQtgo"
+    show_video(url_video)
 
 st.markdown(
     """
