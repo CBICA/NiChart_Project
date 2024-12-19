@@ -2,13 +2,13 @@ import os
 from typing import Any
 
 import streamlit as st
+import utils.utils_cloud as utilcloud
 import utils.utils_dicom as utildcm
 import utils.utils_io as utilio
 import utils.utils_menu as utilmenu
 import utils.utils_nifti as utilni
 import utils.utils_session as utilss
 import utils.utils_st as utilst
-import utils.utils_cloud as utilcloud
 from stqdm import stqdm
 
 # Page config should be called for each page
@@ -21,23 +21,26 @@ utilmenu.menu()
 st.write("# Dicom to Nifti Conversion")
 
 # Update status of checkboxes
-if '_check_dicoms_wdir' in st.session_state:
-    st.session_state.checkbox['dicoms_wdir'] = st.session_state._check_dicoms_wdir
-if '_check_dicoms_in' in st.session_state:
-    st.session_state.checkbox['dicoms_in'] = st.session_state._check_dicoms_in
-if '_check_dicoms_series' in st.session_state:
-    st.session_state.checkbox['dicoms_series'] = st.session_state._check_dicoms_series
-if '_check_dicoms_run' in st.session_state:
-    st.session_state.checkbox['dicoms_run'] = st.session_state._check_dicoms_run
-if '_check_dicoms_view' in st.session_state:
-    st.session_state.checkbox['dicoms_view'] = st.session_state._check_dicoms_view
-if '_check_dicoms_download' in st.session_state:
-    st.session_state.checkbox['dicoms_download'] = st.session_state._check_dicoms_download
+if "_check_dicoms_wdir" in st.session_state:
+    st.session_state.checkbox["dicoms_wdir"] = st.session_state._check_dicoms_wdir
+if "_check_dicoms_in" in st.session_state:
+    st.session_state.checkbox["dicoms_in"] = st.session_state._check_dicoms_in
+if "_check_dicoms_series" in st.session_state:
+    st.session_state.checkbox["dicoms_series"] = st.session_state._check_dicoms_series
+if "_check_dicoms_run" in st.session_state:
+    st.session_state.checkbox["dicoms_run"] = st.session_state._check_dicoms_run
+if "_check_dicoms_view" in st.session_state:
+    st.session_state.checkbox["dicoms_view"] = st.session_state._check_dicoms_view
+if "_check_dicoms_download" in st.session_state:
+    st.session_state.checkbox["dicoms_download"] = (
+        st.session_state._check_dicoms_download
+    )
 
 
 def progress(p: int, i: int, decoded: Any) -> None:
     with result_holder.container():
         st.progress(p, f"Progress: Token position={i}")
+
 
 def panel_wdir() -> None:
     """
@@ -45,9 +48,9 @@ def panel_wdir() -> None:
     """
     icon = st.session_state.icon_thumb[st.session_state.flags["dir_out"]]
     st.checkbox(
-        f":material/folder_shared: Working Directory {icon}", 
-        key='_check_dicoms_wdir',
-        value=st.session_state.checkbox['dicoms_wdir']
+        f":material/folder_shared: Working Directory {icon}",
+        key="_check_dicoms_wdir",
+        value=st.session_state.checkbox["dicoms_wdir"],
     )
     if not st.session_state._check_dicoms_wdir:
         return
@@ -55,20 +58,20 @@ def panel_wdir() -> None:
     with st.container(border=True):
         utilst.util_panel_workingdir(st.session_state.app_type)
         if os.path.exists(st.session_state.paths["dset"]):
-            list_subdir = utilio.get_subfolders(
-                st.session_state.paths["dset"]
-            )
+            list_subdir = utilio.get_subfolders(st.session_state.paths["dset"])
             st.success(
                 f"Working directory is set to: {st.session_state.paths['dset']}",
                 icon=":material/thumb_up:",
             )
             if len(list_subdir) > 0:
                 st.info(
-                    'Working directory already includes the following folders: ' + ', '.join(list_subdir)
+                    "Working directory already includes the following folders: "
+                    + ", ".join(list_subdir)
                 )
             st.session_state.flags["dir_out"] = True
 
         utilst.util_workingdir_get_help()
+
 
 def panel_indicoms() -> None:
     """
@@ -79,8 +82,8 @@ def panel_indicoms() -> None:
     st.checkbox(
         f":material/upload: {msg} Dicoms {icon}",
         disabled=not st.session_state.flags["dir_out"],
-        key='_check_dicoms_in',
-        value=st.session_state.checkbox['dicoms_in']
+        key="_check_dicoms_in",
+        value=st.session_state.checkbox["dicoms_in"],
     )
     if not st.session_state._check_dicoms_in:
         return
@@ -120,8 +123,8 @@ def panel_indicoms() -> None:
                     icon=":material/thumb_up:",
                 )
 
-        s_title="DICOM Data"
-        s_text="""
+        s_title = "DICOM Data"
+        s_text = """
         - Upload or select the input DICOM folder containing all DICOM files. Nested folders are supported.
 
         - On the desktop app, a symbolic link named **"Dicoms"** will be created in the **working directory**, pointing to your input DICOM folder.
@@ -132,6 +135,7 @@ def panel_indicoms() -> None:
         """
         utilst.util_get_help(s_title, s_text)
 
+
 def panel_detect() -> None:
     """
     Panel for detecting dicom series
@@ -140,8 +144,8 @@ def panel_detect() -> None:
     st.checkbox(
         f":material/manage_search: Detect Dicom Series {icon}",
         disabled=not st.session_state.flags["dir_dicom"],
-        key='_check_dicoms_series',
-        value=st.session_state.checkbox['dicoms_series']
+        key="_check_dicoms_series",
+        value=st.session_state.checkbox["dicoms_series"],
     )
     if not st.session_state._check_dicoms_series:
         return
@@ -171,11 +175,11 @@ def panel_detect() -> None:
                 icon=":material/thumb_up:",
             )
 
-        with st.expander('Show dicom metadata', expanded=False):
+        with st.expander("Show dicom metadata", expanded=False):
             st.dataframe(st.session_state.df_dicoms)
 
-        s_title="DICOM Series"
-        s_text="""
+        s_title = "DICOM Series"
+        s_text = """
         - The system verifies all files within the DICOM folder.
         - Valid DICOM files are processed to extract the DICOM header information, which is used to identify and group images into their respective series
         - The DICOM field **"SeriesDesc"** is used to identify series
@@ -191,8 +195,8 @@ def panel_extract() -> None:
     st.checkbox(
         f":material/auto_awesome_motion: Extract Scans {icon}",
         disabled=not st.session_state.flags["dicom_series"],
-        key='_check_dicoms_run',
-        value=st.session_state.checkbox['dicoms_run']
+        key="_check_dicoms_run",
+        value=st.session_state.checkbox["dicoms_run"],
     )
     if not st.session_state._check_dicoms_run:
         return
@@ -236,22 +240,26 @@ def panel_extract() -> None:
                         f"_{st.session_state.sel_mod}.nii.gz",
                     )
                 except:
-                    st.warning(':material/thumb_down: Nifti conversion failed!')
+                    st.warning(":material/thumb_down: Nifti conversion failed!")
 
             num_nifti = utilio.get_file_count(
                 st.session_state.paths[st.session_state.sel_mod], ".nii.gz"
             )
             if num_nifti == 0:
-                st.warning(':material/thumb_down: The extraction process did not produce any Nifti images!')
+                st.warning(
+                    ":material/thumb_down: The extraction process did not produce any Nifti images!"
+                )
             else:
-              if st.session_state.has_cloud_session:
-                utilcloud.update_stats_db(st.session_state.cloud_user_id, "NIFTIfromDICOM", num_nifti)
+                if st.session_state.has_cloud_session:
+                    utilcloud.update_stats_db(
+                        st.session_state.cloud_user_id, "NIFTIfromDICOM", num_nifti
+                    )
 
         df_files = utilio.get_file_names(
             st.session_state.paths[st.session_state.sel_mod], ".nii.gz"
         )
-        num_nifti=df_files.shape[0]
-        
+        num_nifti = df_files.shape[0]
+
         if num_nifti > 0:
             st.session_state.flags["dir_nifti"] = True
             st.session_state.flags[st.session_state.sel_mod] = True
@@ -260,16 +268,17 @@ def panel_extract() -> None:
                 icon=":material/thumb_up:",
             )
 
-            with st.expander('View NIFTI image list'):
+            with st.expander("View NIFTI image list"):
                 st.dataframe(df_files)
 
-        s_title="Nifti Conversion"
-        s_text="""
+        s_title = "Nifti Conversion"
+        s_text = """
         - The user specifies the desired modality and selects the associated series.
         - Selected series are converted into Nifti image format.
-        - Nifti images are renamed with the following format: **{PatientID}\_{StudyDate}\_{modality}.nii.gz**
+        - Nifti images are renamed with the following format: **{PatientID}_{StudyDate}_{modality}.nii.gz**
         """
         utilst.util_get_help(s_title, s_text)
+
 
 def panel_view() -> None:
     """
@@ -278,8 +287,8 @@ def panel_view() -> None:
     st.checkbox(
         ":material/visibility: View Scans",
         disabled=not st.session_state.flags["dir_nifti"],
-        key='_check_dicoms_view',
-        value=st.session_state.checkbox['dicoms_view']
+        key="_check_dicoms_view",
+        value=st.session_state.checkbox["dicoms_view"],
     )
     if not st.session_state._check_dicoms_view:
         return
@@ -339,7 +348,7 @@ def panel_view() -> None:
 
         with st.spinner("Wait for it..."):
 
-            try: 
+            try:
                 # Prepare final 3d matrix to display
                 img = utilni.prep_image(st.session_state.paths["sel_img"])
 
@@ -357,10 +366,17 @@ def panel_view() -> None:
                         ind_view = utilni.img_views.index(tmp_orient)
                         size_auto = True
                         utilst.show_img3D(
-                            img, ind_view, img_bounds[ind_view, :], tmp_orient, size_auto
+                            img,
+                            ind_view,
+                            img_bounds[ind_view, :],
+                            tmp_orient,
+                            size_auto,
                         )
             except:
-                st.warning(':material/thumb_down: Image parsing failed. Please confirm that the image file represents a 3D volume using an external tool.')
+                st.warning(
+                    ":material/thumb_down: Image parsing failed. Please confirm that the image file represents a 3D volume using an external tool."
+                )
+
 
 def panel_download() -> None:
     """
@@ -369,8 +385,8 @@ def panel_download() -> None:
     st.checkbox(
         ":material/download: Download Scans",
         disabled=not st.session_state.flags["dir_nifti"],
-        key='_check_dicoms_download',
-        value=st.session_state.checkbox['dicoms_download']
+        key="_check_dicoms_download",
+        value=st.session_state.checkbox["dicoms_download"],
     )
     if not st.session_state._check_dicoms_download:
         return
@@ -409,7 +425,7 @@ def panel_download() -> None:
                 disabled=False,
             )
         else:
-            st.warning(':material/thumb_down: No images found for download!')
+            st.warning(":material/thumb_down: No images found for download!")
 
 
 st.markdown(

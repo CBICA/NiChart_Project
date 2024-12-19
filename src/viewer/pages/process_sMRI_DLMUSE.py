@@ -1,16 +1,15 @@
 import os
-import re
 
 import NiChart_DLMUSE as ncd
 import pandas as pd
 import streamlit as st
+import utils.utils_cloud as utilcloud
 import utils.utils_io as utilio
 import utils.utils_menu as utilmenu
 import utils.utils_nifti as utilni
 import utils.utils_rois as utilroi
 import utils.utils_session as utilss
 import utils.utils_st as utilst
-import utils.utils_cloud as utilcloud
 from stqdm import stqdm
 
 # Page config should be called for each page
@@ -28,16 +27,18 @@ st.markdown(
 )
 
 # Update status of checkboxes
-if '_check_dlmuse_wdir' in st.session_state:
-    st.session_state.checkbox['dlmuse_wdir'] = st.session_state._check_dlmuse_wdir
-if '_check_dlmuse_in' in st.session_state:
-    st.session_state.checkbox['dlmuse_in'] = st.session_state._check_dlmuse_in
-if '_check_dlmuse_run' in st.session_state:
-    st.session_state.checkbox['dlmuse_run'] = st.session_state._check_dlmuse_run
-if '_check_dlmuse_view' in st.session_state:
-    st.session_state.checkbox['dlmuse_view'] = st.session_state._check_dlmuse_view
-if '_check_dlmuse_download' in st.session_state:
-    st.session_state.checkbox['dlmuse_download'] = st.session_state._check_dlmuse_download
+if "_check_dlmuse_wdir" in st.session_state:
+    st.session_state.checkbox["dlmuse_wdir"] = st.session_state._check_dlmuse_wdir
+if "_check_dlmuse_in" in st.session_state:
+    st.session_state.checkbox["dlmuse_in"] = st.session_state._check_dlmuse_in
+if "_check_dlmuse_run" in st.session_state:
+    st.session_state.checkbox["dlmuse_run"] = st.session_state._check_dlmuse_run
+if "_check_dlmuse_view" in st.session_state:
+    st.session_state.checkbox["dlmuse_view"] = st.session_state._check_dlmuse_view
+if "_check_dlmuse_download" in st.session_state:
+    st.session_state.checkbox["dlmuse_download"] = (
+        st.session_state._check_dlmuse_download
+    )
 
 
 def panel_wdir() -> None:
@@ -47,8 +48,8 @@ def panel_wdir() -> None:
     icon = st.session_state.icon_thumb[st.session_state.flags["dir_out"]]
     st.checkbox(
         f":material/folder_shared: Working Directory {icon}",
-        key='_check_dlmuse_wdir',
-        value=st.session_state.checkbox['dlmuse_wdir']
+        key="_check_dlmuse_wdir",
+        value=st.session_state.checkbox["dlmuse_wdir"],
     )
     if not st.session_state._check_dlmuse_wdir:
         return
@@ -57,20 +58,20 @@ def panel_wdir() -> None:
         utilst.util_panel_workingdir(st.session_state.app_type)
 
         if os.path.exists(st.session_state.paths["dset"]):
-            list_subdir = utilio.get_subfolders(
-                st.session_state.paths["dset"]
-            )
+            list_subdir = utilio.get_subfolders(st.session_state.paths["dset"])
             st.success(
                 f"Working directory is set to: {st.session_state.paths['dset']}",
                 icon=":material/thumb_up:",
             )
             if len(list_subdir) > 0:
                 st.info(
-                    'Working directory already includes the following folders: ' + ', '.join(list_subdir)
+                    "Working directory already includes the following folders: "
+                    + ", ".join(list_subdir)
                 )
             st.session_state.flags["dir_out"] = True
 
         utilst.util_workingdir_get_help()
+
 
 def panel_int1() -> None:
     """
@@ -83,8 +84,8 @@ def panel_int1() -> None:
     st.checkbox(
         f":material/upload: {msg} T1 Images {icon}",
         disabled=not st.session_state.flags["dir_out"],
-        key='_check_dlmuse_in',
-        value=st.session_state.checkbox['dlmuse_in']
+        key="_check_dlmuse_in",
+        value=st.session_state.checkbox["dlmuse_in"],
     )
     if not st.session_state._check_dlmuse_in:
         return
@@ -123,8 +124,8 @@ def panel_int1() -> None:
                     icon=":material/thumb_up:",
                 )
 
-        s_title="Input T1 Scans"
-        s_text="""
+        s_title = "Input T1 Scans"
+        s_text = """
         - Upload or select input T1 scans. DLMUSE can be directly applied to raw T1 scans. Nested folders are not supported.
 
         - The result file with segmented ROI volumes includes an **"MRID"** column that uniquely identifies each scan. **MRID** is extracted from image file names by removing the common suffix to all images. Using consistent input image names is **strongly recommended**
@@ -146,15 +147,15 @@ def panel_dlmuse() -> None:
     st.checkbox(
         f":material/new_label: Run DLMUSE {icon}",
         disabled=not st.session_state.flags["dir_t1"],
-        key='_check_dlmuse_run',
-        value=st.session_state.checkbox['dlmuse_run']
+        key="_check_dlmuse_run",
+        value=st.session_state.checkbox["dlmuse_run"],
     )
     if not st.session_state._check_dlmuse_run:
         return
 
     with st.container(border=True):
         # Device type
-        if st.session_state.app_type != 'cloud':
+        if st.session_state.app_type != "cloud":
             helpmsg = "Choose 'cuda' if your computer has an NVIDIA GPU, 'mps' if you have an Apple M-series chip, and 'cpu' if you have a standard CPU."
             device = utilst.user_input_select(
                 "Device",
@@ -165,7 +166,7 @@ def panel_dlmuse() -> None:
                 False,
             )
         else:
-            device = 'cuda'
+            device = "cuda"
 
         # Button to run DLMUSE
         btn_seg = st.button("Run DLMUSE", disabled=False)
@@ -176,25 +177,31 @@ def panel_dlmuse() -> None:
             with st.spinner("Wait for it..."):
                 fcount = utilio.get_file_count(st.session_state.paths["T1"])
                 if st.session_state.has_cloud_session:
-                    utilcloud.update_stats_db(st.session_state.cloud_user_id, "DLMUSE", fcount)
+                    utilcloud.update_stats_db(
+                        st.session_state.cloud_user_id, "DLMUSE", fcount
+                    )
 
                 progress_bar = stqdm(total=9, desc="Current step", position=0)
                 progress_bar.set_description("Starting...")
-                
-                ncd.run_pipeline(st.session_state.paths['T1'], st.session_state.paths['dlmuse'],
-                                 device, dlmuse_extra_args='-nps 1 -npp 1', dlicv_extra_args='-nps 1 -npp 1', progress_bar=progress_bar)
-                   
-                #dlmuse_cmd = f"NiChart_DLMUSE -i {st.session_state.paths['T1']} -o {st.session_state.paths['dlmuse']} -d {device} --cores 1"
-                #st.info(f"Running: {dlmuse_cmd}", icon=":material/manufacturing:")
+
+                ncd.run_pipeline(
+                    st.session_state.paths["T1"],
+                    st.session_state.paths["dlmuse"],
+                    device,
+                    dlmuse_extra_args="-nps 1 -npp 1",
+                    dlicv_extra_args="-nps 1 -npp 1",
+                    progress_bar=progress_bar,
+                )
+
+                # dlmuse_cmd = f"NiChart_DLMUSE -i {st.session_state.paths['T1']} -o {st.session_state.paths['dlmuse']} -d {device} --cores 1"
+                # st.info(f"Running: {dlmuse_cmd}", icon=":material/manufacturing:")
 
                 # FIXME : bypass dlmuse run
-                #print(f"About to run: {dlmuse_cmd}")
-                #os.system(dlmuse_cmd)
+                # print(f"About to run: {dlmuse_cmd}")
+                # os.system(dlmuse_cmd)
 
         out_csv = f"{st.session_state.paths['dlmuse']}/DLMUSE_Volumes.csv"
-        num_dlmuse = utilio.get_file_count(
-            st.session_state.paths["dlmuse"], ".nii.gz"
-        )
+        num_dlmuse = utilio.get_file_count(st.session_state.paths["dlmuse"], ".nii.gz")
         if os.path.exists(out_csv):
             st.session_state.paths["csv_dlmuse"] = out_csv
             st.session_state.flags["csv_dlmuse"] = True
@@ -203,12 +210,12 @@ def panel_dlmuse() -> None:
                 icon=":material/thumb_up:",
             )
 
-            with st.expander('View DLMUSE volumes'):
-                df_dlmuse=pd.read_csv(st.session_state.paths["csv_dlmuse"])
+            with st.expander("View DLMUSE volumes"):
+                df_dlmuse = pd.read_csv(st.session_state.paths["csv_dlmuse"])
                 st.dataframe(df_dlmuse)
 
-        s_title="DLMUSE Segmentation"
-        s_text="""
+        s_title = "DLMUSE Segmentation"
+        s_text = """
         - Raw T1 images are segmented into anatomical regions of interest (ROIs) using DLMUSE.
         - The output folder (**"DLMUSE"**) will contain the segmentation mask for each scan, and a single CSV file with volumes of all ROIs. The result file will include single ROIs (segmented regions) and composite ROIs (obtained by merging single ROIs within a tree structure).
         """
@@ -222,8 +229,8 @@ def panel_view() -> None:
     st.checkbox(
         ":material/new_label: View Scans",
         disabled=not st.session_state.flags["csv_dlmuse"],
-        key='_check_dlmuse_view',
-        value=st.session_state.checkbox['dlmuse_view']
+        key="_check_dlmuse_view",
+        value=st.session_state.checkbox["dlmuse_view"],
     )
     if not st.session_state._check_dlmuse_view:
         return
@@ -287,27 +294,19 @@ def panel_view() -> None:
             return
 
         st.session_state.paths["sel_img"] = utilio.get_image_path(
-            st.session_state.paths["T1"],
-            sel_mrid,
-            ["nii.gz", ".nii"]
+            st.session_state.paths["T1"], sel_mrid, ["nii.gz", ".nii"]
         )
 
         st.session_state.paths["sel_seg"] = utilio.get_image_path(
-            st.session_state.paths["dlmuse"],
-            sel_mrid,
-            ["nii.gz", ".nii"]
+            st.session_state.paths["dlmuse"], sel_mrid, ["nii.gz", ".nii"]
         )
 
         if not os.path.exists(st.session_state.paths["sel_img"]):
-            st.warning(
-                'Could not locate underlay image!'
-            )
+            st.warning("Could not locate underlay image!")
             return
 
         if not os.path.exists(st.session_state.paths["sel_seg"]):
-            st.warning(
-                'Could not locate overlay image!'
-            )
+            st.warning("Could not locate overlay image!")
             return
 
         with st.spinner("Wait for it..."):
@@ -334,7 +333,11 @@ def panel_view() -> None:
                     size_auto = True
                     if is_show_overlay is False:
                         utilst.show_img3D(
-                            img, ind_view, mask_bounds[ind_view, :], tmp_orient, size_auto
+                            img,
+                            ind_view,
+                            mask_bounds[ind_view, :],
+                            tmp_orient,
+                            size_auto,
                         )
                     else:
                         utilst.show_img3D(
@@ -342,7 +345,7 @@ def panel_view() -> None:
                             ind_view,
                             mask_bounds[ind_view, :],
                             tmp_orient,
-                            size_auto
+                            size_auto,
                         )
 
 
@@ -353,8 +356,8 @@ def panel_download() -> None:
     st.checkbox(
         ":material/new_label: Download Scans",
         disabled=not st.session_state.flags["csv_dlmuse"],
-        key='_check_dlmuse_download',
-        value=st.session_state.checkbox['dlmuse_download']
+        key="_check_dlmuse_download",
+        value=st.session_state.checkbox["dlmuse_download"],
     )
     if not st.session_state._check_dlmuse_download:
         return

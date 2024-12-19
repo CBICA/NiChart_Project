@@ -1,15 +1,16 @@
 import os
+import shutil
+from typing import Any
 
+import jwt
 import pandas as pd
 import plotly.express as px
 import streamlit as st
-import utils.utils_rois as utilroi
 import utils.utils_io as utilio
+import utils.utils_rois as utilroi
 from PIL import Image
-import shutil
 
-from streamlit.web.server.websocket_headers import _get_websocket_headers
-import jwt
+# from streamlit.web.server.websocket_headers import _get_websocket_headers
 
 
 def config_page() -> None:
@@ -26,17 +27,21 @@ def config_page() -> None:
         },
     )
 
-## Function to parse AWS login (if available)
-def process_session_token():
-    #headers = _get_websocket_headers()
+
+# Function to parse AWS login (if available)
+def process_session_token() -> Any:
+    # headers = _get_websocket_headers()
     headers = st.context.headers
     if not headers or "X-Amzn-Oidc-Data" not in headers:
         return {}
     return jwt.decode(
-        headers["X-Amzn-Oidc-Data"], algorithms=["ES256"], options={"verify_signature": False}
+        headers["X-Amzn-Oidc-Data"],
+        algorithms=["ES256"],
+        options={"verify_signature": False},
     )
-    
-def process_session_user_id():
+
+
+def process_session_user_id() -> Any:
     headers = st.context.headers
     if not headers or "X-Amzn-Oidc-Identity" not in headers:
         return "NO_USER_FOUND"
@@ -60,9 +65,9 @@ def init_session_state() -> None:
             "cloud": {"msg_infile": "Upload"},
             "desktop": {"msg_infile": "Select"},
         }
-        
+
         # Store user session info for later retrieval
-        if st.session_state.app_type == 'cloud':
+        if st.session_state.app_type == "cloud":
             st.session_state.cloud_session_token = process_session_token()
             if st.session_state.cloud_session_token:
                 st.session_state.has_cloud_session = True
@@ -71,8 +76,7 @@ def init_session_state() -> None:
                 st.session_state.has_cloud_session = False
         else:
             st.session_state.has_cloud_session = False
-        
-                
+
         ###################################
 
         ###################################
@@ -120,7 +124,7 @@ def init_session_state() -> None:
             "view_wdir": False,
             "view_in": False,
             "view_select": False,
-            "view_plot": False
+            "view_plot": False,
         }
 
         # Flags for various i/o
@@ -209,20 +213,30 @@ def init_session_state() -> None:
             st.session_state.paths["dir_out"] = os.path.join(
                 st.session_state.paths["root"], "output_folder"
             )
-            
-            
+
         if not os.path.exists(st.session_state.paths["dir_out"]):
             os.makedirs(st.session_state.paths["dir_out"])
-        
+
         # Copy demo folders into user folders as needed
         if st.session_state.has_cloud_session:
-            ## Copy demo dirs to user folder (TODO: make this less hardcoded)
-            demo_dir_paths = [os.path.join(st.session_state.paths["root"], "output_folder", "NiChart_sMRI_Demo1" ),
-                              os.path.join(st.session_state.paths["root"], "output_folder", "NiChart_sMRI_Demo2" )
-                            ]
+            # Copy demo dirs to user folder (TODO: make this less hardcoded)
+            demo_dir_paths = [
+                os.path.join(
+                    st.session_state.paths["root"],
+                    "output_folder",
+                    "NiChart_sMRI_Demo1",
+                ),
+                os.path.join(
+                    st.session_state.paths["root"],
+                    "output_folder",
+                    "NiChart_sMRI_Demo2",
+                ),
+            ]
             for demo in demo_dir_paths:
                 demo_name = os.path.basename(demo)
-                destination_path = os.path.join(st.session_state.paths["dir_out"], demo_name)
+                destination_path = os.path.join(
+                    st.session_state.paths["dir_out"], demo_name
+                )
                 if os.path.exists(destination_path):
                     shutil.rmtree(destination_path)
                 shutil.copytree(demo, destination_path, dirs_exist_ok=True)
@@ -295,7 +309,11 @@ def init_session_state() -> None:
             "centile_types": ["", "CN", "CN_Males", "CN_Females", "CN_ICV_Corrected"],
             "linfit_trace_types": ["lin_fit", "conf_95%"],
             "centile_trace_types": [
-                "centile_5", "centile_25", "centile_50", "centile_75", "centile_95"
+                "centile_5",
+                "centile_25",
+                "centile_50",
+                "centile_75",
+                "centile_95",
             ],
             "distplot_trace_types": ["histogram", "density", "rug"],
             "min_per_row": 1,
@@ -467,7 +485,6 @@ def update_default_paths() -> None:
     st.session_state.plot_var["df_data"] = pd.DataFrame()
 
 
-
 def reset_flags() -> None:
     """
     Resets flags if the working dir changed
@@ -475,7 +492,7 @@ def reset_flags() -> None:
     for tmp_key in st.session_state.flags.keys():
         st.session_state.flags[tmp_key] = False
     st.session_state.flags["dset"] = True
-    
+
     # Check dicom folder
     fcount = utilio.get_file_count(st.session_state.paths["dicom"])
     if fcount > 0:
@@ -487,25 +504,25 @@ def reset_plots() -> None:
     Reset plot variables when data file changes
     """
     st.session_state.plots = pd.DataFrame(columns=st.session_state.plots.columns)
-    st.session_state.checkbox['view_select']=False
-    st.session_state.checkbox['view_plot']=False
+    st.session_state.checkbox["view_select"] = False
+    st.session_state.checkbox["view_plot"] = False
     st.session_state.plot_sel_vars = []
-    st.session_state.plot_var['hide_settings'] = False
-    st.session_state.plot_var['hide_legend'] = False
-    st.session_state.plot_var['show_img'] = False
-    st.session_state.plot_var['plot_type'] = False
-    st.session_state.plot_var['xvar'] = ''
-    st.session_state.plot_var['xmin'] = -1.0
-    st.session_state.plot_var['xmax'] = -1.0
-    st.session_state.plot_var['yvar'] = ''
-    st.session_state.plot_var['ymin'] = -1.0
-    st.session_state.plot_var['ymax'] = -1.0
-    st.session_state.plot_var['hvar'] = ''
-    st.session_state.plot_var['hvals'] = []
-    st.session_state.plot_var['corr_icv'] = False
-    st.session_state.plot_var['plot_cent_normalized'] = False
-    st.session_state.plot_var['trend'] = 'Linear'
-    st.session_state.plot_var['traces'] = ["data", "lin_fit"]
-    st.session_state.plot_var['lowess_s'] = 0.5
-    st.session_state.plot_var['centtype'] = ''
-    st.session_state.plot_var['h_coeff'] = 1.0
+    st.session_state.plot_var["hide_settings"] = False
+    st.session_state.plot_var["hide_legend"] = False
+    st.session_state.plot_var["show_img"] = False
+    st.session_state.plot_var["plot_type"] = False
+    st.session_state.plot_var["xvar"] = ""
+    st.session_state.plot_var["xmin"] = -1.0
+    st.session_state.plot_var["xmax"] = -1.0
+    st.session_state.plot_var["yvar"] = ""
+    st.session_state.plot_var["ymin"] = -1.0
+    st.session_state.plot_var["ymax"] = -1.0
+    st.session_state.plot_var["hvar"] = ""
+    st.session_state.plot_var["hvals"] = []
+    st.session_state.plot_var["corr_icv"] = False
+    st.session_state.plot_var["plot_cent_normalized"] = False
+    st.session_state.plot_var["trend"] = "Linear"
+    st.session_state.plot_var["traces"] = ["data", "lin_fit"]
+    st.session_state.plot_var["lowess_s"] = 0.5
+    st.session_state.plot_var["centtype"] = ""
+    st.session_state.plot_var["h_coeff"] = 1.0

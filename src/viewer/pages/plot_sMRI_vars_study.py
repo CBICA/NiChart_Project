@@ -5,9 +5,9 @@ import re
 import pandas as pd
 import streamlit as st
 import utils.utils_dataframe as utildf
+import utils.utils_io as utilio
 import utils.utils_menu as utilmenu
 import utils.utils_nifti as utilni
-import utils.utils_io as utilio
 import utils.utils_plot as utilpl
 import utils.utils_rois as utilroi
 import utils.utils_session as utilss
@@ -35,14 +35,14 @@ st.markdown(
 )
 
 # Update status of checkboxes
-if '_check_view_wdir' in st.session_state:
-    st.session_state.checkbox['view_wdir'] = st.session_state._check_view_wdir
-if '_check_view_in' in st.session_state:
-    st.session_state.checkbox['view_in'] = st.session_state._check_view_in
-if '_check_view_select' in st.session_state:
-    st.session_state.checkbox['view_select'] = st.session_state._check_view_select
-if '_check_view_plot' in st.session_state:
-    st.session_state.checkbox['view_plot'] = st.session_state._check_view_plot
+if "_check_view_wdir" in st.session_state:
+    st.session_state.checkbox["view_wdir"] = st.session_state._check_view_wdir
+if "_check_view_in" in st.session_state:
+    st.session_state.checkbox["view_in"] = st.session_state._check_view_in
+if "_check_view_select" in st.session_state:
+    st.session_state.checkbox["view_select"] = st.session_state._check_view_select
+if "_check_view_plot" in st.session_state:
+    st.session_state.checkbox["view_plot"] = st.session_state._check_view_plot
 
 
 def panel_wdir() -> None:
@@ -50,10 +50,10 @@ def panel_wdir() -> None:
     Panel for selecting the working dir
     """
     icon = st.session_state.icon_thumb[st.session_state.flags["dir_out"]]
-    show_panel_wdir = st.checkbox(
+    st.checkbox(
         f":material/folder_shared: Working Directory {icon}",
-        key='_check_view_wdir',
-        value=st.session_state.checkbox['view_wdir']
+        key="_check_view_wdir",
+        value=st.session_state.checkbox["view_wdir"],
     )
     if not st.session_state._check_view_wdir:
         return
@@ -62,20 +62,20 @@ def panel_wdir() -> None:
         utilst.util_panel_workingdir(st.session_state.app_type)
 
         if os.path.exists(st.session_state.paths["dset"]):
-            list_subdir = utilio.get_subfolders(
-                st.session_state.paths["dset"]
-            )
+            list_subdir = utilio.get_subfolders(st.session_state.paths["dset"])
             st.success(
                 f"Working directory is set to: {st.session_state.paths['dset']}",
                 icon=":material/thumb_up:",
             )
             if len(list_subdir) > 0:
                 st.info(
-                    'Working directory already includes the following folders: ' + ', '.join(list_subdir)
+                    "Working directory already includes the following folders: "
+                    + ", ".join(list_subdir)
                 )
             st.session_state.flags["dir_out"] = True
 
         utilst.util_workingdir_get_help()
+
 
 def panel_incsv() -> None:
     """
@@ -85,23 +85,20 @@ def panel_incsv() -> None:
 
     msg = st.session_state.app_config[st.session_state.app_type]["msg_infile"]
     icon = st.session_state.icon_thumb[st.session_state.flags["csv_plot"]]
-    show_panel_incsv = st.checkbox(
+    st.checkbox(
         f":material/upload: {msg} Data {icon}",
         disabled=not st.session_state.flags["dir_out"],
-        key='_check_view_in',
-        value=st.session_state.checkbox['view_in']
+        key="_check_view_in",
+        value=st.session_state.checkbox["view_in"],
     )
     if not st.session_state._check_view_in:
         return
 
     # Read data if working dir changed
     if st.session_state.plot_var["df_data"].shape[0] == 0:
-        df_tmp = utildf.read_dataframe(
-            st.session_state.paths["csv_plot"]
-        )
+        df_tmp = utildf.read_dataframe(st.session_state.paths["csv_plot"])
         st.session_state.plot_var["df_data"] = utildf.rename_rois(
-            df_tmp,
-            st.session_state.rois["roi_dict"]
+            df_tmp, st.session_state.rois["roi_dict"]
         )
         utilss.reset_plots()
         st.session_state.is_updated["csv_plot"] = False
@@ -132,23 +129,20 @@ def panel_incsv() -> None:
 
         # Read input csv
         if st.session_state.is_updated["csv_plot"]:
-            df_tmp = utildf.read_dataframe(
-                st.session_state.paths["csv_plot"]
-            )
+            df_tmp = utildf.read_dataframe(st.session_state.paths["csv_plot"])
             st.session_state.plot_var["df_data"] = utildf.rename_rois(
-                df_tmp,
-                st.session_state.rois["roi_dict"]
+                df_tmp, st.session_state.rois["roi_dict"]
             )
             utilss.reset_plots()
             st.session_state.is_updated["csv_plot"] = False
 
             # Show input data
         if os.path.exists(st.session_state.paths["csv_plot"]):
-            with st.expander('Show input data', expanded=False):
+            with st.expander("Show input data", expanded=False):
                 st.dataframe(st.session_state.plot_var["df_data"])
 
-        s_title="Input Data"
-        s_text="""
+        s_title = "Input Data"
+        s_text = """
         - Choose a CSV file. Primarily designed for DLMUSE and ML score data, but also supports other files with numeric values.
         """
         utilst.util_get_help(s_title, s_text)
@@ -212,8 +206,8 @@ def panel_rename() -> None:
             st.session_state.plot_var["df_data"] = df
             st.success("Variables are renamed!")
 
-        s_title="Rename Data Columns"
-        s_text="""
+        s_title = "Rename Data Columns"
+        s_text = """
         - If your data includes numeric columns
         """
         utilst.util_get_help(s_title, s_text)
@@ -223,11 +217,11 @@ def panel_select() -> None:
     """
     Panel for selecting variables
     """
-    show_panel_select = st.checkbox(
+    st.checkbox(
         ":material/playlist_add: Select Variables (optional)",
         disabled=not st.session_state.flags["csv_plot"],
-        key='_check_view_select',
-        value=st.session_state.checkbox['view_select']
+        key="_check_view_select",
+        value=st.session_state.checkbox["view_select"],
     )
     if not st.session_state._check_view_select:
         return
@@ -236,8 +230,10 @@ def panel_select() -> None:
 
         df = st.session_state.plot_var["df_data"]
 
-        if 'MRID' not in df.columns:
-            st.warning('The data file does not contain the required "MRID" column. The operation cannot proceed.')
+        if "MRID" not in df.columns:
+            st.warning(
+                'The data file does not contain the required "MRID" column. The operation cannot proceed.'
+            )
             return
 
         with open(st.session_state.dict_categories, "r") as f:
@@ -291,21 +287,20 @@ def panel_select() -> None:
                 ] + st.session_state.plot_sel_vars
             sel_vars = st.session_state.plot_sel_vars
             st.success(f"Selected variables: {sel_vars}")
-            
+
             # Add centile vars
             vars_cent = []
             for tmp_var in sel_vars:
-                c_var=tmp_var + '_centiles'
+                c_var = tmp_var + "_centiles"
                 if c_var in df.columns and c_var not in sel_vars:
                     vars_cent.append(c_var)
             sel_vars_wcent = sel_vars + vars_cent
-                       
+
             df = df[sel_vars_wcent]
             st.session_state.plot_var["df_data"] = df
 
-            with st.expander('Show selected data', expanded=False):
+            with st.expander("Show selected data", expanded=False):
                 st.dataframe(st.session_state.plot_var["df_data"])
-
 
         col1, col2 = st.columns([0.5, 0.1])
         with col2:
@@ -318,8 +313,8 @@ def panel_select() -> None:
                 st.session_state.plot_sel_vars = []
                 st.rerun()
 
-        s_title="Variable Selection"
-        s_text="""
+        s_title = "Variable Selection"
+        s_text = """
         - This step allows you to optionally select a subset of variables for analysis.
         - Variables are grouped into categories.
         - Select a category. The selection box displays variables from that category that are present in your data. An empty selection box signifies no overlap between the selected category and your dataset.
@@ -327,6 +322,7 @@ def panel_select() -> None:
         - You can revert back to the initial data at any point.
         """
         utilst.util_get_help(s_title, s_text)
+
 
 def panel_filter() -> None:
     """
@@ -357,8 +353,8 @@ def show_img() -> None:
     if st.session_state.sel_roi_img == "":
         st.warning("Please select an ROI!")
         return
-    
-    ## Insert duplicate suffix fix
+
+    # Insert duplicate suffix fix
     sel_mrid = st.session_state.sel_mrid
     if sel_mrid is not None:
         st.session_state.paths["sel_img"] = os.path.join(
@@ -366,9 +362,10 @@ def show_img() -> None:
             st.session_state.paths["T1"],
             re.sub(r"_T1$", "", sel_mrid) + st.session_state.suff_t1img,
         )
-        
+
         st.session_state.paths["sel_seg"] = os.path.join(
-            st.session_state.paths["dlmuse"],  re.sub(r"_T1$", "", sel_mrid) + st.session_state.suff_seg
+            st.session_state.paths["dlmuse"],
+            re.sub(r"_T1$", "", sel_mrid) + st.session_state.suff_seg,
         )
 
     if not os.path.exists(st.session_state.paths["sel_img"]):
@@ -416,7 +413,11 @@ def show_img() -> None:
                     )
                 else:
                     utilst.show_img3D(
-                        img_masked, ind_view, mask_bounds[ind_view, :], tmp_orient, size_auto
+                        img_masked,
+                        ind_view,
+                        mask_bounds[ind_view, :],
+                        tmp_orient,
+                        size_auto,
                     )
 
 
@@ -486,11 +487,11 @@ def panel_plot() -> None:
     """
 
     # Panel for displaying plots
-    show_panel_plots = st.checkbox(
+    st.checkbox(
         ":material/bid_landscape: Plot Data",
         disabled=not st.session_state.flags["csv_plot"],
-        key='_check_view_plot',
-        value=st.session_state.checkbox['view_plot']
+        key="_check_view_plot",
+        value=st.session_state.checkbox["view_plot"],
     )
     if not st.session_state._check_view_plot:
         return
@@ -502,7 +503,7 @@ def panel_plot() -> None:
     #     )
     df = st.session_state.plot_var["df_data"]
     if df.shape[0] == 0:
-        st.warning('Dataframe has 0 rows!')
+        st.warning("Dataframe has 0 rows!")
         return
 
     # Add sidebar parameters
