@@ -20,7 +20,7 @@ def dist_plot(
 ) -> Any:
     # Set colormap
     colors = st.session_state.plot_colors["data"]
-    
+
     # Add a tmp column if group var is not set
     dft = df.copy()
     if hvar == "":
@@ -36,9 +36,7 @@ def dist_plot(
     bin_sizes = []
     colors_sel = []
     for hname in hvals:
-        col_ind = vals_hue_all.index(
-            hname
-        )  # Select index of colour for the category
+        col_ind = vals_hue_all.index(hname)  # Select index of colour for the category
         dfh = dft[dft[hvar] == hname]
         x_tmp = dfh[xvar]
         x_range = x_tmp.max() - x_tmp.min()
@@ -242,6 +240,7 @@ def lowess_trace(
     fig.update_layout(xaxis_range=[xmin, xmax])
     fig.update_layout(yaxis_range=[ymin, ymax])
 
+
 def dot_trace(
     df: pd.DataFrame, sel_mrid: str, xvar: str, yvar: str, hide_legend: bool, fig: Any
 ) -> Any:
@@ -269,7 +268,7 @@ def percentile_trace(
     ymax: float,
     traces: list,
     hide_legend: bool,
-    fig: Any
+    fig: Any,
 ) -> Any:
 
     # Set colormap
@@ -299,11 +298,7 @@ def percentile_trace(
     return fig
 
 
-def dots_trace(
-    df: pd.DataFrame,
-    xvar: str,
-    yvar: str
-) -> Any:
+def dots_trace(df: pd.DataFrame, xvar: str, yvar: str) -> Any:
     trace = go.Scatter(
         x=df[xvar],
         y=df[yvar],

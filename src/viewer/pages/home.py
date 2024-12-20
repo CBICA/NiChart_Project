@@ -3,7 +3,7 @@ import utils.utils_menu as utilmenu
 import utils.utils_session as utilss
 import utils.utils_st as utilst
 from streamlit_extras.stylable_container import stylable_container
-import webbrowser
+from streamlitextras.webutils import stxs_javascript
 
 # Page config should be called for each page
 utilss.config_page()
@@ -94,14 +94,14 @@ with st.sidebar.expander("Acknowledgments"):
         """
     )
 
-#st.markdown("""
-#<style>
-    #.st-bb {
-        #background-color: #4CAF50; /* Green */
-        #color: white;
-    #}
-#</style>
-#""", unsafe_allow_html=True)
+# st.markdown("""
+# <style>
+# .st-bb {
+# background-color: #4CAF50; /* Green */
+# color: white;
+# }
+# </style>
+# """, unsafe_allow_html=True)
 
 with st.container(border=True):
 
@@ -111,35 +111,43 @@ with st.container(border=True):
     )
 
     with stylable_container(
-        key="my_button_container", 
+        key="my_button_container",
         css_styles="""
             button {
                 background-color: #FF7944;
                 color: white;
                 border-radius: 20px;
             }
-            """
+            """,
     ):
         if st.button(
-            '📝 NiChart User Experience',
+            "📝 NiChart User Experience",
         ):
-            webbrowser.open_new_tab('https://forms.office.com/r/mM1kx1XsgS')
+            # This code only works locally, not on a container or server.
+            # webbrowser.open_new_tab('https://forms.office.com/r/mM1kx1XsgS')
+            stxs_javascript(
+                """window.open('https://forms.office.com/r/mM1kx1XsgS', '_blank').focus()"""
+            )
 
         if st.button(
-            '📝 Shaping the Future of NiChart',
+            "📝 Shaping the Future of NiChart",
         ):
-            webbrowser.open_new_tab('https://forms.office.com/r/acwgn2WCc4')
+            # This code only works locally, not on a container or server.
+            # webbrowser.open_new_tab('https://forms.office.com/r/acwgn2WCc4')
+            stxs_javascript(
+                """window.open('https://forms.office.com/r/acwgn2WCc4', '_blank').focus()"""
+            )
 
-    ### Bg color on link_button was not supported in styllable container
-    #st.link_button(
-        #'📝 NiChart User Experience',
-        #'https://forms.office.com/r/mM1kx1XsgS',
-    #)
+    # Bg color on link_button was not supported in styllable container
+    # st.link_button(
+    # '📝 NiChart User Experience',
+    # 'https://forms.office.com/r/mM1kx1XsgS',
+    # )
 
-    #st.link_button(
-        #'📝 Shaping the Future of NiChart',
-        #'https://forms.office.com/r/acwgn2WCc4',
-    #)
+    # st.link_button(
+    # '📝 Shaping the Future of NiChart',
+    # 'https://forms.office.com/r/acwgn2WCc4',
+    # )
 
 # FIXME: For DEBUG
 utilst.add_debug_panel()

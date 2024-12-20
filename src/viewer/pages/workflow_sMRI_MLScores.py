@@ -3,6 +3,7 @@ import sys
 
 import pandas as pd
 import streamlit as st
+import utils.utils_cloud as utilcloud
 import utils.utils_io as utilio
 import utils.utils_menu as utilmenu
 import utils.utils_session as utilss
@@ -28,26 +29,27 @@ st.markdown(
 )
 
 # Update status of checkboxes
-if '_check_ml_wdir' in st.session_state:
-    st.session_state.checkbox['ml_wdir'] = st.session_state._check_ml_wdir
-if '_check_ml_inrois' in st.session_state:
-    st.session_state.checkbox['ml_inrois'] = st.session_state._check_ml_inrois
-if '_check_ml_indemog' in st.session_state:
-    st.session_state.checkbox['ml_indemog'] = st.session_state._check_ml_indemog
-if '_check_ml_run' in st.session_state:
-    st.session_state.checkbox['ml_run'] = st.session_state._check_ml_run
-if '_check_ml_download' in st.session_state:
-    st.session_state.checkbox['ml_download'] = st.session_state._check_ml_download
+if "_check_ml_wdir" in st.session_state:
+    st.session_state.checkbox["ml_wdir"] = st.session_state._check_ml_wdir
+if "_check_ml_inrois" in st.session_state:
+    st.session_state.checkbox["ml_inrois"] = st.session_state._check_ml_inrois
+if "_check_ml_indemog" in st.session_state:
+    st.session_state.checkbox["ml_indemog"] = st.session_state._check_ml_indemog
+if "_check_ml_run" in st.session_state:
+    st.session_state.checkbox["ml_run"] = st.session_state._check_ml_run
+if "_check_ml_download" in st.session_state:
+    st.session_state.checkbox["ml_download"] = st.session_state._check_ml_download
+
 
 def panel_wdir() -> None:
     """
     Panel for selecting the working dir
     """
     icon = st.session_state.icon_thumb[st.session_state.flags["dir_out"]]
-    show_panel_wdir = st.checkbox(
+    st.checkbox(
         f":material/folder_shared: Working Directory {icon}",
-        key='_check_ml_wdir',
-        value=st.session_state.checkbox['ml_wdir']
+        key="_check_ml_wdir",
+        value=st.session_state.checkbox["ml_wdir"],
     )
     if not st.session_state._check_ml_wdir:
         return
@@ -56,20 +58,20 @@ def panel_wdir() -> None:
         utilst.util_panel_workingdir(st.session_state.app_type)
 
         if os.path.exists(st.session_state.paths["dset"]):
-            list_subdir = utilio.get_subfolders(
-                st.session_state.paths["dset"]
-            )
+            list_subdir = utilio.get_subfolders(st.session_state.paths["dset"])
             st.success(
                 f"Working directory is set to: {st.session_state.paths['dset']}",
                 icon=":material/thumb_up:",
             )
             if len(list_subdir) > 0:
                 st.info(
-                    'Working directory already includes the following folders: ' + ', '.join(list_subdir)
+                    "Working directory already includes the following folders: "
+                    + ", ".join(list_subdir)
                 )
             st.session_state.flags["dir_out"] = True
 
         utilst.util_workingdir_get_help()
+
 
 def panel_inrois() -> None:
     """
@@ -80,8 +82,8 @@ def panel_inrois() -> None:
     st.checkbox(
         f":material/upload: {msg} ROIs {icon}",
         disabled=not st.session_state.flags["dir_out"],
-        key='_check_ml_inrois', 
-        value=st.session_state.checkbox['ml_inrois']
+        key="_check_ml_inrois",
+        value=st.session_state.checkbox["ml_inrois"],
     )
     if not st.session_state._check_ml_inrois:
         return
@@ -105,25 +107,25 @@ def panel_inrois() -> None:
             )
 
         if os.path.exists(st.session_state.paths["csv_dlmuse"]):
-            p_dlmuse = st.session_state.paths["csv_dlmuse"]            
+            p_dlmuse = st.session_state.paths["csv_dlmuse"]
             st.session_state.flags["csv_dlmuse"] = True
             st.success(f"Data is ready ({p_dlmuse})", icon=":material/thumb_up:")
 
             df_rois = pd.read_csv(st.session_state.paths["csv_dlmuse"])
-            with st.expander('Show ROIs', expanded=False):
+            with st.expander("Show ROIs", expanded=False):
                 st.dataframe(df_rois)
-            
+
         # Check the input data
         @st.dialog("Input data requirements")  # type:ignore
         def help_inrois_data():
             df_muse = pd.DataFrame(
-                columns=['MRID', '702', '701', '600', '601', '...'],
+                columns=["MRID", "702", "701", "600", "601", "..."],
                 data=[
-                    ['Subj1', '...', '...', '...', '...', '...'],
-                    ['Subj2', '...', '...', '...', '...', '...'],
-                    ['Subj3', '...', '...', '...', '...', '...'],
-                    ['...', '...', '...', '...', '...', '...']
-                ]
+                    ["Subj1", "...", "...", "...", "...", "..."],
+                    ["Subj2", "...", "...", "...", "...", "..."],
+                    ["Subj3", "...", "...", "...", "...", "..."],
+                    ["...", "...", "...", "...", "...", "..."],
+                ],
             )
             st.markdown(
                 """
@@ -131,13 +133,16 @@ def panel_inrois() -> None:
                 The DLMUSE CSV file contains volumes of ROIs (Regions of Interest) segmented by the DLMUSE algorithm. This file is generated as output when DLMUSE is applied to a set of images.
                 """
             )
-            st.write('Example MUSE data file:')
+            st.write("Example MUSE data file:")
             st.dataframe(df_muse)
 
         col1, col2 = st.columns([0.5, 0.1])
         with col2:
-            if st.button('Get help 🤔', key='key_btn_help_mlinrois', use_container_width=True):
-                help_inrois_data()            
+            if st.button(
+                "Get help 🤔", key="key_btn_help_mlinrois", use_container_width=True
+            ):
+                help_inrois_data()
+
 
 def panel_indemog() -> None:
     """
@@ -145,35 +150,33 @@ def panel_indemog() -> None:
     """
     msg = st.session_state.app_config[st.session_state.app_type]["msg_infile"]
     icon = st.session_state.icon_thumb[st.session_state.flags["csv_demog"]]
-    
 
     st.checkbox(
         f":material/upload: {msg} Demographics {icon}",
         disabled=not st.session_state.flags["csv_dlmuse"],
-        key='_check_ml_indemog',
-        value=st.session_state.checkbox['ml_indemog']
+        key="_check_ml_indemog",
+        value=st.session_state.checkbox["ml_indemog"],
     )
     if not st.session_state._check_ml_indemog:
         return
 
     with st.container(border=True):
-        flag_manual = st.checkbox(
-            'Enter data manually',
-            False
-        )
+        flag_manual = st.checkbox("Enter data manually", False)
         if flag_manual:
-            st.info('Please enter values for your sample')
+            st.info("Please enter values for your sample")
             df_rois = pd.read_csv(st.session_state.paths["csv_dlmuse"])
-            df_tmp = pd.DataFrame({'MRID': df_rois['MRID'], 'Age': None, 'Sex': None}) 
+            df_tmp = pd.DataFrame({"MRID": df_rois["MRID"], "Age": None, "Sex": None})
             df_user = st.data_editor(df_tmp)
 
-            if st.button('Save data'):
-                if not os.path.exists(os.path.dirname(st.session_state.paths["csv_demog"])):
+            if st.button("Save data"):
+                if not os.path.exists(
+                    os.path.dirname(st.session_state.paths["csv_demog"])
+                ):
                     os.makedirs(os.path.dirname(st.session_state.paths["csv_demog"]))
 
                 df_user.to_csv(st.session_state.paths["csv_demog"], index=False)
                 st.success(f"Data saved to {st.session_state.paths['csv_demog']}")
-        
+
         else:
             if st.session_state.app_type == "cloud":
                 utilst.util_upload_file(
@@ -191,19 +194,19 @@ def panel_indemog() -> None:
                     st.session_state.paths["csv_demog"],
                     st.session_state.paths["file_search_dir"],
                 )
-                
+
         if os.path.exists(st.session_state.paths["csv_demog"]):
             p_demog = st.session_state.paths["csv_demog"]
-            st.session_state.flags["csv_demog"] = True            
+            st.session_state.flags["csv_demog"] = True
             st.success(f"Data is ready ({p_demog})", icon=":material/thumb_up:")
 
             df_demog = pd.read_csv(st.session_state.paths["csv_demog"])
-            with st.expander('Show demographics data', expanded=False):
+            with st.expander("Show demographics data", expanded=False):
                 st.dataframe(df_demog)
 
         # Check the input data
-        if os.path.exists(st.session_state.paths["csv_demog"]):        
-            if st.button('Verify input data'):
+        if os.path.exists(st.session_state.paths["csv_demog"]):
+            if st.button("Verify input data"):
                 [f_check, m_check] = w_mlscores.check_input(
                     st.session_state.paths["csv_dlmuse"],
                     st.session_state.paths["csv_demog"],
@@ -221,13 +224,13 @@ def panel_indemog() -> None:
         @st.dialog("Input data requirements")  # type:ignore
         def help_indemog_data():
             df_demog = pd.DataFrame(
-                columns=['MRID', 'Age', 'Sex'],
+                columns=["MRID", "Age", "Sex"],
                 data=[
-                    ['Subj1', '57', 'F'],
-                    ['Subj2', '65', 'M'],
-                    ['Subj3', '44', 'F'],
-                    ['...', '...', '...']
-                ]
+                    ["Subj1", "57", "F"],
+                    ["Subj2", "65", "M"],
+                    ["Subj3", "44", "F"],
+                    ["...", "...", "..."],
+                ],
             )
             st.markdown(
                 """
@@ -240,12 +243,14 @@ def panel_indemog() -> None:
                 - **Matching MRIDs:** Ensure the MRID values in this file match the corresponding MRIDs in the DLMUSE file for merging the data files.
                 """
             )
-            st.write('Example demographic data file:')
+            st.write("Example demographic data file:")
             st.dataframe(df_demog)
 
         col1, col2 = st.columns([0.5, 0.1])
         with col2:
-            if st.button('Get help 🤔', key='key_btn_help_mlindemog', use_container_width=True):
+            if st.button(
+                "Get help 🤔", key="key_btn_help_mlindemog", use_container_width=True
+            ):
                 help_indemog_data()
 
 
@@ -257,8 +262,8 @@ def panel_run() -> None:
     st.checkbox(
         f":material/new_label: Run MLScores {icon}",
         disabled=not st.session_state.flags["csv_mlscores"],
-        key='_check_ml_run',
-        value=st.session_state.checkbox['ml_run']
+        key="_check_ml_run",
+        value=st.session_state.checkbox["ml_run"],
     )
     if not st.session_state._check_ml_run:
         return
@@ -278,12 +283,19 @@ def panel_run() -> None:
                 flag_harmonize = False
                 st.warning("Sample size is small. The data will not be harmonized!")
 
-            if 'SITE' not in df_tmp.columns:
-                st.warning("SITE column missing, assuming all samples are from the same site!")
-                df_tmp['SITE'] = 'SITE1'
+            if "SITE" not in df_tmp.columns:
+                st.warning(
+                    "SITE column missing, assuming all samples are from the same site!"
+                )
+                df_tmp["SITE"] = "SITE1"
 
             with st.spinner("Wait for it..."):
                 st.info("Running: mlscores_workflow ", icon=":material/manufacturing:")
+                fcount = df_tmp.shape[0]
+                if st.session_state.has_cloud_session:
+                    utilcloud.update_stats_db(
+                        st.session_state.cloud_user_id, "MLScores", fcount
+                    )
 
                 try:
                     if flag_harmonize:
@@ -303,7 +315,7 @@ def panel_run() -> None:
                             st.session_state.paths["mlscores"],
                         )
                 except:
-                    st.warning(':material/thumb_up: ML scores calculation failed!')
+                    st.warning(":material/thumb_up: ML scores calculation failed!")
 
         # Check out file
         if os.path.exists(st.session_state.paths["csv_mlscores"]):
@@ -323,18 +335,19 @@ def panel_run() -> None:
             p_plot = st.session_state.paths["csv_plot"]
             print(f"Data copied to {p_plot}")
 
-            with st.expander('View output data with ROIs and ML scores'):
-                df_ml=pd.read_csv(st.session_state.paths["csv_mlscores"])
+            with st.expander("View output data with ROIs and ML scores"):
+                df_ml = pd.read_csv(st.session_state.paths["csv_mlscores"])
                 st.dataframe(df_ml)
 
-        s_title="ML Biomarkers"
-        s_text="""
+        s_title = "ML Biomarkers"
+        s_text = """
         - DLMUSE ROI volumes are harmonized to reference data.
         - SPARE scores are calculated using harmonized ROI values and pre-trained models
         - SurrealGAN scores are calculated using harmonized ROI values and pre-trained models
         - Final results, ROI values and ML scores, are saved in the result csv file
         """
         utilst.util_get_help(s_title, s_text)
+
 
 def panel_download() -> None:
     """
@@ -343,8 +356,8 @@ def panel_download() -> None:
     st.checkbox(
         ":material/new_label: Download Results",
         disabled=not st.session_state.flags["csv_mlscores"],
-        key='_check_ml_download',
-        value=st.session_state.checkbox['ml_download']
+        key="_check_ml_download",
+        value=st.session_state.checkbox["ml_download"],
     )
     if not st.session_state._check_ml_download:
         return
@@ -362,6 +375,7 @@ def panel_download() -> None:
             file_name=f"{st.session_state.dset}_MLScores.zip",
             disabled=False,
         )
+
 
 st.divider()
 panel_wdir()
