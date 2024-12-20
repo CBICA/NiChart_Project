@@ -1,11 +1,11 @@
 import os
+import shutil
 from typing import Any
 
 import numpy as np
 import streamlit as st
 import utils.utils_io as utilio
 import utils.utils_session as utilses
-import shutil
 
 # from wfork_streamlit_profiler import Profiler
 # import pyinstrument
@@ -16,10 +16,7 @@ COL_RIGHT_BUTTON = 1
 
 
 def user_input_textfield(
-    label: str,
-    init_val: str,
-    help_msg: str,
-    flag_disabled: bool
+    label: str, init_val: str, help_msg: str, flag_disabled: bool
 ) -> Any:
     """
     Single text field to read a text input from the user
@@ -30,6 +27,7 @@ def user_input_textfield(
             label, value=init_val, help=help_msg, disabled=flag_disabled
         )
         return out_text
+
 
 def user_input_select(
     label: Any,
@@ -54,6 +52,7 @@ def user_input_select(
         )
     return out_sel
 
+
 def user_input_multiselect(
     label: str,
     key: Any,
@@ -68,14 +67,10 @@ def user_input_multiselect(
     tmpcol = st.columns((COL_LEFT, COL_RIGHT_EMPTY))
     with tmpcol[0]:
         out_sel = st.multiselect(
-            label,
-            options,
-            init_val,
-            key=key,
-            help=help_msg,
-            disabled=flag_disabled
+            label, options, init_val, key=key, help=help_msg, disabled=flag_disabled
         )
         return out_sel
+
 
 def user_input_filename(
     label_btn: Any,
@@ -93,11 +88,7 @@ def user_input_filename(
 
     # Button to select file
     with tmpcol[1]:
-        if st.button(
-            label_btn,
-            key=f"key_btn_{key_st}",
-            use_container_width=True
-        ):
+        if st.button(label_btn, key=f"key_btn_{key_st}", use_container_width=True):
             tmp_sel = utilio.browse_file(search_dir)
             if tmp_sel is not None and os.path.exists(tmp_sel):
                 out_path = os.path.abspath(tmp_sel)
@@ -112,8 +103,9 @@ def user_input_filename(
         )
         if os.path.exists(tmp_sel):
             out_path = tmp_sel
-            
+
     return out_path
+
 
 def user_input_foldername(
     label_btn: Any,
@@ -131,11 +123,7 @@ def user_input_foldername(
 
     # Button to select folder
     with tmpcol[1]:
-        if st.button(
-            label_btn,
-            key=f"btn_{key_st}",
-            use_container_width=True
-        ):
+        if st.button(label_btn, key=f"btn_{key_st}", use_container_width=True):
             tmp_sel = utilio.browse_folder(search_dir)
             if tmp_sel is not None and os.path.exists(tmp_sel):
                 out_path = os.path.abspath(tmp_sel)
@@ -143,10 +131,7 @@ def user_input_foldername(
     # Text field to select folder
     with tmpcol[0]:
         tmp_sel = st.text_input(
-            label_txt,
-            key=f"txt2_{key_st}",
-            value=out_path,
-            help=help_msg
+            label_txt, key=f"txt2_{key_st}", value=out_path, help=help_msg
         )
         if os.path.exists(tmp_sel):
             out_path = os.path.abspath(tmp_sel)
@@ -195,14 +180,19 @@ def show_img3D(
         else:
             st.image(img[:, :, slice_index], width=w_img)
 
-def util_get_help(s_title, s_text) -> None:
+
+def util_get_help(s_title: str, s_text: str) -> None:
     @st.dialog(s_title)  # type:ignore
     def help_working_dir():
         st.markdown(s_text)
+
     col1, col2 = st.columns([0.5, 0.1])
     with col2:
-        if st.button('Get help 🤔', key='key_btn_help_' + s_title, use_container_width=True):
+        if st.button(
+            "Get help 🤔", key="key_btn_help_" + s_title, use_container_width=True
+        ):
             help_working_dir()
+
 
 def util_workingdir_get_help() -> None:
     @st.dialog("Working Directory")  # type:ignore
@@ -210,9 +200,9 @@ def util_workingdir_get_help() -> None:
         st.markdown(
             """
             - A NiChart pipeline executes a series of steps, with input/output files organized in a predefined folder structure.
-            
+
             - Results for an **experiment** (a new analysis on a new dataset) are kept in a dedicated **working directory**.
- 
+
             - Set an **"output path"** (desktop app only) and an **"experiment name"** to define the **working directory** for your analysis. You only need to set the working directory once.
 
             - The **experiment name** can be any identifier that describes your analysis or data; it does not need to match the input study or data folder name.
@@ -223,13 +213,16 @@ def util_workingdir_get_help() -> None:
         st.warning(
             """
             On the cloud app, uploaded data and results of experiments are deleted in regular intervals!
-            
+
             Accordingly, the data for a previous experiment may not be available.
             """
         )
+
     col1, col2 = st.columns([0.5, 0.1])
     with col2:
-        if st.button('Get help 🤔', key='key_btn_help_working_dir', use_container_width=True):
+        if st.button(
+            "Get help 🤔", key="key_btn_help_working_dir", use_container_width=True
+        ):
             help_working_dir()
 
 
@@ -259,32 +252,18 @@ def util_panel_workingdir(app_type: str) -> None:
     st.write("Experiment name")
     tmp_cols = st.columns(2)
     with tmp_cols[0]:
-        helpmsg = (
-            "Will set the working directory to an existing experiment, with all the data previously uploaded or generated."
-        )
-        list_exp = [''] + utilio.get_subfolders(
-            st.session_state.paths["dir_out"]
-        )
+        helpmsg = "Will set the working directory to an existing experiment, with all the data previously uploaded or generated."
+        list_exp = [""] + utilio.get_subfolders(st.session_state.paths["dir_out"])
         sel_ind = list_exp.index(st.session_state.dset)
-        sel_tmp = st.selectbox(
-            'Select existing',
-            list_exp,
-            sel_ind,
-            help=helpmsg
-        )
-        if sel_tmp is not None and sel_tmp != '':
+        sel_tmp = st.selectbox("Select existing", list_exp, sel_ind, help=helpmsg)
+        if sel_tmp is not None and sel_tmp != "":
             st.session_state.dset = sel_tmp
 
     with tmp_cols[1]:
-        helpmsg = (
-            "Will create a dedicated working directory for a new experiment. All input and output data associated with the analysis will be stored in the new working directory."
-        )
+        helpmsg = "Will create a dedicated working directory for a new experiment. All input and output data associated with the analysis will be stored in the new working directory."
         st.session_state.dset = st.text_input(
-            "Create new",
-            st.session_state.dset,
-            help=helpmsg
+            "Create new", st.session_state.dset, help=helpmsg
         )
-
 
     # Create results folder
     if st.session_state.dset != "" and st.session_state.paths["dir_out"] != "":
@@ -302,6 +281,7 @@ def util_panel_workingdir(app_type: str) -> None:
         utilses.update_default_paths()
         utilses.reset_flags()
 
+
 def copy_uploaded_to_dir() -> None:
     # Copies files to local storage
     if len(st.session_state["uploaded_input"]) > 0:
@@ -311,10 +291,7 @@ def copy_uploaded_to_dir() -> None:
 
 
 def util_upload_folder(
-    dir_out: str,
-    title_txt: str,
-    flag_disabled: bool,
-    help_txt: str
+    dir_out: str, title_txt: str, flag_disabled: bool, help_txt: str
 ) -> None:
     """
     Upload user data to target folder
@@ -369,6 +346,7 @@ def util_upload_file(
     utilio.copy_uploaded_file(in_file, out_file)
     return True
 
+
 def util_select_folder(
     key_selector: str,
     title_txt: str,
@@ -404,11 +382,11 @@ def util_select_folder(
                 os.unlink(dir_out)
             else:
                 shutil.rmtree(dir_out)
-            
+
         # Create parent dir of output dir
         if not os.path.exists(os.path.dirname(dir_out)):
             os.makedirs(os.path.dirname(dir_out))
-        
+
         # Link user input dicoms
         if not os.path.exists(dir_out):
             os.symlink(sel_dir, dir_out)
@@ -461,13 +439,22 @@ def add_debug_panel() -> None:
     if not st.session_state.forced_cloud:
         st.sidebar.divider()
         st.sidebar.write("*** Debugging Flags ***")
-        is_cloud_mode = (st.session_state.app_type == "cloud")
+        is_cloud_mode = st.session_state.app_type == "cloud"
         if st.sidebar.checkbox("Switch to cloud?", value=is_cloud_mode):
             st.session_state.app_type = "cloud"
         else:
             st.session_state.app_type = "desktop"
 
-        list_vars = ["", "All", "plots", "plot_var", "rois", "paths", "flags", "checkbox"]
+        list_vars = [
+            "",
+            "All",
+            "plots",
+            "plot_var",
+            "rois",
+            "paths",
+            "flags",
+            "checkbox",
+        ]
         # list_vars = st.session_state.keys()
         sel_var = st.sidebar.selectbox("View session state vars", list_vars, index=0)
         if sel_var != "":

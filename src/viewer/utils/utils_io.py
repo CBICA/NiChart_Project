@@ -4,6 +4,7 @@ import tkinter as tk
 import zipfile
 from tkinter import filedialog
 from typing import Any, BinaryIO, List, Optional
+
 import pandas as pd
 
 # https://stackoverflow.com/questions/64719918/how-to-write-streamlit-uploadedfile-to-temporary-in_dir-with-original-filenam
@@ -119,6 +120,7 @@ def get_file_count(folder_path: str, file_suff: str = "") -> int:
                         count += 1
     return count
 
+
 def get_subfolders(path: str) -> list:
     subdirs = []
     for item in os.listdir(path):
@@ -126,6 +128,7 @@ def get_subfolders(path: str) -> list:
         if os.path.isdir(item_path):
             subdirs.append(item)
     return subdirs
+
 
 def get_file_names(folder_path: str, file_suff: str = "") -> pd.DataFrame:
     f_names = []
@@ -138,8 +141,9 @@ def get_file_names(folder_path: str, file_suff: str = "") -> pd.DataFrame:
                 for file in files:
                     if file.endswith(file_suff):
                         f_names.append([file])
-    df_out = pd.DataFrame(columns=['FileName'], data=f_names)
+    df_out = pd.DataFrame(columns=["FileName"], data=f_names)
     return df_out
+
 
 def get_file_list(folder_path: str, file_suff: str = "") -> List:
     list_nifti: List[str] = []
@@ -150,6 +154,7 @@ def get_file_list(folder_path: str, file_suff: str = "") -> List:
             list_nifti.append(f)
     return list_nifti
 
+
 def get_image_path(folder_path: str, file_pref: str, file_suff_list: list) -> str:
     if not os.path.exists(folder_path):
         return ""
@@ -157,3 +162,4 @@ def get_image_path(folder_path: str, file_pref: str, file_suff_list: list) -> st
         for f in os.listdir(folder_path):
             if f.startswith(file_pref) and f.endswith(tmp_suff):
                 return os.path.join(folder_path, f)
+    return ""

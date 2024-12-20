@@ -1,8 +1,11 @@
-import requests
 import json
 import os
+from typing import Any
 
-def load_cloud_config(config_file: str):
+import requests
+
+
+def load_cloud_config(config_file: str) -> Any:
     """
     Load Lambda URLs from a local JSON file.
     """
@@ -15,11 +18,12 @@ def load_cloud_config(config_file: str):
     except json.JSONDecodeError:
         raise ValueError(f"Error parsing the configuration file '{config_file}'.")
 
-def update_stats_db(user_id, job_type, count):
+
+def update_stats_db(user_id: str, job_type: str, count: int) -> None:
     current_dir = os.path.dirname(os.path.abspath(__file__))
 
     # Traverse up to the top-level directory (assuming 'config.json' is in the repo root)
-    repo_root = os.path.abspath(os.path.join(current_dir, "..", "..", ".." ))  
+    repo_root = os.path.abspath(os.path.join(current_dir, "..", "..", ".."))
     print(f"repo root: {repo_root}")
 
     # Construct the full path to the config file
@@ -31,17 +35,13 @@ def update_stats_db(user_id, job_type, count):
         print("Lambda URL not provided in cloud config!")
 
     update_stats_url = lambda_urls["update_stats"]
-    
-    payload = {
-        "user_id": user_id,
-        "job_type": job_type,
-        "count": count
-    }
+
+    payload = {"user_id": user_id, "job_type": job_type, "count": count}
     headers = {"Content-Type": "application/json"}
 
     try:
         response = requests.post(update_stats_url, json=payload, headers=headers)
-        #response.raise_for_status()
+        # response.raise_for_status()
         print("Success:", response.json())
     except requests.exceptions.RequestException as e:
         print("Error:", e)
