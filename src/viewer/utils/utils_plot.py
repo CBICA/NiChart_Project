@@ -140,8 +140,8 @@ def add_plot_tabs(
 
     # Tab 1: Plot settings
     with ptabs[0]:
-        # Get df columns
-        list_cols = df.columns[df.columns.str.contains("_centiles") is False].to_list()
+        # Get df columns       
+        list_cols = df.columns[df.columns.str.contains("_centiles") == False].to_list()
         list_cols_ext = [""] + list_cols
         list_trends = st.session_state.plot_const["trend_types"]
 
