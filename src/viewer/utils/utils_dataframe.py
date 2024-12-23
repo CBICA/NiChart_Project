@@ -26,10 +26,9 @@ def read_dataframe(fname: str) -> pd.DataFrame:
 def rename_rois(df: pd.DataFrame, roi_dict: dict) -> pd.DataFrame:
     df_out = df.rename(columns=roi_dict)
 
-    print(f"AAAA  {df_out.shape}")
-    duplicate_columns = df_out.columns.duplicated() is False
-    print(f"bbbAAAA  {df_out.columns.duplicated().sum()}")
+    duplicate_columns = df_out.columns.duplicated() == False
     df_out = df_out.loc[:, duplicate_columns]
+
     return df_out
 
 

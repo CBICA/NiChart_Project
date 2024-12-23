@@ -97,6 +97,7 @@ def panel_incsv() -> None:
     # Read data if working dir changed
     if st.session_state.plot_var["df_data"].shape[0] == 0:
         df_tmp = utildf.read_dataframe(st.session_state.paths["csv_plot"])
+        
         st.session_state.plot_var["df_data"] = utildf.rename_rois(
             df_tmp, st.session_state.rois["roi_dict"]
         )
