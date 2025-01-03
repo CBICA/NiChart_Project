@@ -123,7 +123,11 @@ def user_input_foldername(
 
     # Button to select folder
     with tmpcol[1]:
-        if st.button(label_btn, key=f"btn_{key_st}", use_container_width=True):
+        if st.button(
+            label_btn,
+            key=f"btn_{key_st}",
+            use_container_width=True
+        ):
             tmp_sel = utilio.browse_folder(search_dir)
             if tmp_sel is not None and os.path.exists(tmp_sel):
                 out_path = os.path.abspath(tmp_sel)
@@ -131,7 +135,10 @@ def user_input_foldername(
     # Text field to select folder
     with tmpcol[0]:
         tmp_sel = st.text_input(
-            label_txt, key=f"txt2_{key_st}", value=out_path, help=help_msg
+            label_txt,
+            key=f"txt2_{key_st}",
+            value=out_path,
+            help=help_msg
         )
         if os.path.exists(tmp_sel):
             out_path = os.path.abspath(tmp_sel)
@@ -228,41 +235,67 @@ def util_workingdir_get_help() -> None:
 
 def util_panel_workingdir(app_type: str) -> None:
     """
-    Panel to set results folder name
+    Panel to set working dir
     """
     curr_dir = st.session_state.paths["dset"]
 
-    # Read output folder
+    # Read output path
     if app_type == "desktop":
-        # Read output folder from the user
-        helpmsg = "Results will be saved to a dedicated folder at the output path.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
-        dir_out = user_input_foldername(
-            "Select folder",
-            "btn_sel_dir_out",
-            "Output path",
-            st.session_state.paths["file_search_dir"],
-            st.session_state.paths["dir_out"],
-            helpmsg,
+        # Read output path from the user
+        st.write('Output Path')
+        st.checkbox(
+            'Select folder',
+            key='_check_type_path',
         )
+        
+        tmp_sel=None
+        if st.session_state._check_type_path:
+            if st.button(
+                'Select folder',
+                key='_btn_seldirout'
+            ):
+                tmp_sel = utilio.browse_folder(st.session_state.paths["file_search_dir"])
+            
+        else:
+            help_msg = "Choose the path by typing it into the text field"
+            tmp_sel = st.text_input(
+                'Enter folder name',
+                key="_text_input_folder",
+                value=st.session_state.paths["dir_out"],
+                label_visibility='collapsed',                
+                help=help_msg
+            )
+        
+        if tmp_sel is not None and os.path.exists(tmp_sel):
+            st.session_state.paths["dir_out"] = os.path.abspath(tmp_sel)
 
-        if dir_out != "":
-            st.session_state.paths["dir_out"] = dir_out
-
-    # Read dataset name (used to create a folder where all results will be saved)
-    st.write("Experiment name")
-    tmp_cols = st.columns(2)
-    with tmp_cols[0]:
+    # Read experiment name (used to create a folder where all results will be saved)
+    st.write('Experiment Name')
+    st.checkbox(
+        'Select existing',
+        key='_check_existing_exp',
+    )    
+    if st.session_state._check_existing_exp:
         helpmsg = "Will set the working directory to an existing experiment, with all the data previously uploaded or generated."
         list_exp = [""] + utilio.get_subfolders(st.session_state.paths["dir_out"])
         sel_ind = list_exp.index(st.session_state.dset)
-        sel_tmp = st.selectbox("Select existing", list_exp, sel_ind, help=helpmsg)
+        sel_tmp = st.selectbox(
+            "Select experiment name",
+            list_exp,
+            sel_ind,
+            label_visibility='collapsed',
+            help=helpmsg
+        )
         if sel_tmp is not None and sel_tmp != "":
             st.session_state.dset = sel_tmp
 
-    with tmp_cols[1]:
+    else:
         helpmsg = "Will create a dedicated working directory for a new experiment. All input and output data associated with the analysis will be stored in the new working directory."
         st.session_state.dset = st.text_input(
-            "Create new", st.session_state.dset, help=helpmsg
+            "Enter experiment name",
+            st.session_state.dset,
+            label_visibility='collapsed',
+            help=helpmsg
         )
 
     # Create results folder

@@ -20,28 +20,6 @@ utilmenu.menu()
 
 st.write("# Dicom to Nifti Conversion")
 
-# Update status of checkboxes
-if "_check_dicoms_wdir" in st.session_state:
-    st.session_state.checkbox["dicoms_wdir"] = st.session_state._check_dicoms_wdir
-if "_check_dicoms_in" in st.session_state:
-    st.session_state.checkbox["dicoms_in"] = st.session_state._check_dicoms_in
-if "_check_dicoms_series" in st.session_state:
-    st.session_state.checkbox["dicoms_series"] = st.session_state._check_dicoms_series
-if "_check_dicoms_run" in st.session_state:
-    st.session_state.checkbox["dicoms_run"] = st.session_state._check_dicoms_run
-if "_check_dicoms_view" in st.session_state:
-    st.session_state.checkbox["dicoms_view"] = st.session_state._check_dicoms_view
-if "_check_dicoms_download" in st.session_state:
-    st.session_state.checkbox["dicoms_download"] = (
-        st.session_state._check_dicoms_download
-    )
-
-
-def progress(p: int, i: int, decoded: Any) -> None:
-    with result_holder.container():
-        st.progress(p, f"Progress: Token position={i}")
-
-
 def panel_wdir() -> None:
     """
     Panel for selecting the working dir
@@ -50,7 +28,6 @@ def panel_wdir() -> None:
     st.checkbox(
         f":material/folder_shared: Working Directory {icon}",
         key="_check_dicoms_wdir",
-        value=st.session_state.checkbox["dicoms_wdir"],
     )
     if not st.session_state._check_dicoms_wdir:
         return
@@ -72,7 +49,6 @@ def panel_wdir() -> None:
 
         utilst.util_workingdir_get_help()
 
-
 def panel_indicoms() -> None:
     """
     Panel for selecting input dicoms
@@ -83,7 +59,6 @@ def panel_indicoms() -> None:
         f":material/upload: {msg} Dicoms {icon}",
         disabled=not st.session_state.flags["dir_out"],
         key="_check_dicoms_in",
-        value=st.session_state.checkbox["dicoms_in"],
     )
     if not st.session_state._check_dicoms_in:
         return
@@ -133,8 +108,7 @@ def panel_indicoms() -> None:
 
         - On the cloud, **we strongly recommend** compressing your DICOM data into a single ZIP archive before uploading. The system will automatically extract the contents of the ZIP file into the **"Dicoms"** folder upon upload.
         """
-        utilst.util_get_help(s_title, s_text)
-
+        utilst.util_get_help(s_title, s_text)        
 
 def panel_detect() -> None:
     """
@@ -145,7 +119,6 @@ def panel_detect() -> None:
         f":material/manage_search: Detect Dicom Series {icon}",
         disabled=not st.session_state.flags["dir_dicom"],
         key="_check_dicoms_series",
-        value=st.session_state.checkbox["dicoms_series"],
     )
     if not st.session_state._check_dicoms_series:
         return
@@ -196,7 +169,6 @@ def panel_extract() -> None:
         f":material/auto_awesome_motion: Extract Scans {icon}",
         disabled=not st.session_state.flags["dicom_series"],
         key="_check_dicoms_run",
-        value=st.session_state.checkbox["dicoms_run"],
     )
     if not st.session_state._check_dicoms_run:
         return
@@ -279,7 +251,6 @@ def panel_extract() -> None:
         """
         utilst.util_get_help(s_title, s_text)
 
-
 def panel_view() -> None:
     """
     Panel for viewing extracted nifti images
@@ -288,7 +259,6 @@ def panel_view() -> None:
         ":material/visibility: View Scans",
         disabled=not st.session_state.flags["dir_nifti"],
         key="_check_dicoms_view",
-        value=st.session_state.checkbox["dicoms_view"],
     )
     if not st.session_state._check_dicoms_view:
         return
@@ -377,7 +347,6 @@ def panel_view() -> None:
                     ":material/thumb_down: Image parsing failed. Please confirm that the image file represents a 3D volume using an external tool."
                 )
 
-
 def panel_download() -> None:
     """
     Panel for downloading extracted nifti images
@@ -386,7 +355,6 @@ def panel_download() -> None:
         ":material/download: Download Scans",
         disabled=not st.session_state.flags["dir_nifti"],
         key="_check_dicoms_download",
-        value=st.session_state.checkbox["dicoms_download"],
     )
     if not st.session_state._check_dicoms_download:
         return

@@ -51,7 +51,7 @@ def process_session_user_id() -> Any:
 def init_session_state() -> None:
     # Initiate Session State Values
     if "instantiated" not in st.session_state:
-
+        
         ###################################
         # App type ('desktop' or 'cloud')
         if os.getenv("NICHART_FORCE_CLOUD", "0") == "1":
