@@ -242,7 +242,7 @@ def util_panel_workingdir(app_type: str) -> None:
     # Read output path
     if app_type == "desktop":
         # Read output path from the user
-        st.write('Output Path')
+        st.write('**Please enter the output path:**')
         st.checkbox(
             'Select folder',
             key='_check_type_path',
@@ -254,37 +254,34 @@ def util_panel_workingdir(app_type: str) -> None:
                 'Select folder',
                 key='_btn_seldirout'
             ):
-                tmp_sel = utilio.browse_folder(st.session_state.paths["file_search_dir"])
+                tmp_sel = utilio.browse_folder(st.session_state.paths["dir_out"])
             
         else:
             help_msg = "Choose the path by typing it into the text field"
             tmp_sel = st.text_input(
-                'Enter folder name',
+                'Enter path',
                 key="_text_input_folder",
                 value=st.session_state.paths["dir_out"],
-                label_visibility='collapsed',                
-                help=help_msg
+                label_visibility='collapsed'
             )
         
         if tmp_sel is not None and os.path.exists(tmp_sel):
             st.session_state.paths["dir_out"] = os.path.abspath(tmp_sel)
 
     # Read experiment name (used to create a folder where all results will be saved)
-    st.write('Experiment Name')
+    st.write('**Please enter the experiment name:**')
     st.checkbox(
         'Select existing',
         key='_check_existing_exp',
     )    
     if st.session_state._check_existing_exp:
-        helpmsg = "Will set the working directory to an existing experiment, with all the data previously uploaded or generated."
         list_exp = [""] + utilio.get_subfolders(st.session_state.paths["dir_out"])
         sel_ind = list_exp.index(st.session_state.dset)
         sel_tmp = st.selectbox(
-            "Select experiment name",
+            'Select experiment',
             list_exp,
             sel_ind,
-            label_visibility='collapsed',
-            help=helpmsg
+            label_visibility='collapsed'
         )
         if sel_tmp is not None and sel_tmp != "":
             st.session_state.dset = sel_tmp
