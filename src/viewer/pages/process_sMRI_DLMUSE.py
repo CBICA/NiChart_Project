@@ -1,5 +1,5 @@
 import os
-
+import logging
 import NiChart_DLMUSE as ncd
 import pandas as pd
 import streamlit as st
@@ -184,6 +184,14 @@ def panel_dlmuse() -> None:
                 progress_bar = stqdm(total=9, desc="Current step", position=0)
                 progress_bar.set_description("Starting...")
 
+                ## Clear logs to avoid huge accumulation
+                ## TODO: This is hacky, fix this more elegantly from NiChart_DLMUSE by using log rotation
+                if os.path.exists('pipeline.log'):
+                    try:
+                        open('pipeline.log', 'w').close()
+                    except:
+                        print("Could not empty pipeline.log!")
+
                 ncd.run_pipeline(
                     st.session_state.paths["T1"],
                     st.session_state.paths["dlmuse"],
@@ -192,6 +200,9 @@ def panel_dlmuse() -> None:
                     dlicv_extra_args="-nps 1 -npp 1",
                     progress_bar=progress_bar,
                 )
+                ## Reset logging level after NiChart_DLMUSE pipeline changes it...
+                ## TODO: Fix this hack just like the above
+                logging.basicConfig(filename="pipeline.log", encoding="utf-8", level=logging.ERROR)
 
                 # dlmuse_cmd = f"NiChart_DLMUSE -i {st.session_state.paths['T1']} -o {st.session_state.paths['dlmuse']} -d {device} --cores 1"
                 # st.info(f"Running: {dlmuse_cmd}", icon=":material/manufacturing:")
