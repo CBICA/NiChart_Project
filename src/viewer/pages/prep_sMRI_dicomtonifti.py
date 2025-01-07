@@ -26,7 +26,7 @@ def panel_wdir() -> None:
     """
     icon = st.session_state.icon_thumb[st.session_state.flags["dir_out"]]
     st.checkbox(
-        f":material/folder_shared: Working Directory {icon}",
+        f":material/folder_shared: **Working Directory** {icon}",
         key="_check_dicoms_wdir",
     )
     if not st.session_state._check_dicoms_wdir:

@@ -31,7 +31,7 @@ def user_input_textfield(
 
 def user_input_select(
     label: Any,
-    key: Any,
+    #key: Any,
     selections: Any,
     init_val: Any,
     helpmsg: str,
@@ -242,21 +242,10 @@ def util_panel_workingdir(app_type: str) -> None:
     # Read output path
     if app_type == "desktop":
         # Read output path from the user
-        st.write('**Please enter the output path:**')
-        st.checkbox(
-            'Select folder',
-            key='_check_type_path',
-        )
-        
+        st.write('**Output path**')
         tmp_sel=None
-        if st.session_state._check_type_path:
-            if st.button(
-                'Select folder',
-                key='_btn_seldirout'
-            ):
-                tmp_sel = utilio.browse_folder(st.session_state.paths["dir_out"])
-            
-        else:
+        tab1, tab2 = st.tabs(['Type output path', 'Select output path'])
+        with tab1:
             help_msg = "Choose the path by typing it into the text field"
             tmp_sel = st.text_input(
                 'Enter path',
@@ -264,19 +253,35 @@ def util_panel_workingdir(app_type: str) -> None:
                 value=st.session_state.paths["dir_out"],
                 label_visibility='collapsed'
             )
+
+        with tab2:
+            if st.button(
+                'Select',
+                key='_btn_seldirout'
+            ):
+                tmp_sel = utilio.browse_folder(st.session_state.paths["dir_out"])
         
         if tmp_sel is not None and os.path.exists(tmp_sel):
             st.session_state.paths["dir_out"] = os.path.abspath(tmp_sel)
 
     # Read experiment name (used to create a folder where all results will be saved)
-    st.write('**Please enter the experiment name:**')
-    st.checkbox(
-        'Select existing',
-        key='_check_existing_exp',
-    )    
-    if st.session_state._check_existing_exp:
+    st.write('**Experiment name**')
+    tab1, tab2 = st.tabs(['Type experiment name', 'Select existing experiment'])
+    with tab1:
+        helpmsg = "Will create a dedicated working directory for a new experiment. All input and output data associated with the analysis will be stored in the new working directory."
+        st.session_state.dset = st.text_input(
+            "Enter experiment name",
+            st.session_state.dset,
+            label_visibility='collapsed',
+            help=helpmsg
+        )
+
+    with tab2:
         list_exp = [""] + utilio.get_subfolders(st.session_state.paths["dir_out"])
-        sel_ind = list_exp.index(st.session_state.dset)
+        try: 
+            sel_ind = list_exp.index(st.session_state.dset)
+        except:
+            sel_ind = 0
         sel_tmp = st.selectbox(
             'Select experiment',
             list_exp,
@@ -285,15 +290,6 @@ def util_panel_workingdir(app_type: str) -> None:
         )
         if sel_tmp is not None and sel_tmp != "":
             st.session_state.dset = sel_tmp
-
-    else:
-        helpmsg = "Will create a dedicated working directory for a new experiment. All input and output data associated with the analysis will be stored in the new working directory."
-        st.session_state.dset = st.text_input(
-            "Enter experiment name",
-            st.session_state.dset,
-            label_visibility='collapsed',
-            help=helpmsg
-        )
 
     # Create results folder
     if st.session_state.dset != "" and st.session_state.paths["dir_out"] != "":
