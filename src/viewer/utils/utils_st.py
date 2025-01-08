@@ -244,20 +244,21 @@ def util_panel_workingdir(app_type: str) -> None:
         # Read output path from the user
         st.write('**Output path**')
         tmp_sel=None
-        tab1, tab2 = st.tabs(['Type output path', 'Select output path'])
+        tab1, tab2 = st.tabs(['Enter', 'Select'])
         with tab1:
-            help_msg = "Choose the path by typing it into the text field"
             tmp_sel = st.text_input(
-                'Enter path',
+                '',
                 key="_text_input_folder",
                 value=st.session_state.paths["dir_out"],
-                label_visibility='collapsed'
+                label_visibility='visible',
+                help="Enter the output path. A new folder will be created if it doesn't exist."
             )
 
         with tab2:
             if st.button(
-                'Select',
-                key='_btn_seldirout'
+                'Browse Folders',
+                key='_btn_seldirout',
+                help='Select the output path on your system'
             ):
                 tmp_sel = utilio.browse_folder(st.session_state.paths["dir_out"])
         
@@ -266,13 +267,13 @@ def util_panel_workingdir(app_type: str) -> None:
 
     # Read experiment name (used to create a folder where all results will be saved)
     st.write('**Experiment name**')
-    tab1, tab2 = st.tabs(['Type experiment name', 'Select existing experiment'])
+    tab1, tab2 = st.tabs(['Enter', 'Select'])
     with tab1:
         helpmsg = "Will create a dedicated working directory for a new experiment. All input and output data associated with the analysis will be stored in the new working directory."
         st.session_state.dset = st.text_input(
             "Enter experiment name",
             st.session_state.dset,
-            label_visibility='collapsed',
+            label_visibility='visible',
             help=helpmsg
         )
 
@@ -286,7 +287,8 @@ def util_panel_workingdir(app_type: str) -> None:
             'Select experiment',
             list_exp,
             sel_ind,
-            label_visibility='collapsed'
+            label_visibility='visible',
+            help='Select an existing experiment folder'
         )
         if sel_tmp is not None and sel_tmp != "":
             st.session_state.dset = sel_tmp
