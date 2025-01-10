@@ -8,6 +8,7 @@ import utils.utils_io as utilio
 import utils.utils_menu as utilmenu
 import utils.utils_nifti as utilni
 import utils.utils_session as utilss
+import utils.utils_help as utilhelp
 import utils.utils_st as utilst
 from stqdm import stqdm
 
@@ -47,7 +48,7 @@ def panel_wdir() -> None:
                 )
             st.session_state.flags["dir_out"] = True
 
-        utilst.util_workingdir_get_help()
+        utilhelp.util_help_workingdir()
 
 def panel_indicoms() -> None:
     """
@@ -98,17 +99,7 @@ def panel_indicoms() -> None:
                     icon=":material/thumb_up:",
                 )
 
-        s_title = "DICOM Data"
-        s_text = """
-        - Upload or select the input DICOM folder containing all DICOM files. Nested folders are supported.
-
-        - On the desktop app, a symbolic link named **"Dicoms"** will be created in the **working directory**, pointing to your input DICOM folder.
-
-        - On the cloud platform, you can directly drag and drop your DICOM files or folders and they will be uploaded to the **"Dicoms"** folder within the **working directory**.
-
-        - On the cloud, **we strongly recommend** compressing your DICOM data into a single ZIP archive before uploading. The system will automatically extract the contents of the ZIP file into the **"Dicoms"** folder upon upload.
-        """
-        utilst.util_get_help(s_title, s_text)        
+        utilhelp.util_help_indicoms()        
 
 def panel_detect() -> None:
     """
@@ -151,14 +142,7 @@ def panel_detect() -> None:
         with st.expander("Show dicom metadata", expanded=False):
             st.dataframe(st.session_state.df_dicoms)
 
-        s_title = "DICOM Series"
-        s_text = """
-        - The system verifies all files within the DICOM folder.
-        - Valid DICOM files are processed to extract the DICOM header information, which is used to identify and group images into their respective series
-        - The DICOM field **"SeriesDesc"** is used to identify series
-        """
-        utilst.util_get_help(s_title, s_text)
-
+        utilhelp.util_help_dicom_detect()        
 
 def panel_extract() -> None:
     """
@@ -243,13 +227,7 @@ def panel_extract() -> None:
             with st.expander("View NIFTI image list"):
                 st.dataframe(df_files)
 
-        s_title = "Nifti Conversion"
-        s_text = """
-        - The user specifies the desired modality and selects the associated series.
-        - Selected series are converted into Nifti image format.
-        - Nifti images are renamed with the following format: **{PatientID}_{StudyDate}_{modality}.nii.gz**
-        """
-        utilst.util_get_help(s_title, s_text)
+        utilhelp.util_dicom_extract()
 
 def panel_view() -> None:
     """
