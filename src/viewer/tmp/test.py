@@ -1,94 +1,53 @@
-#import streamlit as st
-#import pandas as pd
+import streamlit as st
+import tkinter as tk
+import os
+from tkinter import filedialog
 
-#with st.container(border=True):
+if "instantiated" not in st.session_state:
+    st.session_state.odir='/home/guraylab/GitHub/CBICA/NiChart_Project/output_folder'
+    st.session_state.instantiated = True
 
-    ## Get df columns
-    #df = pd.read_csv('/home/gurayerus/Desktop/DDD/rois.csv')
+def browse_folder(path_init: str):
+    """
+    Folder selector
+    Returns the folder name selected by the user
+    """
+    root = tk.Tk()
+    root.withdraw()  # Hide the main window
+    out_path = filedialog.askdirectory(initialdir=path_init)
+    root.destroy()
+    if len(out_path) == 0:
+        return None
+    return out_path
 
-    #vType = df.Type.unique()
+st.write('**Output path**')
+tmp_sel=None
+tab1, tab2 = st.tabs(['Enter', 'Select'])
+with tab1:
+    tmp_sel = st.text_input(
+        '',
+        key="_text_input_folder",
+        #value=st.session_state.paths["dir_out"],
+        value=st.session_state.odir,
+        label_visibility='visible',
+        help="Enter the output path. A new folder will be created if it doesn't exist."
+    )
 
-    #xvar = st.selectbox("X Var", vType, key="plot_x1", index=None)
+with tab2:
+    if st.button(
+        'Browse Folders',
+        key='_btn_seldirout',
+        help='Select the output path on your system'
+    ):
+        #tmp_sel = browse_folder(st.session_state.paths["dir_out"])
+        tmp_sel = browse_folder(st.session_state.odir)
+    
+        if tmp_sel is not None and os.path.exists(tmp_sel):
+            #st.session_state.paths["dir_out"] = os.path.abspath(tmp_sel)
+            st.session_state.odir = os.path.abspath(tmp_sel)
+            st.rerun()
 
-    #if xvar is None:
-        #vType2 = []
-    #else:
-        #vType2 = df[df.Type == xvar].Name.tolist()
-    #xvar2 = st.selectbox("X2 Var", vType2, key="plot_x2", index=None)
-
-
-#import streamlit as st
-#if 'checkbox_label' not in st.session_state:
-    #st.session_state.checkbox_label = "Original Label"
-#checkbox_value = st.checkbox(st.session_state.checkbox_label)
-#st.session_state.checkbox_label = "Updated Label"
 #with st.container():
     #st.write(st.session_state)
-
-import streamlit as st
-if "instantiated" not in st.session_state:
-    st.session_state.wtext= 'HELLO'
-    st.session_state.instantiated = True
-show_panel_wdir = st.checkbox(st.session_state.wtext)
-if show_panel_wdir:
-    with st.container(border=True):
-        if st.checkbox('Select'):
-            st.session_state.wtext = 'BYE'
-        st.write('Success!')
-with st.container():
-    st.write(st.session_state)
-
-
-#with st.popover("Open popover"):
-    #st.markdown("Hello World 👋")
-    #name = st.text_input("What's your name?")
-
-#st.write("Your name:", name)
-
-#def display_folder_contents(folder_path: str, parent_folder: str = "") -> None:
-    #"""Displays the contents of a folder in a Streamlit panel with a tree structure.
-
-    #Args:
-        #folder_path (str): The path to the folder.
-        #parent_folder (str): The parent folder's name (optional).
-    #"""
-
-    #st.title("Folder Contents")
-
-    ## Check if the folder exists
-    #if not os.path.exists(folder_path):
-        #st.error(f"Folder '{folder_path}' does not exist.")
-        #return
-
-    ## Get a list of files and directories in the folder
-    #contents = os.listdir(folder_path)
-
-    ## Create a container for the folder contents
-    #container = st.container()
-
-    ## Display the parent folder name
-    #if parent_folder:
-        #container.markdown(f"**{parent_folder}**")
-
-    ## Iterate over the contents and display them
-    #for item in contents:
-        #item_path = os.path.join(folder_path, item)
-
-        ## Check if the item is a file or a directory
-        #if os.path.isfile(item_path):
-            ## Display the file name with indentation based on the parent folder
-            #file_name = os.path.basename(item_path)
-            #file_url = f"download/{file_name}"  # Adjust the download URL as needed
-            #container.markdown(
-                #f"{'  ' * len(parent_folder.split('/'))}[Download]({file_url}) {file_name}"
-            #)
-        #else:
-            ## Display the directory name with indentation and a link to explore it
-            #directory_name = os.path.basename(item_path)
-            #container.markdown(
-                #f"{'  ' * len(parent_folder.split('/'))}[Explore]({directory_name}) {directory_name}"
-            #)
-
-            ## Recursively display the contents of the subdirectory
-            #display_folder_contents(item_path, parent_folder=directory_name)
-
+    
+    

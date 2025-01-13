@@ -6,6 +6,7 @@ import numpy as np
 import streamlit as st
 import utils.utils_io as utilio
 import utils.utils_session as utilses
+import time
 
 # from wfork_streamlit_profiler import Profiler
 # import pyinstrument
@@ -253,6 +254,17 @@ def util_panel_workingdir(app_type: str) -> None:
                 label_visibility='visible',
                 help="Enter the output path. A new folder will be created if it doesn't exist."
             )
+            if tmp_sel is not None and tmp_sel != st.session_state.paths["dir_out"]:
+                tmp_sel = os.path.abspath(tmp_sel)
+                if not os.path.exists(tmp_sel):
+                    try:
+                        os.makedirs(tmp_sel)
+                        st.info(f'Created new output directory: {tmp_sel}')
+                        time.sleep(2)
+                        
+                    except:
+                        st.warning(f'Could not create new output directory: {tmp_sel}')
+                        tmp_sel = None
 
         with tab2:
             if st.button(
@@ -262,8 +274,9 @@ def util_panel_workingdir(app_type: str) -> None:
             ):
                 tmp_sel = utilio.browse_folder(st.session_state.paths["dir_out"])
         
-        if tmp_sel is not None and os.path.exists(tmp_sel):
+        if tmp_sel is not None and tmp_sel != st.session_state.paths["dir_out"] and os.path.exists(tmp_sel):
             st.session_state.paths["dir_out"] = os.path.abspath(tmp_sel)
+            st.rerun()
 
     # Read experiment name (used to create a folder where all results will be saved)
     st.write('**Experiment name**')

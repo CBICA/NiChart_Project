@@ -39,9 +39,9 @@ def util_help_workingdir() -> None:
         - You can initiate a NiChart pipeline by selecting the **working directory** from a previously completed experiment.
     """
     s_warning="""
-        On the cloud app, uploaded data and results of experiments are deleted in regular intervals!
-
-        Accordingly, the data for a previous experiment may not be available.
+        ❗ On the cloud app, uploaded data and results of experiments are deleted in regular intervals. 
+        
+        The data from a previous experiment may not be available!
     """
     
     util_help_dialog(s_title, s_text, s_warning)
