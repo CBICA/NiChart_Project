@@ -82,3 +82,7 @@ These pipelines are planned for integration in future NiChart releases.
 ====================================
 2. fMRI Biomarkers of Disease and Aging
 ====================================
+
+====================================
+3. CCL-NMF: Dynamic Patterns of Brain Aging from Coupled Cross-sectional and Longitudinal Non-negative Matrix Factorization
+====================================

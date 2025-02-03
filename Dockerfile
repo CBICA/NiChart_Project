@@ -60,4 +60,4 @@ RUN useradd -s /bin/bash streamlit && \
     chmod a+rw /app/src/viewer/pipeline.log
 USER streamlit
 WORKDIR /app/src/viewer/
-ENTRYPOINT ["/usr/local/bin/_entrypoint.sh", "streamlit", "run", "./NiChartProject.py", "--server.headless", "true"]
+ENTRYPOINT ["/usr/local/bin/_entrypoint.sh", "streamlit", "run", "./NiChartProject.py", "--server.headless", "true", "--server.fileWatcherType=none"]
