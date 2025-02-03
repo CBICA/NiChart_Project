@@ -75,3 +75,19 @@ st.markdown(
 )
 f_img = os.path.join(st.session_state.paths["root"], "resources", "images", "sgan1.jpg")
 st.image(f_img, width=800, caption="Zhijian Yang et. al. Nature Medicine 2023")
+
+st.divider()
+
+st.markdown(
+    """
+    - Coupled Cross-sectional and Longitudinal Non-negative Matrix Factorization (CCL-NMF)
+    """
+)
+
+st.text("Coming soon!")
+st.text("Coupled Cross-sectional and Longitudinal Non-negative Matrix Factorization Elucidates (Seven) Dynamic Patterns of Brain Aging in 48,949 Individuals")
+
+f_img = os.path.join(st.session_state.paths["root"], "resources", "images", "ccl_nmf1.jpg")
+st.image(f_img, width=800, caption="Ioanna Skampardoni et. al.")
+f_img = os.path.join(st.session_state.paths["root"], "resources", "images", "ccl_nmf2.jpg")
+st.image(f_img, width=800, caption="Ioanna Skampardoni et. al, ")
