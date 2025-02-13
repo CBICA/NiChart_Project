@@ -1,6 +1,9 @@
 import json
 import os
 import re
+from fpdf import FPDF
+import tempfile
+import plotly.graph_objects as go
 
 import pandas as pd
 import streamlit as st
@@ -97,7 +100,7 @@ def panel_incsv() -> None:
     # Read data if working dir changed
     if st.session_state.plot_var["df_data"].shape[0] == 0:
         df_tmp = utildf.read_dataframe(st.session_state.paths["csv_plot"])
-        
+
         st.session_state.plot_var["df_data"] = utildf.rename_rois(
             df_tmp, st.session_state.rois["roi_dict"]
         )
@@ -455,13 +458,14 @@ def show_plots(df: pd.DataFrame, btn_plots: bool) -> None:
         st.warning("Dataframe is empty, skip plotting!")
         return
 
-    plots_arr = []
+    st.session_state.plots_arr = []
     for i, plot_ind in enumerate(list_plots):
         column_no = i % plots_per_row
         if column_no == 0:
             blocks = st.columns(plots_per_row)
         with blocks[column_no]:
             plot_type = st.session_state.plots.loc[plot_ind, "plot_type"]
+
             if plot_type == "Scatter Plot":
                 new_plot = utilpl.display_scatter_plot(
                     df,
@@ -469,6 +473,7 @@ def show_plots(df: pd.DataFrame, btn_plots: bool) -> None:
                     not st.session_state.plot_var["hide_settings"],
                     st.session_state.sel_mrid,
                 )
+                st.session_state.plots_arr.append(new_plot)
             elif plot_type == "Distribution Plot":
                 new_plot = utilpl.display_dist_plot(
                     df,
@@ -476,7 +481,7 @@ def show_plots(df: pd.DataFrame, btn_plots: bool) -> None:
                     not st.session_state.plot_var["hide_settings"],
                     st.session_state.sel_mrid,
                 )
-            plots_arr.append(new_plot)
+                st.session_state.plots_arr.append(new_plot)
 
     if st.session_state.plot_var["show_img"]:
         show_img()
@@ -619,6 +624,57 @@ def panel_plot() -> None:
     # Show plot
     show_plots(df, btn_plots)
 
+def generate_pdf_base():
+    generate = st.checkbox(
+        ":material/playlist_add: Generate medical report",
+        disabled=len(st.session_state.plots_arr) == 0
+    )
+    if generate:
+        with st.container():
+            st.info(f"Found a total of {len(st.session_state.plots_arr)} plots")
+
+            pdf = FPDF()
+            pdf.add_page()
+
+            pdf.set_font("Times", 'B', size=14)
+            pdf.cell(200, 10, "NiChart Medical Report", ln=True, align="C")
+            pdf.set_font("Times", 'I', size=12)
+            pdf.cell(200, 10, "CBICA Lab - Center for Biomedical Image Computing and Analytics", ln=True, align="C")
+            pdf.ln(10)
+
+            image_x, image_y = 10, 10
+            image_w, image_h = 30, 30
+            pdf.image("../resources/nichart1.png", x=image_x, y=image_y, w=image_w, h=image_h)
+            pdf.ln(35)
+
+            image_x, image_y = 10, 50
+            image_w, image_h = 180, 120
+            with tempfile.TemporaryDirectory() as tmpdir:
+                img_path = os.path.join(tmpdir, "fig.png")
+                data = []
+                for figure in st.session_state.plots_arr:
+                    data += figure.data
+
+                fig = go.Figure(data=data)
+                fig.write_image(img_path)
+
+                if os.path.exists(img_path):
+                    pdf.image(img_path, x=image_x, y=image_y, w=image_w, h=image_h)
+                else:
+                    st.warning("The Plotly image could not be generated.")
+
+            pdf_output_path = 'medical_report.pdf'
+            pdf.output(pdf_output_path)
+
+            with open(pdf_output_path, "rb") as f:
+                pdf_bytes = f.read()
+
+            st.download_button(
+                label="Download PDF report",
+                data=pdf_bytes,
+                file_name="medical_report.pdf",
+                mime="application/pdf"
+            )
 
 # Call all steps
 st.divider()
@@ -628,6 +684,7 @@ panel_incsv()
 panel_select()
 # panel_filter()
 panel_plot()
+generate_pdf_base()
 
 # FIXME: For DEBUG
 utilst.add_debug_panel()
