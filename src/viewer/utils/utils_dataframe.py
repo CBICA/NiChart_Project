@@ -15,9 +15,21 @@ def read_dataframe(fname: str) -> pd.DataFrame:
         return df
     try:
         df = pd.read_csv(fname)
+        # FIXME: this will be resolved in a more systematic way
+        df = df.rename(columns={"DLICV": "ICV", "DLICV_centiles": "ICV_centiles"})
     except:
         df = pd.DataFrame()
+
     return df
+
+
+def rename_rois(df: pd.DataFrame, roi_dict: dict) -> pd.DataFrame:
+    df_out = df.rename(columns=roi_dict)
+
+    duplicate_columns = df_out.columns.duplicated() == False
+    df_out = df_out.loc[:, duplicate_columns]
+
+    return df_out
 
 
 def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:

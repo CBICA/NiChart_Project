@@ -1,16 +1,39 @@
 from typing import Any
 
 import streamlit as st
+from streamlitextras.webutils import stxs_javascript
+
+
+def redirect(url: str) -> None:
+    stxs_javascript(f"window.location.replace('{url}');")
 
 
 def menu() -> Any:
+    # Force redirect to the home page if anything is not properly instantiated.
+    if "instantiated" not in st.session_state:
+        print(
+            "Redirected to home page as a required instantiation variable was missing."
+        )
+        st.switch_page("pages/home.py")
+    if st.session_state.has_cloud_session:
+        email = st.session_state.cloud_session_token["email"]
+        logout_url = "https://cbica-nichart.auth.us-east-1.amazoncognito.com/logout?client_id=4shr6mm2h0p0i4o9uleqpu33fj&response_type=code&scope=email+openid+phone&redirect_uri=https://cbica-nichart-alb-272274500.us-east-1.elb.amazonaws.com/oauth2/idpresponse"
+        st.sidebar.info(f"Logged in as {email}.")
+        st.sidebar.info(f"User ID: {st.session_state.cloud_user_id}")
+        # TODO: Make this button also delete user data automatically
+        st.sidebar.button("Log out", on_click=redirect, args=(logout_url,))
     if st.session_state.pipeline == "Home":
         st.sidebar.page_link("pages/home.py", label="Home")
 
     if st.session_state.pipeline == "sMRI Biomarkers (T1)":
         st.sidebar.page_link("pages/home.py", label="Home")
         st.sidebar.page_link(
-            "pages/pipeline_dlmuse.py", label=":material/arrow_forward: Pipeline Overview"
+            "pages/pipeline_dlmuse.py",
+            label=":material/arrow_forward: Pipeline Overview",
+        )
+        st.sidebar.page_link(
+            "pages/tutorial_dlmuse.py",
+            label=":material/arrow_forward: Tutorial",
         )
         st.sidebar.page_link(
             "pages/prep_sMRI_dicomtonifti.py",
@@ -31,7 +54,8 @@ def menu() -> Any:
     if st.session_state.pipeline == "WM Lesion Segmentation (FL)":
         st.sidebar.page_link("pages/home.py", label="Home")
         st.sidebar.page_link(
-            "pages/pipeline_dlwmls.py", label=":material/arrow_forward: Pipeline Overview"
+            "pages/pipeline_dlwmls.py",
+            label=":material/arrow_forward: Pipeline Overview",
         )
         st.sidebar.page_link(
             "pages/prep_sMRI_dicomtonifti.py",

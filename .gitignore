@@ -179,5 +179,6 @@ test/test_output
 # ignore test dicom folder
 10089_short/
 
-# make sure no data go to the repo
-*.nii.gz
+## make sure no data go to the repo
+##*.nii.gz
+

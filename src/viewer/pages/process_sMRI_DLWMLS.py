@@ -2,6 +2,7 @@ import os
 
 import pandas as pd
 import streamlit as st
+import utils.utils_cloud as utilcloud
 import utils.utils_io as utilio
 import utils.utils_menu as utilmenu
 import utils.utils_nifti as utilni
@@ -19,9 +20,23 @@ st.write("# Segmentation of White Matter Lesions")
 st.markdown(
     """
     - Segmentation of WM Lesions on FL scan
-    - [DLWMLS](https://github.com/CBICA/NiChart_DLWMLS): Fast deep learning based segmentation of WM lesions
+    - [DLWMLS](https://github.com/CBICA/DLWMLS): Fast deep learning based segmentation of WM lesions
     """
 )
+
+# Update status of checkboxes
+if "_check_dlwmls_wdir" in st.session_state:
+    st.session_state.checkbox["dlwmls_wdir"] = st.session_state._check_dlwmls_wdir
+if "_check_dlwmls_in" in st.session_state:
+    st.session_state.checkbox["dlwmls_in"] = st.session_state._check_dlwmls_in
+if "_check_dlwmls_run" in st.session_state:
+    st.session_state.checkbox["dlwmls_run"] = st.session_state._check_dlwmls_run
+if "_check_dlwmls_view" in st.session_state:
+    st.session_state.checkbox["dlwmls_view"] = st.session_state._check_dlwmls_view
+if "_check_dlwmls_download" in st.session_state:
+    st.session_state.checkbox["dlwmls_download"] = (
+        st.session_state._check_dlwmls_download
+    )
 
 
 def panel_wdir() -> None:
@@ -29,20 +44,31 @@ def panel_wdir() -> None:
     Panel for selecting the working dir
     """
     icon = st.session_state.icon_thumb[st.session_state.flags["dir_out"]]
-    show_panel_wdir = st.checkbox(
-        f":material/folder_shared: Working Directory {icon}", value=False
+    st.checkbox(
+        f":material/folder_shared: Working Directory {icon}",
+        key="_check_dlwmls_wdir",
+        value=st.session_state.checkbox["dlwmls_wdir"],
     )
-    if not show_panel_wdir:
+    if not st.session_state._check_dlwmls_wdir:
         return
 
     with st.container(border=True):
         utilst.util_panel_workingdir(st.session_state.app_type)
+
         if os.path.exists(st.session_state.paths["dset"]):
+            list_subdir = utilio.get_subfolders(st.session_state.paths["dset"])
             st.success(
-                f"All results will be saved to: {st.session_state.paths['dset']}",
+                f"Working directory is set to: {st.session_state.paths['dset']}",
                 icon=":material/thumb_up:",
             )
+            if len(list_subdir) > 0:
+                st.info(
+                    "Working directory already includes the following folders: "
+                    + ", ".join(list_subdir)
+                )
             st.session_state.flags["dir_out"] = True
+
+        utilst.util_workingdir_get_help()
 
 
 def panel_infl() -> None:
@@ -53,12 +79,13 @@ def panel_infl() -> None:
 
     msg = st.session_state.app_config[st.session_state.app_type]["msg_infile"]
     icon = st.session_state.icon_thumb[st.session_state.flags["dir_fl"]]
-    show_panel_infl = st.checkbox(
+    st.checkbox(
         f":material/upload: {msg} FL Images {icon}",
         disabled=not st.session_state.flags["dir_out"],
-        value=False,
+        key="_check_dlwmls_in",
+        value=st.session_state.checkbox["dlwmls_in"],
     )
-    if not show_panel_infl:
+    if not st.session_state._check_dlwmls_in:
         return
 
     with st.container(border=True):
@@ -95,26 +122,49 @@ def panel_infl() -> None:
                     icon=":material/thumb_up:",
                 )
 
+        s_title = "Input FL Scans"
+        s_text = """
+        - Upload or select input FL scans. DLWMLS can be directly applied to raw FL scans. Nested folders are not supported.
+
+        - The result file with total segmented WMLS volume includes an **"MRID"** column that uniquely identifies each scan. **MRID** is extracted from image file names by removing the common suffix to all images. Using consistent input image names is **strongly recommended**
+
+        - On the desktop app, a symbolic link named **"Nifti/FL"** will be created in the **working directory**, pointing to your input FL images folder.
+
+        - On the cloud platform, you can directly drag and drop your FL image files or folder and they will be uploaded to the **"Nifti/FL"** folder within the **working directory**.
+
+        - On the cloud, **we strongly recommend** compressing your input images into a single ZIP archive before uploading. The system will automatically extract the contents of the ZIP file into the **"Nifti/T1"** folder upon upload.
+        """
+        utilst.util_get_help(s_title, s_text)
+
 
 def panel_dlwmls() -> None:
     """
     Panel for running DLWMLS
     """
     icon = st.session_state.icon_thumb[st.session_state.flags["csv_dlwmls"]]
-    show_panel_dlwmls = st.checkbox(
+    st.checkbox(
         f":material/new_label: Run DLWMLS {icon}",
         disabled=not st.session_state.flags["dir_fl"],
-        value=False,
+        key="_check_dlwmls_run",
+        value=st.session_state.checkbox["dlwmls_run"],
     )
-    if not show_panel_dlwmls:
+    if not st.session_state._check_dlwmls_run:
         return
 
     with st.container(border=True):
         # Device type
         helpmsg = "Choose 'cuda' if your computer has an NVIDIA GPU, 'mps' if you have an Apple M-series chip, and 'cpu' if you have a standard CPU."
-        device = utilst.user_input_select(
-            "Device", "key_select_device", ["cuda", "cpu", "mps"], None, helpmsg, False
-        )
+        if st.session_state.app_type != "cloud":
+            device = utilst.user_input_select(
+                "Device",
+                "key_select_device",
+                ["cuda", "cpu", "mps"],
+                None,
+                helpmsg,
+                False,
+            )
+        else:
+            device = "cuda"
 
         # Button to run DLWMLS
         btn_seg = st.button("Run DLWMLS", disabled=False)
@@ -123,17 +173,21 @@ def panel_dlwmls() -> None:
                 os.makedirs(st.session_state.paths["dlwmls"])
 
             with st.spinner("Wait for it..."):
+                fcount = utilio.get_file_count(st.session_state.paths["FL"])
+                if st.session_state.has_cloud_session:
+                    utilcloud.update_stats_db(
+                        st.session_state.cloud_user_id, "DLWMLS", fcount
+                    )
+
                 dlwmls_cmd = f"DLWMLS -i {st.session_state.paths['FL']} -o {st.session_state.paths['dlwmls']} -d {device}"
                 st.info(f"Running: {dlwmls_cmd}", icon=":material/manufacturing:")
 
-                # FIXME : bypass dlwmls run
                 print(f"About to run: {dlwmls_cmd}")
                 os.system(dlwmls_cmd)
 
                 run_scr = os.path.join(
                     st.session_state.paths["root"],
                     "src",
-                    "workflow",
                     "workflows",
                     "w_DLWMLS",
                     "wmls_post.py",
@@ -153,17 +207,29 @@ def panel_dlwmls() -> None:
                 icon=":material/thumb_up:",
             )
 
+            with st.expander("View WM lesion volumes"):
+                df_dlwmls = pd.read_csv(st.session_state.paths["csv_dlwmls"])
+                st.dataframe(df_dlwmls)
+
+        s_title = "WM Lesion Segmentation"
+        s_text = """
+        - WM lesions are segmented on raw FL images using DLWMLS.
+        - The output folder (**"DLWMLS"**) will contain the segmentation mask for each scan, and a single CSV file with WML volumes.
+        """
+        utilst.util_get_help(s_title, s_text)
+
 
 def panel_view() -> None:
     """
     Panel for viewing images
     """
-    show_panel_view = st.checkbox(
+    st.checkbox(
         ":material/new_label: View Scans",
         disabled=not st.session_state.flags["csv_dlwmls"],
-        value=False,
+        key="_check_dlwmls_view",
+        value=st.session_state.checkbox["dlwmls_view"],
     )
-    if not show_panel_view:
+    if not st.session_state._check_dlwmls_view:
         return
 
     with st.container(border=True):
@@ -232,13 +298,22 @@ def panel_view() -> None:
             ):
                 with blocks[i]:
                     ind_view = utilni.img_views.index(tmp_orient)
+                    size_auto = True
                     if is_show_overlay is False:
                         utilst.show_img3D(
-                            img, ind_view, mask_bounds[ind_view, :], tmp_orient
+                            img,
+                            ind_view,
+                            mask_bounds[ind_view, :],
+                            tmp_orient,
+                            size_auto,
                         )
                     else:
                         utilst.show_img3D(
-                            img_masked, ind_view, mask_bounds[ind_view, :], tmp_orient
+                            img_masked,
+                            ind_view,
+                            mask_bounds[ind_view, :],
+                            tmp_orient,
+                            size_auto,
                         )
 
 
@@ -247,30 +322,31 @@ def panel_download() -> None:
     Panel for downloading results
     """
     if st.session_state.app_type == "cloud":
-        show_panel_view = st.checkbox(
+        st.checkbox(
             ":material/new_label: Download Scans",
             disabled=not st.session_state.flags["csv_dlwmls"],
-            value=False,
+            key="_check_dlwmls_download",
+            value=st.session_state.checkbox["dlwmls_download"],
         )
-        if not show_panel_view:
-            return
+    if not st.session_state._check_dlwmls_download:
+        return
 
-        with st.container(border=True):
+    with st.container(border=True):
 
-            # Zip results and download
-            out_zip = bytes()
-            if not False:
-                if not os.path.exists(st.session_state.paths["download"]):
-                    os.makedirs(st.session_state.paths["download"])
-                f_tmp = os.path.join(st.session_state.paths["download"], "DLWMLS")
-                out_zip = utilio.zip_folder(st.session_state.paths["dlwmls"], f_tmp)
+        # Zip results and download
+        out_zip = bytes()
+        if not False:
+            if not os.path.exists(st.session_state.paths["download"]):
+                os.makedirs(st.session_state.paths["download"])
+            f_tmp = os.path.join(st.session_state.paths["download"], "DLWMLS")
+            out_zip = utilio.zip_folder(st.session_state.paths["dlwmls"], f_tmp)
 
-            st.download_button(
-                "Download DLWMLS results",
-                out_zip,
-                file_name=f"{st.session_state.dset}_DLWMLS.zip",
-                disabled=False,
-            )
+        st.download_button(
+            "Download DLWMLS results",
+            out_zip,
+            file_name=f"{st.session_state.dset}_DLWMLS.zip",
+            disabled=False,
+        )
 
 
 st.divider()

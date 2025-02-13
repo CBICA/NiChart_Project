@@ -12,13 +12,8 @@ def get_list_rois(sel_var: str, roi_dict: dict, derived_dict: dict) -> Any:
     Get a list of ROI indices for the selected var
     """
     # Convert ROI name to index
-
-    print(f"rrr {sel_var}")
-
     if sel_var in roi_dict.keys():
         sel_var = roi_dict[sel_var]
-
-    print(f"rrr {sel_var}")
 
     # Get list of derived ROIs
     if sel_var in derived_dict.keys():

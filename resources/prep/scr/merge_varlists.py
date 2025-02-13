@@ -2,7 +2,11 @@ import pandas as pd
 import json
 import os
 
-list_cat = ['Demographic', 'Diagnosis', 'Cognitive', 'MUSE-Primary', 'SPARE', 'SurrealGAN']
+list_cat = [
+    'Demographic', 'Diagnosis', 'Cognitive', 'Scan',
+    'MUSE-TopPicks', 'MUSE-SingleROIs', 'MUSE-CompositeROIs',
+    'SPARE', 'SurrealGAN'
+]
 
 dict_cat = {}
 for tmp_cat in list_cat:

@@ -1,12 +1,20 @@
 import os
+import shutil
+from typing import Any
 
+import jwt
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+import utils.utils_io as utilio
 import utils.utils_rois as utilroi
+from PIL import Image
+
+# from streamlit.web.server.websocket_headers import _get_websocket_headers
 
 
 def config_page() -> None:
+    st.session_state.nicon = Image.open("../resources/nichart1.png")
     st.set_page_config(
         page_title="NiChart",
         page_icon=st.session_state.nicon,
@@ -14,10 +22,30 @@ def config_page() -> None:
         # layout="centered",
         menu_items={
             "Get help": "https://neuroimagingchart.com/",
-            "Report a bug": "https://neuroimagingchart.com/",
+            "Report a bug": "https://github.com/CBICA/NiChart_Project/issues/new?assignees=&labels=&projects=&template=bug_report.md&title=%5BBUG%5D+",
             "About": "https://neuroimagingchart.com/",
         },
     )
+
+
+# Function to parse AWS login (if available)
+def process_session_token() -> Any:
+    # headers = _get_websocket_headers()
+    headers = st.context.headers
+    if not headers or "X-Amzn-Oidc-Data" not in headers:
+        return {}
+    return jwt.decode(
+        headers["X-Amzn-Oidc-Data"],
+        algorithms=["ES256"],
+        options={"verify_signature": False},
+    )
+
+
+def process_session_user_id() -> Any:
+    headers = st.context.headers
+    if not headers or "X-Amzn-Oidc-Identity" not in headers:
+        return "NO_USER_FOUND"
+    return headers["X-Amzn-Oidc-Identity"]
 
 
 def init_session_state() -> None:
@@ -26,12 +54,29 @@ def init_session_state() -> None:
 
         ###################################
         # App type ('desktop' or 'cloud')
-        st.session_state.app_type = "cloud"
-        st.session_state.app_type = "desktop"
+        if os.getenv("NICHART_FORCE_CLOUD", "0") == "1":
+            st.session_state.forced_cloud = True
+            st.session_state.app_type = "cloud"
+        else:
+            st.session_state.forced_cloud = False
+            st.session_state.app_type = "desktop"
+
         st.session_state.app_config = {
             "cloud": {"msg_infile": "Upload"},
             "desktop": {"msg_infile": "Select"},
         }
+
+        # Store user session info for later retrieval
+        if st.session_state.app_type == "cloud":
+            st.session_state.cloud_session_token = process_session_token()
+            if st.session_state.cloud_session_token:
+                st.session_state.has_cloud_session = True
+                st.session_state.cloud_user_id = process_session_user_id()
+            else:
+                st.session_state.has_cloud_session = False
+        else:
+            st.session_state.has_cloud_session = False
+
         ###################################
 
         ###################################
@@ -56,6 +101,35 @@ def init_session_state() -> None:
         st.session_state.icon_thumb = {
             False: ":material/thumb_down:",
             True: ":material/thumb_up:",
+        }
+
+        # Flags for checkbox states
+        st.session_state.checkbox = {
+            "dicoms_wdir": False,
+            "dicoms_in": False,
+            "dicoms_series": False,
+            "dicoms_run": False,
+            "dicoms_view": False,
+            "dicoms_download": False,
+            "dlmuse_wdir": False,
+            "dlmuse_in": False,
+            "dlmuse_run": False,
+            "dlmuse_view": False,
+            "dlmuse_download": False,
+            "dlwmls_wdir": False,
+            "dlwmls_in": False,
+            "dlwmls_run": False,
+            "dlwmls_view": False,
+            "dlwmls_download": False,
+            "ml_wdir": False,
+            "ml_inrois": False,
+            "ml_indemog": False,
+            "ml_run": False,
+            "ml_download": False,
+            "view_wdir": False,
+            "view_in": False,
+            "view_select": False,
+            "view_plot": False,
         }
 
         # Flags for various i/o
@@ -135,16 +209,47 @@ def init_session_state() -> None:
         # Set initial values for paths
         st.session_state.paths["root"] = os.path.dirname(os.path.dirname(os.getcwd()))
         st.session_state.paths["init"] = st.session_state.paths["root"]
-        st.session_state.paths["dir_out"] = os.path.join(
-            st.session_state.paths["root"], "output_folder"
-        )
+        if st.session_state.has_cloud_session:
+            user_id = st.session_state.cloud_user_id
+            st.session_state.paths["dir_out"] = os.path.join(
+                st.session_state.paths["root"], "output_folder", user_id
+            )
+        else:
+            st.session_state.paths["dir_out"] = os.path.join(
+                st.session_state.paths["root"], "output_folder"
+            )
+
         if not os.path.exists(st.session_state.paths["dir_out"]):
             os.makedirs(st.session_state.paths["dir_out"])
+
+        # Copy demo folders into user folders as needed
+        if st.session_state.has_cloud_session:
+            # Copy demo dirs to user folder (TODO: make this less hardcoded)
+            demo_dir_paths = [
+                os.path.join(
+                    st.session_state.paths["root"],
+                    "output_folder",
+                    "NiChart_sMRI_Demo1",
+                ),
+                os.path.join(
+                    st.session_state.paths["root"],
+                    "output_folder",
+                    "NiChart_sMRI_Demo2",
+                ),
+            ]
+            for demo in demo_dir_paths:
+                demo_name = os.path.basename(demo)
+                destination_path = os.path.join(
+                    st.session_state.paths["dir_out"], demo_name
+                )
+                if os.path.exists(destination_path):
+                    shutil.rmtree(destination_path)
+                shutil.copytree(demo, destination_path, dirs_exist_ok=True)
 
         ############
         # FIXME : set init folder to test folder outside repo
         st.session_state.paths["init"] = os.path.join(
-            os.path.dirname(st.session_state.paths["root"]), "TestData"
+            st.session_state.paths["root"], "test_data"
         )
         st.session_state.paths["file_search_dir"] = st.session_state.paths["init"]
         ############
@@ -167,15 +272,14 @@ def init_session_state() -> None:
         )
 
         # Various parameters
-        
+
         # Average ICV estimated from a large sample
         # IMPORTANT: Used in NiChart Engine for normalization!
         st.session_state.mean_icv = 1430000
-        
+
         # Min number of samples to run harmonization
         st.session_state.harm_min_samples = 30
-        
-        
+
         ###################################
 
         ###################################
@@ -186,11 +290,15 @@ def init_session_state() -> None:
                 "pid",
                 "plot_type",
                 "xvar",
+                "xmin",
+                "xmax",
                 "yvar",
+                "ymin",
+                "ymax",
                 "hvar",
                 "hvals",
                 "corr_icv",
-                "plot_centiles",
+                "plot_cent_normalized",
                 "trend",
                 "lowess_s",
                 "traces",
@@ -204,7 +312,14 @@ def init_session_state() -> None:
         st.session_state.plot_const = {
             "trend_types": ["", "Linear", "Smooth LOWESS Curve"],
             "centile_types": ["", "CN", "CN_Males", "CN_Females", "CN_ICV_Corrected"],
-            "linfit_trace_types": ["data", "lin_fit", "conf_95%"],
+            "linfit_trace_types": ["lin_fit", "conf_95%"],
+            "centile_trace_types": [
+                "centile_5",
+                "centile_25",
+                "centile_50",
+                "centile_75",
+                "centile_95",
+            ],
             "distplot_trace_types": ["histogram", "density", "rug"],
             "min_per_row": 1,
             "max_per_row": 5,
@@ -226,13 +341,17 @@ def init_session_state() -> None:
             "show_img": False,
             "plot_type": "Scatter Plot",
             "xvar": "",
+            "xmin": -1.0,
+            "xmax": -1.0,
             "yvar": "",
+            "ymin": -1.0,
+            "ymax": -1.0,
             "hvar": "",
             "hvals": [],
             "corr_icv": False,
-            "plot_centiles": False,
+            "plot_cent_normalized": False,
             "trend": "Linear",
-            "traces": ["data", "lin"],
+            "traces": ["data", "lin_fit"],
             "lowess_s": 0.5,
             "centtype": "",
             "h_coeff": 1.0,
@@ -328,6 +447,7 @@ def init_session_state() -> None:
         # MRID selected by user
         st.session_state.sel_mrid = ""
         st.session_state.sel_roi = ""
+        st.session_state.sel_roi_img = ""
 
         # Variable selected by user
         st.session_state.sel_var = ""
@@ -366,6 +486,8 @@ def update_default_paths() -> None:
     st.session_state.paths["csv_plot"] = os.path.join(
         st.session_state.paths["plots"], "Data.csv"
     )
+    # Reset plot data
+    st.session_state.plot_var["df_data"] = pd.DataFrame()
 
 
 def reset_flags() -> None:
@@ -375,3 +497,37 @@ def reset_flags() -> None:
     for tmp_key in st.session_state.flags.keys():
         st.session_state.flags[tmp_key] = False
     st.session_state.flags["dset"] = True
+
+    # Check dicom folder
+    fcount = utilio.get_file_count(st.session_state.paths["dicom"])
+    if fcount > 0:
+        st.session_state.flags["dir_dicom"] = True
+
+
+def reset_plots() -> None:
+    """
+    Reset plot variables when data file changes
+    """
+    st.session_state.plots = pd.DataFrame(columns=st.session_state.plots.columns)
+    st.session_state.checkbox["view_select"] = False
+    st.session_state.checkbox["view_plot"] = False
+    st.session_state.plot_sel_vars = []
+    st.session_state.plot_var["hide_settings"] = False
+    st.session_state.plot_var["hide_legend"] = False
+    st.session_state.plot_var["show_img"] = False
+    st.session_state.plot_var["plot_type"] = False
+    st.session_state.plot_var["xvar"] = ""
+    st.session_state.plot_var["xmin"] = -1.0
+    st.session_state.plot_var["xmax"] = -1.0
+    st.session_state.plot_var["yvar"] = ""
+    st.session_state.plot_var["ymin"] = -1.0
+    st.session_state.plot_var["ymax"] = -1.0
+    st.session_state.plot_var["hvar"] = ""
+    st.session_state.plot_var["hvals"] = []
+    st.session_state.plot_var["corr_icv"] = False
+    st.session_state.plot_var["plot_cent_normalized"] = False
+    st.session_state.plot_var["trend"] = "Linear"
+    st.session_state.plot_var["traces"] = ["data", "lin_fit"]
+    st.session_state.plot_var["lowess_s"] = 0.5
+    st.session_state.plot_var["centtype"] = ""
+    st.session_state.plot_var["h_coeff"] = 1.0

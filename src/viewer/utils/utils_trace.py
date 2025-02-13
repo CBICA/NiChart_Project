@@ -18,6 +18,9 @@ def dist_plot(
     binnum: int,
     hide_legend: bool,
 ) -> Any:
+    # Set colormap
+    colors = st.session_state.plot_colors["data"]
+
     # Add a tmp column if group var is not set
     dft = df.copy()
     if hvar == "":
@@ -31,6 +34,7 @@ def dist_plot(
 
     data = []
     bin_sizes = []
+    colors_sel = []
     for hname in hvals:
         col_ind = vals_hue_all.index(hname)  # Select index of colour for the category
         dfh = dft[dft[hvar] == hname]
@@ -39,6 +43,7 @@ def dist_plot(
         bin_size = x_range / binnum
         bin_sizes.append(bin_size)
         data.append(x_tmp)
+        colors_sel.append(colors[col_ind])
 
     show_hist = "histogram" in traces
     show_curve = "density" in traces
@@ -49,6 +54,7 @@ def dist_plot(
         hvals,
         histnorm="",
         bin_size=bin_sizes,
+        colors=colors_sel,
         show_hist=show_hist,
         show_rug=show_rug,
         show_curve=show_curve,
@@ -61,7 +67,11 @@ def dist_plot(
 def scatter_trace(
     df: pd.DataFrame,
     xvar: str,
+    xmin: float,
+    xmax: float,
     yvar: str,
+    ymin: float,
+    ymax: float,
     hvar: str,
     hvals: list,
     traces: list,
@@ -98,12 +108,18 @@ def scatter_trace(
                 showlegend=not hide_legend,
             )
             fig.add_trace(trace)
+        fig.update_layout(xaxis_range=[xmin, xmax])
+        fig.update_layout(yaxis_range=[ymin, ymax])
 
 
 def linreg_trace(
     df: pd.DataFrame,
     xvar: str,
+    xmin: float,
+    xmax: float,
     yvar: str,
+    ymin: float,
+    ymax: float,
     hvar: str,
     hvals: list,
     traces: list,
@@ -169,14 +185,19 @@ def linreg_trace(
                 showlegend=not hide_legend,
             )
             fig.add_trace(trace)
-
+    fig.update_layout(xaxis_range=[xmin, xmax])
+    fig.update_layout(yaxis_range=[ymin, ymax])
     return fig
 
 
 def lowess_trace(
     df: pd.DataFrame,
     xvar: str,
+    xmin: float,
+    xmax: float,
     yvar: str,
+    ymin: float,
+    ymax: float,
     hvar: str,
     hvals: list,
     lowess_s: float,
@@ -197,7 +218,7 @@ def lowess_trace(
     if hvals == []:
         hvals = vals_hue_all
 
-    dict_fit = utilstat.lowess_model(df, xvar, yvar, hvar, lowess_s)
+    dict_fit = utilstat.lowess_model(dft, xvar, yvar, hvar, lowess_s)
 
     # Add traces for the fit and confidence intervals
     for hname in hvals:
@@ -215,6 +236,9 @@ def lowess_trace(
             showlegend=not hide_legend,
         )
         fig.add_trace(trace)
+
+    fig.update_layout(xaxis_range=[xmin, xmax])
+    fig.update_layout(yaxis_range=[ymin, ymax])
 
 
 def dot_trace(
@@ -234,7 +258,19 @@ def dot_trace(
     fig.add_trace(trace)
 
 
-def percentile_trace(df: pd.DataFrame, xvar: str, yvar: str, fig: Any) -> Any:
+def percentile_trace(
+    df: pd.DataFrame,
+    xvar: str,
+    xmin: float,
+    xmax: float,
+    yvar: str,
+    ymin: float,
+    ymax: float,
+    traces: list,
+    hide_legend: bool,
+    fig: Any,
+) -> Any:
+
     # Set colormap
     colors = st.session_state.plot_colors["centile"]
 
@@ -243,34 +279,21 @@ def percentile_trace(df: pd.DataFrame, xvar: str, yvar: str, fig: Any) -> Any:
 
     # Create line traces
     for i, cvar in enumerate(df_tmp.columns[2:]):
-        # if i == 0:
-        # ctrace = go.Scatter(
-        # x=df_tmp[xvar],
-        # y=df_tmp[cvar],
-        # mode="lines",
-        # name=cvar,
-        # line=dict(color=cline[i]),
-        # )
-        # else:
-        # ctrace = go.Scatter(
-        # x=df_tmp[xvar],
-        # y=df_tmp[cvar],
-        # mode="lines",
-        # name=cvar,
-        # line=dict(color=cline[i]),
-        # fill="tonexty",
-        # fillcolor=cfan[i],
-        # )
-        ctrace = go.Scatter(
-            x=df_tmp[xvar],
-            y=df_tmp[cvar],
-            mode="lines",
-            name=cvar,
-            legendgroup="centiles",
-            line=dict(color=colors[i]),
-        )
+        if cvar in traces:
+            ctrace = go.Scatter(
+                x=df_tmp[xvar],
+                y=df_tmp[cvar],
+                mode="lines",
+                name=cvar,
+                legendgroup="centiles",
+                line=dict(color=colors[i]),
+                showlegend=not hide_legend,
+            )
 
-        fig.add_trace(ctrace)  # plot in first row
+            fig.add_trace(ctrace)  # plot in first row
+
+    fig.update_layout(xaxis_range=[xmin, xmax])
+    fig.update_layout(yaxis_range=[ymin, ymax])
 
     return fig
 
