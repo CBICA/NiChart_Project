@@ -16,7 +16,7 @@ os.environ['AWS_DEFAULT_REGION'] = 'YOUR_KEY_HERE'
 runtime_client = boto3.client("bedrock-runtime")
 knowledge_client = boto3.client("bedrock-agent-runtime")
 
-knowledge_base_id = "HPO74INWGW"
+knowledge_base_id = 'YOUR_KEY_HERE'
 
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
