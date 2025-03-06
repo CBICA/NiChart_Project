@@ -135,7 +135,7 @@ def init_session_state() -> None:
         # Flags for various i/o
         st.session_state.flags = {
             "dset": False,
-            "dir_out": False,
+            "out_dir": False,
             "dir_dicom": False,
             "dicom_series": False,
             "dir_nifti": False,
@@ -177,7 +177,7 @@ def init_session_state() -> None:
             "target_dir": "",
             "target_file": "",
             "dset": "",
-            "dir_out": "",
+            "out_dir": "",
             "lists": "",
             "dicom": "",
             "nifti": "",

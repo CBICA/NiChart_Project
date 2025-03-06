@@ -20,58 +20,27 @@ utilmenu.menu()
 
 st.write("# Dicom to Nifti Conversion")
 
-# Update status of checkboxes
-if "_check_dicoms_wdir" in st.session_state:
-    st.session_state.checkbox["dicoms_wdir"] = st.session_state._check_dicoms_wdir
-if "_check_dicoms_in" in st.session_state:
-    st.session_state.checkbox["dicoms_in"] = st.session_state._check_dicoms_in
-if "_check_dicoms_series" in st.session_state:
-    st.session_state.checkbox["dicoms_series"] = st.session_state._check_dicoms_series
-if "_check_dicoms_run" in st.session_state:
-    st.session_state.checkbox["dicoms_run"] = st.session_state._check_dicoms_run
-if "_check_dicoms_view" in st.session_state:
-    st.session_state.checkbox["dicoms_view"] = st.session_state._check_dicoms_view
-if "_check_dicoms_download" in st.session_state:
-    st.session_state.checkbox["dicoms_download"] = (
-        st.session_state._check_dicoms_download
-    )
-
-
 def progress(p: int, i: int, decoded: Any) -> None:
     with result_holder.container():
         st.progress(p, f"Progress: Token position={i}")
 
-
 def panel_wdir() -> None:
     """
-    Panel for selecting the working dir
+    Panel for selecting output dir
     """
-    icon = st.session_state.icon_thumb[st.session_state.flags["dir_out"]]
-    st.checkbox(
-        f":material/folder_shared: Working Directory {icon}",
-        key="_check_dicoms_wdir",
-        value=st.session_state.checkbox["dicoms_wdir"],
-    )
-    if not st.session_state._check_dicoms_wdir:
-        return
-
     with st.container(border=True):
-        utilst.util_panel_workingdir(st.session_state.app_type)
-        if os.path.exists(st.session_state.paths["dset"]):
-            list_subdir = utilio.get_subfolders(st.session_state.paths["dset"])
+        curr_dir = st.session_state.paths["out_dir"]
+        sel_dir = utilst.util_select_dir(curr_dir, 'sel_out_dir')
+        if sel_dir is not None and sel_dir != curr_dir:
+            st.session_state.paths["outdir"] = sel_dir
+            
+    with st.container(border=True):
+        if os.path.exists(st.session_state.paths["out_dir"]):
             st.success(
-                f"Working directory is set to: {st.session_state.paths['dset']}",
+                f"Output directory: {st.session_state.paths['out_dir']}",
                 icon=":material/thumb_up:",
             )
-            if len(list_subdir) > 0:
-                st.info(
-                    "Working directory already includes the following folders: "
-                    + ", ".join(list_subdir)
-                )
-            st.session_state.flags["dir_out"] = True
-
-        utilst.util_workingdir_get_help()
-
+            st.session_state.flags["out_dir"] = True
 
 def panel_indicoms() -> None:
     """
@@ -81,7 +50,7 @@ def panel_indicoms() -> None:
     icon = st.session_state.icon_thumb[st.session_state.flags["dir_dicom"]]
     st.checkbox(
         f":material/upload: {msg} Dicoms {icon}",
-        disabled=not st.session_state.flags["dir_out"],
+        disabled=not st.session_state.flags["out_dir"],
         key="_check_dicoms_in",
         value=st.session_state.checkbox["dicoms_in"],
     )
@@ -134,7 +103,6 @@ def panel_indicoms() -> None:
         - On the cloud, **we strongly recommend** compressing your DICOM data into a single ZIP archive before uploading. The system will automatically extract the contents of the ZIP file into the **"Dicoms"** folder upon upload.
         """
         utilst.util_get_help(s_title, s_text)
-
 
 def panel_detect() -> None:
     """
@@ -439,14 +407,27 @@ st.markdown(
 )
 
 # Call all steps
-st.divider()
-panel_wdir()
-panel_indicoms()
-panel_detect()
-panel_extract()
-panel_view()
+t1, t2, t3, t4, t5 =  st.tabs(
+    ['Working Dir', 'Input Data', 'Detect Series', 'Extract Scans', 'View Scans']
+)
 if st.session_state.app_type == "cloud":
-    panel_download()
+    t1, t2, t3, t4, t5, t6 =  st.tabs(
+        ['Working Dir', 'Input Data', 'Detect Series', 'Extract Scans', 'View Scans', 'Download']
+    )
+
+with t1:
+    panel_wdir()
+with t2:
+    panel_indicoms()
+with t3:
+    panel_detect()
+with t4:
+    panel_extract()
+with t5:
+    panel_view()
+if st.session_state.app_type == "cloud":
+    with t6:
+        panel_download()
 
 # FIXME: For DEBUG
 utilst.add_debug_panel()

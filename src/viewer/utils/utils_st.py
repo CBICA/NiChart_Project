@@ -431,6 +431,37 @@ def util_select_file(
 
     return False
 
+def util_select_dir(curr_dir, key_txt) -> None:
+    """
+    Panel to select a folder from the file system
+    """
+    tab1, tab2 = st.tabs(['Enter Path', 'Browse Path'])
+    with tab1:
+        sel_dir = st.text_input(
+            '',
+            key=f'_key_sel_{key_txt}',
+            value=curr_dir,
+            label_visibility='collapsed',
+        )
+        if sel_dir is not None:
+            sel_dir = os.path.abspath(sel_dir)
+
+    with tab2:
+        if st.button(
+            'Browse',
+            key=f'_key_btn_{key_txt}',
+        ):
+            sel_dir = utilio.browse_folder(curr_dir)
+    
+    if sel_dir is not None:
+        sel_dir = os.path.abspath(sel_dir)
+        if not os.path.exists(sel_dir):
+            try:
+                os.makedirs(sel_dir)
+                st.info(f'Created directory: {sel_dir}')
+            except:
+                st.error(f'Could not create directory: {sel_dir}')
+    return sel_dir
 
 def add_debug_panel() -> None:
     """
