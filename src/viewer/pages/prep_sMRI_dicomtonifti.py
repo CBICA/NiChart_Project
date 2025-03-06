@@ -29,34 +29,23 @@ def panel_wdir() -> None:
     Panel for selecting output dir
     """
     with st.container(border=True):
-        curr_dir = st.session_state.paths["out_dir"]
-        sel_dir = utilst.util_select_dir(curr_dir, 'sel_out_dir')
+        curr_dir = st.session_state.paths["wdir"]
+        sel_dir = utilst.util_select_dir(curr_dir, 'sel_wdir')
         if sel_dir is not None and sel_dir != curr_dir:
             st.session_state.paths["outdir"] = sel_dir
             
     with st.container(border=True):
-        if os.path.exists(st.session_state.paths["out_dir"]):
+        if os.path.exists(st.session_state.paths["wdir"]):
             st.success(
-                f"Output directory: {st.session_state.paths['out_dir']}",
+                f"Output directory: {st.session_state.paths['wdir']}",
                 icon=":material/thumb_up:",
             )
-            st.session_state.flags["out_dir"] = True
+            st.session_state.flags["wdir"] = True
 
 def panel_indicoms() -> None:
     """
     Panel for selecting input dicoms
     """
-    msg = st.session_state.app_config[st.session_state.app_type]["msg_infile"]
-    icon = st.session_state.icon_thumb[st.session_state.flags["dir_dicom"]]
-    st.checkbox(
-        f":material/upload: {msg} Dicoms {icon}",
-        disabled=not st.session_state.flags["out_dir"],
-        key="_check_dicoms_in",
-        value=st.session_state.checkbox["dicoms_in"],
-    )
-    if not st.session_state._check_dicoms_in:
-        return
-
     with st.container(border=True):
         if st.session_state.app_type == "cloud":
             # Upload data
@@ -108,16 +97,6 @@ def panel_detect() -> None:
     """
     Panel for detecting dicom series
     """
-    icon = st.session_state.icon_thumb[st.session_state.flags["dicom_series"]]
-    st.checkbox(
-        f":material/manage_search: Detect Dicom Series {icon}",
-        disabled=not st.session_state.flags["dir_dicom"],
-        key="_check_dicoms_series",
-        value=st.session_state.checkbox["dicoms_series"],
-    )
-    if not st.session_state._check_dicoms_series:
-        return
-
     with st.container(border=True):
         flag_disabled = not st.session_state.flags["dir_dicom"]
 
@@ -159,16 +138,6 @@ def panel_extract() -> None:
     """
     Panel for extracting dicoms
     """
-    icon = st.session_state.icon_thumb[st.session_state.flags["dir_nifti"]]
-    st.checkbox(
-        f":material/auto_awesome_motion: Extract Scans {icon}",
-        disabled=not st.session_state.flags["dicom_series"],
-        key="_check_dicoms_run",
-        value=st.session_state.checkbox["dicoms_run"],
-    )
-    if not st.session_state._check_dicoms_run:
-        return
-
     with st.container(border=True):
 
         flag_disabled = not st.session_state.flags["dicom_series"]
@@ -252,15 +221,6 @@ def panel_view() -> None:
     """
     Panel for viewing extracted nifti images
     """
-    st.checkbox(
-        ":material/visibility: View Scans",
-        disabled=not st.session_state.flags["dir_nifti"],
-        key="_check_dicoms_view",
-        value=st.session_state.checkbox["dicoms_view"],
-    )
-    if not st.session_state._check_dicoms_view:
-        return
-
     with st.container(border=True):
 
         # Selection of img modality
@@ -350,15 +310,6 @@ def panel_download() -> None:
     """
     Panel for downloading extracted nifti images
     """
-    st.checkbox(
-        ":material/download: Download Scans",
-        disabled=not st.session_state.flags["dir_nifti"],
-        key="_check_dicoms_download",
-        value=st.session_state.checkbox["dicoms_download"],
-    )
-    if not st.session_state._check_dicoms_download:
-        return
-
     with st.container(border=True):
         # Selection of img modality
         sel_mod = utilst.user_input_select(

@@ -28,32 +28,10 @@ st.markdown(
     """
 )
 
-# Update status of checkboxes
-if "_check_ml_wdir" in st.session_state:
-    st.session_state.checkbox["ml_wdir"] = st.session_state._check_ml_wdir
-if "_check_ml_inrois" in st.session_state:
-    st.session_state.checkbox["ml_inrois"] = st.session_state._check_ml_inrois
-if "_check_ml_indemog" in st.session_state:
-    st.session_state.checkbox["ml_indemog"] = st.session_state._check_ml_indemog
-if "_check_ml_run" in st.session_state:
-    st.session_state.checkbox["ml_run"] = st.session_state._check_ml_run
-if "_check_ml_download" in st.session_state:
-    st.session_state.checkbox["ml_download"] = st.session_state._check_ml_download
-
-
 def panel_wdir() -> None:
     """
     Panel for selecting the working dir
     """
-    icon = st.session_state.icon_thumb[st.session_state.flags["dir_out"]]
-    st.checkbox(
-        f":material/folder_shared: Working Directory {icon}",
-        key="_check_ml_wdir",
-        value=st.session_state.checkbox["ml_wdir"],
-    )
-    if not st.session_state._check_ml_wdir:
-        return
-
     with st.container(border=True):
         utilst.util_panel_workingdir(st.session_state.app_type)
 
@@ -77,17 +55,6 @@ def panel_inrois() -> None:
     """
     Panel for uploading input rois
     """
-    msg = st.session_state.app_config[st.session_state.app_type]["msg_infile"]
-    icon = st.session_state.icon_thumb[st.session_state.flags["csv_dlmuse"]]
-    st.checkbox(
-        f":material/upload: {msg} ROIs {icon}",
-        disabled=not st.session_state.flags["dir_out"],
-        key="_check_ml_inrois",
-        value=st.session_state.checkbox["ml_inrois"],
-    )
-    if not st.session_state._check_ml_inrois:
-        return
-
     with st.container(border=True):
         if st.session_state.app_type == "cloud":
             utilst.util_upload_file(
@@ -148,18 +115,6 @@ def panel_indemog() -> None:
     """
     Panel for uploading demographics
     """
-    msg = st.session_state.app_config[st.session_state.app_type]["msg_infile"]
-    icon = st.session_state.icon_thumb[st.session_state.flags["csv_demog"]]
-
-    st.checkbox(
-        f":material/upload: {msg} Demographics {icon}",
-        disabled=not st.session_state.flags["csv_dlmuse"],
-        key="_check_ml_indemog",
-        value=st.session_state.checkbox["ml_indemog"],
-    )
-    if not st.session_state._check_ml_indemog:
-        return
-
     with st.container(border=True):
         flag_manual = st.checkbox("Enter data manually", False)
         if flag_manual:
@@ -258,16 +213,6 @@ def panel_run() -> None:
     """
     Panel for running ml score calculation
     """
-    icon = st.session_state.icon_thumb[st.session_state.flags["csv_mlscores"]]
-    st.checkbox(
-        f":material/new_label: Run MLScores {icon}",
-        disabled=not st.session_state.flags["csv_mlscores"],
-        key="_check_ml_run",
-        value=st.session_state.checkbox["ml_run"],
-    )
-    if not st.session_state._check_ml_run:
-        return
-
     with st.container(border=True):
 
         btn_mlscore = st.button("Run MLScore", disabled=False)
@@ -353,15 +298,6 @@ def panel_download() -> None:
     """
     Panel for downloading results
     """
-    st.checkbox(
-        ":material/new_label: Download Results",
-        disabled=not st.session_state.flags["csv_mlscores"],
-        key="_check_ml_download",
-        value=st.session_state.checkbox["ml_download"],
-    )
-    if not st.session_state._check_ml_download:
-        return
-
     with st.container(border=True):
         out_zip = bytes()
         if not os.path.exists(st.session_state.paths["download"]):
@@ -376,14 +312,26 @@ def panel_download() -> None:
             disabled=False,
         )
 
-
-st.divider()
-panel_wdir()
-panel_inrois()
-panel_indemog()
-panel_run()
+# Call all steps
+t1, t2, t3, t4 =  st.tabs(
+    ['Working Dir', 'Input Data', 'In ROIS', 'In Demog']
+)
 if st.session_state.app_type == "cloud":
-    panel_download()
+    t1, t2, t3, t4, t5 =  st.tabs(
+        ['Working Dir', 'Input Data', 'In ROIS', 'In Demog', 'Download']
+    )
+
+with t1:
+    panel_wdir()
+with t2:
+    panel_inrois()
+with t3:
+    panel_indemog()
+with t4:
+    panel_run()
+if st.session_state.app_type == "cloud":
+    with t5:
+        panel_download()
 
 # FIXME: For DEBUG
 utilst.add_debug_panel()

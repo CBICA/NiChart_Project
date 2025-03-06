@@ -26,34 +26,10 @@ st.markdown(
         """
 )
 
-# Update status of checkboxes
-if "_check_dlmuse_wdir" in st.session_state:
-    st.session_state.checkbox["dlmuse_wdir"] = st.session_state._check_dlmuse_wdir
-if "_check_dlmuse_in" in st.session_state:
-    st.session_state.checkbox["dlmuse_in"] = st.session_state._check_dlmuse_in
-if "_check_dlmuse_run" in st.session_state:
-    st.session_state.checkbox["dlmuse_run"] = st.session_state._check_dlmuse_run
-if "_check_dlmuse_view" in st.session_state:
-    st.session_state.checkbox["dlmuse_view"] = st.session_state._check_dlmuse_view
-if "_check_dlmuse_download" in st.session_state:
-    st.session_state.checkbox["dlmuse_download"] = (
-        st.session_state._check_dlmuse_download
-    )
-
-
 def panel_wdir() -> None:
     """
     Panel for selecting the working dir
     """
-    icon = st.session_state.icon_thumb[st.session_state.flags["dir_out"]]
-    st.checkbox(
-        f":material/folder_shared: Working Directory {icon}",
-        key="_check_dlmuse_wdir",
-        value=st.session_state.checkbox["dlmuse_wdir"],
-    )
-    if not st.session_state._check_dlmuse_wdir:
-        return
-
     with st.container(border=True):
         utilst.util_panel_workingdir(st.session_state.app_type)
 
@@ -78,17 +54,6 @@ def panel_int1() -> None:
     Panel for uploading input t1 images
     """
     st.session_state.flags["dir_t1"] = os.path.exists(st.session_state.paths["T1"])
-
-    msg = st.session_state.app_config[st.session_state.app_type]["msg_infile"]
-    icon = st.session_state.icon_thumb[st.session_state.flags["dir_t1"]]
-    st.checkbox(
-        f":material/upload: {msg} T1 Images {icon}",
-        disabled=not st.session_state.flags["dir_out"],
-        key="_check_dlmuse_in",
-        value=st.session_state.checkbox["dlmuse_in"],
-    )
-    if not st.session_state._check_dlmuse_in:
-        return
 
     with st.container(border=True):
         if st.session_state.app_type == "cloud":
@@ -143,16 +108,6 @@ def panel_dlmuse() -> None:
     """
     Panel for running dlmuse
     """
-    icon = st.session_state.icon_thumb[st.session_state.flags["csv_dlmuse"]]
-    st.checkbox(
-        f":material/new_label: Run DLMUSE {icon}",
-        disabled=not st.session_state.flags["dir_t1"],
-        key="_check_dlmuse_run",
-        value=st.session_state.checkbox["dlmuse_run"],
-    )
-    if not st.session_state._check_dlmuse_run:
-        return
-
     with st.container(border=True):
         # Device type
         if st.session_state.app_type != "cloud":
@@ -237,15 +192,6 @@ def panel_view() -> None:
     """
     Panel for viewing images
     """
-    st.checkbox(
-        ":material/new_label: View Scans",
-        disabled=not st.session_state.flags["csv_dlmuse"],
-        key="_check_dlmuse_view",
-        value=st.session_state.checkbox["dlmuse_view"],
-    )
-    if not st.session_state._check_dlmuse_view:
-        return
-
     with st.container(border=True):
         # Selection of MRID
         try:
@@ -364,15 +310,6 @@ def panel_download() -> None:
     """
     Panel for downloading results
     """
-    st.checkbox(
-        ":material/new_label: Download Scans",
-        disabled=not st.session_state.flags["csv_dlmuse"],
-        key="_check_dlmuse_download",
-        value=st.session_state.checkbox["dlmuse_download"],
-    )
-    if not st.session_state._check_dlmuse_download:
-        return
-
     with st.container(border=True):
 
         # Zip results and download
@@ -390,14 +327,26 @@ def panel_download() -> None:
             disabled=False,
         )
 
-
-st.divider()
-panel_wdir()
-panel_int1()
-panel_dlmuse()
-panel_view()
+# Call all steps
+t1, t2, t3, t4 =  st.tabs(
+    ['Working Dir', 'Input Data', 'DLMUSE', 'View Scans']
+)
 if st.session_state.app_type == "cloud":
-    panel_download()
+    t1, t2, t3, t4, t5 =  st.tabs(
+        ['Working Dir', 'Input Data', 'DLMUSE', 'View Scans', 'Download']
+    )
+
+with t1:
+    panel_wdir()
+with t2:
+    panel_int1()
+with t3:
+    panel_dlmuse()
+with t4:
+    panel_view()
+if st.session_state.app_type == "cloud":
+    with t5:
+        panel_download()
 
 # FIXME: For DEBUG
 utilst.add_debug_panel()

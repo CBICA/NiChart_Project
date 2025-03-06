@@ -34,30 +34,10 @@ st.markdown(
     """
 )
 
-# Update status of checkboxes
-if "_check_view_wdir" in st.session_state:
-    st.session_state.checkbox["view_wdir"] = st.session_state._check_view_wdir
-if "_check_view_in" in st.session_state:
-    st.session_state.checkbox["view_in"] = st.session_state._check_view_in
-if "_check_view_select" in st.session_state:
-    st.session_state.checkbox["view_select"] = st.session_state._check_view_select
-if "_check_view_plot" in st.session_state:
-    st.session_state.checkbox["view_plot"] = st.session_state._check_view_plot
-
-
 def panel_wdir() -> None:
     """
     Panel for selecting the working dir
     """
-    icon = st.session_state.icon_thumb[st.session_state.flags["dir_out"]]
-    st.checkbox(
-        f":material/folder_shared: Working Directory {icon}",
-        key="_check_view_wdir",
-        value=st.session_state.checkbox["view_wdir"],
-    )
-    if not st.session_state._check_view_wdir:
-        return
-
     with st.container(border=True):
         utilst.util_panel_workingdir(st.session_state.app_type)
 
@@ -81,19 +61,6 @@ def panel_incsv() -> None:
     """
     Panel for selecting the input csv
     """
-    # Check input csv's in plots folder
-
-    msg = st.session_state.app_config[st.session_state.app_type]["msg_infile"]
-    icon = st.session_state.icon_thumb[st.session_state.flags["csv_plot"]]
-    st.checkbox(
-        f":material/upload: {msg} Data {icon}",
-        disabled=not st.session_state.flags["dir_out"],
-        key="_check_view_in",
-        value=st.session_state.checkbox["view_in"],
-    )
-    if not st.session_state._check_view_in:
-        return
-
     # Read data if working dir changed
     if st.session_state.plot_var["df_data"].shape[0] == 0:
         df_tmp = utildf.read_dataframe(st.session_state.paths["csv_plot"])
@@ -153,14 +120,6 @@ def panel_rename() -> None:
     """
     Panel for renaming variables
     """
-    show_panel_rename = st.checkbox(
-        ":material/new_label: Rename Variables (optional)",
-        disabled=not st.session_state.flags["csv_plot"],
-        value=False,
-    )
-    if not show_panel_rename:
-        return
-
     with st.container(border=True):
 
         msg_help = "Rename numeric ROI indices to ROI names. \n\n If a dictionary is not provided for your data type, please continue with the next step!"
@@ -218,15 +177,6 @@ def panel_select() -> None:
     """
     Panel for selecting variables
     """
-    st.checkbox(
-        ":material/playlist_add: Select Variables (optional)",
-        disabled=not st.session_state.flags["csv_plot"],
-        key="_check_view_select",
-        value=st.session_state.checkbox["view_select"],
-    )
-    if not st.session_state._check_view_select:
-        return
-
     with st.container(border=True):
 
         df = st.session_state.plot_var["df_data"]
@@ -330,14 +280,6 @@ def panel_filter() -> None:
     Panel filter
     """
     # Panel for filtering variables
-    show_panel_filter = st.checkbox(
-        ":material/filter_alt: Filter Data (optional)",
-        disabled=not st.session_state.flags["csv_plot"],
-        value=False,
-    )
-    if not show_panel_filter:
-        return
-
     df = st.session_state.plot_var["df_data"]
     with st.container(border=True):
         df = utildf.filter_dataframe(df)
@@ -486,17 +428,6 @@ def panel_plot() -> None:
     """
     Panel plot
     """
-
-    # Panel for displaying plots
-    st.checkbox(
-        ":material/bid_landscape: Plot Data",
-        disabled=not st.session_state.flags["csv_plot"],
-        key="_check_view_plot",
-        value=st.session_state.checkbox["view_plot"],
-    )
-    if not st.session_state._check_view_plot:
-        return
-
     # Read dataframe
     # if st.session_state.plot_var["df_data"].shape[0] == 0:
     #     st.session_state.plot_var["df_data"] = utildf.read_dataframe(
@@ -619,15 +550,19 @@ def panel_plot() -> None:
     # Show plot
     show_plots(df, btn_plots)
 
-
 # Call all steps
-st.divider()
-panel_wdir()
-panel_incsv()
-# panel_rename()
-panel_select()
-# panel_filter()
-panel_plot()
+t1, t2, t3, t4 =  st.tabs(
+    ['Working Dir', 'Input Data', 'Select', 'Plot']
+)
+
+with t1:
+    panel_wdir()
+with t2:
+    panel_incsv()
+with t3:
+    panel_select()
+with t4:
+    panel_plot()
 
 # FIXME: For DEBUG
 utilst.add_debug_panel()
