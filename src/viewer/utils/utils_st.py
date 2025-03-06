@@ -284,7 +284,7 @@ def util_panel_workingdir(app_type: str) -> None:
     with tab1:
         helpmsg = "Will create a dedicated working directory for a new experiment. All input and output data associated with the analysis will be stored in the new working directory."
         st.session_state.dset = st.text_input(
-            "Enter experiment name",
+            "Enter a new experiment name",
             st.session_state.dset,
             label_visibility='visible',
             help=helpmsg
@@ -297,7 +297,7 @@ def util_panel_workingdir(app_type: str) -> None:
         except:
             sel_ind = 0
         sel_tmp = st.selectbox(
-            'Select experiment',
+            'Select an existing experiment',
             list_exp,
             sel_ind,
             label_visibility='visible',
