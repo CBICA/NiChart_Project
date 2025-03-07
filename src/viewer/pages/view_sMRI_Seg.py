@@ -24,7 +24,7 @@ elif os.path.exists(st.session_state.paths["csv_dlmuse"]):
     st.session_state.paths["csv_plot"] = st.session_state.paths["csv_dlmuse"]
 
 # Panel for selecting input csv
-flag_disabled = not st.session_state.flags["dset"]
+flag_disabled = not st.session_state.flags["experiment"]
 
 if st.session_state.app_type == "cloud":
     with st.expander(":material/upload: Upload data", expanded=False):

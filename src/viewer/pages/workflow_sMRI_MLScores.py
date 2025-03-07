@@ -28,17 +28,17 @@ st.markdown(
     """
 )
 
-def panel_wdir() -> None:
+def panel_experiment() -> None:
     """
     Panel for selecting the working dir
     """
     with st.container(border=True):
         utilst.util_panel_workingdir(st.session_state.app_type)
 
-        if os.path.exists(st.session_state.paths["dset"]):
-            list_subdir = utilio.get_subfolders(st.session_state.paths["dset"])
+        if os.path.exists(st.session_state.paths["experiment"]):
+            list_subdir = utilio.get_subfolders(st.session_state.paths["experiment"])
             st.success(
-                f"Working directory is set to: {st.session_state.paths['dset']}",
+                f"Working directory is set to: {st.session_state.paths['experiment']}",
                 icon=":material/thumb_up:",
             )
             if len(list_subdir) > 0:
@@ -245,7 +245,7 @@ def panel_run() -> None:
                 try:
                     if flag_harmonize:
                         w_mlscores.run_workflow(
-                            st.session_state.dset,
+                            st.session_state.experiment,
                             st.session_state.paths["root"],
                             st.session_state.paths["csv_dlmuse"],
                             st.session_state.paths["csv_demog"],
@@ -253,7 +253,7 @@ def panel_run() -> None:
                         )
                     else:
                         w_mlscores.run_workflow_noharmonization(
-                            st.session_state.dset,
+                            st.session_state.experiment,
                             st.session_state.paths["root"],
                             st.session_state.paths["csv_dlmuse"],
                             st.session_state.paths["csv_demog"],
@@ -308,7 +308,7 @@ def panel_download() -> None:
         st.download_button(
             "Download ML Scores",
             out_zip,
-            file_name=f"{st.session_state.dset}_MLScores.zip",
+            file_name=f"{st.session_state.experiment}_MLScores.zip",
             disabled=False,
         )
 
@@ -322,7 +322,7 @@ if st.session_state.app_type == "cloud":
     )
 
 with t1:
-    panel_wdir()
+    panel_experiment()
 with t2:
     panel_inrois()
 with t3:

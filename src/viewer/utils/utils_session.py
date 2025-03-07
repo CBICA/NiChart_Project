@@ -95,7 +95,7 @@ def init_session_state() -> None:
         ###################################
         # General
         # Study name
-        st.session_state.dset = ""
+        st.session_state.experiment = ""
 
         # Icons for panels
         st.session_state.icon_thumb = {
@@ -105,28 +105,28 @@ def init_session_state() -> None:
 
         # Flags for checkbox states
         st.session_state.checkbox = {
-            "dicoms_wdir": False,
+            "dicoms_experiment": False,
             "dicoms_in": False,
             "dicoms_series": False,
             "dicoms_run": False,
             "dicoms_view": False,
             "dicoms_download": False,
-            "dlmuse_wdir": False,
+            "dlmuse_experiment": False,
             "dlmuse_in": False,
             "dlmuse_run": False,
             "dlmuse_view": False,
             "dlmuse_download": False,
-            "dlwmls_wdir": False,
+            "dlwmls_experiment": False,
             "dlwmls_in": False,
             "dlwmls_run": False,
             "dlwmls_view": False,
             "dlwmls_download": False,
-            "ml_wdir": False,
+            "ml_experiment": False,
             "ml_inrois": False,
             "ml_indemog": False,
             "ml_run": False,
             "ml_download": False,
-            "view_wdir": False,
+            "view_experiment": False,
             "view_in": False,
             "view_select": False,
             "view_plot": False,
@@ -134,8 +134,8 @@ def init_session_state() -> None:
 
         # Flags for various i/o
         st.session_state.flags = {
-            "dset": False,
-            "wdir": False,
+            "experiment": False,
+            "experiment": False,
             "dir_dicom": False,
             "dicom_series": False,
             "dir_nifti": False,
@@ -176,8 +176,8 @@ def init_session_state() -> None:
             "file_search_dir": "",
             "target_dir": "",
             "target_file": "",
-            "dset": "",
-            "wdir": "",
+            "dir_out": "",
+            "experiment": "",
             "lists": "",
             "dicom": "",
             "nifti": "",
@@ -464,7 +464,7 @@ def update_default_paths() -> None:
     """
     for d_tmp in st.session_state.dict_paths.keys():
         st.session_state.paths[d_tmp] = os.path.join(
-            st.session_state.paths["dset"],
+            st.session_state.paths["experiment"],
             st.session_state.dict_paths[d_tmp][0],
             st.session_state.dict_paths[d_tmp][1],
         )
@@ -476,11 +476,11 @@ def update_default_paths() -> None:
 
     st.session_state.paths["csv_mlscores"] = os.path.join(
         st.session_state.paths["mlscores"],
-        f"{st.session_state.dset}_DLMUSE+MLScores.csv",
+        f"{st.session_state.experiment}_DLMUSE+MLScores.csv",
     )
 
     st.session_state.paths["csv_demog"] = os.path.join(
-        st.session_state.paths["dset"], "lists", "Demog.csv"
+        st.session_state.paths["experiment"], "lists", "Demog.csv"
     )
 
     st.session_state.paths["csv_plot"] = os.path.join(
@@ -496,7 +496,7 @@ def reset_flags() -> None:
     """
     for tmp_key in st.session_state.flags.keys():
         st.session_state.flags[tmp_key] = False
-    st.session_state.flags["dset"] = True
+    st.session_state.flags["experiment"] = True
 
     # Check dicom folder
     fcount = utilio.get_file_count(st.session_state.paths["dicom"])

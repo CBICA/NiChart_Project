@@ -24,23 +24,28 @@ def progress(p: int, i: int, decoded: Any) -> None:
     with result_holder.container():
         st.progress(p, f"Progress: Token position={i}")
 
-def panel_wdir() -> None:
+def panel_experiment() -> None:
     """
     Panel for selecting output dir
     """
     with st.container(border=True):
-        curr_dir = st.session_state.paths["wdir"]
-        sel_dir = utilst.util_select_dir(curr_dir, 'sel_wdir')
-        if sel_dir is not None and sel_dir != curr_dir:
-            st.session_state.paths["outdir"] = sel_dir
+        dir_out = st.session_state.paths["dir_out"]
+        exp_curr = st.session_state.experiment
+        exp_sel = utilst.util_select_experiment(dir_out, exp_curr)
+        print(f'ssss {exp_sel} {exp_curr}')
+        if exp_sel is not None and exp_sel != exp_curr:
+            st.session_state.experiment = exp_sel
+            st.session_state.paths["experiment"] = os.path.join(
+                st.session_state.paths["dir_out"], exp_sel
+            )
             
     with st.container(border=True):
-        if os.path.exists(st.session_state.paths["wdir"]):
+        if os.path.exists(st.session_state.paths["experiment"]):
             st.success(
-                f"Output directory: {st.session_state.paths['wdir']}",
+                f"Experiment directory: {st.session_state.paths['experiment']}",
                 icon=":material/thumb_up:",
             )
-            st.session_state.flags["wdir"] = True
+            st.session_state.flags["experiments"] = True
 
 def panel_indicoms() -> None:
     """
@@ -340,7 +345,7 @@ def panel_download() -> None:
             st.download_button(
                 "Download Extracted Scans",
                 out_zip,
-                file_name=f"{st.session_state.dset}_{st.session_state.sel_mod}.zip",
+                file_name=f"{st.session_state.experiment}_{st.session_state.sel_mod}.zip",
                 disabled=False,
             )
         else:
@@ -359,7 +364,7 @@ st.markdown(
 
 # Call all steps
 t1, t2, t3, t4, t5 =  st.tabs(
-    ['Working Dir', 'Input Data', 'Detect Series', 'Extract Scans', 'View Scans']
+    ['Experiment', 'Input Data', 'Detect Series', 'Extract Scans', 'View Scans']
 )
 if st.session_state.app_type == "cloud":
     t1, t2, t3, t4, t5, t6 =  st.tabs(
@@ -367,7 +372,7 @@ if st.session_state.app_type == "cloud":
     )
 
 with t1:
-    panel_wdir()
+    panel_experiment()
 with t2:
     panel_indicoms()
 with t3:

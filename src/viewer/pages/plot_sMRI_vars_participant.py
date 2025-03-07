@@ -23,15 +23,15 @@ st.divider()
 
 # Panel for selecting the working dir
 icon = st.session_state.icon_thumb[st.session_state.flags["dir_out"]]
-show_panel_wdir = st.checkbox(
+show_panel_experiment = st.checkbox(
     f":material/folder_shared: Working Directory {icon}", value=False
 )
-if show_panel_wdir:
+if show_panel_experiment:
     with st.container(border=True):
         utilst.util_panel_workingdir(st.session_state.app_type)
-        if os.path.exists(st.session_state.paths["dset"]):
+        if os.path.exists(st.session_state.paths["experiment"]):
             st.success(
-                f"All results will be saved to: {st.session_state.paths['dset']}",
+                f"All results will be saved to: {st.session_state.paths['experiment']}",
                 icon=":material/thumb_up:",
             )
             st.session_state.flags["dir_out"] = True

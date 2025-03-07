@@ -25,8 +25,8 @@ st.markdown(
 )
 
 # Update status of checkboxes
-if "_check_dlwmls_wdir" in st.session_state:
-    st.session_state.checkbox["dlwmls_wdir"] = st.session_state._check_dlwmls_wdir
+if "_check_dlwmls_experiment" in st.session_state:
+    st.session_state.checkbox["dlwmls_experiment"] = st.session_state._check_dlwmls_experiment
 if "_check_dlwmls_in" in st.session_state:
     st.session_state.checkbox["dlwmls_in"] = st.session_state._check_dlwmls_in
 if "_check_dlwmls_run" in st.session_state:
@@ -39,26 +39,26 @@ if "_check_dlwmls_download" in st.session_state:
     )
 
 
-def panel_wdir() -> None:
+def panel_experiment() -> None:
     """
     Panel for selecting the working dir
     """
     icon = st.session_state.icon_thumb[st.session_state.flags["dir_out"]]
     st.checkbox(
         f":material/folder_shared: Working Directory {icon}",
-        key="_check_dlwmls_wdir",
-        value=st.session_state.checkbox["dlwmls_wdir"],
+        key="_check_dlwmls_experiment",
+        value=st.session_state.checkbox["dlwmls_experiment"],
     )
-    if not st.session_state._check_dlwmls_wdir:
+    if not st.session_state._check_dlwmls_experiment:
         return
 
     with st.container(border=True):
         utilst.util_panel_workingdir(st.session_state.app_type)
 
-        if os.path.exists(st.session_state.paths["dset"]):
-            list_subdir = utilio.get_subfolders(st.session_state.paths["dset"])
+        if os.path.exists(st.session_state.paths["experiment"]):
+            list_subdir = utilio.get_subfolders(st.session_state.paths["experiment"])
             st.success(
-                f"Working directory is set to: {st.session_state.paths['dset']}",
+                f"Working directory is set to: {st.session_state.paths['experiment']}",
                 icon=":material/thumb_up:",
             )
             if len(list_subdir) > 0:
@@ -344,13 +344,13 @@ def panel_download() -> None:
         st.download_button(
             "Download DLWMLS results",
             out_zip,
-            file_name=f"{st.session_state.dset}_DLWMLS.zip",
+            file_name=f"{st.session_state.experiment}_DLWMLS.zip",
             disabled=False,
         )
 
 
 st.divider()
-panel_wdir()
+panel_experiment()
 panel_infl()
 panel_dlwmls()
 panel_view()

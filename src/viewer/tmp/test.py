@@ -29,8 +29,8 @@ import streamlit as st
 if "instantiated" not in st.session_state:
     st.session_state.wtext= 'HELLO'
     st.session_state.instantiated = True
-show_panel_wdir = st.checkbox(st.session_state.wtext)
-if show_panel_wdir:
+show_panel_experiment = st.checkbox(st.session_state.wtext)
+if show_panel_experiment:
     with st.container(border=True):
         if st.checkbox('Select'):
             st.session_state.wtext = 'BYE'

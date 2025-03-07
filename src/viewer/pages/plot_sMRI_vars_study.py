@@ -34,17 +34,17 @@ st.markdown(
     """
 )
 
-def panel_wdir() -> None:
+def panel_experiment() -> None:
     """
     Panel for selecting the working dir
     """
     with st.container(border=True):
         utilst.util_panel_workingdir(st.session_state.app_type)
 
-        if os.path.exists(st.session_state.paths["dset"]):
-            list_subdir = utilio.get_subfolders(st.session_state.paths["dset"])
+        if os.path.exists(st.session_state.paths["experiment"]):
+            list_subdir = utilio.get_subfolders(st.session_state.paths["experiment"])
             st.success(
-                f"Working directory is set to: {st.session_state.paths['dset']}",
+                f"Working directory is set to: {st.session_state.paths['experiment']}",
                 icon=":material/thumb_up:",
             )
             if len(list_subdir) > 0:
@@ -556,7 +556,7 @@ t1, t2, t3, t4 =  st.tabs(
 )
 
 with t1:
-    panel_wdir()
+    panel_experiment()
 with t2:
     panel_incsv()
 with t3:

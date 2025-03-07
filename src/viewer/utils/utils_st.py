@@ -226,61 +226,29 @@ def util_workingdir_get_help() -> None:
             help_working_dir()
 
 
-def util_panel_workingdir(app_type: str) -> None:
+def util_select_experiment(dir_out: str, exp_curr:str) -> str:
     """
-    Panel to set results folder name
+    Panel to set/select experiment name
     """
-    curr_dir = st.session_state.paths["dset"]
-
-    # Read output folder
-    if app_type == "desktop":
-        # Read output folder from the user
-        helpmsg = "Results will be saved to a dedicated folder at the output path.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
-        dir_out = user_input_foldername(
-            "Select folder",
-            "btn_sel_dir_out",
-            "Output path",
-            st.session_state.paths["file_search_dir"],
-            st.session_state.paths["dir_out"],
-            helpmsg,
-        )
-
-        if dir_out != "":
-            st.session_state.paths["dir_out"] = dir_out
-
     # Read dataset name (used to create a folder where all results will be saved)
-    st.write("Experiment name")
-    tmp_cols = st.columns(2)
-    with tmp_cols[0]:
-        helpmsg = "Will set the working directory to an existing experiment, with all the data previously uploaded or generated."
-        list_exp = [""] + utilio.get_subfolders(st.session_state.paths["dir_out"])
-        sel_ind = list_exp.index(st.session_state.dset)
-        sel_tmp = st.selectbox("Select existing", list_exp, sel_ind, help=helpmsg)
-        if sel_tmp is not None and sel_tmp != "":
-            st.session_state.dset = sel_tmp
+    sel_opt = st.radio(
+        'Options:',
+        ['Select Existing', 'Create New'],
+        horizontal = True
+    )
+    if sel_opt == 'Select Existing':
+        helpmsg = "Use existing experiment with data previously uploaded or generated."
+        list_exp = utilio.get_subfolders(dir_out)
+        exp_sel = st.selectbox("Select", list_exp, None, help=helpmsg)
 
-    with tmp_cols[1]:
-        helpmsg = "Will create a dedicated working directory for a new experiment. All input and output data associated with the analysis will be stored in the new working directory."
-        st.session_state.dset = st.text_input(
-            "Create new", st.session_state.dset, help=helpmsg
-        )
-
-    # Create results folder
-    if st.session_state.dset != "" and st.session_state.paths["dir_out"] != "":
-        st.session_state.paths["dset"] = os.path.join(
-            st.session_state.paths["dir_out"], st.session_state.dset
-        )
-
-    # Check if results folder name changed
-    if curr_dir != st.session_state.paths["dset"]:
-        # Create output folder
-        if not os.path.exists(st.session_state.paths["dset"]):
-            os.makedirs(st.session_state.paths["dset"])
-
-        # Update paths for output subfolders
-        utilses.update_default_paths()
-        utilses.reset_flags()
-
+    if sel_opt == 'Create New':
+        helpmsg = "Create new experiment."
+        exp_sel = st.text_input("Experiment name:", None, help=helpmsg)
+        if exp_sel is not None:
+            dir_tmp = os.path.join(dir_out, exp_sel)
+            if not os.path.exists(dir_tmp):
+                os.makedirs(dir_tmp)
+    return exp_sel
 
 def copy_uploaded_to_dir() -> None:
     # Copies files to local storage
