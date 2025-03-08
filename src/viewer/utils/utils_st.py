@@ -234,16 +234,26 @@ def util_select_experiment(dir_out: str, exp_curr:str) -> str:
     sel_opt = st.radio(
         'Options:',
         ['Select Existing', 'Create New'],
-        horizontal = True
+        horizontal = True,
+        label_visibility = 'collapsed'
     )
     if sel_opt == 'Select Existing':
-        helpmsg = "Use existing experiment with data previously uploaded or generated."
         list_exp = utilio.get_subfolders(dir_out)
-        exp_sel = st.selectbox("Select", list_exp, None, help=helpmsg)
+        exp_sel = st.selectbox(
+            "Select",
+            list_exp,
+            None,
+            label_visibility = 'collapsed',
+            placeholder='Select experiment name'
+        )
 
     if sel_opt == 'Create New':
-        helpmsg = "Create new experiment."
-        exp_sel = st.text_input("Experiment name:", None, help=helpmsg)
+        exp_sel = st.text_input(
+            "Experiment name:",
+            None,
+            label_visibility = 'collapsed',
+            placeholder='Type experiment name'
+        )
         if exp_sel is not None:
             dir_tmp = os.path.join(dir_out, exp_sel)
             if not os.path.exists(dir_tmp):
