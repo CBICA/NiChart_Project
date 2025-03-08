@@ -38,6 +38,9 @@ def panel_experiment() -> None:
             st.session_state.paths["experiment"] = os.path.join(
                 st.session_state.paths["dir_out"], exp_sel
             )
+            # Update paths when selected experiment changes
+            utilss.update_default_paths()
+            utilss.reset_flags()
             
     with st.container(border=True):
         if os.path.exists(st.session_state.paths["experiment"]):
@@ -368,7 +371,7 @@ t1, t2, t3, t4, t5 =  st.tabs(
 )
 if st.session_state.app_type == "cloud":
     t1, t2, t3, t4, t5, t6 =  st.tabs(
-        ['Working Dir', 'Input Data', 'Detect Series', 'Extract Scans', 'View Scans', 'Download']
+        ['Experiment', 'Input Data', 'Detect Series', 'Extract Scans', 'View Scans', 'Download']
     )
 
 with t1:

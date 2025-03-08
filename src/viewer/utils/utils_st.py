@@ -418,7 +418,7 @@ def util_select_dir(curr_dir, key_txt) -> None:
         sel_dir = st.text_input(
             '',
             key=f'_key_sel_{key_txt}',
-            value=curr_dir,
+            value=None,
             label_visibility='collapsed',
         )
         if sel_dir is not None:

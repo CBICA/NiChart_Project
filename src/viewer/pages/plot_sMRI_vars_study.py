@@ -36,26 +36,29 @@ st.markdown(
 
 def panel_experiment() -> None:
     """
-    Panel for selecting the working dir
+    Panel for selecting output dir
     """
     with st.container(border=True):
-        utilst.util_panel_workingdir(st.session_state.app_type)
+        dir_out = st.session_state.paths["dir_out"]
+        exp_curr = st.session_state.experiment
+        exp_sel = utilst.util_select_experiment(dir_out, exp_curr)
+        print(f'ssss {exp_sel} {exp_curr}')
+        if exp_sel is not None and exp_sel != exp_curr:
+            st.session_state.experiment = exp_sel
+            st.session_state.paths["experiment"] = os.path.join(
+                st.session_state.paths["dir_out"], exp_sel
+            )
+            # Update paths when selected experiment changes
+            utilss.update_default_paths()
+            utilss.reset_flags()
 
+    with st.container(border=True):
         if os.path.exists(st.session_state.paths["experiment"]):
-            list_subdir = utilio.get_subfolders(st.session_state.paths["experiment"])
             st.success(
-                f"Working directory is set to: {st.session_state.paths['experiment']}",
+                f"Experiment directory: {st.session_state.paths['experiment']}",
                 icon=":material/thumb_up:",
             )
-            if len(list_subdir) > 0:
-                st.info(
-                    "Working directory already includes the following folders: "
-                    + ", ".join(list_subdir)
-                )
-            st.session_state.flags["dir_out"] = True
-
-        utilst.util_workingdir_get_help()
-
+            st.session_state.flags["experiments"] = True
 
 def panel_incsv() -> None:
     """
@@ -552,7 +555,7 @@ def panel_plot() -> None:
 
 # Call all steps
 t1, t2, t3, t4 =  st.tabs(
-    ['Working Dir', 'Input Data', 'Select', 'Plot']
+    ['Experiment', 'Input Data', 'Select', 'Plot']
 )
 
 with t1:
