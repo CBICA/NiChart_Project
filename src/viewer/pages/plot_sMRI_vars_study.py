@@ -116,7 +116,7 @@ def panel_incsv() -> None:
         s_text = """
         - Choose a CSV file. Primarily designed for DLMUSE and ML score data, but also supports other files with numeric values.
         """
-        utilst.util_get_help(s_title, s_text)
+        utilst.util_help_dialog(s_title, s_text)
 
 
 def panel_rename() -> None:
@@ -173,7 +173,7 @@ def panel_rename() -> None:
         s_text = """
         - If your data includes numeric columns
         """
-        utilst.util_get_help(s_title, s_text)
+        utilst.util_help_dialog(s_title, s_text)
 
 
 def panel_select() -> None:
@@ -275,7 +275,7 @@ def panel_select() -> None:
         - You can further refine your selection by choosing specific variables within each chosen category.
         - You can revert back to the initial data at any point.
         """
-        utilst.util_get_help(s_title, s_text)
+        utilst.util_help_dialog(s_title, s_text)
 
 
 def panel_filter() -> None:

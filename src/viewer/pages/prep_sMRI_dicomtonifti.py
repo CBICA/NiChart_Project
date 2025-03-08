@@ -9,7 +9,10 @@ import utils.utils_menu as utilmenu
 import utils.utils_nifti as utilni
 import utils.utils_session as utilss
 import utils.utils_st as utilst
+import utils.utils_doc as utildoc
+import utils.utils_panels as utilpn
 from stqdm import stqdm
+import time
 
 # Page config should be called for each page
 utilss.config_page()
@@ -24,95 +27,22 @@ def progress(p: int, i: int, decoded: Any) -> None:
     with result_holder.container():
         st.progress(p, f"Progress: Token position={i}")
 
-def panel_experiment() -> None:
-    """
-    Panel for selecting output dir
-    """
-    with st.container(border=True):
-        dir_out = st.session_state.paths["dir_out"]
-        exp_curr = st.session_state.experiment
-        exp_sel = utilst.util_select_experiment(dir_out, exp_curr)
-        print(f'ssss {exp_sel} {exp_curr}')
-        if exp_sel is not None and exp_sel != exp_curr:
-            st.session_state.experiment = exp_sel
-            st.session_state.paths["experiment"] = os.path.join(
-                st.session_state.paths["dir_out"], exp_sel
-            )
-            # Update paths when selected experiment changes
-            utilss.update_default_paths()
-            utilss.reset_flags()
-            
-    with st.container(border=True):
-        if os.path.exists(st.session_state.paths["experiment"]):
-            st.success(
-                f"Experiment directory: {st.session_state.paths['experiment']}",
-                icon=":material/thumb_up:",
-            )
-            st.session_state.flags["experiments"] = True
-
-def panel_indicoms() -> None:
-    """
-    Panel for selecting input dicoms
-    """
-    with st.container(border=True):
-        if st.session_state.app_type == "cloud":
-            # Upload data
-            utilst.util_upload_folder(
-                st.session_state.paths["dicom"],
-                "Dicom files or folders",
-                False,
-                "Raw dicom files can be uploaded as a folder, multiple files, or a single zip file",
-            )
-            fcount = utilio.get_file_count(st.session_state.paths["dicom"])
-            if fcount > 0:
-                st.session_state.flags["dir_dicom"] = True
-                p_dicom = st.session_state.paths["dicom"]
-                st.success(
-                    f"Data is ready ({p_dicom}, {fcount} files)",
-                    icon=":material/thumb_up:",
-                )
-
-        else:  # st.session_state.app_type == 'desktop'
-            utilst.util_select_folder(
-                "selected_dicom_folder",
-                "Dicom folder",
-                st.session_state.paths["dicom"],
-                st.session_state.paths["file_search_dir"],
-                False,
-            )
-            fcount = utilio.get_file_count(st.session_state.paths["dicom"])
-            if fcount > 0:
-                st.session_state.flags["dir_dicom"] = True
-                p_dicom = st.session_state.paths["dicom"]
-                st.success(
-                    f"Data is ready ({p_dicom}, {fcount} files)",
-                    icon=":material/thumb_up:",
-                )
-
-        s_title = "DICOM Data"
-        s_text = """
-        - Upload or select the input DICOM folder containing all DICOM files. Nested folders are supported.
-
-        - On the desktop app, a symbolic link named **"Dicoms"** will be created in the **working directory**, pointing to your input DICOM folder.
-
-        - On the cloud platform, you can directly drag and drop your DICOM files or folders and they will be uploaded to the **"Dicoms"** folder within the **working directory**.
-
-        - On the cloud, **we strongly recommend** compressing your DICOM data into a single ZIP archive before uploading. The system will automatically extract the contents of the ZIP file into the **"Dicoms"** folder upon upload.
-        """
-        utilst.util_get_help(s_title, s_text)
-
-def panel_detect() -> None:
+def panel_detect(status) -> None:
     """
     Panel for detecting dicom series
     """
     with st.container(border=True):
-        flag_disabled = not st.session_state.flags["dir_dicom"]
+        # Check init status
+        if not status:
+            st.warning('Please check previous step!')
+            return
+            flag_disabled = not st.session_state.flags["dicoms"]
 
         # Detect dicom series
-        btn_detect = st.button("Detect Series", disabled=flag_disabled)
+        btn_detect = st.button("Detect Series")
         if btn_detect:
             with st.spinner("Wait for it..."):
-                df_dicoms = utildcm.detect_series(st.session_state.paths["dicom"])
+                df_dicoms = utildcm.detect_series(st.session_state.paths["dicoms"])
                 list_series = df_dicoms.SeriesDesc.unique()
                 num_dicom_scans = (
                     df_dicoms[["PatientID", "StudyDate", "SeriesDesc"]]
@@ -124,7 +54,7 @@ def panel_detect() -> None:
                 st.session_state.df_dicoms = df_dicoms
 
         if len(st.session_state.list_series) > 0:
-            st.session_state.flags["dicom_series"] = True
+            st.session_state.flags["dicoms_series"] = True
             st.success(
                 f"Detected {st.session_state.num_dicom_scans} scans in {len(st.session_state.list_series)} series!",
                 icon=":material/thumb_up:",
@@ -133,103 +63,104 @@ def panel_detect() -> None:
         with st.expander("Show dicom metadata", expanded=False):
             st.dataframe(st.session_state.df_dicoms)
 
-        s_title = "DICOM Series"
-        s_text = """
-        - The system verifies all files within the DICOM folder.
-        - Valid DICOM files are processed to extract the DICOM header information, which is used to identify and group images into their respective series
-        - The DICOM field **"SeriesDesc"** is used to identify series
-        """
-        utilst.util_get_help(s_title, s_text)
+        utilst.util_help_dialog(utildoc.title_dicoms_detect, utildoc.def_dicoms_detect)
 
 
-def panel_extract() -> None:
+def panel_extract(status) -> None:
     """
     Panel for extracting dicoms
     """
     with st.container(border=True):
-
-        flag_disabled = not st.session_state.flags["dicom_series"]
+        # Check init status
+        if not status:
+            st.warning('Please check previous step!')
+            return
 
         # Selection of img modality
-        sel_mod = utilst.user_input_select(
-            "Image Modality",
-            "key_select_modality",
-            st.session_state.list_mods,
-            None,
-            "Modality of the extracted images",
-            flag_disabled,
+        sel_mod = st.selectbox(
+            'Image Modality', st.session_state.list_mods, None
         )
-        if sel_mod is not None:
-            st.session_state.sel_mod = sel_mod
-            if not os.path.exists(st.session_state.paths[st.session_state.sel_mod]):
-                os.makedirs(st.session_state.paths[st.session_state.sel_mod])
+        if sel_mod is None:
+            return
 
-        # Selection of dicom series
-        st.session_state.sel_series = utilst.user_input_multiselect(
-            "Select series:",
-            "key_multiselect_dseries",
-            st.session_state.list_series,
-            [],
-            "",
-            flag_disabled=flag_disabled,
-        )
-
-        btn_convert = st.button("Convert Series", disabled=flag_disabled)
-        if btn_convert:
-            with st.spinner("Wait for it..."):
-                try:
-                    utildcm.convert_sel_series(
-                        st.session_state.df_dicoms,
-                        st.session_state.sel_series,
-                        st.session_state.paths[st.session_state.sel_mod],
-                        f"_{st.session_state.sel_mod}.nii.gz",
-                    )
-                except:
-                    st.warning(":material/thumb_down: Nifti conversion failed!")
-
-            num_nifti = utilio.get_file_count(
-                st.session_state.paths[st.session_state.sel_mod], ".nii.gz"
-            )
-            if num_nifti == 0:
-                st.warning(
-                    ":material/thumb_down: The extraction process did not produce any Nifti images!"
-                )
-            else:
-                if st.session_state.has_cloud_session:
-                    utilcloud.update_stats_db(
-                        st.session_state.cloud_user_id, "NIFTIfromDICOM", num_nifti
-                    )
-
-        df_files = utilio.get_file_names(
-            st.session_state.paths[st.session_state.sel_mod], ".nii.gz"
-        )
-        num_nifti = df_files.shape[0]
-
-        if num_nifti > 0:
-            st.session_state.flags["dir_nifti"] = True
-            st.session_state.flags[st.session_state.sel_mod] = True
+        # Check if data exists
+        dout = st.session_state.paths[sel_mod]
+        if st.session_state.flags[sel_mod]:
             st.success(
-                f"Nifti images are ready ({st.session_state.paths[st.session_state.sel_mod]}, {num_nifti} scan(s))",
+                f"Data is ready: {dout}",
                 icon=":material/thumb_up:",
             )
 
+            df_files = utilio.get_file_names(
+                st.session_state.paths[sel_mod], ".nii.gz"
+            )
             with st.expander("View NIFTI image list"):
                 st.dataframe(df_files)
 
-        s_title = "Nifti Conversion"
-        s_text = """
-        - The user specifies the desired modality and selects the associated series.
-        - Selected series are converted into Nifti image format.
-        - Nifti images are renamed with the following format: **{PatientID}_{StudyDate}_{modality}.nii.gz**
-        """
-        utilst.util_get_help(s_title, s_text)
+            # Delete folder if user wants to reload
+            if st.button('Reset', key='reset_extraction'):
+                try:
+                    if os.path.islink(dout):
+                        os.unlink(dout)
+                    else:
+                        shutil.rmtree(dout)
+                    st.session_state.flags[dtype] = False
+                    st.success(f'Removed dir: {dout}')
+                    time.sleep(4)
+                except:
+                    st.error(f'Could not delete folder: {dout}')
+                st.rerun()
+
+        else:
+            # Create out dir
+            if not os.path.exists(st.session_state.paths[st.session_state.sel_mod]):
+                os.makedirs(st.session_state.paths[st.session_state.sel_mod])
+
+            # Selection of dicom series
+            st.session_state.sel_series = st.selectbox(
+                "Select series:", st.session_state.list_series, None
+            )
+
+            btn_convert = st.button("Convert Series")
+            if btn_convert:
+                with st.spinner("Wait for it..."):
+                    try:
+                        utildcm.convert_sel_series(
+                            st.session_state.df_dicoms,
+                            st.session_state.sel_series,
+                            st.session_state.paths[st.session_state.sel_mod],
+                            f"_{st.session_state.sel_mod}.nii.gz",
+                        )
+                    except:
+                        st.warning(":material/thumb_down: Nifti conversion failed!")
+
+            st.rerun()
+                # num_nifti = utilio.get_file_count(
+                #     st.session_state.paths[st.session_state.sel_mod], ".nii.gz"
+                # )
+                # if num_nifti == 0:
+                #     st.warning(
+                #         ":material/thumb_down: The extraction process did not produce any Nifti images!"
+                #     )
+                # else:
+                #     if st.session_state.has_cloud_session:
+                #         utilcloud.update_stats_db(
+                #             st.session_state.cloud_user_id, "NIFTIfromDICOM", num_nifti
+                #         )
+                #
+
+        utilst.util_help_dialog(utildoc.title_dicoms_extract, utildoc.def_dicoms_extract)
 
 
-def panel_view() -> None:
+def panel_view(status) -> None:
     """
     Panel for viewing extracted nifti images
     """
     with st.container(border=True):
+        # Check init status
+        if not status:
+            st.warning('Please check previous step!')
+            return
 
         # Selection of img modality
         sel_mod = utilst.user_input_select(
@@ -313,48 +244,6 @@ def panel_view() -> None:
                     ":material/thumb_down: Image parsing failed. Please confirm that the image file represents a 3D volume using an external tool."
                 )
 
-
-def panel_download() -> None:
-    """
-    Panel for downloading extracted nifti images
-    """
-    with st.container(border=True):
-        # Selection of img modality
-        sel_mod = utilst.user_input_select(
-            "Image Modality",
-            "key_selbox_modality_download",
-            ["All"] + st.session_state.list_mods,
-            None,
-            "Modality of the images to download",
-            False,
-        )
-
-        if sel_mod is not None:
-            st.session_state.sel_mod = sel_mod
-            if st.session_state.sel_mod == "All":
-                st.session_state.sel_mod = "nifti"
-
-        out_zip = bytes()
-        if not os.path.exists(st.session_state.paths["download"]):
-            os.makedirs(st.session_state.paths["download"])
-        f_tmp = os.path.join(
-            st.session_state.paths["download"], f"{st.session_state.sel_mod}"
-        )
-        out_zip = utilio.zip_folder(
-            st.session_state.paths[st.session_state.sel_mod], f_tmp
-        )
-
-        if os.path.exists(st.session_state.paths[st.session_state.sel_mod]):
-            st.download_button(
-                "Download Extracted Scans",
-                out_zip,
-                file_name=f"{st.session_state.experiment}_{st.session_state.sel_mod}.zip",
-                disabled=False,
-            )
-        else:
-            st.warning(":material/thumb_down: No images found for download!")
-
-
 st.markdown(
     """
     - Extracts raw DICOM files to NIFTI format.
@@ -367,26 +256,32 @@ st.markdown(
 
 # Call all steps
 t1, t2, t3, t4, t5 =  st.tabs(
-    ['Experiment', 'Input Data', 'Detect Series', 'Extract Scans', 'View Scans']
+    ['Experiment Name', 'Input Data', 'Detect Series', 'Extract Scans', 'View Scans']
 )
 if st.session_state.app_type == "cloud":
     t1, t2, t3, t4, t5, t6 =  st.tabs(
-        ['Experiment', 'Input Data', 'Detect Series', 'Extract Scans', 'View Scans', 'Download']
+        ['Experiment Name', 'Input Data', 'Detect Series', 'Extract Scans', 'View Scans', 'Download']
     )
 
 with t1:
-    panel_experiment()
+    utilpn.util_panel_experiment()
 with t2:
-    panel_indicoms()
+    # panel_indicoms()
+    status = st.session_state.flags['experiment']
+    utilpn.util_panel_input_multi('dicoms', status)
 with t3:
-    panel_detect()
+    status = st.session_state.flags['dicoms']
+    panel_detect(status)
 with t4:
-    panel_extract()
+    status = st.session_state.flags['dicoms_series']
+    panel_extract(status)
 with t5:
-    panel_view()
+    status = st.session_state.flags['nifti']
+    panel_view(status)
 if st.session_state.app_type == "cloud":
     with t6:
-        panel_download()
+        status = st.session_state.flags['dicoms']
+        utilpn.util_panel_download('Nifti', status)
 
 # FIXME: For DEBUG
 utilst.add_debug_panel()

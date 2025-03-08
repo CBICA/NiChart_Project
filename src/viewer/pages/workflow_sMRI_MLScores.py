@@ -28,31 +28,9 @@ st.markdown(
     """
 )
 
-def panel_experiment() -> None:
-    """
-    Panel for selecting output dir
-    """
-    with st.container(border=True):
-        dir_out = st.session_state.paths["dir_out"]
-        exp_curr = st.session_state.experiment
-        exp_sel = utilst.util_select_experiment(dir_out, exp_curr)
-        print(f'ssss {exp_sel} {exp_curr}')
-        if exp_sel is not None and exp_sel != exp_curr:
-            st.session_state.experiment = exp_sel
-            st.session_state.paths["experiment"] = os.path.join(
-                st.session_state.paths["dir_out"], exp_sel
-            )
-            # Update paths when selected experiment changes
-            utilss.update_default_paths()
-            utilss.reset_flags()
-
-    with st.container(border=True):
-        if os.path.exists(st.session_state.paths["experiment"]):
-            st.success(
-                f"Experiment directory: {st.session_state.paths['experiment']}",
-                icon=":material/thumb_up:",
-            )
-            st.session_state.flags["experiments"] = True
+def panel_indata() -> None:
+    panel_inrois()
+    panel_indemog()
 
 def panel_inrois() -> None:
     """
@@ -294,7 +272,7 @@ def panel_run() -> None:
         - SurrealGAN scores are calculated using harmonized ROI values and pre-trained models
         - Final results, ROI values and ML scores, are saved in the result csv file
         """
-        utilst.util_get_help(s_title, s_text)
+        utilst.util_help_dialog(s_title, s_text)
 
 
 def panel_download() -> None:
@@ -316,20 +294,18 @@ def panel_download() -> None:
         )
 
 # Call all steps
-t1, t2, t3, t4 =  st.tabs(
-    ['Experiment', 'In ROIS', 'In Demog', 'Run']
+t1, t2, t3 =  st.tabs(
+    ['Experiment', 'Input Data', 'Run MLScores']
 )
 if st.session_state.app_type == "cloud":
-    t1, t2, t3, t4, t5 =  st.tabs(
-        ['Experiment', 'In ROIS', 'In Demog', 'Run', 'Download']
+    t1, t2, t3, t4 =  st.tabs(
+        ['Experiment', 'Input Data', 'Run MLScores', 'Download']
     )
 
 with t1:
-    panel_experiment()
+    utilpn.util_panel_experiment()
 with t2:
-    panel_inrois()
-with t3:
-    panel_indemog()
+    panel_indata()
 with t4:
     panel_run()
 if st.session_state.app_type == "cloud":

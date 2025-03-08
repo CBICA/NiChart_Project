@@ -62,9 +62,9 @@ def zip_folder(in_dir: str, f_out: str) -> Optional[bytes]:
         )
 
         with open(f"{f_out}.zip", "rb") as f:
-            dir_download = f.read()
+            download_dir = f.read()
 
-        return dir_download
+        return download_dir
 
 
 def unzip_zip_files(in_dir: str) -> None:

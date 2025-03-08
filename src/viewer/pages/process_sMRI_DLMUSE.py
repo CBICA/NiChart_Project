@@ -26,32 +26,6 @@ st.markdown(
         """
 )
 
-def panel_experiment() -> None:
-    """
-    Panel for selecting output dir
-    """
-    with st.container(border=True):
-        dir_out = st.session_state.paths["dir_out"]
-        exp_curr = st.session_state.experiment
-        exp_sel = utilst.util_select_experiment(dir_out, exp_curr)
-        print(f'ssss {exp_sel} {exp_curr}')
-        if exp_sel is not None and exp_sel != exp_curr:
-            st.session_state.experiment = exp_sel
-            st.session_state.paths["experiment"] = os.path.join(
-                st.session_state.paths["dir_out"], exp_sel
-            )
-            # Update paths when selected experiment changes
-            utilss.update_default_paths()
-            utilss.reset_flags()
-
-    with st.container(border=True):
-        if os.path.exists(st.session_state.paths["experiment"]):
-            st.success(
-                f"Experiment directory: {st.session_state.paths['experiment']}",
-                icon=":material/thumb_up:",
-            )
-            st.session_state.flags["experiments"] = True
-
 def panel_int1() -> None:
     """
     Panel for selecting input dir
@@ -74,7 +48,7 @@ def panel_int1() -> None:
 #     """
 #     Panel for uploading input t1 images
 #     """
-#     st.session_state.flags["dir_t1"] = os.path.exists(st.session_state.paths["T1"])
+#     st.session_state.flags["T1_dir"] = os.path.exists(st.session_state.paths["T1"])
 #     with st.container(border=True):
 #         if st.session_state.app_type == "cloud":
 #             utilst.util_upload_folder(
@@ -102,7 +76,7 @@ def panel_int1() -> None:
 #             )
 #             fcount = utilio.get_file_count(st.session_state.paths["T1"])
 #             if fcount > 0:
-#                 st.session_state.flags["dir_t1"] = True
+#                 st.session_state.flags["T1_dir"] = True
 #                 p_t1 = st.session_state.paths["T1"]
 #                 st.success(
 #                     f"Data is ready ({p_t1}, {fcount} files)",
@@ -121,7 +95,7 @@ def panel_int1() -> None:
 #
 #         - On the cloud, **we strongly recommend** compressing your input images into a single ZIP archive before uploading. The system will automatically extract the contents of the ZIP file into the **"Nifti/T1"** folder upon upload.
 #         """
-#         utilst.util_get_help(s_title, s_text)
+#         utilst.util_help_dialog(s_title, s_text)
 #
 
 def panel_dlmuse() -> None:
@@ -205,7 +179,7 @@ def panel_dlmuse() -> None:
         - Raw T1 images are segmented into anatomical regions of interest (ROIs) using DLMUSE.
         - The output folder (**"DLMUSE"**) will contain the segmentation mask for each scan, and a single CSV file with volumes of all ROIs. The result file will include single ROIs (segmented regions) and composite ROIs (obtained by merging single ROIs within a tree structure).
         """
-        utilst.util_get_help(s_title, s_text)
+        utilst.util_help_dialog(s_title, s_text)
 
 
 def panel_view() -> None:
@@ -326,38 +300,18 @@ def panel_view() -> None:
                         )
 
 
-def panel_download() -> None:
-    """
-    Panel for downloading results
-    """
-    with st.container(border=True):
-
-        # Zip results and download
-        out_zip = bytes()
-        if not False:
-            if not os.path.exists(st.session_state.paths["download"]):
-                os.makedirs(st.session_state.paths["download"])
-            f_tmp = os.path.join(st.session_state.paths["download"], "DLMUSE")
-            out_zip = utilio.zip_folder(st.session_state.paths["dlmuse"], f_tmp)
-
-        st.download_button(
-            "Download DLMUSE results",
-            out_zip,
-            file_name=f"{st.session_state.experiment}_DLMUSE.zip",
-            disabled=False,
-        )
 
 # Call all steps
 t1, t2, t3, t4 =  st.tabs(
-    ['Working Dir', 'Input Data', 'DLMUSE', 'View Scans']
+    ['Experiment Name', 'Input Data', 'DLMUSE', 'View Scans']
 )
 if st.session_state.app_type == "cloud":
     t1, t2, t3, t4, t5 =  st.tabs(
-        ['Working Dir', 'Input Data', 'DLMUSE', 'View Scans', 'Download']
+        ['Experiment Name', 'Input Data', 'DLMUSE', 'View Scans', 'Download']
     )
 
 with t1:
-    panel_experiment()
+    utilpn.util_panel_experiment()
 with t2:
     panel_int1()
 with t3:
@@ -366,7 +320,7 @@ with t4:
     panel_view()
 if st.session_state.app_type == "cloud":
     with t5:
-        panel_download()
+        utilpn.util_panel_download('DLMUSE')
 
 # FIXME: For DEBUG
 utilst.add_debug_panel()

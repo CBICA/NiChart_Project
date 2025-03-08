@@ -14,6 +14,72 @@ COL_LEFT = 5
 COL_RIGHT_EMPTY = 0.01
 COL_RIGHT_BUTTON = 1
 
+def util_select_expname(dir_out: str, exp_curr:str) -> str:
+    """
+    Set/select experiment name
+    """
+    # Read dataset name (used to create a folder where all results will be saved)
+    sel_opt = st.radio(
+        'Options:',
+        ['Select Existing', 'Create New'],
+        horizontal = True,
+        label_visibility = 'collapsed'
+    )
+
+    if sel_opt == 'Select Existing':
+        list_exp = utilio.get_subfolders(dir_out)
+        exp_sel = st.selectbox(
+            "Select",
+            list_exp,
+            None,
+            label_visibility = 'collapsed',
+            placeholder='Select experiment name'
+        )
+
+    if sel_opt == 'Create New':
+        exp_sel = st.text_input(
+            "Experiment name:",
+            None,
+            label_visibility = 'collapsed',
+            placeholder='Type experiment name'
+        )
+        if exp_sel is not None:
+            dir_tmp = os.path.join(dir_out, exp_sel)
+            if not os.path.exists(dir_tmp):
+                os.makedirs(dir_tmp)
+    return exp_sel
+
+def util_panel_experiment() -> None:
+    """
+    Panel for selecting experiment
+    """
+    with st.container(border=True):
+        if st.session_state.flags["experiment"]:
+            st.success(
+                f"Experiment directory: {st.session_state.paths['experiment']}",
+                icon=":material/thumb_up:",
+            )
+            if st.button('Switch'):
+                st.session_state.flags["experiment"] = False
+                st.session_state.experiment = ''
+                st.rerun()
+
+        else:
+            dir_out = st.session_state.paths["dir_out"]
+            exp_curr = st.session_state.experiment
+            exp_sel = util_select_expname(dir_out, exp_curr)
+
+            if exp_sel is not None and exp_sel != exp_curr:
+                st.session_state.experiment = exp_sel
+                st.session_state.paths["experiment"] = os.path.join(
+                    st.session_state.paths["dir_out"], exp_sel
+                )
+                st.session_state.flags["experiment"] = True
+                # Update paths when selected experiment changes
+                utilses.update_default_paths()
+                utilses.reset_flags()
+                st.rerun()
+
 
 def user_input_textfield(
     label: str, init_val: str, help_msg: str, flag_disabled: bool
@@ -181,7 +247,7 @@ def show_img3D(
             st.image(img[:, :, slice_index], width=w_img)
 
 
-def util_get_help(s_title: str, s_text: str) -> None:
+def util_help_dialog(s_title: str, s_text: str) -> None:
     @st.dialog(s_title)  # type:ignore
     def help_working_dir():
         st.markdown(s_text)
@@ -224,41 +290,6 @@ def util_workingdir_get_help() -> None:
             "Get help 🤔", key="key_btn_help_working_dir", use_container_width=True
         ):
             help_working_dir()
-
-
-def util_select_experiment(dir_out: str, exp_curr:str) -> str:
-    """
-    Panel to set/select experiment name
-    """
-    # Read dataset name (used to create a folder where all results will be saved)
-    sel_opt = st.radio(
-        'Options:',
-        ['Select Existing', 'Create New'],
-        horizontal = True,
-        label_visibility = 'collapsed'
-    )
-    if sel_opt == 'Select Existing':
-        list_exp = utilio.get_subfolders(dir_out)
-        exp_sel = st.selectbox(
-            "Select",
-            list_exp,
-            None,
-            label_visibility = 'collapsed',
-            placeholder='Select experiment name'
-        )
-
-    if sel_opt == 'Create New':
-        exp_sel = st.text_input(
-            "Experiment name:",
-            None,
-            label_visibility = 'collapsed',
-            placeholder='Type experiment name'
-        )
-        if exp_sel is not None:
-            dir_tmp = os.path.join(dir_out, exp_sel)
-            if not os.path.exists(dir_tmp):
-                os.makedirs(dir_tmp)
-    return exp_sel
 
 def copy_uploaded_to_dir() -> None:
     # Copies files to local storage

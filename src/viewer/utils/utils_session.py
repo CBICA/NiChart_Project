@@ -135,19 +135,18 @@ def init_session_state() -> None:
         # Flags for various i/o
         st.session_state.flags = {
             "experiment": False,
-            "experiment": False,
-            "dir_dicom": False,
-            "dicom_series": False,
-            "dir_nifti": False,
-            "dir_t1": False,
-            "dir_dlmuse": False,
-            "csv_dlmuse": False,
-            "csv_dlwmls": False,
-            "csv_demog": False,
-            "csv_dlmuse+demog": False,
-            "dir_download": False,
-            "csv_mlscores": False,
-            "csv_plot": False,
+            "dicoms": False,
+            "dicoms_series": False,
+            "nifti": False,
+            "T1": False,
+            "dlmuse": False,
+            "dlmuse_csv": False,
+            "dlwmls_csv": False,
+            "demog_csv": False,
+            "dlmuse+demog_csv": False,
+            "downloaddir": False,
+            "mlscores_csv": False,
+            "plot_csv": False,
         }
 
         # Predefined paths for different tasks in the final results
@@ -155,7 +154,7 @@ def init_session_state() -> None:
         # This should be good enough to keep results organized
         st.session_state.dict_paths = {
             "lists": ["", "Lists"],
-            "dicom": ["", "Dicoms"],
+            "dicoms": ["", "Dicoms"],
             "nifti": ["", "Nifti"],
             "T1": ["Nifti", "T1"],
             "T2": ["Nifti", "T2"],
@@ -179,7 +178,7 @@ def init_session_state() -> None:
             "dir_out": "",
             "experiment": "",
             "lists": "",
-            "dicom": "",
+            "dicoms": "",
             "nifti": "",
             "T1": "",
             "T2": "",
@@ -499,9 +498,9 @@ def reset_flags() -> None:
     st.session_state.flags["experiment"] = True
 
     # Check dicom folder
-    fcount = utilio.get_file_count(st.session_state.paths["dicom"])
+    fcount = utilio.get_file_count(st.session_state.paths["dicoms"])
     if fcount > 0:
-        st.session_state.flags["dir_dicom"] = True
+        st.session_state.flags["dicoms"] = True
 
 
 def reset_plots() -> None:

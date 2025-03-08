@@ -8,6 +8,7 @@ import utils.utils_menu as utilmenu
 import utils.utils_nifti as utilni
 import utils.utils_session as utilss
 import utils.utils_st as utilst
+import utils.utils_panels as utilpn
 from stqdm import stqdm
 
 # Page config should be called for each page
@@ -24,56 +25,9 @@ st.markdown(
     """
 )
 
-# Update status of checkboxes
-if "_check_dlwmls_experiment" in st.session_state:
-    st.session_state.checkbox["dlwmls_experiment"] = st.session_state._check_dlwmls_experiment
-if "_check_dlwmls_in" in st.session_state:
-    st.session_state.checkbox["dlwmls_in"] = st.session_state._check_dlwmls_in
-if "_check_dlwmls_run" in st.session_state:
-    st.session_state.checkbox["dlwmls_run"] = st.session_state._check_dlwmls_run
-if "_check_dlwmls_view" in st.session_state:
-    st.session_state.checkbox["dlwmls_view"] = st.session_state._check_dlwmls_view
-if "_check_dlwmls_download" in st.session_state:
-    st.session_state.checkbox["dlwmls_download"] = (
-        st.session_state._check_dlwmls_download
-    )
-
-
-def panel_experiment() -> None:
-    """
-    Panel for selecting the working dir
-    """
-    icon = st.session_state.icon_thumb[st.session_state.flags["dir_out"]]
-    st.checkbox(
-        f":material/folder_shared: Working Directory {icon}",
-        key="_check_dlwmls_experiment",
-        value=st.session_state.checkbox["dlwmls_experiment"],
-    )
-    if not st.session_state._check_dlwmls_experiment:
-        return
-
-    with st.container(border=True):
-        utilst.util_panel_workingdir(st.session_state.app_type)
-
-        if os.path.exists(st.session_state.paths["experiment"]):
-            list_subdir = utilio.get_subfolders(st.session_state.paths["experiment"])
-            st.success(
-                f"Working directory is set to: {st.session_state.paths['experiment']}",
-                icon=":material/thumb_up:",
-            )
-            if len(list_subdir) > 0:
-                st.info(
-                    "Working directory already includes the following folders: "
-                    + ", ".join(list_subdir)
-                )
-            st.session_state.flags["dir_out"] = True
-
-        utilst.util_workingdir_get_help()
-
-
 def panel_infl() -> None:
     """
-    Panel for uploading input t1 images
+    Panel for uploading input fl images
     """
     st.session_state.flags["dir_fl"] = os.path.exists(st.session_state.paths["FL"])
 
@@ -134,7 +88,7 @@ def panel_infl() -> None:
 
         - On the cloud, **we strongly recommend** compressing your input images into a single ZIP archive before uploading. The system will automatically extract the contents of the ZIP file into the **"Nifti/T1"** folder upon upload.
         """
-        utilst.util_get_help(s_title, s_text)
+        utilst.util_help_dialog(s_title, s_text)
 
 
 def panel_dlwmls() -> None:
@@ -216,7 +170,7 @@ def panel_dlwmls() -> None:
         - WM lesions are segmented on raw FL images using DLWMLS.
         - The output folder (**"DLWMLS"**) will contain the segmentation mask for each scan, and a single CSV file with WML volumes.
         """
-        utilst.util_get_help(s_title, s_text)
+        utilst.util_help_dialog(s_title, s_text)
 
 
 def panel_view() -> None:
@@ -317,45 +271,26 @@ def panel_view() -> None:
                         )
 
 
-def panel_download() -> None:
-    """
-    Panel for downloading results
-    """
-    if st.session_state.app_type == "cloud":
-        st.checkbox(
-            ":material/new_label: Download Scans",
-            disabled=not st.session_state.flags["csv_dlwmls"],
-            key="_check_dlwmls_download",
-            value=st.session_state.checkbox["dlwmls_download"],
-        )
-    if not st.session_state._check_dlwmls_download:
-        return
-
-    with st.container(border=True):
-
-        # Zip results and download
-        out_zip = bytes()
-        if not False:
-            if not os.path.exists(st.session_state.paths["download"]):
-                os.makedirs(st.session_state.paths["download"])
-            f_tmp = os.path.join(st.session_state.paths["download"], "DLWMLS")
-            out_zip = utilio.zip_folder(st.session_state.paths["dlwmls"], f_tmp)
-
-        st.download_button(
-            "Download DLWMLS results",
-            out_zip,
-            file_name=f"{st.session_state.experiment}_DLWMLS.zip",
-            disabled=False,
-        )
-
-
-st.divider()
-panel_experiment()
-panel_infl()
-panel_dlwmls()
-panel_view()
+# Call all steps
+t1, t2, t3, t4 =  st.tabs(
+    ['Experiment Name', 'Input Data', 'DLWMLS', 'View Scans']
+)
 if st.session_state.app_type == "cloud":
-    panel_download()
+    t1, t2, t3, t4, t5 =  st.tabs(
+        ['Experiment Name', 'Input Data', 'DLWMLS', 'View Scans', 'Download']
+    )
+
+with t1:
+    utilpn.util_panel_experiment()
+with t2:
+    panel_infl()
+with t3:
+    panel_dlwmls()
+with t4:
+    panel_view()
+if st.session_state.app_type == "cloud":
+    with t5:
+        utilpn.util_panel_download('DLWMLS')
 
 # FIXME: For DEBUG
 utilst.add_debug_panel()
