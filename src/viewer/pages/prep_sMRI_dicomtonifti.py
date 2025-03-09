@@ -13,6 +13,7 @@ import utils.utils_doc as utildoc
 import utils.utils_panels as utilpn
 from stqdm import stqdm
 import time
+import shutil
 
 # Page config should be called for each page
 utilss.config_page()
@@ -76,12 +77,7 @@ def panel_extract(status) -> None:
             st.warning('Please check previous step!')
             return
 
-        # Selection of img modality
-        sel_mod = st.selectbox(
-            'Image Modality', st.session_state.list_mods, None
-        )
-        if sel_mod is None:
-            return
+        sel_mod = 'T1'
 
         # Check if data exists
         dout = st.session_state.paths[sel_mod]
@@ -104,23 +100,22 @@ def panel_extract(status) -> None:
                         os.unlink(dout)
                     else:
                         shutil.rmtree(dout)
-                    st.session_state.flags[dtype] = False
+                    st.session_state.flags[sel_mod] = False
                     st.success(f'Removed dir: {dout}')
-                    time.sleep(4)
                 except:
                     st.error(f'Could not delete folder: {dout}')
+                time.sleep(4)
                 st.rerun()
 
         else:
             # Create out dir
-            if not os.path.exists(st.session_state.paths[st.session_state.sel_mod]):
-                os.makedirs(st.session_state.paths[st.session_state.sel_mod])
+            if not os.path.exists(dout):
+                os.makedirs(dout)
 
             # Selection of dicom series
-            st.session_state.sel_series = st.selectbox(
-                "Select series:", st.session_state.list_series, None
+            st.session_state.sel_series = st.multiselect(
+                "Select series for the T1 scan:", st.session_state.list_series, None
             )
-
             btn_convert = st.button("Convert Series")
             if btn_convert:
                 with st.spinner("Wait for it..."):
@@ -128,26 +123,20 @@ def panel_extract(status) -> None:
                         utildcm.convert_sel_series(
                             st.session_state.df_dicoms,
                             st.session_state.sel_series,
-                            st.session_state.paths[st.session_state.sel_mod],
-                            f"_{st.session_state.sel_mod}.nii.gz",
+                            dout,
+                            f"_{sel_mod}.nii.gz",
                         )
+                        st.session_state.flags[sel_mod] = True
+                        # if st.session_state.has_cloud_session:
+                        #     utilcloud.update_stats_db(
+                        #         st.session_state.cloud_user_id, "NIFTIfromDICOM", num_nifti
+                        #     )
+
                     except:
                         st.warning(":material/thumb_down: Nifti conversion failed!")
 
-            st.rerun()
-                # num_nifti = utilio.get_file_count(
-                #     st.session_state.paths[st.session_state.sel_mod], ".nii.gz"
-                # )
-                # if num_nifti == 0:
-                #     st.warning(
-                #         ":material/thumb_down: The extraction process did not produce any Nifti images!"
-                #     )
-                # else:
-                #     if st.session_state.has_cloud_session:
-                #         utilcloud.update_stats_db(
-                #             st.session_state.cloud_user_id, "NIFTIfromDICOM", num_nifti
-                #         )
-                #
+                time.sleep(1)
+                st.rerun()
 
         utilst.util_help_dialog(utildoc.title_dicoms_extract, utildoc.def_dicoms_extract)
 
@@ -162,23 +151,9 @@ def panel_view(status) -> None:
             st.warning('Please check previous step!')
             return
 
-        # Selection of img modality
-        sel_mod = utilst.user_input_select(
-            "Image Modality",
-            "key_selbox_modality_viewer",
-            st.session_state.list_mods,
-            None,
-            "Modality of the images to view",
-            False,
-        )
-
-        list_nifti = []
-        if sel_mod is None:
-            return
-
-        st.session_state.sel_mod = sel_mod
+        sel_mod = 'T1'
         list_nifti = utilio.get_file_list(
-            st.session_state.paths[st.session_state.sel_mod], ".nii.gz"
+            st.session_state.paths[sel_mod], ".nii.gz"
         )
 
         # Selection of image
@@ -193,8 +168,8 @@ def panel_view(status) -> None:
         if sel_img is None:
             return
 
-        st.session_state.paths["sel_img"] = os.path.join(
-            st.session_state.paths[st.session_state.sel_mod], sel_img
+        path_img = os.path.join(
+            st.session_state.paths[sel_mod], sel_img
         )
 
         # Create a list of checkbox options
@@ -210,14 +185,14 @@ def panel_view(status) -> None:
         if len(list_orient) == 0:
             return
 
-        if not os.path.exists(st.session_state.paths["sel_img"]):
+        if not os.path.exists(path_img):
             return
 
         with st.spinner("Wait for it..."):
 
             try:
                 # Prepare final 3d matrix to display
-                img = utilni.prep_image(st.session_state.paths["sel_img"])
+                img = utilni.prep_image(path_img)
 
                 # Detect mask bounds and center in each view
                 img_bounds = utilni.detect_img_bounds(img)
@@ -276,7 +251,7 @@ with t4:
     status = st.session_state.flags['dicoms_series']
     panel_extract(status)
 with t5:
-    status = st.session_state.flags['nifti']
+    status = st.session_state.flags['T1']
     panel_view(status)
 if st.session_state.app_type == "cloud":
     with t6:
