@@ -98,6 +98,13 @@ def util_panel_experiment() -> None:
 
         util_help_dialog(utildoc.title_exp, utildoc.def_exp)
 
+def copy_uploaded_to_dir() -> None:
+    # Copies files to local storage
+    if len(st.session_state["uploaded_input"]) > 0:
+        utilio.copy_and_unzip_uploaded_files(
+            st.session_state["uploaded_input"], st.session_state.paths["target_path"]
+        )
+
 def util_upload_folder(
     dir_out: str, title_txt: str, flag_disabled: bool, help_txt: str
 ) -> None:
@@ -269,7 +276,7 @@ def util_panel_input_multi(dtype: str, status:bool) -> None:
             if st.session_state.app_type == "cloud":
                 # Upload data
                 util_upload_folder(
-                    st.session_state.paths["dicom"],
+                    st.session_state.paths["dicoms"],
                     "Input files or folders",
                     False,
                     "Raw dicom files can be uploaded as a folder, multiple files, or a single zip file",
@@ -294,12 +301,12 @@ def util_panel_input_multi(dtype: str, status:bool) -> None:
                 st.session_state.flags[dtype] = True
                 p_dicom = st.session_state.paths[dtype]
                 st.success(
-                    f"Data is ready ({p_dicom}, {fcount} files)",
+                    f" Uploaded data: ({p_dicom}, {fcount} files)",
                     icon=":material/thumb_up:",
                 )
                 time.sleep(4)
 
-            st.rerun()
+                st.rerun()
             util_help_dialog(utildoc.title_dicoms, utildoc.def_dicoms)
 
 
@@ -315,15 +322,21 @@ def util_panel_download(dtype:str, status:bool) -> None:
 
         # Zip results and download
         out_zip = bytes()
-        if not False:
-            if not os.path.exists(st.session_state.paths["download"]):
-                os.makedirs(st.session_state.paths["download"])
-            f_tmp = os.path.join(st.session_state.paths["download"], dtype)
-            out_zip = utilio.zip_folder(st.session_state.paths[dtype], f_tmp)
+        out_dir = st.session_state.paths["download"]
+        in_dir = st.session_state.paths[dtype]
+        if not os.path.exists(in_dir):
+            st.error('Input data missing!')
+            return
+        if not os.path.exists(out_dir):
+            os.makedirs(out_dir)
+        try:
+            f_tmp = os.path.join(out_dir, dtype)
+            out_zip = utilio.zip_folder(in_dir, f_tmp)
+            st.download_button(
+                f'Download results: {dtype}',
+                out_zip,
+                file_name=f"{st.session_state.experiment}_{dtype}.zip",
+            )
+        except:
+            st.error('Could not download data!')
 
-        st.download_button(
-            f'Download results: {dtype}',
-            out_zip,
-            file_name=f"{st.session_state.experiment}_{dtype}.zip",
-            disabled=False,
-        )

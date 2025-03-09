@@ -230,12 +230,13 @@ st.markdown(
 )
 
 # Call all steps
-t1, t2, t3, t4, t5 =  st.tabs(
-    ['Experiment Name', 'Input Data', 'Detect Series', 'Extract Scans', 'View Scans']
-)
 if st.session_state.app_type == "cloud":
     t1, t2, t3, t4, t5, t6 =  st.tabs(
         ['Experiment Name', 'Input Data', 'Detect Series', 'Extract Scans', 'View Scans', 'Download']
+    )
+else:
+    t1, t2, t3, t4, t5 =  st.tabs(
+        ['Experiment Name', 'Input Data', 'Detect Series', 'Extract Scans', 'View Scans']
     )
 
 with t1:
@@ -256,7 +257,7 @@ with t5:
 if st.session_state.app_type == "cloud":
     with t6:
         status = st.session_state.flags['dicoms']
-        utilpn.util_panel_download('Nifti', status)
+        utilpn.util_panel_download('T1', status)
 
 # FIXME: For DEBUG
 utilst.add_debug_panel()
