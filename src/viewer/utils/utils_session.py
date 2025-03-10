@@ -103,35 +103,6 @@ def init_session_state() -> None:
             True: ":material/thumb_up:",
         }
 
-        # Flags for checkbox states
-        st.session_state.checkbox = {
-            "dicoms_experiment": False,
-            "dicoms_in": False,
-            "dicoms_series": False,
-            "dicoms_run": False,
-            "dicoms_view": False,
-            "dicoms_download": False,
-            "dlmuse_experiment": False,
-            "dlmuse_in": False,
-            "dlmuse_run": False,
-            "dlmuse_view": False,
-            "dlmuse_download": False,
-            "dlwmls_experiment": False,
-            "dlwmls_in": False,
-            "dlwmls_run": False,
-            "dlwmls_view": False,
-            "dlwmls_download": False,
-            "ml_experiment": False,
-            "ml_inrois": False,
-            "ml_indemog": False,
-            "ml_run": False,
-            "ml_download": False,
-            "view_experiment": False,
-            "view_in": False,
-            "view_select": False,
-            "view_plot": False,
-        }
-
         # Flags for various i/o
         st.session_state.flags = {
             "experiment": False,
@@ -192,8 +163,8 @@ def init_session_state() -> None:
             "plots": "",
             "sel_img": "",
             "sel_seg": "",
-            "csv_demog": "",
-            "csv_dlmuse": "",
+            "demog_csv": "",
+            "dlmuse_csv": "",
             "csv_dlwmls": "",
             "csv_plot": "",
             "csv_roidict": "",
@@ -469,7 +440,7 @@ def update_default_paths() -> None:
         )
         print(f"setting {st.session_state.paths[d_tmp]}")
 
-    st.session_state.paths["csv_dlmuse"] = os.path.join(
+    st.session_state.paths["dlmuse_csv"] = os.path.join(
         st.session_state.paths["dlmuse"], "DLMUSE_Volumes.csv"
     )
 
@@ -478,7 +449,7 @@ def update_default_paths() -> None:
         f"{st.session_state.experiment}_DLMUSE+MLScores.csv",
     )
 
-    st.session_state.paths["csv_demog"] = os.path.join(
+    st.session_state.paths["demog_csv"] = os.path.join(
         st.session_state.paths["experiment"], "lists", "Demog.csv"
     )
 
@@ -508,8 +479,6 @@ def reset_plots() -> None:
     Reset plot variables when data file changes
     """
     st.session_state.plots = pd.DataFrame(columns=st.session_state.plots.columns)
-    st.session_state.checkbox["view_select"] = False
-    st.session_state.checkbox["view_plot"] = False
     st.session_state.plot_sel_vars = []
     st.session_state.plot_var["hide_settings"] = False
     st.session_state.plot_var["hide_legend"] = False

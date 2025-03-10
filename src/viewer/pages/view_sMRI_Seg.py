@@ -20,8 +20,8 @@ utilst.util_panel_workingdir(st.session_state.app_type)
 # Set default path for the data csv
 if os.path.exists(st.session_state.paths["csv_mlscores"]):
     st.session_state.paths["csv_plot"] = st.session_state.paths["csv_mlscores"]
-elif os.path.exists(st.session_state.paths["csv_dlmuse"]):
-    st.session_state.paths["csv_plot"] = st.session_state.paths["csv_dlmuse"]
+elif os.path.exists(st.session_state.paths["dlmuse_csv"]):
+    st.session_state.paths["csv_plot"] = st.session_state.paths["dlmuse_csv"]
 
 # Panel for selecting input csv
 flag_disabled = not st.session_state.flags["experiment"]
@@ -29,7 +29,7 @@ flag_disabled = not st.session_state.flags["experiment"]
 if st.session_state.app_type == "cloud":
     with st.expander(":material/upload: Upload data", expanded=False):
         utilst.util_upload_file(
-            st.session_state.paths["csv_dlmuse"],
+            st.session_state.paths["dlmuse_csv"],
             "Input data csv file",
             "key_in_csv",
             flag_disabled,
@@ -44,12 +44,12 @@ else:  # st.session_state.app_type == 'desktop'
         utilst.util_select_file(
             "selected_data_file",
             "Data csv",
-            st.session_state.paths["csv_dlmuse"],
+            st.session_state.paths["dlmuse_csv"],
             st.session_state.paths["file_search_dir"],
             flag_disabled,
         )
-        if not flag_disabled and os.path.exists(st.session_state.paths["csv_dlmuse"]):
-            p_dlmuse = st.session_state.paths["csv_dlmuse"]
+        if not flag_disabled and os.path.exists(st.session_state.paths["dlmuse_csv"]):
+            p_dlmuse = st.session_state.paths["dlmuse_csv"]
             st.success(f"Data is ready ({p_dlmuse})", icon=":material/thumb_up:")
 
     with st.expander(":material/upload: Select data", expanded=False):
@@ -106,11 +106,11 @@ else:  # st.session_state.app_type == 'desktop'
 # Panel for viewing DLMUSE images
 with st.expander(":material/visibility: View segmentations", expanded=False):
 
-    flag_disabled = not st.session_state.flags["csv_dlmuse"]
+    flag_disabled = not st.session_state.flags["dlmuse_csv"]
 
     # Selection of MRID
     try:
-        df = pd.read_csv(st.session_state.paths["csv_dlmuse"])
+        df = pd.read_csv(st.session_state.paths["dlmuse_csv"])
         list_mrid = df.MRID.tolist()
     except:
         list_mrid = [""]

@@ -259,7 +259,7 @@ def util_panel_input_multi(dtype: str, status:bool) -> None:
                 icon=":material/thumb_up:",
             )
             # Delete folder if user wants to reload
-            if st.button('Reset'):
+            if st.button('Reset', f'key_btn_reset_{dtype}'):
                 try:
                     if os.path.islink(dout):
                         os.unlink(dout)
@@ -273,13 +273,18 @@ def util_panel_input_multi(dtype: str, status:bool) -> None:
                 st.rerun()
 
         else:
+            # Create parent dir for out data
+            dbase = os.path.dirname(dout)
+            if not os.path.exists(dbase):
+                os.makedirs(dbase)
+
             if st.session_state.app_type == "cloud":
                 # Upload data
                 util_upload_folder(
                     st.session_state.paths["dicoms"],
                     "Input files or folders",
                     False,
-                    "Raw dicom files can be uploaded as a folder, multiple files, or a single zip file",
+                    "Input files can be uploaded as a folder, multiple files, or a single zip file",
                 )
 
             else:  # st.session_state.app_type == 'desktop'
@@ -309,6 +314,140 @@ def util_panel_input_multi(dtype: str, status:bool) -> None:
                 st.rerun()
             util_help_dialog(utildoc.title_dicoms, utildoc.def_dicoms)
 
+
+def util_select_file(curr_dir, key_txt) -> None:
+    """
+    Select a file
+    """
+    sel_file = None
+    sel_opt = st.radio(
+        'Options:',
+        ['Browse File', 'Enter File Path'],
+        horizontal = True,
+        label_visibility = 'collapsed'
+    )
+    if sel_opt == 'Browse File':
+        if st.button('Browse', key=f'_key_btn_{key_txt}'):
+            sel_file = utilio.browse_file(curr_dir)    ##FIXME
+
+    elif sel_opt == 'Enter Path':
+        sel_file = st.text_input(
+            '',
+            key=f'_key_sel_{key_txt}',
+            value=curr_dir,
+            label_visibility='collapsed',
+        )
+    if sel_file is None:
+        return
+
+    sel_file = os.path.abspath(sel_file)
+    if not os.path.exists(sel_file):
+        return
+
+    return sel_file
+
+def util_upload_file(
+    out_file: str,
+    title_txt: str,
+    key_uploader: str,
+    flag_disabled: bool,
+    label_visibility: str,
+) -> bool:
+    """
+    Upload user data to target folder
+    Input data is a single file
+    """
+    # Upload input
+    in_file = st.file_uploader(
+        title_txt,
+        key=key_uploader,
+        accept_multiple_files=False,
+        disabled=flag_disabled,
+        label_visibility=label_visibility,
+    )
+    if in_file is None:
+        return False
+
+    # Create parent dir of out file
+    if not os.path.exists(os.path.dirname(out_file)):
+        os.makedirs(os.path.dirname(out_file))
+    # Remove existing output file
+    if os.path.exists(out_file):
+        os.remove(out_file)
+    # Copy selected input file to destination
+    utilio.copy_uploaded_file(in_file, out_file)
+    return True
+
+def util_panel_input_single(dtype: str, status:bool) -> None:
+    """
+    Panel for selecting single input file
+    """
+    with st.container(border=True):
+        # Check init status
+        if not status:
+            st.warning('Please check previous step!')
+            return
+
+        # Check if data exists
+        fout = st.session_state.paths[dtype]
+        if st.session_state.flags[dtype]:
+            st.success(
+                f"Data is ready: {fout}",
+                icon=":material/thumb_up:",
+            )
+            # Delete data if user wants to reload
+            if st.button('Reset', f'key_btn_reset_{dtype}'):
+                try:
+                    shutil.rmtree(dout)
+                    st.session_state.flags[dtype] = False
+                    st.success(f'Removed file: {dout}')
+                    time.sleep(4)
+                except:
+                    st.error(f'Could not delete folder: {dout}')
+                st.rerun()
+
+        else:
+            # Create parent dir for out data
+            dbase = os.path.dirname(fout)
+            if not os.path.exists(dbase):
+                os.makedirs(dbase)
+
+            if st.session_state.app_type == "cloud":
+                # Upload data
+                util_upload_file(
+                    st.session_state.paths[dtype],
+                    "input data",
+                    "upload_data_file",
+                    False,
+                    "visible",
+                )
+
+            else:  # st.session_state.app_type == 'desktop'
+                # Get user input
+                sel_file = util_select_file(
+                    # st.session_state.paths['init'], 'sel_file', key=f'key_self_{dtype}'
+                    st.session_state.paths['init'], 'sel_file'
+                )
+                if sel_file is None:
+                    return
+
+                # Copy file
+                try:
+                    shutil.copy2(sel_file, fout)
+                except:
+                    st.error(f'Could not copy input file to destination: {fout}')
+
+            # Check out files
+            if os.path.exists(fout):
+                st.session_state.flags[dtype] = True
+                st.success(
+                    f" Uploaded data: {fout}",
+                    icon=":material/thumb_up:",
+                )
+                time.sleep(4)
+
+                st.rerun()
+            util_help_dialog(utildoc.title_dicoms, utildoc.def_dicoms)
 
 def util_panel_download(dtype:str, status:bool) -> None:
     """

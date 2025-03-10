@@ -10,6 +10,7 @@ import utils.utils_nifti as utilni
 import utils.utils_rois as utilroi
 import utils.utils_session as utilss
 import utils.utils_st as utilst
+import utils.utils_panels as utilpn
 from stqdm import stqdm
 
 # Page config should be called for each page
@@ -25,78 +26,6 @@ st.markdown(
     - [DLMUSE](https://github.com/CBICA/NiChart_DLMUSE): Fast deep learning based segmentation into 145 ROIs + 105 composite ROIs
         """
 )
-
-def panel_int1() -> None:
-    """
-    Panel for selecting input dir
-    """
-    with st.container(border=True):
-        curr_dir = st.session_state.paths["T1"]
-        sel_dir = utilst.util_select_dir(curr_dir, 'sel_indir')
-        if sel_dir is not None and sel_dir != curr_dir:
-            utilss.update_indir(sel_dir)
-
-    with st.container(border=True):
-        if os.path.exists(st.session_state.paths["T1"]):
-            st.success(
-                f"Input directory: {st.session_state.paths['T1']}",
-                icon=":material/thumb_up:",
-            )
-            st.session_state.flags["T1"] = True
-
-# def panel_int1() -> None:
-#     """
-#     Panel for uploading input t1 images
-#     """
-#     st.session_state.flags["T1_dir"] = os.path.exists(st.session_state.paths["T1"])
-#     with st.container(border=True):
-#         if st.session_state.app_type == "cloud":
-#             utilst.util_upload_folder(
-#                 st.session_state.paths["T1"],
-#                 "T1 images",
-#                 False,
-#                 "Nifti images can be uploaded as a folder, multiple files, or a single zip file",
-#             )
-#             fcount = utilio.get_file_count(st.session_state.paths["T1"])
-#             if fcount > 0:
-#                 st.session_state.flags["T1"] = True
-#                 p_t1 = st.session_state.paths["T1"]
-#                 st.success(
-#                     f"Data is ready ({p_t1}, {fcount} files)",
-#                     icon=":material/thumb_up:",
-#                 )
-#
-#         else:  # st.session_state.app_type == 'desktop'
-#             utilst.util_select_folder(
-#                 "selected_img_folder",
-#                 "T1 nifti image folder",
-#                 st.session_state.paths["T1"],
-#                 st.session_state.paths["file_search_dir"],
-#                 False,
-#             )
-#             fcount = utilio.get_file_count(st.session_state.paths["T1"])
-#             if fcount > 0:
-#                 st.session_state.flags["T1_dir"] = True
-#                 p_t1 = st.session_state.paths["T1"]
-#                 st.success(
-#                     f"Data is ready ({p_t1}, {fcount} files)",
-#                     icon=":material/thumb_up:",
-#                 )
-#
-#         s_title = "Input T1 Scans"
-#         s_text = """
-#         - Upload or select input T1 scans. DLMUSE can be directly applied to raw T1 scans. Nested folders are not supported.
-#
-#         - The result file with segmented ROI volumes includes an **"MRID"** column that uniquely identifies each scan. **MRID** is extracted from image file names by removing the common suffix to all images. Using consistent input image names is **strongly recommended**
-#
-#         - On the desktop app, a symbolic link named **"Nifti/T1"** will be created in the **working directory**, pointing to your input T1 images folder.
-#
-#         - On the cloud platform, you can directly drag and drop your T1 image files or folder and they will be uploaded to the **"Nifti/T1"** folder within the **working directory**.
-#
-#         - On the cloud, **we strongly recommend** compressing your input images into a single ZIP archive before uploading. The system will automatically extract the contents of the ZIP file into the **"Nifti/T1"** folder upon upload.
-#         """
-#         utilst.util_help_dialog(s_title, s_text)
-#
 
 def panel_dlmuse() -> None:
     """
@@ -163,15 +92,15 @@ def panel_dlmuse() -> None:
         out_csv = f"{st.session_state.paths['dlmuse']}/DLMUSE_Volumes.csv"
         num_dlmuse = utilio.get_file_count(st.session_state.paths["dlmuse"], ".nii.gz")
         if os.path.exists(out_csv):
-            st.session_state.paths["csv_dlmuse"] = out_csv
-            st.session_state.flags["csv_dlmuse"] = True
+            st.session_state.paths["dlmuse_csv"] = out_csv
+            st.session_state.flags["dlmuse_csv"] = True
             st.success(
                 f"DLMUSE images are ready ({st.session_state.paths['dlmuse']}, {num_dlmuse} scan(s))",
                 icon=":material/thumb_up:",
             )
 
             with st.expander("View DLMUSE volumes"):
-                df_dlmuse = pd.read_csv(st.session_state.paths["csv_dlmuse"])
+                df_dlmuse = pd.read_csv(st.session_state.paths["dlmuse_csv"])
                 st.dataframe(df_dlmuse)
 
         s_title = "DLMUSE Segmentation"
@@ -189,7 +118,7 @@ def panel_view() -> None:
     with st.container(border=True):
         # Selection of MRID
         try:
-            df = pd.read_csv(st.session_state.paths["csv_dlmuse"])
+            df = pd.read_csv(st.session_state.paths["dlmuse_csv"])
             list_mrid = df.MRID.tolist()
         except:
             list_mrid = []
@@ -313,7 +242,9 @@ if st.session_state.app_type == "cloud":
 with t1:
     utilpn.util_panel_experiment()
 with t2:
-    panel_int1()
+    # panel_indicoms()
+    status = st.session_state.flags['experiment']
+    utilpn.util_panel_input_multi('T1', status)
 with t3:
     panel_dlmuse()
 with t4:

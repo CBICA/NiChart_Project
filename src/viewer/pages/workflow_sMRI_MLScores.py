@@ -8,6 +8,7 @@ import utils.utils_io as utilio
 import utils.utils_menu as utilmenu
 import utils.utils_session as utilss
 import utils.utils_st as utilst
+import utils.utils_panels as utilpn
 
 run_dir = os.path.join(st.session_state.paths["root"], "src", "workflows", "w_sMRI")
 sys.path.append(run_dir)
@@ -39,7 +40,7 @@ def panel_inrois() -> None:
     with st.container(border=True):
         if st.session_state.app_type == "cloud":
             utilst.util_upload_file(
-                st.session_state.paths["csv_dlmuse"],
+                st.session_state.paths["dlmuse_csv"],
                 "DLMUSE csv",
                 "uploaded_dlmuse_file",
                 False,
@@ -50,16 +51,16 @@ def panel_inrois() -> None:
             utilst.util_select_file(
                 "selected_dlmuse_file",
                 "DLMUSE csv",
-                st.session_state.paths["csv_dlmuse"],
+                st.session_state.paths["dlmuse_csv"],
                 st.session_state.paths["file_search_dir"],
             )
 
-        if os.path.exists(st.session_state.paths["csv_dlmuse"]):
-            p_dlmuse = st.session_state.paths["csv_dlmuse"]
-            st.session_state.flags["csv_dlmuse"] = True
+        if os.path.exists(st.session_state.paths["dlmuse_csv"]):
+            p_dlmuse = st.session_state.paths["dlmuse_csv"]
+            st.session_state.flags["dlmuse_csv"] = True
             st.success(f"Data is ready ({p_dlmuse})", icon=":material/thumb_up:")
 
-            df_rois = pd.read_csv(st.session_state.paths["csv_dlmuse"])
+            df_rois = pd.read_csv(st.session_state.paths["dlmuse_csv"])
             with st.expander("Show ROIs", expanded=False):
                 st.dataframe(df_rois)
 
@@ -100,23 +101,23 @@ def panel_indemog() -> None:
         flag_manual = st.checkbox("Enter data manually", False)
         if flag_manual:
             st.info("Please enter values for your sample")
-            df_rois = pd.read_csv(st.session_state.paths["csv_dlmuse"])
+            df_rois = pd.read_csv(st.session_state.paths["dlmuse_csv"])
             df_tmp = pd.DataFrame({"MRID": df_rois["MRID"], "Age": None, "Sex": None})
             df_user = st.data_editor(df_tmp)
 
             if st.button("Save data"):
                 if not os.path.exists(
-                    os.path.dirname(st.session_state.paths["csv_demog"])
+                    os.path.dirname(st.session_state.paths["demog_csv"])
                 ):
-                    os.makedirs(os.path.dirname(st.session_state.paths["csv_demog"]))
+                    os.makedirs(os.path.dirname(st.session_state.paths["demog_csv"]))
 
-                df_user.to_csv(st.session_state.paths["csv_demog"], index=False)
-                st.success(f"Data saved to {st.session_state.paths['csv_demog']}")
+                df_user.to_csv(st.session_state.paths["demog_csv"], index=False)
+                st.success(f"Data saved to {st.session_state.paths['demog_csv']}")
 
         else:
             if st.session_state.app_type == "cloud":
                 utilst.util_upload_file(
-                    st.session_state.paths["csv_demog"],
+                    st.session_state.paths["demog_csv"],
                     "Demographics csv",
                     "uploaded_demog_file",
                     False,
@@ -127,32 +128,32 @@ def panel_indemog() -> None:
                 utilst.util_select_file(
                     "selected_demog_file",
                     "Demographics csv",
-                    st.session_state.paths["csv_demog"],
+                    st.session_state.paths["demog_csv"],
                     st.session_state.paths["file_search_dir"],
                 )
 
-        if os.path.exists(st.session_state.paths["csv_demog"]):
-            p_demog = st.session_state.paths["csv_demog"]
-            st.session_state.flags["csv_demog"] = True
+        if os.path.exists(st.session_state.paths["demog_csv"]):
+            p_demog = st.session_state.paths["demog_csv"]
+            st.session_state.flags["demog_csv"] = True
             st.success(f"Data is ready ({p_demog})", icon=":material/thumb_up:")
 
-            df_demog = pd.read_csv(st.session_state.paths["csv_demog"])
+            df_demog = pd.read_csv(st.session_state.paths["demog_csv"])
             with st.expander("Show demographics data", expanded=False):
                 st.dataframe(df_demog)
 
         # Check the input data
-        if os.path.exists(st.session_state.paths["csv_demog"]):
+        if os.path.exists(st.session_state.paths["demog_csv"]):
             if st.button("Verify input data"):
                 [f_check, m_check] = w_mlscores.check_input(
-                    st.session_state.paths["csv_dlmuse"],
-                    st.session_state.paths["csv_demog"],
+                    st.session_state.paths["dlmuse_csv"],
+                    st.session_state.paths["demog_csv"],
                 )
                 if f_check == 0:
-                    st.session_state.flags["csv_dlmuse+demog"] = True
+                    st.session_state.flags["dlmuse_csv+demog"] = True
                     st.success(m_check, icon=":material/thumb_up:")
                     st.session_state.flags["csv_mlscores"] = True
                 else:
-                    st.session_state.flags["csv_dlmuse+demog"] = False
+                    st.session_state.flags["dlmuse_csv+demog"] = False
                     st.error(m_check, icon=":material/thumb_down:")
                     st.session_state.flags["csv_mlscores"] = False
 
@@ -204,7 +205,7 @@ def panel_run() -> None:
 
             # Check flag for harmonization
             flag_harmonize = True
-            df_tmp = pd.read_csv(st.session_state.paths["csv_demog"])
+            df_tmp = pd.read_csv(st.session_state.paths["demog_csv"])
             if df_tmp.shape[0] < st.session_state.harm_min_samples:
                 flag_harmonize = False
                 st.warning("Sample size is small. The data will not be harmonized!")
@@ -228,16 +229,16 @@ def panel_run() -> None:
                         w_mlscores.run_workflow(
                             st.session_state.experiment,
                             st.session_state.paths["root"],
-                            st.session_state.paths["csv_dlmuse"],
-                            st.session_state.paths["csv_demog"],
+                            st.session_state.paths["dlmuse_csv"],
+                            st.session_state.paths["demog_csv"],
                             st.session_state.paths["mlscores"],
                         )
                     else:
                         w_mlscores.run_workflow_noharmonization(
                             st.session_state.experiment,
                             st.session_state.paths["root"],
-                            st.session_state.paths["csv_dlmuse"],
-                            st.session_state.paths["csv_demog"],
+                            st.session_state.paths["dlmuse_csv"],
+                            st.session_state.paths["demog_csv"],
                             st.session_state.paths["mlscores"],
                         )
                 except:
@@ -294,18 +295,22 @@ def panel_download() -> None:
         )
 
 # Call all steps
-t1, t2, t3 =  st.tabs(
-    ['Experiment', 'Input Data', 'Run MLScores']
+t1, t2, t3, t4 =  st.tabs(
+    ['Experiment', 'Input ROIs', 'Input Demog', 'Run MLScores']
 )
 if st.session_state.app_type == "cloud":
-    t1, t2, t3, t4 =  st.tabs(
-        ['Experiment', 'Input Data', 'Run MLScores', 'Download']
+    t1, t2, t3, t4, t5 =  st.tabs(
+        ['Experiment', 'Input ROIs', 'Input Demog', 'Run MLScores', 'Download']
     )
 
 with t1:
     utilpn.util_panel_experiment()
 with t2:
-    panel_indata()
+    status = st.session_state.flags['experiment']
+    utilpn.util_panel_input_single('dlmuse_csv', status)
+with t3:
+    status = st.session_state.flags['experiment']
+    utilpn.util_panel_input_single('demog_csv', status)
 with t4:
     panel_run()
 if st.session_state.app_type == "cloud":
