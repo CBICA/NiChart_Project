@@ -13,6 +13,7 @@ import utils.utils_rois as utilroi
 import utils.utils_session as utilss
 import utils.utils_st as utilst
 import utils.utils_viewimg as utilvi
+import utils.utils_panels as utilpn
 
 # from stqdm import stqdm
 
@@ -33,91 +34,6 @@ st.markdown(
         - View MRI images and segmentations for selected data points
     """
 )
-
-def panel_experiment() -> None:
-    """
-    Panel for selecting output dir
-    """
-    with st.container(border=True):
-        dir_out = st.session_state.paths["dir_out"]
-        exp_curr = st.session_state.experiment
-        exp_sel = utilst.util_select_experiment(dir_out, exp_curr)
-        print(f'ssss {exp_sel} {exp_curr}')
-        if exp_sel is not None and exp_sel != exp_curr:
-            st.session_state.experiment = exp_sel
-            st.session_state.paths["experiment"] = os.path.join(
-                st.session_state.paths["dir_out"], exp_sel
-            )
-            # Update paths when selected experiment changes
-            utilss.update_default_paths()
-            utilss.reset_flags()
-
-    with st.container(border=True):
-        if os.path.exists(st.session_state.paths["experiment"]):
-            st.success(
-                f"Experiment directory: {st.session_state.paths['experiment']}",
-                icon=":material/thumb_up:",
-            )
-            st.session_state.flags["experiments"] = True
-
-def panel_incsv() -> None:
-    """
-    Panel for selecting the input csv
-    """
-    # Read data if working dir changed
-    if st.session_state.plot_var["df_data"].shape[0] == 0:
-        df_tmp = utildf.read_dataframe(st.session_state.paths["csv_plot"])
-        
-        st.session_state.plot_var["df_data"] = utildf.rename_rois(
-            df_tmp, st.session_state.rois["roi_dict"]
-        )
-        utilss.reset_plots()
-        st.session_state.is_updated["csv_plot"] = False
-
-    with st.container(border=True):
-        if st.session_state.app_type == "cloud":
-            st.session_state.is_updated["csv_plot"] = utilst.util_upload_file(
-                st.session_state.paths["csv_plot"],
-                "Input data csv file",
-                "key_in_csv",
-                False,
-                "visible",
-            )
-        else:  # st.session_state.app_type == 'desktop'
-            st.session_state.is_updated["csv_plot"] = utilst.util_select_file(
-                "selected_data_file",
-                "Data csv",
-                st.session_state.paths["csv_plot"],
-                st.session_state.paths["file_search_dir"],
-            )
-
-        if os.path.exists(st.session_state.paths["csv_plot"]):
-            p_plot = st.session_state.paths["csv_plot"]
-            st.success(f"Data is ready ({p_plot})", icon=":material/thumb_up:")
-            st.session_state.flags["csv_plot"] = True
-            if st.session_state.plot_var["df_data"].shape[0] == 0:
-                st.session_state.is_updated["csv_plot"] = True
-
-        # Read input csv
-        if st.session_state.is_updated["csv_plot"]:
-            df_tmp = utildf.read_dataframe(st.session_state.paths["csv_plot"])
-            st.session_state.plot_var["df_data"] = utildf.rename_rois(
-                df_tmp, st.session_state.rois["roi_dict"]
-            )
-            utilss.reset_plots()
-            st.session_state.is_updated["csv_plot"] = False
-
-            # Show input data
-        if os.path.exists(st.session_state.paths["csv_plot"]):
-            with st.expander("Show input data", expanded=False):
-                st.dataframe(st.session_state.plot_var["df_data"])
-
-        s_title = "Input Data"
-        s_text = """
-        - Choose a CSV file. Primarily designed for DLMUSE and ML score data, but also supports other files with numeric values.
-        """
-        utilst.util_help_dialog(s_title, s_text)
-
 
 def panel_rename() -> None:
     """
@@ -555,13 +471,14 @@ def panel_plot() -> None:
 
 # Call all steps
 t1, t2, t3, t4 =  st.tabs(
-    ['Experiment', 'Input Data', 'Select', 'Plot']
+    ['Experiment Name', 'Input Data', 'Select Variables', 'Plot']
 )
 
 with t1:
-    panel_experiment()
+    utilpn.util_panel_experiment()
 with t2:
-    panel_incsv()
+    status = st.session_state.flags['experiment']
+    utilpn.util_panel_input_single('dlmuse_csv', status)
 with t3:
     panel_select()
 with t4:
