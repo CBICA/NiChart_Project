@@ -1,32 +1,34 @@
 import os
+import shutil
+import time
 from typing import Any
 
 import streamlit as st
 import utils.utils_cloud as utilcloud
 import utils.utils_dicom as utildcm
+import utils.utils_doc as utildoc
 import utils.utils_io as utilio
 import utils.utils_menu as utilmenu
 import utils.utils_nifti as utilni
+import utils.utils_pages as utilpg
+import utils.utils_panels as utilpn
 import utils.utils_session as utilss
 import utils.utils_st as utilst
-import utils.utils_doc as utildoc
-import utils.utils_panels as utilpn
 from stqdm import stqdm
-import time
-import shutil
 
 # Page config should be called for each page
-utilss.config_page()
+utilpg.config_page()
+utilpg.show_menu()
 
 result_holder = st.empty()
 
-utilmenu.menu()
-
 st.write("# Dicom to Nifti Conversion")
+
 
 def progress(p: int, i: int, decoded: Any) -> None:
     with result_holder.container():
         st.progress(p, f"Progress: Token position={i}")
+
 
 def panel_detect(status) -> None:
     """
@@ -35,7 +37,7 @@ def panel_detect(status) -> None:
     with st.container(border=True):
         # Check init status
         if not status:
-            st.warning('Please check previous step!')
+            st.warning("Please check previous step!")
             return
             flag_disabled = not st.session_state.flags["dicoms"]
 
@@ -74,10 +76,10 @@ def panel_extract(status) -> None:
     with st.container(border=True):
         # Check init status
         if not status:
-            st.warning('Please check previous step!')
+            st.warning("Please check previous step!")
             return
 
-        sel_mod = 'T1'
+        sel_mod = "T1"
 
         # Check if data exists
         dout = st.session_state.paths[sel_mod]
@@ -87,23 +89,21 @@ def panel_extract(status) -> None:
                 icon=":material/thumb_up:",
             )
 
-            df_files = utilio.get_file_names(
-                st.session_state.paths[sel_mod], ".nii.gz"
-            )
+            df_files = utilio.get_file_names(st.session_state.paths[sel_mod], ".nii.gz")
             with st.expander("View NIFTI image list"):
                 st.dataframe(df_files)
 
             # Delete folder if user wants to reload
-            if st.button('Reset', key='reset_extraction'):
+            if st.button("Reset", key="reset_extraction"):
                 try:
                     if os.path.islink(dout):
                         os.unlink(dout)
                     else:
                         shutil.rmtree(dout)
                     st.session_state.flags[sel_mod] = False
-                    st.success(f'Removed dir: {dout}')
+                    st.success(f"Removed dir: {dout}")
                 except:
-                    st.error(f'Could not delete folder: {dout}')
+                    st.error(f"Could not delete folder: {dout}")
                 time.sleep(4)
                 st.rerun()
 
@@ -138,7 +138,9 @@ def panel_extract(status) -> None:
                 time.sleep(1)
                 st.rerun()
 
-        utilst.util_help_dialog(utildoc.title_dicoms_extract, utildoc.def_dicoms_extract)
+        utilst.util_help_dialog(
+            utildoc.title_dicoms_extract, utildoc.def_dicoms_extract
+        )
 
 
 def panel_view(status) -> None:
@@ -148,13 +150,11 @@ def panel_view(status) -> None:
     with st.container(border=True):
         # Check init status
         if not status:
-            st.warning('Please check previous step!')
+            st.warning("Please check previous step!")
             return
 
-        sel_mod = 'T1'
-        list_nifti = utilio.get_file_list(
-            st.session_state.paths[sel_mod], ".nii.gz"
-        )
+        sel_mod = "T1"
+        list_nifti = utilio.get_file_list(st.session_state.paths[sel_mod], ".nii.gz")
 
         # Selection of image
         sel_img = utilst.user_input_select(
@@ -168,9 +168,7 @@ def panel_view(status) -> None:
         if sel_img is None:
             return
 
-        path_img = os.path.join(
-            st.session_state.paths[sel_mod], sel_img
-        )
+        path_img = os.path.join(st.session_state.paths[sel_mod], sel_img)
 
         # Create a list of checkbox options
         list_orient = utilst.user_input_multiselect(
@@ -219,6 +217,7 @@ def panel_view(status) -> None:
                     ":material/thumb_down: Image parsing failed. Please confirm that the image file represents a 3D volume using an external tool."
                 )
 
+
 st.markdown(
     """
     - Extracts raw DICOM files to NIFTI format.
@@ -231,33 +230,43 @@ st.markdown(
 
 # Call all steps
 if st.session_state.app_type == "cloud":
-    t1, t2, t3, t4, t5, t6 =  st.tabs(
-        ['Experiment Name', 'Input Data', 'Detect Series', 'Extract Scans', 'View Scans', 'Download']
+    t1, t2, t3, t4, t5, t6 = st.tabs(
+        [
+            "Experiment Name",
+            "Input Data",
+            "Detect Series",
+            "Extract Scans",
+            "View Scans",
+            "Download",
+        ]
     )
 else:
-    t1, t2, t3, t4, t5 =  st.tabs(
-        ['Experiment Name', 'Input Data', 'Detect Series', 'Extract Scans', 'View Scans']
+    t1, t2, t3, t4, t5 = st.tabs(
+        [
+            "Experiment Name",
+            "Input Data",
+            "Detect Series",
+            "Extract Scans",
+            "View Scans",
+        ]
     )
 
 with t1:
     utilpn.util_panel_experiment()
 with t2:
     # panel_indicoms()
-    status = st.session_state.flags['experiment']
-    utilpn.util_panel_input_multi('dicoms', status)
+    status = st.session_state.flags["experiment"]
+    utilpn.util_panel_input_multi("dicoms", status)
 with t3:
-    status = st.session_state.flags['dicoms']
+    status = st.session_state.flags["dicoms"]
     panel_detect(status)
 with t4:
-    status = st.session_state.flags['dicoms_series']
+    status = st.session_state.flags["dicoms_series"]
     panel_extract(status)
 with t5:
-    status = st.session_state.flags['T1']
+    status = st.session_state.flags["T1"]
     panel_view(status)
 if st.session_state.app_type == "cloud":
     with t6:
-        status = st.session_state.flags['dicoms']
-        utilpn.util_panel_download('T1', status)
-
-# FIXME: For DEBUG
-utilst.add_debug_panel()
+        status = st.session_state.flags["dicoms"]
+        utilpn.util_panel_download("T1", status)

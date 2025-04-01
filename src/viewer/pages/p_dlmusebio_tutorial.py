@@ -1,5 +1,3 @@
-import os
-
 import streamlit as st
 import utils.utils_menu as utilmenu
 import utils.utils_session as utilss
@@ -49,7 +47,7 @@ st.markdown(
     """
     ### Show me an example 🤔
     Please watch the videos below for a step-by-step guide. Example datasets are provided for your convenience.
-    
+
     **Note:** These videos are currently under development and will be updated with newer versions as they become available.
     """
 )
@@ -63,9 +61,9 @@ st.markdown(
 )
 
 if st.button(":material/play_circle: DICOMs to Biomarkers"):
-    url_video="https://youtu.be/RrnibCrNiHA"
+    url_video = "https://youtu.be/RrnibCrNiHA"
     st.video(url_video)
-    
+
 
 st.markdown(
     """
@@ -76,7 +74,7 @@ st.markdown(
 )
 
 if st.button(":material/play_circle: ROIs to Biomarkers"):
-    url_video="https://youtu.be/aw5AK0UQtgo"
+    url_video = "https://youtu.be/aw5AK0UQtgo"
     st.video(url_video)
 
 st.markdown(

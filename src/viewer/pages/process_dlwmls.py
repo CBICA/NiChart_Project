@@ -4,26 +4,17 @@ import pandas as pd
 import streamlit as st
 import utils.utils_cloud as utilcloud
 import utils.utils_io as utilio
-import utils.utils_menu as utilmenu
 import utils.utils_nifti as utilni
+import utils.utils_pages as utilpg
+import utils.utils_panels as utilpn
 import utils.utils_session as utilss
 import utils.utils_st as utilst
-import utils.utils_panels as utilpn
 from stqdm import stqdm
 
 # Page config should be called for each page
-utilss.config_page()
+utilpg.config_page()
+utilpg.show_menu()
 
-utilmenu.menu()
-
-st.write("# Segmentation of White Matter Lesions")
-
-st.markdown(
-    """
-    - Segmentation of WM Lesions on FL scan
-    - [DLWMLS](https://github.com/CBICA/DLWMLS): Fast deep learning based segmentation of WM lesions
-    """
-)
 
 def panel_infl() -> None:
     """
@@ -271,13 +262,19 @@ def panel_view() -> None:
                         )
 
 
-# Call all steps
-t1, t2, t3, t4 =  st.tabs(
-    ['Experiment Name', 'Input Data', 'DLWMLS', 'View Scans']
+st.write("# Segmentation of White Matter Lesions")
+st.markdown(
+    """
+    - Segmentation of WM Lesions on FL scan
+    - [DLWMLS](https://github.com/CBICA/DLWMLS): Fast deep learning based segmentation of WM lesions
+    """
 )
+
+# Call all steps
+t1, t2, t3, t4 = st.tabs(["Experiment Name", "Input Data", "DLWMLS", "View Scans"])
 if st.session_state.app_type == "cloud":
-    t1, t2, t3, t4, t5 =  st.tabs(
-        ['Experiment Name', 'Input Data', 'DLWMLS', 'View Scans', 'Download']
+    t1, t2, t3, t4, t5 = st.tabs(
+        ["Experiment Name", "Input Data", "DLWMLS", "View Scans", "Download"]
     )
 
 with t1:
@@ -290,7 +287,4 @@ with t4:
     panel_view()
 if st.session_state.app_type == "cloud":
     with t5:
-        utilpn.util_panel_download('DLWMLS')
-
-# FIXME: For DEBUG
-utilst.add_debug_panel()
+        utilpn.util_panel_download("DLWMLS")

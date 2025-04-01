@@ -14,40 +14,42 @@ COL_LEFT = 5
 COL_RIGHT_EMPTY = 0.01
 COL_RIGHT_BUTTON = 1
 
-def util_select_expname(dir_out: str, exp_curr:str) -> str:
+
+def util_select_expname(dir_out: str, exp_curr: str) -> str:
     """
     Set/select experiment name
     """
     # Read dataset name (used to create a folder where all results will be saved)
     sel_opt = st.radio(
-        'Options:',
-        ['Select Existing', 'Create New'],
-        horizontal = True,
-        label_visibility = 'collapsed'
+        "Options:",
+        ["Select Existing", "Create New"],
+        horizontal=True,
+        label_visibility="collapsed",
     )
 
-    if sel_opt == 'Select Existing':
+    if sel_opt == "Select Existing":
         list_exp = utilio.get_subfolders(dir_out)
         exp_sel = st.selectbox(
             "Select",
             list_exp,
             None,
-            label_visibility = 'collapsed',
-            placeholder='Select experiment name'
+            label_visibility="collapsed",
+            placeholder="Select experiment name",
         )
 
-    if sel_opt == 'Create New':
+    if sel_opt == "Create New":
         exp_sel = st.text_input(
             "Experiment name:",
             None,
-            label_visibility = 'collapsed',
-            placeholder='Type experiment name'
+            label_visibility="collapsed",
+            placeholder="Type experiment name",
         )
         if exp_sel is not None:
             dir_tmp = os.path.join(dir_out, exp_sel)
             if not os.path.exists(dir_tmp):
                 os.makedirs(dir_tmp)
     return exp_sel
+
 
 def util_panel_experiment() -> None:
     """
@@ -59,9 +61,9 @@ def util_panel_experiment() -> None:
                 f"Experiment directory: {st.session_state.paths['experiment']}",
                 icon=":material/thumb_up:",
             )
-            if st.button('Switch'):
+            if st.button("Switch"):
                 st.session_state.flags["experiment"] = False
-                st.session_state.experiment = ''
+                st.session_state.experiment = ""
                 st.rerun()
 
         else:
@@ -291,6 +293,7 @@ def util_workingdir_get_help() -> None:
         ):
             help_working_dir()
 
+
 def copy_uploaded_to_dir() -> None:
     # Copies files to local storage
     if len(st.session_state["uploaded_input"]) > 0:
@@ -440,37 +443,39 @@ def util_select_file(
 
     return False
 
+
 def util_select_dir(curr_dir, key_txt) -> None:
     """
     Panel to select a folder from the file system
     """
-    tab1, tab2 = st.tabs(['Enter Path', 'Browse Path'])
+    tab1, tab2 = st.tabs(["Enter Path", "Browse Path"])
     with tab1:
         sel_dir = st.text_input(
-            '',
-            key=f'_key_sel_{key_txt}',
+            "",
+            key=f"_key_sel_{key_txt}",
             value=None,
-            label_visibility='collapsed',
+            label_visibility="collapsed",
         )
         if sel_dir is not None:
             sel_dir = os.path.abspath(sel_dir)
 
     with tab2:
         if st.button(
-            'Browse',
-            key=f'_key_btn_{key_txt}',
+            "Browse",
+            key=f"_key_btn_{key_txt}",
         ):
             sel_dir = utilio.browse_folder(curr_dir)
-    
+
     if sel_dir is not None:
         sel_dir = os.path.abspath(sel_dir)
         if not os.path.exists(sel_dir):
             try:
                 os.makedirs(sel_dir)
-                st.info(f'Created directory: {sel_dir}')
+                st.info(f"Created directory: {sel_dir}")
             except:
-                st.error(f'Could not create directory: {sel_dir}')
+                st.error(f"Could not create directory: {sel_dir}")
     return sel_dir
+
 
 def add_debug_panel() -> None:
     """

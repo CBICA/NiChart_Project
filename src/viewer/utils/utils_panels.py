@@ -1,24 +1,24 @@
 import os
 import shutil
+import time
 from typing import Any
 
 import numpy as np
 import streamlit as st
+import utils.utils_doc as utildoc
 import utils.utils_io as utilio
 import utils.utils_session as utilses
-import utils.utils_doc as utildoc
-
-import time
-
 
 COL_LEFT = 5
 COL_RIGHT_EMPTY = 0.01
 COL_RIGHT_BUTTON = 1
 
+
 def util_help_dialog(s_title: str, s_text: str) -> None:
     """
     Display help dialog box
     """
+
     @st.dialog(s_title)  # type:ignore
     def help_working_dir():
         st.markdown(s_text)
@@ -30,40 +30,42 @@ def util_help_dialog(s_title: str, s_text: str) -> None:
         ):
             help_working_dir()
 
-def util_select_expname(dir_out: str, exp_curr:str) -> str:
+
+def util_select_expname(dir_out: str, exp_curr: str) -> str:
     """
     Set/select experiment name
     """
     # Read dataset name (used to create a folder where all results will be saved)
     sel_opt = st.radio(
-        'Options:',
-        ['Select Existing', 'Create New'],
-        horizontal = True,
-        label_visibility = 'collapsed'
+        "Options:",
+        ["Select Existing", "Create New"],
+        horizontal=True,
+        label_visibility="collapsed",
     )
 
-    if sel_opt == 'Select Existing':
+    if sel_opt == "Select Existing":
         list_exp = utilio.get_subfolders(dir_out)
         exp_sel = st.selectbox(
             "Select",
             list_exp,
             None,
-            label_visibility = 'collapsed',
-            placeholder='Select experiment name'
+            label_visibility="collapsed",
+            placeholder="Select experiment name",
         )
 
-    if sel_opt == 'Create New':
+    if sel_opt == "Create New":
         exp_sel = st.text_input(
             "Experiment name:",
             None,
-            label_visibility = 'collapsed',
-            placeholder='Type experiment name'
+            label_visibility="collapsed",
+            placeholder="Type experiment name",
         )
         if exp_sel is not None:
             dir_tmp = os.path.join(dir_out, exp_sel)
             if not os.path.exists(dir_tmp):
                 os.makedirs(dir_tmp)
     return exp_sel
+
 
 def util_panel_experiment() -> None:
     """
@@ -75,9 +77,9 @@ def util_panel_experiment() -> None:
                 f"Experiment directory: {st.session_state.paths['experiment']}",
                 icon=":material/thumb_up:",
             )
-            if st.button('Reset', key = 'reset_exp'):
+            if st.button("Reset", key="reset_exp"):
                 st.session_state.flags["experiment"] = False
-                st.session_state.experiment = ''
+                st.session_state.experiment = ""
                 st.rerun()
 
         else:
@@ -98,12 +100,14 @@ def util_panel_experiment() -> None:
 
         util_help_dialog(utildoc.title_exp, utildoc.def_exp)
 
+
 def copy_uploaded_to_dir() -> None:
     # Copies files to local storage
     if len(st.session_state["uploaded_input"]) > 0:
         utilio.copy_and_unzip_uploaded_files(
             st.session_state["uploaded_input"], st.session_state.paths["target_path"]
         )
+
 
 def util_upload_folder(
     dir_out: str, title_txt: str, flag_disabled: bool, help_txt: str
@@ -127,6 +131,7 @@ def util_upload_folder(
         disabled=flag_disabled,
         help=help_txt,
     )
+
 
 def user_input_foldername(
     label_btn: Any,
@@ -158,6 +163,7 @@ def user_input_foldername(
             out_path = os.path.abspath(tmp_sel)
 
     return out_path
+
 
 def util_select_folder(
     key_selector: str,
@@ -203,30 +209,31 @@ def util_select_folder(
         if not os.path.exists(dir_out):
             os.symlink(sel_dir, dir_out)
 
+
 def util_select_dir(curr_dir, key_txt) -> None:
     """
     Panel to select a folder from the file system
     """
     sel_dir = None
     sel_opt = st.radio(
-        'Options:',
-        ['Browse Path', 'Enter Path'],
-        horizontal = True,
-        label_visibility = 'collapsed'
+        "Options:",
+        ["Browse Path", "Enter Path"],
+        horizontal=True,
+        label_visibility="collapsed",
     )
-    if sel_opt == 'Browse Path':
+    if sel_opt == "Browse Path":
         if st.button(
-            'Browse',
-            key=f'_key_btn_{key_txt}',
+            "Browse",
+            key=f"_key_btn_{key_txt}",
         ):
             sel_dir = utilio.browse_folder(curr_dir)
 
-    elif sel_opt == 'Enter Path':
+    elif sel_opt == "Enter Path":
         sel_dir = st.text_input(
-            '',
-            key=f'_key_sel_{key_txt}',
+            "",
+            key=f"_key_sel_{key_txt}",
             value=curr_dir,
-            label_visibility='collapsed',
+            label_visibility="collapsed",
         )
         if sel_dir is not None:
             sel_dir = os.path.abspath(sel_dir)
@@ -236,19 +243,20 @@ def util_select_dir(curr_dir, key_txt) -> None:
         if not os.path.exists(sel_dir):
             try:
                 os.makedirs(sel_dir)
-                st.info(f'Created directory: {sel_dir}')
+                st.info(f"Created directory: {sel_dir}")
             except:
-                st.error(f'Could not create directory: {sel_dir}')
+                st.error(f"Could not create directory: {sel_dir}")
     return sel_dir
 
-def util_panel_input_multi(dtype: str, status:bool) -> None:
+
+def util_panel_input_multi(dtype: str, status: bool) -> None:
     """
     Panel for selecting multiple input files or folder(s)
     """
     with st.container(border=True):
         # Check init status
         if not status:
-            st.warning('Please check previous step!')
+            st.warning("Please check previous step!")
             return
 
         # Check if data exists
@@ -259,17 +267,17 @@ def util_panel_input_multi(dtype: str, status:bool) -> None:
                 icon=":material/thumb_up:",
             )
             # Delete folder if user wants to reload
-            if st.button('Reset', f'key_btn_reset_{dtype}'):
+            if st.button("Reset", f"key_btn_reset_{dtype}"):
                 try:
                     if os.path.islink(dout):
                         os.unlink(dout)
                     else:
                         shutil.rmtree(dout)
                     st.session_state.flags[dtype] = False
-                    st.success(f'Removed dir: {dout}')
+                    st.success(f"Removed dir: {dout}")
                     time.sleep(4)
                 except:
-                    st.error(f'Could not delete folder: {dout}')
+                    st.error(f"Could not delete folder: {dout}")
                 st.rerun()
 
         else:
@@ -289,7 +297,7 @@ def util_panel_input_multi(dtype: str, status:bool) -> None:
 
             else:  # st.session_state.app_type == 'desktop'
                 # Get user input
-                sel_dir = util_select_dir(dout, 'sel_folder')
+                sel_dir = util_select_dir(dout, "sel_folder")
                 if sel_dir is None:
                     return
 
@@ -298,7 +306,9 @@ def util_panel_input_multi(dtype: str, status:bool) -> None:
                     try:
                         os.symlink(sel_dir, dout)
                     except:
-                        st.error(f'Could not link user input to destination folder: {dout}')
+                        st.error(
+                            f"Could not link user input to destination folder: {dout}"
+                        )
 
             # Check out files
             fcount = utilio.get_file_count(st.session_state.paths[dtype])
@@ -321,21 +331,21 @@ def util_select_file(curr_dir, key_txt) -> None:
     """
     sel_file = None
     sel_opt = st.radio(
-        'Options:',
-        ['Browse File', 'Enter File Path'],
-        horizontal = True,
-        label_visibility = 'collapsed'
+        "Options:",
+        ["Browse File", "Enter File Path"],
+        horizontal=True,
+        label_visibility="collapsed",
     )
-    if sel_opt == 'Browse File':
-        if st.button('Browse', key=f'_key_btn_{key_txt}'):
-            sel_file = utilio.browse_file(curr_dir)    ##FIXME
+    if sel_opt == "Browse File":
+        if st.button("Browse", key=f"_key_btn_{key_txt}"):
+            sel_file = utilio.browse_file(curr_dir)  ##FIXME
 
-    elif sel_opt == 'Enter Path':
+    elif sel_opt == "Enter Path":
         sel_file = st.text_input(
-            '',
-            key=f'_key_sel_{key_txt}',
+            "",
+            key=f"_key_sel_{key_txt}",
             value=curr_dir,
-            label_visibility='collapsed',
+            label_visibility="collapsed",
         )
     if sel_file is None:
         return
@@ -345,6 +355,7 @@ def util_select_file(curr_dir, key_txt) -> None:
         return
 
     return sel_file
+
 
 def util_upload_file(
     out_file: str,
@@ -378,14 +389,15 @@ def util_upload_file(
     utilio.copy_uploaded_file(in_file, out_file)
     return True
 
-def util_panel_input_single(dtype: str, status:bool) -> None:
+
+def util_panel_input_single(dtype: str, status: bool) -> None:
     """
     Panel for selecting single input file
     """
     with st.container(border=True):
         # Check init status
         if not status:
-            st.warning('Please check previous step!')
+            st.warning("Please check previous step!")
             return
 
         # Check if data exists
@@ -396,14 +408,14 @@ def util_panel_input_single(dtype: str, status:bool) -> None:
                 icon=":material/thumb_up:",
             )
             # Delete data if user wants to reload
-            if st.button('Reset', f'key_btn_reset_{dtype}'):
+            if st.button("Reset", f"key_btn_reset_{dtype}"):
                 try:
                     shutil.rmtree(dout)
                     st.session_state.flags[dtype] = False
-                    st.success(f'Removed file: {dout}')
+                    st.success(f"Removed file: {dout}")
                     time.sleep(4)
                 except:
-                    st.error(f'Could not delete folder: {dout}')
+                    st.error(f"Could not delete folder: {dout}")
                 st.rerun()
 
         else:
@@ -426,7 +438,8 @@ def util_panel_input_single(dtype: str, status:bool) -> None:
                 # Get user input
                 sel_file = util_select_file(
                     # st.session_state.paths['init'], 'sel_file', key=f'key_self_{dtype}'
-                    st.session_state.paths['init'], 'sel_file'
+                    st.session_state.paths["init"],
+                    "sel_file",
                 )
                 if sel_file is None:
                     return
@@ -435,7 +448,7 @@ def util_panel_input_single(dtype: str, status:bool) -> None:
                 try:
                     shutil.copy2(sel_file, fout)
                 except:
-                    st.error(f'Could not copy input file to destination: {fout}')
+                    st.error(f"Could not copy input file to destination: {fout}")
 
             # Check out files
             if os.path.exists(fout):
@@ -449,14 +462,15 @@ def util_panel_input_single(dtype: str, status:bool) -> None:
                 st.rerun()
             util_help_dialog(utildoc.title_dicoms, utildoc.def_dicoms)
 
-def util_panel_download(dtype:str, status:bool) -> None:
+
+def util_panel_download(dtype: str, status: bool) -> None:
     """
     Panel for downloading results
     """
     with st.container(border=True):
         # Check init status
         if not status:
-            st.warning('Please check previous step!')
+            st.warning("Please check previous step!")
             return
 
         # Zip results and download
@@ -464,7 +478,7 @@ def util_panel_download(dtype:str, status:bool) -> None:
         out_dir = st.session_state.paths["download"]
         in_dir = st.session_state.paths[dtype]
         if not os.path.exists(in_dir):
-            st.error('Input data missing!')
+            st.error("Input data missing!")
             return
         if not os.path.exists(out_dir):
             os.makedirs(out_dir)
@@ -472,10 +486,9 @@ def util_panel_download(dtype:str, status:bool) -> None:
             f_tmp = os.path.join(out_dir, dtype)
             out_zip = utilio.zip_folder(in_dir, f_tmp)
             st.download_button(
-                f'Download results: {dtype}',
+                f"Download results: {dtype}",
                 out_zip,
                 file_name=f"{st.session_state.experiment}_{dtype}.zip",
             )
         except:
-            st.error('Could not download data!')
-
+            st.error("Could not download data!")

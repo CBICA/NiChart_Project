@@ -1,12 +1,12 @@
 import os
 from typing import Any
-from menu import menu
 
 import streamlit as st
 import utils.utils_dicom as utildcm
 import utils.utils_io as utilio
 import utils.utils_nifti as utilni
 import utils.utils_st as utilst
+from menu import menu
 from stqdm import stqdm
 
 result_holder = st.empty()

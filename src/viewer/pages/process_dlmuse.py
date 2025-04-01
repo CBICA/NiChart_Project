@@ -1,5 +1,6 @@
-import os
 import logging
+import os
+
 import NiChart_DLMUSE as ncd
 import pandas as pd
 import streamlit as st
@@ -7,25 +8,13 @@ import utils.utils_cloud as utilcloud
 import utils.utils_io as utilio
 import utils.utils_menu as utilmenu
 import utils.utils_nifti as utilni
+import utils.utils_pages as utilpg
+import utils.utils_panels as utilpn
 import utils.utils_rois as utilroi
 import utils.utils_session as utilss
 import utils.utils_st as utilst
-import utils.utils_panels as utilpn
 from stqdm import stqdm
 
-# Page config should be called for each page
-utilss.config_page()
-
-utilmenu.menu()
-
-st.write("# Segmentation of Anatomical Regions of Interest")
-
-st.markdown(
-    """
-    - Segmentation of T1-weighted MRI scans into anatomical regions of interest (ROIs)
-    - [DLMUSE](https://github.com/CBICA/NiChart_DLMUSE): Fast deep learning based segmentation into 145 ROIs + 105 composite ROIs
-        """
-)
 
 def panel_dlmuse() -> None:
     """
@@ -64,9 +53,9 @@ def panel_dlmuse() -> None:
 
                 ## Clear logs to avoid huge accumulation
                 ## TODO: This is hacky, fix this more elegantly from NiChart_DLMUSE by using log rotation
-                if os.path.exists('pipeline.log'):
+                if os.path.exists("pipeline.log"):
                     try:
-                        open('pipeline.log', 'w').close()
+                        open("pipeline.log", "w").close()
                     except:
                         print("Could not empty pipeline.log!")
 
@@ -80,7 +69,9 @@ def panel_dlmuse() -> None:
                 )
                 ## Reset logging level after NiChart_DLMUSE pipeline changes it...
                 ## TODO: Fix this hack just like the above
-                logging.basicConfig(filename="pipeline.log", encoding="utf-8", level=logging.ERROR)
+                logging.basicConfig(
+                    filename="pipeline.log", encoding="utf-8", level=logging.ERROR
+                )
 
                 # dlmuse_cmd = f"NiChart_DLMUSE -i {st.session_state.paths['T1']} -o {st.session_state.paths['dlmuse']} -d {device} --cores 1"
                 # st.info(f"Running: {dlmuse_cmd}", icon=":material/manufacturing:")
@@ -229,29 +220,35 @@ def panel_view() -> None:
                         )
 
 
+# Page config should be called for each page
+utilpg.config_page()
+utilpg.select_main_menu()
+utilpg.select_pipeline()
+utilpg.select_pipeline_step()
 
-# Call all steps
-t1, t2, t3, t4 =  st.tabs(
-    ['Experiment Name', 'Input Data', 'DLMUSE', 'View Scans']
-)
-if st.session_state.app_type == "cloud":
-    t1, t2, t3, t4, t5 =  st.tabs(
-        ['Experiment Name', 'Input Data', 'DLMUSE', 'View Scans', 'Download']
+with st.container(border=True):
+
+    st.markdown(
+        """
+        ### Segmentation of Anatomical Regions of Interest
+        - Segmentation of T1-weighted MRI scans into anatomical regions of interest (ROIs)
+        - [DLMUSE](https://github.com/CBICA/NiChart_DLMUSE): Fast deep learning based segmentation into 145 ROIs + 105 composite ROIs
+        """
     )
 
-with t1:
-    utilpn.util_panel_experiment()
-with t2:
-    # panel_indicoms()
-    status = st.session_state.flags['experiment']
-    utilpn.util_panel_input_multi('T1', status)
-with t3:
-    panel_dlmuse()
-with t4:
-    panel_view()
-if st.session_state.app_type == "cloud":
-    with t5:
-        utilpn.util_panel_download('DLMUSE')
-
-# FIXME: For DEBUG
-utilst.add_debug_panel()
+    st.markdown("##### Select Task")
+    list_tasks = ["Experiment Name", "Input Data", "DLMUSE", "View Scans", "Download"]
+    sel_task = st.pills(
+        "Select Task", list_tasks, selection_mode="single", label_visibility="collapsed"
+    )
+    if sel_task == "Experiment Name":
+        utilpn.util_panel_experiment()
+    elif sel_task == "Input Data":
+        status = st.session_state.flags["experiment"]
+        utilpn.util_panel_input_multi("T1", status)
+    elif sel_task == "DLMUSE":
+        panel_dlmuse()
+    elif sel_task == "View Scans":
+        panel_view()
+    elif sel_task == "Download":
+        utilpn.util_panel_download("DLMUSE")

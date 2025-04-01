@@ -5,35 +5,21 @@ import re
 import pandas as pd
 import streamlit as st
 import utils.utils_dataframe as utildf
-import utils.utils_io as utilio
-import utils.utils_menu as utilmenu
 import utils.utils_nifti as utilni
+import utils.utils_pages as utilpg
+import utils.utils_panels as utilpn
 import utils.utils_plot as utilpl
 import utils.utils_rois as utilroi
 import utils.utils_session as utilss
 import utils.utils_st as utilst
 import utils.utils_viewimg as utilvi
-import utils.utils_panels as utilpn
 
 # from stqdm import stqdm
 
 # Page config should be called for each page
-utilss.config_page()
+utilpg.config_page()
+utilpg.show_menu()
 
-utilmenu.menu()
-
-st.write("# View Data")
-
-st.markdown(
-    """
-    - Plot study data to visualize imaging variables
-    - With options to:
-        - Select target variables to plot
-        - View reference distributions (centile values of the reference dataset)
-        - Filter data
-        - View MRI images and segmentations for selected data points
-    """
-)
 
 def panel_rename() -> None:
     """
@@ -469,20 +455,28 @@ def panel_plot() -> None:
     # Show plot
     show_plots(df, btn_plots)
 
-# Call all steps
-t1, t2, t3, t4 =  st.tabs(
-    ['Experiment Name', 'Input Data', 'Select Variables', 'Plot']
+
+st.markdown(
+    """
+    ### View Data
+    - Plot study data to visualize imaging variables
+    - With options to:
+        - Select target variables to plot
+        - View reference distributions (centile values of the reference dataset)
+        - Filter data
+        - View MRI images and segmentations for selected data points
+    """
 )
+
+# Call all steps
+t1, t2, t3, t4 = st.tabs(["Experiment Name", "Input Data", "Select Variables", "Plot"])
 
 with t1:
     utilpn.util_panel_experiment()
 with t2:
-    status = st.session_state.flags['experiment']
-    utilpn.util_panel_input_single('dlmuse_csv', status)
+    status = st.session_state.flags["experiment"]
+    utilpn.util_panel_input_single("dlmuse_csv", status)
 with t3:
     panel_select()
 with t4:
     panel_plot()
-
-# FIXME: For DEBUG
-utilst.add_debug_panel()

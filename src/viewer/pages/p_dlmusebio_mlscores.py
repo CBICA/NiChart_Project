@@ -5,33 +5,23 @@ import pandas as pd
 import streamlit as st
 import utils.utils_cloud as utilcloud
 import utils.utils_io as utilio
-import utils.utils_menu as utilmenu
-import utils.utils_session as utilss
-import utils.utils_st as utilst
+import utils.utils_pages as utilpg
 import utils.utils_panels as utilpn
+import utils.utils_st as utilst
 
 run_dir = os.path.join(st.session_state.paths["root"], "src", "workflows", "w_sMRI")
 sys.path.append(run_dir)
 import w_mlscores as w_mlscores
 
 # Page config should be called for each page
-utilss.config_page()
+utilpg.config_page()
+utilpg.show_menu()
 
-utilmenu.menu()
-
-st.write("# Machine Learning (ML)-Based Imaging Biomarkers")
-
-st.markdown(
-    """
-    - Application of pre-trained  machine learning (ML) models to derive imaging biomarkers.
-    - ML biomarkers quantify brain changes related to aging and disease.
-    - ML models were trained on ISTAGING reference data using DLMUSE ROIs after statistical harmonization with COMBAT.
-    """
-)
 
 def panel_indata() -> None:
     panel_inrois()
     panel_indemog()
+
 
 def panel_inrois() -> None:
     """
@@ -294,28 +284,33 @@ def panel_download() -> None:
             disabled=False,
         )
 
-# Call all steps
-t1, t2, t3, t4 =  st.tabs(
-    ['Experiment', 'Input ROIs', 'Input Demog', 'Run MLScores']
+
+st.markdown(
+    """
+    ### Machine Learning (ML)-Based Imaging Biomarkers
+    - Application of pre-trained  machine learning (ML) models to derive imaging biomarkers.
+    - ML biomarkers quantify brain changes related to aging and disease.
+    - ML models were trained on ISTAGING reference data using DLMUSE ROIs after statistical harmonization with COMBAT.
+    """
 )
+
+# Call all steps
+t1, t2, t3, t4 = st.tabs(["Experiment", "Input ROIs", "Input Demog", "Run MLScores"])
 if st.session_state.app_type == "cloud":
-    t1, t2, t3, t4, t5 =  st.tabs(
-        ['Experiment', 'Input ROIs', 'Input Demog', 'Run MLScores', 'Download']
+    t1, t2, t3, t4, t5 = st.tabs(
+        ["Experiment", "Input ROIs", "Input Demog", "Run MLScores", "Download"]
     )
 
 with t1:
     utilpn.util_panel_experiment()
 with t2:
-    status = st.session_state.flags['experiment']
-    utilpn.util_panel_input_single('dlmuse_csv', status)
+    status = st.session_state.flags["experiment"]
+    utilpn.util_panel_input_single("dlmuse_csv", status)
 with t3:
-    status = st.session_state.flags['experiment']
-    utilpn.util_panel_input_single('demog_csv', status)
+    status = st.session_state.flags["experiment"]
+    utilpn.util_panel_input_single("demog_csv", status)
 with t4:
     panel_run()
 if st.session_state.app_type == "cloud":
     with t5:
         panel_download()
-
-# FIXME: For DEBUG
-utilst.add_debug_panel()

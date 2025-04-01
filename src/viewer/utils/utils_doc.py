@@ -6,7 +6,6 @@ from typing import Optional
 import streamlit as st
 import utils.utils_st as utilst
 
-
 title_exp = "Experiment"
 def_exp = """
     - A NiChart pipeline executes a series of steps, with input/output files organized in a predefined folder structure.
@@ -39,4 +38,3 @@ def_dicoms_extract = """
 - Selected series are converted into Nifti image format.
 - Nifti images are renamed with the following format: **{PatientID}_{StudyDate}_{modality}.nii.gz**
 """
-

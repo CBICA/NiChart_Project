@@ -1,20 +1,16 @@
 import os
 
 import streamlit as st
-import utils.utils_menu as utilmenu
-import utils.utils_session as utilss
 import utils.utils_pages as utilpg
 
 # Page config should be called for each page
 utilpg.config_page()
-utilpg.select_main_menu()
-utilpg.select_pipeline()
-utilpg.select_pipeline_step()
+utilpg.show_menu()
 
 st.markdown(
     """
-    # Structural MRI Biomarkers
-    ### Neuroimaging pipeline for computing AI biomarkers of disease and aging from T1-weighted MRI scans
+    ### Structural MRI Biomarkers
+    - Neuroimaging pipeline for computing AI biomarkers of disease and aging from T1-weighted MRI scans
     """
 )
 
@@ -86,10 +82,10 @@ st.markdown(
     """
 )
 
-st.text("Coming soon!")
-st.text("Coupled Cross-sectional and Longitudinal Non-negative Matrix Factorization Elucidates (Seven) Dynamic Patterns of Brain Aging in 48,949 Individuals")
+# st.text("Coming soon!")
+# st.text("Coupled Cross-sectional and Longitudinal Non-negative Matrix Factorization Elucidates (Seven) Dynamic Patterns of Brain Aging in 48,949 Individuals")
 
-f_img = os.path.join(st.session_state.paths["root"], "resources", "images", "ccl_nmf1.jpg")
-st.image(f_img, width=800, caption="Ioanna Skampardoni et. al.")
-f_img = os.path.join(st.session_state.paths["root"], "resources", "images", "ccl_nmf2.jpg")
-st.image(f_img, width=800, caption="Ioanna Skampardoni et. al, ")
+# f_img = os.path.join(st.session_state.paths["root"], "resources", "images", "ccl_nmf1.jpg")
+# st.image(f_img, width=800, caption="Ioanna Skampardoni et. al.")
+# f_img = os.path.join(st.session_state.paths["root"], "resources", "images", "ccl_nmf2.jpg")
+# st.image(f_img, width=800, caption="Ioanna Skampardoni et. al, ")

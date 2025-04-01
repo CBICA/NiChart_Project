@@ -66,11 +66,11 @@ def init_session_state() -> None:
             "desktop": {"msg_infile": "Select"},
         }
 
-        st.session_state.sel_main_menu = 'Home'
-        st.session_state.sel_pipeline = None    
+        st.session_state.nicon = Image.open("../resources/nichart1.png")
+
+        st.session_state.sel_main_menu = "Home"
+        st.session_state.sel_pipeline = None
         st.session_state.sel_pipeline_step = None
-        
-        print('AAAA')
 
         # Store user session info for later retrieval
         if st.session_state.app_type == "cloud":

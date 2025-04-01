@@ -6,15 +6,18 @@ import streamlit as st
 import utils.utils_rois as utilroi
 import utils.utils_st as utilst
 
-
-#from wfork_streamlit_profiler import Profiler
+# from wfork_streamlit_profiler import Profiler
 # with Profiler():
 
 
-parser = argparse.ArgumentParser(description='NiChart Application Server')
+parser = argparse.ArgumentParser(description="NiChart Application Server")
 
-parser.add_argument('--cloud', action='store_true', default=False,
-                    help="If passed, set the session type to cloud")
+parser.add_argument(
+    "--cloud",
+    action="store_true",
+    default=False,
+    help="If passed, set the session type to cloud",
+)
 try:
     args = parser.parse_args()
 except SystemExit as e:
@@ -35,12 +38,8 @@ if "instantiated" not in st.session_state:
     st.session_state.app_type = "cloud"
     st.session_state.app_type = "desktop"
     st.session_state.app_config = {
-        'cloud': {
-            'msg_infile': 'Upload'
-        },
-        'desktop': {
-            'msg_infile': 'Select'
-        }
+        "cloud": {"msg_infile": "Upload"},
+        "desktop": {"msg_infile": "Select"},
     }
     ###################################
 
@@ -51,26 +50,26 @@ if "instantiated" not in st.session_state:
 
     # Icons for panels
     st.session_state.icon_thumb = {
-        False: ':material/thumb_down:',
-        True: ':material/thumb_up:'
+        False: ":material/thumb_down:",
+        True: ":material/thumb_up:",
     }
 
     # Flags for various i/o
     st.session_state.flags = {
-        'dset': False,
-        'dir_out': False,
-        'dir_dicom': False,
-        'dicom_series': False,
-        'dir_nifti': False,
-        'dir_t1': False,
-        'dir_dlmuse': False,
-        'csv_dlmuse': False,
-        'csv_dlwmls': False,
-        'csv_demog': False,
-        'csv_dlmuse+demog': False,
-        'dir_download': False,
-        'csv_mlscores': False,
-        'csv_plot': False,
+        "dset": False,
+        "dir_out": False,
+        "dir_dicom": False,
+        "dicom_series": False,
+        "dir_nifti": False,
+        "dir_t1": False,
+        "dir_dlmuse": False,
+        "csv_dlmuse": False,
+        "csv_dlwmls": False,
+        "csv_demog": False,
+        "csv_dlmuse+demog": False,
+        "dir_download": False,
+        "csv_mlscores": False,
+        "csv_plot": False,
     }
 
     # Predefined paths for different tasks in the final results
@@ -133,8 +132,7 @@ if "instantiated" not in st.session_state:
     st.session_state.paths["root"] = os.path.dirname(os.path.dirname(os.getcwd()))
     st.session_state.paths["init"] = st.session_state.paths["root"]
     st.session_state.paths["dir_out"] = os.path.join(
-        st.session_state.paths["root"],
-        "output_folder"
+        st.session_state.paths["root"], "output_folder"
     )
     if not os.path.exists(st.session_state.paths["dir_out"]):
         os.makedirs(st.session_state.paths["dir_out"])
@@ -159,9 +157,7 @@ if "instantiated" not in st.session_state:
         "muse_sel": os.path.join(res_dir, "MUSE", "list_MUSE_all.csv"),
     }
     st.session_state.dict_categories = os.path.join(
-        res_dir,
-        'lists',
-        'dict_var_categories.json'
+        res_dir, "lists", "dict_var_categories.json"
     )
     ###################################
 
@@ -170,9 +166,16 @@ if "instantiated" not in st.session_state:
     # Dictionary with plot info
     st.session_state.plots = pd.DataFrame(
         columns=[
-            "pid", "plot_type", "xvar", "yvar",
-            "hvar", "hvals", "trend",
-            "lowess_s", "traces", "centtype"
+            "pid",
+            "plot_type",
+            "xvar",
+            "yvar",
+            "hvar",
+            "hvals",
+            "trend",
+            "lowess_s",
+            "traces",
+            "centtype",
         ]
     )
     st.session_state.plot_index = 1
@@ -180,57 +183,57 @@ if "instantiated" not in st.session_state:
 
     # Constant plot settings
     st.session_state.plot_const = {
-        'trend_types' : ['', 'Linear', 'Smooth LOWESS Curve'],
-        'centile_types' : ['', 'CN-All', 'CN-M', 'CN-F'],
-        'linfit_trace_types' : ['data', 'lin_fit', 'conf_95%'],
-        'distplot_trace_types' : ['histogram', 'density', 'rug'],
-        'min_per_row': 1,
-        'max_per_row': 5,
-        'num_per_row': 3,
-        'margin': 20,
-        'h_init': 500,
-        'h_coeff': 1.0,
-        'h_coeff_max': 2.0,
-        'h_coeff_min': 0.6,
-        'h_coeff_step': 0.2,
-        'distplot_binnum': 100
+        "trend_types": ["", "Linear", "Smooth LOWESS Curve"],
+        "centile_types": ["", "CN-All", "CN-M", "CN-F"],
+        "linfit_trace_types": ["data", "lin_fit", "conf_95%"],
+        "distplot_trace_types": ["histogram", "density", "rug"],
+        "min_per_row": 1,
+        "max_per_row": 5,
+        "num_per_row": 3,
+        "margin": 20,
+        "h_init": 500,
+        "h_coeff": 1.0,
+        "h_coeff_max": 2.0,
+        "h_coeff_min": 0.6,
+        "h_coeff_step": 0.2,
+        "distplot_binnum": 100,
     }
 
     # Plot variables
     st.session_state.plot_var = {
-        'df_data': pd.DataFrame(),
-        'hide_settings': False,
-        'hide_legend': False,
-        'show_img': False,
-        'plot_type': 'Scatter Plot',
-        'xvar': '',
-        'yvar': '',
-        'hvar': '',
-        'hvals': [],
-        'trend': 'Linear',
-        'traces': ['data', 'lin'],
-        'lowess_s': 0.5,
-        'centtype' : '',
-        'h_coeff': 1.0        
+        "df_data": pd.DataFrame(),
+        "hide_settings": False,
+        "hide_legend": False,
+        "show_img": False,
+        "plot_type": "Scatter Plot",
+        "xvar": "",
+        "yvar": "",
+        "hvar": "",
+        "hvals": [],
+        "trend": "Linear",
+        "traces": ["data", "lin"],
+        "lowess_s": 0.5,
+        "centtype": "",
+        "h_coeff": 1.0,
     }
     ###################################
 
     ###################################
     # MRI view
     st.session_state.mriview_const = {
-        'img_views': ["axial", "coronal", "sagittal"],
-        'w_init': 500,
-        'w_coeff': 1.0,
-        'w_coeff_max': 2.0,
-        'w_coeff_min': 0.6,
-        'w_coeff_step': 0.2
+        "img_views": ["axial", "coronal", "sagittal"],
+        "w_init": 500,
+        "w_coeff": 1.0,
+        "w_coeff_max": 2.0,
+        "w_coeff_min": 0.6,
+        "w_coeff_step": 0.2,
     }
 
     st.session_state.mriview_var = {
-        'crop_to_mask': True,
-        'show_overlay': True,
-        'list_orient': ["axial", "coronal", "sagittal"],
-        'w_coeff': 1.0        
+        "crop_to_mask": True,
+        "show_overlay": True,
+        "list_orient": ["axial", "coronal", "sagittal"],
+        "w_coeff": 1.0,
     }
 
     ###################################
@@ -239,29 +242,32 @@ if "instantiated" not in st.session_state:
     # ROI dictionaries
     # List of roi names, indices, etc.
     st.session_state.rois = {
-        'path': os.path.join(st.session_state.paths['root'], 'resources', 'lists'),
-        'roi_dict_options': ['', 'muse_rois'], # This will be extended with additional roi dict.s
-        'roi_csvs': {
-            'muse_rois': 'MUSE_listROIs.csv',
-            'muse_derived': 'MUSE_mapping_derivedROIs.csv'
+        "path": os.path.join(st.session_state.paths["root"], "resources", "lists"),
+        "roi_dict_options": [
+            "",
+            "muse_rois",
+        ],  # This will be extended with additional roi dict.s
+        "roi_csvs": {
+            "muse_rois": "MUSE_listROIs.csv",
+            "muse_derived": "MUSE_mapping_derivedROIs.csv",
         },
-        'sel_roi_dict': 'muse_rois',
-        'sel_derived_dict': 'muse_derived'
+        "sel_roi_dict": "muse_rois",
+        "sel_derived_dict": "muse_derived",
     }
 
     # Read initial roi lists (default:MUSE) to dictionaries
     ssroi = st.session_state.rois
     df_tmp = pd.read_csv(
-        os.path.join(ssroi['path'], ssroi['roi_csvs'][ssroi['sel_roi_dict']])
+        os.path.join(ssroi["path"], ssroi["roi_csvs"][ssroi["sel_roi_dict"]])
     )
     dict1 = dict(zip(df_tmp["Index"].astype(str), df_tmp["Name"].astype(str)))
     dict2 = dict(zip(df_tmp["Name"].astype(str), df_tmp["Index"].astype(str)))
     dict3 = utilroi.muse_derived_to_dict(
-        os.path.join(ssroi['path'], ssroi['roi_csvs'][ssroi['sel_derived_dict']])
+        os.path.join(ssroi["path"], ssroi["roi_csvs"][ssroi["sel_derived_dict"]])
     )
-    st.session_state.rois['roi_dict'] = dict1
-    st.session_state.rois['roi_dict_inv'] = dict2
-    st.session_state.rois['roi_dict_derived'] = dict3
+    st.session_state.rois["roi_dict"] = dict1
+    st.session_state.rois["roi_dict_inv"] = dict2
+    st.session_state.rois["roi_dict_derived"] = dict3
     ###################################
 
     # Current roi dictionary
