@@ -4,7 +4,6 @@ import utils.utils_pages as utilpg
 import utils.utils_session as utilss
 from streamlit_extras.stylable_container import stylable_container
 from streamlitextras.webutils import stxs_javascript
-import utils.utils_panels as utilpn
 
 # Page config should be called for each page
 utilpg.config_page()
@@ -14,21 +13,16 @@ utilpg.select_main_menu()
 with st.container(border=True):
     st.markdown(
         """
-        ### Configuration
-        - Select config options here.
+        ### View session state variables
         """
     )
 
-    sel_config = st.pills(
-        'Select Config',
-        ['Input Dir', 'Output Dir'],
+    sel_ssvar = st.pills(
+        'Select Session State Var',
+        st.session_state.keys(),
         selection_mode='single',
         default = None,
         label_visibility="collapsed"
     )
-
-    if sel_config == 'Input Dir':
-        utilpn.panel_indir()
-
-    elif sel_config == 'Output Dir':
-        utilpn.panel_outdir()
+    if sel_ssvar is not None:
+        st.write(st.session_state[sel_ssvar])

@@ -66,6 +66,12 @@ def init_session_state() -> None:
             "desktop": {"msg_infile": "Select"},
         }
 
+        st.session_state.sel_main_menu = 'Home'
+        st.session_state.sel_pipeline = None    
+        st.session_state.sel_pipeline_step = None
+        
+        print('AAAA')
+
         # Store user session info for later retrieval
         if st.session_state.app_type == "cloud":
             st.session_state.cloud_session_token = process_session_token()
