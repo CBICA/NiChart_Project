@@ -11,21 +11,29 @@ dict_main_menu = {
 }
 
 dict_pipelines = {
-    "DLMUSE Biomarkers (T1)": "pages/Menu.py",
-    "DLWMLS (FL)": "pages/Menu.py",
-    "DTI Biomarkers (DTI)": "pages/Menu.py",
-    "rsfMRI Biomarkers (rsfMRI)": "pages/Menu.py",
+    "Interactive Brain Anatomy": "pages/Menu.py",
+    "sMRI Segmentation and Biomarker Extraction": "pages/Menu.py",
+    "White Matter Lesion Segmentation": "pages/Menu.py",
+    "DTI Biomarker Extraction": "pages/Menu.py",
+    "fMRI Biomarker Extraction": "pages/Menu.py",
 }
 
 dict_pipeline_steps = {
-    "DLMUSE Biomarkers (T1)": {
+    "Interactive Brain Anatomy": {
         "Overview": "pages/p_dlmusebio_overview.py",
         "Upload Data": "pages/p_dlmusebio_indata.py",
         "DLMUSE": "pages/process_dlmuse.py",
         "ML Biomarkers": "pages/p_dlmusebio_mlscores.py",
         "Plotting": "pages/p_dlmusebio_plot.py",
     },
-    "DLWMLS (FL)": {
+    "sMRI Segmentation and Biomarker Extraction": {
+        "Overview": "pages/p_dlmusebio_overview.py",
+        "Upload Data": "pages/p_dlmusebio_indata.py",
+        "DLMUSE": "pages/process_dlmuse.py",
+        "ML Biomarkers": "pages/p_dlmusebio_mlscores.py",
+        "Plotting": "pages/p_dlmusebio_plot.py",
+    },
+    "White Matter Lesion Segmentation": {
         "Overview": "pages/p_dlwmls_overview.py",
         "Upload Data": "pages/p_dlwmls_indata.py",
         "DLWMLS": "pages/process_dlwmls.py",
