@@ -26,7 +26,7 @@ def read_dataframe(fname: str) -> pd.DataFrame:
 def rename_rois(df: pd.DataFrame, roi_dict: dict) -> pd.DataFrame:
     df_out = df.rename(columns=roi_dict)
 
-    duplicate_columns = df_out.columns.duplicated() == False
+    duplicate_columns = df_out.columns.duplicated() is False
     df_out = df_out.loc[:, duplicate_columns]
 
     return df_out

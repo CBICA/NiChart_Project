@@ -1,10 +1,4 @@
-import glob
-import os
-import time
-from typing import Optional
-
 import streamlit as st
-import utils.utils_st as utilst
 
 title_exp = "Experiment"
 def_exp = """
@@ -38,3 +32,31 @@ def_dicoms_extract = """
 - Selected series are converted into Nifti image format.
 - Nifti images are renamed with the following format: **{PatientID}_{StudyDate}_{modality}.nii.gz**
 """
+
+title_inp = "Input"
+def_inp = """
+    - Input data folder with initial files for each study.
+    - Study data is organized in subfolders with the study name
+"""
+
+title_out = "Output"
+def_out = """
+    - Output data folder with consolidated data files for each study.
+    - Output data is organized in subfolders with the study name and process name
+"""
+
+def util_help_dialog(s_title: str, s_text: str) -> None:
+    """
+    Display help dialog box
+    """
+    @st.dialog(s_title)  # type:ignore
+    def help_working_dir():
+        st.markdown(s_text)
+
+    col1, col2 = st.columns([0.5, 0.1])
+    with col2:
+        if st.button(
+            "Get help 🤔", key="key_btn_help_" + s_title, use_container_width=True
+        ):
+            help_working_dir()
+            

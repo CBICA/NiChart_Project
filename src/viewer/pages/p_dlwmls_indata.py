@@ -4,15 +4,12 @@ import time
 from typing import Any
 
 import streamlit as st
-import utils.utils_cloud as utilcloud
 import utils.utils_dicom as utildcm
 import utils.utils_doc as utildoc
 import utils.utils_io as utilio
-import utils.utils_menu as utilmenu
 import utils.utils_nifti as utilni
 import utils.utils_pages as utilpg
 import utils.utils_panels as utilpn
-import utils.utils_session as utilss
 import utils.utils_st as utilst
 from stqdm import stqdm
 
@@ -30,7 +27,7 @@ def progress(p: int, i: int, decoded: Any) -> None:
         st.progress(p, f"Progress: Token position={i}")
 
 
-def panel_detect(status) -> None:
+def panel_detect(status: bool) -> None:
     """
     Panel for detecting dicom series
     """
@@ -39,7 +36,6 @@ def panel_detect(status) -> None:
         if not status:
             st.warning("Please check previous step!")
             return
-            flag_disabled = not st.session_state.flags["dicoms"]
 
         # Detect dicom series
         btn_detect = st.button("Detect Series")
@@ -69,7 +65,7 @@ def panel_detect(status) -> None:
         utilst.util_help_dialog(utildoc.title_dicoms_detect, utildoc.def_dicoms_detect)
 
 
-def panel_extract(status) -> None:
+def panel_extract(status: bool) -> None:
     """
     Panel for extracting dicoms
     """
@@ -143,7 +139,7 @@ def panel_extract(status) -> None:
         )
 
 
-def panel_view(status) -> None:
+def panel_view(status: bool) -> None:
     """
     Panel for viewing extracted nifti images
     """

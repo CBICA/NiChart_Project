@@ -1,9 +1,4 @@
 import os
-import shutil
-import tkinter as tk
-import zipfile
-from tkinter import filedialog
-from typing import Any, BinaryIO, List, Optional
 
 import pandas as pd
 import streamlit as st
@@ -48,14 +43,14 @@ df_files = pd.DataFrame({"ftype": ftypes, "fdir": fdirs, "fpref": fprefs})
 #####################################################################
 
 
-def get_file_names(std, ftype):
+def get_file_names(std: str, ftype: str) -> pd.DataFrame:
 
     df_sel = df_files[df_files.ftype == ftype]
 
     if df_sel.shape[0] != 1:
         return []
 
-    dout = os.path.join(st.session_state.paths["outdir"], std, df_sel.fdir.values[0])
+    dout = os.path.join(st.session_state.paths["out_dir"], std, df_sel.fdir.values[0])
 
     fpaths = [
         os.path.join(dout, std + "_" + x + ".csv") for x in df_sel.fpref.values[0]
@@ -69,7 +64,7 @@ def get_file_names(std, ftype):
     return df
 
 
-def check_files_exist(std, ftype):
+def check_files_exist(std: str, ftype: str) -> bool:
     df_tmp = get_file_names(std, ftype)
 
     if df_tmp.FileExists.min() == 1:
@@ -77,7 +72,7 @@ def check_files_exist(std, ftype):
     return False
 
 
-def delete_files(flist):
+def delete_files(flist: list) -> None:
     for fname in flist:
         try:
             os.remove(fname)

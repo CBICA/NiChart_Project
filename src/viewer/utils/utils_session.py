@@ -111,6 +111,7 @@ def init_session_state() -> None:
 
         # Flags for various i/o
         st.session_state.flags = {
+            "out_dir": None,
             "experiment": False,
             "dicoms": False,
             "dicoms_series": False,
@@ -152,7 +153,7 @@ def init_session_state() -> None:
             "file_search_dir": "",
             "target_dir": "",
             "target_file": "",
-            "dir_out": "",
+            "out_dir": "",
             "experiment": "",
             "lists": "",
             "dicoms": "",
@@ -187,16 +188,16 @@ def init_session_state() -> None:
         st.session_state.paths["init"] = st.session_state.paths["root"]
         if st.session_state.has_cloud_session:
             user_id = st.session_state.cloud_user_id
-            st.session_state.paths["dir_out"] = os.path.join(
+            st.session_state.paths["out_dir"] = os.path.join(
                 st.session_state.paths["root"], "output_folder", user_id
             )
         else:
-            st.session_state.paths["dir_out"] = os.path.join(
+            st.session_state.paths["out_dir"] = os.path.join(
                 st.session_state.paths["root"], "output_folder"
             )
 
-        if not os.path.exists(st.session_state.paths["dir_out"]):
-            os.makedirs(st.session_state.paths["dir_out"])
+        if not os.path.exists(st.session_state.paths["out_dir"]):
+            os.makedirs(st.session_state.paths["out_dir"])
 
         # Copy demo folders into user folders as needed
         if st.session_state.has_cloud_session:
@@ -216,7 +217,7 @@ def init_session_state() -> None:
             for demo in demo_dir_paths:
                 demo_name = os.path.basename(demo)
                 destination_path = os.path.join(
-                    st.session_state.paths["dir_out"], demo_name
+                    st.session_state.paths["out_dir"], demo_name
                 )
                 if os.path.exists(destination_path):
                     shutil.rmtree(destination_path)
@@ -505,3 +506,54 @@ def reset_plots() -> None:
     st.session_state.plot_var["lowess_s"] = 0.5
     st.session_state.plot_var["centtype"] = ""
     st.session_state.plot_var["h_coeff"] = 1.0
+
+
+def update_out_dir(sel_outdir) -> None:
+    """
+    Updates when outdir changes
+    """
+    # Set flag
+    st.session_state.flags["out_dir"] = True
+
+    # Set out dir path
+    st.session_state.paths['out_dir'] = sel_outdir
+    
+    ## Reset paths and flags if out dir was reset
+    #if sel_outdir is None:
+        #st.session_state.flags["outdir"] = False   
+        #st.session_state.flags["selstd"] = False
+        #st.session_state.selstd = None
+        #st.session_state.paths['selstd_out'] = ''
+        #st.session_state.flags["selstd_unified"] = False
+        #st.session_state.flags["selstd_vals_mapped"] = False
+        #st.session_state.flags["selstd_visits"] = False
+        #st.session_state.flags["selstd_final"] = False
+        #return 
+    
+    ## Reset paths and flags if out dir was selected
+    #if st.session_state.selstd is None:
+        #return
+
+    #st.session_state.paths['selstd_out'] = os.path.join(
+        #st.session_state.paths['outdir'],
+        #st.session_state.selstd
+    #)
+    #if not os.path.exists(st.session_state.paths['selstd_out']):
+        #os.makedirs(st.session_state.paths['selstd_out'])
+        
+    #st.session_state.flags["selstd_unified"] = utilcf.check_files_exist(
+        #st.session_state.selstd, 'unified'
+    #)
+    #st.session_state.flags["selstd_vals_mapped"] = utilcf.check_files_exist(
+        #st.session_state.selstd, 'mapped'
+    #)
+    #st.session_state.flags["selstd_visits"] = utilcf.check_files_exist(
+        #st.session_state.selstd, 'visits'
+    #)
+    #st.session_state.flags["selstd_final"] = utilcf.check_files_exist(
+        #st.session_state.selstd, 'final'
+    #)
+    #st.session_state.flags["selstd_qc"] = False
+
+
+

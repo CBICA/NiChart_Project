@@ -4,6 +4,7 @@ import tkinter as tk
 import zipfile
 from tkinter import filedialog
 from typing import Any, BinaryIO, List, Optional
+import streamlit as st
 
 import pandas as pd
 
@@ -163,3 +164,45 @@ def get_image_path(folder_path: str, file_pref: str, file_suff_list: list) -> st
             if f.startswith(file_pref) and f.endswith(tmp_suff):
                 return os.path.join(folder_path, f)
     return ""
+
+def util_select_dir(curr_dir, key_txt) -> None:
+    """
+    Panel to select a folder from the file system
+    """
+    sel_dir = None
+    sel_opt = st.radio(
+        'Options:',
+        ['Browse Path', 'Enter Path'],
+        horizontal = True,
+        label_visibility = 'collapsed',
+        key = f'key_{key_txt}'
+    )
+
+    if sel_opt == 'Browse Path':
+        if st.button(
+            'Browse',
+            key=f'_key_btn_{key_txt}',
+        ):
+            sel_dir = browse_folder(curr_dir)
+
+    elif sel_opt == 'Enter Path':
+        sel_dir = st.text_input(
+            '',
+            key=f'_key_sel_{key_txt}',
+            value=curr_dir,
+            label_visibility='collapsed',
+        )
+        if sel_dir is not None:
+            sel_dir = os.path.abspath(sel_dir)
+    
+    if sel_dir is not None:
+        sel_dir = os.path.abspath(sel_dir)
+        if not os.path.exists(sel_dir):
+            try:
+                os.makedirs(sel_dir)
+                st.info(f'Created directory: {sel_dir}')
+            except:
+                st.error(f'Could not create directory: {sel_dir}')
+    return sel_dir
+
+

@@ -22,7 +22,7 @@ st.markdown(
 st.divider()
 
 # Panel for selecting the working dir
-icon = st.session_state.icon_thumb[st.session_state.flags["dir_out"]]
+icon = st.session_state.icon_thumb[st.session_state.flags["out_dir"]]
 show_panel_experiment = st.checkbox(
     f":material/folder_shared: Working Directory {icon}", value=False
 )
@@ -34,14 +34,14 @@ if show_panel_experiment:
                 f"All results will be saved to: {st.session_state.paths['experiment']}",
                 icon=":material/thumb_up:",
             )
-            st.session_state.flags["dir_out"] = True
+            st.session_state.flags["out_dir"] = True
 
 # Panel for selecting data csv
 msg = st.session_state.app_config[st.session_state.app_type]["msg_infile"]
 icon = st.session_state.icon_thumb[st.session_state.flags["csv_plot"]]
 show_panel_incsv = st.checkbox(
     f":material/upload: {msg} Data {icon}",
-    disabled=not st.session_state.flags["dir_out"],
+    disabled=not st.session_state.flags["out_dir"],
     value=False,
 )
 if show_panel_incsv:

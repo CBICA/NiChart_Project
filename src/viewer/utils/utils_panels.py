@@ -3,15 +3,62 @@ import shutil
 import time
 from typing import Any
 
-import numpy as np
 import streamlit as st
 import utils.utils_doc as utildoc
 import utils.utils_io as utilio
-import utils.utils_session as utilses
+import utils.utils_session as utilss
 
 COL_LEFT = 5
 COL_RIGHT_EMPTY = 0.01
 COL_RIGHT_BUTTON = 1
+
+
+#def panel_indir() -> None:
+    #"""
+    #Panel for selecting input dir
+    #"""
+    #with st.container(border=True):
+        #if st.session_state.flags["in_dir"]:
+            #st.success(
+                #f"Input directory: {st.session_state.paths['indir']}",
+                #icon=":material/thumb_up:",
+            #)
+            #if st.button("Reset", key="reset_inp"):
+                #utilss.update_indir(None)
+                #st.rerun()
+
+        #else:
+            #curr_dir = st.session_state.paths["indir"]
+            #sel_dir = utilio.util_select_dir(curr_dir, "sel_indir")
+            #if sel_dir is not None and sel_dir != curr_dir:
+                #utilss.update_indir(sel_dir)
+                #st.rerun()
+
+        #utildoc.util_help_dialog(utildoc.title_inp, utildoc.def_inp)
+
+
+def panel_out_dir() -> None:
+    """
+    Panel for selecting output dir
+    """
+    with st.container(border=True):
+        if st.session_state.flags["out_dir"]:
+            st.success(
+                f"Output directory: {st.session_state.paths['out_dir']}",
+                icon=":material/thumb_up:",
+            )
+            if st.button("Reset", key="reset_out"):
+                utilss.update_out_dir(None)
+                st.rerun()
+
+        else:
+            curr_dir = st.session_state.paths["out_dir"]
+            sel_dir = utilio.util_select_dir(curr_dir, "sel_out_dir")
+            if sel_dir is not None and sel_dir != curr_dir:
+                utilss.update_out_dir(sel_dir)
+                st.rerun()
+
+        utildoc.util_help_dialog(utildoc.title_out, utildoc.def_out)
 
 
 def util_help_dialog(s_title: str, s_text: str) -> None:
@@ -31,7 +78,7 @@ def util_help_dialog(s_title: str, s_text: str) -> None:
             help_working_dir()
 
 
-def util_select_expname(dir_out: str, exp_curr: str) -> str:
+def util_select_expname(out_dir: str, exp_curr: str) -> Any:
     """
     Set/select experiment name
     """
@@ -44,7 +91,7 @@ def util_select_expname(dir_out: str, exp_curr: str) -> str:
     )
 
     if sel_opt == "Select Existing":
-        list_exp = utilio.get_subfolders(dir_out)
+        list_exp = utilio.get_subfolders(out_dir)
         exp_sel = st.selectbox(
             "Select",
             list_exp,
@@ -61,7 +108,7 @@ def util_select_expname(dir_out: str, exp_curr: str) -> str:
             placeholder="Type experiment name",
         )
         if exp_sel is not None:
-            dir_tmp = os.path.join(dir_out, exp_sel)
+            dir_tmp = os.path.join(out_dir, exp_sel)
             if not os.path.exists(dir_tmp):
                 os.makedirs(dir_tmp)
     return exp_sel
@@ -83,19 +130,19 @@ def util_panel_experiment() -> None:
                 st.rerun()
 
         else:
-            dir_out = st.session_state.paths["dir_out"]
+            out_dir = st.session_state.paths["out_dir"]
             exp_curr = st.session_state.experiment
-            exp_sel = util_select_expname(dir_out, exp_curr)
+            exp_sel = util_select_expname(out_dir, exp_curr)
 
             if exp_sel is not None and exp_sel != exp_curr:
                 st.session_state.experiment = exp_sel
                 st.session_state.paths["experiment"] = os.path.join(
-                    st.session_state.paths["dir_out"], exp_sel
+                    st.session_state.paths["out_dir"], exp_sel
                 )
                 st.session_state.flags["experiment"] = True
                 # Update paths when selected experiment changes
-                utilses.update_default_paths()
-                utilses.reset_flags()
+                utilss.update_default_paths()
+                utilss.reset_flags()
                 st.rerun()
 
         util_help_dialog(utildoc.title_exp, utildoc.def_exp)
@@ -110,7 +157,7 @@ def copy_uploaded_to_dir() -> None:
 
 
 def util_upload_folder(
-    dir_out: str, title_txt: str, flag_disabled: bool, help_txt: str
+    out_dir: str, title_txt: str, flag_disabled: bool, help_txt: str
 ) -> None:
     """
     Upload user data to target folder
@@ -118,9 +165,9 @@ def util_upload_folder(
     """
     # Set target path
     if not flag_disabled:
-        if not os.path.exists(dir_out):
-            os.makedirs(dir_out)
-        st.session_state.paths["target_path"] = dir_out
+        if not os.path.exists(out_dir):
+            os.makedirs(out_dir)
+        st.session_state.paths["target_path"] = out_dir
 
     # Upload data
     st.file_uploader(
@@ -168,7 +215,7 @@ def user_input_foldername(
 def util_select_folder(
     key_selector: str,
     title_txt: str,
-    dir_out: str,
+    out_dir: str,
     file_search_dir: str,
     flag_disabled: bool,
 ) -> None:
@@ -177,10 +224,10 @@ def util_select_folder(
     """
     # Check if out folder already exists
     curr_dir = ""
-    if os.path.exists(dir_out):
-        fcount = utilio.get_file_count(dir_out)
+    if os.path.exists(out_dir):
+        fcount = utilio.get_file_count(out_dir)
         if fcount > 0:
-            curr_dir = dir_out
+            curr_dir = out_dir
 
     # Upload data
     helpmsg = "Select input folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
@@ -195,22 +242,22 @@ def util_select_folder(
 
     if sel_dir is not None and os.path.exists(sel_dir):
         # Remove existing output folder
-        if os.path.exists(dir_out) and dir_out != sel_dir:
-            if os.path.islink(dir_out):
-                os.unlink(dir_out)
+        if os.path.exists(out_dir) and out_dir != sel_dir:
+            if os.path.islink(out_dir):
+                os.unlink(out_dir)
             else:
-                shutil.rmtree(dir_out)
+                shutil.rmtree(out_dir)
 
         # Create parent dir of output dir
-        if not os.path.exists(os.path.dirname(dir_out)):
-            os.makedirs(os.path.dirname(dir_out))
+        if not os.path.exists(os.path.dirname(out_dir)):
+            os.makedirs(os.path.dirname(out_dir))
 
         # Link user input dicoms
-        if not os.path.exists(dir_out):
-            os.symlink(sel_dir, dir_out)
+        if not os.path.exists(out_dir):
+            os.symlink(sel_dir, out_dir)
 
 
-def util_select_dir(curr_dir, key_txt) -> None:
+def util_select_dir(curr_dir: str, key_txt: str) -> Any:
     """
     Panel to select a folder from the file system
     """
@@ -325,7 +372,7 @@ def util_panel_input_multi(dtype: str, status: bool) -> None:
             util_help_dialog(utildoc.title_dicoms, utildoc.def_dicoms)
 
 
-def util_select_file(curr_dir, key_txt) -> None:
+def util_select_file(curr_dir: str, key_txt: str) -> Any:
     """
     Select a file
     """
@@ -338,7 +385,7 @@ def util_select_file(curr_dir, key_txt) -> None:
     )
     if sel_opt == "Browse File":
         if st.button("Browse", key=f"_key_btn_{key_txt}"):
-            sel_file = utilio.browse_file(curr_dir)  ##FIXME
+            sel_file = utilio.browse_file(curr_dir)  # FIXME
 
     elif sel_opt == "Enter Path":
         sel_file = st.text_input(
@@ -410,12 +457,12 @@ def util_panel_input_single(dtype: str, status: bool) -> None:
             # Delete data if user wants to reload
             if st.button("Reset", f"key_btn_reset_{dtype}"):
                 try:
-                    shutil.rmtree(dout)
+                    shutil.rmtree(fout)
                     st.session_state.flags[dtype] = False
-                    st.success(f"Removed file: {dout}")
+                    st.success(f"Removed file: {fout}")
                     time.sleep(4)
                 except:
-                    st.error(f"Could not delete folder: {dout}")
+                    st.error(f"Could not delete file: {fout}")
                 st.rerun()
 
         else:

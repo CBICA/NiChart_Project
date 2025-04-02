@@ -7,7 +7,6 @@ import utils.utils_io as utilio
 import utils.utils_nifti as utilni
 import utils.utils_pages as utilpg
 import utils.utils_panels as utilpn
-import utils.utils_session as utilss
 import utils.utils_st as utilst
 from stqdm import stqdm
 
@@ -26,7 +25,7 @@ def panel_infl() -> None:
     icon = st.session_state.icon_thumb[st.session_state.flags["dir_fl"]]
     st.checkbox(
         f":material/upload: {msg} FL Images {icon}",
-        disabled=not st.session_state.flags["dir_out"],
+        disabled=not st.session_state.flags["out_dir"],
         key="_check_dlwmls_in",
         value=st.session_state.checkbox["dlwmls_in"],
     )

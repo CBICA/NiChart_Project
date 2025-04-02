@@ -6,12 +6,10 @@ import pandas as pd
 import streamlit as st
 import utils.utils_cloud as utilcloud
 import utils.utils_io as utilio
-import utils.utils_menu as utilmenu
 import utils.utils_nifti as utilni
 import utils.utils_pages as utilpg
 import utils.utils_panels as utilpn
 import utils.utils_rois as utilroi
-import utils.utils_session as utilss
 import utils.utils_st as utilst
 from stqdm import stqdm
 
@@ -51,8 +49,8 @@ def panel_dlmuse() -> None:
                 progress_bar = stqdm(total=9, desc="Current step", position=0)
                 progress_bar.set_description("Starting...")
 
-                ## Clear logs to avoid huge accumulation
-                ## TODO: This is hacky, fix this more elegantly from NiChart_DLMUSE by using log rotation
+                # Clear logs to avoid huge accumulation
+                # TODO: This is hacky, fix this more elegantly from NiChart_DLMUSE by using log rotation
                 if os.path.exists("pipeline.log"):
                     try:
                         open("pipeline.log", "w").close()
@@ -67,8 +65,8 @@ def panel_dlmuse() -> None:
                     dlicv_extra_args="-nps 1 -npp 1",
                     progress_bar=progress_bar,
                 )
-                ## Reset logging level after NiChart_DLMUSE pipeline changes it...
-                ## TODO: Fix this hack just like the above
+                # Reset logging level after NiChart_DLMUSE pipeline changes it...
+                # TODO: Fix this hack just like the above
                 logging.basicConfig(
                     filename="pipeline.log", encoding="utf-8", level=logging.ERROR
                 )

@@ -22,8 +22,5 @@ with st.container(border=True):
         label_visibility="collapsed",
     )
 
-    if sel_config == "Input Dir":
-        utilpn.panel_indir()
-
-    elif sel_config == "Output Dir":
-        utilpn.panel_outdir()
+    if sel_config == "Output Dir":
+        utilpn.panel_out_dir()

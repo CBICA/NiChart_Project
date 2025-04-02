@@ -14,7 +14,7 @@ st.markdown(
     """
 )
 
-# Panel for output (dataset name + dir_out)
+# Panel for output (dataset name + out_dir)
 utilst.util_panel_workingdir(st.session_state.app_type)
 
 # Set default path for the data csv
