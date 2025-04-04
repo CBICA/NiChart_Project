@@ -9,8 +9,8 @@ utilpg.show_menu()
 
 st.markdown(
     """
-    ### DTI Processing and ML Biomarkers
-    - Work in progress
+    ### Intaractive Brain Anatomy
+    - Anatomical regions of interest
     """
 )
 

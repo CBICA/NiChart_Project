@@ -307,29 +307,31 @@ def util_panel_input_multi(dtype: str, status: bool) -> None:
             return
 
         # Check if data exists
-        dout = st.session_state.paths[dtype]
+        out_dir = st.session_state.paths[dtype]
         if st.session_state.flags[dtype]:
             st.success(
-                f"Data is ready: {dout}",
+                f"Data is ready: {out_dir}",
                 icon=":material/thumb_up:",
             )
             # Delete folder if user wants to reload
             if st.button("Reset", f"key_btn_reset_{dtype}"):
                 try:
-                    if os.path.islink(dout):
-                        os.unlink(dout)
+                    if os.path.islink(out_dir):
+                        os.unlink(out_dir)
                     else:
-                        shutil.rmtree(dout)
+                        shutil.rmtree(out_dir)
                     st.session_state.flags[dtype] = False
-                    st.success(f"Removed dir: {dout}")
+                    st.success(f"Removed dir: {out_dir}")
                     time.sleep(4)
                 except:
-                    st.error(f"Could not delete folder: {dout}")
+                    st.error(f"Could not delete folder: {out_dir}")
                 st.rerun()
 
         else:
             # Create parent dir for out data
-            dbase = os.path.dirname(dout)
+            dbase = os.path.dirname(out_dir)
+            print(dbase)
+            print('aaa')
             if not os.path.exists(dbase):
                 os.makedirs(dbase)
 
@@ -344,17 +346,17 @@ def util_panel_input_multi(dtype: str, status: bool) -> None:
 
             else:  # st.session_state.app_type == 'desktop'
                 # Get user input
-                sel_dir = util_select_dir(dout, "sel_folder")
+                sel_dir = util_select_dir(out_dir, "sel_folder")
                 if sel_dir is None:
                     return
 
                 # Link it to out folder
-                if not os.path.exists(dout):
+                if not os.path.exists(out_dir):
                     try:
-                        os.symlink(sel_dir, dout)
+                        os.symlink(sel_dir, out_dir)
                     except:
                         st.error(
-                            f"Could not link user input to destination folder: {dout}"
+                            f"Could not link user input to destination folder: {out_dir}"
                         )
 
             # Check out files

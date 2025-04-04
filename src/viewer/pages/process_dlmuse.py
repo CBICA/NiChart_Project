@@ -220,33 +220,29 @@ def panel_view() -> None:
 
 # Page config should be called for each page
 utilpg.config_page()
-utilpg.select_main_menu()
-utilpg.select_pipeline()
-utilpg.select_pipeline_step()
+utilpg.show_menu()
 
-with st.container(border=True):
+st.markdown(
+    """
+    ### Segmentation of Anatomical Regions of Interest
+    - Segmentation of T1-weighted MRI scans into anatomical regions of interest (ROIs)
+    - [DLMUSE](https://github.com/CBICA/NiChart_DLMUSE): Fast deep learning based segmentation into 145 ROIs + 105 composite ROIs
+    """
+)
 
-    st.markdown(
-        """
-        ### Segmentation of Anatomical Regions of Interest
-        - Segmentation of T1-weighted MRI scans into anatomical regions of interest (ROIs)
-        - [DLMUSE](https://github.com/CBICA/NiChart_DLMUSE): Fast deep learning based segmentation into 145 ROIs + 105 composite ROIs
-        """
-    )
-
-    st.markdown("##### Select Task")
-    list_tasks = ["Experiment Name", "Input Data", "DLMUSE", "View Scans", "Download"]
-    sel_task = st.pills(
-        "Select Task", list_tasks, selection_mode="single", label_visibility="collapsed"
-    )
-    if sel_task == "Experiment Name":
-        utilpn.util_panel_experiment()
-    elif sel_task == "Input Data":
-        status = st.session_state.flags["experiment"]
-        utilpn.util_panel_input_multi("T1", status)
-    elif sel_task == "DLMUSE":
-        panel_dlmuse()
-    elif sel_task == "View Scans":
-        panel_view()
-    elif sel_task == "Download":
-        utilpn.util_panel_download("DLMUSE")
+st.markdown("##### Select Task")
+list_tasks = ["Experiment Name", "Input Data", "DLMUSE", "View Scans", "Download"]
+sel_task = st.pills(
+    "Select Task", list_tasks, selection_mode="single", label_visibility="collapsed"
+)
+if sel_task == "Experiment Name":
+    utilpn.util_panel_experiment()
+elif sel_task == "Input Data":
+    status = st.session_state.flags["experiment"]
+    utilpn.util_panel_input_multi("T1", status)
+elif sel_task == "DLMUSE":
+    panel_dlmuse()
+elif sel_task == "View Scans":
+    panel_view()
+elif sel_task == "Download":
+    utilpn.util_panel_download("DLMUSE")

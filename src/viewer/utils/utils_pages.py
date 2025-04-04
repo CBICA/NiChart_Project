@@ -11,7 +11,7 @@ dict_main_menu = {
 }
 
 dict_pipelines = {
-    "Interactive Brain Anatomy": "pages/p_brain_anatomy.py",
+    "Interactive Brain Anatomy": "pages/Menu.py",
     "sMRI Biomarkers": "pages/Menu.py",
     "White Matter Lesion Segmentation": "pages/Menu.py",
     "DTI Biomarkers": "pages/Menu.py",
@@ -20,11 +20,8 @@ dict_pipelines = {
 
 dict_pipeline_steps = {
     "Interactive Brain Anatomy": {
-        "Overview": "pages/p_dlmusebio_overview.py",
-        "Upload Data": "pages/p_dlmusebio_indata.py",
-        "DLMUSE": "pages/process_dlmuse.py",
-        "ML Biomarkers": "pages/p_dlmusebio_mlscores.py",
-        "Plotting": "pages/p_dlmusebio_plot.py",
+        "Overview": "pages/p_brain_anatomy_overview.py",
+        "View": "pages/p_brain_anatomy_view.py",
     },
     "sMRI Biomarkers": {
         "Overview": "pages/p_dlmusebio_overview.py",
@@ -39,8 +36,13 @@ dict_pipeline_steps = {
         "DLWMLS": "pages/process_dlwmls.py",
         "Plotting": "pages/plot_sMRI_vars_study.py",
     },
+    "DTI Biomarkers": {
+        "Overview": "pages/p_dti_biomarkers_overview.py",
+    },
+    "fMRI Biomarkers": {
+        "Overview": "pages/p_fmri_biomarkers_overview.py",
+    }
 }
-
 
 def select_main_menu() -> None:
     """

@@ -4,6 +4,7 @@ import time
 from typing import Any
 
 import streamlit as st
+import pandas as pd
 import utils.utils_dicom as utildcm
 import utils.utils_doc as utildoc
 import utils.utils_io as utilio
@@ -19,22 +20,16 @@ utilpg.show_menu()
 
 result_holder = st.empty()
 
-
 def progress(p: int, i: int, decoded: Any) -> None:
     with result_holder.container():
         st.progress(p, f"Progress: Token position={i}")
 
 
-def panel_detect(status: bool) -> None:
+def panel_detect() -> None:
     """
     Panel for detecting dicom series
     """
     with st.container(border=True):
-        # Check init status
-        if not status:
-            st.warning("Please check previous step!")
-            return
-
         # Detect dicom series
         btn_detect = st.button("Detect Series")
         if btn_detect:
@@ -62,17 +57,11 @@ def panel_detect(status: bool) -> None:
 
         utilst.util_help_dialog(utildoc.title_dicoms_detect, utildoc.def_dicoms_detect)
 
-
-def panel_extract(status: bool) -> None:
+def panel_extract() -> None:
     """
     Panel for extracting dicoms
     """
     with st.container(border=True):
-        # Check init status
-        if not status:
-            st.warning("Please check previous step!")
-            return
-
         sel_mod = "T1"
 
         # Check if data exists
@@ -137,17 +126,12 @@ def panel_extract(status: bool) -> None:
         )
 
 
-def panel_view(status: bool) -> None:
+def panel_view(sel_mod: str) -> None:
     """
     Panel for viewing extracted nifti images
     """
     with st.container(border=True):
         # Check init status
-        if not status:
-            st.warning("Please check previous step!")
-            return
-
-        sel_mod = "T1"
         list_nifti = utilio.get_file_list(st.session_state.paths[sel_mod], ".nii.gz")
 
         # Selection of image
@@ -211,57 +195,102 @@ def panel_view(status: bool) -> None:
                     ":material/thumb_down: Image parsing failed. Please confirm that the image file represents a 3D volume using an external tool."
                 )
 
+def panel_in_covars() -> None:
+    """
+    Panel for uploading covariates
+    """
+    with st.container(border=True):
+        flag_manual = st.checkbox("Enter data manually", False)
+        if flag_manual:
+            st.info("Please enter values for your sample")
+            df_rois = pd.read_csv(st.session_state.paths["dlmuse_csv"])
+            df_tmp = pd.DataFrame({"MRID": df_rois["MRID"], "Age": None, "Sex": None})
+            df_user = st.data_editor(df_tmp)
+
+            if st.button("Save data"):
+                if not os.path.exists(
+                    os.path.dirname(st.session_state.paths["demog_csv"])
+                ):
+                    os.makedirs(os.path.dirname(st.session_state.paths["demog_csv"]))
+
+                df_user.to_csv(st.session_state.paths["demog_csv"], index=False)
+                st.success(f"Data saved to {st.session_state.paths['demog_csv']}")
+
+        else:
+            if st.session_state.app_type == "cloud":
+                utilst.util_upload_file(
+                    st.session_state.paths["demog_csv"],
+                    "Demographics csv",
+                    "uploaded_demog_file",
+                    False,
+                    "visible",
+                )
+
+            else:  # st.session_state.app_type == 'desktop'
+                utilst.util_select_file(
+                    "selected_demog_file",
+                    "Demographics csv",
+                    st.session_state.paths["demog_csv"],
+                    st.session_state.paths["file_search_dir"],
+                )
+
+        if os.path.exists(st.session_state.paths["demog_csv"]):
+            p_demog = st.session_state.paths["demog_csv"]
+            st.session_state.flags["demog_csv"] = True
+            st.success(f"Data is ready ({p_demog})", icon=":material/thumb_up:")
+
+            df_demog = pd.read_csv(st.session_state.paths["demog_csv"])
+            with st.expander("Show demographics data", expanded=False):
+                st.dataframe(df_demog)
+
+def panel_dicoms():
+    list_opt = ["Load Data", "Detect Series", "Extract Scans", "View Scans"]
+    sel_step = st.pills(
+        "Select Step", list_opt, selection_mode="single", label_visibility="collapsed"
+    )
+    if sel_step == "Load Data":
+        utilpn.util_panel_input_multi("dicoms", True)
+    elif sel_step == "Detect Series":
+        panel_detect()
+    elif sel_step == "Extract Scans":
+        panel_extract()
+    elif sel_step == "View Scans":
+        panel_view('T1')
+        
+def panel_nifti():
+    list_opt = ["Load Data", "View Scans"]
+    sel_step = st.pills(
+        "Select Step", list_opt, selection_mode="single", label_visibility="collapsed"
+    )
+    if sel_step == "Load Data":
+        utilpn.util_panel_input_multi("T1", True)
+    elif sel_step == "View Scans":
+        panel_view('T1')
+    
+def panel_covars():
+    st.write('covars')
 
 st.markdown(
     """
-    ### Dicom to Nifti Conversion
-    - Extracts raw DICOM files to NIFTI format.
-    - Automatically identifies different imaging series.
-    - Allows users to select specific series for extraction.
-    - Generates consistently named NIFTI files based on DICOM information.
-    - Provides a visual review of extracted images.
+    ### Load data
     """
 )
 
-# Call all steps
-if st.session_state.app_type == "cloud":
-    t1, t2, t3, t4, t5, t6 = st.tabs(
-        [
-            "Experiment Name",
-            "Input Data",
-            "Detect Series",
-            "Extract Scans",
-            "View Scans",
-            "Download",
-        ]
+list_opt = ["Images", "Covariates"]
+sel_task = st.pills(
+    "Select Task", list_opt, selection_mode="single", label_visibility="collapsed"
+)
+if sel_task == "Images":
+    list_opt = ["Dicom", "Nifti"]
+    sel_img = st.pills(
+        "Select Task", list_opt, selection_mode="single", label_visibility="collapsed"
     )
-else:
-    t1, t2, t3, t4, t5 = st.tabs(
-        [
-            "Experiment Name",
-            "Input Data",
-            "Detect Series",
-            "Extract Scans",
-            "View Scans",
-        ]
-    )
+    if sel_img == 'Dicom':
+        panel_dicoms()
+        
+    elif sel_img == 'Nifti':
+        panel_nifti()
 
-with t1:
-    utilpn.util_panel_experiment()
-with t2:
-    # panel_indicoms()
-    status = st.session_state.flags["experiment"]
-    utilpn.util_panel_input_multi("dicoms", status)
-with t3:
-    status = st.session_state.flags["dicoms"]
-    panel_detect(status)
-with t4:
-    status = st.session_state.flags["dicoms_series"]
-    panel_extract(status)
-with t5:
-    status = st.session_state.flags["T1"]
-    panel_view(status)
-if st.session_state.app_type == "cloud":
-    with t6:
-        status = st.session_state.flags["dicoms"]
-        utilpn.util_panel_download("T1", status)
+elif sel_task == "Covariates":
+    panel_in_covars()
+
