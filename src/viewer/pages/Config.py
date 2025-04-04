@@ -6,21 +6,23 @@ import utils.utils_panels as utilpn
 utilpg.config_page()
 utilpg.select_main_menu()
 
-with st.container(border=True):
-    st.markdown(
-        """
-        ### Configuration
-        - Select config options here.
-        """
-    )
+st.markdown(
+    """
+    ### Configuration Options
+    - Select configuration options here.
+    """
+)
 
-    sel_config = st.pills(
-        "Select Config",
-        ["Input Dir", "Output Dir"],
-        selection_mode="single",
-        default=None,
-        label_visibility="collapsed",
-    )
+sel_config = st.pills(
+    "Select Config",
+    ["Output Dir", "Task Name"],
+    selection_mode="single",
+    default=None,
+    label_visibility="collapsed",
+)
 
-    if sel_config == "Output Dir":
-        utilpn.panel_out_dir()
+if sel_config == "Output Dir":
+    utilpn.panel_out_dir()
+
+if sel_config == "Task Name":
+    utilpn.util_panel_experiment()

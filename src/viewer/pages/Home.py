@@ -9,14 +9,13 @@ utilpg.show_menu()
 
 # utilpg.select_main_menu()
 
-with st.container(border=True):
-    st.markdown(
-        """
-        ### Welcome to NiChart Project!
+st.markdown(
+    """
+    ### Welcome to NiChart Project!
 
-        """
-    )
-    st.image("../resources/nichart1.png", width=300)
+    """
+)
+st.image("../resources/nichart1.png", width=300)
 
 with st.container(border=True):
     st.markdown(
@@ -29,7 +28,7 @@ with st.container(border=True):
         """
     )
 
-with st.container(border=True):
+with st.expander(label='Installation'):
     st.markdown(
         """
         - You can install NiChart Project desktop

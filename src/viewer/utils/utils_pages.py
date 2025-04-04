@@ -5,17 +5,17 @@ import streamlit as st
 
 dict_main_menu = {
     "Home": "pages/Home.py",
-    "Pipelines": "pages/Menu.py",
     "Config": "pages/Config.py",
+    "Pipelines": "pages/Menu.py",
     "Debug": "pages/Debug.py",
 }
 
 dict_pipelines = {
-    "Interactive Brain Anatomy": "pages/Menu.py",
-    "sMRI Segmentation and Biomarker Extraction": "pages/Menu.py",
+    "Interactive Brain Anatomy": "pages/p_brain_anatomy.py",
+    "sMRI Biomarkers": "pages/Menu.py",
     "White Matter Lesion Segmentation": "pages/Menu.py",
-    "DTI Biomarker Extraction": "pages/Menu.py",
-    "fMRI Biomarker Extraction": "pages/Menu.py",
+    "DTI Biomarkers": "pages/Menu.py",
+    "fMRI Biomarkers": "pages/Menu.py",
 }
 
 dict_pipeline_steps = {
@@ -26,7 +26,7 @@ dict_pipeline_steps = {
         "ML Biomarkers": "pages/p_dlmusebio_mlscores.py",
         "Plotting": "pages/p_dlmusebio_plot.py",
     },
-    "sMRI Segmentation and Biomarker Extraction": {
+    "sMRI Biomarkers": {
         "Overview": "pages/p_dlmusebio_overview.py",
         "Upload Data": "pages/p_dlmusebio_indata.py",
         "DLMUSE": "pages/process_dlmuse.py",
