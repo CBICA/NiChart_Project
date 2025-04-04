@@ -78,27 +78,26 @@ def select_pipeline() -> None:
         return
 
     with st.sidebar:
-        with st.container(border=True):
-            # st.markdown('##### ')
-            st.markdown("### Pipeline:")
-            sel_pipeline = st.pills(
-                "Pipelines",
-                dict_pipelines.keys(),
-                selection_mode="single",
-                default=st.session_state.sel_pipeline,
-                label_visibility="collapsed",
-            )
-            if sel_pipeline is None:
-                return
-            if sel_pipeline == st.session_state.sel_pipeline:
-                return
+        # st.markdown('##### ')
+        st.markdown("### Pipeline:")
+        sel_pipeline = st.pills(
+            "Pipelines",
+            dict_pipelines.keys(),
+            selection_mode="single",
+            default=st.session_state.sel_pipeline,
+            label_visibility="collapsed",
+        )
+        if sel_pipeline is None:
+            return
+        if sel_pipeline == st.session_state.sel_pipeline:
+            return
 
-            # Reset selection in next steps
-            st.session_state.sel_pipeline_step = None
+        # Reset selection in next steps
+        st.session_state.sel_pipeline_step = None
 
-            st.session_state.sel_pipeline = sel_pipeline
-            sel_page = dict_pipelines[sel_pipeline]
-            st.switch_page(sel_page)
+        st.session_state.sel_pipeline = sel_pipeline
+        sel_page = dict_pipelines[sel_pipeline]
+        st.switch_page(sel_page)
 
 
 def select_pipeline_step() -> None:
@@ -110,22 +109,21 @@ def select_pipeline_step() -> None:
 
     sel_dict = dict_pipeline_steps[st.session_state.sel_pipeline]
     with st.sidebar:
-        with st.container(border=True):
-            st.markdown("### Pipeline step:")
-            sel_step = st.pills(
-                "Pipeline steps",
-                sel_dict.keys(),
-                selection_mode="single",
-                default=st.session_state.sel_pipeline_step,
-                label_visibility="collapsed",
-            )
-            if sel_step is None:
-                return
-            if sel_step == st.session_state.sel_pipeline_step:
-                return
-            st.session_state.sel_pipeline_step = sel_step
-            sel_page = sel_dict[sel_step]
-            st.switch_page(sel_page)
+        st.markdown("### Pipeline step:")
+        sel_step = st.pills(
+            "Pipeline steps",
+            sel_dict.keys(),
+            selection_mode="single",
+            default=st.session_state.sel_pipeline_step,
+            label_visibility="collapsed",
+        )
+        if sel_step is None:
+            return
+        if sel_step == st.session_state.sel_pipeline_step:
+            return
+        st.session_state.sel_pipeline_step = sel_step
+        sel_page = sel_dict[sel_step]
+        st.switch_page(sel_page)
 
 
 def config_page() -> None:
