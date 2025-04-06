@@ -12,55 +12,6 @@ COL_LEFT = 5
 COL_RIGHT_EMPTY = 0.01
 COL_RIGHT_BUTTON = 1
 
-
-#def panel_indir() -> None:
-    #"""
-    #Panel for selecting input dir
-    #"""
-    #with st.container(border=True):
-        #if st.session_state.flags["in_dir"]:
-            #st.success(
-                #f"Input directory: {st.session_state.paths['indir']}",
-                #icon=":material/thumb_up:",
-            #)
-            #if st.button("Reset", key="reset_inp"):
-                #utilss.update_indir(None)
-                #st.rerun()
-
-        #else:
-            #curr_dir = st.session_state.paths["indir"]
-            #sel_dir = utilio.util_select_dir(curr_dir, "sel_indir")
-            #if sel_dir is not None and sel_dir != curr_dir:
-                #utilss.update_indir(sel_dir)
-                #st.rerun()
-
-        #utildoc.util_help_dialog(utildoc.title_inp, utildoc.def_inp)
-
-
-def panel_out_dir() -> None:
-    """
-    Panel for selecting output dir
-    """
-    with st.container(border=True):
-        if st.session_state.flags["out_dir"]:
-            st.success(
-                f"Output directory: {st.session_state.paths['out_dir']}",
-                icon=":material/thumb_up:",
-            )
-            if st.button("Reset", key="reset_out"):
-                utilss.update_out_dir(None)
-                st.rerun()
-
-        else:
-            curr_dir = st.session_state.paths["out_dir"]
-            sel_dir = utilio.util_select_dir(curr_dir, "sel_out_dir")
-            if sel_dir is not None and sel_dir != curr_dir:
-                utilss.update_out_dir(sel_dir)
-                st.rerun()
-
-        utildoc.util_help_dialog(utildoc.title_out, utildoc.def_out)
-
-
 def util_help_dialog(s_title: str, s_text: str) -> None:
     """
     Display help dialog box
@@ -78,69 +29,64 @@ def util_help_dialog(s_title: str, s_text: str) -> None:
             help_working_dir()
 
 
-def util_select_expname(out_dir: str, exp_curr: str) -> Any:
+def util_sel_task(out_dir: str, task_curr: str) -> Any:
     """
-    Set/select experiment name
+    Set/select task name
     """
-    # Read dataset name (used to create a folder where all results will be saved)
-    sel_opt = st.radio(
+    # Read existing task folders
+    list_tasks = utilio.get_subfolders(out_dir)
+    st.write("Select Existing")
+    sel_opt = st.pills(
         "Options:",
-        ["Select Existing", "Create New"],
-        horizontal=True,
+        options = list_tasks,
+        default = st.session_state.task,
         label_visibility="collapsed",
     )
 
-    if sel_opt == "Select Existing":
-        list_exp = utilio.get_subfolders(out_dir)
-        exp_sel = st.selectbox(
-            "Select",
-            list_exp,
-            None,
-            label_visibility="collapsed",
-            placeholder="Select experiment name",
-        )
-
-    if sel_opt == "Create New":
-        exp_sel = st.text_input(
-            "Experiment name:",
-            None,
-            label_visibility="collapsed",
-            placeholder="Type experiment name",
-        )
-        if exp_sel is not None:
-            dir_tmp = os.path.join(out_dir, exp_sel)
+    st.write("Create New")
+    task_sel = st.text_input(
+        "Experiment name:",
+        None,
+        label_visibility="collapsed",
+        placeholder="Type task name",
+    )
+    if st.button('Create task'):
+        if task_sel is not None:
+            dir_tmp = os.path.join(out_dir, task_sel)
             if not os.path.exists(dir_tmp):
                 os.makedirs(dir_tmp)
-    return exp_sel
 
+            sel_opt = task_sel
 
-def util_panel_experiment() -> None:
+    return sel_opt
+
+def util_panel_task() -> None:
     """
-    Panel for selecting experiment
+    Panel for selecting task name
     """
     with st.container(border=True):
-        if st.session_state.flags["experiment"]:
+        if st.session_state.flags["task"]:
             st.success(
-                f"Experiment directory: {st.session_state.paths['experiment']}",
+                f"Task name: {st.session_state.task}",
                 icon=":material/thumb_up:",
             )
             if st.button("Reset", key="reset_exp"):
-                st.session_state.flags["experiment"] = False
-                st.session_state.experiment = ""
+                st.session_state.flags["task"] = False
+                st.session_state.task = None
                 st.rerun()
 
         else:
             out_dir = st.session_state.paths["out_dir"]
-            exp_curr = st.session_state.experiment
-            exp_sel = util_select_expname(out_dir, exp_curr)
+            task_curr = st.session_state.task
+            task_sel = util_sel_task(out_dir, task_curr)
 
-            if exp_sel is not None and exp_sel != exp_curr:
-                st.session_state.experiment = exp_sel
-                st.session_state.paths["experiment"] = os.path.join(
-                    st.session_state.paths["out_dir"], exp_sel
+            if task_sel is not None and task_sel != task_curr:
+                st.session_state.task = task_sel
+                st.session_state.paths["task"] = os.path.join(
+                    st.session_state.paths["out_dir"], task_sel
                 )
-                st.session_state.flags["experiment"] = True
-                # Update paths when selected experiment changes
+                st.session_state.flags["task"] = True
+                # Update paths when selected task changes
                 utilss.update_default_paths()
                 utilss.reset_flags()
                 st.rerun()
@@ -223,11 +169,11 @@ def util_select_folder(
     Select user input folder and link to target folder
     """
     # Check if out folder already exists
-    curr_dir = ""
+    out_dir = ""
     if os.path.exists(out_dir):
         fcount = utilio.get_file_count(out_dir)
         if fcount > 0:
-            curr_dir = out_dir
+            out_dir = out_dir
 
     # Upload data
     helpmsg = "Select input folder.\n\nChoose the path by typing it into the text field or using the file browser to browse and select it"
@@ -236,7 +182,7 @@ def util_select_folder(
         f"btn_{key_selector}",
         title_txt,
         file_search_dir,
-        curr_dir,
+        out_dir,
         helpmsg,
     )
 
@@ -257,7 +203,7 @@ def util_select_folder(
             os.symlink(sel_dir, out_dir)
 
 
-def util_select_dir(curr_dir: str, key_txt: str) -> Any:
+def util_select_dir(out_dir: str, key_txt: str) -> Any:
     """
     Panel to select a folder from the file system
     """
@@ -273,13 +219,13 @@ def util_select_dir(curr_dir: str, key_txt: str) -> Any:
             "Browse",
             key=f"_key_btn_{key_txt}",
         ):
-            sel_dir = utilio.browse_folder(curr_dir)
+            sel_dir = utilio.browse_folder(out_dir)
 
     elif sel_opt == "Enter Path":
         sel_dir = st.text_input(
             "",
             key=f"_key_sel_{key_txt}",
-            value=curr_dir,
+            value=out_dir,
             label_visibility="collapsed",
         )
         if sel_dir is not None:
@@ -374,7 +320,7 @@ def util_panel_input_multi(dtype: str, status: bool) -> None:
             util_help_dialog(utildoc.title_dicoms, utildoc.def_dicoms)
 
 
-def util_select_file(curr_dir: str, key_txt: str) -> Any:
+def util_select_file(out_dir: str, key_txt: str) -> Any:
     """
     Select a file
     """
@@ -387,13 +333,13 @@ def util_select_file(curr_dir: str, key_txt: str) -> Any:
     )
     if sel_opt == "Browse File":
         if st.button("Browse", key=f"_key_btn_{key_txt}"):
-            sel_file = utilio.browse_file(curr_dir)  # FIXME
+            sel_file = utilio.browse_file(out_dir)  # FIXME
 
     elif sel_opt == "Enter Path":
         sel_file = st.text_input(
             "",
             key=f"_key_sel_{key_txt}",
-            value=curr_dir,
+            value=out_dir,
             label_visibility="collapsed",
         )
     if sel_file is None:
@@ -537,7 +483,7 @@ def util_panel_download(dtype: str, status: bool) -> None:
             st.download_button(
                 f"Download results: {dtype}",
                 out_zip,
-                file_name=f"{st.session_state.experiment}_{dtype}.zip",
+                file_name=f"{st.session_state.task}_{dtype}.zip",
             )
         except:
             st.error("Could not download data!")

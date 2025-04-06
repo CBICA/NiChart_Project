@@ -3,6 +3,7 @@ import shutil
 from typing import Any
 
 import jwt
+import time
 import pandas as pd
 import plotly.express as px
 import streamlit as st
@@ -72,6 +73,8 @@ def init_session_state() -> None:
         st.session_state.sel_pipeline = None
         st.session_state.sel_pipeline_step = None
 
+        st.session_state.task = None
+
         # Store user session info for later retrieval
         if st.session_state.app_type == "cloud":
             st.session_state.cloud_session_token = process_session_token()
@@ -112,7 +115,7 @@ def init_session_state() -> None:
         # Flags for various i/o
         st.session_state.flags = {
             "out_dir": None,
-            "experiment": False,
+            "task": False,
             "dicoms": False,
             "dicoms_series": False,
             "nifti": False,
@@ -154,7 +157,7 @@ def init_session_state() -> None:
             "target_dir": "",
             "target_file": "",
             "out_dir": "",
-            "experiment": "",
+            "task": "",
             "lists": "",
             "dicoms": "",
             "nifti": "",
@@ -195,9 +198,10 @@ def init_session_state() -> None:
             st.session_state.paths["out_dir"] = os.path.join(
                 st.session_state.paths["root"], "output_folder"
             )
-
         if not os.path.exists(st.session_state.paths["out_dir"]):
             os.makedirs(st.session_state.paths["out_dir"])
+
+        st.session_state.flags['out_dir'] = True
 
         # Copy demo folders into user folders as needed
         if st.session_state.has_cloud_session:
@@ -512,48 +516,61 @@ def update_out_dir(sel_outdir) -> None:
     """
     Updates when outdir changes
     """
-    # Set flag
-    st.session_state.flags["out_dir"] = True
+    if sel_outdir is None:
+        return
+
+    if sel_outdir == st.session_state.paths['out_dir']:
+        return
+
+    sel_outdir = os.path.abspath(sel_outdir)
+    if not os.path.exists(sel_outdir):
+        try:
+            os.makedirs(sel_outdir)
+        except:
+            st.error(f'Could not create folder: {sel_outdir}')
+            return
 
     # Set out dir path
     st.session_state.paths['out_dir'] = sel_outdir
-    
-    ## Reset paths and flags if out dir was reset
-    #if sel_outdir is None:
-        #st.session_state.flags["outdir"] = False   
-        #st.session_state.flags["selstd"] = False
-        #st.session_state.selstd = None
-        #st.session_state.paths['selstd_out'] = ''
-        #st.session_state.flags["selstd_unified"] = False
-        #st.session_state.flags["selstd_vals_mapped"] = False
-        #st.session_state.flags["selstd_visits"] = False
-        #st.session_state.flags["selstd_final"] = False
-        #return 
-    
-    ## Reset paths and flags if out dir was selected
-    #if st.session_state.selstd is None:
-        #return
+    st.session_state.flags["out_dir"] = True
 
-    #st.session_state.paths['selstd_out'] = os.path.join(
-        #st.session_state.paths['outdir'],
-        #st.session_state.selstd
-    #)
-    #if not os.path.exists(st.session_state.paths['selstd_out']):
-        #os.makedirs(st.session_state.paths['selstd_out'])
-        
-    #st.session_state.flags["selstd_unified"] = utilcf.check_files_exist(
-        #st.session_state.selstd, 'unified'
-    #)
-    #st.session_state.flags["selstd_vals_mapped"] = utilcf.check_files_exist(
-        #st.session_state.selstd, 'mapped'
-    #)
-    #st.session_state.flags["selstd_visits"] = utilcf.check_files_exist(
-        #st.session_state.selstd, 'visits'
-    #)
-    #st.session_state.flags["selstd_final"] = utilcf.check_files_exist(
-        #st.session_state.selstd, 'final'
-    #)
-    #st.session_state.flags["selstd_qc"] = False
+    # Reset other vars
+    st.session_state.task = None
 
+    st.rerun()
+
+
+def update_task(sel_task) -> None:
+    """
+    Updates when outdir changes
+    """
+    if sel_task is None:
+        return
+
+    if sel_task == st.session_state.task:
+        return
+
+    # Create task dir
+    task_dir = os.path.join(
+        st.session_state.paths['out_dir'],
+        sel_task
+    )
+    try:
+        if not os.path.exists(task_dir):
+            os.makedirs(task_dir)
+            st.success(f'Created folder {task_dir}')
+            time.sleep(3)
+    except:
+        return
+
+    # Set task name
+    st.session_state.task = sel_task
+    st.session_state.flags["task"] = True
+    st.session_state.paths['task'] = task_dir
+
+    # Reset other vars
+    # st.session_state.task = None
+
+    st.rerun()
 
 

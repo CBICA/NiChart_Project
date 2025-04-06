@@ -13,6 +13,7 @@ import pandas as pd
 # https://stackoverflow.com/questions/65612750/how-can-i-specify-the-exact-folder-in-streamlit-for-the-uploaded-file-to-be-save
 
 
+
 def browse_file(path_init: str) -> Any:
     """
     File selector
@@ -128,7 +129,7 @@ def get_subfolders(path: str) -> list:
         item_path = os.path.join(path, item)
         if os.path.isdir(item_path):
             subdirs.append(item)
-    return subdirs
+    return sorted(subdirs)
 
 
 def get_file_names(folder_path: str, file_suff: str = "") -> pd.DataFrame:
@@ -165,44 +166,37 @@ def get_image_path(folder_path: str, file_pref: str, file_suff_list: list) -> st
                 return os.path.join(folder_path, f)
     return ""
 
-def util_select_dir(curr_dir, key_txt) -> None:
+
+def sel_task() -> Any:
     """
-    Panel to select a folder from the file system
+    Set/select task name
     """
-    sel_dir = None
-    sel_opt = st.radio(
-        'Options:',
-        ['Browse Path', 'Enter Path'],
-        horizontal = True,
-        label_visibility = 'collapsed',
-        key = f'key_{key_txt}'
+    out_dir = st.session_state.paths['out_dir']
+    curr_task = st.session_state.task
+
+    # Read existing task folders
+    list_tasks = get_subfolders(out_dir)
+    st.write("Select Existing")
+    sel_opt = st.pills(
+        "Options:",
+        options = list_tasks,
+        default = st.session_state.task,
+        label_visibility="collapsed",
     )
 
-    if sel_opt == 'Browse Path':
-        if st.button(
-            'Browse',
-            key=f'_key_btn_{key_txt}',
-        ):
-            sel_dir = browse_folder(curr_dir)
+    st.write("Create New")
+    task_sel = st.text_input(
+        "Experiment name:",
+        None,
+        label_visibility="collapsed",
+        placeholder="Type task name",
+    )
+    if st.button('Create task'):
+        if task_sel is not None:
+            dir_tmp = os.path.join(out_dir, task_sel)
+            if not os.path.exists(dir_tmp):
+                os.makedirs(dir_tmp)
 
-    elif sel_opt == 'Enter Path':
-        sel_dir = st.text_input(
-            '',
-            key=f'_key_sel_{key_txt}',
-            value=curr_dir,
-            label_visibility='collapsed',
-        )
-        if sel_dir is not None:
-            sel_dir = os.path.abspath(sel_dir)
-    
-    if sel_dir is not None:
-        sel_dir = os.path.abspath(sel_dir)
-        if not os.path.exists(sel_dir):
-            try:
-                os.makedirs(sel_dir)
-                st.info(f'Created directory: {sel_dir}')
-            except:
-                st.error(f'Could not create directory: {sel_dir}')
-    return sel_dir
+            sel_opt = task_sel
 
-
+    return sel_opt
