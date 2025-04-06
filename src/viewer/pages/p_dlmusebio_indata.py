@@ -281,15 +281,16 @@ sel_task = st.pills(
     "Select Task", list_opt, selection_mode="single", label_visibility="collapsed"
 )
 if sel_task == "Images":
-    list_opt = ["Dicom", "Nifti"]
-    sel_img = st.pills(
-        "Select Task", list_opt, selection_mode="single", label_visibility="collapsed"
-    )
-    if sel_img == 'Dicom':
-        panel_dicoms()
-        
-    elif sel_img == 'Nifti':
-        panel_nifti()
+    with st.container(border=True):
+        list_opt = ["Dicom", "Nifti"]
+        sel_img = st.pills(
+            "Select Task", list_opt, selection_mode="single", label_visibility="collapsed"
+        )
+        if sel_img == 'Dicom':
+            panel_dicoms()
+
+        elif sel_img == 'Nifti':
+            panel_nifti()
 
 elif sel_task == "Covariates":
     panel_in_covars()

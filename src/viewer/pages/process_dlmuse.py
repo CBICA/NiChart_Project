@@ -231,18 +231,16 @@ st.markdown(
 )
 
 st.markdown("##### Select Task")
-list_tasks = ["Experiment Name", "Input Data", "DLMUSE", "View Scans", "Download"]
+list_tasks = ["DLMUSE", "View Scans", "Download"]
 sel_task = st.pills(
     "Select Task", list_tasks, selection_mode="single", label_visibility="collapsed"
 )
-if sel_task == "Experiment Name":
-    utilpn.util_panel_experiment()
-elif sel_task == "Input Data":
-    status = st.session_state.flags["experiment"]
-    utilpn.util_panel_input_multi("T1", status)
-elif sel_task == "DLMUSE":
-    panel_dlmuse()
+if sel_task == "DLMUSE":
+    with st.container(border=True):
+        panel_dlmuse()
 elif sel_task == "View Scans":
-    panel_view()
+    with st.container(border=True):
+        panel_view()
 elif sel_task == "Download":
-    utilpn.util_panel_download("DLMUSE")
+    with st.container(border=True):
+        utilpn.util_panel_download("DLMUSE")

@@ -260,30 +260,25 @@ def panel_view() -> None:
                             size_auto,
                         )
 
+# Page config should be called for each page
+utilpg.config_page()
+utilpg.show_menu()
 
-st.write("# Segmentation of White Matter Lesions")
 st.markdown(
     """
-    - Segmentation of WM Lesions on FL scan
-    - [DLWMLS](https://github.com/CBICA/DLWMLS): Fast deep learning based segmentation of WM lesions
+    ### Segmentation of White Matter Lesions (DLWMLS)
     """
 )
 
-# Call all steps
-t1, t2, t3, t4 = st.tabs(["Experiment Name", "Input Data", "DLWMLS", "View Scans"])
-if st.session_state.app_type == "cloud":
-    t1, t2, t3, t4, t5 = st.tabs(
-        ["Experiment Name", "Input Data", "DLWMLS", "View Scans", "Download"]
-    )
-
-with t1:
-    utilpn.util_panel_experiment()
-with t2:
-    panel_infl()
-with t3:
+st.markdown("##### Select Task")
+list_tasks = ["DLMUSE", "View Scans", "Download"]
+sel_task = st.pills(
+    "Select Task", list_tasks, selection_mode="single", label_visibility="collapsed"
+)
+if sel_task == "DLWMLS":
     panel_dlwmls()
-with t4:
+elif sel_task == "View Scans":
     panel_view()
-if st.session_state.app_type == "cloud":
-    with t5:
-        utilpn.util_panel_download("DLWMLS")
+elif sel_task == "Download":
+    utilpn.util_panel_download("DLWMLS")
+
