@@ -13,6 +13,64 @@ from PIL import Image
 
 # from streamlit.web.server.websocket_headers import _get_websocket_headers
 
+def update_out_dir(sel_outdir) -> None:
+    """
+    Updates when outdir changes
+    """
+    if sel_outdir is None:
+        return
+
+    if sel_outdir == st.session_state.paths['out_dir']:
+        return
+
+    sel_outdir = os.path.abspath(sel_outdir)
+    if not os.path.exists(sel_outdir):
+        try:
+            os.makedirs(sel_outdir)
+        except:
+            st.error(f'Could not create folder: {sel_outdir}')
+            return
+
+    # Set out dir path
+    st.session_state.paths['out_dir'] = sel_outdir
+    st.session_state.flags["out_dir"] = True
+
+    # Reset other vars
+    st.session_state.navig['task'] = None
+
+def update_task(sel_task) -> None:
+    """
+    Updates when outdir changes
+    """
+    if sel_task is None:
+        return
+
+    if sel_task == st.session_state.navig['task']:
+        return
+
+    # Create task dir
+    task_dir = os.path.join(
+        st.session_state.paths['out_dir'],
+        sel_task
+    )
+    
+    try:
+        if not os.path.exists(task_dir):
+            os.makedirs(task_dir)
+            #st.success(f'Created folder {task_dir}')
+            #time.sleep(3)
+    except:
+        st.error(f'Could not create task folder: {task_dir}')
+        return
+
+    # Set task name
+    st.session_state.navig['task'] = sel_task
+    st.session_state.flags["task"] = True
+    st.session_state.paths['task'] = task_dir
+
+    # Reset other vars
+    update_default_paths()
+
 def config_page() -> None:
     st.session_state.nicon = Image.open("../resources/nichart1.png")
     st.set_page_config(
@@ -169,7 +227,7 @@ def init_session_state() -> None:
             "csv_plot": False,
         }
 
-        # Set initial values for paths
+        # Set default out dir
         st.session_state.paths["root"] = os.path.dirname(os.path.dirname(os.getcwd()))
         st.session_state.paths["init"] = st.session_state.paths["root"]
         if st.session_state.has_cloud_session:
@@ -183,8 +241,11 @@ def init_session_state() -> None:
             )
         if not os.path.exists(st.session_state.paths["out_dir"]):
             os.makedirs(st.session_state.paths["out_dir"])
-
         st.session_state.flags['out_dir'] = True
+
+        # Set default task
+        sel_task = 'Experiment_1'
+        update_task(sel_task)
 
         # Copy demo folders into user folders as needed
         if st.session_state.has_cloud_session:
@@ -450,8 +511,8 @@ def update_default_paths() -> None:
     st.session_state.paths["csv_plot"] = os.path.join(
         st.session_state.paths["plots"], "Data.csv"
     )
-    # Reset plot data
-    st.session_state.plot_var["df_data"] = pd.DataFrame()
+    ## Reset plot data
+    #st.session_state.plot_var["df_data"] = pd.DataFrame()
 
 
 def reset_flags() -> None:
@@ -494,66 +555,5 @@ def reset_plots() -> None:
     st.session_state.plot_var["centtype"] = ""
     st.session_state.plot_var["h_coeff"] = 1.0
 
-
-def update_out_dir(sel_outdir) -> None:
-    """
-    Updates when outdir changes
-    """
-    if sel_outdir is None:
-        return
-
-    if sel_outdir == st.session_state.paths['out_dir']:
-        return
-
-    sel_outdir = os.path.abspath(sel_outdir)
-    if not os.path.exists(sel_outdir):
-        try:
-            os.makedirs(sel_outdir)
-        except:
-            st.error(f'Could not create folder: {sel_outdir}')
-            return
-
-    # Set out dir path
-    st.session_state.paths['out_dir'] = sel_outdir
-    st.session_state.flags["out_dir"] = True
-
-    # Reset other vars
-    st.session_state.navig['task'] = None
-
-    st.rerun()
-
-
-def update_task(sel_task) -> None:
-    """
-    Updates when outdir changes
-    """
-    if sel_task is None:
-        return
-
-    if sel_task == st.session_state.navig['task']:
-        return
-
-    # Create task dir
-    task_dir = os.path.join(
-        st.session_state.paths['out_dir'],
-        sel_task
-    )
-    try:
-        if not os.path.exists(task_dir):
-            os.makedirs(task_dir)
-            st.success(f'Created folder {task_dir}')
-            time.sleep(3)
-    except:
-        return
-
-    # Set task name
-    st.session_state.navig['task'] = sel_task
-    st.session_state.flags["task"] = True
-    st.session_state.paths['task'] = task_dir
-
-    # Reset other vars
-    update_default_paths()
-
-    st.rerun()
 
 

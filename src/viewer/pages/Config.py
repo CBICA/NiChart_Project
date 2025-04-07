@@ -20,6 +20,7 @@ def panel_out_dir():
         if st.button('Browse path'):
             sel_dir = utilio.browse_folder(out_dir)
             utilss.update_out_dir(sel_dir)
+            st.rerun()
 
         # Enter output folder
         sel_dir = st.text_input(
@@ -29,6 +30,7 @@ def panel_out_dir():
         )
         if sel_dir != out_dir:
             utilss.update_out_dir(sel_dir)
+            st.rerun()
 
         if st.session_state.flags["out_dir"]:
             st.success(
@@ -59,6 +61,7 @@ def panel_task() -> None:
             )
             if sel_task != curr_task:
                 utilss.update_task(sel_task)
+                st.rerun()
 
         # Enter new
         st.write("Enter New Task Name")
@@ -68,8 +71,9 @@ def panel_task() -> None:
             label_visibility="collapsed",
             placeholder="My_new_study"
         )
-        if sel_task != curr_task:
+        if sel_task is not None and sel_task != curr_task:
             utilss.update_task(sel_task)
+            st.rerun()
 
         if st.session_state.flags["task"]:
             st.success(

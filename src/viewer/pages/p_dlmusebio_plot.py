@@ -16,68 +16,6 @@ import utils.utils_viewimg as utilvi
 
 # from stqdm import stqdm
 
-# Page config should be called for each page
-utilpg.config_page()
-utilpg.show_menu()
-
-
-def panel_rename() -> None:
-    """
-    Panel for renaming variables
-    """
-    with st.container(border=True):
-
-        msg_help = "Rename numeric ROI indices to ROI names. \n\n If a dictionary is not provided for your data type, please continue with the next step!"
-
-        df = st.session_state.plot_var["df_data"]
-
-        sel_dict = st.selectbox(
-            "Select ROI dictionary",
-            st.session_state.rois["roi_dict_options"],
-            index=None,
-            help=msg_help,
-        )
-        if sel_dict is None or sel_dict == "":
-            return
-
-        st.session_state.rois["sel_roi_dict"] = sel_dict
-        ssroi = st.session_state.rois
-        df_tmp = pd.read_csv(
-            os.path.join(ssroi["path"], ssroi["roi_csvs"][ssroi["sel_roi_dict"]])
-        )
-        dict1 = dict(zip(df_tmp["Index"].astype(str), df_tmp["Name"].astype(str)))
-        dict2 = dict(zip(df_tmp["Name"].astype(str), df_tmp["Index"].astype(str)))
-        st.session_state.rois["roi_dict"] = dict1
-        st.session_state.rois["roi_dict_inv"] = dict2
-
-        # Get a list of columns that match the dict key
-        df_tmp = df[
-            df.columns[df.columns.isin(st.session_state.rois["roi_dict"].keys())]
-        ]
-        df_tmp2 = df_tmp.rename(columns=st.session_state.rois["roi_dict"])
-        if df_tmp.shape[1] == 0:
-            st.warning("None of the variables were found in the dictionary!")
-            return
-
-        with st.container(border=True):
-            tmp_cols = st.columns(3)
-            with tmp_cols[0]:
-                st.selectbox("Initial ...", df_tmp.columns, 0)
-            with tmp_cols[1]:
-                st.selectbox("Renamed to ...", df_tmp2.columns, 0)
-
-        if st.button("Approve renaming"):
-            df = df.rename(columns=st.session_state.rois["roi_dict"])
-            st.session_state.plot_var["df_data"] = df
-            st.success("Variables are renamed!")
-
-        s_title = "Rename Data Columns"
-        s_text = """
-        - If your data includes numeric columns
-        """
-        utilst.util_help_dialog(s_title, s_text)
-
-
 def panel_select() -> None:
     """
     Panel for selecting variables
@@ -455,6 +393,9 @@ def panel_plot() -> None:
     # Show plot
     show_plots(df, btn_plots)
 
+# Page config should be called for each page
+utilpg.config_page()
+utilpg.show_menu()
 
 st.markdown(
     """
@@ -468,15 +409,12 @@ st.markdown(
     """
 )
 
-# Call all steps
-t1, t2, t3, t4 = st.tabs(["Experiment Name", "Input Data", "Select Variables", "Plot"])
-
-with t1:
-    utilpn.util_panel_experiment()
-with t2:
-    status = st.session_state.flags["experiment"]
-    utilpn.util_panel_input_single("dlmuse_csv", status)
-with t3:
+st.markdown("##### Select Task")
+list_tasks = ["Select Variables", "Plot"]
+sel_task = st.pills(
+    "Select Task", list_tasks, selection_mode="single", label_visibility="collapsed"
+)
+if sel_task == "Select Variables":
     panel_select()
-with t4:
+elif sel_task == "Plot":
     panel_plot()
