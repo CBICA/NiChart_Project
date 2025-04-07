@@ -13,7 +13,6 @@ from PIL import Image
 
 # from streamlit.web.server.websocket_headers import _get_websocket_headers
 
-
 def config_page() -> None:
     st.session_state.nicon = Image.open("../resources/nichart1.png")
     st.set_page_config(
@@ -69,12 +68,6 @@ def init_session_state() -> None:
 
         st.session_state.nicon = Image.open("../resources/nichart1.png")
 
-        st.session_state.sel_main_menu = "Home"
-        st.session_state.sel_pipeline = None
-        st.session_state.sel_pipeline_step = None
-
-        st.session_state.task = None
-
         # Store user session info for later retrieval
         if st.session_state.app_type == "cloud":
             st.session_state.cloud_session_token = process_session_token()
@@ -88,23 +81,13 @@ def init_session_state() -> None:
 
         ###################################
 
-        ###################################
-        # Pipelines
-        st.session_state.pipelines = [
-            "Home",
-            "sMRI Biomarkers (T1)",
-            "WM Lesion Segmentation (FL)",
-            "DTI Biomarkers (DTI)",
-            "Resting State fMRI Biomarkers (rsfMRI)",
-        ]
-        st.session_state.pipeline = "Home"
-        st.session_state._pipeline = st.session_state.pipeline
-        ###################################
-
-        ###################################
-        # General
-        # Study name
-        st.session_state.experiment = ""
+        # Menu navigation
+        st.session_state.navig = {
+            'main_menu': "Home",
+            'pipeline': None,
+            'pipeline_step': None,
+            'task': None
+        }
 
         # Icons for panels
         st.session_state.icon_thumb = {
@@ -445,7 +428,7 @@ def update_default_paths() -> None:
     """
     for d_tmp in st.session_state.dict_paths.keys():
         st.session_state.paths[d_tmp] = os.path.join(
-            st.session_state.paths["experiment"],
+            st.session_state.paths["task"],
             st.session_state.dict_paths[d_tmp][0],
             st.session_state.dict_paths[d_tmp][1],
         )
@@ -457,11 +440,11 @@ def update_default_paths() -> None:
 
     st.session_state.paths["csv_mlscores"] = os.path.join(
         st.session_state.paths["mlscores"],
-        f"{st.session_state.experiment}_DLMUSE+MLScores.csv",
+        f"{st.session_state.navig['task']}_DLMUSE+MLScores.csv",
     )
 
     st.session_state.paths["demog_csv"] = os.path.join(
-        st.session_state.paths["experiment"], "lists", "Demog.csv"
+        st.session_state.paths["task"], "lists", "Demog.csv"
     )
 
     st.session_state.paths["csv_plot"] = os.path.join(
@@ -477,7 +460,7 @@ def reset_flags() -> None:
     """
     for tmp_key in st.session_state.flags.keys():
         st.session_state.flags[tmp_key] = False
-    st.session_state.flags["experiment"] = True
+    st.session_state.flags["task"] = True
 
     # Check dicom folder
     fcount = utilio.get_file_count(st.session_state.paths["dicoms"])
@@ -535,7 +518,7 @@ def update_out_dir(sel_outdir) -> None:
     st.session_state.flags["out_dir"] = True
 
     # Reset other vars
-    st.session_state.task = None
+    st.session_state.navig['task'] = None
 
     st.rerun()
 
@@ -547,7 +530,7 @@ def update_task(sel_task) -> None:
     if sel_task is None:
         return
 
-    if sel_task == st.session_state.task:
+    if sel_task == st.session_state.navig['task']:
         return
 
     # Create task dir
@@ -564,12 +547,12 @@ def update_task(sel_task) -> None:
         return
 
     # Set task name
-    st.session_state.task = sel_task
+    st.session_state.navig['task'] = sel_task
     st.session_state.flags["task"] = True
     st.session_state.paths['task'] = task_dir
 
     # Reset other vars
-    # st.session_state.task = None
+    update_default_paths()
 
     st.rerun()
 

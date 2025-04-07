@@ -39,7 +39,7 @@ def util_sel_task(out_dir: str, task_curr: str) -> Any:
     sel_opt = st.pills(
         "Options:",
         options = list_tasks,
-        default = st.session_state.task,
+        default = st.session_state.navig['task'],
         label_visibility="collapsed",
     )
 
@@ -67,21 +67,21 @@ def util_panel_task() -> None:
     with st.container(border=True):
         if st.session_state.flags["task"]:
             st.success(
-                f"Task name: {st.session_state.task}",
+                f"Task name: {st.session_state.navig['task']}",
                 icon=":material/thumb_up:",
             )
             if st.button("Reset", key="reset_exp"):
                 st.session_state.flags["task"] = False
-                st.session_state.task = None
+                st.session_state.navig['task'] = None
                 st.rerun()
 
         else:
             out_dir = st.session_state.paths["out_dir"]
-            task_curr = st.session_state.task
+            task_curr = st.session_state.navig['task']
             task_sel = util_sel_task(out_dir, task_curr)
 
             if task_sel is not None and task_sel != task_curr:
-                st.session_state.task = task_sel
+                st.session_state.navig['task'] = task_sel
                 st.session_state.paths["task"] = os.path.join(
                     st.session_state.paths["out_dir"], task_sel
                 )
@@ -483,7 +483,7 @@ def util_panel_download(dtype: str, status: bool) -> None:
             st.download_button(
                 f"Download results: {dtype}",
                 out_zip,
-                file_name=f"{st.session_state.task}_{dtype}.zip",
+                file_name=f"{st.session_state.navig['task']}_{dtype}.zip",
             )
         except:
             st.error("Could not download data!")

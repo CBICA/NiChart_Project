@@ -172,7 +172,7 @@ def sel_task() -> Any:
     Set/select task name
     """
     out_dir = st.session_state.paths['out_dir']
-    curr_task = st.session_state.task
+    curr_task = st.session_state.navig['task']
 
     # Read existing task folders
     list_tasks = get_subfolders(out_dir)
@@ -180,7 +180,7 @@ def sel_task() -> Any:
     sel_opt = st.pills(
         "Options:",
         options = list_tasks,
-        default = st.session_state.task,
+        default = st.session_state.navig['task'],
         label_visibility="collapsed",
     )
 

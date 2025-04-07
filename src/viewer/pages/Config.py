@@ -45,7 +45,7 @@ def panel_task() -> None:
     with st.container(border=True):
 
         out_dir = st.session_state.paths["out_dir"]
-        curr_task = st.session_state.task
+        curr_task = st.session_state.navig['task']
 
         # Select from existing
         list_tasks = utilio.get_subfolders(out_dir)
@@ -73,7 +73,7 @@ def panel_task() -> None:
 
         if st.session_state.flags["task"]:
             st.success(
-                f"Task name: {st.session_state.task}",
+                f"Task name: {st.session_state.navig['task']}",
                 icon=":material/thumb_up:",
             )
 

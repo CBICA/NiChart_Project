@@ -230,11 +230,11 @@ def show_img3D(
     # Extract the slice and display it
     if size_auto:
         if scroll_axis == 0:
-            st.image(img[slice_index, :, :], use_column_width=True)
+            st.image(img[slice_index, :, :], use_container_width=True)
         elif scroll_axis == 1:
-            st.image(img[:, slice_index, :], use_column_width=True)
+            st.image(img[:, slice_index, :], use_container_width=True)
         else:
-            st.image(img[:, :, slice_index], use_column_width=True)
+            st.image(img[:, :, slice_index], use_container_width=True)
     else:
         w_img = (
             st.session_state.mriview_const["w_init"]

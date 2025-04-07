@@ -57,6 +57,6 @@ if sel_config == "Session State":
         disp_session_state()
 if sel_config == "Output Files":
     with st.container(border=True):
-        st.markdown('##### '+ st.session_state.task + ':')
+        st.markdown('##### '+ st.session_state.navig['task'] + ':')
         disp_folder(st.session_state.paths['task'])
 
