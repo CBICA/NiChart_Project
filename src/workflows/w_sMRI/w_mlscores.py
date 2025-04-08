@@ -317,9 +317,10 @@ def run_workflow(
         df_in = pd.read_csv(f_in, dtype={"MRID": str})
 
         # Select input
-        sel_demog_vars = ["MRID", "Age", "Sex", "DLICV"]
-        sel_vars = ["MRID"] + list_muse_single
-        df_self = df_in[sel_vars]
+        sel_demog_vars = ["MRID", "Age", "Sex"]
+        sel_vars = ["MRID"] + list_muse_single + ["DLICV"]
+        df_sel = df_in[sel_vars].rename(columns={"DLICV": "702"}) # Needed for CCL_NMF_Prediction
+        df_sel = df_sel.rename(columns=lambda x: x[5:] if x.startswith('MUSE_') else x)
         df_demog_sel = df_in[sel_demog_vars]
         f_cclnmf_in = os.path.join(out_wdir, f"{dset_name}_cclnmf_in.csv")
         df_sel.to_csv(f_cclnmf_in, index=False)
@@ -328,13 +329,13 @@ def run_workflow(
 
         # Run prediction
         f_cclnmf_out = os.path.join(out_wdir, f"{dset_name}_cclnmf_init.csv")
-        cmd = f"ccl_nmf_prediction -i {f_cclnmf_in} -o {f_cclnmf_demog_in} -o {f_cclnmf_out}"
+        cmd = f"ccl_nmf_prediction -i {f_cclnmf_in} -d {f_cclnmf_demog_in} -o {f_cclnmf_out}"
         print(f"About to run {cmd}")
         os.system(cmd)
 
         # Edit columns
         df_cclnmf = pd.read_csv(f_cclnmf_out)
-        df_cclnmf_columns = ["MRID"] + df_cclnmf.add_prefix("CCLNMF_").columns[
+        df_cclnmf.columns = ["MRID"] + df_cclnmf.add_prefix("CCLNMF_").columns[
             1:
         ].tolist()
 
@@ -420,6 +421,10 @@ def run_workflow(
     f_sgan = os.path.join(out_wdir, f"{dset_name}_sgan.csv")
     df_sgan = pd.read_csv(f_sgan, dtype={"MRID": str})
     df_out = df_out.merge(df_sgan, on="MRID")
+
+    f_cclnmf = os.path.join(out_wdir, f"{dset_name}_cclnmf.csv")
+    df_cclnmf = pd.read_csv(f_cclnmf, dtype={"MRID": str})
+    df_out = df_out.merge(df_cclnmf, on="MRID")
 
     # Write out file
     f_results = os.path.join(out_dir, f"{dset_name}_DLMUSE+MLScores.csv")
@@ -538,10 +543,13 @@ def run_workflow_noharmonization(
         df_in = pd.read_csv(f_in, dtype={"MRID": str})
 
         # Select input
-        sel_demog_vars = ["MRID", "Age", "Sex", "DLICV"]
-        sel_vars = ["MRID"] + list_muse_single
-        df_self = df_in[sel_vars]
+        sel_demog_vars = ["MRID", "Age", "Sex"]
+        sel_vars = ["MRID"] + list_muse_single + ["DLICV"]
+        df_sel = df_in[sel_vars]
         df_demog_sel = df_in[sel_demog_vars]
+        df_sel = df_in[sel_vars].rename(columns={"DLICV": "702"}) # Needed for CCL_NMF_Prediction
+        df_sel = df_sel.rename(columns=lambda x: x[5:] if x.startswith('MUSE_') else x)
+
         f_cclnmf_in = os.path.join(out_wdir, f"{dset_name}_cclnmf_in.csv")
         df_sel.to_csv(f_cclnmf_in, index=False)
         f_cclnmf_demog_in = os.path.join(out_wdir, f"{dset_name}_cclnmf_demographics.csv")
@@ -549,13 +557,13 @@ def run_workflow_noharmonization(
 
         # Run prediction
         f_cclnmf_out = os.path.join(out_wdir, f"{dset_name}_cclnmf_init.csv")
-        cmd = f"ccl_nmf_prediction -i {f_cclnmf_in} -o {f_cclnmf_demog_in} -o {f_cclnmf_out}"
+        cmd = f"ccl_nmf_prediction -i {f_cclnmf_in} -d {f_cclnmf_demog_in} -o {f_cclnmf_out}"
         print(f"About to run {cmd}")
         os.system(cmd)
 
         # Edit columns
         df_cclnmf = pd.read_csv(f_cclnmf_out)
-        df_cclnmf_columns = ["MRID"] + df_cclnmf.add_prefix("CCLNMF_").columns[
+        df_cclnmf.columns = ["MRID"] + df_cclnmf.add_prefix("CCLNMF_").columns[
             1:
         ].tolist()
 
@@ -641,6 +649,10 @@ def run_workflow_noharmonization(
     f_sgan = os.path.join(out_wdir, f"{dset_name}_sgan.csv")
     df_sgan = pd.read_csv(f_sgan, dtype={"MRID": str})
     df_out = df_out.merge(df_sgan, on="MRID")
+
+    f_cclnmf = os.path.join(out_wdir, f"{dset_name}_cclnmf.csv")
+    df_cclnmf = pd.read_csv(f_cclnmf, dtype={"MRID": str})
+    df_out = df_out.merge(df_cclnmf, on="MRID")
 
     # Write out file
     f_results = os.path.join(out_dir, f"{dset_name}_DLMUSE+MLScores.csv")

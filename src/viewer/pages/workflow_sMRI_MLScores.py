@@ -320,7 +320,7 @@ def panel_run() -> None:
         # Check out file
         if os.path.exists(st.session_state.paths["csv_mlscores"]):
             st.success(
-                f"Data is ready ({st.session_state.paths['csv_mlscores']}).\n\n Output data includes harmonized ROIs, SPARE scores (AD, Age, Diabetes, Hyperlipidemia, Hypertension, Obesity, Smoking) and SurrealGAN subtype indices (R1-R5)",
+                f"Data is ready ({st.session_state.paths['csv_mlscores']}).\n\n Output data includes harmonized ROIs, SPARE scores (AD, Age, Diabetes, Hyperlipidemia, Hypertension, Obesity, Smoking) and SurrealGAN subtype indices (R1-R5), and CCLNMF components.\n\n For more information on interpreting CCLNMF component results, please see the associated README at https://github.com/CBICA/CCL_NMF_Prediction/blob/main/README.md",
                 icon=":material/thumb_up:",
             )
             st.session_state.flags["csv_mlscores"] = True
