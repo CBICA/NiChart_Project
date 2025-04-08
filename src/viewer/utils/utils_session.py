@@ -155,7 +155,7 @@ def init_session_state() -> None:
 
         # Flags for various i/o
         st.session_state.flags = {
-            "out_dir": None,
+            "out_dir": False,
             "task": False,
             "dicoms": False,
             "dicoms_series": False,
@@ -493,7 +493,6 @@ def update_default_paths() -> None:
             st.session_state.dict_paths[d_tmp][0],
             st.session_state.dict_paths[d_tmp][1],
         )
-        print(f"setting {st.session_state.paths[d_tmp]}")
 
     st.session_state.paths["dlmuse_csv"] = os.path.join(
         st.session_state.paths["dlmuse"], "DLMUSE_Volumes.csv"

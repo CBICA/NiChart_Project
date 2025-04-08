@@ -20,6 +20,14 @@ import utils.utils_viewimg as utilvi
 utilpg.config_page()
 utilpg.show_menu()
 
+def panel_load_data():
+    # Load ROI data
+    in_csv = st.session_state
+    df = pd.read_csv('/home/guraylab/GitHub/gurayerus/NiChart_Project/output_folder/IXI/DLMUSE/DLMUSE_Volumes.csv')
+    st.session_state.plot_var["df_data"] = df
+    
+    st.session_state.paths["dlmuse_csv"] = '/home/guraylab/GitHub/gurayerus/NiChart_Project/output_folder/IXI/DLMUSE/DLMUSE_Volumes.csv'
+
 def panel_select() -> None:
     """
     Panel for selecting variables
@@ -120,17 +128,6 @@ def panel_select() -> None:
         - You can revert back to the initial data at any point.
         """
         utilst.util_help_dialog(s_title, s_text)
-
-
-def panel_filter() -> None:
-    """
-    Panel filter
-    """
-    # Panel for filtering variables
-    df = st.session_state.plot_var["df_data"]
-    with st.container(border=True):
-        df = utildf.filter_dataframe(df)
-
 
 def show_img() -> None:
     """
@@ -397,25 +394,34 @@ def panel_plot() -> None:
     # Show plot
     show_plots(df, btn_plots)
 
+def panel_plot2():
+    st.write('Hello')
+    
+    
+
 with st.container(border=True):
     st.markdown(
         """
         ### View Brain Anatomy
-        - Dataset derived by applying DLMUSE on reference dataset
-        - Plot reference distributions of anatomical regions of interest (ROIs)
-        - Plot reference distributions for various disease and demographic groups
-        - View T1w MRI scans and segmentations for the public IXI dataset
         """
     )
 
     st.markdown("##### Select Task")
-    list_tasks = ["Dataset", "Select Variables", "Plot"]
+    list_tasks = ["Load Data", "Select Variables", "Plot"]
     sel_task = st.pills(
         "Select Task", list_tasks, selection_mode="single", label_visibility="collapsed"
     )
-    if sel_task == "Dataset":
-        utilpn.util_panel_experiment()
+    if sel_task == "Load Data":
+        panel_load_data()
     elif sel_task == "Select Variables":
         panel_select()
     elif sel_task == "Plot":
-        panel_plot()
+        list_rois = utilroi.get_roi_names(st.session_state.dicts["muse_sel"])
+        config = {
+            'list_roi': list_rois,
+            'list_mrid': ['IXI313-HH-2241', 'IXI080-HH-1341'],
+            'dir_ulay': '/home/guraylab/GitHub/gurayerus/NiChart_Project/output_folder/IXI/Nifti/T1',
+            'dir_olay': '/home/guraylab/GitHub/gurayerus/NiChart_Project/output_folder/IXI/DLMUSE',
+        }
+        utilpn.panel_view_mri(config)
+        #panel_plot()

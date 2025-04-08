@@ -3,10 +3,15 @@ import shutil
 import time
 from typing import Any
 
+import pandas as pd
 import streamlit as st
 import utils.utils_doc as utildoc
 import utils.utils_io as utilio
 import utils.utils_session as utilss
+import utils.utils_rois as utilroi
+import utils.utils_nifti as utilni
+from stqdm import stqdm
+import utils.utils_st as utilst
 
 COL_LEFT = 5
 COL_RIGHT_EMPTY = 0.01
@@ -487,3 +492,104 @@ def util_panel_download(dtype: str, status: bool) -> None:
             )
         except:
             st.error("Could not download data!")
+
+def panel_view_mri(config) -> None:
+    """
+    Panel for viewing mri images
+    """
+    with st.container(border=True):
+
+        # Select MRID
+        sel_mrid = st.selectbox(
+            "MRID",
+            config['list_mrid'],
+            key="_key_selbox_mrid",
+            index=None,
+        )
+        if sel_mrid is None:
+            return
+
+        # Select target ROI
+        sel_var = st.selectbox(
+            "ROI",
+            config['list_roi'],
+            key="_key_selbox_rois",
+            index=None
+        )
+        if sel_var is None:
+            return
+
+        # Select orientation(s)
+        list_orient = st.multiselect(
+            "Select viewing planes:", utilni.img_views, utilni.img_views, disabled=False
+        )        
+        if list_orient is None or len(list_orient) == 0:
+            st.warning("Please select the viewing plane!")
+            return
+        
+        # View hide overlay
+        is_show_overlay = st.checkbox("Show overlay", True, disabled=False)
+
+        # Crop to mask area
+        crop_to_mask = st.checkbox("Crop to mask", True, disabled=False)
+        
+        # Get indices for the selected var
+        list_rois = utilroi.get_list_rois(
+            sel_var,
+            st.session_state.rois["roi_dict_inv"],
+            st.session_state.rois["roi_dict_derived"],
+        )
+        
+        img_ulay = utilio.get_image_path(
+            config['dir_ulay'], sel_mrid, ["nii.gz", ".nii"]
+        )
+
+        img_olay = utilio.get_image_path(
+            config['dir_olay'], sel_mrid, ["nii.gz", ".nii"]
+        )
+
+        print('aaa')
+        print(config['dir_ulay'])
+        print(sel_mrid)
+        print('aaa')
+
+        with st.spinner("Wait for it..."):
+            # Process image and mask to prepare final 3d matrix to display
+            img, mask, img_masked = utilni.prep_image_and_olay(
+                img_ulay,
+                img_olay,
+                list_rois,
+                crop_to_mask,
+            )
+
+            # Detect mask bounds and center in each view
+            mask_bounds = utilni.detect_mask_bounds(mask)
+
+            # Show images
+            blocks = st.columns(len(list_orient))
+            for i, tmp_orient in stqdm(
+                enumerate(list_orient),
+                desc="Showing images ...",
+                total=len(list_orient),
+            ):
+                with blocks[i]:
+                    ind_view = utilni.img_views.index(tmp_orient)
+                    size_auto = True
+                    if is_show_overlay is False:
+                        utilst.show_img3D(
+                            img,
+                            ind_view,
+                            mask_bounds[ind_view, :],
+                            tmp_orient,
+                            size_auto,
+                        )
+                    else:
+                        utilst.show_img3D(
+                            img_masked,
+                            ind_view,
+                            mask_bounds[ind_view, :],
+                            tmp_orient,
+                            size_auto,
+                        )
+
+
