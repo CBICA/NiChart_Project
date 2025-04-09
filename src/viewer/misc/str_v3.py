@@ -92,7 +92,11 @@ folder = st.text_input("Path to YAML step files", "./steps")
 if Path(folder).exists():
     steps_data = load_steps(folder)
     file_roles = get_file_roles(steps_data)
-    all_files = sorted(file_roles.keys())
+
+    #all_files = sorted(file_roles.keys())
+    # Exclude files that are outputs of any step (only allow true source files)
+    output_files = {f for step in steps_data.values() for f in step.get("output", [])}
+    input_candidates = sorted(set(file_roles.keys()) - output_files)
 
     # --- Session State Initialization ---
     if "selected_inputs" not in st.session_state:
@@ -105,7 +109,7 @@ if Path(folder).exists():
     # --- Input Selection ---
     if not st.session_state.selected_inputs:
         st.subheader("1️⃣ Select Available Input Files")
-        selected_inputs = st.multiselect("Choose files you already have", all_files)
+        selected_inputs = st.multiselect("Choose files you already have", input_candidates)
         if st.button("Confirm Inputs") and selected_inputs:
             st.session_state.selected_inputs = selected_inputs
             st.session_state.available_files = set(selected_inputs)
