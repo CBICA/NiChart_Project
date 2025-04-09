@@ -1,0 +1,6 @@
+pname: dlmuse
+input: [t1_img]
+output: [dlmuse_csv]
+parameters:
+  device: [cpu, gpu]
+
