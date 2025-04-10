@@ -4,6 +4,7 @@ import os
 
 import numpy as np
 import pandas as pd
+import re
 from stqdm import stqdm
 
 def check_input(
@@ -266,6 +267,10 @@ def run_workflow(
         f_in = os.path.join(out_wdir, f"{dset_name}_combat.csv")
         df_in = pd.read_csv(f_in, dtype={"MRID": str})
 
+        df_modified = df_in.rename(columns=lambda x: x[5:] if x.startswith('MUSE_') else x)
+        alt_f_in = os.path.join(out_wdir, f"{dset_name}_combat_alt.csv")
+        df_modified.to_csv(alt_f_in, index=False)
+
         # Apply spare
         df_spare = df_in[["MRID"]]
         for spare_type in spare_types:
@@ -273,7 +278,10 @@ def run_workflow(
             f_spare_out = os.path.join(
                 out_wdir, f"{dset_name}_combat_spare_{spare_type}.csv"
             )
-            os.system(f"spare_score -a test -i {f_in} -m {spare_mdl} -o {f_spare_out}")
+            if spare_type in ["AD", "Age"]:
+                os.system(f"spare_score -a test -i {alt_f_in} -m {spare_mdl} -o {f_spare_out}")
+            else:
+                os.system(f"spare_score -a test -i {f_in} -m {spare_mdl} -o {f_spare_out}")
 
             # Change column name for the spare output
             df = pd.read_csv(f_spare_out)
@@ -335,9 +343,10 @@ def run_workflow(
 
         # Edit columns
         df_cclnmf = pd.read_csv(f_cclnmf_out)
-        df_cclnmf.columns = ["MRID"] + df_cclnmf.add_prefix("CCLNMF_").columns[
-            1:
-        ].tolist()
+        df_cclnmf.rename(columns={
+            col: re.sub(r"CCL_NMF_(\d+)", r"CCL-NMF\1", col)
+            for col in df.columns
+        }, inplace=True)
 
         # Export to csv
         f_cclnmf = os.path.join(out_wdir, f"{dset_name}_cclnmf.csv")
@@ -494,13 +503,20 @@ def run_workflow_noharmonization(
         f_in = os.path.join(out_wdir, f"{dset_name}_rois_init.csv")
         df_in = pd.read_csv(f_in, dtype={"MRID": str})
 
+        df_modified = df_in.rename(columns=lambda x: x[5:] if x.startswith('MUSE_') else x)
+        alt_f_in = os.path.join(out_wdir, f"{dset_name}_combat_alt.csv")
+        df_modified.to_csv(alt_f_in, index=False)
+
         # Apply spare
         df_spare = df_in[["MRID"]]
         for spare_type in spare_types:
             spare_mdl = os.path.join(spare_dir, f"{spare_pref}{spare_type}{spare_suff}")
             f_spare_out = os.path.join(out_wdir, f"{dset_name}_spare_{spare_type}.csv")
-            os.system(f"spare_score -a test -i {f_in} -m {spare_mdl} -o {f_spare_out}")
-
+            
+            if spare_type in ["AD", "Age"]:
+                os.system(f"spare_score -a test -i {alt_f_in} -m {spare_mdl} -o {f_spare_out}")
+            else:
+                os.system(f"spare_score -a test -i {f_in} -m {spare_mdl} -o {f_spare_out}")
             # Change column name for the spare output
             df = pd.read_csv(f_spare_out)
             df = df[df.columns[0:2]]
@@ -563,9 +579,10 @@ def run_workflow_noharmonization(
 
         # Edit columns
         df_cclnmf = pd.read_csv(f_cclnmf_out)
-        df_cclnmf.columns = ["MRID"] + df_cclnmf.add_prefix("CCLNMF_").columns[
-            1:
-        ].tolist()
+        df_cclnmf.rename(columns={
+            col: re.sub(r"CCL_NMF_(\d+)", r"CCL-NMF\1", col)
+            for col in df.columns
+        }, inplace=True)
 
         # Export to csv
         f_cclnmf = os.path.join(out_wdir, f"{dset_name}_cclnmf.csv")
