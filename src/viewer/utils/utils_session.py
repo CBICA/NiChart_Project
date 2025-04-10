@@ -142,7 +142,7 @@ def init_session_state() -> None:
         # Menu navigation
         st.session_state.navig = {
             'main_menu': "Home",
-            'pipeline': None,
+            'workflow': None,
             'pipeline_step': None,
             'task': None
         }

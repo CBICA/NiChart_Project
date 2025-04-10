@@ -6,42 +6,14 @@ import streamlit as st
 dict_main_menu = {
     "Home": "pages/Home.py",
     "Config": "pages/Config.py",
-    "Pipelines": "pages/Menu.py",
+    "Workflow": "pages/Menu.py",
     "Debug": "pages/Debug.py",
 }
 
-dict_pipelines = {
-    "Interactive Brain Anatomy": "pages/Menu.py",
-    "sMRI Biomarkers": "pages/Menu.py",
-    "White Matter Lesion Segmentation": "pages/Menu.py",
-    "DTI Biomarkers": "pages/Menu.py",
-    "fMRI Biomarkers": "pages/Menu.py",
-}
-
-dict_pipeline_steps = {
-    "Interactive Brain Anatomy": {
-        "Overview": "pages/p_brain_anatomy_overview.py",
-        "View": "pages/p_brain_anatomy_view.py",
-    },
-    "sMRI Biomarkers": {
-        "Overview": "pages/p_dlmusebio_overview.py",
-        "Upload Data": "pages/p_dlmusebio_indata.py",
-        "DLMUSE": "pages/process_dlmuse.py",
-        "ML Biomarkers": "pages/p_dlmusebio_mlscores.py",
-        "Plotting": "pages/p_dlmusebio_plot.py",
-    },
-    "White Matter Lesion Segmentation": {
-        "Overview": "pages/p_dlwmls_overview.py",
-        "Upload Data": "pages/p_dlwmls_indata.py",
-        "DLWMLS": "pages/process_dlwmls.py",
-        "Plotting": "pages/plot_sMRI_vars_study.py",
-    },
-    "DTI Biomarkers": {
-        "Overview": "pages/p_dti_biomarkers_overview.py",
-    },
-    "fMRI Biomarkers": {
-        "Overview": "pages/p_fmri_biomarkers_overview.py",
-    }
+dict_workflow = {
+    "Load Input Data": "pages/data_input.py",
+    "Select Pipeline(s)": "pages/select_workflow.py",
+    "View Results": "pages/Menu.py",
 }
 
 def select_main_menu() -> None:
@@ -64,15 +36,14 @@ def select_main_menu() -> None:
             return
 
         # Reset selection in next steps
-        st.session_state.navig['pipeline'] = None
+        st.session_state.navig['workflow'] = None
         st.session_state.navig['pipeline_step'] = None
 
         st.session_state.navig['main_menu'] = sel_main_menu
         sel_page = dict_main_menu[sel_main_menu]
         st.switch_page(sel_page)
 
-
-def select_pipeline() -> None:
+def select_workflow() -> None:
     """
     Select pipeline from a list and switch to pipeline page
     """
@@ -82,51 +53,21 @@ def select_pipeline() -> None:
     with st.sidebar:
         # st.markdown('##### ')
         st.markdown("### Pipeline:")
-        sel_pipeline = st.pills(
-            "Pipelines",
-            dict_pipelines.keys(),
+        sel_workflow = st.pills(
+            "Workflow",
+            dict_workflow.keys(),
             selection_mode="single",
-            default=st.session_state.navig['pipeline'],
+            default=st.session_state.navig['workflow'],
             label_visibility="collapsed",
         )
-        if sel_pipeline is None:
+        if sel_workflow is None:
             return
-        if sel_pipeline == st.session_state.navig['pipeline']:
+        if sel_workflow == st.session_state.navig['workflow']:
             return
 
-        # Reset selection in next steps
-        st.session_state.navig['pipeline_step'] = None
-
-        st.session_state.navig['pipeline'] = sel_pipeline
-        sel_page = dict_pipelines[sel_pipeline]
+        st.session_state.navig['workflow'] = sel_workflow
+        sel_page = dict_workflow[sel_workflow]
         st.switch_page(sel_page)
-
-
-def select_pipeline_step() -> None:
-    """
-    Select pipeline step from a list and switch page
-    """
-    if st.session_state.navig['pipeline'] is None:
-        return
-
-    sel_dict = dict_pipeline_steps[st.session_state.navig['pipeline']]
-    with st.sidebar:
-        st.markdown("### Pipeline step:")
-        sel_step = st.pills(
-            "Pipeline steps",
-            sel_dict.keys(),
-            selection_mode="single",
-            default=st.session_state.navig['pipeline_step'],
-            label_visibility="collapsed",
-        )
-        if sel_step is None:
-            return
-        if sel_step == st.session_state.navig['pipeline_step']:
-            return
-        st.session_state.navig['pipeline_step'] = sel_step
-        sel_page = sel_dict[sel_step]
-        st.switch_page(sel_page)
-
 
 def config_page() -> None:
     st.set_page_config(
@@ -144,5 +85,4 @@ def config_page() -> None:
 
 def show_menu() -> None:
     select_main_menu()
-    select_pipeline()
-    select_pipeline_step()
+    select_workflow()
