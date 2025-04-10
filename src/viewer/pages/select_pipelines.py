@@ -4,6 +4,8 @@ import yaml
 from pathlib import Path
 from graphviz import Digraph
 from collections import defaultdict
+import utils.utils_pages as utilpg
+
 
 # Load YAML step definitions
 def load_steps(folder):
@@ -83,12 +85,29 @@ def generate_pipeline_command(step_list, steps):
         cmds.append(cmd)
     return " | \\\n  ".join(cmds)
 
-# --- Streamlit App Starts Here ---
-st.set_page_config(page_title="Interactive Pipeline Builder", layout="wide")
-st.title("🧬 Interactive Pipeline Builder")
+
+
+
+
+
+
+
+
+# Page config should be called for each page
+utilpg.config_page()
+utilpg.show_menu()
+
+st.markdown(
+    """
+    ### Interactive Pipeline Builder
+    """
+)
 
 # --- Load steps ---
-folder = st.text_input("Path to YAML step files", "./steps")
+folder = st.text_input(
+    "Path to process definition files",
+    st.session_state.paths["proc_def"]
+)
 if Path(folder).exists():
     steps_data = load_steps(folder)
     file_roles = get_file_roles(steps_data)

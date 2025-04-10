@@ -194,9 +194,12 @@ def init_session_state() -> None:
         st.session_state.paths = {
             "root": "",
             "init": "",
+            "resources": "",
+            "proc_def": "",
             "file_search_dir": "",
             "target_dir": "",
             "target_file": "",
+            "process_def": "",
             "out_dir": "",
             "task": "",
             "lists": "",
@@ -230,6 +233,12 @@ def init_session_state() -> None:
         # Set default out dir
         st.session_state.paths["root"] = os.path.dirname(os.path.dirname(os.getcwd()))
         st.session_state.paths["init"] = st.session_state.paths["root"]
+        st.session_state.paths["resources"] = os.path.join(
+            st.session_state.paths["root"], "resources"
+        )
+        st.session_state.paths["proc_def"] = os.path.join(
+            st.session_state.paths["resources"], "process_definitions"
+        )
         if st.session_state.has_cloud_session:
             user_id = st.session_state.cloud_user_id
             st.session_state.paths["out_dir"] = os.path.join(
@@ -283,7 +292,7 @@ def init_session_state() -> None:
         st.session_state.list_mods = ["T1", "T2", "FL", "DTI", "fMRI"]
 
         # Dictionaries
-        res_dir = os.path.join(st.session_state.paths["root"], "resources")
+        res_dir = st.session_state.paths["resources"]
         st.session_state.dicts = {
             "muse_derived": os.path.join(
                 res_dir, "MUSE", "list_MUSE_mapping_derived.csv"

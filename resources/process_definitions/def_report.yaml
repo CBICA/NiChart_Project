@@ -1,0 +1,4 @@
+pname: report
+input: [demog_csv, dlmuse_csv, dlmuse_harm_csv, spare_csv]
+output: [report_csv]
+

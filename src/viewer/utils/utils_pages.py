@@ -12,7 +12,7 @@ dict_main_menu = {
 
 dict_workflow = {
     "Load Input Data": "pages/data_input.py",
-    "Select Pipeline(s)": "pages/select_workflow.py",
+    "Select Pipeline(s)": "pages/select_pipelines.py",
     "View Results": "pages/Menu.py",
 }
 
@@ -47,12 +47,12 @@ def select_workflow() -> None:
     """
     Select pipeline from a list and switch to pipeline page
     """
-    if st.session_state.navig['main_menu'] != "Pipelines":
+    if st.session_state.navig['main_menu'] != "Workflow":
         return
 
     with st.sidebar:
         # st.markdown('##### ')
-        st.markdown("### Pipeline:")
+        st.markdown("### Workflow Steps:")
         sel_workflow = st.pills(
             "Workflow",
             dict_workflow.keys(),

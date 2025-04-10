@@ -287,42 +287,57 @@ sel_task = st.pills(
     "Select Task", list_opt, selection_mode="single", label_visibility="collapsed"
 )
 
-if sel_task == "Connect to PACS Server":
+if sel_task == "Nifti Images":
     with st.container(border=True):
-        st.markdown("""
-        **Connect to PACS Server**  
-        Query and fetch imaging data directly from a hospital PACS server using DICOM networking.  
-        Requires PACS credentials and access permissions.
-        """)
-        st.warning('Work in progress ...')
+        st.markdown(
+            """
+            **Nifti Images**
+            Upload a folder containing Nifti images
+            """
+        )
+        panel_nifti()
 
 elif sel_task == "Dicom Files":
     with st.container(border=True):
-        st.markdown("""
-        **Raw DICOM Files**  
-        Upload a folder containing unprocessed DICOM images (as exported by MRI scanners).  
-        The tool can convert DICOM to NIfTI internally or as part of a preprocessing pipeline step.  
-        This option is ideal if your data has not yet been converted or organized.
-        """)
+        st.markdown(
+            """
+            **Raw DICOM Files**
+            Upload a folder containing unprocessed DICOM images (as exported by MRI scanners).
+            The tool can convert DICOM to NIfTI internally or as part of a preprocessing pipeline step.
+            This option is ideal if your data has not yet been converted or organized.
+            """
+        )
         panel_dicoms()
     
 elif sel_task == "BIDS Data":
     with st.container(border=True):
-        st.markdown("""
+        st.markdown(
+            """
             **BIDS Format**
-            Load a dataset structured according to the [BIDS standard](https://bids.neuroimaging.io/), where all imaging modalities and metadata are organized in a single directory. 
+            Load a dataset structured according to the [BIDS standard](https://bids.neuroimaging.io/), where all imaging modalities and metadata are organized in a single directory.
             This is the easiest option if your data is already standardized.
-        """)
+            """
+        )
         st.warning('Work in progress ...')
         
-elif sel_task == "Images":
-    with st.container(border=True):
-        st.markdown("""
-        **Nifti Images**  
-        Upload a folder containing Nifti images
-        """)
-        panel_nifti()
 
-elif sel_task == "Covariates":
+elif sel_task == "Covariate File":
+    with st.container(border=True):
+        st.markdown(
+            """
+            **Covariate File**
+            Upload a csv file with covariate info (Age, Sex, DX, etc.)
+            """
+        )
     panel_in_covars()
 
+if sel_task == "Connect to PACS Server":
+    with st.container(border=True):
+        st.markdown(
+            """
+            **Connect to PACS Server**
+            Query and fetch imaging data directly from a hospital PACS server using DICOM networking.
+            Requires PACS credentials and access permissions.
+            """
+        )
+        st.warning('Work in progress ...')
