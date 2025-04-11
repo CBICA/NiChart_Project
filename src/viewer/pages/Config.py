@@ -9,6 +9,56 @@ import utils.utils_session as utilss
 utilpg.config_page()
 utilpg.select_main_menu()
 
+def panel_models_path():
+    """
+    Panel for selecting models
+    """
+    with st.container(border=True):
+        st.write('Work in progress!')
+
+def panel_resources_path():
+    """
+    Panel for selecting resource directories
+    """
+    with st.container(border=True):
+        sel_res = st.pills(
+            "Select resource type",
+            ["process definitions", "roi lists"],
+            selection_mode="single",
+            default=None,
+            label_visibility="collapsed",
+        )
+
+        if sel_res is None:
+            return
+        
+        if sel_res == "process definitions":
+            out_dir = st.session_state.paths["proc_def"]
+
+            # Browse output folder
+            if st.button('Browse path'):
+                sel_dir = utilio.browse_folder(out_dir)
+                utilss.update_out_dir(sel_dir)
+                st.rerun()
+
+            # Enter output folder
+            sel_dir = st.text_input(
+                'Enter path',
+                value=out_dir,
+                # label_visibility='collapsed',
+            )
+            if sel_dir != out_dir:
+                utilss.update_out_dir(sel_dir)
+                st.rerun()
+
+            if st.session_state.flags["out_dir"]:
+                st.success(
+                    f"Output directory: {st.session_state.paths['out_dir']}",
+                    icon=":material/thumb_up:",
+                )
+
+            utildoc.util_help_dialog(utildoc.title_out, utildoc.def_out)
+
 def panel_out_dir():
     """
     Panel for selecting output dir
@@ -91,16 +141,40 @@ st.markdown(
     """
 )
 
-sel_config = st.pills(
-    "Select Config",
-    ["Output Dir", "Task Name"],
+sel_config_cat = st.pills(
+    "Select Config Category",
+    ["Basic", "Advanced"],
     selection_mode="single",
     default=None,
     label_visibility="collapsed",
 )
 
-if sel_config == "Output Dir":
-    panel_out_dir()
+if sel_config_cat == "Basic":
+    sel_config = st.pills(
+        "Select Basic Config",
+        ["Output Dir", "Task Name"],
+        selection_mode="single",
+        default=None,
+        label_visibility="collapsed",
+    )
 
-if sel_config == "Task Name":
-    panel_task()
+    if sel_config == "Output Dir":
+        panel_out_dir()
+
+    if sel_config == "Task Name":
+        panel_task()
+
+elif sel_config_cat == "Advanced":
+    sel_config = st.pills(
+        "Select Advanced Config",
+        ["Resources", "Models"],
+        selection_mode="single",
+        default=None,
+        label_visibility="collapsed",
+    )
+
+    if sel_config == "Resources":
+        panel_resources_path()
+
+    if sel_config == "Models":
+        panel_models_path()
