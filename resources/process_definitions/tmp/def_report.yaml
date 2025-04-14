@@ -1,4 +1,4 @@
-pname: report
+pname: report_dlmuse_harm
 input: [demog_csv, dlmuse_csv, dlmuse_harm_csv, spare_csv]
-output: [report_csv]
+output: [report_dlmuse_harm_csv]
 

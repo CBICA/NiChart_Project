@@ -1,0 +1,4 @@
+pname: combat_fmri
+input: [demog_csv, fmri_csv]
+output: [fmri_harm_csv]
+

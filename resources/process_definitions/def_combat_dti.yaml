@@ -1,0 +1,4 @@
+pname: combat_dti
+input: [demog_csv, dti_csv]
+output: [dti_harm_csv]
+

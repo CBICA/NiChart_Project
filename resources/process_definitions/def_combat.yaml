@@ -1,4 +1,0 @@
-pname: combat
-input: [dlmuse_csv]
-output: [dlmuse_harm_csv]
-

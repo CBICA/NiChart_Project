@@ -85,12 +85,84 @@ def generate_pipeline_command(step_list, steps):
         cmds.append(cmd)
     return " | \\\n  ".join(cmds)
 
+def panel_interactive():
+    with st.container(border=True):
+        st.markdown(
+            """
+            ### Interactive Pipeline Builder
+            """
+        )
 
+        # --- Load steps ---
+        if not os.path.exists(st.session_state.paths["proc_def"]):
+            st.warning('Process definition yaml files not found!')
+            return
 
+        steps_data = load_steps(st.session_state.paths["proc_def"])
+        file_roles = get_file_roles(steps_data)
 
+        # Exclude files that are outputs of any step (only allow true source files)
+        output_files = {f for step in steps_data.values() for f in step.get("output", [])}
+        input_candidates = sorted(set(file_roles.keys()) - output_files)
 
+        # --- Session State Initialization ---
+        if "selected_inputs" not in st.session_state:
+            st.session_state.selected_inputs = []
+        if "selected_steps" not in st.session_state:
+            st.session_state.selected_steps = []
+        if "available_files" not in st.session_state:
+            st.session_state.available_files = set()
 
+        # --- Input Selection ---
+        if not st.session_state.selected_inputs:
+            st.markdown("### Step 1. Select Available Input Files")
+            selected_inputs = st.multiselect("Choose files you already have", input_candidates)
+            if st.button("Confirm Inputs") and selected_inputs:
+                st.session_state.selected_inputs = selected_inputs
+                st.session_state.available_files = set(selected_inputs)
+                st.rerun()
 
+        # --- Step-by-Step Build ---
+        else:
+            st.markdown("### Step 2. Add Pipeline Step")
+            current_pipeline = st.session_state.selected_steps
+            available_files = st.session_state.available_files
+
+            runnable = get_runnable_steps(steps_data, current_pipeline, available_files)
+            st.markdown(f"**Available Files**: `{sorted(list(available_files))}`")
+            st.markdown(f"**Steps in Pipeline**: `{current_pipeline}`")
+
+            if runnable:
+                selected_step = st.selectbox("Select next step to add", runnable)
+                if st.button("Add Step"):
+                    st.session_state.selected_steps.append(selected_step)
+                    step_outputs = steps_data[selected_step].get("output", [])
+                    st.session_state.available_files.update(step_outputs)
+                    st.rerun()
+            else:
+                st.info("No more steps can be added with current files.")
+
+            # --- Graph + Command Output ---
+            st.markdown("### Current Pipeline Graph")
+            graph = build_graphviz_pipeline(
+                steps_data,
+                st.session_state.selected_steps,
+                st.session_state.selected_inputs,
+            )
+            st.graphviz_chart(graph.source)
+
+            if st.session_state.selected_steps:
+                st.markdown("### Pipeline Command")
+                st.code(
+                    generate_pipeline_command(
+                        st.session_state.selected_steps, steps_data
+                    ),
+                    language="bash",
+                )
+
+            if st.button("🔄 Reset Pipeline"):
+                st.session_state.clear()
+                st.rerun()
 
 
 # Page config should be called for each page
@@ -99,81 +171,19 @@ utilpg.show_menu()
 
 st.markdown(
     """
-    ### Interactive Pipeline Builder
+    ### Select Pipeline
     """
 )
 
-# --- Load steps ---
-folder = st.text_input(
-    "Path to process definition files",
-    st.session_state.paths["proc_def"]
+st.markdown("##### Select Task")
+list_tasks = ["By Input", "By Output", "Interactive"]
+sel_task = st.pills(
+    "Select Workflow Task", list_tasks, selection_mode="single", label_visibility="collapsed"
 )
-if Path(folder).exists():
-    steps_data = load_steps(folder)
-    file_roles = get_file_roles(steps_data)
+if sel_task == "By Input":
+    st.write('Wait...')
+elif sel_task == "By Output":
+    st.write('Wait...')
+elif sel_task == "Interactive":
+    panel_interactive()
 
-    #all_files = sorted(file_roles.keys())
-    # Exclude files that are outputs of any step (only allow true source files)
-    output_files = {f for step in steps_data.values() for f in step.get("output", [])}
-    input_candidates = sorted(set(file_roles.keys()) - output_files)
-
-    # --- Session State Initialization ---
-    if "selected_inputs" not in st.session_state:
-        st.session_state.selected_inputs = []
-    if "selected_steps" not in st.session_state:
-        st.session_state.selected_steps = []
-    if "available_files" not in st.session_state:
-        st.session_state.available_files = set()
-
-    # --- Input Selection ---
-    if not st.session_state.selected_inputs:
-        st.subheader("1️⃣ Select Available Input Files")
-        selected_inputs = st.multiselect("Choose files you already have", input_candidates)
-        if st.button("Confirm Inputs") and selected_inputs:
-            st.session_state.selected_inputs = selected_inputs
-            st.session_state.available_files = set(selected_inputs)
-            st.rerun()
-
-    # --- Step-by-Step Build ---
-    else:
-        st.subheader("2️⃣ Build Pipeline Step by Step")
-        current_pipeline = st.session_state.selected_steps
-        available_files = st.session_state.available_files
-
-        runnable = get_runnable_steps(steps_data, current_pipeline, available_files)
-        st.markdown(f"**Available Files**: `{sorted(list(available_files))}`")
-        st.markdown(f"**Steps in Pipeline**: `{current_pipeline}`")
-
-        if runnable:
-            selected_step = st.selectbox("Select next step to add", runnable)
-            if st.button("Add Step"):
-                st.session_state.selected_steps.append(selected_step)
-                step_outputs = steps_data[selected_step].get("output", [])
-                st.session_state.available_files.update(step_outputs)
-                st.rerun()
-        else:
-            st.info("No more steps can be added with current files.")
-
-        # --- Graph + Command Output ---
-        st.markdown("### 📊 Current Pipeline Graph")
-        graph = build_graphviz_pipeline(
-            steps_data,
-            st.session_state.selected_steps,
-            st.session_state.selected_inputs,
-        )
-        st.graphviz_chart(graph.source)
-
-        if st.session_state.selected_steps:
-            st.markdown("### 💻 Generated Command")
-            st.code(
-                generate_pipeline_command(
-                    st.session_state.selected_steps, steps_data
-                ),
-                language="bash",
-            )
-
-        if st.button("🔄 Reset Pipeline"):
-            st.session_state.clear()
-            st.rerun()
-else:
-    st.error("YAML folder not found.")

@@ -1,0 +1,4 @@
+pname: dti
+input: [dti_img, t1_img]
+output: [dti_csv]
+
