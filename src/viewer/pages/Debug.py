@@ -14,23 +14,43 @@ def disp_session_state():
         st.markdown('➤ ' + sel_var + ':')
         st.write(st.session_state[sel_var])
 
+def disp_folder_tree(allowed_extensions=None):
+    root_path = st.session_state.paths['task']
+    curr_path = st.session_state.paths['task_curr_path']
 
-def disp_folder(path: str, indent: int = 0):
-    """Recursively display the contents of a folder with subfolders."""
-    try:
-        items = sorted(os.listdir(path))
-    except Exception as e:
-        st.error(f"Error reading directory: {e}")
-        return
+    # Prevent access outside root
+    def is_within_root(path):
+        return os.path.commonpath([root_path, path]) == root_path
 
-    for item in items:
-        full_path = os.path.join(path, item)
-        if os.path.isdir(full_path):
-            st.markdown(">" * indent + "📁 " + item)
-            disp_folder(full_path, indent + 1)
-        else:
-            st.markdown(">" * indent + "📄 " + item, unsafe_allow_html=True)
+    entries = sorted(os.listdir(curr_path))
+    folders = [e for e in entries if os.path.isdir(os.path.join(curr_path, e))]
+    files = [e for e in entries if os.path.isfile(os.path.join(curr_path, e))]
 
+    if allowed_extensions:
+        files = [f for f in files if any(f.endswith(ext) for ext in allowed_extensions)]
+    
+    st.markdown(f"##### 📂 `{curr_path}`")
+
+    with st.container(border=True):
+        # Show subfolders
+        for folder in folders:
+            folder_path = os.path.join(curr_path, folder)
+            if is_within_root(folder_path):
+                if st.button(f"📁 {folder}", key=f'_key_folder_{folder}'):
+                    st.session_state.paths['task_curr_path'] = folder_path
+                    st.rerun()
+
+        # Show files
+        selected_file = None
+        for f in files:
+            st.write(f"📝 {f}")
+
+    # Go Up Button (only if not already at root)
+    parent_path = os.path.abspath(os.path.join(curr_path, ".."))
+    if is_within_root(parent_path) and curr_path != root_path:
+        if st.button("⬆️ Go Up", key='_key_btn_up'):
+            st.session_state.paths['task_curr_path'] = parent_path
+            st.rerun()
 
 
 # Page config should be called for each page
@@ -58,5 +78,5 @@ if sel_config == "Session State":
 if sel_config == "Output Files":
     with st.container(border=True):
         st.markdown('##### '+ st.session_state.navig['task'] + ':')
-        disp_folder(st.session_state.paths['task'])
+        disp_folder_tree()
 

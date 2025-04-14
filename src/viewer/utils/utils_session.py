@@ -95,6 +95,7 @@ def update_task(sel_task) -> None:
     st.session_state.navig['task'] = sel_task
     st.session_state.flags["task"] = True
     st.session_state.paths['task'] = task_dir
+    st.session_state.paths['task_curr_path'] = task_dir
 
     # Reset other vars
     update_default_paths()
@@ -229,6 +230,7 @@ def init_session_state() -> None:
             "process_def": "",
             "out_dir": "",
             "task": "",
+            "task_curr_path": "",            
             "lists": "",
             "dicoms": "",
             "nifti": "",
@@ -341,7 +343,7 @@ def init_session_state() -> None:
             'out_files': None,
             'sel_inputs': [],
             'sel_steps': [],
-            'avail_files': set(),            
+            'avail_files': set(),
         }
         update_proc_def(st.session_state.paths['proc_def'])
 

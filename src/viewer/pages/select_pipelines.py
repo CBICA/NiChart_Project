@@ -8,6 +8,79 @@ import utils.utils_pages as utilpg
 import utils.utils_processes as utilprc
 import utils.utils_session as utilses
 
+#def panel_view_pipeline():
+    #with st.container(border=True):
+        #proc = st.session_state.processes
+
+        #st.markdown("#### Input Files")
+        #sel_inputs = st.pills(
+            #"Select input files",
+            #proc['in_files'],
+            #selection_mode="multi",
+            #label_visibility="collapsed"
+        #)
+        #if sel_inputs is None:
+            #return
+
+        #proc['sel_steps'] = utilprc.get_all_runnable_steps(
+            #proc['data'],
+            #sel_inputs
+        #)
+
+        #st.markdown("#### Pipeline Steps")
+        #sel_steps = st.pills(
+            #"Select pipeline steps",
+            #proc['sel_steps'],
+            #selection_mode="multi",
+            #default=proc['sel_steps'],
+            #label_visibility="collapsed"
+        #)
+
+        #graph = utilprc.build_graphviz_pipeline_reachable(
+            #proc['data'],
+            #sel_inputs,
+        #)
+        #st.graphviz_chart(graph.source)
+
+def panel_view_pipeline():
+    with st.container(border=True):
+        proc = st.session_state.processes
+
+        st.markdown("##### Select Input:")
+        sel_inputs = st.pills(
+            "Select input:",
+            proc['in_files'],
+            selection_mode="multi",
+            label_visibility="collapsed"
+        )
+        if len(sel_inputs) == 0:
+            return
+        
+        graph, sel_steps = utilprc.build_graphviz_pipeline_reachable(
+            proc['data'],
+            sel_inputs,
+        )
+        
+        st.markdown("##### Select Step:")
+        sel_steps = st.pills(
+            "Select output:",
+            sel_steps,
+            selection_mode="multi",
+            default = sel_steps,
+            label_visibility="collapsed"
+        )
+        
+        if len(sel_steps) > 0:
+            graph = utilprc.build_graphviz_with_supporting_steps(
+                proc['data'],
+                sel_steps,
+                sel_inputs
+            )
+            with st.expander('Process Graph', expanded = True):
+                st.graphviz_chart(graph.source)
+
+            if st.button('Confirm'):
+                st.success('Pipeline Selected!')
 
 def panel_interactive():
     with st.container(border=True):
@@ -21,9 +94,10 @@ def panel_interactive():
         # --- Input Selection ---
         if not proc['sel_inputs']:
             st.markdown("### Step 1. Select Available Input Files")
-            sel_inputs = st.multiselect(
-                "Choose files you already have",
-                proc['in_files']
+            sel_inputs = st.pills(
+                "Choose input files you already have",
+                proc['in_files'],
+                selection_mode="multi"
             )
             if st.button("Confirm Inputs") and sel_inputs:
                 proc['sel_inputs'] = sel_inputs
@@ -44,8 +118,12 @@ def panel_interactive():
             st.markdown(f"**Steps in Pipeline**: `{current_pipeline}`")
 
             if runnable:
-                sel_step = st.selectbox("Select next step to add", runnable)
-                if st.button("Add Step"):
+                sel_step = st.pills(
+                    "Select next step to add",
+                    runnable,
+                    selection_mode="single"
+                )
+                if st.button("Add Step") and sel_step:
                     proc['sel_steps'].append(sel_step)
                     step_outputs = proc['data'][sel_step].get("output", [])
                     proc['avail_files'].update(step_outputs)
@@ -87,14 +165,14 @@ st.markdown(
 )
 
 st.markdown("##### Select Task")
-list_tasks = ["By Input", "By Output", "Interactive"]
+list_tasks = ["View", "Select", "Interactive"]
 sel_task = st.pills(
     "Select Workflow Task", list_tasks, selection_mode="single", label_visibility="collapsed"
 )
-if sel_task == "By Input":
-    st.write('Wait...')
-elif sel_task == "By Output":
-    st.write('Wait...')
+if sel_task == "View":
+    panel_view_pipeline()
+elif sel_task == "Select":
+    panel_sel_pipeline()
 elif sel_task == "Interactive":
     panel_interactive()
 
