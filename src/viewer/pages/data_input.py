@@ -272,7 +272,7 @@ def panel_covars():
 
 st.markdown(
     """
-    ### Load data
+    ### Load input data
     """
 )
 

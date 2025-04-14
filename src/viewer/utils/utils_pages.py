@@ -11,9 +11,9 @@ dict_main_menu = {
 }
 
 dict_workflow = {
-    "Load Input Data": "pages/data_input.py",
-    "Select Pipeline(s)": "pages/select_pipelines.py",
-    "View Results": "pages/Menu.py",
+    "Data": "pages/data_input.py",
+    "Pipeline": "pages/select_pipelines.py",
+    "Results": "pages/Menu.py",
 }
 
 def select_main_menu() -> None:

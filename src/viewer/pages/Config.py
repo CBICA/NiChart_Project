@@ -5,6 +5,11 @@ import utils.utils_doc as utildoc
 import utils.utils_io as utilio
 import utils.utils_session as utilss
 
+from utils.utils_logger import setup_logger
+logger = setup_logger()
+
+logger.debug('Start of Config Screen!')
+
 # Page config should be called for each page
 utilpg.config_page()
 utilpg.select_main_menu()
@@ -132,7 +137,6 @@ def panel_task() -> None:
             )
 
         utildoc.util_help_dialog(utildoc.title_exp, utildoc.def_exp)
-
 
 st.markdown(
     """
