@@ -1,4 +1,5 @@
-pname: dlmuse
+pname: DLMUSE
+pname_full: DLMUSE
 input: [t1_img]
 output: [dlmuse_csv]
 parameters:

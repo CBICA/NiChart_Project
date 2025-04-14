@@ -1,4 +1,5 @@
-pname: spare_t1img
+pname: SPARE[t1img]
+pname_full: SPARE[t1img]
 input: [demog_csv, t1_img]
-output: [spare_t1img_csv]
+output: [spare_t1_csv]
 

@@ -1,4 +1,5 @@
-pname: combat_dlmuse
-input: [demog_csv, dlmuse_harm_csv]
+pname: Harmonize[dlmuse]
+pname_full: Harmonize[dlmuse]
+input: [demog_csv, dlmuse_csv]
 output: [dlmuse_harm_csv]
 

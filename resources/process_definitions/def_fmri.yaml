@@ -1,4 +1,5 @@
-pname: fmri
+pname: FMRI
+pname_full: FMRI[fmri]
 input: [fmri_img, t1_img]
 output: [fmri_csv]
 

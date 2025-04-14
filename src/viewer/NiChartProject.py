@@ -4,6 +4,9 @@ import os
 import streamlit as st
 import utils.utils_session as utilss
 
+# Init session state
+utilss.init_session_state()
+
 utilss.config_page()
 
 # Read user arg to select cloud / desktop

@@ -1,4 +1,5 @@
-pname: combat_fmri
+pname: Harmonize[fmri]
+pname_full: Harmonize[fmri]
 input: [demog_csv, fmri_csv]
 output: [fmri_harm_csv]
 

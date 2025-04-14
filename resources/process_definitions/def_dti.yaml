@@ -1,4 +1,5 @@
-pname: dti
+pname: DTI
+pname_full: DTI[dti]
 input: [dti_img, t1_img]
 output: [dti_csv]
 

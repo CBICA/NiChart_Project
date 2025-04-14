@@ -9,9 +9,37 @@ import plotly.express as px
 import streamlit as st
 import utils.utils_io as utilio
 import utils.utils_rois as utilroi
+import utils.utils_processes as utilproc
 from PIL import Image
 
 # from streamlit.web.server.websocket_headers import _get_websocket_headers
+
+def update_proc_def(sel_dir) -> None:
+    """
+    Updates process definitions
+    """
+    if sel_dir is None:
+        return
+
+    sel_dir = os.path.abspath(sel_dir)
+
+    # Update process data
+    data = utilproc.load_steps(st.session_state.paths["proc_def"])
+    file_roles = utilproc.get_file_roles(data)
+    
+    # Exclude files that are outputs of any step (only allow true source files)
+    out_files = {f for step in data.values() for f in step.get("output", [])}
+    in_files = sorted(set(file_roles.keys()) - out_files)
+    
+    st.session_state.processes['data'] = data
+    st.session_state.processes['roles'] = file_roles
+    st.session_state.processes['out_files'] = out_files
+    st.session_state.processes['in_files'] = in_files
+
+    st.session_state.processes['sel_inputs'] = []
+    st.session_state.processes['sel_steps'] = []
+    st.session_state.processes['avail_files'] = set()
+    
 
 def update_out_dir(sel_outdir) -> None:
     """
@@ -72,7 +100,6 @@ def update_task(sel_task) -> None:
     update_default_paths()
 
 def config_page() -> None:
-    st.session_state.nicon = Image.open("../resources/nichart1.png")
     st.set_page_config(
         page_title="NiChart",
         page_icon=st.session_state.nicon,
@@ -304,6 +331,19 @@ def init_session_state() -> None:
         st.session_state.dict_categories = os.path.join(
             res_dir, "lists", "dict_var_categories.json"
         )
+
+        # Process definitions
+        #   Used to keep process info provided as yaml files
+        st.session_state.processes = {
+            'data': None,
+            'roles': None,
+            'in_files': None,
+            'out_files': None,
+            'sel_inputs': [],
+            'sel_steps': [],
+            'avail_files': set(),            
+        }
+        update_proc_def(st.session_state.paths['proc_def'])
 
         # Various parameters
 

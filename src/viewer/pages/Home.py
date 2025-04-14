@@ -3,7 +3,6 @@ import utils.utils_pages as utilpg
 import utils.utils_session as utilss
 
 # Page config should be called for each page
-utilss.init_session_state()
 utilpg.config_page()
 utilpg.show_menu()
 

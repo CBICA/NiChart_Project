@@ -1,4 +1,5 @@
-pname: spare_dlmuse
+pname: SPARE[dlmuse]
+pname_full: SPARE[dlmuse]
 input: [demog_csv, dlmuse_csv]
 output: [spare_dlmuse_csv]
 

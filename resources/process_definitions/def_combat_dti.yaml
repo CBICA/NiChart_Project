@@ -1,4 +1,5 @@
-pname: combat_dti
+pname: Harmonize[dti]
+pname_full: Harmonize[dti]
 input: [demog_csv, dti_csv]
 output: [dti_harm_csv]
 
