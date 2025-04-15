@@ -12,22 +12,29 @@ def panel_sel_pipeline():
     with st.container(border=True):
         proc = st.session_state.processes
 
-        st.markdown("##### Select Input:")
+        st.markdown("##### Select Input Data:")
         sel_inputs = st.pills(
             "Select input:",
             proc['in_files'],
             selection_mode="multi",
             label_visibility="collapsed"
         )
+        flag_input_all = st.checkbox(
+            "Require all selected inputs",
+            value=True,
+            help=(
+                "If checked, only include steps that depend on **all** selected inputs.\n\n"
+                "If unchecked, include steps that depend on **any one** of the selected inputs."
+            )
+        )
         if len(sel_inputs) == 0:
             return
         
-        graph, sel_steps = utilprc.build_graphviz_pipeline_reachable(
-            proc['data'],
-            sel_inputs,
+        sel_steps = utilprc.detect_reachable_steps(
+            proc['data'], sel_inputs, flag_input_all
         )
         
-        st.markdown("##### Select Step:")
+        st.markdown("##### Select Pipeline Steps:")
         sel_steps = st.pills(
             "Select output:",
             sel_steps,
@@ -37,12 +44,16 @@ def panel_sel_pipeline():
         )
         
         if len(sel_steps) > 0:
-            graph = utilprc.build_graphviz_with_supporting_steps(
-                proc['data'],
-                sel_steps,
-                sel_inputs
+            
+            flag_show_graph = st.checkbox(
+                'Show Process Graph?',
+                value=True
             )
-            with st.expander('Process Graph', expanded = True):
+            
+            if flag_show_graph:
+                graph = utilprc.build_proc_graph(
+                    proc['data'], sel_steps, sel_inputs
+                )
                 st.graphviz_chart(graph.source)
 
             if st.button('Confirm'):
