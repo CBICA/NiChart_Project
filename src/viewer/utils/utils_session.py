@@ -24,22 +24,25 @@ def update_proc_def(sel_dir) -> None:
     sel_dir = os.path.abspath(sel_dir)
 
     # Update process data
-    data = utilproc.load_steps(st.session_state.paths["proc_def"])
-    file_roles = utilproc.get_file_roles(data)
+    steps = utilproc.load_steps_from_yaml(st.session_state.paths["proc_def"])
+
+    # Create process graph
+    graph = utilproc.build_graph(steps)
+
+    # Detect file roles
+    file_roles = utilproc.get_file_roles(steps)
     
     # Exclude files that are outputs of any step (only allow true source files)
-    out_files = {f for step in data.values() for f in step.get("output", [])}
+    out_files = {f for step in steps.values() for f in step.get("output", [])}
     in_files = sorted(set(file_roles.keys()) - out_files)
     
-    st.session_state.processes['data'] = data
+    st.session_state.processes['steps'] = steps
+    st.session_state.processes['graph'] = graph
     st.session_state.processes['roles'] = file_roles
-    st.session_state.processes['out_files'] = out_files
     st.session_state.processes['in_files'] = in_files
-
+    st.session_state.processes['out_files'] = out_files
     st.session_state.processes['sel_inputs'] = []
     st.session_state.processes['sel_steps'] = []
-    st.session_state.processes['avail_files'] = set()
-    
 
 def update_out_dir(sel_outdir) -> None:
     """
@@ -137,7 +140,7 @@ def process_session_user_id() -> Any:
 def init_session_state() -> None:
     # Initiate Session State Values
     if "instantiated" not in st.session_state:
-
+        
         ###################################
         # App type ('desktop' or 'cloud')
         if os.getenv("NICHART_FORCE_CLOUD", "0") == "1":
@@ -337,13 +340,12 @@ def init_session_state() -> None:
         # Process definitions
         #   Used to keep process info provided as yaml files
         st.session_state.processes = {
-            'data': None,
+            'steps': None,
             'roles': None,
             'in_files': None,
             'out_files': None,
             'sel_inputs': [],
             'sel_steps': [],
-            'avail_files': set(),
         }
         update_proc_def(st.session_state.paths['proc_def'])
 
