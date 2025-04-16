@@ -7,7 +7,7 @@ import utils.utils_session as utilss
 # Init session state
 utilss.init_session_state()
 
-utilss.config_page()
+#utilss.config_page()
 
 
 
