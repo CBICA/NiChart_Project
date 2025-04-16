@@ -15,6 +15,8 @@ def load_steps_from_yaml(folder):
         if fname.endswith(".yaml") or fname.endswith(".yml"):
             with open(os.path.join(folder, fname), "r") as f:
                 data = yaml.safe_load(f)
+                data['in_list'] = [d['name'] for d in data.get('inputs', []) if 'name' in d]
+                data['out_list'] = [d['name'] for d in data.get('outputs', []) if 'name' in d]
                 steps[data["pname"]] = data
     return steps
 
@@ -26,13 +28,11 @@ def build_graph(steps):
     file_to_consumers = defaultdict(list)
 
     for name, step in steps.items():
-        ins = set(step.get("input", []))
-        outs = set(step.get("output", []))
-        step_inputs[name] = ins
-        step_outputs[name] = outs
-        for f in outs:
+        step_inputs[name] = set(step['in_list'])
+        step_outputs[name] = set(step['out_list'])
+        for f in step['out_list']:
             file_to_producers[f].append(name)
-        for f in ins:
+        for f in step['in_list']:
             file_to_consumers[f].append(name)
 
     return {
@@ -46,9 +46,9 @@ def build_graph(steps):
 def get_file_roles(steps):
     roles = defaultdict(lambda: {"input": False, "output": False})
     for step in steps.values():
-        for f in step.get("input", []):
+        for f in step['in_list']:
             roles[f]["input"] = True
-        for f in step.get("output", []):
+        for f in step['out_list']:
             roles[f]["output"] = True
     return roles
 
@@ -116,10 +116,10 @@ def topological_sort(steps, sel_steps):
     reverse_graph = defaultdict(set)
 
     for name in sel_steps:
-        inputs = set(steps[name].get("input", []))
+        inputs = set(steps[name]['in_list'])
         for other in sel_steps:
             if other != name:
-                if inputs & set(steps[other].get("output", [])):
+                if inputs & set(steps[other]['out_list']):
                     dependency_graph[name].add(other)
                     reverse_graph[other].add(name)
 
@@ -172,13 +172,13 @@ def find_disconnected_pipelines(steps, sel_steps):
     # Build undirected connectivity graph (ignore direction for grouping)
     graph = defaultdict(set)
     for name in sel_steps:
-        inputs = set(steps[name].get("input", []))
-        outputs = set(steps[name].get("output", []))
+        inputs = set(steps[name]['in_list'])
+        outputs = set(steps[name]['out_list'])
         for other in sel_steps:
             if other == name:
                 continue
-            other_inputs = set(steps[other].get("input", []))
-            other_outputs = set(steps[other].get("output", []))
+            other_inputs = set(steps[other]['in_list'])
+            other_outputs = set(steps[other]['out_list'])
             # Connect if they share input/output
             if inputs & other_outputs or outputs & other_inputs:
                 graph[name].add(other)
@@ -215,7 +215,7 @@ def build_proc_graph(steps, sel_steps, list_inputs=None):
     # Build reverse index: which step produces each file?
     file_to_step = {}
     for step_name, step in steps.items():
-        for f in step.get("output", []):
+        for f in step['out_list']:
             file_to_step[f] = step_name
 
     # BFS from selected steps to collect required steps and inputs
@@ -226,7 +226,7 @@ def build_proc_graph(steps, sel_steps, list_inputs=None):
             continue
         all_required_steps.add(step_name)
 
-        for f in steps[step_name].get("input", []):
+        for f in steps[step_name]['in_list']:
             all_required_files.add(f)
             if f not in list_inputs and f in file_to_step:
                 producing_step = file_to_step[f]
@@ -243,12 +243,12 @@ def build_proc_graph(steps, sel_steps, list_inputs=None):
         color = 'lightblue' if step_name in sel_steps else 'lightgray'
         dot.node(step_name, shape='box', style='filled', fillcolor=color)
 
-        for f in step.get("input", []):
+        for f in step['in_list']:
             color = get_file_color(file_roles.get(f, "input"))
             dot.node(f, shape='ellipse', style='filled', fillcolor=color)
             dot.edge(f, step_name)
 
-        for f in step.get("output", []):
+        for f in step['out_list']:
             color = get_file_color(file_roles.get(f, "output"))
             dot.node(f, shape='ellipse', style='filled', fillcolor=color)
             dot.edge(step_name, f)

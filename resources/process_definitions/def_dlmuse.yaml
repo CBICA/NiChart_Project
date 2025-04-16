@@ -1,7 +1,41 @@
 pname: DLMUSE
-pname_full: DLMUSE
-input: [t1_img]
-output: [dlmuse_csv]
-parameters:
-  device: [cpu, gpu]
+description: Segmentation of brain anatomy
 
+dependencies:
+  - t1_img
+
+inputs:
+  - name: t1_img
+    type: directory
+
+outputs:
+  - name: dlmuse_csv
+    type: file
+
+mounts:
+  - name: t1_img
+    path_in_container: /mnt/data/t1
+    mode: ro
+    
+  - name: dlmuse_csv
+    path_in_container: /mnt/output/dlmuse.csv
+    mode: rw
+
+resources:
+  vcpus: 4
+  memory: 16GB
+  gpus: 1
+
+container:
+  image: cbica/sample_tool_container:latest 
+  command: > # Leave blank to use container default entrypoint/command
+    dlmuse --input {t1_img} --output {dlmuse_csv} --num_features {num_features}
+
+parameters:
+  - name: some_flag
+    type: bool
+    default: false
+        
+  - name: num_features
+    type: int
+    default: 300

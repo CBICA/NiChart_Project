@@ -33,7 +33,7 @@ def update_proc_def(sel_dir) -> None:
     file_roles = utilproc.get_file_roles(steps)
     
     # Exclude files that are outputs of any step (only allow true source files)
-    out_files = {f for step in steps.values() for f in step.get("output", [])}
+    out_files = {f for step in steps.values() for f in step['out_list']}
     in_files = sorted(set(file_roles.keys()) - out_files)
     
     st.session_state.processes['steps'] = steps

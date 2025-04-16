@@ -1,5 +1,0 @@
-pname: SPARE[fmri_harm]
-pname_full: SPARE[fmri_harm]
-input: [demog_csv, fmri_harm_csv]
-output: [spare_fmri_harm_csv]
-

@@ -12,7 +12,7 @@ dict_main_menu = {
 
 dict_workflow = {
     "Data": "pages/data_input.py",
-    "Pipeline": "pages/select_pipelines.py",
+    "Pipeline": "pages/select_and_run_pipeline.py",
     "Results": "pages/Menu.py",
 }
 

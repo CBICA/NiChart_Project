@@ -1,5 +1,0 @@
-pname: SPARE[dlmuse+dti]
-pname_full: SPARE[dlmuse+dti]
-input: [demog_csv, dlmuse_harm_csv, dti_harm_csv]
-output: [spare_dlmuse+dti_harm_csv]
-
