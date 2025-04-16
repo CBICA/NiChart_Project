@@ -61,26 +61,44 @@ def panel_sel_pipeline():
                 'Show Process Graph?',
                 value = True
             )
-            
+
+            graph, req_steps = utilprc.build_proc_graph(
+                proc['steps'], sel_steps, sel_inputs
+            )
+
             if flag_show_graph:
-                graph = utilprc.build_proc_graph(
-                    proc['steps'], sel_steps, sel_inputs
-                )
                 st.graphviz_chart(graph.source)
 
             if st.button('Confirm'):
+                sel_steps = utilprc.topological_sort(
+                    proc['steps'], req_steps
+                )
                 st.session_state.processes['sel_inputs'] = sel_inputs
                 st.session_state.processes['sel_steps'] = sel_steps
                 st.success('Pipeline Selected!')
+                st.markdown('##### Pipeline steps:')
                 st.write(sel_steps)
 
 def panel_conf_pipeline():
     with st.container(border=True):
         st.markdown(
             """
-            ### Work in prog ...
+            ##### Select args for each step
             """
         )
+        for sel_step in st.session_state.processes['sel_steps']:
+            with st.expander(sel_step, expanded=True):
+                for sel_arg in ['arg1', 'arg2', 'arg3']:
+                    st.selectbox(
+                        f'Select {sel_arg}',
+                        [1,2,3],
+                        0,
+                        key = f'_key_selbox_{sel_step}_{sel_arg}',
+                    )
+                st.button(
+                    'Confirm',
+                    key = f'_key_btn_confirm_{sel_step}'
+                )
 
 def panel_run_pipeline():
     with st.container(border=True):

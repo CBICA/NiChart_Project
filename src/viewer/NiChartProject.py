@@ -9,6 +9,8 @@ utilss.init_session_state()
 
 utilss.config_page()
 
+
+
 # Read user arg to select cloud / desktop
 parser = argparse.ArgumentParser(description="NiChart Application Server")
 parser.add_argument(

@@ -4,13 +4,15 @@ import utils.utils_session as utilss
 import logging
 
 from utils.utils_logger import setup_logger
-logger = setup_logger()
-
-logger.debug('Start of Home Screen!')
 
 # Page config should be called for each page
 utilpg.config_page()
 utilpg.show_menu()
+
+logger = setup_logger()
+
+logger.debug('Start of Home Screen!')
+
 
 # utilpg.select_main_menu()
 

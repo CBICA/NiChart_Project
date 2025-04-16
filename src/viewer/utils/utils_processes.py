@@ -65,21 +65,8 @@ def get_file_color(role):
     
 def detect_reachable_steps(graph, list_inputs, flag_all = False):
     '''
-    Creates a graph from process definitions and detect steps reachable from given input list
+    Detects steps reachable from process graph and given input list
     '''
-    #file_to_producers = defaultdict(list)
-    #file_to_consumers = defaultdict(list)
-    #step_inputs = {}
-    #step_outputs = {}
-
-    #for name, step in steps.items():
-        #step_inputs[name] = set(step.get("input", []))
-        #step_outputs[name] = set(step.get("output", []))
-        #for f in step_outputs[name]:
-            #file_to_producers[f].append(name)
-        #for f in step_inputs[name]:
-            #file_to_consumers[f].append(name)
-
     # Forward propagation of input origin tracking
     file_origins = {f: {f} for f in list_inputs}
     queue = deque(list_inputs)
@@ -155,18 +142,6 @@ def topological_sort(steps, sel_steps):
     return sorted_steps
 
 def detect_reachable_from_steps(steps, starting_steps):
-    # Map: file → steps that consume it
-    file_to_consumers = defaultdict(set)
-    step_inputs = {}
-    step_outputs = {}
-
-    for name, step in steps.items():
-        inputs = set(step.get("input", []))
-        outputs = set(step.get("output", []))
-        step_inputs[name] = inputs
-        step_outputs[name] = outputs
-        for f in inputs:
-            file_to_consumers[f].add(name)
 
     # Initialize queue with outputs from starting steps
     reachable_steps = set(starting_steps)
@@ -283,7 +258,7 @@ def build_proc_graph(steps, sel_steps, list_inputs=None):
         if f not in file_to_step:
             dot.node(f, shape='ellipse', style='filled', fillcolor='lightgreen')
 
-    return dot
+    return dot, all_required_steps
 
 # Generate CLI pipeline command
 def generate_pipeline_command(steps, step_list):
