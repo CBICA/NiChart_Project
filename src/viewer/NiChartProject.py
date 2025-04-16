@@ -41,4 +41,4 @@ if args.cloud:
     st.session_state.forced_cloud = True
 
 # Initialize session state variables
-st.switch_page("pages/Home.py")
+st.switch_page("pages/home.py")

@@ -2,6 +2,7 @@ import streamlit as st
 
 ###################################
 # Hard-coded menu items for NiChart
+
 dict_main_menu = {
     "Home": "pages/home.py",
     "Config": "pages/config.py",
