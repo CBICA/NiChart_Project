@@ -246,22 +246,18 @@ def util_select_dir(out_dir: str, key_txt: str) -> Any:
                 st.error(f"Could not create directory: {sel_dir}")
     return sel_dir
 
-
-def util_panel_input_multi(dtype: str, status: bool) -> None:
+def util_panel_input_multi(dtype: str) -> None:
     """
     Panel for selecting multiple input files or folder(s)
     """
     with st.container(border=True):
-        # Check init status
-        if not status:
-            st.warning("Please check previous step!")
-            return
-
         # Check if data exists
-        out_dir = st.session_state.paths[dtype]
-        if st.session_state.flags[dtype]:
+        out_dir = os.path.join(
+            st.session_state.paths['task'], dtype
+        )
+        if os.path.exists(out_dir):
             st.success(
-                f"Data is ready: {out_dir}",
+                f"Out dir exists: {out_dir}",
                 icon=":material/thumb_up:",
             )
             # Delete folder if user wants to reload
@@ -271,7 +267,6 @@ def util_panel_input_multi(dtype: str, status: bool) -> None:
                         os.unlink(out_dir)
                     else:
                         shutil.rmtree(out_dir)
-                    st.session_state.flags[dtype] = False
                     st.success(f"Removed dir: {out_dir}")
                     time.sleep(4)
                 except:
@@ -279,17 +274,10 @@ def util_panel_input_multi(dtype: str, status: bool) -> None:
                 st.rerun()
 
         else:
-            # Create parent dir for out data
-            dbase = os.path.dirname(out_dir)
-            print(dbase)
-            print('aaa')
-            if not os.path.exists(dbase):
-                os.makedirs(dbase)
-
             if st.session_state.app_type == "cloud":
                 # Upload data
                 util_upload_folder(
-                    st.session_state.paths["dicoms"],
+                    out_dir,
                     "Input files or folders",
                     False,
                     "Input files can be uploaded as a folder, multiple files, or a single zip file",
@@ -311,18 +299,94 @@ def util_panel_input_multi(dtype: str, status: bool) -> None:
                         )
 
             # Check out files
-            fcount = utilio.get_file_count(st.session_state.paths[dtype])
+            fcount = utilio.get_file_count(out_dir)
             if fcount > 0:
-                st.session_state.flags[dtype] = True
-                p_dicom = st.session_state.paths[dtype]
                 st.success(
-                    f" Uploaded data: ({p_dicom}, {fcount} files)",
+                    f" Uploaded data: ({fcount} files)",
                     icon=":material/thumb_up:",
                 )
                 time.sleep(4)
 
                 st.rerun()
-            util_help_dialog(utildoc.title_dicoms, utildoc.def_dicoms)
+
+
+
+#def util_panel_input_multi(dtype: str, status: bool) -> None:
+    #"""
+    #Panel for selecting multiple input files or folder(s)
+    #"""
+    #with st.container(border=True):
+        ## Check init status
+        #if not status:
+            #st.warning("Please check previous step!")
+            #return
+
+        ## Check if data exists
+        #out_dir = st.session_state.paths[dtype]
+        #if st.session_state.flags[dtype]:
+            #st.success(
+                #f"Data is ready: {out_dir}",
+                #icon=":material/thumb_up:",
+            #)
+            ## Delete folder if user wants to reload
+            #if st.button("Reset", f"key_btn_reset_{dtype}"):
+                #try:
+                    #if os.path.islink(out_dir):
+                        #os.unlink(out_dir)
+                    #else:
+                        #shutil.rmtree(out_dir)
+                    #st.session_state.flags[dtype] = False
+                    #st.success(f"Removed dir: {out_dir}")
+                    #time.sleep(4)
+                #except:
+                    #st.error(f"Could not delete folder: {out_dir}")
+                #st.rerun()
+
+        #else:
+            ## Create parent dir for out data
+            #dbase = os.path.dirname(out_dir)
+            #print(dbase)
+            #print('aaa')
+            #if not os.path.exists(dbase):
+                #os.makedirs(dbase)
+
+            #if st.session_state.app_type == "cloud":
+                ## Upload data
+                #util_upload_folder(
+                    #st.session_state.paths["dicoms"],
+                    #"Input files or folders",
+                    #False,
+                    #"Input files can be uploaded as a folder, multiple files, or a single zip file",
+                #)
+
+            #else:  # st.session_state.app_type == 'desktop'
+                ## Get user input
+                #sel_dir = util_select_dir(out_dir, "sel_folder")
+                #if sel_dir is None:
+                    #return
+
+                ## Link it to out folder
+                #if not os.path.exists(out_dir):
+                    #try:
+                        #os.symlink(sel_dir, out_dir)
+                    #except:
+                        #st.error(
+                            #f"Could not link user input to destination folder: {out_dir}"
+                        #)
+
+            ## Check out files
+            #fcount = utilio.get_file_count(st.session_state.paths[dtype])
+            #if fcount > 0:
+                #st.session_state.flags[dtype] = True
+                #p_dicom = st.session_state.paths[dtype]
+                #st.success(
+                    #f" Uploaded data: ({p_dicom}, {fcount} files)",
+                    #icon=":material/thumb_up:",
+                #)
+                #time.sleep(4)
+
+                #st.rerun()
+            #util_help_dialog(utildoc.title_dicoms, utildoc.def_dicoms)
 
 
 def util_select_file(out_dir: str, key_txt: str) -> Any:

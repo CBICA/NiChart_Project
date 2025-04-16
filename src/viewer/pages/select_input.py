@@ -10,7 +10,7 @@ import utils.utils_doc as utildoc
 import utils.utils_io as utilio
 import utils.utils_nifti as utilni
 import utils.utils_pages as utilpg
-import utils.utils_panels as utilpn
+#import utils.utils_panels as utilpn
 import utils.utils_st as utilst
 from stqdm import stqdm
 
@@ -126,13 +126,18 @@ def panel_extract() -> None:
         )
 
 
-def panel_view(sel_mod: str) -> None:
+def panel_view(dtype:str) -> None:
     """
-    Panel for viewing extracted nifti images
+    Panel for viewing nifti images
     """
+    in_dir = os.path.join(
+        st.session_state.paths['task'], dtype
+    )
+    
     with st.container(border=True):
         # Check init status
-        list_nifti = utilio.get_file_list(st.session_state.paths[sel_mod], ".nii.gz")
+        
+        list_nifti = utilio.get_file_list(in_dir, ".nii.gz")
 
         # Selection of image
         sel_img = utilst.user_input_select(
@@ -146,7 +151,7 @@ def panel_view(sel_mod: str) -> None:
         if sel_img is None:
             return
 
-        path_img = os.path.join(st.session_state.paths[sel_mod], sel_img)
+        path_img = os.path.join(in_dir, sel_img)
 
         # Create a list of checkbox options
         list_orient = utilst.user_input_multiselect(
@@ -258,15 +263,50 @@ def panel_dicoms():
         panel_view('T1')
         
 def panel_nifti():
-    list_opt = ["Load Data", "View Scans"]
-    sel_step = st.pills(
-        "Select Step", list_opt, selection_mode="single", label_visibility="collapsed"
+    sel_mod = st.pills(
+        "Select Modality",
+        st.session_state.list_mods,
+        selection_mode="single",
+        label_visibility="collapsed"
     )
-    if sel_step == "Load Data":
-        utilpn.util_panel_input_multi("T1", True)
-    elif sel_step == "View Scans":
-        panel_view('T1')
+    if sel_mod is None:
+        return
     
+    # Check out files
+    folder_path = os.path.join(
+        st.session_state.paths['task'], sel_mod.lower()
+    )
+    fcount = utilio.get_file_count(folder_path, ['.nii', '.nii.gz'])
+    if fcount > 0:
+        st.success(
+            f" Input data available: ({fcount} nifti image files)",
+            icon=":material/thumb_up:",
+        )
+        list_opt = ["Reset", "View Scans"]
+        sel_step = st.pills(
+            "Select Step", list_opt, selection_mode="single", label_visibility="collapsed"
+        )
+        if sel_step is None:
+            return    
+        if sel_step == "Reset":
+            if utilio.remove_dir(sel_mod.lower()):
+                st.rerun()
+
+        elif sel_step == "View Scans":
+            panel_view(sel_mod.lower())
+    
+    else:
+        list_opt = ["Load"]
+        sel_step = st.pills(
+            "Select Step", list_opt, selection_mode="single", label_visibility="collapsed"
+        )
+        if sel_step is None:
+            return    
+        if sel_step == "Load":
+            if utilio.util_panel_input_multi(sel_mod.lower()):
+                st.rerun()
+
+
 def panel_covars():
     st.write('covars')
 
@@ -278,10 +318,10 @@ st.markdown(
 
 list_opt = [
     "Nifti Images",
-    "BIDS Data",
     "Dicom Files",
-    "Covariate File",
+    "BIDS Data",
     "Connect to PACS Server",
+    "Covariate File",
 ]
 sel_task = st.pills(
     "Select Task", list_opt, selection_mode="single", label_visibility="collapsed"
@@ -321,17 +361,7 @@ elif sel_task == "BIDS Data":
         st.warning('Work in progress ...')
         
 
-elif sel_task == "Covariate File":
-    with st.container(border=True):
-        st.markdown(
-            """
-            **Covariate File**
-            Upload a csv file with covariate info (Age, Sex, DX, etc.)
-            """
-        )
-    panel_in_covars()
-
-if sel_task == "Connect to PACS Server":
+elif sel_task == "Connect to PACS Server":
     with st.container(border=True):
         st.markdown(
             """
@@ -341,3 +371,13 @@ if sel_task == "Connect to PACS Server":
             """
         )
         st.warning('Work in progress ...')
+
+elif sel_task == "Covariate File":
+    with st.container(border=True):
+        st.markdown(
+            """
+            **Covariate File**
+            Upload a csv file with covariate info (Age, Sex, DX, etc.)
+            """
+        )
+    panel_in_covars()

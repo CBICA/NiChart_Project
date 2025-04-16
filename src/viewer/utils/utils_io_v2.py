@@ -5,13 +5,13 @@ import zipfile
 from tkinter import filedialog
 from typing import Any, BinaryIO, List, Optional
 import streamlit as st
-import time
 
 import pandas as pd
 
 # https://stackoverflow.com/questions/64719918/how-to-write-streamlit-uploadedfile-to-temporary-in_dir-with-original-filenam
 # https://gist.github.com/benlansdell/44000c264d1b373c77497c0ea73f0ef2
 # https://stackoverflow.com/questions/65612750/how-can-i-specify-the-exact-folder-in-streamlit-for-the-uploaded-file-to-be-save
+
 
 
 def browse_file(path_init: str) -> Any:
@@ -109,12 +109,15 @@ def copy_uploaded_file(in_file: BinaryIO, out_file: str) -> None:
             shutil.copyfileobj(in_file, f)
 
 
-def get_file_count(folder_path: str, file_suff: List[str] = []) -> int:
+def get_file_count(dtype: str, file_suff: List[str] = []) -> int:
     """
     Returns the count of files matching any of the suffixes in `file_suff`
-    within the output folder. If `file_suff` is empty, all files are counted.
+    within the output folder for a given dtype. If `file_suff` is empty,
+    all files are counted.
     """
     count = 0
+    folder_path = os.path.join(st.session_state.paths['task'], dtype)
+
     if not os.path.exists(folder_path):
         return 0
 
@@ -130,15 +133,13 @@ def remove_dir(dtype):
     folder_path = os.path.join(st.session_state.paths['task'], dtype)
     try:
         if os.path.islink(folder_path):
-            os.unlink(folder_path)
+            os.unlink(out_dir)
         else:
             shutil.rmtree(folder_path)
         st.success(f"Removed dir: {folder_path}")
         time.sleep(2)
-        return True
     except:
         st.error(f"Could not delete folder: {folder_path}")
-        return False
     
 def util_select_dir(out_dir: str, key_txt: str) -> Any:
     """
@@ -156,7 +157,7 @@ def util_select_dir(out_dir: str, key_txt: str) -> Any:
             "Browse",
             key=f"_key_btn_{key_txt}",
         ):
-            sel_dir = browse_folder(out_dir)
+            sel_dir = utilio.browse_folder(out_dir)
 
     elif sel_opt == "Enter Path":
         sel_dir = st.text_input(
@@ -195,7 +196,6 @@ def util_panel_input_multi(dtype: str) -> None:
                 False,
                 "Input files can be uploaded as a folder, multiple files, or a single zip file",
             )
-            return True
 
         else:  # st.session_state.app_type == 'desktop'
             # Get user input
@@ -207,12 +207,10 @@ def util_panel_input_multi(dtype: str) -> None:
             if not os.path.exists(out_dir):
                 try:
                     os.symlink(sel_dir, out_dir)
-                    return True
                 except:
                     st.error(
                         f"Could not link user input to destination folder: {out_dir}"
                     )
-                    return False
 
 
 def util_upload_folder(
