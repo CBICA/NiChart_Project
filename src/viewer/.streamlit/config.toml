@@ -4,7 +4,7 @@ showSidebarNavigation = false
 [theme]
 
 base = 'light'
-# primaryColor = '#223344'
+primaryColor = '#FF0000'
 backgroundColor = '#FFFFFF'
 secondaryBackgroundColor = 'F5F5F5'
 # textColor = 'black'

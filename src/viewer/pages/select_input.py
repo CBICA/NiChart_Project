@@ -13,6 +13,7 @@ import utils.utils_pages as utilpg
 #import utils.utils_panels as utilpn
 import utils.utils_st as utilst
 from stqdm import stqdm
+import pandas as pd
 
 # Page config should be called for each page
 utilpg.config_page()
@@ -200,54 +201,6 @@ def panel_view(dtype:str) -> None:
                     ":material/thumb_down: Image parsing failed. Please confirm that the image file represents a 3D volume using an external tool."
                 )
 
-def panel_in_covars() -> None:
-    """
-    Panel for uploading covariates
-    """
-    with st.container(border=True):
-        flag_manual = st.checkbox("Enter data manually", False)
-        if flag_manual:
-            st.info("Please enter values for your sample")
-            df_rois = pd.read_csv(st.session_state.paths["dlmuse_csv"])
-            df_tmp = pd.DataFrame({"MRID": df_rois["MRID"], "Age": None, "Sex": None})
-            df_user = st.data_editor(df_tmp)
-
-            if st.button("Save data"):
-                if not os.path.exists(
-                    os.path.dirname(st.session_state.paths["demog_csv"])
-                ):
-                    os.makedirs(os.path.dirname(st.session_state.paths["demog_csv"]))
-
-                df_user.to_csv(st.session_state.paths["demog_csv"], index=False)
-                st.success(f"Data saved to {st.session_state.paths['demog_csv']}")
-
-        else:
-            if st.session_state.app_type == "cloud":
-                utilst.util_upload_file(
-                    st.session_state.paths["demog_csv"],
-                    "Demographics csv",
-                    "uploaded_demog_file",
-                    False,
-                    "visible",
-                )
-
-            else:  # st.session_state.app_type == 'desktop'
-                utilst.util_select_file(
-                    "selected_demog_file",
-                    "Demographics csv",
-                    st.session_state.paths["demog_csv"],
-                    st.session_state.paths["file_search_dir"],
-                )
-
-        if os.path.exists(st.session_state.paths["demog_csv"]):
-            p_demog = st.session_state.paths["demog_csv"]
-            st.session_state.flags["demog_csv"] = True
-            st.success(f"Data is ready ({p_demog})", icon=":material/thumb_up:")
-
-            df_demog = pd.read_csv(st.session_state.paths["demog_csv"])
-            with st.expander("Show demographics data", expanded=False):
-                st.dataframe(df_demog)
-
 def panel_dicoms():
     list_opt = ["Load Data", "Detect Series", "Extract Scans", "View Scans"]
     sel_step = st.pills(
@@ -267,7 +220,8 @@ def panel_nifti():
         "Select Modality",
         st.session_state.list_mods,
         selection_mode="single",
-        label_visibility="collapsed"
+        label_visibility="collapsed",
+        default = None,
     )
     if sel_mod is None:
         return
@@ -282,33 +236,111 @@ def panel_nifti():
             f" Input data available: ({fcount} nifti image files)",
             icon=":material/thumb_up:",
         )
-        list_opt = ["Reset", "View Scans"]
+        list_opt = ["View"]
         sel_step = st.pills(
-            "Select Step", list_opt, selection_mode="single", label_visibility="collapsed"
+            "Select Step1",
+            list_opt,
+            selection_mode="single",
+            label_visibility="collapsed",
         )
-        if sel_step is None:
-            return    
-        if sel_step == "Reset":
+        if sel_step == "View":
+            panel_view(sel_mod.lower())
+            
+        if st.button("Reset Data", key = '_btn_reset_nifti'):
             if utilio.remove_dir(sel_mod.lower()):
                 st.rerun()
-
-        elif sel_step == "View Scans":
-            panel_view(sel_mod.lower())
     
     else:
         list_opt = ["Load"]
         sel_step = st.pills(
-            "Select Step", list_opt, selection_mode="single", label_visibility="collapsed"
-        )
-        if sel_step is None:
-            return    
+            "Select Step2",
+            list_opt,
+            selection_mode="single",
+            label_visibility="collapsed",
+            default = None,
+        )       
         if sel_step == "Load":
-            if utilio.util_panel_input_multi(sel_mod.lower()):
+            if utilio.panel_input_multi(sel_mod.lower()):
                 st.rerun()
 
 
-def panel_covars():
-    st.write('covars')
+def panel_in_covars() -> None:
+    """
+    Panel for uploading covariates
+    """
+    # Check out files
+    file_path = os.path.join(
+        st.session_state.paths['task'], 'lists', 'covars.csv'
+    )
+    if os.path.exists(file_path):
+        st.success(
+            f" Covariates file available: {file_path}",
+            icon=":material/thumb_up:",
+        )
+        list_opt = ["View"]
+        sel_step = st.pills(
+            "Select Step",
+            list_opt,
+            selection_mode="single",
+            label_visibility="collapsed",
+            default = []
+        )
+        if sel_step == "View":
+            try:
+                df_cov = pd.read_csv(file_path)
+                st.dataframe(df_cov)
+            except:
+                st.warning(f'Could not load dataframe: {file_path}')
+
+        if st.button("Reset", key = '_btn_reset_covar'):
+            if utilio.remove_file(file_path):
+                st.rerun()
+    
+    else:
+        sel_mod = st.pills(
+            "Covar data type",
+            ['Load File', 'Enter Manually'],
+            selection_mode="single",
+            label_visibility="collapsed"
+        )
+        if sel_mod is None:
+            return
+    
+        if sel_mod == 'Load File':
+            if st.session_state.app_type == "cloud":
+                utilio.upload_file(
+                    file_path,
+                    "Demographics csv",
+                    "uploaded_demog_file",
+                )
+
+            else:  # st.session_state.app_type == 'desktop'
+                utilio.util_select_file(
+                    "selected_demog_file",
+                    "Demographics csv",
+                    file_path,
+                    st.session_state.paths["file_search_dir"],
+                )
+                
+            if os.path.exists(file_path):
+                st.rerun()
+
+
+        elif sel_mod == 'Enter Manually':
+            st.info("Please enter values for your sample")
+            df_rois = pd.read_csv(st.session_state.paths["dlmuse_csv"])
+            df_tmp = pd.DataFrame({"MRID": df_rois["MRID"], "Age": None, "Sex": None})
+            df_user = st.data_editor(df_tmp)
+
+            if st.button("Save data"):
+                if not os.path.exists(
+                    os.path.dirname(st.session_state.paths["demog_csv"])
+                ):
+                    os.makedirs(os.path.dirname(st.session_state.paths["demog_csv"]))
+
+                df_user.to_csv(st.session_state.paths["demog_csv"], index=False)
+                st.success(f"Data saved to {st.session_state.paths['demog_csv']}")
+
 
 st.markdown(
     """
@@ -388,4 +420,4 @@ elif sel_task == "Covariate File":
             Upload a csv file with covariate info (Age, Sex, DX, etc.)
             """
         )
-    panel_in_covars()
+        panel_in_covars()

@@ -27,7 +27,6 @@ def browse_file(path_init: str) -> Any:
         return None
     return out_file
 
-
 def browse_folder(path_init: str) -> Any:
     """
     Folder selector
@@ -41,21 +40,10 @@ def browse_folder(path_init: str) -> Any:
         return None
     return out_path
 
-
 def zip_folder(in_dir: str, f_out: str) -> Optional[bytes]:
     """
     Zips a folder and its contents.
     """
-    # if os.path.exists(in_dir):
-    #     with zipfile.ZipFile(f_out, "w") as zip_file:
-    #         for root, dirs, files in os.walk(in_dir):
-    #             for file in files:
-    #                 zip_file.write(
-    #                     os.path.join(root, file),
-    #                     os.path.relpath(os.path.join(root, file), in_dir),
-    #                 )
-    #         zip_file.write(in_dir, os.path.basename(in_dir))
-
     if not os.path.exists(in_dir):
         return None
     else:
@@ -67,7 +55,6 @@ def zip_folder(in_dir: str, f_out: str) -> Optional[bytes]:
             download_dir = f.read()
 
         return download_dir
-
 
 def unzip_zip_files(in_dir: str) -> None:
     """
@@ -81,25 +68,6 @@ def unzip_zip_files(in_dir: str) -> None:
                     zip_ref.extractall(in_dir)
                     os.remove(zip_path)
 
-
-def copy_and_unzip_uploaded_files(in_files: list, d_out: str) -> None:
-    """
-    Copy uploaded files to the output dir and unzip zip files
-    """
-    # Save uploaded files
-    print("Saving uploaded files")
-    if in_files is not None:
-        for in_file in in_files:
-            f_out = os.path.join(d_out, in_file.name)
-            if not os.path.exists(f_out):
-                with open(os.path.join(d_out, in_file.name), "wb") as f:
-                    f.write(in_file.getbuffer())
-    # Unzip zip files
-    print("Extracting zip files")
-    if os.path.exists(d_out):
-        unzip_zip_files(d_out)
-
-
 def copy_uploaded_file(in_file: BinaryIO, out_file: str) -> None:
     """
     Save uploaded file to the output path
@@ -107,7 +75,6 @@ def copy_uploaded_file(in_file: BinaryIO, out_file: str) -> None:
     if in_file is not None:
         with open(out_file, "wb") as f:
             shutil.copyfileobj(in_file, f)
-
 
 def get_file_count(folder_path: str, file_suff: List[str] = []) -> int:
     """
@@ -139,8 +106,21 @@ def remove_dir(dtype):
     except:
         st.error(f"Could not delete folder: {folder_path}")
         return False
+
+def remove_file(fname):
+    try:
+        if os.path.islink(fname):
+            os.unlink(fname)
+        else:
+            os.remove(fname)
+        st.success(f"Removed file: {fname}")
+        time.sleep(2)
+        return True
+    except:
+        st.error(f"Could not delete file: {fname}")
+        return False
     
-def util_select_dir(out_dir: str, key_txt: str) -> Any:
+def select_dir(out_dir: str, key_txt: str) -> Any:
     """
     Panel to select a folder from the file system
     """
@@ -178,55 +158,99 @@ def util_select_dir(out_dir: str, key_txt: str) -> Any:
                 st.error(f"Could not create directory: {sel_dir}")
     return sel_dir
 
-def util_panel_input_multi(dtype: str) -> None:
+def copy_and_unzip_uploaded_files(in_files: list, d_out: str) -> None:
     """
-    Panel for selecting multiple input files or folder(s)
+    Copy uploaded files to the output dir and unzip zip files
     """
-    out_dir = os.path.join(
-        st.session_state.paths['task'], dtype
+    # Save uploaded files
+    print("Saving uploaded files")
+    if in_files is not None:
+        for in_file in in_files:
+            f_out = os.path.join(d_out, in_file.name)
+            if not os.path.exists(f_out):
+                with open(os.path.join(d_out, in_file.name), "wb") as f:
+                    f.write(in_file.getbuffer())
+    # Unzip zip files
+    print("Extracting zip files")
+    if os.path.exists(d_out):
+        unzip_zip_files(d_out)
+        
+def copy_uploaded_to_dir() -> None:
+    '''
+    Copies files to local storage
+    '''
+    if len(st.session_state["uploaded_input"]) > 0:
+        copy_and_unzip_uploaded_files(
+            st.session_state["uploaded_input"], st.session_state.paths["target_path"]
+        )
+
+def upload_file(
+    out_file: str, title_txt: str, key_uploader: str
+) -> bool:
+    """
+    Upload user data to target folder
+    Input data is a single file
+    """
+    # Upload input
+    in_file = st.file_uploader(
+        title_txt,
+        key=key_uploader,
+        accept_multiple_files=False,
     )
+    if in_file is None:
+        return False
 
-    with st.container(border=True):
-        if st.session_state.app_type == "cloud":
-            # Upload data
-            util_upload_folder(
-                out_dir,
-                "Input files or folders",
-                False,
-                "Input files can be uploaded as a folder, multiple files, or a single zip file",
-            )
-            return True
+    # Create parent dir of out file
+    if not os.path.exists(os.path.dirname(out_file)):
+        os.makedirs(os.path.dirname(out_file))
+    # Remove existing output file
+    if os.path.exists(out_file):
+        os.remove(out_file)
+    # Copy selected input file to destination
+    copy_uploaded_file(in_file, out_file)
+    return True
 
-        else:  # st.session_state.app_type == 'desktop'
-            # Get user input
-            sel_dir = util_select_dir(out_dir, "sel_folder")
-            if sel_dir is None:
-                return
+def select_file(out_dir: str, key_txt: str) -> Any:
+    """
+    Select a file
+    """
+    sel_file = None
+    sel_opt = st.radio(
+        "Options:",
+        ["Browse File", "Enter File Path"],
+        horizontal=True,
+        label_visibility="collapsed",
+    )
+    if sel_opt == "Browse File":
+        if st.button("Browse", key=f"_key_btn_{key_txt}"):
+            sel_file = browse_file(out_dir)  # FIXME
 
-            # Link it to out folder
-            if not os.path.exists(out_dir):
-                try:
-                    os.symlink(sel_dir, out_dir)
-                    return True
-                except:
-                    st.error(
-                        f"Could not link user input to destination folder: {out_dir}"
-                    )
-                    return False
+    elif sel_opt == "Enter Path":
+        sel_file = st.text_input(
+            "",
+            key=f"_key_sel_{key_txt}",
+            value=out_dir,
+            label_visibility="collapsed",
+        )
+    if sel_file is None:
+        return
+
+    sel_file = os.path.abspath(sel_file)
+    if not os.path.exists(sel_file):
+        return
+
+    return sel_file
 
 
-def util_upload_folder(
-    out_dir: str, title_txt: str, flag_disabled: bool, help_txt: str
-) -> None:
+def upload_folder(out_dir: str, title_txt: str, help_txt: str) -> None:
     """
     Upload user data to target folder
     Input data may be a folder, multiple files, or a zip file (unzip the zip file if so)
     """
     # Set target path
-    if not flag_disabled:
-        if not os.path.exists(out_dir):
-            os.makedirs(out_dir)
-        st.session_state.paths["target_path"] = out_dir
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
+    st.session_state.paths["target_path"] = out_dir
 
     # Upload data
     st.file_uploader(
@@ -234,40 +258,61 @@ def util_upload_folder(
         key="uploaded_input",
         accept_multiple_files=True,
         on_change=copy_uploaded_to_dir,
-        disabled=flag_disabled,
         help=help_txt,
     )
 
-def util_load_dir(dtype: str) -> None:
-    #"""
-    #Panel for selecting input files or folder(s)
-    #"""
-    # Create parent dir for out data
-    if st.session_state.app_type == "cloud":
-        # Upload data
-        util_upload_folder(
-            st.session_state.paths["dicoms"],
-            "Input files or folders",
-            False,
-            "Input files can be uploaded as a folder, multiple files, or a single zip file",
-        )
+def panel_input_multi(dtype: str) -> None:
+    """
+    Panel for selecting multiple input files or folder(s)
+    """
+    out_dir = os.path.join(
+        st.session_state.paths['task'], dtype
+    )
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
 
-    else:  # st.session_state.app_type == 'desktop'
-        # Get user input
-        sel_dir = util_select_dir(out_dir, "sel_folder")
-        if sel_dir is None:
-            return
+    with st.container(border=True):
+        if st.session_state.app_type == "cloud":
+            # Upload data
+            upload_folder(
+                out_dir,
+                "Input files or folders",
+                "Input files can be uploaded as a folder, multiple files, or a single zip file",
+            )
+            
+            print('im here')
 
-        # Link it to out folder
-        if not os.path.exists(out_dir):
-            try:
-                os.symlink(sel_dir, out_dir)
-            except:
-                st.error(
-                    f"Could not link user input to destination folder: {out_dir}"
-                )
+        else:  # st.session_state.app_type == 'desktop'
+            # Get user input
+            sel_dir = select_dir(out_dir, "sel_folder")
+            if sel_dir is None:
+                return False
+
+            # Link it to out folder
+            if not os.path.exists(out_dir):
+                try:
+                    os.symlink(sel_dir, out_dir)
+                except:
+                    st.error(
+                        f"Could not link user input to destination folder: {out_dir}"
+                    )
+                    return False
+
+        print('im here2')
+
+        if get_file_count(out_dir, ['.nii', '.nii.gz']) > 0:
+            print('found files!')
+            return True
+        
+        print('bbbbbbbbbbbbbbb foaaaaa files!')
+        print(out_dir)
+        print('foaaaaa files!')
+        return False
 
 def get_subfolders(path: str) -> list:
+    '''
+    Returns a list of subfolders in input folder
+    '''
     subdirs = []
     for item in os.listdir(path):
         item_path = os.path.join(path, item)
@@ -275,8 +320,10 @@ def get_subfolders(path: str) -> list:
             subdirs.append(item)
     return sorted(subdirs)
 
-
 def get_file_names(folder_path: str, file_suff: str = "") -> pd.DataFrame:
+    '''
+    Returns a dataframe with image names with given suffix and input path
+    '''
     f_names = []
     if os.path.exists(folder_path):
         if file_suff == "":
@@ -290,18 +337,24 @@ def get_file_names(folder_path: str, file_suff: str = "") -> pd.DataFrame:
     df_out = pd.DataFrame(columns=["FileName"], data=f_names)
     return df_out
 
-
 def get_file_list(folder_path: str, file_suff: str = "") -> List:
-    list_nifti: List[str] = []
+    '''
+    Returns list of image names with given suffix and input path
+    '''
+    list_files: List[str] = []
     if not os.path.exists(folder_path):
-        return list_nifti
+        return list_files
     for f in os.listdir(folder_path):
         if f.endswith(file_suff):
-            list_nifti.append(f)
-    return list_nifti
+            list_files.append(f)
+    return list_files
 
-
-def get_image_path(folder_path: str, file_pref: str, file_suff_list: list) -> str:
+def get_image_path(
+    folder_path: str, file_pref: str, file_suff_list: list
+) -> str:
+    '''
+    Returns full image name with given suffix, prefix and input path
+    '''
     if not os.path.exists(folder_path):
         return ""
     for tmp_suff in file_suff_list:
@@ -309,38 +362,3 @@ def get_image_path(folder_path: str, file_pref: str, file_suff_list: list) -> st
             if f.startswith(file_pref) and f.endswith(tmp_suff):
                 return os.path.join(folder_path, f)
     return ""
-
-
-def sel_task() -> Any:
-    """
-    Set/select task name
-    """
-    out_dir = st.session_state.paths['out_dir']
-    curr_task = st.session_state.navig['task']
-
-    # Read existing task folders
-    list_tasks = get_subfolders(out_dir)
-    st.write("Select Existing")
-    sel_opt = st.pills(
-        "Options:",
-        options = list_tasks,
-        default = st.session_state.navig['task'],
-        label_visibility="collapsed",
-    )
-
-    st.write("Create New")
-    task_sel = st.text_input(
-        "Experiment name:",
-        None,
-        label_visibility="collapsed",
-        placeholder="Type task name",
-    )
-    if st.button('Create task'):
-        if task_sel is not None:
-            dir_tmp = os.path.join(out_dir, task_sel)
-            if not os.path.exists(dir_tmp):
-                os.makedirs(dir_tmp)
-
-            sel_opt = task_sel
-
-    return sel_opt

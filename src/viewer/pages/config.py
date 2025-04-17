@@ -138,6 +138,19 @@ def panel_task() -> None:
 
         utildoc.util_help_dialog(utildoc.title_exp, utildoc.def_exp)
 
+def panel_misc() -> None:
+    """
+    Panel for setting various parameters
+    """
+    with st.container(border=True):
+
+        is_cloud_mode = st.session_state.app_type == "cloud"
+        if st.checkbox("Switch to cloud?", value=is_cloud_mode):
+            st.session_state.app_type = "cloud"
+        else:
+            st.session_state.app_type = "desktop"
+
+
 st.markdown(
     """
     ### Configuration Options
@@ -156,7 +169,7 @@ sel_config_cat = st.pills(
 if sel_config_cat == "Basic":
     sel_config = st.pills(
         "Select Basic Config",
-        ["Output Dir", "Task Name"],
+        ["Output Dir", "Task Name", "Misc"],
         selection_mode="single",
         default=None,
         label_visibility="collapsed",
@@ -167,6 +180,9 @@ if sel_config_cat == "Basic":
 
     if sel_config == "Task Name":
         panel_task()
+
+    if sel_config == "Misc":
+        panel_misc()
 
 elif sel_config_cat == "Advanced":
     sel_config = st.pills(

@@ -340,7 +340,9 @@ def init_session_state() -> None:
             'harm_min_samples': 30,
         }
         
-                # Icons for panels
+        st.session_state._sel_step1 = None
+        
+        # Icons for panels
         
         ####################################
         # Miscallenous settings
