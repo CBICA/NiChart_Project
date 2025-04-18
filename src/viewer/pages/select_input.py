@@ -231,39 +231,42 @@ def panel_nifti():
         st.session_state.paths['task'], sel_mod.lower()
     )
     fcount = utilio.get_file_count(folder_path, ['.nii', '.nii.gz'])
-    if fcount == 0:
-        list_opt = ["Load"]
-        sel_step = st.pills(
-            "Select Step2",
-            list_opt,
-            selection_mode="single",
-            label_visibility="collapsed",
-            default = None,
-        )       
-        if sel_step == "Load":
-            utilio.panel_input_multi(sel_mod.lower())
-
-    fcount = utilio.get_file_count(folder_path, ['.nii', '.nii.gz'])
     if fcount > 0:
-
         st.success(
             f" Input data available: ({fcount} nifti image files)",
             icon=":material/thumb_up:",
         )
-        list_opt = ["View"]
+        list_options = ["View", "Reset"]
         sel_step = st.pills(
-            "Select Step1",
-            list_opt,
+            "Select Step",
+            list_options,
             selection_mode="single",
             label_visibility="collapsed",
+            default = None,
+            key = '_sel_view_reset'
         )
         if sel_step == "View":
             panel_view(sel_mod.lower())
             
-        if st.button("Reset Data", key = '_btn_reset_nifti'):
-            if utilio.remove_dir(sel_mod.lower()):
-                st.rerun()
-    
+        if sel_step == "Reset":
+            utilio.remove_dir(sel_mod.lower())
+            if '_sel_view_reset' in st.session_state:
+                del(st.session_state['_sel_view_reset'])
+            st.rerun()
+
+    else:
+        list_options = ["Load"]
+        sel_step = st.pills(
+            "Select Step2",
+            list_options,
+            selection_mode="single",
+            label_visibility="collapsed",
+            default = None,
+            key = '_key_sel_load'
+        )       
+        if sel_step == "Load":
+            utilio.panel_input_multi(sel_mod.lower())
+            st.rerun()
 
 
 def panel_in_covars() -> None:
@@ -385,7 +388,7 @@ if sel_task == "Image Data":
                 Upload a folder containing Nifti images
                 """
             )
-            #panel_nifti()
+            panel_nifti()
 
     elif sel_task_img == "Dicom Files":
         with st.container(border=True):

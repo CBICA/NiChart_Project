@@ -268,9 +268,6 @@ def panel_input_multi(dtype: str) -> None:
     out_dir = os.path.join(
         st.session_state.paths['task'], dtype
     )
-    if not os.path.exists(out_dir):
-        os.makedirs(out_dir)
-
     with st.container(border=True):
         if st.session_state.app_type == "cloud":
             # Upload data
@@ -282,12 +279,19 @@ def panel_input_multi(dtype: str) -> None:
 
         else:  # st.session_state.app_type == 'desktop'
             # Get user input
-            sel_dir = select_dir(out_dir, "sel_folder")
+            sel_dir = select_dir(
+                st.session_state.paths['init'], "sel_folder"
+            )
+            
+            print(sel_dir)
+            print(out_dir)
+
             if sel_dir is None:
                 return False
 
             # Link it to out folder
             if not os.path.exists(out_dir):
+                
                 try:
                     os.symlink(sel_dir, out_dir)
                 except:
