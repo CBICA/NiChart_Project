@@ -78,7 +78,7 @@ def util_panel_task() -> None:
             if st.button("Reset", key="reset_exp"):
                 st.session_state.flags["task"] = False
                 st.session_state.navig['task'] = None
-                st.rerun()
+                #st.rerun()
 
         else:
             out_dir = st.session_state.paths["out_dir"]
@@ -94,7 +94,7 @@ def util_panel_task() -> None:
                 # Update paths when selected task changes
                 utilss.update_default_paths()
                 utilss.reset_flags()
-                st.rerun()
+                #st.rerun()
 
         util_help_dialog(utildoc.title_exp, utildoc.def_exp)
 
@@ -271,7 +271,7 @@ def util_panel_input_multi(dtype: str) -> None:
                     time.sleep(4)
                 except:
                     st.error(f"Could not delete folder: {out_dir}")
-                st.rerun()
+                #st.rerun()
 
         else:
             if st.session_state.app_type == "cloud":
@@ -307,7 +307,7 @@ def util_panel_input_multi(dtype: str) -> None:
                 )
                 time.sleep(4)
 
-                st.rerun()
+                #st.rerun()
 
 
 
@@ -480,7 +480,7 @@ def util_panel_input_single(dtype: str, status: bool) -> None:
                     time.sleep(4)
                 except:
                     st.error(f"Could not delete file: {fout}")
-                st.rerun()
+                #st.rerun()
 
         else:
             # Create parent dir for out data
@@ -523,7 +523,7 @@ def util_panel_input_single(dtype: str, status: bool) -> None:
                 )
                 time.sleep(4)
 
-                st.rerun()
+                #st.rerun()
             util_help_dialog(utildoc.title_dicoms, utildoc.def_dicoms)
 
 

@@ -231,7 +231,21 @@ def panel_nifti():
         st.session_state.paths['task'], sel_mod.lower()
     )
     fcount = utilio.get_file_count(folder_path, ['.nii', '.nii.gz'])
+    if fcount == 0:
+        list_opt = ["Load"]
+        sel_step = st.pills(
+            "Select Step2",
+            list_opt,
+            selection_mode="single",
+            label_visibility="collapsed",
+            default = None,
+        )       
+        if sel_step == "Load":
+            utilio.panel_input_multi(sel_mod.lower())
+
+    fcount = utilio.get_file_count(folder_path, ['.nii', '.nii.gz'])
     if fcount > 0:
+
         st.success(
             f" Input data available: ({fcount} nifti image files)",
             icon=":material/thumb_up:",
@@ -250,25 +264,16 @@ def panel_nifti():
             if utilio.remove_dir(sel_mod.lower()):
                 st.rerun()
     
-    else:
-        list_opt = ["Load"]
-        sel_step = st.pills(
-            "Select Step2",
-            list_opt,
-            selection_mode="single",
-            label_visibility="collapsed",
-            default = None,
-        )       
-        if sel_step == "Load":
-            if utilio.panel_input_multi(sel_mod.lower()):
-                st.rerun()
 
 
 def panel_in_covars() -> None:
     """
     Panel for uploading covariates
     """
-    # Check out files
+    
+    st.write('hello')
+    
+    #Check out files
     file_path = os.path.join(
         st.session_state.paths['task'], 'lists', 'covars.csv'
     )
@@ -293,8 +298,8 @@ def panel_in_covars() -> None:
                 st.warning(f'Could not load dataframe: {file_path}')
 
         if st.button("Reset", key = '_btn_reset_covar'):
-            if utilio.remove_file(file_path):
-                st.rerun()
+            utilio.remove_file(file_path)
+                #st.rerun()
     
     else:
         sel_mod = st.pills(
@@ -322,8 +327,8 @@ def panel_in_covars() -> None:
                     st.session_state.paths["file_search_dir"],
                 )
                 
-            if os.path.exists(file_path):
-                st.rerun()
+            #if os.path.exists(file_path):
+                #st.rerun()
 
 
         elif sel_mod == 'Enter Manually':
@@ -364,7 +369,12 @@ if sel_task == "Image Data":
         "Connect to PACS Server",
     ]
     sel_task_img = st.pills(
-        "Select Img Task", list_opt_img, selection_mode="single", label_visibility="collapsed"
+        "Select Img Task",
+        list_opt_img,
+        selection_mode="single",
+        label_visibility="collapsed",
+        default=None,
+        key='_sel_task_img'
     )
 
     if sel_task_img == "Nifti Images":
@@ -375,7 +385,7 @@ if sel_task == "Image Data":
                 Upload a folder containing Nifti images
                 """
             )
-            panel_nifti()
+            #panel_nifti()
 
     elif sel_task_img == "Dicom Files":
         with st.container(border=True):
@@ -413,6 +423,7 @@ if sel_task == "Image Data":
             st.warning('Work in progress ...')
 
 elif sel_task == "Covariate File":
+    del st.session_state['_sel_task_img']
     with st.container(border=True):
         st.markdown(
             """

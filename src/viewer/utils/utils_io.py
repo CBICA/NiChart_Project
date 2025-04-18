@@ -279,8 +279,6 @@ def panel_input_multi(dtype: str) -> None:
                 "Input files or folders",
                 "Input files can be uploaded as a folder, multiple files, or a single zip file",
             )
-            
-            print('im here')
 
         else:  # st.session_state.app_type == 'desktop'
             # Get user input
@@ -298,15 +296,9 @@ def panel_input_multi(dtype: str) -> None:
                     )
                     return False
 
-        print('im here2')
-
         if get_file_count(out_dir, ['.nii', '.nii.gz']) > 0:
-            print('found files!')
             return True
         
-        print('bbbbbbbbbbbbbbb foaaaaa files!')
-        print(out_dir)
-        print('foaaaaa files!')
         return False
 
 def get_subfolders(path: str) -> list:

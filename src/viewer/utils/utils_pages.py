@@ -26,19 +26,25 @@ def select_main_menu() -> None:
             selection_mode="single",
             default=st.session_state.navig['main_menu'],
             label_visibility="collapsed",
+            key='_sel_main_menu'
         )
-
         if sel_main_menu is None:
+            if '_sel_workflow' in st.session_state:
+                del st.session_state['_sel_workflow']            
+            st.session_state.navig['main_menu'] == None
             return
 
         if sel_main_menu == st.session_state.navig['main_menu']:
             return
 
+        # Set menu selection
+        st.session_state.navig['main_menu'] = sel_main_menu
+
         # Reset selection in next steps
         st.session_state.navig['workflow'] = None
         st.session_state.navig['pipeline_step'] = None
-
-        st.session_state.navig['main_menu'] = sel_main_menu
+        
+        # Navigate to selected page
         sel_page = dict_main_menu[sel_main_menu]
         st.switch_page(sel_page)
 
@@ -58,6 +64,7 @@ def select_workflow() -> None:
             selection_mode="single",
             default=st.session_state.navig['workflow'],
             label_visibility="collapsed",
+            key='_sel_workflow'            
         )
         if sel_workflow is None:
             return
