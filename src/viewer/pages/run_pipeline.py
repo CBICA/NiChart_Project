@@ -8,13 +8,49 @@ import utils.utils_pages as utilpg
 import utils.utils_processes as utilprc
 import utils.utils_session as utilses
 
-def panel_sel_pipeline():
+def sel_pipeline_from_list():
     with st.container(border=True):
-        
+                
         # Read process data
         proc = st.session_state.processes
 
-        # Let user select input files
+        # Let users select input files
+        st.markdown("##### Filter tags:")
+        sel_inputs = st.pills(
+            "Select proc input:",
+            proc['in_files'],
+            selection_mode="multi",
+            label_visibility="collapsed",
+        )
+
+        # Detect steps that can be run using the given input files
+        reachable_steps = utilprc.detect_reachable_steps(
+            proc['graph'], sel_inputs, False
+        )
+
+        # Sort steps (top down order in precess tree)
+        reachable_steps = utilprc.topological_sort(
+            proc['steps'], reachable_steps
+        )
+        
+        # Let user select steps
+        st.markdown("##### Select Pipeline Steps:")
+        sel_steps = st.pills(
+            "Select output:",
+            reachable_steps,
+            selection_mode="multi",
+            label_visibility="collapsed",
+            default = reachable_steps
+        )
+
+
+def sel_pipeline_from_graph():
+    with st.container(border=True):
+                
+        # Read process data
+        proc = st.session_state.processes
+
+        # Let users select input files
         st.markdown("##### Select Input Data:")
         sel_inputs = st.pills(
             "Select proc input:",
@@ -157,9 +193,21 @@ sel_task = st.pills(
     "Select Workflow Task", list_tasks, selection_mode="single", label_visibility="collapsed"
 )
 if sel_task == "Select":
-    panel_sel_pipeline()
+    
+    list_views = ["List View", "Graph View"]
+    sel_view = st.pills(
+        "Select View", list_views, selection_mode="single", label_visibility="collapsed"
+    )
+    if sel_view == "List View":
+        sel_pipeline_from_list()
+    elif sel_view == "Graph View":
+        sel_pipeline_from_graph()
+
 elif sel_task == "Configure":
     panel_conf_pipeline()
+    
 elif sel_task == "Run":
     panel_run_pipeline()
+
+
 

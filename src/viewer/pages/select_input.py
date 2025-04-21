@@ -30,12 +30,15 @@ def panel_detect() -> None:
     """
     Panel for detecting dicom series
     """
+    
+    dicom_folder = os.path.join(st.session_state.paths['task'], 'dicoms')
+    
     with st.container(border=True):
         # Detect dicom series
         btn_detect = st.button("Detect Series")
         if btn_detect:
             with st.spinner("Wait for it..."):
-                df_dicoms = utildcm.detect_series(st.session_state.paths["dicoms"])
+                df_dicoms = utildcm.detect_series(dicom_folder)
                 list_series = df_dicoms.SeriesDesc.unique()
                 num_dicom_scans = (
                     df_dicoms[["PatientID", "StudyDate", "SeriesDesc"]]
@@ -56,45 +59,48 @@ def panel_detect() -> None:
         with st.expander("Show dicom metadata", expanded=False):
             st.dataframe(st.session_state.df_dicoms)
 
-        utilst.util_help_dialog(utildoc.title_dicoms_detect, utildoc.def_dicoms_detect)
+        #utilst.util_help_dialog(utildoc.title_dicoms_detect, utildoc.def_dicoms_detect)
 
 def panel_extract() -> None:
     """
     Panel for extracting dicoms
     """
+    sel_mod = "T1"
+
+    dicom_folder = os.path.join(st.session_state.paths['task'], 'dicoms')
+    out_folder = os.path.join(st.session_state.paths['task'], sel_mod.lower())
+    
     with st.container(border=True):
-        sel_mod = "T1"
 
         # Check if data exists
-        dout = st.session_state.paths[sel_mod]
         if st.session_state.flags[sel_mod]:
             st.success(
-                f"Data is ready: {dout}",
+                f"Data is ready: {out_folder}",
                 icon=":material/thumb_up:",
             )
 
-            df_files = utilio.get_file_names(st.session_state.paths[sel_mod], ".nii.gz")
+            df_files = utilio.get_file_names(out_folder, ".nii.gz")
             with st.expander("View NIFTI image list"):
                 st.dataframe(df_files)
 
             # Delete folder if user wants to reload
             if st.button("Reset", key="reset_extraction"):
                 try:
-                    if os.path.islink(dout):
-                        os.unlink(dout)
+                    if os.path.islink(out_folder):
+                        os.unlink(out_folder)
                     else:
-                        shutil.rmtree(dout)
+                        shutil.rmtree(out_folder)
                     st.session_state.flags[sel_mod] = False
-                    st.success(f"Removed dir: {dout}")
+                    st.success(f"Removed dir: {out_folder}")
                 except:
-                    st.error(f"Could not delete folder: {dout}")
+                    st.error(f"Could not delete folder: {out_folder}")
                 time.sleep(4)
                 st.rerun()
 
         else:
             # Create out dir
-            if not os.path.exists(dout):
-                os.makedirs(dout)
+            if not os.path.exists(out_folder):
+                os.makedirs(out_folder)
 
             # Selection of dicom series
             st.session_state.sel_series = st.multiselect(
@@ -107,7 +113,7 @@ def panel_extract() -> None:
                         utildcm.convert_sel_series(
                             st.session_state.df_dicoms,
                             st.session_state.sel_series,
-                            dout,
+                            out_folder,
                             f"_{sel_mod}.nii.gz",
                         )
                         st.session_state.flags[sel_mod] = True
@@ -122,9 +128,9 @@ def panel_extract() -> None:
                 time.sleep(1)
                 st.rerun()
 
-        utilst.util_help_dialog(
-            utildoc.title_dicoms_extract, utildoc.def_dicoms_extract
-        )
+        #utilst.util_help_dialog(
+            #utildoc.title_dicoms_extract, utildoc.def_dicoms_extract
+        #)
 
 
 def panel_view(dtype:str) -> None:
@@ -132,13 +138,16 @@ def panel_view(dtype:str) -> None:
     Panel for viewing nifti images
     """
     in_dir = os.path.join(
-        st.session_state.paths['task'], dtype
+        st.session_state.paths['task'], dtype.lower()
     )
     
     with st.container(border=True):
         # Check init status
         
         list_nifti = utilio.get_file_list(in_dir, ".nii.gz")
+        
+        st.write(list_nifti)
+        st.write(list_nifti)
 
         # Selection of image
         sel_img = utilst.user_input_select(
@@ -172,7 +181,7 @@ def panel_view(dtype:str) -> None:
 
         with st.spinner("Wait for it..."):
 
-            #try:
+            try:
                 # Prepare final 3d matrix to display
                 img = utilni.prep_image(path_img)
 
@@ -196,25 +205,31 @@ def panel_view(dtype:str) -> None:
                             tmp_orient,
                             size_auto,
                         )
-            #except:
-                #st.warning(
-                    #":material/thumb_down: Image parsing failed. Please confirm that the image file represents a 3D volume using an external tool."
-                #)
+            except:
+                st.warning(
+                    ":material/thumb_down: Image parsing failed. Please confirm that the image file represents a 3D volume using an external tool."
+                )
 
 def panel_dicoms():
-    list_opt = ["Load Data", "Detect Series", "Extract Scans", "View Scans"]
+    list_opt = ["Upload", "Detect Series", "Extract Scans", "View", "Reset"]
     sel_step = st.pills(
         "Select Step", list_opt, selection_mode="single", label_visibility="collapsed"
     )
-    if sel_step == "Load Data":
-        utilpn.util_panel_input_multi("dicoms", True)
+    if sel_step == "Upload":
+        utilio.upload_multiple_files('dicoms')
+
     elif sel_step == "Detect Series":
         panel_detect()
+        
     elif sel_step == "Extract Scans":
         panel_extract()
-    elif sel_step == "View Scans":
+        
+    elif sel_step == "View":
         panel_view('T1')
         
+    elif sel_step == "Reset":
+        utilio.remove_dir('dicoms')
+
 def panel_nifti():
     sel_mod = st.pills(
         "Select Modality",
@@ -339,7 +354,7 @@ if sel_task == "Image Data":
             st.markdown(
                 """
                 **Nifti Images**
-                Upload a folder containing Nifti images
+                Upload Nifti images
                 """
             )
             panel_nifti()
