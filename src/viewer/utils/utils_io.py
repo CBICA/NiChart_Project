@@ -242,24 +242,60 @@ def select_file(out_dir: str, key_txt: str) -> Any:
     return sel_file
 
 
-def upload_folder(out_dir: str, title_txt: str, help_txt: str) -> None:
+def upload_single_file(dtype: str, out_name: str, in_suff: str) -> None:
+    """
+    Upload user file to target folder
+    """
+    out_dir = os.path.join(
+        st.session_state.paths['task'], dtype
+    )
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
+
+    out_file = os.path.join(out_dir, out_name)
+
+    # Set target path
+    st.session_state.paths["target_path"] = out_dir
+
+    # Upload data
+    with st.container(border=True):
+        sel_file = st.file_uploader(
+            "Input demographics file",
+            key="uploaded_input_csv",
+            accept_multiple_files=False
+        )        
+        if sel_file is not None:
+            try:
+                with open(out_file, "wb") as f:
+                    f.write(sel_file.getbuffer())
+                st.success(f"File '{sel_file.name}' saved to {out_file}")
+            except:
+                st.warning(f'Could not upload file: {sel_file}')
+
+
+def upload_multiple_files(dtype: str) -> None:
     """
     Upload user data to target folder
     Input data may be a folder, multiple files, or a zip file (unzip the zip file if so)
     """
-    # Set target path
+    out_dir = os.path.join(
+        st.session_state.paths['task'], dtype
+    )
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
+
+    # Set target path
     st.session_state.paths["target_path"] = out_dir
 
     # Upload data
-    st.file_uploader(
-        title_txt,
-        key="uploaded_input",
-        accept_multiple_files=True,
-        on_change=copy_uploaded_to_dir,
-        help=help_txt,
-    )
+    with st.container(border=True):
+        st.file_uploader(
+            "Input files or folders",
+            key="uploaded_input",
+            accept_multiple_files=True,
+            on_change=copy_uploaded_to_dir,
+            help="Input files can be uploaded as a folder, multiple files, or a single zip file",
+        )
 
 def panel_input_multi(dtype: str) -> None:
     """
@@ -304,6 +340,8 @@ def panel_input_multi(dtype: str) -> None:
             return True
         
         return False
+    
+
 
 def get_subfolders(path: str) -> list:
     '''

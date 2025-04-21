@@ -60,3 +60,44 @@ def user_input_multiselect(
             label, options, init_val, key=key, help=help_msg, disabled=flag_disabled
         )
         return out_sel
+    
+def show_img3D(
+    img: np.ndarray,
+    scroll_axis: Any,
+    sel_axis_bounds: Any,
+    img_name: str,
+    size_auto: bool,
+) -> None:
+    """
+    Display a 3D img
+    """
+
+    # Create a slider to select the slice index
+    slice_index = st.slider(
+        f"{img_name}",
+        0,
+        sel_axis_bounds[1] - 1,
+        value=sel_axis_bounds[2],
+        key=f"slider_{img_name}",
+    )
+
+    # Extract the slice and display it
+    if size_auto:
+        if scroll_axis == 0:
+            st.image(img[slice_index, :, :], use_container_width=True)
+        elif scroll_axis == 1:
+            st.image(img[:, slice_index, :], use_container_width=True)
+        else:
+            st.image(img[:, :, slice_index], use_container_width=True)
+    else:
+        w_img = (
+            st.session_state.mriview_const["w_init"]
+            * st.session_state.mriview_var["w_coeff"]
+        )
+        if scroll_axis == 0:
+            # st.image(img[slice_index, :, :], use_container_width=True)
+            st.image(img[slice_index, :, :], width=w_img)
+        elif scroll_axis == 1:
+            st.image(img[:, slice_index, :], width=w_img)
+        else:
+            st.image(img[:, :, slice_index], width=w_img)

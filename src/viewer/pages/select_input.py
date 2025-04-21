@@ -172,7 +172,7 @@ def panel_view(dtype:str) -> None:
 
         with st.spinner("Wait for it..."):
 
-            try:
+            #try:
                 # Prepare final 3d matrix to display
                 img = utilni.prep_image(path_img)
 
@@ -196,10 +196,10 @@ def panel_view(dtype:str) -> None:
                             tmp_orient,
                             size_auto,
                         )
-            except:
-                st.warning(
-                    ":material/thumb_down: Image parsing failed. Please confirm that the image file represents a 3D volume using an external tool."
-                )
+            #except:
+                #st.warning(
+                    #":material/thumb_down: Image parsing failed. Please confirm that the image file represents a 3D volume using an external tool."
+                #)
 
 def panel_dicoms():
     list_opt = ["Load Data", "Detect Series", "Extract Scans", "View Scans"]
@@ -225,129 +225,83 @@ def panel_nifti():
     )
     if sel_mod is None:
         return
-    
-    # Check out files
+
     folder_path = os.path.join(
         st.session_state.paths['task'], sel_mod.lower()
     )
+    
+    list_options = ['Upload', 'Link', 'View', 'Reset']
+    sel_step = st.pills(
+        "Select Step",
+        list_options,
+        selection_mode="single",
+        label_visibility="collapsed",
+        default = None,
+        key = '_key_sel_input_nifti'
+    )       
+    if sel_step == "Upload":
+        utilio.upload_multiple_files(sel_mod.lower())
+
+    elif sel_step == "Link":
+        st.write('!!! Not implemented yet !!!')
+        
+    elif sel_step == "View":
+        fcount = utilio.get_file_count(folder_path, ['.nii', '.nii.gz'])
+        if fcount == 0:
+            st.warning('Input data not found!')
+            return
+        panel_view(sel_mod.lower())
+            
+    elif sel_step == "Reset":
+        utilio.remove_dir(sel_mod.lower())
+    
     fcount = utilio.get_file_count(folder_path, ['.nii', '.nii.gz'])
     if fcount > 0:
         st.success(
             f" Input data available: ({fcount} nifti image files)",
             icon=":material/thumb_up:",
         )
-        list_options = ["View", "Reset"]
-        sel_step = st.pills(
-            "Select Step",
-            list_options,
-            selection_mode="single",
-            label_visibility="collapsed",
-            default = None,
-            key = '_sel_view_reset'
-        )
-        if sel_step == "View":
-            panel_view(sel_mod.lower())
-            
-        if sel_step == "Reset":
-            utilio.remove_dir(sel_mod.lower())
-            if '_sel_view_reset' in st.session_state:
-                del(st.session_state['_sel_view_reset'])
-            st.rerun()
-
-    else:
-        list_options = ["Load"]
-        sel_step = st.pills(
-            "Select Step2",
-            list_options,
-            selection_mode="single",
-            label_visibility="collapsed",
-            default = None,
-            key = '_key_sel_load'
-        )       
-        if sel_step == "Load":
-            utilio.panel_input_multi(sel_mod.lower())
-            st.rerun()
-
 
 def panel_in_covars() -> None:
     """
     Panel for uploading covariates
-    """
-    
-    st.write('hello')
-    
+    """    
     #Check out files
     file_path = os.path.join(
         st.session_state.paths['task'], 'lists', 'covars.csv'
     )
-    if os.path.exists(file_path):
-        st.success(
-            f" Covariates file available: {file_path}",
-            icon=":material/thumb_up:",
-        )
-        list_opt = ["View"]
-        sel_step = st.pills(
-            "Select Step",
-            list_opt,
-            selection_mode="single",
-            label_visibility="collapsed",
-            default = []
-        )
-        if sel_step == "View":
-            try:
-                df_cov = pd.read_csv(file_path)
-                st.dataframe(df_cov)
-            except:
-                st.warning(f'Could not load dataframe: {file_path}')
-
-        if st.button("Reset", key = '_btn_reset_covar'):
-            utilio.remove_file(file_path)
-                #st.rerun()
     
-    else:
-        sel_mod = st.pills(
-            "Covar data type",
-            ['Load File', 'Enter Manually'],
-            selection_mode="single",
-            label_visibility="collapsed"
-        )
-        if sel_mod is None:
+    list_options = ['Upload', 'Enter Manually', 'View', 'Reset']
+    sel_step = st.pills(
+        "Select Step",
+        list_options,
+        selection_mode="single",
+        label_visibility="collapsed",
+        default = None,
+        key = '_key_sel_input_covar'
+    )       
+    if sel_step == "Upload":
+        utilio.upload_single_file('lists', 'demog.csv', '.csv')
+
+    elif sel_step == 'Enter Manually':
+        st.info("Please enter values for your sample")
+        df_rois = pd.read_csv(st.session_state.paths["dlmuse_csv"])
+        df_tmp = pd.DataFrame({"MRID": df_rois["MRID"], "Age": None, "Sex": None})
+        df_user = st.data_editor(df_tmp)
+
+    elif sel_step == "View":
+        if not os.path.exists(file_path):
+            st.warning('Covariate file not found!')
             return
+        try:
+            df_cov = pd.read_csv(file_path)
+            st.dataframe(df_cov)
+        except:
+            st.warning(f'Could not load covariate file: {file_path}')
+        
+    elif sel_step == "Reset":
+        utilio.remove_dir('lists')
     
-        if sel_mod == 'Load File':
-            if st.session_state.app_type == "cloud":
-                utilio.upload_file(
-                    file_path,
-                    "Demographics csv",
-                    "uploaded_demog_file",
-                )
-
-            else:  # st.session_state.app_type == 'desktop'
-                utilio.util_select_file(
-                    "selected_demog_file",
-                    "Demographics csv",
-                    file_path,
-                    st.session_state.paths["file_search_dir"],
-                )
-                
-            #if os.path.exists(file_path):
-                #st.rerun()
-
-
-        elif sel_mod == 'Enter Manually':
-            st.info("Please enter values for your sample")
-            df_rois = pd.read_csv(st.session_state.paths["dlmuse_csv"])
-            df_tmp = pd.DataFrame({"MRID": df_rois["MRID"], "Age": None, "Sex": None})
-            df_user = st.data_editor(df_tmp)
-
-            if st.button("Save data"):
-                if not os.path.exists(
-                    os.path.dirname(st.session_state.paths["demog_csv"])
-                ):
-                    os.makedirs(os.path.dirname(st.session_state.paths["demog_csv"]))
-
-                df_user.to_csv(st.session_state.paths["demog_csv"], index=False)
-                st.success(f"Data saved to {st.session_state.paths['demog_csv']}")
 
 
 st.markdown(
@@ -426,7 +380,6 @@ if sel_task == "Image Data":
             st.warning('Work in progress ...')
 
 elif sel_task == "Covariate File":
-    del st.session_state['_sel_task_img']
     with st.container(border=True):
         st.markdown(
             """
