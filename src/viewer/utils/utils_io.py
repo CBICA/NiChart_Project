@@ -297,6 +297,40 @@ def upload_multiple_files(dtype: str) -> None:
             help="Input files can be uploaded as a folder, multiple files, or a single zip file",
         )
 
+def create_img_list(dtype: str) -> None:
+    """
+    Create a list of input images
+    """
+    out_dir = os.path.join(
+        st.session_state.paths['task'], dtype
+    )
+
+    # Get all NIfTI files
+    nifti_files = [
+        f for f in os.listdir(out_dir) if f.endswith('.nii') or f.endswith('.nii.gz')
+    ]
+
+    # If no files, show warning
+    if not nifti_files:
+        st.warning("No NIfTI files found in the data folder.")
+        return None
+    else:
+        # Remove common suffix to get mrid
+        def remove_common_suffix(files):
+            reversed_names = [f[::-1] for f in files]
+            common_suffix = os.path.commonprefix(reversed_names)[::-1]
+            return [f[:-len(common_suffix)] if common_suffix else f for f in files]
+
+        mrids = remove_common_suffix(nifti_files)
+
+        # Create the DataFrame
+        df = pd.DataFrame({
+            'MRID': mrids,
+            'FileName': nifti_files
+        })
+        return df
+    
+
 def panel_input_multi(dtype: str) -> None:
     """
     Panel for selecting multiple input files or folder(s)

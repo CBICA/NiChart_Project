@@ -14,6 +14,7 @@ import utils.utils_pages as utilpg
 import utils.utils_st as utilst
 from stqdm import stqdm
 import pandas as pd
+import numpy as np
 
 # Page config should be called for each page
 utilpg.config_page()
@@ -123,7 +124,7 @@ def panel_extract() -> None:
                         #     )
 
                     except:
-                        st.warning(":material/thumb_down: Nifti conversion failed!")
+                        st.warning(":material/thumb_down: NIfTI conversion failed!")
 
                 time.sleep(1)
                 st.rerun()
@@ -244,6 +245,14 @@ def panel_nifti():
     folder_path = os.path.join(
         st.session_state.paths['task'], sel_mod.lower()
     )
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+
+    lists_path = os.path.join(
+        st.session_state.paths['task'], 'lists'
+    )
+    if not os.path.exists(lists_path):
+        os.makedirs(lists_path)
     
     list_options = ['Upload', 'Link', 'View', 'Reset']
     sel_step = st.pills(
@@ -255,7 +264,16 @@ def panel_nifti():
         key = '_key_sel_input_nifti'
     )       
     if sel_step == "Upload":
+        # Upload data
         utilio.upload_multiple_files(sel_mod.lower())
+        
+        # Create list of scans
+        df = utilio.create_img_list(sel_mod.lower())
+        if df is not None:
+            out_file = os.path.join(
+                lists_path, 'list_nifti.csv'
+            )
+            df.to_csv(out_file, index=False)
 
     elif sel_step == "Link":
         st.write('!!! Not implemented yet !!!')
@@ -299,10 +317,41 @@ def panel_in_covars() -> None:
         utilio.upload_single_file('lists', 'demog.csv', '.csv')
 
     elif sel_step == 'Enter Manually':
+        id_list = os.path.join(
+            st.session_state.paths['task'], 'lists', 'list_nifti.csv'
+        )
+        try:
+            df = pd.read_csv(id_list)
+            df = df[['MRID']]
+            
+        except:
+            st.warning('Could not read id list')
+            return
+
+        df['Age'] = pd.Series([np.nan] * len(df), dtype='float')
+        df['Sex'] = pd.Series([''] * len(df), dtype='string')
+            
         st.info("Please enter values for your sample")
-        df_rois = pd.read_csv(st.session_state.paths["dlmuse_csv"])
-        df_tmp = pd.DataFrame({"MRID": df_rois["MRID"], "Age": None, "Sex": None})
-        df_user = st.data_editor(df_tmp)
+        
+        # Define column options
+        column_config = {
+            "Sex": st.column_config.SelectboxColumn(
+                "Sex",
+                help="Select sex",
+                options=["M", "F", "Other"],
+                required=True
+            )
+        }
+        df_user = st.data_editor(
+            df,
+            column_config=column_config,
+            num_rows="dynamic",  # allows adding rows if you want
+            use_container_width=True
+        )
+        if st.button('Save'):
+            df_user.to_csv(file_path, index=False)
+            st.success(f'Created demographic file: {file_path}')
+        
 
     elif sel_step == "View":
         if not os.path.exists(file_path):
@@ -334,12 +383,8 @@ sel_task = st.pills(
 )
 
 if sel_task == "Image Data":
-    list_opt_img = [
-        "Nifti Images",
-        "Dicom Files",
-        "BIDS Data",
-        "Connect to PACS Server",
-    ]
+    #list_opt_img = ["NIfTI", "DICOM", "BIDS", "PACS Server"]
+    list_opt_img = ["NIfTI", "DICOM"]
     sel_task_img = st.pills(
         "Select Img Task",
         list_opt_img,
@@ -349,24 +394,24 @@ if sel_task == "Image Data":
         key='_sel_task_img'
     )
 
-    if sel_task_img == "Nifti Images":
+    if sel_task_img == "NIfTI":
         with st.container(border=True):
             st.markdown(
                 """
-                **Nifti Images**
-                Upload Nifti images
+                **NIfTI Images**
+                - Upload NIfTI images
                 """
             )
             panel_nifti()
 
-    elif sel_task_img == "Dicom Files":
+    elif sel_task_img == "DICOM":
         with st.container(border=True):
             st.markdown(
                 """
-                **Raw DICOM Files**
-                Upload a folder containing unprocessed DICOM images (as exported by MRI scanners).
-                The tool can convert DICOM to NIfTI internally or as part of a preprocessing pipeline step.
-                This option is ideal if your data has not yet been converted or organized.
+                **DICOM Files**
+                
+                - Upload a folder containing raw DICOM files
+                - DICOM files will be converted to NIfTI scans
                 """
             )
             panel_dicoms()
@@ -376,8 +421,8 @@ if sel_task == "Image Data":
             st.markdown(
                 """
                 **BIDS Format**
-                Load a dataset structured according to the [BIDS standard](https://bids.neuroimaging.io/), where all imaging modalities and metadata are organized in a single directory.
-                This is the easiest option if your data is already standardized.
+                - Load a dataset structured according to the [BIDS standard](https://bids.neuroimaging.io/), where all imaging modalities and metadata are organized in a single directory.
+                - This is the easiest option if your data is already standardized.
                 """
             )
             st.warning('Work in progress ...')
@@ -388,8 +433,8 @@ if sel_task == "Image Data":
             st.markdown(
                 """
                 **Connect to PACS Server**
-                Query and fetch imaging data directly from a hospital PACS server using DICOM networking.
-                Requires PACS credentials and access permissions.
+                - Query and fetch imaging data directly from a hospital PACS server using DICOM networking.
+                - Requires PACS credentials and access permissions.
                 """
             )
             st.warning('Work in progress ...')
@@ -399,7 +444,7 @@ elif sel_task == "Covariate File":
         st.markdown(
             """
             **Covariate File**
-            Upload a csv file with covariate info (Age, Sex, DX, etc.)
+            - Upload a csv file with covariate info (Age, Sex, DX, etc.)
             """
         )
         panel_in_covars()
