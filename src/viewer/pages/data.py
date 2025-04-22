@@ -21,11 +21,9 @@ utilpg.config_page()
 utilpg.show_menu()
 
 result_holder = st.empty()
-
 def progress(p: int, i: int, decoded: Any) -> None:
     with result_holder.container():
         st.progress(p, f"Progress: Token position={i}")
-
 
 def panel_detect() -> None:
     """
@@ -370,7 +368,10 @@ def panel_in_covars() -> None:
 
 st.markdown(
     """
-    ### Load input data
+    ### Upload Input Data
+    - Panel to enter MRI image files and/or CSV files containing demographic and other information.
+    - Supported file types and formats are indicated in each section to ensure smooth uploads.
+    - Once your data is uploaded, you can proceed to apply pipelines tailored to your needs.
     """
 )
 

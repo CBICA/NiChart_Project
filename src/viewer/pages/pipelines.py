@@ -184,7 +184,12 @@ utilpg.show_menu()
 
 st.markdown(
     """
-    ### Select and run pipeline
+    ### Pipelines
+    - Choose from a variety of image processing and analysis pipelines.
+    - Pipeline steps include image processing, feature extraction, and machine learning models
+    - **List view:** Select pipelines by name, tag or output.
+    - **Graph view:** Select pipelines based on their dependencies within the overall pipeline network.    
+    - Once the processing is complete, go to the **Results** page for reports and visualizations.
     """
 )
 

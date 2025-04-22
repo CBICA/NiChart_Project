@@ -190,6 +190,8 @@ def init_session_state() -> None:
         st.session_state.nicon = Image.open("../resources/nichart1.png")
 
         # Menu navigation
+        st.session_state.sel_menu = 'Home'
+
         st.session_state.navig = {
             'main_menu': "Home",
             'workflow': None,

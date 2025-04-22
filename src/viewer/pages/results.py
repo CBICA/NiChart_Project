@@ -55,7 +55,7 @@ def disp_folder_tree(allowed_extensions=None):
 
 # Page config should be called for each page
 utilpg.config_page()
-utilpg.select_main_menu()
+utilpg.show_menu()
 
 st.markdown(
     """

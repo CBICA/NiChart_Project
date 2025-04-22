@@ -12,7 +12,7 @@ logger.debug('Start of Config Screen!')
 
 # Page config should be called for each page
 utilpg.config_page()
-utilpg.select_main_menu()
+utilpg.show_menu()
 
 def panel_models_path():
     """
