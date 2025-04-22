@@ -122,6 +122,13 @@ def panel_out_dir():
     with st.container(border=True):
         out_dir = st.session_state.paths["out_dir"]
 
+        st.markdown(
+            """
+                - Output data folder with consolidated data files for each study.
+                - Output data is organized in subfolders with the study name and process name
+            """
+        )
+        
         # Browse output folder
         if st.button('Browse path'):
             sel_dir = utilio.browse_folder(out_dir)
@@ -152,42 +159,48 @@ def panel_task() -> None:
     """
     with st.container(border=True):
 
+        print(f'alooooo {st.session_state.navig['task']}')
+        st.success(
+            f"Task name: {st.session_state.navig['task']}",
+            icon=":material/thumb_up:",
+        )
+
         out_dir = st.session_state.paths["out_dir"]
         curr_task = st.session_state.navig['task']
 
-        # Select from existing
-        list_tasks = utilio.get_subfolders(out_dir)
-        if len(list_tasks) > 0:
-            st.write("Select Existing Task")
-            sel_task = st.pills(
-                "Options:",
-                options = list_tasks,
-                default = curr_task,
-                label_visibility="collapsed",
-            )
-            if sel_task != curr_task:
-                utilss.update_task(sel_task)
-                st.rerun()
+        flag_edit = st.checkbox('Update task')
+        
+        if flag_edit:
 
-        # Enter new
-        st.write("Enter New Task Name")
-        sel_task = st.text_input(
-            "Task name:",
-            None,
-            label_visibility="collapsed",
-            placeholder="My_new_study"
-        )
-        if sel_task is not None and sel_task != curr_task:
-            utilss.update_task(sel_task)
-            st.rerun()
+            sel_mode = st.radio('Sel mode', options=['Select Existing', 'Enter Manually'])
+            
+            if sel_mode == 'Select Existing':
+            
+                list_tasks = utilio.get_subfolders(out_dir)
+                if len(list_tasks) > 0:
+                    sel_ind = list_tasks.index(curr_task)
+                    sel_task = st.selectbox(
+                        "Select Existing Task:",
+                        options = list_tasks,
+                        index = sel_ind,
+                        label_visibility = 'collapsed'
+                    )
 
-        if st.session_state.flags["task"]:
-            st.success(
-                f"Task name: {st.session_state.navig['task']}",
-                icon=":material/thumb_up:",
-            )
+            elif sel_mode == 'Enter Manually':
+                sel_task = st.text_input(
+                    "Task name:",
+                    None,
+                    placeholder="My_new_study",
+                    label_visibility = 'collapsed'
+                )   
+                
+            if st.button("Submit"):
+                if sel_task is not None and sel_task != curr_task:
+                    utilss.update_task(sel_task)
+                    st.rerun()
 
-        utildoc.util_help_dialog(utildoc.title_exp, utildoc.def_exp)
+
+        #utildoc.util_help_dialog(utildoc.title_exp, utildoc.def_exp)
 
 def panel_misc() -> None:
     """
@@ -217,64 +230,69 @@ st.markdown(
     #label_visibility="collapsed",
 #)
 
-sel_config_cat = st.radio(
-    "Select Config Category",
-    ["Basic Config", "Advanced Config", "Debug"],
-    horizontal = True,
-    #selection_mode="single",
-    #default=None,
-    label_visibility="collapsed",
-)
+with st.container(border=True):
 
-
-if sel_config_cat == "Basic Config":
-    sel_config = st.pills(
-        "Select Basic Config",
-        ["Output Dir", "Task Name", "Misc"],
-        selection_mode="single",
-        default=None,
+    sel_config_cat = st.radio(
+        "Select Config Category",
+        ["Basic", "Advanced", "Debugging"],
+        horizontal = True,
+        #selection_mode="single",
+        #default=None,
         label_visibility="collapsed",
     )
 
-    if sel_config == "Output Dir":
-        panel_out_dir()
 
-    if sel_config == "Task Name":
-        panel_task()
+    if sel_config_cat == "Basic":
+        sel_config = st.selectbox(
+            "Select Basic Config",
+            ["Output Dir", "Task Name", "Misc"],
+            index=None,
+            #selection_mode="single",
+            #default=None,
+            key = '_sel_config_cat',
+            label_visibility="collapsed",
+        )
 
-    if sel_config == "Misc":
-        panel_misc()
+        if sel_config == "Output Dir":
+            panel_out_dir()
 
-elif sel_config_cat == "Advanced Config":
-    sel_config = st.pills(
-        "Select Advanced Config",
-        ["Resources", "Models"],
-        selection_mode="single",
-        default=None,
-        label_visibility="collapsed",
-    )
+        if sel_config == "Task Name":
+            panel_task()
 
-    if sel_config == "Resources":
-        panel_resources_path()
+        if sel_config == "Misc":
+            panel_misc()
 
-    elif sel_config == "Models":
-        panel_models_path()
+    elif sel_config_cat == "Advanced":
+        del st.session_state["_sel_config_cat"]
+        sel_config = st.pills(
+            "Select Advanced Config",
+            ["Resources", "Models"],
+            selection_mode="single",
+            default=None,
+            label_visibility="collapsed",
+        )
 
-if sel_config_cat == "Debug":
-    sel_debug = st.pills(
-        "Select Debug Options",
-        ["Session State", "Output Files"],
-        selection_mode="single",
-        default=None,
-        label_visibility="collapsed",
-    )
+        if sel_config == "Resources":
+            panel_resources_path()
 
-    if sel_debug == "Session State":
-        with st.container(border=True):
-            disp_session_state()
-    
-    elif sel_debug == "Output Files":
-        with st.container(border=True):
-            st.markdown('##### '+ st.session_state.navig['task'] + ':')
-            disp_folder_tree()
+        elif sel_config == "Models":
+            panel_models_path()
+
+    if sel_config_cat == "Debugging":
+        sel_debug = st.pills(
+            "Select Debug Options",
+            ["Session State", "Output Files"],
+            selection_mode="single",
+            default=None,
+            label_visibility="collapsed",
+        )
+
+        if sel_debug == "Session State":
+            with st.container(border=True):
+                disp_session_state()
         
+        elif sel_debug == "Output Files":
+            with st.container(border=True):
+                st.markdown('##### '+ st.session_state.navig['task'] + ':')
+                disp_folder_tree()
+            
