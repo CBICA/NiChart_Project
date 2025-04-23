@@ -268,6 +268,7 @@ def run_workflow(
         df_in = pd.read_csv(f_in, dtype={"MRID": str})
 
         df_modified = df_in.rename(columns=lambda x: x[5:] if x.startswith('MUSE_') else x)
+        df_modified = df_modified.rename(columns={"ICV": "702"})
         alt_f_in = os.path.join(out_wdir, f"{dset_name}_combat_alt.csv")
         df_modified.to_csv(alt_f_in, index=False)
 
@@ -504,6 +505,7 @@ def run_workflow_noharmonization(
         df_in = pd.read_csv(f_in, dtype={"MRID": str})
 
         df_modified = df_in.rename(columns=lambda x: x[5:] if x.startswith('MUSE_') else x)
+        df_modified = df_modified.rename(columns={"ICV": "702"})
         alt_f_in = os.path.join(out_wdir, f"{dset_name}_combat_alt.csv")
         df_modified.to_csv(alt_f_in, index=False)
 
