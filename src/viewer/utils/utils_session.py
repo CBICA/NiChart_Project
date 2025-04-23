@@ -87,6 +87,7 @@ def init_session_state() -> None:
             "WM Lesion Segmentation (FL)",
             "DTI Biomarkers (DTI)",
             "Resting State fMRI Biomarkers (rsfMRI)",
+            "Sample Container Workflow"
         ]
         st.session_state.pipeline = "Home"
         st.session_state._pipeline = st.session_state.pipeline

@@ -15,6 +15,7 @@ def menu() -> Any:
             "Redirected to home page as a required instantiation variable was missing."
         )
         st.switch_page("pages/home.py")
+    st.sidebar.page_link("pages/docker_management.py", label=":material/build: Configure Docker Engine")
     if st.session_state.has_cloud_session:
         email = st.session_state.cloud_session_token["email"]
         logout_url = "https://cbica-nichart.auth.us-east-1.amazoncognito.com/logout?client_id=4shr6mm2h0p0i4o9uleqpu33fj&response_type=code&scope=email+openid+phone&redirect_uri=https://cbica-nichart-alb-272274500.us-east-1.elb.amazonaws.com/oauth2/idpresponse"
@@ -22,6 +23,7 @@ def menu() -> Any:
         st.sidebar.info(f"User ID: {st.session_state.cloud_user_id}")
         # TODO: Make this button also delete user data automatically
         st.sidebar.button("Log out", on_click=redirect, args=(logout_url,))
+
     if st.session_state.pipeline == "Home":
         st.sidebar.page_link("pages/home.py", label="Home")
 
@@ -76,6 +78,9 @@ def menu() -> Any:
         st.sidebar.page_link(
             "pages/pipeline_fmri.py", label=":material/arrow_forward: Pipeline Overview"
         )
+    if st.session_state.pipeline == "Sample Container Workflow":
+        st.sidebar.page_link("pages/home.py", label="Home")
+        st.sidebar.page_link("pages/sample_containerjob_workflow.py", label="Sample Container Workflow")
 
 
 def menu_selection() -> Any:

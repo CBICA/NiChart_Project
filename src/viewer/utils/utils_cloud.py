@@ -1,6 +1,7 @@
 import json
 import os
 from typing import Any
+import boto3
 
 import requests
 
@@ -45,3 +46,43 @@ def update_stats_db(user_id: str, job_type: str, count: int) -> None:
         print("Success:", response.json())
     except requests.exceptions.RequestException as e:
         print("Error:", e)
+
+
+def get_credentials_from_token(id_token: str, user_pool_id: str, identity_pool_id: str, region: str):
+    cognito_identity = boto3.client('cognito-identity', region_name=region)
+
+    # Step 1: Get identity ID using token from the user pool
+    identity_response = cognito_identity.get_id(
+        IdentityPoolId=identity_pool_id,
+        Logins={
+            f'cognito-idp.{region}.amazonaws.com/{user_pool_id}': id_token
+        }
+    )
+    identity_id = identity_response['IdentityId']
+
+    # Step 2: Get temporary AWS credentials
+    credentials_response = cognito_identity.get_credentials_for_identity(
+        IdentityId=identity_id,
+        Logins={
+            f'cognito-idp.{region}.amazonaws.com/{user_pool_id}': id_token
+        }
+    )
+
+    return credentials_response['Credentials']
+
+def invoke_lambda_as_user(credentials, lambda_name, payload, region='us-east-1'):
+    session = boto3.Session(
+        aws_access_key_id=credentials['AccessKeyId'],
+        aws_secret_access_key=credentials['SecretKey'],
+        aws_session_token=credentials['SessionToken'],
+        region_name=region
+    )
+
+    lambda_client = session.client('lambda')
+    response = lambda_client.invoke(
+        FunctionName=lambda_name,
+        InvocationType='RequestResponse',
+        Payload=json.dumps(payload)
+    )
+
+    return json.load(response['Payload'])

@@ -4,7 +4,7 @@
 # E.g. for validation that a requested application is actually in the list.
 # This information is used to validate job submission requests
 # and perform the correct value substitutions. 
-my_app: # Do not actually invoke this one, it's just an example. 
+sample_app: # Do not actually invoke this one, it's just an example. 
   container: "my-docker-image:latest"
   entrypoint: "/bin/bash"
   cmd_base: "app_cmd"
