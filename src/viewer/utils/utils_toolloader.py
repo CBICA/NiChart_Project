@@ -270,13 +270,18 @@ def submit_job(
             return container_name
 
     except FileNotFoundError as e:
+        print(f"File error: {e}")
         return f"File error: {e}"
     except ValueError as e:
+        print(f"Validation error: {e}")
         return f"Validation error: {e}"
     except TypeError as e:
+        print(f"Parameter type error: {e}")
         return f"Parameter type error: {e}"
     except ClientError as e:
+        print(f"AWS Error {e.response['Error']['Message']}")
         return f"AWS error: {e.response['Error']['Message']}"
     except Exception as e:
+        print(f"Unexpected error: {str(e)}")
         return f"Unexpected error: {str(e)}"
 
