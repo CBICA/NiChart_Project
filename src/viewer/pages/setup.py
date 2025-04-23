@@ -15,143 +15,69 @@ logger.debug('Start of setup!')
 utilpg.config_page()
 utilpg.show_menu()
 
-def disp_session_state():
-    sel_ssvars = st.pills(
-        "Select Session State Variable(s) to View",
-        sorted(st.session_state.keys()),
-        selection_mode="multi",
-        default=None,
-        #label_visibility="collapsed",
-    )
-    for sel_var in sel_ssvars:
-        st.markdown('➤ ' + sel_var + ':')
-        st.write(st.session_state[sel_var])
-
-def disp_folder_tree(allowed_extensions=None):
-    root_path = st.session_state.paths['task']
-    curr_path = st.session_state.paths['task_curr_path']
-
-    # Prevent access outside root
-    def is_within_root(path):
-        return os.path.commonpath([root_path, path]) == root_path
-
-    entries = sorted(os.listdir(curr_path))
-    folders = [e for e in entries if os.path.isdir(os.path.join(curr_path, e))]
-    files = [e for e in entries if os.path.isfile(os.path.join(curr_path, e))]
-
-    if allowed_extensions:
-        files = [f for f in files if any(f.endswith(ext) for ext in allowed_extensions)]
-    
-    st.markdown(f"##### 📂 `{curr_path}`")
-
-    with st.container(border=True):
-        # Show subfolders
-        for folder in folders:
-            folder_path = os.path.join(curr_path, folder)
-            if is_within_root(folder_path):
-                if st.button(f"📁 {folder}", key=f'_key_folder_{folder}'):
-                    st.session_state.paths['task_curr_path'] = folder_path
-                    st.rerun()
-
-        # Show files
-        selected_file = None
-        for f in files:
-            st.write(f"📝 {f}")
-
-    # Go Up Button (only if not already at root)
-    parent_path = os.path.abspath(os.path.join(curr_path, ".."))
-    if is_within_root(parent_path) and curr_path != root_path:
-        if st.button("⬆️ Go Up", key='_key_btn_up'):
-            st.session_state.paths['task_curr_path'] = parent_path
-            st.rerun()
-
-def panel_models_path():
-    """
-    Panel for selecting models
-    """
-    with st.container(border=True):
-        st.write('Work in progress!')
-
-def panel_resources_path():
-    """
-    Panel for selecting resource directories
-    """
-    with st.container(border=True):
-        sel_res = st.pills(
-            "Select resource type",
-            ["process definitions", "roi lists"],
-            selection_mode="single",
-            default=None,
-            label_visibility="collapsed",
-        )
-
-        if sel_res is None:
-            return
-        
-        if sel_res == "process definitions":
-            out_dir = st.session_state.paths["proc_def"]
-
-            # Browse output folder
-            if st.button('Browse path'):
-                sel_dir = utilio.browse_folder(out_dir)
-                utilss.update_out_dir(sel_dir)
-                st.rerun()
-
-            # Enter output folder
-            sel_dir = st.text_input(
-                'Enter path',
-                value=out_dir,
-                # label_visibility='collapsed',
-            )
-            if sel_dir != out_dir:
-                utilss.update_out_dir(sel_dir)
-                st.rerun()
-
-            if st.session_state.flags["out_dir"]:
-                st.success(
-                    f"Output directory: {st.session_state.paths['out_dir']}",
-                    icon=":material/thumb_up:",
-                )
-
-            utildoc.util_help_dialog(utildoc.title_out, utildoc.def_out)
-
-def panel_out_dir():
+def update_out_dir():
     """
     Panel for selecting output dir
     """
     with st.container(border=True):
-        out_dir = st.session_state.paths["out_dir"]
 
         st.markdown(
             """
-                - Output data folder with consolidated data files for each study.
-                - Output data is organized in subfolders with the study name and process name
+                - The designated folder where all generated results will be stored.
             """
         )
-        
-        # Browse output folder
-        if st.button('Browse path'):
-            sel_dir = utilio.browse_folder(out_dir)
-            utilss.update_out_dir(sel_dir)
-            st.rerun()
 
-        # Enter output folder
-        sel_dir = st.text_input(
-            'Enter path',
-            value=out_dir,
-            # label_visibility='collapsed',
-        )
-        if sel_dir != out_dir:
-            utilss.update_out_dir(sel_dir)
-            st.rerun()
+        if 'key_setup_out_btn' not in st.session_state:
+            st.session_state.key_setup_out_btn = False
 
-        if st.session_state.flags["out_dir"]:
+        if st.session_state.key_setup_out_btn:
+            
+            curr_dir = st.session_state.paths["out_dir"]
+
+            if 'key_setup_out_mode' not in st.session_state:
+                st.session_state.key_setup_out_mode = 'Browse Path'
+            
+            sel_mode = st.radio(
+                'Sel mode',
+                options=['Browse Path', 'Enter Manually'],
+                horizontal = True,
+                label_visibility = 'collapsed',                
+                key = 'key_setup_out_mode'
+            )
+            
+            if sel_mode == 'Browse Path':
+                # Browse output folder
+                if st.button('Browse'):
+                    sel_dir = utilio.browse_folder(curr_dir)
+                    if sel_dir is not None and sel_dir != curr_dir:
+                        utilss.update_out_dir(sel_dir)
+                    st.session_state['key_setup_out_btn'] = False
+                    st.rerun()
+
+            elif sel_mode == 'Enter Manually':
+                # Enter output folder
+                sel_dir = st.text_input(
+                    'Enter path',
+                    value=curr_dir,
+                    label_visibility='collapsed',
+                )
+                
+                if st.button("Submit"):
+                    if sel_dir is not None and sel_dir != curr_dir:
+                        utilss.update_out_dir(sel_dir)
+                    st.session_state['key_setup_out_btn'] = False
+                    st.rerun()
+
+
+        else:
             st.success(
                 f"Output directory: {st.session_state.paths['out_dir']}",
                 icon=":material/thumb_up:",
             )
 
-        utildoc.util_help_dialog(utildoc.title_out, utildoc.def_out)
+            if st.button('Update'):
+                st.session_state['key_setup_out_btn'] = True
+                st.rerun()
 
 def update_task() -> None:
     """
@@ -159,39 +85,62 @@ def update_task() -> None:
     """
     with st.container(border=True):
 
-        if st.session_state.user['btn_update']:
+        st.markdown(
+            """
+                - Task Name serves as a unique identifier for your analysis.
+                - All results will be organized and saved under a folder named after the Task Name, following a predefined nested folder structure.
+                - You can also choose a demo dataset or revisit a previous task here.
+            """
+        )
+
+        if 'key_setup_task_btn' not in st.session_state:
+            st.session_state.key_setup_task_btn = False
+
+        if st.session_state.key_setup_task_btn:
             out_dir = st.session_state.paths["out_dir"]
             curr_task = st.session_state.navig['task']            
+
+            if 'key_setup_task_mode' not in st.session_state:
+                st.session_state.key_setup_task_mode = 'Select Existing'
+
             sel_mode = st.radio(
                 'Sel mode',
                 options=['Select Existing', 'Enter Manually'],
                 horizontal = True,
-                index = st.session_state.user['radio_mode']
+                label_visibility = 'collapsed',
+                key = 'key_setup_task_mode'
             )
+            
             if sel_mode == 'Select Existing':
-                st.session_state.user['radio_mode'] = 0
                 list_tasks = utilio.get_subfolders(out_dir)
                 if len(list_tasks) > 0:
-                    sel_ind = list_tasks.index(curr_task)
+
+                    if 'key_setup_task_list' not in st.session_state:
+                        st.session_state.key_setup_task_list = None
+                        
                     sel_task = st.selectbox(
                         "Select Existing Task:",
                         options = list_tasks,
-                        index = sel_ind,
                         label_visibility = 'collapsed',
+                        key = 'key_setup_task_list'
                     )
             elif sel_mode == 'Enter Manually':
-                st.session_state.user['radio_mode'] = 1
+
+                if 'key_setup_task_text' not in st.session_state:
+                    st.session_state.key_setup_task_text = None
+
                 sel_task = st.text_input(
                     "Task name:",
                     None,
                     placeholder="My_new_study",
-                    label_visibility = 'collapsed'
+                    label_visibility = 'collapsed',
+                    key = 'key_setup_task_text'
                 )   
                 
             if st.button("Submit"):
                 if sel_task is not None and sel_task != curr_task:
                     utilss.update_task(sel_task)
-                st.session_state.user['btn_update'] = False
+                st.session_state['key_setup_task_btn'] = False
                 st.rerun()
         
         else:
@@ -200,10 +149,8 @@ def update_task() -> None:
                 icon=":material/thumb_up:",
             )
             if st.button('Update'):
-                st.session_state.user['btn_update'] = True
+                st.session_state['key_setup_task_btn'] = True
                 st.rerun()
-
-        #utildoc.util_help_dialog(utildoc.title_exp, utildoc.def_exp)
 
 def panel_misc() -> None:
     """
@@ -221,25 +168,31 @@ def panel_misc() -> None:
 st.markdown(
     """
     ### User Configuration
-    - Get started by selecting the main settings for your experiment here.
+    - To help you better organize your work, please select a few important settings below.
     """
 )
 
 with st.container(border=True):
 
-    sel_config = st.selectbox(
-        "Select Basic Config",
-        ["Output Folder Path", "Task Name"],
-        index=None,
-        #selection_mode="single",
-        #default=None,
-        key = '_sel_config_cat',
+    if 'key_setup_sel_item' not in st.session_state:
+        st.session_state.key_setup_sel_item = None
+    
+    sel_item = st.pills(
+         "Select Config Item",
+        ["Output Folder", "Task Name"],
+        selection_mode="single",
+        key='key_setup_sel_item',
         label_visibility="collapsed",
     )
+    
+    ## Required to make sure that state of widget is consistent with returned value
+    #if st.session_state._setup_sel_item != sel_item:
+        #st.session_state._setup_sel_item = sel_item
+        #st.rerun()    
 
-    if sel_config == "Output Folder Path":
-        panel_out_dir()
+    if sel_item == 'Output Folder':
+        update_out_dir()
 
-    if sel_config == "Task Name":
+    if sel_item == 'Task Name':
         update_task()
 

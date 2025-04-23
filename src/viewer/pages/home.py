@@ -19,7 +19,6 @@ logger.debug('Start of Home Screen!')
 st.markdown(
     """
     ### Welcome to NiChart Project!
-
     """
 )
 st.image("../resources/nichart1.png", width=300)

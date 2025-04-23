@@ -193,8 +193,9 @@ def init_session_state() -> None:
         st.session_state.sel_menu = 'Home'
 
         st.session_state.user = {
-            'btn_update': False,
-            'radio_mode': 0,
+            'setup_sel_item': None,
+            'setup_task_update': False,
+            'setup_task_mode': 0,
         }
 
 
