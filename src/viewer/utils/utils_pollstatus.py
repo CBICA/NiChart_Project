@@ -161,6 +161,7 @@ def get_handle(mode: str, raw_id: str) -> TaskHandle:
     
 
 def parse_lambda_response(response_str: str) -> TaskHandle:
+    print(f"Parsing lambda response: {response_str}")
     try:
         response = json.loads(response_str)
     except json.JSONDecodeError:
@@ -183,6 +184,7 @@ def parse_lambda_response(response_str: str) -> TaskHandle:
         raise ValueError(f"Unknown task mode '{mode}' in Lambda response")
 
 def add_job_to_session(job_handle):
+    print(f"Attempting to add job with handle {job_handle.get_id()}")
     if 'active_jobs' not in st.session_state:
         st.session_state.active_jobs = {}
     st.session_state.active_jobs[job_handle.get_id()] = job_handle
