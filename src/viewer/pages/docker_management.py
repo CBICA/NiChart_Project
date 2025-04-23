@@ -25,10 +25,12 @@ utilss.config_page()
 
 utilmenu.menu()
 
-if st.session_state.has_cloud_session:
-    st.header("Page Unavailable")
-    st.text("This page is unavailable on NiChart Cloud. Redirecting you to the home page...")
-    st.switch_page("pages/home.py")
+DISABLE_PUBLIC = True
+if st.session_state.has_cloud_session and DISABLE_PUBLIC:
+    if st.session_state.cloud_user_id != 'b8915a31-544a-4b70-9c7e-253c359e7abe':
+        st.header("Page Unavailable")
+        st.text("This page is unavailable on NiChart Cloud. Redirecting you to the home page...")
+        st.switch_page("pages/home.py")
 
 # Initialize Docker client
 try:
