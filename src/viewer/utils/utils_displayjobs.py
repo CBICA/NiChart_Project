@@ -19,4 +19,4 @@ def display_jobs():
 
             if st.button(f"Remove {job_id}"):
                 del st.session_state.active_jobs[job_id]
-                st.experimental_rerun()
+                st.rerun()
