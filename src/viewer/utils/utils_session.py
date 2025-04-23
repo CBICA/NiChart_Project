@@ -192,6 +192,12 @@ def init_session_state() -> None:
         # Menu navigation
         st.session_state.sel_menu = 'Home'
 
+        st.session_state.user = {
+            'btn_update': False,
+            'radio_mode': 0,
+        }
+
+
         st.session_state.navig = {
             'main_menu': "Home",
             'workflow': None,

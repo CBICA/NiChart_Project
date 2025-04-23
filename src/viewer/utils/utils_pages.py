@@ -6,6 +6,7 @@ from streamlit_option_menu import option_menu
 # Hard-coded menu items for NiChart
 dict_menu = {
     "Home": "pages/home.py",
+    "Quick Setup": "pages/setup.py",
     "Data": "pages/data.py",
     "Pipelines": "pages/pipelines.py",
     "Results": "pages/results.py",
@@ -22,7 +23,7 @@ def show_menu() -> None:
         sel_menu = option_menu(
             'NiChart',
             list_options,
-            icons=['house', 'clipboard-data', 'rocket-takeoff', 'graph-up', 'gear'],
+            icons=['house', 'sliders', 'clipboard-data', 'rocket-takeoff', 'graph-up', 'gear'],
             menu_icon='cast',
             default_index=sel_ind
         )
