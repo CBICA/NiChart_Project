@@ -13,6 +13,9 @@ nibabel
 pulp==2.7.0
 tabulate==0.8.10
 sphinx
+pydantic
+pyyaml
+humanize
 
 # streamlit
 streamlit==1.39.0
@@ -25,6 +28,7 @@ Jinja2
 plotly-express
 stqdm
 pyjwt
+docker
 
 # chatbot 
 boto3

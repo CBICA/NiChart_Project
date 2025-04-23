@@ -85,6 +85,7 @@ st.markdown(
 )
 
 st.markdown("Coupled Cross-sectional and Longitudinal Non-negative Matrix Factorization Elucidates (Seven) Dynamic Patterns of Brain Aging in 48,949 Individuals")
+st.markdown("Support for CCL-NMF longitudinal loading coefficient is a work in progress as NiChart currently doesn't support longitudinal data.")
 
 f_img = os.path.join(st.session_state.paths["root"], "resources", "images", "ccl_nmf1.png")
 st.image(f_img, width=800, caption="Ioanna Skampardoni et. al.")

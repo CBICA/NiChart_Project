@@ -324,5 +324,14 @@
         "SurrealGAN_R3",
         "SurrealGAN_R4",
         "SurrealGAN_R5"
+    ],
+    "CCL-NMF": [
+        "CCL-NMF1",
+        "CCL-NMF2",
+        "CCL-NMF3",
+        "CCL-NMF4",
+        "CCL-NMF5",
+        "CCL-NMF6",
+        "CCL-NMF7"
     ]
 }
