@@ -208,7 +208,7 @@ def submit_job(
     
     aws_lambda_function_name = "cbica-nichart-submitjob"
     try:
-        if (getattr(st.session_state, "has_cloud_session", False) or execution_mode.lower() == 'cloud'):
+        if (st.session_state.get("has_cloud_session", False) and execution_mode.lower() == 'cloud'):
             # === CLOUD MODE ===
             id_token = st.session_state.get("cloud_session_token", None)
             if id_token is None:
@@ -220,7 +220,7 @@ def submit_job(
                 "user_mounts": user_mounts
             }
 
-            lambda_client = boto3.client("lambda")
+            lambda_client = boto3.client("lambda", region_name='us-east-1')
             response = lambda_client.invoke(
                 FunctionName=aws_lambda_function_name,
                 InvocationType='RequestResponse',
