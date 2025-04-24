@@ -20,12 +20,17 @@ def update_out_dir():
     Panel for selecting output dir
     """
     with st.container(border=True):
-
-        st.markdown(
+        
+        st.info(
             """
-                - The designated folder where all generated results will be stored.
+            The designated output directory where all generated results will be stored.
             """
         )
+
+        if st.session_state.app_type == 'cloud':
+            st.warning('Output directory selection isn’t needed in the cloud version!')
+            return
+            
 
         if 'key_setup_out_btn' not in st.session_state:
             st.session_state.key_setup_out_btn = False
@@ -165,34 +170,32 @@ def panel_misc() -> None:
             st.session_state.app_type = "desktop"
 
 
-st.markdown(
+st.info(
     """
     ### User Configuration
     - To help you better organize your work, please select a few important settings below.
     """
 )
 
-with st.container(border=True):
+if 'key_setup_sel_item' not in st.session_state:
+    st.session_state.key_setup_sel_item = None
 
-    if 'key_setup_sel_item' not in st.session_state:
-        st.session_state.key_setup_sel_item = None
-    
-    sel_item = st.pills(
-         "Select Config Item",
-        ["Output Folder", "Task Name"],
-        selection_mode="single",
-        key='key_setup_sel_item',
-        label_visibility="collapsed",
-    )
-    
-    ## Required to make sure that state of widget is consistent with returned value
-    #if st.session_state._setup_sel_item != sel_item:
-        #st.session_state._setup_sel_item = sel_item
-        #st.rerun()    
+sel_item = st.pills(
+        "Select Config Item",
+    ["Output Directory", "Task Name"],
+    selection_mode="single",
+    key='key_setup_sel_item',
+    label_visibility="collapsed",
+)
 
-    if sel_item == 'Output Folder':
-        update_out_dir()
+## Required to make sure that state of widget is consistent with returned value
+#if st.session_state._setup_sel_item != sel_item:
+    #st.session_state._setup_sel_item = sel_item
+    #st.rerun()    
 
-    if sel_item == 'Task Name':
-        update_task()
+if sel_item == 'Output Directory':
+    update_out_dir()
+
+if sel_item == 'Task Name':
+    update_task()
 

@@ -8,10 +8,10 @@ import os
 utilpg.config_page()
 utilpg.show_menu()
 
-st.markdown(
+st.info(
     """
-    ### Debugging Options (Dev)
-    - Select debugging options here.
+    ### View Results 
+    - Select options to view/report results here.
     """
 )
 

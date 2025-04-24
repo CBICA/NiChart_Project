@@ -16,42 +16,53 @@ logger.debug('Start of Home Screen!')
 
 # utilpg.select_main_menu()
 
-st.markdown(
+st.info(
     """
     ### Welcome to NiChart Project!
+    - NiChart is an :red[open-source framework] built specifically for deriving :red[machine learning biomarkers] from MRI imaging data.
     """
 )
+
 st.image("../resources/nichart1.png", width=300)
 
-with st.container(border=True):
-    st.markdown(
-        """
-        - NiChart is an open-source framework built specifically for deriving Machine Learning based indices from MRI data.
-        - Check out [NiChart Web page](https://neuroimagingchart.com)
-        - Visit [NiChart GitHub](https://github.com/CBICA/NiChart_Project)
-        - Jump into [our documentation](https://cbica.github.io/NiChart_Project)
-        - Ask a question in [our community discussions](https://github.com/CBICA/NiChart_Project/discussions)
-        """
-    )
+sel = st.pills(
+    'Select an option',
+    ['Links', 'Installation'],
+    default = 'Links',
+    label_visibility="collapsed"
+)
 
-with st.expander(label='Installation'):
-    st.markdown(
-        """
-        - You can install NiChart Project desktop
-        ```
-        pip install NiChart_Project
-        ```
+if sel == 'Links':
+    with st.container(border=True):
+        st.markdown(
+            """
+            - Check out [NiChart Web page](https://neuroimagingchart.com)
+            - Visit [NiChart GitHub](https://github.com/CBICA/NiChart_Project)
+            - Jump into [our documentation](https://cbica.github.io/NiChart_Project)
+            - Ask a question in [our community discussions](https://github.com/CBICA/NiChart_Project/discussions)
+            """
+        )
 
-        - Run the application
-        ```
-        cd src/viewer
-        streamlit run NiChartProject.py
-        ```
+elif sel == 'Installation':
+    with st.container(border=True):
+    #with st.expander(label='Installation'):
+        st.markdown(
+            """
+            - You can install NiChart Project desktop
+            ```
+            pip install NiChart_Project
+            ```
 
-        - Alternatively, the cloud app can be launched at
-        ```
-        https://cloud.neuroimagingchart.com
-        ```
-        """
-    )
+            - Run the application
+            ```
+            cd src/viewer
+            streamlit run NiChartProject.py
+            ```
+
+            - Alternatively, the cloud app can be launched at
+            ```
+            https://cloud.neuroimagingchart.com
+            ```
+            """
+        )
     

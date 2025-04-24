@@ -365,8 +365,7 @@ def panel_in_covars() -> None:
         utilio.remove_dir('lists')
     
 
-
-st.markdown(
+st.info(
     """
     ### Upload Input Data
     - Panel to enter MRI image files and/or CSV files containing demographic and other information.

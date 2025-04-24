@@ -218,84 +218,74 @@ def panel_misc() -> None:
             st.session_state.app_type = "desktop"
 
 
-st.markdown(
+st.info(
     """
     ### Configuration Options
     - Select configuration options here.
     """
 )
 
-#sel_config_cat = st.pills(
-    #"Select Config Category",
-    #["Basic Config", "Advanced Config", "Debug"],
+sel_config_cat = st.radio(
+    "Select Config Category",
+    ["Basic", "Advanced", "Debugging"],
+    horizontal = True,
     #selection_mode="single",
     #default=None,
-    #label_visibility="collapsed",
-#)
+    label_visibility="collapsed",
+)
 
-with st.container(border=True):
 
-    sel_config_cat = st.radio(
-        "Select Config Category",
-        ["Basic", "Advanced", "Debugging"],
-        horizontal = True,
+if sel_config_cat == "Basic":
+    sel_config = st.selectbox(
+        "Select Basic Config",
+        ["Output Dir", "Task Name", "Misc"],
+        index=None,
         #selection_mode="single",
         #default=None,
+        key = '_sel_config_cat',
         label_visibility="collapsed",
     )
 
+    if sel_config == "Output Dir":
+        panel_out_dir()
 
-    if sel_config_cat == "Basic":
-        sel_config = st.selectbox(
-            "Select Basic Config",
-            ["Output Dir", "Task Name", "Misc"],
-            index=None,
-            #selection_mode="single",
-            #default=None,
-            key = '_sel_config_cat',
-            label_visibility="collapsed",
-        )
+    if sel_config == "Task Name":
+        update_task()
 
-        if sel_config == "Output Dir":
-            panel_out_dir()
+    if sel_config == "Misc":
+        panel_misc()
 
-        if sel_config == "Task Name":
-            update_task()
+elif sel_config_cat == "Advanced":
+    del st.session_state["_sel_config_cat"]
+    sel_config = st.pills(
+        "Select Advanced Config",
+        ["Resources", "Models"],
+        selection_mode="single",
+        default=None,
+        label_visibility="collapsed",
+    )
 
-        if sel_config == "Misc":
-            panel_misc()
+    if sel_config == "Resources":
+        panel_resources_path()
 
-    elif sel_config_cat == "Advanced":
-        del st.session_state["_sel_config_cat"]
-        sel_config = st.pills(
-            "Select Advanced Config",
-            ["Resources", "Models"],
-            selection_mode="single",
-            default=None,
-            label_visibility="collapsed",
-        )
+    elif sel_config == "Models":
+        panel_models_path()
 
-        if sel_config == "Resources":
-            panel_resources_path()
+if sel_config_cat == "Debugging":
+    sel_debug = st.pills(
+        "Select Debug Options",
+        ["Session State", "Output Files"],
+        selection_mode="single",
+        default=None,
+        label_visibility="collapsed",
+    )
 
-        elif sel_config == "Models":
-            panel_models_path()
-
-    if sel_config_cat == "Debugging":
-        sel_debug = st.pills(
-            "Select Debug Options",
-            ["Session State", "Output Files"],
-            selection_mode="single",
-            default=None,
-            label_visibility="collapsed",
-        )
-
-        if sel_debug == "Session State":
-            with st.container(border=True):
-                disp_session_state()
+    if sel_debug == "Session State":
+        with st.container(border=True):
+            disp_session_state()
+    
+    elif sel_debug == "Output Files":
+        with st.container(border=True):
+            st.markdown('##### '+ st.session_state.navig['task'] + ':')
+            disp_folder_tree()
         
-        elif sel_debug == "Output Files":
-            with st.container(border=True):
-                st.markdown('##### '+ st.session_state.navig['task'] + ':')
-                disp_folder_tree()
-            

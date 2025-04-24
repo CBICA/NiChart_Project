@@ -182,7 +182,7 @@ def panel_run_pipeline():
 utilpg.config_page()
 utilpg.show_menu()
 
-st.markdown(
+st.info(
     """
     ### Pipelines
     - Choose from a variety of image processing and analysis pipelines.
