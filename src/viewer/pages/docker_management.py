@@ -19,6 +19,7 @@ import utils.utils_pollstatus as ps
 import utils.utils_displayjobs as dj
 from pathlib import Path
 import pathlib
+from streamlit_autorefresh import st_autorefresh
 
 # Page config should be called for each page
 utilss.config_page()
@@ -38,6 +39,11 @@ try:
 except:
     st.header("ERROR: We couldn't find Docker!")
     st.markdown("This page is for configuring NiChart to use [Docker](https://www.docker.com) on your system. If you are seeing this message, we couldn't find Docker on your system. Please make sure it is [installed](https://docs.docker.com/engine/install/) or that the Docker daemon is running, then try again.")
+
+st.markdown("This page will refresh automatically every 10 seconds to update the job monitor.")
+
+# Limited to 100 refreshes, in case a user goes AFK.
+count = st_autorefresh(interval=10000, limit=50, key='autorefreshcounter')
 
 # Pre-defined list of supported images
 SUPPORTED_IMAGES = [
