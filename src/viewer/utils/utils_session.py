@@ -33,12 +33,8 @@ def process_session_token() -> Any:
     # headers = _get_websocket_headers()
     headers = st.context.headers
     if not headers or "X-Amzn-Oidc-Data" not in headers:
-        return {}
-    return jwt.decode(
-        headers["X-Amzn-Oidc-Data"],
-        algorithms=["ES256"],
-        options={"verify_signature": False},
-    )
+        return ""
+    return headers["X-Amzn-Oidc-Data"]
 
 
 def process_session_user_id() -> Any:
