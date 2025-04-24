@@ -216,6 +216,7 @@ def submit_job(
     try:
         if (st.session_state.get("has_cloud_session", False) and execution_mode.lower() == 'cloud'):
             # === CLOUD MODE ===
+            print("DEBUG: Cloud mode job submission.")
             id_token = st.session_state.get("cloud_session_token", None)
             if id_token is None:
                 raise ValueError("An ID token must be provided to submit cloud jobs and none was found in the session state.")
@@ -234,7 +235,7 @@ def submit_job(
             )
 
             response_payload = json.load(response['Payload'])
-
+            print(f"Got response from Lambda: {response_payload}")
             if response.get("FunctionError"):
                 return f"Lambda error: {response_payload.get('errorMessage', 'Unknown error')}"
 
@@ -248,6 +249,7 @@ def submit_job(
 
         else:
             # === LOCAL MODE ===
+            print("DEBUG: Local mode job submission.")
             docker_command = validate_user_request(
                 tool_name=tool_name,
                 user_params=user_params,
