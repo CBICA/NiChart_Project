@@ -192,6 +192,12 @@ def validate_user_request(tool_name: str, user_params: Dict, user_mounts: Dict[s
 
     return tool_spec.generate_docker_command(user_params, user_mounts)
 
+def stringify_mounts(mounts_dict: Dict[str, Union[str, Path]]) -> Dict[str, str]:
+    '''Utility function that converts mount dicts of Path objects to string form. 
+    This is useful/necessary for JSON encoding these, which is necessary
+    for cloud job submission.
+    '''
+    return {k: str(v) for k, v in mounts_dict.items()}
 
 
 def submit_job(

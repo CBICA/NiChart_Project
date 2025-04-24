@@ -78,6 +78,7 @@ example_user_mounts = {
     "t1_img":  path_to_t1.resolve(),
     "dlmuse_csv": path_to_outcsv.resolve()
 }
+example_user_mounts = tl.stringify_mounts(example_user_mounts)
 
 # --- Initialize dummy jobs ---
 if "active_jobs" not in st.session_state:
@@ -104,6 +105,7 @@ if st.button("Press me to try submitting a local job!"):
         user_mounts=example_user_mounts,
         execution_mode='local',
     )
+    st.rerun()
 if st.button("Press me to try submitting a cloud job!"):
     result = tl.submit_job(
         tool_name=example_tool_name,
@@ -111,7 +113,7 @@ if st.button("Press me to try submitting a cloud job!"):
         user_mounts=example_user_mounts,
         execution_mode='cloud',
     )
-
+    st.rerun()
 st.text(f"{result}")
 
 
