@@ -238,7 +238,7 @@ def submit_job(
             else:
                 handle = ps.get_handle(mode='batch', raw_id=res_job_id)
                 ps.add_job_to_session(handle)
-                return 
+                return f"Added job {res_job_id}"
 
         else:
             # === LOCAL MODE ===
@@ -267,7 +267,7 @@ def submit_job(
             container_name = inspect_result.stdout.strip().lstrip("/")
             handle = ps.get_handle(mode='docker', raw_id=container_name)
             ps.add_job_to_session(handle)
-            return container_name
+            return f"Added job {container_name}"
 
     except FileNotFoundError as e:
         print(f"File error: {e}")

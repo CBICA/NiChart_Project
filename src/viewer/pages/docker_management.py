@@ -112,6 +112,8 @@ if st.button("Press me to try submitting a cloud job!"):
         execution_mode='cloud',
     )
 
+st.text(f"{result}")
+
 
 
 
