@@ -119,8 +119,7 @@ if st.button("Press me to try submitting a cloud job!"):
         user_mounts=example_user_mounts,
         execution_mode='cloud',
     )
-    st.rerun()
-st.text(f"{result}")
+    st.text(f"{result}")
 
 
 
