@@ -241,7 +241,7 @@ def submit_job(
 
             res_job_id = response_payload.get("job_id", None)
             if res_job_id is None:
-                raise ValueError("No job_id returned from Lambda")
+                return f"No job ID returned from lambda. Lambda response: {response_payload}"
             else:
                 handle = ps.get_handle(mode='batch', raw_id=res_job_id)
                 ps.add_job_to_session(handle)
