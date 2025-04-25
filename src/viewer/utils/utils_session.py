@@ -43,6 +43,19 @@ def process_session_user_id() -> Any:
         return "NO_USER_FOUND"
     return headers["X-Amzn-Oidc-Identity"]
 
+def process_session_user_email() -> Any:
+    headers = st.context.headers
+    if not headers or "X-Amzn-Oidc-Data" not in headers:
+        return "NO_EMAIL_FOUND"
+    raw_token = headers['X-Amzn-Oidc-Data']
+    decoded_token = jwt.decode(
+        raw_token,
+        algorithms=["ES256"],
+        options={"verify_signature": False},
+    )
+    if not decoded_token or 'email' not in decoded_token:
+        return "NO_EMAIL_FOUND"
+    return decoded_token['email']
 
 def init_session_state() -> None:
     # Initiate Session State Values
@@ -68,6 +81,7 @@ def init_session_state() -> None:
             if st.session_state.cloud_session_token:
                 st.session_state.has_cloud_session = True
                 st.session_state.cloud_user_id = process_session_user_id()
+                st.session_state.cloud_user_email = process_session_user_email()
             else:
                 st.session_state.has_cloud_session = False
         else:
