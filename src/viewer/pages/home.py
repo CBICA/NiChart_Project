@@ -8,6 +8,7 @@ from utils.utils_logger import setup_logger
 # Page config should be called for each page
 utilpg.config_page()
 utilpg.show_menu()
+utilpg.add_sidebar_options()
 
 logger = setup_logger()
 

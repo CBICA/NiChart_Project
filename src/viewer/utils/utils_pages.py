@@ -50,3 +50,16 @@ def config_page() -> None:
             "About": "https://neuroimagingchart.com/",
         },
     )
+
+def add_sidebar_options():
+    with st.sidebar:
+
+        col1, col2 = st.columns([1, 1])
+        with col1:
+            st.markdown(
+                "[![GitHub](https://img.shields.io/badge/GitHub-Repo-8DA1EE?style=for-the-badge&logo=github&logoColor=white)](https://github.com/CBICA/NiChart_Project)"
+            )
+        with col2:
+            st.markdown(
+                "[![ISTAGING](https://img.shields.io/badge/NiChart-Web-C744C2?style=for-the-badge&logoColor=white)](https://neuroimagingchart.com)"
+            )
