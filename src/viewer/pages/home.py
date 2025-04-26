@@ -28,12 +28,44 @@ st.image("../resources/nichart1.png", width=300)
 
 sel = st.pills(
     'Select an option',
-    ['Links', 'Installation'],
-    default = 'Links',
+    ['Overview', 'Quick Start Guide', 'Links', 'Installation'],
+    default = 'Overview',
     label_visibility="collapsed"
 )
 
-if sel == 'Links':
+if sel == 'Overview':
+    with st.container(border=True):
+        st.markdown(
+            """
+            - NiChart is a modular platform offering neuroimaging tools for **mapping large-scale, multi-modal brain MRI data** into **dimensional measures**.
+
+            - It provides processing tools for MRI images, enabling extraction of **:red[imaging phenotypes]** and **machine learning (ML) indices** of disease and aging.
+
+            - Pre-trained **ML models]** allow users to quantify complex brain changes and compare results against **normative and disease-specific reference ranges]**.
+            """
+        )
+
+elif sel == 'Quick Start Guide':
+    with st.container(border=True):
+        st.markdown(
+            """
+            ##### Analyze Your Own Data:
+
+            - **Upload Your Data:** Navigate to the "Data" page to upload the files you wish to analyze.
+
+            - **Select Your Pipeline:** Go to the "Pipelines" page and choose the analysis workflow you want to apply to your data.
+
+            - **View Your Results:** Once the pipeline has finished processing, your findings will be available on the "Results" page.
+
+            ##### Explore Sample Outputs (No Data Upload Required):
+
+            - **View Reference Data:** Alternatively, go to the "Examples" page to visualize results of image processing and ML steps
+
+            - **Example Results:** Segmentation of brain anatomy, volumes of brain regions, and biomarkers of disease and aging, such as AD and Brain Aging indices.
+            """
+        )
+
+elif sel == 'Links':
     with st.container(border=True):
         st.markdown(
             """
