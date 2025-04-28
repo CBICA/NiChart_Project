@@ -1,0 +1,30 @@
+name: nichart_dlmuse 
+description: This tool extracts DLICV intracranial volumes, DLMUSE segmentations, and ROI volume CSV files.
+
+dependencies: # Names of dependencies. To make another tool's output a dependency, place its name in this list
+  - t1_img
+
+inputs:
+  t1_img:
+    type: directory
+
+outputs:
+  dlmuse_csv:
+    type: file
+
+mounts:
+  t1_img:
+    path_in_container: /input
+    mode: ro
+  dlmuse_output:
+    path_in_container: /output
+    mode: rw
+
+resources: # Used to allocate jobs on the cloud. Please be diligent.
+  vcpus: 4
+  memory: 16000 # Amount must be in MiB, see https://docs.aws.amazon.com/batch/latest/APIReference/API_ResourceRequirement.html
+  gpus: 1
+
+container:
+  image: cbica/nichart_dlmuse:1.0.8
+
