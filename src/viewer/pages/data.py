@@ -368,7 +368,7 @@ def panel_in_covars() -> None:
 st.info(
     """
     ### Upload Input Data
-    - Panel to enter **:red[MRI image files] and/or **:red[CSV files] containing demographic and other information.
+    - Panel to enter ***:red[MRI image files]*** and/or ***:red[CSV files]*** containing demographic and other information.
     - Supported file types and formats are indicated in each section to ensure smooth uploads.
     - Once your data is uploaded, you can proceed to apply pipelines tailored to your needs.
     """
@@ -398,7 +398,7 @@ if sel_task == "Image Data":
         with st.container(border=True):
             st.markdown(
                 """
-                **NIfTI Images**
+                ***NIfTI Images***
                 - Upload NIfTI images
                 """
             )
@@ -408,7 +408,7 @@ if sel_task == "Image Data":
         with st.container(border=True):
             st.markdown(
                 """
-                **DICOM Files**
+                ***DICOM Files***
                 
                 - Upload a folder containing raw DICOM files
                 - DICOM files will be converted to NIfTI scans
@@ -420,8 +420,8 @@ if sel_task == "Image Data":
         with st.container(border=True):
             st.markdown(
                 """
-                **BIDS Format**
-                - Load a dataset structured according to the **:red[BIDS standard](https://bids.neuroimaging.io)**, where all imaging modalities and metadata are organized in a single directory.
+                ***BIDS Format***
+                - Load a dataset structured according to the ***:red[BIDS standard](https://bids.neuroimaging.io)***, where all imaging modalities and metadata are organized in a single directory.
                 - This is the easiest option if your data is already standardized.
                 """
             )
@@ -432,7 +432,7 @@ if sel_task == "Image Data":
         with st.container(border=True):
             st.markdown(
                 """
-                **Connect to PACS Server**
+                ***Connect to PACS Server***
                 - Query and fetch imaging data directly from a hospital PACS server using DICOM networking.
                 - Requires PACS credentials and access permissions.
                 """
@@ -443,8 +443,8 @@ elif sel_task == "Covariate File":
     with st.container(border=True):
         st.markdown(
             """
-            **Covariate File**
-            - Upload a **:red[csv file with covariate info]** (Age, Sex, DX, etc.)
+            ***Covariate File***
+            - Upload a ***:red[csv file with covariate info]*** (Age, Sex, DX, etc.)
             """
         )
         panel_in_covars()
