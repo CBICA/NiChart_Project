@@ -20,7 +20,7 @@ logger.debug('Start of Home Screen!')
 st.info(
     """
     ### Welcome to NiChart Project!
-    - NiChart is an :red[open-source framework] built specifically for deriving :red[machine learning biomarkers] from MRI imaging data.
+    - NiChart is an **:red[open-source framework]** built specifically for deriving **:red[machine learning biomarkers]** from MRI imaging data.
     """
 )
 
@@ -37,11 +37,11 @@ if sel == 'Overview':
     with st.container(border=True):
         st.markdown(
             """
-            - NiChart is a modular platform offering neuroimaging tools for **mapping large-scale, multi-modal brain MRI data** into **dimensional measures**.
+            - NiChart is a modular platform offering neuroimaging tools for **:red[mapping large-scale, multi-modal brain MRI data]** into **:red[dimensional measures]**.
 
-            - It provides processing tools for MRI images, enabling extraction of **:red[imaging phenotypes]** and **machine learning (ML) indices** of disease and aging.
+            - It provides processing tools for MRI images, enabling extraction of **:red[imaging phenotypes]** and **:red[machine learning (ML) indices]** of disease and aging.
 
-            - Pre-trained **ML models]** allow users to quantify complex brain changes and compare results against **normative and disease-specific reference ranges]**.
+            - Pre-trained **:red[ML models]** allow users to quantify complex brain changes and compare results against **:red[normative and disease-specific reference ranges]**.
             """
         )
 
@@ -51,17 +51,19 @@ elif sel == 'Quick Start Guide':
             """
             ##### Analyze Your Own Data:
 
-            - **Upload Your Data:** Navigate to the "Data" page to upload the files you wish to analyze.
+            - **:red[Quick Setup:]** Select a few settings that will help to better organize your work.
 
-            - **Select Your Pipeline:** Go to the "Pipelines" page and choose the analysis workflow you want to apply to your data.
+            - **:red[Upload Your Data:]** Navigate to the "Data" page to upload the files you wish to analyze.
 
-            - **View Your Results:** Once the pipeline has finished processing, your findings will be available on the "Results" page.
+            - **:red[Select Your Pipeline:]** Go to the "Pipelines" page and choose the analysis workflow you want to apply to your data.
+
+            - **:red[View Your Results:]** Once the pipeline has finished processing, your findings will be available on the "Results" page.
 
             ##### Explore Sample Outputs (No Data Upload Required):
 
-            - **View Reference Data:** Alternatively, go to the "Examples" page to visualize results of image processing and ML steps
+            - **:red[View Examples:]** Go to the "Examples" page to visualize results of image processing and ML steps on public samples
 
-            - **Example Results:** Segmentation of brain anatomy, volumes of brain regions, and biomarkers of disease and aging, such as AD and Brain Aging indices.
+            - **:red[Contents:]** Segmentation of brain anatomy, volumes of brain regions, biomarkers of disease and aging such as AD and Brain Aging indices.
             """
         )
 

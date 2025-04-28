@@ -368,7 +368,7 @@ def panel_in_covars() -> None:
 st.info(
     """
     ### Upload Input Data
-    - Panel to enter MRI image files and/or CSV files containing demographic and other information.
+    - Panel to enter **:red[MRI image files] and/or **:red[CSV files] containing demographic and other information.
     - Supported file types and formats are indicated in each section to ensure smooth uploads.
     - Once your data is uploaded, you can proceed to apply pipelines tailored to your needs.
     """
@@ -421,7 +421,7 @@ if sel_task == "Image Data":
             st.markdown(
                 """
                 **BIDS Format**
-                - Load a dataset structured according to the [BIDS standard](https://bids.neuroimaging.io/), where all imaging modalities and metadata are organized in a single directory.
+                - Load a dataset structured according to the **:red[BIDS standard](https://bids.neuroimaging.io)**, where all imaging modalities and metadata are organized in a single directory.
                 - This is the easiest option if your data is already standardized.
                 """
             )
@@ -444,7 +444,7 @@ elif sel_task == "Covariate File":
         st.markdown(
             """
             **Covariate File**
-            - Upload a csv file with covariate info (Age, Sex, DX, etc.)
+            - Upload a **:red[csv file with covariate info]** (Age, Sex, DX, etc.)
             """
         )
         panel_in_covars()

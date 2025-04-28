@@ -21,9 +21,9 @@ def update_out_dir():
     """
     with st.container(border=True):
         
-        st.info(
+        st.markdown(
             """
-            The designated output directory where all generated results will be stored.
+            The **:red[designated output directory]** where all generated results will be stored.
             """
         )
 
@@ -92,9 +92,9 @@ def update_task() -> None:
 
         st.markdown(
             """
-                - Task Name serves as a unique identifier for your analysis.
+                - Task Name serves as a **:red[unique identifier for your analysis]**.
                 - All results will be organized and saved under a folder named after the Task Name, following a predefined nested folder structure.
-                - You can also choose a demo dataset or revisit a previous task here.
+                - You can also **:red[choose a demo dataset]** or **:red[revisit a previous task]** here.
             """
         )
 
@@ -173,7 +173,7 @@ def panel_misc() -> None:
 st.info(
     """
     ### User Configuration
-    - To help you better organize your work, please select a few important settings below.
+    - To help you better organize your work, please select a **:red[few important settings]** below.
     """
 )
 
