@@ -14,6 +14,55 @@ from PIL import Image
 
 # from streamlit.web.server.websocket_headers import _get_websocket_headers
 
+def init_reference_data() -> None:
+    t1img = os.path.join(
+        st.session_state.paths['resources'], 'reference_data', 'dlmuse', 'IXI012-HH-1211_T1.nii.gz'
+    )
+    dlmuse = os.path.join(
+        st.session_state.paths['resources'], 'reference_data', 'dlmuse', 'IXI012-HH-1211_T1_DLMUSE.nii.gz'
+    )
+    
+    st.session_state.ref_data = {
+        't1img' : t1img,
+        'dlmuse' : dlmuse
+    }
+
+
+
+def init_roi_definitions() -> None:
+
+    ###################################
+    # ROI dictionaries
+    # List of roi names, indices, etc.
+    st.session_state.rois = {
+        "path": os.path.join(st.session_state.paths["resources"], "lists"),
+        "roi_dict_options": [
+            "",
+            "muse_rois",
+        ],  # This will be extended with additional roi dict.s
+        "roi_csvs": {
+            "muse_rois": "MUSE_listROIs.csv",
+            "muse_derived": "MUSE_mapping_derivedROIs.csv",
+        },
+        "sel_roi_dict": "muse_rois",
+        "sel_derived_dict": "muse_derived",
+    }
+
+    # Read initial roi lists (default:MUSE) to dictionaries
+    ssroi = st.session_state.rois
+    df_tmp = pd.read_csv(
+        os.path.join(ssroi["path"], ssroi["roi_csvs"][ssroi["sel_roi_dict"]])
+    )
+    dict1 = dict(zip(df_tmp["Index"].astype(str), df_tmp["Name"].astype(str)))
+    dict2 = dict(zip(df_tmp["Name"].astype(str), df_tmp["Index"].astype(str)))
+    dict3 = utilroi.muse_derived_to_dict(
+        os.path.join(ssroi["path"], ssroi["roi_csvs"][ssroi["sel_derived_dict"]])
+    )
+    st.session_state.rois["roi_dict"] = dict1
+    st.session_state.rois["roi_dict_inv"] = dict2
+    st.session_state.rois["roi_dict_derived"] = dict3
+
+
 def update_default_paths() -> None:
     """
     Update default paths in session state if the working dir changed
@@ -284,6 +333,16 @@ def init_session_state() -> None:
             os.makedirs(st.session_state.paths["out_dir"])
         st.session_state.flags['out_dir'] = True
 
+        res_dir = st.session_state.paths["resources"]
+        st.session_state.dicts = {
+            "muse_derived": os.path.join(
+                res_dir, "MUSE", "list_MUSE_mapping_derived.csv"
+            ),
+            "muse_all": os.path.join(res_dir, "MUSE", "list_MUSE_all.csv"),
+            "muse_sel": os.path.join(res_dir, "MUSE", "list_MUSE_primary.csv"),
+        }
+
+
         # Set default task
         sel_task = 'Experiment_1'
         update_task(sel_task)
@@ -339,6 +398,9 @@ def init_session_state() -> None:
         }
         update_process_def(st.session_state.paths['proc_def'])
 
+        init_roi_definitions()
+        init_reference_data()
+        
         ####################################
         # Various parameters
 

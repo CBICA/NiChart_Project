@@ -17,11 +17,13 @@ logger.debug('Start of Home Screen!')
 
 # utilpg.select_main_menu()
 
-st.info(
+#st.info(
+st.markdown(
     """
     ### Welcome to NiChart Project!
-    - NiChart is an ***:red[open-source framework]*** built specifically for deriving ***:red[machine learning biomarkers]*** from ***:red[MRI imaging data]***.
+    - NiChart is an **<u>open-source framework</u>** built specifically for deriving **<u>machine learning biomarkers </u>** from **<u>MRI imaging data</u>**.
     """
+    , unsafe_allow_html=True
 )
 
 st.image("../resources/nichart1.png", width=300)
@@ -37,34 +39,38 @@ if sel == 'Overview':
     with st.container(border=True):
         st.markdown(
             """
-            - NiChart is a modular platform offering tools for ***:red[image processing]*** and ***:red[data analysis]***.
+            - NiChart is a modular platform offering tools for **<u>image processing </u>** and **<u>data analysis</u>**.
 
-            - Users can extract ***:red[imaging phenotypes]*** and ***:red[machine learning (ML) indices]*** of disease and aging.
+            - Users can extract **<u>imaging phenotypes </u>** and **<u>machine learning (ML) indices </u>** of disease and aging.
 
-            - Pre-trained ***:red[ML models]*** allow users to quantify complex brain changes and compare results against ***:red[normative and disease-specific reference ranges]***.
+            - Pre-trained **<u>ML models </u>** allow users to quantify complex brain changes and compare results against **<u>normative and disease-specific reference ranges</u>**.
             """
+            , unsafe_allow_html=True
         )
 
 elif sel == 'Quick Start Guide':
     with st.container(border=True):
         st.markdown(
             """
+            ##### Explore Brain Chart (No Data Upload Required):
+            
+            - **<u>Explore the distribution</u>** of imaging variables and machine learning–derived biomarkers **<u>from the NiChart reference dataset</u>**.
+            
+            - This module is designed for visualization only and **<u>does not require user data**</u>.
+            
+            - **<u>Includes:</u>** brain segmentation, region volumes, and biomarkers for aging and disease (e.g., AD, brain age).
+            
             ##### Analyze Your Own Data:
 
-            - ***:red[Quick Setup:]*** Select a few settings that will help to better organize your work.
+            - **<u>Upload Your Data: </u>** Navigate to the "Data" page to upload the files you wish to analyze.
 
-            - ***:red[Upload Your Data:]*** Navigate to the "Data" page to upload the files you wish to analyze.
+            - **<u>Select Your Pipeline: </u>** Go to the "Pipelines" page and choose the analysis workflow you want to apply to your data.
 
-            - ***:red[Select Your Pipeline:]*** Go to the "Pipelines" page and choose the analysis workflow you want to apply to your data.
+            - **<u>View and/or Download Your Results: </u>** Once the pipeline has finished processing, your findings will be available to view or to download.
 
-            - ***:red[View Your Results:]*** Once the pipeline has finished processing, your findings will be available on the "Results" page.
 
-            ##### Explore Sample Outputs (No Data Upload Required):
-
-            - ***:red[View Examples:]*** Go to the "Examples" page to visualize results of image processing and ML steps on public samples
-
-            - ***:red[Contents:]*** Segmentation of brain anatomy, volumes of brain regions, biomarkers of disease and aging such as AD and Brain Aging indices.
             """
+            , unsafe_allow_html=True
         )
 
 elif sel == 'Links':
@@ -76,6 +82,7 @@ elif sel == 'Links':
             - Jump into [our documentation](https://cbica.github.io/NiChart_Project)
             - Ask a question in [our community discussions](https://github.com/CBICA/NiChart_Project/discussions)
             """
+            , unsafe_allow_html=True
         )
 
 elif sel == 'Installation':
@@ -99,5 +106,6 @@ elif sel == 'Installation':
             https://cloud.neuroimagingchart.com
             ```
             """
+            , unsafe_allow_html=True
         )
     
