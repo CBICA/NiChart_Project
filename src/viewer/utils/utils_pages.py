@@ -7,9 +7,9 @@ from streamlit_option_menu import option_menu
 dict_menu = {
     "Home": "pages/home.py",
     "Quick Setup": "pages/setup.py",
-    "Data": "pages/data.py",
-    "Pipelines": "pages/pipelines.py",
-    "Results": "pages/results.py",
+    "Load Data": "pages/data.py",
+    "Process Data": "pages/pipelines.py",
+    "View Results": "pages/results.py",
     "Settings": "pages/settings.py",
 }
 
