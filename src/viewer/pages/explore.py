@@ -7,6 +7,7 @@ import utils.utils_session as utilss
 import utils.utils_rois as utilroi
 import utils.utils_nifti as utilni
 import utils.utils_st as utilst
+import utils.utils_plots as utilpl
 
 from stqdm import stqdm
 
@@ -94,7 +95,7 @@ def view_dlmuse_seg() -> None:
                             size_auto,
                         )
                     else:
-                        utilst.show_img3D(
+                        utilpl.show_img3D(
                             img_masked,
                             ind_view,
                             mask_bounds[ind_view, :],
@@ -102,7 +103,9 @@ def view_dlmuse_seg() -> None:
                             size_auto,
                         )
 
-
+def view_centiles_dlmuse() -> None:
+    
+    utilpl.panel_plot()
 
 #st.info(
 st.markdown(
@@ -132,7 +135,7 @@ if sel_item == 'Anatomical Brain Segmentation':
     view_dlmuse_seg()
 
 elif sel_item == 'Regional Brain Volumes':
-    view_dlmuse_centiles()
+    view_centiles_dlmuse()
     
 elif sel_item == 'ML-Based Brain Signatures':
     view_ml_centiles()

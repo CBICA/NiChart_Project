@@ -14,6 +14,98 @@ from PIL import Image
 
 # from streamlit.web.server.websocket_headers import _get_websocket_headers
 
+def init_plot_vars() -> None:
+    ###################################
+    # Plotting
+    # Dictionary with plot info
+    st.session_state.plots = pd.DataFrame(
+        columns=[
+            "pid",
+            "plot_type",
+            "xvar",
+            "xmin",
+            "xmax",
+            "yvar",
+            "ymin",
+            "ymax",
+            "hvar",
+            "hvals",
+            "corr_icv",
+            "plot_cent_normalized",
+            "trend",
+            "lowess_s",
+            "traces",
+            "centtype",
+        ]
+    )
+    st.session_state.plot_index = 1
+    st.session_state.plot_active = ""
+
+    # Constant plot settings
+    st.session_state.plot_const = {
+        "trend_types": ["", "Linear", "Smooth LOWESS Curve"],
+        "centile_types": ["", "CN", "CN_Males", "CN_Females", "CN_ICV_Corrected"],
+        "linfit_trace_types": ["lin_fit", "conf_95%"],
+        "centile_trace_types": [
+            "centile_5",
+            "centile_25",
+            "centile_50",
+            "centile_75",
+            "centile_95",
+        ],
+        "distplot_trace_types": ["histogram", "density", "rug"],
+        "min_per_row": 1,
+        "max_per_row": 5,
+        "num_per_row": 3,
+        "margin": 20,
+        "h_init": 500,
+        "h_coeff": 1.0,
+        "h_coeff_max": 2.0,
+        "h_coeff_min": 0.6,
+        "h_coeff_step": 0.2,
+        "distplot_binnum": 100,
+    }
+
+    # Plot variables
+    st.session_state.plot_var = {
+        "df_data": pd.DataFrame(),
+        "hide_settings": False,
+        "hide_legend": False,
+        "show_img": False,
+        "plot_type": "Scatter Plot",
+        "xvar": "",
+        "xmin": -1.0,
+        "xmax": -1.0,
+        "yvar": "",
+        "ymin": -1.0,
+        "ymax": -1.0,
+        "hvar": "",
+        "hvals": [],
+        "corr_icv": False,
+        "plot_cent_normalized": False,
+        "trend": "Linear",
+        "traces": ["data", "lin_fit"],
+        "lowess_s": 0.5,
+        "centtype": "",
+        "h_coeff": 1.0,
+    }
+    ###################################
+
+    ###################################
+    # Color maps for plots
+    st.session_state.plot_colors = {
+        "data": px.colors.qualitative.Set1,
+        "centile": [
+            "rgba(0, 0, 120, 0.5)",
+            "rgba(0, 0, 90, 0.7)",
+            "rgba(0, 0, 60, 0.9)",
+            "rgba(0, 0, 90, 0.7)",
+            "rgba(0, 0, 120, 0.5)",
+        ],
+    }
+    ###################################
+    
+
 def init_reference_data() -> None:
     t1img = os.path.join(
         st.session_state.paths['resources'], 'reference_data', 'dlmuse', 'IXI012-HH-1211_T1.nii.gz'
@@ -400,7 +492,7 @@ def init_session_state() -> None:
 
         init_roi_definitions()
         init_reference_data()
-        
+        init_plot_vars()
         ####################################
         # Various parameters
 
