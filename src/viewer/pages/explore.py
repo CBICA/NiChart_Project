@@ -22,11 +22,43 @@ logger.debug('Start of setup!')
 utilpg.config_page()
 utilpg.show_menu()
 
-def view_dlmuse_seg() -> None:
+def view_segmentations() -> None:
     """
-    Panel for viewing DLMUSE segmentations
+    Panel for viewing segmentations
     """
     with st.container(border=True):
+
+        # Select method
+        list_methods = ['DLMUSE', 'FreeSurfer']
+        sel_method = utilpn.panel_select_single(
+            list_methods, None, 'Method', 'sel_method'
+        )
+        if sel_method is None:
+            return
+
+        # Select var category
+        list_cat = ['Single', 'Derived', 'Deep Structures', 'White Matter']
+        sel_cat = utilpn.panel_select_single(
+            list_cat, None, 'Category', 'sel_cat'
+        )
+        if sel_cat is None:
+            return
+
+        # Select roi name
+        list_roi = ['Hippocampus', 'Thalamus']
+        sel_roi = utilpn.panel_select_single(
+            list_roi, None, 'Region', 'sel_roi'
+        )
+        if sel_roi is None:
+            return
+
+        # Select roi name
+        list_side = ['Left', 'Right', 'None']
+        sel_side = utilpn.panel_select_single(
+            list_side, None, 'Hemisphere', 'sel_side'
+        )
+        if sel_side is None:
+            return
 
         # Create combo list for selecting target ROI
         list_roi_names = utilroi.get_roi_names(st.session_state.dicts["muse_sel"])
@@ -111,7 +143,7 @@ def view_centiles_dlmuse() -> None:
 st.markdown(
     """
     ### Neuroimaging Chart Viewer
-    - View NiChart imaging variables and biomarkers derived from reference dataset
+    - View reference variables and distributions
     """
 )
 
@@ -120,7 +152,7 @@ if 'key_setup_sel_item' not in st.session_state:
 
 sel_item = st.pills(
     "Select NiChart Item",
-    ["Anatomical Brain Segmentation", "Regional Brain Volumes", "ML-Based Brain Signatures"],
+    ["Segmentations", "Volumes", "Biomarkers"],
     selection_mode="single",
     key='key_setup_sel_item',
     label_visibility="collapsed",
@@ -131,12 +163,12 @@ sel_item = st.pills(
     #st.session_state._setup_sel_item = sel_item
     #st.rerun()    
 
-if sel_item == 'Anatomical Brain Segmentation':
-    view_dlmuse_seg()
+if sel_item == 'Segmentations':
+    view_segmentations()
 
-elif sel_item == 'Regional Brain Volumes':
-    view_centiles_dlmuse()
+elif sel_item == 'Volumes':
+    view_volumes()
     
-elif sel_item == 'ML-Based Brain Signatures':
-    view_ml_centiles()
+elif sel_item == 'Biomarkers':
+    view_biomarkers()
     

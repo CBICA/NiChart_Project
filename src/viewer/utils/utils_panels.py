@@ -657,3 +657,36 @@ def panel_view_mri(config) -> None:
                         )
 
 
+def panel_select_single(list_options, def_val, msg_txt, key) -> None:
+    if msg_txt != '':
+        st.markdown(f'##### {msg_txt}')
+    
+    sel_items = st.pills(
+        'Select Item',
+        list_options,
+        default = def_val,
+        selection_mode = 'single',
+        label_visibility = 'collapsed',
+        key = f'_key_pills_{key}'
+    )
+    
+    return sel_items
+
+def panel_select_multi(list_options, msg_txt, key) -> None:
+    if msg_txt != '':
+        st.markdown(f'##### {msg_txt}')    
+    
+    list_sel = []
+    if st.checkbox('Select/Deselect All', key = f'_key_check_{key}'):
+        list_sel = list_options
+        
+    sel_items = st.pills(
+        'Select Item',
+        list_options,
+        default = list_sel,
+        selection_mode = 'multi',
+        label_visibility="collapsed",
+        key = f'_key_pills_{key}'
+    )
+    
+    return sel_items

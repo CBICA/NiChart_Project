@@ -218,7 +218,7 @@ def panel_misc() -> None:
             st.session_state.app_type = "desktop"
 
 
-st.info(
+st.markdown(
     """
     ### Configuration Options
     - Select configuration options here.

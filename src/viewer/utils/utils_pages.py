@@ -6,7 +6,7 @@ from streamlit_option_menu import option_menu
 # Hard-coded menu items for NiChart
 dict_menu = {
     "Home": "pages/home.py",
-    "Explore Brain Chart": "pages/explore.py",
+    "Explore NiChart": "pages/explore.py",
     "Upload Your Data": "pages/data.py",
     "Run Processing": "pages/pipelines.py",
     "View Your Brain Chart": "pages/results.py",

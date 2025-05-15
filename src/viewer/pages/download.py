@@ -8,10 +8,9 @@ import os
 utilpg.config_page()
 utilpg.show_menu()
 
-st.info(
+st.markdown(
     """
-    ### View Results 
-    - Select options to view/report results here.
+    ### Download Results 
     """
 )
 
