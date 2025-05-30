@@ -23,7 +23,7 @@ logger.debug('Start of setup!')
 utilpg.config_page()
 utilpg.show_menu()
 
-def view_segmentations() -> None:
+def view_dlmuse() -> None:
     """
     Panel for viewing segmentations
     """
@@ -142,7 +142,7 @@ def view_centiles_dlmuse() -> None:
 #st.info(
 st.markdown(
     """
-    ### Explore Neuroimaging Chart Values
+    ### Explore Neuroimaging Chart
     """
 )
 
@@ -162,17 +162,12 @@ psel = image_select(
     use_container_width = False
 )
 
-st.write(logo_fnames)
-st.write(psel)
+if psel == 0:
+    view_dlmuse()
 
-#st.write(img)
-
-#if sel_item == 'Segmentations':
-    #view_segmentations()
-
-#elif sel_item == 'Volumes':
-    #view_volumes()
+elif psel == 1:
+    view_dlwmls()
     
-#elif sel_item == 'Biomarkers':
-    #view_biomarkers()
+elif psel == 2:
+    view_spare()
     
