@@ -6,11 +6,12 @@ from streamlit_option_menu import option_menu
 # Hard-coded menu items for NiChart
 dict_menu = {
     "Home": "pages/home.py",
-    "Explore NiChart": "pages/explore.py",
-    "Upload Your Data": "pages/data.py",
-    "Run Processing": "pages/pipelines.py",
-    "View Your Brain Chart": "pages/results.py",
-    "Download Results": "pages/download.py",
+    "Explore NiChart": "pages/explore_nichart.py",
+    "Select Pipeline(s)": "pages/sel_pipelines.py",
+    "Upload Your Data": "pages/upload_data.py",
+    "Run Pipeline(s)": "pages/run_pipelines.py",
+    "View Your Brain Chart": "pages/view_chart.py",
+    "Download Results": "pages/download_results.py",
     "Settings": "pages/settings.py",
 }
 
@@ -24,7 +25,7 @@ def show_menu() -> None:
         sel_menu = option_menu(
             'NiChart',
             list_options,
-            icons=['house', 'diagram-3', 'upload', 'rocket-takeoff', 'graph-up', 'download', 'sliders'],
+            icons=['house', 'map', 'check2-square', 'upload', 'rocket-takeoff', 'graph-up', 'download', 'sliders'],
             menu_icon='cast',
             default_index=sel_ind
         )

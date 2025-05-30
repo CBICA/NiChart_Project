@@ -105,6 +105,14 @@ def init_plot_vars() -> None:
     }
     ###################################
     
+def init_pipeline_definitions() -> None:
+    plist = os.path.join(
+        st.session_state.paths['resources'], 'pipelines', 'list_pipelines.csv'
+    )
+    df_tmp = pd.read_csv(plist)
+    st.session_state.pdict = dict(zip(df_tmp["Name"], df_tmp["Label"]))
+    
+    print(st.session_state.pdict)
 
 def init_reference_data() -> None:
     t1img = os.path.join(
@@ -477,6 +485,11 @@ def init_session_state() -> None:
             "T1", "T2", "FL", "DTI", "fMRI"
         ]
 
+        init_roi_definitions()
+        init_pipeline_definitions()
+        init_reference_data()
+        init_plot_vars()
+
         ####################################
         # Process definitions
         # Used to keep process info provided in yaml files
@@ -488,11 +501,9 @@ def init_session_state() -> None:
             'sel_inputs': [],
             'sel_steps': [],
         }
-        update_process_def(st.session_state.paths['proc_def'])
+        #update_process_def(st.session_state.paths['proc_def'])
 
-        init_roi_definitions()
-        init_reference_data()
-        init_plot_vars()
+        
         ####################################
         # Various parameters
 
