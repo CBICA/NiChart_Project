@@ -23,22 +23,22 @@ logger.debug('Start of setup!')
 utilpg.config_page()
 utilpg.show_menu()
 
-def view_dlmuse() -> None:
+def view_segmentation(method) -> None:
     """
     Panel for viewing segmentations
     """
     with st.expander('Select parameters', expanded=True):
         
-        # Select method
-        list_out_type = ['Segmentation', 'Volumes']        
-        sel_out_type = st.pills(
+        # Select result type
+        list_res_type = ['Segmentation', 'Volumes']        
+        sel_res_type = st.pills(
             'Select result type',
-            list_out_type,
+            list_res_type,
             default = None,
             selection_mode = 'single',
             label_visibility = 'collapsed',
         )
-        if sel_out_type is None:
+        if sel_res_type is None:
             return        
 
         # Create combo list for selecting target ROI
@@ -77,14 +77,22 @@ def view_dlmuse() -> None:
             return
 
     with st.container():
-        if sel_out_type == 'Segmentation': 
+        if sel_res_type == 'Segmentation': 
+
+            # Select images
+            if method == 'dlmuse':
+                ulay = st.session_state.ref_data["t1img"]
+                olay = st.session_state.ref_data["dlmuse"],
+            elif method == 'dlwmls':
+                ulay = st.session_state.ref_data["flimg"]
+                olay = st.session_state.ref_data["dlwmls"],
 
             # Select images
             with st.spinner("Wait for it..."):
                 # Process image and mask to prepare final 3d matrix to display
                 img, mask, img_masked = utilni.prep_image_and_olay(
-                    st.session_state.ref_data["t1img"],
-                    st.session_state.ref_data["dlmuse"],
+                    ulay,
+                    olay,
                     list_rois,
                     crop_to_mask,
                 )
@@ -119,7 +127,7 @@ def view_dlmuse() -> None:
                                 size_auto,
                             )
 
-        elif sel_out_type == 'Volumes': 
+        elif sel_res_type == 'Volumes': 
 
             utilpl.panel_plot()
 
@@ -153,10 +161,10 @@ with st.expander('Select Pipeline', expanded=True):
     )
 
 if psel == 0:
-    view_dlmuse()
+    view_segmentation('dlmuse')
 
 elif psel == 1:
-    view_dlwmls()
+    view_segmentation('dlwmls')
     
 elif psel == 2:
     view_spare()
