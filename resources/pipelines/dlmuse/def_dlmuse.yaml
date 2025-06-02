@@ -5,11 +5,13 @@ dependencies:
   - t1_img
 
 inputs:
-  - name: t1_img
+  - name: t1
     type: directory
 
 outputs:
-  - name: dlmuse_csv
+  - name: dlmuse_seg
+    type: directory
+  - name: dlmuse_vol
     type: file
 
 mounts:
@@ -18,7 +20,7 @@ mounts:
     mode: ro
     
   - name: dlmuse_csv
-    path_in_container: /mnt/output/dlmuse.csv
+    path_in_container: /mnt/data/dlmuse/dlmuse.csv
     mode: rw
 
 resources:

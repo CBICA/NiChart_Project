@@ -27,39 +27,19 @@ def view_dlmuse() -> None:
     """
     Panel for viewing segmentations
     """
-    with st.container(border=True):
-
+    with st.expander('Select parameters', expanded=True):
+        
         # Select method
-        list_methods = ['DLMUSE', 'FreeSurfer']
-        sel_method = utilpn.panel_select_single(
-            list_methods, None, 'Method', 'sel_method'
+        list_out_type = ['Segmentation', 'Volumes']        
+        sel_out_type = st.pills(
+            'Select result type',
+            list_out_type,
+            default = None,
+            selection_mode = 'single',
+            label_visibility = 'collapsed',
         )
-        if sel_method is None:
-            return
-
-        # Select var category
-        list_cat = ['Single', 'Derived', 'Deep Structures', 'White Matter']
-        sel_cat = utilpn.panel_select_single(
-            list_cat, None, 'Category', 'sel_cat'
-        )
-        if sel_cat is None:
-            return
-
-        # Select roi name
-        list_roi = ['Hippocampus', 'Thalamus']
-        sel_roi = utilpn.panel_select_single(
-            list_roi, None, 'Region', 'sel_roi'
-        )
-        if sel_roi is None:
-            return
-
-        # Select roi name
-        list_side = ['Left', 'Right', 'None']
-        sel_side = utilpn.panel_select_single(
-            list_side, None, 'Hemisphere', 'sel_side'
-        )
-        if sel_side is None:
-            return
+        if sel_out_type is None:
+            return        
 
         # Create combo list for selecting target ROI
         list_roi_names = utilroi.get_roi_names(st.session_state.dicts["muse_sel"])
@@ -96,48 +76,58 @@ def view_dlmuse() -> None:
             st.warning("ROI list is empty!")
             return
 
-        # Select images
-        with st.spinner("Wait for it..."):
-            # Process image and mask to prepare final 3d matrix to display
-            img, mask, img_masked = utilni.prep_image_and_olay(
-                st.session_state.ref_data["t1img"],
-                st.session_state.ref_data["dlmuse"],
-                list_rois,
-                crop_to_mask,
-            )
+    with st.container():
+        if sel_out_type == 'Segmentation': 
 
-            # Detect mask bounds and center in each view
-            mask_bounds = utilni.detect_mask_bounds(mask)
+            # Select images
+            with st.spinner("Wait for it..."):
+                # Process image and mask to prepare final 3d matrix to display
+                img, mask, img_masked = utilni.prep_image_and_olay(
+                    st.session_state.ref_data["t1img"],
+                    st.session_state.ref_data["dlmuse"],
+                    list_rois,
+                    crop_to_mask,
+                )
 
-            # Show images
-            blocks = st.columns(len(list_orient))
-            for i, tmp_orient in stqdm(
-                enumerate(list_orient),
-                desc="Showing images ...",
-                total=len(list_orient),
-            ):
-                with blocks[i]:
-                    ind_view = utilni.img_views.index(tmp_orient)
-                    size_auto = True
-                    if is_show_overlay is False:
-                        utilst.show_img3D(
-                            img,
-                            ind_view,
-                            mask_bounds[ind_view, :],
-                            tmp_orient,
-                            size_auto,
-                        )
-                    else:
-                        utilpl.show_img3D(
-                            img_masked,
-                            ind_view,
-                            mask_bounds[ind_view, :],
-                            tmp_orient,
-                            size_auto,
-                        )
+                # Detect mask bounds and center in each view
+                mask_bounds = utilni.detect_mask_bounds(mask)
 
-def view_centiles_dlmuse() -> None:
-    utilpl.panel_plot()
+                # Show images
+                blocks = st.columns(len(list_orient))
+                for i, tmp_orient in stqdm(
+                    enumerate(list_orient),
+                    desc="Showing images ...",
+                    total=len(list_orient),
+                ):
+                    with blocks[i]:
+                        ind_view = utilni.img_views.index(tmp_orient)
+                        size_auto = True
+                        if is_show_overlay is False:
+                            utilst.show_img3D(
+                                img,
+                                ind_view,
+                                mask_bounds[ind_view, :],
+                                tmp_orient,
+                                size_auto,
+                            )
+                        else:
+                            utilpl.show_img3D(
+                                img_masked,
+                                ind_view,
+                                mask_bounds[ind_view, :],
+                                tmp_orient,
+                                size_auto,
+                            )
+
+        elif sel_out_type == 'Volumes': 
+
+            utilpl.panel_plot()
+
+def view_dlwmls() -> None:
+    st.write('Not there yet!')
+
+def view_spare() -> None:
+    st.write('Not there yet!')
 
 #st.info(
 st.markdown(
@@ -146,21 +136,21 @@ st.markdown(
     """
 )
 
-st.markdown("##### Select pipeline")
+with st.expander('Select Pipeline', expanded=True):
 
-pdict = st.session_state.pdict
-pdir = os.path.join(st.session_state.paths['resources'], 'pipelines')
-logo_fnames = [
-    os.path.join(pdir, pname, f'logo_{pname}.png') for pname in list(pdict.values())
-]
-psel = image_select(
-    "",
-    images = logo_fnames,
-    captions=list(pdict.keys()),
-    index=-1,
-    return_value="index",
-    use_container_width = False
-)
+    pdict = st.session_state.pdict
+    pdir = os.path.join(st.session_state.paths['resources'], 'pipelines')
+    logo_fnames = [
+        os.path.join(pdir, pname, f'logo_{pname}.png') for pname in list(pdict.values())
+    ]
+    psel = image_select(
+        "",
+        images = logo_fnames,
+        captions=list(pdict.keys()),
+        index=-1,
+        return_value="index",
+        use_container_width = False
+    )
 
 if psel == 0:
     view_dlmuse()
