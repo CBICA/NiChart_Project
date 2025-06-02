@@ -27,54 +27,51 @@ def view_segmentation(method) -> None:
     """
     Panel for viewing segmentations
     """
-    with st.expander('Select parameters', expanded=True):
+    with st.expander('Display Parameters', expanded=True):
         
-        # Select result type
-        list_res_type = ['Segmentation', 'Volumes']        
+        # Select result type        
+        list_res_type = ['Segmentation', 'Volumes']
+        st.markdown('Output type:')
         sel_res_type = st.pills(
             'Select result type',
             list_res_type,
-            default = None,
+            default = 'Segmentation',
             selection_mode = 'single',
             label_visibility = 'collapsed',
         )
-        if sel_res_type is None:
-            return        
+
+        if sel_res_type == 'Segmentation':
+            # Create a list of checkbox options
+            st.markdown('Viewing planes:')
+            list_orient = st.multiselect(
+                "Select viewing planes:",
+                utilni.img_views, 
+                utilni.img_views,
+                disabled=False,
+                label_visibility = 'collapsed'
+            )
+
+            # View hide overlay
+            is_show_overlay = st.checkbox("Show overlay", True, disabled=False)
+
+            # Crop to mask area
+            crop_to_mask = st.checkbox("Crop to mask", True, disabled=False)
 
         # Create combo list for selecting target ROI
         list_roi_names = utilroi.get_roi_names(st.session_state.dicts["muse_sel"])
         sel_var = st.selectbox(
             "ROI", list_roi_names, key="selbox_rois", index=None, disabled=False
         )
-        if sel_var is None:
-            st.warning("Please select the ROI!")
-            return
-
-        # Create a list of checkbox options
-        list_orient = st.multiselect(
-            "Select viewing planes:", utilni.img_views, utilni.img_views, disabled=False
-        )
-
-        if list_orient is None or len(list_orient) == 0:
-            st.warning("Please select the viewing plane!")
-            return
-
-        # View hide overlay
-        is_show_overlay = st.checkbox("Show overlay", True, disabled=False)
-
-        # Crop to mask area
-        crop_to_mask = st.checkbox("Crop to mask", True, disabled=False)
-
+        
         # Get indices for the selected var
         list_rois = utilroi.get_list_rois(
             sel_var,
             st.session_state.rois["roi_dict_inv"],
             st.session_state.rois["roi_dict_derived"],
         )
-
         if list_rois is None:
-            st.warning("ROI list is empty!")
             return
+
 
     with st.container():
         if sel_res_type == 'Segmentation': 
@@ -82,10 +79,10 @@ def view_segmentation(method) -> None:
             # Select images
             if method == 'dlmuse':
                 ulay = st.session_state.ref_data["t1img"]
-                olay = st.session_state.ref_data["dlmuse"],
+                olay = st.session_state.ref_data["dlmuse"]
             elif method == 'dlwmls':
                 ulay = st.session_state.ref_data["flimg"]
-                olay = st.session_state.ref_data["dlwmls"],
+                olay = st.session_state.ref_data["dlwmls"]
 
             # Select images
             with st.spinner("Wait for it..."):
@@ -144,9 +141,11 @@ st.markdown(
     """
 )
 
-with st.expander('Select Pipeline', expanded=True):
+with st.expander('Pipelines', expanded=True):
 
-    pdict = st.session_state.pdict
+    pdict = dict(
+        zip(st.session_state.pipelines['Name'], st.session_state.pipelines['Label'])
+    )
     pdir = os.path.join(st.session_state.paths['resources'], 'pipelines')
     logo_fnames = [
         os.path.join(pdir, pname, f'logo_{pname}.png') for pname in list(pdict.values())

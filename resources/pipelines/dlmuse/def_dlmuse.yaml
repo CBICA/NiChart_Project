@@ -12,7 +12,7 @@ outputs:
   - name: dlmuse_seg
     type: directory
   - name: dlmuse_vol
-    type: file
+    type: directory
 
 mounts:
   - name: t1_img

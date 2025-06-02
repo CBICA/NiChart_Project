@@ -1,4 +1,8 @@
 Name,Label
 DLMUSE,dlmuse
 DLWMLS,dlwmls
-SPARE,spare
+SPARE-AD,spare-ad
+SPARE-BA,spare-ba
+SPARE-CVM,spare-cvm
+SurrealGAN,surrealgan
+

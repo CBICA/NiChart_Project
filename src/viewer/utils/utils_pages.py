@@ -10,7 +10,7 @@ dict_menu = {
     "Select Pipeline(s)": "pages/sel_pipelines.py",
     "Upload Your Data": "pages/upload_data.py",
     "Run Pipeline(s)": "pages/run_pipelines.py",
-    "View Your Brain Chart": "pages/view_chart.py",
+    "View Your Brain Chart": "pages/view_results.py",
     "Download Results": "pages/download_results.py",
     "Settings": "pages/settings.py",
 }

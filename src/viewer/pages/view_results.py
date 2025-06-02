@@ -10,7 +10,7 @@ utilpg.show_menu()
 
 st.markdown(
     """
-    ### Download Results 
+    ### View Results 
     """
 )
 

@@ -109,10 +109,9 @@ def init_pipeline_definitions() -> None:
     plist = os.path.join(
         st.session_state.paths['resources'], 'pipelines', 'list_pipelines.csv'
     )
-    df_tmp = pd.read_csv(plist)
-    st.session_state.pdict = dict(zip(df_tmp["Name"], df_tmp["Label"]))
+    st.session_state.pipelines = pd.read_csv(plist)
     
-    print(st.session_state.pdict)
+    print(st.session_state.pipelines)
 
 def init_reference_data() -> None:
     t1img = os.path.join(
@@ -337,6 +336,8 @@ def init_session_state() -> None:
         
         # App icon image
         st.session_state.nicon = Image.open("../resources/nichart1.png")
+
+        st.session_state.sel_pipeline = None
 
         # Menu navigation
         st.session_state.sel_menu = 'Home'
