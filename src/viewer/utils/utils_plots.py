@@ -274,12 +274,20 @@ def add_plot(df_plots, new_plot_params):
     df_plots.loc[len(df_plots)] = {'params': new_plot_params}
     return df_plots
 
-def remove_plot(df_plots, sel_index):
+def delete_sel_plots(df_plots):
     """
-    Removes a plot 
+    Removes plots selected by the user
     (removes the row with the given index from the plots dataframe)
     """
-    df_plots = df_plots.drop(sel_index)
+    list_sel = []
+    for tmp_ind in df_plots.index.tolist():
+        if st.session_state[f'_key_plot_sel_{tmp_ind}']:
+            list_sel.append(tmp_ind)
+            st.session_state[f'_key_plot_sel_{tmp_ind}'] = False
+    
+    print(f'selected: {list_sel}')
+    
+    df_plots = df_plots.drop(list_sel).reset_index().drop(columns=['index'])
     return df_plots
 
 
@@ -455,39 +463,25 @@ def show_plots(df, df_plots):
             blocks = st.columns(plots_per_row)
         sel_params = df_plots.loc[plot_ind, 'params']
         with blocks[column_no]:
-            plot_type = sel_params['plot_type']
-            if plot_type == "Scatter Plot":
-                new_plot = display_scatter_plot(
-                    df, sel_params, None, plot_ind
-                )
-            plots_arr.append(new_plot)
-
+            with st.container(border=True):
+                plot_type = sel_params['plot_type']
+                if plot_type == "Scatter Plot":
+                    new_plot = display_scatter_plot(
+                        df, sel_params, None, plot_ind
+                    )
+                st.checkbox('Select', key = f'_key_plot_sel_{plot_ind}')
+                plots_arr.append(new_plot)
+    
     #if st.session_state.plot_params["show_img"]:
     #show_img()
 
 
-def panel_plot() -> None:
+def panel_plot(df):
     """
     Panel plot
     """
-    # Read dataframe
-    # if st.session_state.curr_df.shape[0] == 0:
-    #     st.session_state.curr_df = utildf.read_dataframe(
-    #         st.session_state.paths["csv_plot"]
-    #     )
-    
-    #df = st.session_state.curr_df
-    df = pd.read_csv('/home/guraylab/GitHub/gurayerus/NiChart_Project/test_data/processed/IXI/DLMUSE/DLMUSE_Volumes.csv')
-    
-    if df.shape[0] == 0:
-        st.warning("Dataframe has 0 rows!")
-        return
-
-    st.session_state.curr_df = df
-
-    # Add sidebar parameters
-    with st.sidebar:
-        # Button to add plot
+    # Add parameters
+    with st.container(border=True):
         plot_type = st.selectbox(
             "Plot Type", ["Scatter Plot", "Distribution Plot"], index=0
         )
@@ -551,16 +545,25 @@ def panel_plot() -> None:
             "Show image", value=st.session_state.plot_params["show_img"], disabled=False
         )
 
-    if st.button("New Plot"):
+        btn_add = st.button("Add Plot")
+        btn_del = st.button("Delete Plot")
+        
+    if btn_add:
         # Add plot
         st.session_state.plots = add_plot(
             st.session_state.plots,
             st.session_state.plot_params
         )
-                    
-        # Show plot
-        show_plots(
-            st.session_state.curr_df,
-            st.session_state.plots            
+
+    if btn_del:
+        # Add plot
+        st.session_state.plots = delete_sel_plots(
+            st.session_state.plots
         )
+                    
+    # Show plot
+    show_plots(
+        st.session_state.curr_df,
+        st.session_state.plots            
+    )
 
