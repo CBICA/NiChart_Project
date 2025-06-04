@@ -11,11 +11,8 @@ import utils.utils_session as utilses
 import plotly.graph_objs as go
 import utils.utils_trace as utiltr
 
-COL_LEFT = 5
-COL_RIGHT_EMPTY = 0.01
-COL_RIGHT_BUTTON = 1
-
-
+###################################################################
+# Misc utils
 
 def add_items_to_list(my_list: list, items_to_add: list) -> list:
     """Adds multiple items to a list, avoiding duplicates.
@@ -49,45 +46,6 @@ def remove_items_from_list(my_list: list, items_to_remove: list) -> list:
             out_list.append(item)
     return out_list
 
-
-def add_plot() -> None:
-    """
-    Adds a new plot (updates a dataframe with plot ids)
-    """
-    df_p = st.session_state.plots
-    plot_id = f"Plot{st.session_state.plot_index}"
-
-    df_p.loc[plot_id] = [
-        plot_id,
-        st.session_state.plot_var["plot_type"],
-        st.session_state.plot_var["xvar"],
-        st.session_state.plot_var["xmin"],
-        st.session_state.plot_var["xmax"],
-        st.session_state.plot_var["yvar"],
-        st.session_state.plot_var["ymin"],
-        st.session_state.plot_var["ymax"],
-        st.session_state.plot_var["hvar"],
-        st.session_state.plot_var["hvals"],
-        st.session_state.plot_var["corr_icv"],
-        st.session_state.plot_var["plot_cent_normalized"],
-        st.session_state.plot_var["trend"],
-        st.session_state.plot_var["lowess_s"],
-        st.session_state.plot_var["traces"].copy(),
-        st.session_state.plot_var["centtype"],
-    ]
-    st.session_state.plot_index += 1
-
-
-# Remove a plot
-def remove_plot(plot_id: str) -> None:
-    """
-    Removes the plot with the plot_id (updates the plot ids dataframe)
-    """
-    df_p = st.session_state.plots
-    df_p = df_p[df_p.pid != plot_id]
-    st.session_state.plots = df_p
-
-
 def get_index_in_list(in_list: list, in_item: str) -> Optional[int]:
     """
     Returns the index of the item in list, or None if item not found
@@ -96,6 +54,233 @@ def get_index_in_list(in_list: list, in_item: str) -> Optional[int]:
         return None
     else:
         return in_list.index(in_item)
+
+###################################################################
+# Traces
+
+def add_trace_scatter(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
+    # Set colormap
+    colors = st.session_state.plot_colors["data"]
+
+    # Get params
+    xvar = plot_params['xvar']
+    yvar = plot_params['yvar']
+    hvar = plot_params['hvar']
+    hvals = plot_params['hvals']
+    xmin = plot_params['xmin']
+    xmax = plot_params['xmax']
+    ymin = plot_params['ymin']
+    ymax = plot_params['ymax']
+    traces = plot_params['traces']
+    hide_legend = plot_params['hide_legend']
+
+    # Add a tmp column if group var is not set
+    dft = df.copy()
+    if hvar == "":
+        hvar = "grouping_var"
+        dft["grouping_var"] = "Data"
+    vals_hue_all = sorted(dft[hvar].unique())
+
+    if hvals == []:
+        hvals = vals_hue_all
+
+    if "data" in traces:
+        for hname in hvals:
+            
+            print(hvals)
+            
+            col_ind = vals_hue_all.index(hname)  # Select index of colour for the category
+            dfh = dft[dft[hvar] == hname]
+                        
+            trace = go.Scatter(
+                x=dfh[xvar],
+                y=dfh[yvar],
+                mode="markers",
+                marker={"color": colors[col_ind]},
+                name=hname,
+                legendgroup=hname,
+                showlegend=not hide_legend,
+            )
+            fig.add_trace(trace)
+        #fig.update_layout(xaxis_range=[xmin, xmax])
+        #fig.update_layout(yaxis_range=[ymin, ymax])
+
+def add_trace_linreg(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
+    """
+    Add linear fit and confidence interval
+    """
+    # Set colormap
+    colors = st.session_state.plot_colors["data"]
+
+    # Add a tmp column if group var is not set
+    dft = df.copy()
+    if hvar == "":
+        hvar = "All"
+        dft["All"] = "data"
+        vals_hue_all = ["All"]
+
+    vals_hue_all = sorted(dft[hvar].unique())
+    if hvals == []:
+        hvals = vals_hue_all
+
+    # Calculate fit
+    dict_fit = utilstat.linreg_model(dft, xvar, yvar, hvar)
+
+    # Add traces for the fit and confidence intervals
+    if "lin_fit" in traces:
+        for hname in hvals:
+            col_ind = vals_hue_all.index(
+                hname
+            )  # Select index of colour for the category
+            x_hat = dict_fit[hname]["x_hat"]
+            y_hat = dict_fit[hname]["y_hat"]
+            trace = go.Scatter(
+                x=x_hat,
+                y=y_hat,
+                mode="lines",
+                line={"color": colors[col_ind]},
+                name=f"lin_{hname}",
+                legendgroup=hname,
+                showlegend=not hide_legend,
+            )
+            fig.add_trace(trace)
+
+    if "conf_95%" in traces:
+        for hname in hvals:
+            col_ind = vals_hue_all.index(
+                hname
+            )  # Select index of colour for the category
+            x_hat = dict_fit[hname]["x_hat"]
+            y_hat = dict_fit[hname]["y_hat"]
+            conf_int = dict_fit[hname]["conf_int"]
+            trace = go.Scatter(
+                x=np.concatenate([x_hat, x_hat[::-1]]),
+                y=np.concatenate([conf_int[:, 0], conf_int[:, 1][::-1]]),
+                fill="toself",
+                fillcolor=f"rgba({colors[col_ind][4:-1]}, 0.2)",  # Add alpha channel
+                line=dict(color=f"rgba({colors[col_ind][4:-1]}, 0)"),
+                hoverinfo="skip",
+                name=f"lin_conf95_{hname}",
+                legendgroup=hname,
+                showlegend=not hide_legend,
+            )
+            fig.add_trace(trace)
+    fig.update_layout(xaxis_range=[xmin, xmax])
+    fig.update_layout(yaxis_range=[ymin, ymax])
+    return fig
+
+def add_trace_lowess(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
+    # Set colormap
+    colors = st.session_state.plot_colors["data"]
+
+    # Add a tmp column if group var is not set
+    dft = df.copy()
+    if hvar == "":
+        hvar = "All"
+        dft["All"] = "data"
+        vals_hue_all = ["All"]
+
+    vals_hue_all = sorted(dft[hvar].unique())
+    if hvals == []:
+        hvals = vals_hue_all
+
+    dict_fit = utilstat.lowess_model(dft, xvar, yvar, hvar, lowess_s)
+
+    # Add traces for the fit and confidence intervals
+    for hname in hvals:
+        col_ind = vals_hue_all.index(hname)  # Select index of colour for the category
+        x_hat = dict_fit[hname]["x_hat"]
+        y_hat = dict_fit[hname]["y_hat"]
+        trace = go.Scatter(
+            x=x_hat,
+            y=y_hat,
+            # showlegend=False,
+            mode="lines",
+            line={"color": colors[col_ind]},
+            name=f"lowess_{hname}",
+            legendgroup=hname,
+            showlegend=not hide_legend,
+        )
+        fig.add_trace(trace)
+
+    fig.update_layout(xaxis_range=[xmin, xmax])
+    fig.update_layout(yaxis_range=[ymin, ymax])
+
+def add_trace_dot(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
+    df_tmp = df[df.MRID == sel_mrid]
+    trace = go.Scatter(
+        x=df_tmp[xvar],
+        y=df_tmp[yvar],
+        mode="markers",
+        name="Selected",
+        marker=dict(
+            color="rgba(250, 50, 50, 0.5)", size=12, line=dict(color="Red", width=3)
+        ),
+        showlegend=not hide_legend,
+    )
+    fig.add_trace(trace)
+
+def add_trace_percentile(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
+    # Set colormap
+    colors = st.session_state.plot_colors["centile"]
+
+    # Get centile values for the selected roi
+    df_tmp = df[df.VarName == yvar]
+
+    # Create line traces
+    for i, cvar in enumerate(df_tmp.columns[2:]):
+        if cvar in traces:
+            ctrace = go.Scatter(
+                x=df_tmp[xvar],
+                y=df_tmp[cvar],
+                mode="lines",
+                name=cvar,
+                legendgroup="centiles",
+                line=dict(color=colors[i]),
+                showlegend=not hide_legend,
+            )
+
+            fig.add_trace(ctrace)  # plot in first row
+
+    fig.update_layout(xaxis_range=[xmin, xmax])
+    fig.update_layout(yaxis_range=[ymin, ymax])
+
+    return fig
+
+
+def add_trace_dots(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
+    trace = go.Scatter(
+        x=df[xvar],
+        y=df[yvar],
+        showlegend=False,
+        mode="markers",
+        name="datapoint",
+        line=dict(color="rgb(0,160,250)"),
+    )
+    return trace
+
+###################################################################
+# Plots
+
+def add_plot(df_plots, new_plot_params):
+    """
+    Adds a new plot 
+    (adds a new row to the plots dataframe with new plot params)
+    """
+    
+    new_plot_params['xvar'] = '702'
+    new_plot_params['yvar'] = '601'
+    
+    df_plots.loc[len(df_plots)] = {'params': new_plot_params}
+    return df_plots
+
+def remove_plot(df_plots, sel_index):
+    """
+    Removes a plot 
+    (removes the row with the given index from the plots dataframe)
+    """
+    df_plots = df_plots.drop(sel_index)
+    return df_plots
 
 
 def set_x_bounds(
@@ -135,476 +320,37 @@ def set_y_bounds(
     df_plots.loc[plot_id, "ymax"] = ymax
     df_plots.loc[plot_id, "ymin"] = ymin
 
-
-def add_plot_tabs(
-    df: pd.DataFrame, df_plots: pd.DataFrame, plot_id: str
-) -> pd.DataFrame:
-
-    # Set xy bounds initially to make plots consistent
-    if df_plots.loc[plot_id, "xmin"] == -1:
-        set_x_bounds(df, df_plots, plot_id, df_plots.loc[plot_id, "xvar"])
-    if df_plots.loc[plot_id, "ymin"] == -1:
-        set_y_bounds(df, df_plots, plot_id, df_plots.loc[plot_id, "yvar"])
-
-    ptabs = st.tabs(["Settings", "Layers", ":material/x:"])
-
-    # Tab 1: Plot settings
-    with ptabs[0]:
-        # Get df columns       
-        list_cols = df.columns[df.columns.str.contains("_centiles") == False].to_list()
-        list_cols_ext = [""] + list_cols
-        list_trends = st.session_state.plot_const["trend_types"]
-
-        # Set x var
-        def on_xvar_change() -> None:
-            key = f"plot_xvar_{plot_id}"
-            sel_val = st.session_state[key]
-            df_plots.loc[plot_id, "xvar"] = sel_val
-
-            # Update x bounds
-            set_x_bounds(df, df_plots, plot_id, df_plots.loc[plot_id, "xvar"])
-
-            # Reset centiles if x is not Age
-            if sel_val != "Age":
-                df_plots.loc[plot_id, "centtype"] = ""
-                df_plots.at[plot_id, "traces"] = remove_items_from_list(
-                    df_plots.loc[plot_id, "traces"],
-                    st.session_state.plot_const["centile_trace_types"],
-                )
-
-        xind = get_index_in_list(list_cols, df_plots.loc[plot_id, "xvar"])
-        st.selectbox(
-            "X Var",
-            list_cols,
-            key=f"plot_xvar_{plot_id}",
-            index=xind,
-            on_change=on_xvar_change,
-        )
-
-        if df_plots.loc[plot_id, "plot_type"] == "Scatter Plot":
-            # Set y var
-            def on_yvar_change() -> None:
-                key = f"plot_yvar_{plot_id}"
-                sel_val = st.session_state[key]
-                df_plots.loc[plot_id, "yvar"] = sel_val
-
-                # Check if centile value exists
-                if df_plots.loc[plot_id, "plot_cent_normalized"]:
-                    y_new = df_plots.loc[plot_id, "yvar"] + "_centiles"
-                    if y_new not in df.columns:
-                        df_plots.loc[plot_id, "plot_cent_normalized"] = False
-
-                # Update y bounds
-                if df_plots.loc[plot_id, "plot_cent_normalized"]:
-                    set_y_bounds(
-                        df,
-                        df_plots,
-                        plot_id,
-                        df_plots.loc[plot_id, "yvar"] + "_centiles",
-                    )
-                else:
-                    set_y_bounds(df, df_plots, plot_id, df_plots.loc[plot_id, "yvar"])
-
-            yind = get_index_in_list(list_cols, df_plots.loc[plot_id, "yvar"])
-            st.selectbox(
-                "Y Var",
-                list_cols,
-                key=f"plot_yvar_{plot_id}",
-                index=yind,
-                on_change=on_yvar_change,
-            )
-
-        # Set hvar
-        def on_hvar_change() -> None:
-            key = f"plot_hvar_{plot_id}"
-            sel_val = st.session_state[key]
-            df_plots.loc[plot_id, "hvar"] = sel_val
-            df_plots.at[plot_id, "hvals"] = []
-
-        hind = get_index_in_list(list_cols_ext, df_plots.loc[plot_id, "hvar"])
-        st.selectbox(
-            "Group by",
-            list_cols_ext,
-            key=f"plot_hvar_{plot_id}",
-            index=hind,
-            on_change=on_hvar_change,
-        )
-
-        if "ICV" in list_cols:
-            # Set icv corr flag
-            def on_check_icvcorr_change() -> None:
-                key = f"key_check_icv_{plot_id}"
-                sel_val = st.session_state[key]
-                df_plots.loc[plot_id, "corr_icv"] = sel_val
-
-            st.checkbox(
-                "Correct ICV",
-                value=df_plots.loc[plot_id, "corr_icv"],
-                help="Correct regional volumes using the intra-cranial volume to account for differences in head size",
-                key=f"key_check_icv_{plot_id}",
-                on_change=on_check_icvcorr_change,
-            )
-
-        if df_plots.loc[plot_id, "plot_type"] == "Scatter Plot":
-            # Set view cent norm data flag
-            def on_check_centnorm_change() -> None:
-                key = f"key_check_centiles_{plot_id}"
-                sel_val = st.session_state[key]
-                df_plots.loc[plot_id, "plot_cent_normalized"] = sel_val
-                if sel_val:
-                    set_y_bounds(
-                        df,
-                        df_plots,
-                        plot_id,
-                        df_plots.loc[plot_id, "yvar"] + "_centiles",
-                    )
-                else:
-                    set_y_bounds(df, df_plots, plot_id, df_plots.loc[plot_id, "yvar"])
-
-            y_new = df_plots.loc[plot_id, "yvar"] + "_centiles"
-            if y_new in df.columns:
-                st.checkbox(
-                    "Plot ROIs normalized by centiles",
-                    value=df_plots.loc[plot_id, "plot_cent_normalized"],
-                    help="Show ROI values normalized by reference centiles",
-                    key=f"key_check_centiles_{plot_id}",
-                    on_change=on_check_centnorm_change,
-                )
-
-            # Select trend
-            def on_trend_sel_change() -> None:
-                key = f"trend_type_{plot_id}"
-                sel_val = st.session_state[key]
-                df_plots.loc[plot_id, "trend"] = sel_val
-                if sel_val == "Linear":
-                    df_plots.at[plot_id, "traces"] = add_items_to_list(
-                        df_plots.loc[plot_id, "traces"], ["lin_fit"]
-                    )
-                else:
-                    df_plots.at[plot_id, "traces"] = remove_items_from_list(
-                        df_plots.loc[plot_id, "traces"], ["lin_fit", "conf_95%"]
-                    )
-
-            tind = get_index_in_list(list_trends, df_plots.loc[plot_id, "trend"])
-            st.selectbox(
-                "Trend Line",
-                list_trends,
-                key=f"trend_type_{plot_id}",
-                index=tind,
-                on_change=on_trend_sel_change,
-            )
-
-            # Select lowess smoothness
-            if df_plots.loc[plot_id, "trend"] == "Smooth LOWESS Curve":
-
-                def on_sel_lowessval_change() -> None:
-                    key = f"lowess_sm_{plot_id}"
-                    sel_val = st.session_state[key]
-                    df_plots.loc[plot_id, "lowess_s"] = sel_val
-
-                st.slider(
-                    "Smoothness",
-                    min_value=0.4,
-                    max_value=1.0,
-                    value=0.7,
-                    step=0.1,
-                    key=f"lowess_sm_{plot_id}",
-                    on_change=on_sel_lowessval_change,
-                )
-
-        if df_plots.loc[plot_id, "plot_type"] == "Distribution Plot":
-            df_plots.at[plot_id, "traces"] = ["density", "rug"]
-
-    # Tab 2: Layers
-    with ptabs[1]:
-
-        if df_plots.loc[plot_id, "plot_type"] == "Scatter Plot":
-
-            if df_plots.loc[plot_id, "xvar"] != "Age":
-                st.warning(
-                    'To view data centiles please select the "Age" as the x axis variable!'
-                )
-            else:
-                # Select centile type
-                def on_centile_sel_change() -> None:
-                    # Set centile selection to plot var
-                    key = f"cent_type_{plot_id}"
-                    sel_val = st.session_state[key]
-                    df_plots.loc[plot_id, "centtype"] = sel_val
-                    if sel_val == "":
-                        df_plots.at[plot_id, "traces"] = remove_items_from_list(
-                            df_plots.loc[plot_id, "traces"],
-                            st.session_state.plot_const["centile_trace_types"],
-                        )
-                    else:
-                        df_plots.at[plot_id, "traces"] = add_items_to_list(
-                            df_plots.loc[plot_id, "traces"],
-                            st.session_state.plot_const["centile_trace_types"],
-                        )
-
-                centtype = df_plots.loc[plot_id, "centtype"]
-                centind = st.session_state.plot_const["centile_types"].index(centtype)
-                st.selectbox(
-                    "Centile Type",
-                    st.session_state.plot_const["centile_types"],
-                    key=f"cent_type_{plot_id}",
-                    index=centind,
-                    on_change=on_centile_sel_change,
-                )
-
-        # Select group (hue) values
-        hvar = df_plots.loc[plot_id, "hvar"]
-        if hvar != "":
-
-            def on_hvals_change() -> None:
-                key = f"key_select_hvals_{plot_id}"
-                sel_val = st.session_state[key]
-                df_plots.at[plot_id, "hvals"] = sel_val
-                # if sel_val != '':
-
-            vals_hue = sorted(df[hvar].unique())
-            df_plots.at[plot_id, "hvals"] = st.multiselect(
-                "Select groups",
-                vals_hue,
-                vals_hue,
-                key=f"key_select_hvals_{plot_id}",
-                on_change=on_hvals_change,
-            )
-
-        if df_plots.loc[plot_id, "plot_type"] == "Scatter Plot":
-
-            # Update current list of traces
-            # df_plots.at[plot_id, "traces"] = [x for x in df_plots.loc[plot_id, "traces"] if x in list_traces]
-
-            # Read user selection for traces
-            def on_scatter_trace_sel_change() -> None:
-                key = f"key_sel_traces_scatter_{plot_id}"
-                sel_trace = st.session_state[key]
-                df_plots.at[plot_id, "traces"] = sel_trace
-
-            list_traces = ["data"]
-            if df_plots.loc[plot_id, "trend"] == "Linear":
-                list_traces = (
-                    list_traces + st.session_state.plot_const["linfit_trace_types"]
-                )
-            if df_plots.loc[plot_id, "centtype"] != "":
-                list_traces = (
-                    list_traces + st.session_state.plot_const["centile_trace_types"]
-                )
-
-            st.multiselect(
-                "Select traces",
-                list_traces,
-                df_plots.loc[plot_id, "traces"],
-                key=f"key_sel_traces_scatter_{plot_id}",
-                on_change=on_scatter_trace_sel_change,
-            )
-
-        if df_plots.loc[plot_id, "plot_type"] == "Distribution Plot":
-            # Read user selection for traces
-            def on_dist_trace_sel_change() -> None:
-                key = f"key_sel_trace_dist_{plot_id}"
-                sel_trace = st.session_state[key]
-                df_plots.at[plot_id, "traces"] = sel_trace
-
-            df_plots.at[plot_id, "traces"] = st.multiselect(
-                "Select traces",
-                st.session_state.plot_const["distplot_trace_types"],
-                df_plots.loc[plot_id, "traces"],
-                key=f"key_sel_trace_dist_{plot_id}",
-                on_change=on_dist_trace_sel_change,
-            )
-
-    # Tab 3: Reset parameters and/or delete plot
-    with ptabs[2]:
-        st.button(
-            "Delete Plot",
-            key=f"p_delete_{plot_id}",
-            on_click=remove_plot,
-            args=[plot_id],
-        )
-    return df
-
-
-def display_scatter_plot(
-    df: pd.DataFrame, plot_id: str, show_settings: bool, sel_mrid: str
-) -> Any:
+def display_scatter_plot(df, plot_params, sel_mrid, plot_ind):
     """
-    Displays the plot with the plot_id
+    Display plot
     """
+    # Main plot
+    m = st.session_state.plot_const["margin"]
+    hi = st.session_state.plot_const["h_init"]
+    hc = st.session_state.plot_params["h_coeff"]
+    layout = go.Layout(
+        height = hi * hc,
+        margin = dict(l=m, r=m, t=m, b=m),
+    )
+    fig = go.Figure(layout=layout)
 
-    def callback_plot_clicked() -> None:
-        """
-        Set the active plot id to plot that was clicked
-        """
-        st.session_state.plot_active = plot_id
+    # If user selected to use ICV corrected data
+    xvar = plot_params["xvar"]
+    yvar = plot_params["yvar"]
 
-        # Detect MRID from the click info and save to session_state
-        hind = get_index_in_list(df.columns.tolist(), curr_plot["hvar"])
+    # Add axis labels
+    fig.update_layout(xaxis_title = xvar, yaxis_title = yvar)
 
-        sel_info = st.session_state[f"bubble_chart_{plot_id}"]
-        if len(sel_info["selection"]["points"]) > 0:
-            sind = sel_info["selection"]["point_indices"][0]
-            if hind is None:
-                sel_mrid = df_filt.iloc[sind]["MRID"]
-            else:
-                lgroup = sel_info["selection"]["points"][0]["legendgroup"]
-                sel_mrid = df_filt[df_filt[curr_plot["hvar"]] == lgroup].iloc[sind][
-                    "MRID"
-                ]
-            sel_roi = st.session_state.plots.loc[st.session_state.plot_active, "yvar"]
-            st.session_state.sel_mrid = sel_mrid
-            st.session_state.sel_roi = sel_roi
-            st.session_state.sel_roi_img = sel_roi
-            st.session_state.paths["sel_img"] = ""
-            st.session_state.paths["sel_seg"] = ""
-            # st.rerun()
+    # Add data scatter
+    add_trace_scatter(df, plot_params, fig)
 
-    # Main container for the plot
-    with st.container(border=True):
+    #st.plotly_chart(fig, key=f"bubble_chart_{plot_id}", on_select=callback_plot_clicked)
+    st.plotly_chart(fig, key=f"bubble_chart_{plot_ind}")
 
-        # Tabs for plot parameters
-        df_filt = df
-        if show_settings:
-            df_filt = add_plot_tabs(df, st.session_state.plots, plot_id)
-
-        curr_plot = st.session_state.plots.loc[plot_id]
-
-        # Main plot
-        layout = go.Layout(
-            # height=st.session_state.plot_const['h_init']
-            height=st.session_state.plot_const["h_init"]
-            * st.session_state.plot_var["h_coeff"],
-            margin=dict(
-                l=st.session_state.plot_const["margin"],
-                r=st.session_state.plot_const["margin"],
-                t=st.session_state.plot_const["margin"],
-                b=st.session_state.plot_const["margin"],
-            ),
-        )
-        fig = go.Figure(layout=layout)
-
-        # If user selected to use ICV corrected data
-        yvar = curr_plot["yvar"]
-        if curr_plot["corr_icv"]:
-            df_filt[f"{yvar}_corrICV"] = (
-                df_filt[yvar] / df_filt["ICV"] * st.session_state.mean_icv
-            )
-            yvar = f"{yvar}_corrICV"
-
-        # If user selected to plot centiles
-        if curr_plot["plot_cent_normalized"]:
-            yvar = f'{curr_plot["yvar"]}_centiles'
-            if yvar not in df.columns:
-                st.warning(
-                    f'Centile values not available for variable: {curr_plot["yvar"]}'
-                )
-                yvar = curr_plot["yvar"]
-
-        # Add axis labels
-        fig.update_layout(
-            xaxis_title=curr_plot["xvar"],
-            yaxis_title=yvar,
-        )
-
-        # Add data scatter
-        utiltr.scatter_trace(
-            df_filt,
-            curr_plot["xvar"],
-            curr_plot["xmin"],
-            curr_plot["xmax"],
-            yvar,
-            curr_plot["ymin"],
-            curr_plot["ymax"],
-            curr_plot["hvar"],
-            curr_plot["hvals"],
-            curr_plot["traces"],
-            st.session_state.plot_var["hide_legend"],
-            fig,
-        )
-
-        # Add regression lines
-        if curr_plot["trend"] == "Linear":
-            utiltr.linreg_trace(
-                df_filt,
-                curr_plot["xvar"],
-                curr_plot["xmin"],
-                curr_plot["xmax"],
-                yvar,
-                curr_plot["ymin"],
-                curr_plot["ymax"],
-                curr_plot["hvar"],
-                curr_plot["hvals"],
-                curr_plot["traces"],
-                st.session_state.plot_var["hide_legend"],
-                fig,
-            )
-        elif curr_plot["trend"] == "Smooth LOWESS Curve":
-            utiltr.lowess_trace(
-                df_filt,
-                curr_plot["xvar"],
-                curr_plot["xmin"],
-                curr_plot["xmax"],
-                yvar,
-                curr_plot["ymin"],
-                curr_plot["ymax"],
-                curr_plot["hvar"],
-                curr_plot["hvals"],
-                curr_plot["lowess_s"],
-                st.session_state.plot_var["hide_legend"],
-                fig,
-            )
-
-        # Add centile values
-        if curr_plot["centtype"] != "":
-            fcent = os.path.join(
-                st.session_state.paths["root"],
-                "resources",
-                "centiles",
-                # f"centiles_{curr_plot['centtype']}.csv",
-                f"istag_centiles_{curr_plot['centtype']}.csv",
-            )
-            df_cent = pd.read_csv(fcent)
-            utiltr.percentile_trace(
-                df_cent,
-                curr_plot["xvar"],
-                curr_plot["xmin"],
-                curr_plot["xmax"],
-                yvar,
-                curr_plot["ymin"],
-                curr_plot["ymax"],
-                curr_plot["traces"],
-                st.session_state.plot_var["hide_legend"],
-                fig,
-            )
-
-        # Highlight selected data point
-        if sel_mrid != "":
-            yvar = curr_plot["yvar"]
-            if curr_plot["plot_cent_normalized"]:
-                yvar = f"{yvar}_centiles"
-            elif curr_plot["corr_icv"]:
-                yvar = f"{yvar}_corrICV"
-            utiltr.dot_trace(
-                df,
-                sel_mrid,
-                curr_plot["xvar"],
-                yvar,
-                st.session_state.plot_var["hide_legend"],
-                fig,
-            )
-
-        # Catch clicks on plot
-        # - on_select: when clicked it will rerun and return the info
-        st.plotly_chart(
-            fig, key=f"bubble_chart_{plot_id}", on_select=callback_plot_clicked
-        )
-
-        return fig
-
+    return fig
 
 def display_dist_plot(
-    df: pd.DataFrame, plot_id: str, show_settings: bool, sel_mrid: str
+    df_plots: pd.DataFrame, plot_id: str, show_settings: bool, sel_mrid: str
 ) -> Any:
     """
     Displays the plot with the plot_id
@@ -613,27 +359,27 @@ def display_dist_plot(
     with st.container(border=True):
 
         # Tabs for plot parameters
-        df_filt = df
+        df_plots_filt = df_plots
         if show_settings:
-            df_filt = add_plot_tabs(df, st.session_state.plots, plot_id)
+            df_plots_filt = add_plot_tabs(df_plots, st.session_state.plots, plot_id)
 
-        curr_plot = st.session_state.plots.loc[plot_id]
+        sel_plot = st.session_state.plots.loc[plot_id]
 
         # Main plot
         fig = utiltr.dist_plot(
-            df_filt,
-            curr_plot["xvar"],
-            curr_plot["hvar"],
-            curr_plot["hvals"],
-            curr_plot["traces"],
+            df_plots_filt,
+            sel_plot["xvar"],
+            sel_plot["hvar"],
+            sel_plot["hvals"],
+            sel_plot["traces"],
             st.session_state.plot_const["distplot_binnum"],
-            st.session_state.plot_var["hide_legend"],
+            st.session_state.plot_params["hide_legend"],
         )
 
         fig.update_layout(
             # height=st.session_state.plot_const['h_init']
             height=st.session_state.plot_const["h_init"]
-            * st.session_state.plot_var["h_coeff"],
+            * st.session_state.plot_params["h_coeff"],
             margin=dict(
                 l=st.session_state.plot_const["margin"],
                 r=st.session_state.plot_const["margin"],
@@ -645,7 +391,6 @@ def display_dist_plot(
 
         return fig
 
-  
 def show_img3D(
     img: np.ndarray,
     scroll_axis: Any,
@@ -687,29 +432,12 @@ def show_img3D(
         else:
             st.image(img[:, :, slice_index], width=w_img)
 
-def show_plots(df: pd.DataFrame, btn_plots: bool) -> None:
+def show_plots(df, df_plots):
     """
-    Display plots
+    Display all plots
     """
-    # Add a plot (a first plot is added by default; others at button click)
-    if st.session_state.plots.shape[0] == 0 or btn_plots:
-        # Select xvar and yvar, if not set yet
-        num_cols = df.select_dtypes(include="number").columns
-        if num_cols.shape[0] > 0:
-            if st.session_state.plot_var["xvar"] == "":
-                st.session_state.plot_var["xvar"] = num_cols[0]
-                if st.session_state.plot_var["yvar"] == "":
-                    if num_cols.shape[0] > 1:
-                        st.session_state.plot_var["yvar"] = num_cols[1]
-                    else:
-                        st.session_state.plot_var["yvar"] = num_cols[0]
-            add_plot()
-        else:
-            st.warning("No numeric columns in data!")
-
     # Read plot ids
-    df_p = st.session_state.plots
-    list_plots = df_p.index.tolist()
+    list_plots = df_plots.index.tolist()
     plots_per_row = st.session_state.plot_const["num_per_row"]
 
     # Render plots
@@ -725,68 +453,46 @@ def show_plots(df: pd.DataFrame, btn_plots: bool) -> None:
         column_no = i % plots_per_row
         if column_no == 0:
             blocks = st.columns(plots_per_row)
+        sel_params = df_plots.loc[plot_ind, 'params']
         with blocks[column_no]:
-            plot_type = st.session_state.plots.loc[plot_ind, "plot_type"]
+            plot_type = sel_params['plot_type']
             if plot_type == "Scatter Plot":
                 new_plot = display_scatter_plot(
-                    df,
-                    plot_ind,
-                    not st.session_state.plot_var["hide_settings"],
-                    st.session_state.sel_mrid,
-                )
-            elif plot_type == "Distribution Plot":
-                new_plot = display_dist_plot(
-                    df,
-                    plot_ind,
-                    not st.session_state.plot_var["hide_settings"],
-                    st.session_state.sel_mrid,
+                    df, sel_params, None, plot_ind
                 )
             plots_arr.append(new_plot)
 
-    if st.session_state.plot_var["show_img"]:
-        show_img()
+    #if st.session_state.plot_params["show_img"]:
+    #show_img()
 
 
 def panel_plot() -> None:
     """
     Panel plot
     """
-
-    # Panel for displaying plots
-    st.checkbox(
-        ":material/bid_landscape: Plot Data",
-        key="_check_view_plot",
-        #value=st.session_state.checkbox["view_plot"],
-    )
-    if not st.session_state._check_view_plot:
-        return
-
     # Read dataframe
-    # if st.session_state.plot_var["df_data"].shape[0] == 0:
-    #     st.session_state.plot_var["df_data"] = utildf.read_dataframe(
+    # if st.session_state.curr_df.shape[0] == 0:
+    #     st.session_state.curr_df = utildf.read_dataframe(
     #         st.session_state.paths["csv_plot"]
     #     )
     
-    #df = st.session_state.plot_var["df_data"]
+    #df = st.session_state.curr_df
     df = pd.read_csv('/home/guraylab/GitHub/gurayerus/NiChart_Project/test_data/processed/IXI/DLMUSE/DLMUSE_Volumes.csv')
     
     if df.shape[0] == 0:
         st.warning("Dataframe has 0 rows!")
         return
 
+    st.session_state.curr_df = df
+
     # Add sidebar parameters
     with st.sidebar:
         # Button to add plot
-        tmp_cols = st.columns((1, 1), vertical_alignment="bottom")
-        with tmp_cols[0]:
-            plot_type = st.selectbox(
-                "Plot Type", ["Scatter Plot", "Distribution Plot"], index=0
-            )
-            if plot_type is not None:
-                st.session_state.plot_var["plot_type"] = plot_type
-
-        with tmp_cols[1]:
-            btn_plots = st.button("Add plot", disabled=False)
+        plot_type = st.selectbox(
+            "Plot Type", ["Scatter Plot", "Distribution Plot"], index=0
+        )
+        if plot_type is not None:
+            st.session_state.plot_params["plot_type"] = plot_type
 
         st.session_state.plot_const["num_per_row"] = st.slider(
             "Plots per row",
@@ -796,7 +502,7 @@ def panel_plot() -> None:
             disabled=False,
         )
 
-        st.session_state.plot_var["h_coeff"] = st.slider(
+        st.session_state.plot_params["h_coeff"] = st.slider(
             "Plot height",
             min_value=st.session_state.plot_const["h_coeff_min"],
             max_value=st.session_state.plot_const["h_coeff_max"],
@@ -806,16 +512,16 @@ def panel_plot() -> None:
         )
 
         # Checkbox to show/hide plot options
-        st.session_state.plot_var["hide_settings"] = st.checkbox(
+        st.session_state.plot_params["hide_settings"] = st.checkbox(
             "Hide plot settings",
-            value=st.session_state.plot_var["hide_settings"],
+            value=st.session_state.plot_params["hide_settings"],
             disabled=False,
         )
 
         # Checkbox to show/hide plot legend
-        st.session_state.plot_var["hide_legend"] = st.checkbox(
+        st.session_state.plot_params["hide_legend"] = st.checkbox(
             "Hide legend",
-            value=st.session_state.plot_var["hide_legend"],
+            value=st.session_state.plot_params["hide_legend"],
             disabled=False,
         )
 
@@ -841,50 +547,20 @@ def panel_plot() -> None:
         st.divider()
 
         # Checkbox to show/hide mri image
-        st.session_state.plot_var["show_img"] = st.checkbox(
-            "Show image", value=st.session_state.plot_var["show_img"], disabled=False
+        st.session_state.plot_params["show_img"] = st.checkbox(
+            "Show image", value=st.session_state.plot_params["show_img"], disabled=False
         )
 
-        if st.session_state.plot_var["show_img"]:
-
-            # Selected roi rois
-            list_roi = df.columns.sort_values().tolist()
-            if st.session_state.sel_roi_img == "":
-                sel_ind = None
-            else:
-                sel_ind = list_roi.index(st.session_state.sel_roi_img)
-            sel_roi_img = st.selectbox(
-                "Selected ROI", list_roi, sel_ind, help="Select an ROI from the list"
-            )
-            if sel_roi_img is not None:
-                st.session_state.sel_roi_img = sel_roi_img
-
-            # Create a list of checkbox options
-            list_orient = st.multiselect(
-                "Select viewing planes:", utilni.img_views, utilni.img_views
-            )
-            if list_orient is not None:
-                st.session_state.mriview_var["list_orient"] = list_orient
-
-            # View hide overlay
-            st.session_state.mriview_var["show_overlay"] = st.checkbox(
-                "Show overlay", True
-            )
-
-            # Crop to mask area
-            st.session_state.mriview_var["crop_to_mask"] = st.checkbox(
-                "Crop to mask", True
-            )
-
-            st.session_state.mriview_var["w_coeff"] = st.slider(
-                "Img width",
-                min_value=st.session_state.mriview_const["w_coeff_min"],
-                max_value=st.session_state.mriview_const["w_coeff_max"],
-                value=st.session_state.mriview_const["w_coeff"],
-                step=st.session_state.mriview_const["w_coeff_step"],
-                disabled=False,
-            )
-
-    # Show plot
-    show_plots(df, btn_plots)
+    if st.button("New Plot"):
+        # Add plot
+        st.session_state.plots = add_plot(
+            st.session_state.plots,
+            st.session_state.plot_params
+        )
+                    
+        # Show plot
+        show_plots(
+            st.session_state.curr_df,
+            st.session_state.plots            
+        )
 

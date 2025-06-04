@@ -270,7 +270,6 @@ def percentile_trace(
     hide_legend: bool,
     fig: Any,
 ) -> Any:
-
     # Set colormap
     colors = st.session_state.plot_colors["centile"]
 

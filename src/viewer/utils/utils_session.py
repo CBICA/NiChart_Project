@@ -18,28 +18,8 @@ def init_plot_vars() -> None:
     ###################################
     # Plotting
     # Dictionary with plot info
-    st.session_state.plots = pd.DataFrame(
-        columns=[
-            "pid",
-            "plot_type",
-            "xvar",
-            "xmin",
-            "xmax",
-            "yvar",
-            "ymin",
-            "ymax",
-            "hvar",
-            "hvals",
-            "corr_icv",
-            "plot_cent_normalized",
-            "trend",
-            "lowess_s",
-            "traces",
-            "centtype",
-        ]
-    )
-    st.session_state.plot_index = 1
-    st.session_state.plot_active = ""
+    st.session_state.plots = pd.DataFrame(columns=['params'])
+    st.session_state.plot_curr = -1
 
     # Constant plot settings
     st.session_state.plot_const = {
@@ -66,9 +46,11 @@ def init_plot_vars() -> None:
         "distplot_binnum": 100,
     }
 
+    # Plot data
+    st.session_state.curr_df = pd.DataFrame()
+
     # Plot variables
-    st.session_state.plot_var = {
-        "df_data": pd.DataFrame(),
+    st.session_state.plot_params = {
         "hide_settings": False,
         "hide_legend": False,
         "show_img": False,
