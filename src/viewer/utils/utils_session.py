@@ -114,19 +114,19 @@ def init_pipeline_definitions() -> None:
     print(st.session_state.pipelines)
 
 def init_reference_data() -> None:
-    t1img = os.path.join(
-        st.session_state.paths['resources'], 'reference_data', 'dlmuse', 'IXI012-HH-1211_T1.nii.gz'
+    indir = os.path.join(
+        st.session_state.paths['resources'], 'reference_data', 'sample1'
     )
-    dlmuse = os.path.join(
-        st.session_state.paths['resources'], 'reference_data', 'dlmuse', 'IXI012-HH-1211_T1_DLMUSE.nii.gz'
-    )
-    
+    t1 = os.path.join(indir, 't1', 'sample1_T1.nii.gz')
+    fl = os.path.join(indir, 'fl', 'sample1_FL.nii.gz')
+    dlmuse = os.path.join(indir, 'dlmuse', 'sample1_T1_DLMUSE.nii.gz')
+    dlwmls = os.path.join(indir, 'dlwmls', 'sample1_FL_DLWMLS.nii.gz')
     st.session_state.ref_data = {
-        't1img' : t1img,
-        'dlmuse' : dlmuse
+        't1' : t1,
+        'fl' : fl,
+        'dlmuse' : dlmuse,
+        'dlwmls' : dlwmls
     }
-
-
 
 def init_roi_definitions() -> None:
 

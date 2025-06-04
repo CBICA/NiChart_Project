@@ -23,45 +23,49 @@ logger.debug('Start of setup!')
 utilpg.config_page()
 utilpg.show_menu()
 
-def view_segmentation(method) -> None:
+def view_description(method) -> None:
     """
-    Panel for viewing segmentations
+    Panel for viewing method description
     """
-    with st.expander('Display Parameters', expanded=True):
+    with st.container(border=True):
+        fdoc = os.path.join(
+            st.session_state.paths['resources'],
+            'pipelines',
+            method,
+            'overview_' + method + '.md'
+        )
+        with open(fdoc, 'r') as f:
+            markdown_content = f.read()
+        st.markdown(markdown_content)
+
+def view_dlmuse() -> None:
+    """
+    Panel for viewing dlmuse segmentation
+    """
+    with st.container(border=True):
         
-        # Select result type        
-        list_res_type = ['Segmentation', 'Volumes']
-        st.markdown('Output type:')
-        sel_res_type = st.pills(
-            'Select result type',
-            list_res_type,
-            default = 'Segmentation',
-            selection_mode = 'single',
-            label_visibility = 'collapsed',
-        )
+        col1, col2, col3 = st.columns(3)
 
-        if sel_res_type == 'Segmentation':
-            # Create a list of checkbox options
-            st.markdown('Viewing planes:')
-            list_orient = st.multiselect(
-                "Select viewing planes:",
-                utilni.img_views, 
-                utilni.img_views,
-                disabled=False,
-                label_visibility = 'collapsed'
+        with col1:
+            # Select result type        
+            list_res_type = ['Segmentation', 'Volumes']
+            st.markdown('Output type:')
+            sel_res_type = st.pills(
+                'Select result type',
+                list_res_type,
+                default = None,
+                selection_mode = 'single',
+                label_visibility = 'collapsed',
             )
+        if sel_res_type is None:
+            return
 
-            # View hide overlay
-            is_show_overlay = st.checkbox("Show overlay", True, disabled=False)
-
-            # Crop to mask area
-            crop_to_mask = st.checkbox("Crop to mask", True, disabled=False)
-
-        # Create combo list for selecting target ROI
-        list_roi_names = utilroi.get_roi_names(st.session_state.dicts["muse_sel"])
-        sel_var = st.selectbox(
-            "ROI", list_roi_names, key="selbox_rois", index=None, disabled=False
-        )
+        with col2:
+            # Create combo list for selecting target ROI
+            list_roi_names = utilroi.get_roi_names(st.session_state.dicts["muse_sel"])
+            sel_var = st.selectbox(
+                "ROI", list_roi_names, key="selbox_rois", index=None, disabled=False
+            )
         
         # Get indices for the selected var
         list_rois = utilroi.get_list_rois(
@@ -69,20 +73,34 @@ def view_segmentation(method) -> None:
             st.session_state.rois["roi_dict_inv"],
             st.session_state.rois["roi_dict_derived"],
         )
+
         if list_rois is None:
             return
+
+        if sel_res_type == 'Segmentation':
+
+            with col3:
+                # Create a list of checkbox options
+                list_orient = st.multiselect(
+                    "Select viewing planes:",
+                    utilni.img_views, 
+                    utilni.img_views,
+                    disabled=False,
+                    label_visibility = 'collapsed'
+                )
+                # View hide overlay
+                is_show_overlay = st.checkbox("Show overlay", True, disabled=False)
+                # Crop to mask area
+                crop_to_mask = st.checkbox("Crop to mask", True, disabled=False)
+
 
 
     with st.container():
         if sel_res_type == 'Segmentation': 
 
             # Select images
-            if method == 'dlmuse':
-                ulay = st.session_state.ref_data["t1img"]
-                olay = st.session_state.ref_data["dlmuse"]
-            elif method == 'dlwmls':
-                ulay = st.session_state.ref_data["flimg"]
-                olay = st.session_state.ref_data["dlwmls"]
+            ulay = st.session_state.ref_data["t1"]
+            olay = st.session_state.ref_data["dlmuse"]
 
             # Select images
             with st.spinner("Wait for it..."):
@@ -125,11 +143,99 @@ def view_segmentation(method) -> None:
                             )
 
         elif sel_res_type == 'Volumes': 
-
             utilpl.panel_plot()
 
 def view_dlwmls() -> None:
-    st.write('Not there yet!')
+    """
+    Panel for viewing dlwmls segmentation
+    """
+    with st.container(border=True):
+        
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            # Select result type        
+            list_res_type = ['Segmentation', 'Volumes']
+            st.markdown('Output type:')
+            sel_res_type = st.pills(
+                'Select result type',
+                list_res_type,
+                default = None,
+                selection_mode = 'single',
+                label_visibility = 'collapsed',
+            )
+        if sel_res_type is None:
+            return
+        
+        # Select 1 for overlay indice (lesion)
+        list_rois = [1]
+
+        if sel_res_type == 'Segmentation':
+
+            with col3:
+                # Create a list of checkbox options
+                list_orient = st.multiselect(
+                    "Select viewing planes:",
+                    utilni.img_views, 
+                    utilni.img_views,
+                    disabled=False,
+                    label_visibility = 'collapsed'
+                )
+                # View hide overlay
+                is_show_overlay = st.checkbox("Show overlay", True, disabled=False)
+                # Crop to mask area
+                crop_to_mask = st.checkbox("Crop to mask", False, disabled=False)
+
+    with st.container():
+        if sel_res_type == 'Segmentation': 
+
+            # Select images
+            ulay = st.session_state.ref_data["fl"]
+            olay = st.session_state.ref_data["dlwmls"]
+
+            # Select images
+            with st.spinner("Wait for it..."):
+                # Process image and mask to prepare final 3d matrix to display
+                img, mask, img_masked = utilni.prep_image_and_olay(
+                    ulay,
+                    olay,
+                    list_rois,
+                    crop_to_mask,
+                )
+
+                # Detect mask bounds and center in each view
+                mask_bounds = utilni.detect_mask_bounds(mask)
+
+                # Show images
+                blocks = st.columns(len(list_orient))
+                for i, tmp_orient in stqdm(
+                    enumerate(list_orient),
+                    desc="Showing images ...",
+                    total=len(list_orient),
+                ):
+                    with blocks[i]:
+                        ind_view = utilni.img_views.index(tmp_orient)
+                        size_auto = True
+                        if is_show_overlay is False:
+                            utilst.show_img3D(
+                                img,
+                                ind_view,
+                                mask_bounds[ind_view, :],
+                                tmp_orient,
+                                size_auto,
+                            )
+                        else:
+                            utilpl.show_img3D(
+                                img_masked,
+                                ind_view,
+                                mask_bounds[ind_view, :],
+                                tmp_orient,
+                                size_auto,
+                            )
+
+        elif sel_res_type == 'Volumes': 
+            utilpl.panel_plot()
+
 
 def view_spare() -> None:
     st.write('Not there yet!')
@@ -141,7 +247,11 @@ st.markdown(
     """
 )
 
-with st.expander('Pipelines', expanded=True):
+tab1, tab2, tab3 = st.tabs(
+    ["Select Pipeline", "View Description", "View Outputs"]
+)
+
+with tab1:
 
     pdict = dict(
         zip(st.session_state.pipelines['Name'], st.session_state.pipelines['Label'])
@@ -154,17 +264,23 @@ with st.expander('Pipelines', expanded=True):
         "",
         images = logo_fnames,
         captions=list(pdict.keys()),
-        index=-1,
+        index=0,
         return_value="index",
         use_container_width = False
     )
-
-if psel == 0:
-    view_segmentation('dlmuse')
-
-elif psel == 1:
-    view_segmentation('dlwmls')
     
-elif psel == 2:
-    view_spare()
+    print(psel)
+    print(pdict)
+
+with tab2:
+    view_description(list(pdict.values())[psel])
     
+with tab3:
+    if psel == 0:
+        view_dlmuse()
+
+    elif psel == 1:
+        view_dlwmls()
+        
+    elif psel == 2:
+        view_spare()
