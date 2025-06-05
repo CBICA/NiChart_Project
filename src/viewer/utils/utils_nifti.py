@@ -100,7 +100,7 @@ def pad_image(img: np.ndarray) -> np.ndarray:
     return out_img
 
 
-def detect_mask_bounds(mask: Any) -> Any:
+def detect_img_bounds(mask: Any) -> Any:
     """
     Detect the mask start, end and center in each view
     Used later to set the slider in the image viewer

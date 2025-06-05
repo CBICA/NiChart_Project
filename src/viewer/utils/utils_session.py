@@ -139,9 +139,13 @@ def init_roi_definitions() -> None:
     dict3 = utilroi.muse_derived_to_dict(
         os.path.join(ssroi["path"], ssroi["roi_csvs"][ssroi["sel_derived_dict"]])
     )
+    dict4 = utilroi.muse_derived_to_df(
+        os.path.join(ssroi["path"], ssroi["roi_csvs"][ssroi["sel_derived_dict"]])
+    )
     st.session_state.rois["roi_dict"] = dict1
     st.session_state.rois["roi_dict_inv"] = dict2
     st.session_state.rois["roi_dict_derived"] = dict3
+    st.session_state.rois["muse_derived"] = dict4
 
 
 def update_default_paths() -> None:

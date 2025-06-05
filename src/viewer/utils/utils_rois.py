@@ -63,6 +63,24 @@ def muse_derived_to_dict(list_derived: list) -> Any:
 
     return dict_derived
 
+def muse_derived_to_df(list_derived: list) -> Any:
+    """
+    Create a df from derived roi list
+    """
+    # Read list
+    df = pd.read_csv(list_derived, header=None)
+
+    # Rename first two columns
+    df = df.rename(columns={0: 'Index', 1: 'Name'})
+
+    # Create a new column 'List' with the remaining columns as a list
+    df['List'] = df.iloc[:, 2:].values.tolist()
+
+    # Keep only the desired columns
+    df = df[['Index', 'Name', 'List']]
+
+    return df
+
 
 def muse_get_derived(sel_roi: str, list_derived: list) -> Any:
     """
