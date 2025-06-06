@@ -13,6 +13,41 @@ import plotly.graph_objs as go
 import utils.utils_trace as utiltr
 from stqdm import stqdm
 
+VIEW_AXES = [0, 1, 2]
+VIEW_OTHER_AXES = [(1, 2), (0, 2), (0, 1)]
+
+def detect_mask_bounds(mask: Any) -> Any:
+    """
+    Detect the mask start, end and center in each view
+    Used later to set the slider in the image viewer
+    """
+    mask_bounds = np.zeros([3, 3]).astype(int)
+    for i, axis in enumerate(VIEW_AXES):
+        mask_bounds[i, 0] = 0
+        mask_bounds[i, 1] = mask.shape[i]
+        slices_nz = np.where(np.sum(mask, axis=VIEW_OTHER_AXES[i]) > 0)[0]
+        try:
+            mask_bounds[i, 2] = slices_nz[len(slices_nz) // 2]
+        except:
+            # Could not detect masked region. Set center to image center
+            mask_bounds[i, 2] = mask.shape[i] // 2
+
+    return mask_bounds
+
+
+def detect_img_bounds(img: np.ndarray) -> np.ndarray:
+    """
+    Detect the img start, end and center in each view
+    Used later to set the slider in the image viewer
+    """
+    img_bounds = np.zeros([3, 3]).astype(int)
+    for i, axis in enumerate(VIEW_AXES):
+        img_bounds[i, 0] = 0
+        img_bounds[i, 1] = img.shape[i]
+        img_bounds[i, 2] = img.shape[i] // 2
+
+    return img_bounds
+
 def show_img_slices(
     img, scroll_axis, sel_axis_bounds, orientation, wimg = None,
 ):
@@ -92,13 +127,13 @@ def view_mri(
             # Process image (and mask) to prepare final 3d matrix to display
             if olay is None:
                 img = utilnii.prep_image(ulay)
-                img_bounds = utilnii.detect_img_bounds(img)
+                img_bounds = detect_img_bounds(img)
                 
             else:
                 img, mask, img_masked = utilnii.prep_image_and_olay(
                     ulay, olay, list_roi_indices, crop_to_mask
                 )
-                img_bounds = utilnii.detect_img_bounds(mask)
+                img_bounds = detect_mask_bounds(mask)
 
             # Show images
             blocks = st.columns(len(list_orient))

@@ -221,6 +221,19 @@ def add_trace_dot(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
     fig.add_trace(trace)
 
 def add_trace_percentile(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
+    
+    # Get params
+    xvar = plot_params['xvar']
+    yvar = plot_params['yvar']
+    hvar = plot_params['hvar']
+    hvals = plot_params['hvals']
+    xmin = plot_params['xmin']
+    xmax = plot_params['xmax']
+    ymin = plot_params['ymin']
+    ymax = plot_params['ymax']
+    traces = plot_params['traces']
+    hide_legend = plot_params['hide_legend']
+    
     # Set colormap
     colors = st.session_state.plot_colors["centile"]
 
@@ -242,8 +255,8 @@ def add_trace_percentile(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
 
             fig.add_trace(ctrace)  # plot in first row
 
-    fig.update_layout(xaxis_range=[xmin, xmax])
-    fig.update_layout(yaxis_range=[ymin, ymax])
+    #fig.update_layout(xaxis_range=[xmin, xmax])
+    #fig.update_layout(yaxis_range=[ymin, ymax])
 
     return fig
 
@@ -268,8 +281,11 @@ def add_plot(df_plots, new_plot_params):
     (adds a new row to the plots dataframe with new plot params)
     """
     
-    new_plot_params['xvar'] = '702'
-    new_plot_params['yvar'] = '601'
+    new_plot_params['xvar'] = 'Age'
+    new_plot_params['yvar'] = 'GM'
+    new_plot_params['traces'] = [
+        'centile_5', 'centile_50', 'centile_95'
+    ]
     
     df_plots.loc[len(df_plots)] = {'params': new_plot_params}
     return df_plots
@@ -342,15 +358,17 @@ def display_scatter_plot(df, plot_params, sel_mrid, plot_ind):
     )
     fig = go.Figure(layout=layout)
 
-    # If user selected to use ICV corrected data
     xvar = plot_params["xvar"]
     yvar = plot_params["yvar"]
 
     # Add axis labels
     fig.update_layout(xaxis_title = xvar, yaxis_title = yvar)
 
-    # Add data scatter
-    add_trace_scatter(df, plot_params, fig)
+    ## Add data scatter
+    #add_trace_scatter(df, plot_params, fig)
+
+    # Add centile trace
+    add_trace_percentile(df, plot_params, fig)
 
     #st.plotly_chart(fig, key=f"bubble_chart_{plot_id}", on_select=callback_plot_clicked)
     st.plotly_chart(fig, key=f"bubble_chart_{plot_ind}")
@@ -476,77 +494,74 @@ def show_plots(df, df_plots):
     #show_img()
 
 
-def panel_plot(df):
+def panel_data_plots(df):
     """
-    Panel plot
+    Panel for adding multiple plots with configuration options
     """
+    flag_settings = st.sidebar.checkbox('Hide plot settings')
+    flag_params = st.sidebar.checkbox('Hide plot params')
+
     # Add parameters
     with st.container(border=True):
-        plot_type = st.selectbox(
-            "Plot Type", ["Scatter Plot", "Distribution Plot"], index=0
-        )
-        if plot_type is not None:
-            st.session_state.plot_params["plot_type"] = plot_type
-
-        st.session_state.plot_const["num_per_row"] = st.slider(
-            "Plots per row",
-            st.session_state.plot_const["min_per_row"],
-            st.session_state.plot_const["max_per_row"],
-            st.session_state.plot_const["num_per_row"],
-            disabled=False,
-        )
-
-        st.session_state.plot_params["h_coeff"] = st.slider(
-            "Plot height",
-            min_value=st.session_state.plot_const["h_coeff_min"],
-            max_value=st.session_state.plot_const["h_coeff_max"],
-            value=st.session_state.plot_const["h_coeff"],
-            step=st.session_state.plot_const["h_coeff_step"],
-            disabled=False,
-        )
-
-        # Checkbox to show/hide plot options
-        st.session_state.plot_params["hide_settings"] = st.checkbox(
-            "Hide plot settings",
-            value=st.session_state.plot_params["hide_settings"],
-            disabled=False,
-        )
-
-        # Checkbox to show/hide plot legend
-        st.session_state.plot_params["hide_legend"] = st.checkbox(
-            "Hide legend",
-            value=st.session_state.plot_params["hide_legend"],
-            disabled=False,
-        )
-
-        # Selected id
-        list_mrid = df.MRID.sort_values().tolist()
         
-        st.session_state.sel_mrid = df.MRID.values[0]
-        if st.session_state.sel_mrid == "":
-            sel_ind = None
-        else:
-            sel_ind = list_mrid.index(st.session_state.sel_mrid)
-        sel_mrid = st.selectbox(
-            "Selected subject",
-            list_mrid,
-            sel_ind,
-            help="Select a subject from the list, or by clicking on data points on the plots",
-        )
-        if sel_mrid is not None:
-            st.session_state.sel_mrid = sel_mrid
-            st.session_state.paths["sel_img"] = ""
-            st.session_state.paths["sel_seg"] = ""
+        if not flag_settings:
+            ptab1, ptab2, ptab3 = st.tabs(
+                ['Plot Settings', 'Variables', 'Others']
+            )        
+            with ptab1:
+                plot_type = st.selectbox(
+                    "Plot Type", ["Scatter Plot", "Distribution Plot"], index=0
+                )
+                if plot_type is not None:
+                    st.session_state.plot_params["plot_type"] = plot_type
 
-        st.divider()
+                st.session_state.plot_const["num_per_row"] = st.slider(
+                    "Plots per row",
+                    st.session_state.plot_const["min_per_row"],
+                    st.session_state.plot_const["max_per_row"],
+                    st.session_state.plot_const["num_per_row"],
+                    disabled=False,
+                )
 
-        # Checkbox to show/hide mri image
-        st.session_state.plot_params["show_img"] = st.checkbox(
-            "Show image", value=st.session_state.plot_params["show_img"], disabled=False
-        )
+                st.session_state.plot_params["h_coeff"] = st.slider(
+                    "Plot height",
+                    min_value=st.session_state.plot_const["h_coeff_min"],
+                    max_value=st.session_state.plot_const["h_coeff_max"],
+                    value=st.session_state.plot_const["h_coeff"],
+                    step=st.session_state.plot_const["h_coeff_step"],
+                    disabled=False,
+                )
 
-        btn_add = st.button("Add Plot")
-        btn_del = st.button("Delete Plot")
+                # Checkbox to show/hide plot legend
+                st.session_state.plot_params["hide_legend"] = st.checkbox(
+                    "Hide legend",
+                    value=st.session_state.plot_params["hide_legend"],
+                    disabled=False,
+                )
+
+            with ptab2:
+
+                # Selected id
+                list_mrid = df.MRID.sort_values().tolist()
+                
+                st.session_state.sel_mrid = df.MRID.values[0]
+                if st.session_state.sel_mrid == "":
+                    sel_ind = None
+                else:
+                    sel_ind = list_mrid.index(st.session_state.sel_mrid)
+                sel_mrid = st.selectbox(
+                    "Selected subject",
+                    list_mrid,
+                    sel_ind,
+                    help="Select a subject from the list, or by clicking on data points on the plots",
+                )
+                if sel_mrid is not None:
+                    st.session_state.sel_mrid = sel_mrid
+                    st.session_state.paths["sel_img"] = ""
+                    st.session_state.paths["sel_seg"] = ""
+
+    btn_add = st.sidebar.button("Add Plot")
+    btn_del = st.sidebar.button("Delete Selected Plots")
         
     if btn_add:
         # Add plot
@@ -567,3 +582,68 @@ def panel_plot(df):
         st.session_state.plots            
     )
 
+def panel_centile_plots(df):
+    """
+    Panel for adding multiple centile plots with configuration options
+    """
+    flag_settings = st.sidebar.checkbox('Hide plot settings')
+
+    # Add parameters
+    with st.container(border=True):
+        
+        if not flag_settings:
+            ptab1, ptab2, ptab3 = st.tabs(
+                ['Plot Settings', 'Variables', 'Others']
+            )        
+            with ptab1:
+                plot_type = st.selectbox(
+                    "Plot Type", ["Scatter Plot", "Distribution Plot"], index=0
+                )
+                if plot_type is not None:
+                    st.session_state.plot_params["plot_type"] = plot_type
+
+                st.session_state.plot_const["num_per_row"] = st.slider(
+                    "Plots per row",
+                    st.session_state.plot_const["min_per_row"],
+                    st.session_state.plot_const["max_per_row"],
+                    st.session_state.plot_const["num_per_row"],
+                    disabled=False,
+                )
+
+                st.session_state.plot_params["h_coeff"] = st.slider(
+                    "Plot height",
+                    min_value=st.session_state.plot_const["h_coeff_min"],
+                    max_value=st.session_state.plot_const["h_coeff_max"],
+                    value=st.session_state.plot_const["h_coeff"],
+                    step=st.session_state.plot_const["h_coeff_step"],
+                    disabled=False,
+                )
+
+                # Checkbox to show/hide plot legend
+                st.session_state.plot_params["hide_legend"] = st.checkbox(
+                    "Hide legend",
+                    value=st.session_state.plot_params["hide_legend"],
+                    disabled=False,
+                )
+
+    btn_add = st.sidebar.button("Add Plot")
+    btn_del = st.sidebar.button("Delete Selected Plots")
+        
+    if btn_add:
+        # Add plot
+        st.session_state.plots = add_plot(
+            st.session_state.plots,
+            st.session_state.plot_params
+        )
+
+    if btn_del:
+        # Add plot
+        st.session_state.plots = delete_sel_plots(
+            st.session_state.plots
+        )
+                    
+    # Show plot
+    show_plots(
+        st.session_state.curr_df,
+        st.session_state.plots            
+    )
