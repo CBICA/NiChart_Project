@@ -560,8 +560,13 @@ def panel_data_plots(df):
                     st.session_state.paths["sel_img"] = ""
                     st.session_state.paths["sel_seg"] = ""
 
-    btn_add = st.sidebar.button("Add Plot")
-    btn_del = st.sidebar.button("Delete Selected Plots")
+    c1, c2, c3 = st.columns(3, border=True)
+    with c1:
+        btn_add = st.sidebar.button("Add Plot")
+    with c2:
+        btn_del_sel = st.sidebar.button("Delete Selected")
+    with c3:
+        btn_del_all = st.sidebar.button("Delete All")
         
     if btn_add:
         # Add plot
@@ -570,11 +575,15 @@ def panel_data_plots(df):
             st.session_state.plot_params
         )
 
-    if btn_del:
+    if btn_del_sel:
         # Add plot
         st.session_state.plots = delete_sel_plots(
             st.session_state.plots
         )
+
+    if btn_del_alll:
+        # Add plot
+        st.session_state.plots = pd.DataFrame(columns=['params'])
                     
     # Show plot
     show_plots(
@@ -626,8 +635,13 @@ def panel_centile_plots(df):
                     disabled=False,
                 )
 
-    btn_add = st.sidebar.button("Add Plot")
-    btn_del = st.sidebar.button("Delete Selected Plots")
+    c1, c2, c3 = st.sidebar.columns(3, vertical_alignment="center")
+    with c1:
+        btn_add = st.button("Add Plot")
+    with c2:
+        btn_del_sel = st.button("Delete Selected")
+    with c3:
+        btn_del_all = st.button("Delete All")
         
     if btn_add:
         # Add plot
@@ -636,11 +650,15 @@ def panel_centile_plots(df):
             st.session_state.plot_params
         )
 
-    if btn_del:
+    if btn_del_sel:
         # Add plot
         st.session_state.plots = delete_sel_plots(
             st.session_state.plots
         )
+
+    if btn_del_all:
+        # Add plot
+        st.session_state.plots = pd.DataFrame(columns=['params'])
                     
     # Show plot
     show_plots(
