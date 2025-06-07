@@ -70,6 +70,7 @@ def init_plot_vars() -> None:
         "lowess_s": 0.5,
         "centtype": "",
         "h_coeff": 1.0,
+        "ptype": 'scatter'
     }
     ###################################
 

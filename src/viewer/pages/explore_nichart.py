@@ -71,11 +71,11 @@ def view_dlmuse() -> None:
         #utilpl.panel_data_plots(df)
 
         df = pd.read_csv(
-            '/home/guraylab/GitHub/gurayerus/NiChart_Project/resources/reference_data/centiles/istag_centiles_CN.csv'
+            # '/home/guraylab/GitHub/gurayerus/NiChart_Project/resources/reference_data/centiles/istag_centiles_CN.csv'
+            '/home/gurayerus/GitHub/gurayerus/NiChart_Project/resources/reference_data/centiles/dlmuse_centiles_CN.csv'
         )
         st.session_state.curr_df = df
         utilpl.panel_centile_plots(df)
-        
         
         #with st.container(border=True):
             #st.write(st.session_state.plots)

@@ -9,6 +9,7 @@ import utils.utils_io as utilio
 import utils.utils_session as utilses
 
 import plotly.graph_objs as go
+import plotly.figure_factory as ff
 import utils.utils_trace as utiltr
 
 ###################################################################
@@ -62,17 +63,9 @@ def add_trace_scatter(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
     # Set colormap
     colors = st.session_state.plot_colors["data"]
 
-    # Get params
-    xvar = plot_params['xvar']
-    yvar = plot_params['yvar']
+    # Get hue params
     hvar = plot_params['hvar']
     hvals = plot_params['hvals']
-    xmin = plot_params['xmin']
-    xmax = plot_params['xmax']
-    ymin = plot_params['ymin']
-    ymax = plot_params['ymax']
-    traces = plot_params['traces']
-    hide_legend = plot_params['hide_legend']
 
     # Add a tmp column if group var is not set
     dft = df.copy()
@@ -84,7 +77,7 @@ def add_trace_scatter(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
     if hvals == []:
         hvals = vals_hue_all
 
-    if "data" in traces:
+    if "data" in plot_params['traces']:
         for hname in hvals:
             
             print(hvals)
@@ -93,15 +86,16 @@ def add_trace_scatter(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
             dfh = dft[dft[hvar] == hname]
                         
             trace = go.Scatter(
-                x=dfh[xvar],
-                y=dfh[yvar],
+                x=dfh[plot_params['xvar']],
+                y=dfh[plot_params['yvar']],
                 mode="markers",
                 marker={"color": colors[col_ind]},
                 name=hname,
                 legendgroup=hname,
-                showlegend=not hide_legend,
+                showlegend=not plot_params['hide_legend'],
             )
             fig.add_trace(trace)
+
         #fig.update_layout(xaxis_range=[xmin, xmax])
         #fig.update_layout(yaxis_range=[ymin, ymax])
 
@@ -111,6 +105,10 @@ def add_trace_linreg(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
     """
     # Set colormap
     colors = st.session_state.plot_colors["data"]
+
+    # Get hue params
+    hvar = plot_params['hvar']
+    hvals = plot_params['hvals']
 
     # Add a tmp column if group var is not set
     dft = df.copy()
@@ -124,10 +122,12 @@ def add_trace_linreg(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
         hvals = vals_hue_all
 
     # Calculate fit
-    dict_fit = utilstat.linreg_model(dft, xvar, yvar, hvar)
+    dict_fit = utilstat.linreg_model(
+        dft, plot_params['xvar'], plot_params['yvar'], hvar
+    )
 
     # Add traces for the fit and confidence intervals
-    if "lin_fit" in traces:
+    if "lin_fit" in plot_params['traces']:
         for hname in hvals:
             col_ind = vals_hue_all.index(
                 hname
@@ -141,7 +141,7 @@ def add_trace_linreg(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
                 line={"color": colors[col_ind]},
                 name=f"lin_{hname}",
                 legendgroup=hname,
-                showlegend=not hide_legend,
+                showlegend=not plot_params['hide_legend'],
             )
             fig.add_trace(trace)
 
@@ -162,16 +162,21 @@ def add_trace_linreg(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
                 hoverinfo="skip",
                 name=f"lin_conf95_{hname}",
                 legendgroup=hname,
-                showlegend=not hide_legend,
+                showlegend=not plot_params['hide_legend'],
             )
             fig.add_trace(trace)
-    fig.update_layout(xaxis_range=[xmin, xmax])
-    fig.update_layout(yaxis_range=[ymin, ymax])
+
+    # fig.update_layout(xaxis_range=[xmin, xmax])
+    # fig.update_layout(yaxis_range=[ymin, ymax])
     return fig
 
 def add_trace_lowess(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
     # Set colormap
     colors = st.session_state.plot_colors["data"]
+
+    # Get hue params
+    hvar = plot_params['hvar']
+    hvals = plot_params['hvals']
 
     # Add a tmp column if group var is not set
     dft = df.copy()
@@ -184,7 +189,9 @@ def add_trace_lowess(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
     if hvals == []:
         hvals = vals_hue_all
 
-    dict_fit = utilstat.lowess_model(dft, xvar, yvar, hvar, lowess_s)
+    dict_fit = utilstat.lowess_model(
+        dft, plot_params['xvar'], plot_params['yvar'], hvar, lowess_s
+    )
 
     # Add traces for the fit and confidence intervals
     for hname in hvals:
@@ -199,72 +206,58 @@ def add_trace_lowess(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
             line={"color": colors[col_ind]},
             name=f"lowess_{hname}",
             legendgroup=hname,
-            showlegend=not hide_legend,
+            showlegend=not plot_params['hide_legend'],
         )
         fig.add_trace(trace)
 
-    fig.update_layout(xaxis_range=[xmin, xmax])
-    fig.update_layout(yaxis_range=[ymin, ymax])
+    # fig.update_layout(xaxis_range=[xmin, xmax])
+    # fig.update_layout(yaxis_range=[ymin, ymax])
 
 def add_trace_dot(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
     df_tmp = df[df.MRID == sel_mrid]
     trace = go.Scatter(
-        x=df_tmp[xvar],
-        y=df_tmp[yvar],
+        x=df_tmp[plot_params['xvar']],
+        y=df_tmp[plot_params['yvar']],
         mode="markers",
         name="Selected",
         marker=dict(
             color="rgba(250, 50, 50, 0.5)", size=12, line=dict(color="Red", width=3)
         ),
-        showlegend=not hide_legend,
+        showlegend=not plot_params['hide_legend'],
     )
     fig.add_trace(trace)
 
-def add_trace_percentile(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
-    
-    # Get params
-    xvar = plot_params['xvar']
-    yvar = plot_params['yvar']
-    hvar = plot_params['hvar']
-    hvals = plot_params['hvals']
-    xmin = plot_params['xmin']
-    xmax = plot_params['xmax']
-    ymin = plot_params['ymin']
-    ymax = plot_params['ymax']
-    traces = plot_params['traces']
-    hide_legend = plot_params['hide_legend']
-    
+def add_trace_centile(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
     # Set colormap
     colors = st.session_state.plot_colors["centile"]
 
     # Get centile values for the selected roi
-    df_tmp = df[df.VarName == yvar]
+    df_tmp = df[df.VarName == plot_params['yvar']]
 
     # Create line traces
     for i, cvar in enumerate(df_tmp.columns[2:]):
-        if cvar in traces:
+        if cvar in plot_params['traces']:
             ctrace = go.Scatter(
-                x=df_tmp[xvar],
+                x=df_tmp[plot_params['xvar']],
                 y=df_tmp[cvar],
                 mode="lines",
                 name=cvar,
                 legendgroup="centiles",
                 line=dict(color=colors[i]),
-                showlegend=not hide_legend,
+                showlegend=not plot_params['hide_legend'],
             )
-
             fig.add_trace(ctrace)  # plot in first row
 
+    # Update min/max
     #fig.update_layout(xaxis_range=[xmin, xmax])
     #fig.update_layout(yaxis_range=[ymin, ymax])
 
     return fig
 
-
 def add_trace_dots(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
     trace = go.Scatter(
-        x=df[xvar],
-        y=df[yvar],
+        x=df[plot_params['xvar']],
+        y=df[plot_params['yvar']],
         showlegend=False,
         mode="markers",
         name="datapoint",
@@ -344,6 +337,106 @@ def set_y_bounds(
     df_plots.loc[plot_id, "ymax"] = ymax
     df_plots.loc[plot_id, "ymin"] = ymin
 
+def dist_plot(df, plot_params, plot_ind):
+    # Set colormap
+    colors = st.session_state.plot_colors["data"]
+
+    # Add a tmp column if group var is not set
+    dft = df.copy()
+    if hvar == "":
+        hvar = "All"
+        dft["All"] = "Data"
+        vals_hue_all = ["All"]
+
+    vals_hue_all = sorted(dft[hvar].unique())
+    if hvals == []:
+        hvals = vals_hue_all
+
+    data = []
+    bin_sizes = []
+    colors_sel = []
+    for hname in hvals:
+        col_ind = vals_hue_all.index(hname)  # Select index of colour for the category
+        dfh = dft[dft[hvar] == hname]
+        x_tmp = dfh[xvar]
+        x_range = x_tmp.max() - x_tmp.min()
+        bin_size = x_range / binnum
+        bin_sizes.append(bin_size)
+        data.append(x_tmp)
+        colors_sel.append(colors[col_ind])
+
+    show_hist = "histogram" in traces
+    show_curve = "density" in traces
+    show_rug = "rug" in traces
+
+    fig = ff.create_distplot(
+        data,
+        hvals,
+        histnorm="",
+        bin_size=bin_sizes,
+        colors=colors_sel,
+        show_hist=show_hist,
+        show_rug=show_rug,
+        show_curve=show_curve,
+        # hide_legend=hide_legend  ## THIS IS NOT AVAILABLE IN FF
+    )
+
+    return fig
+
+def display_plot(df, plot_params, sel_mrid, plot_ind):
+    """
+    Display plot
+    """
+    # Main plot
+    m = st.session_state.plot_const["margin"]
+    hi = st.session_state.plot_const["h_init"]
+    hc = st.session_state.plot_params["h_coeff"]
+    layout = go.Layout(
+        height = hi * hc,
+        margin = dict(l=m, r=m, t=m, b=m),
+    )
+    fig = go.Figure(layout=layout)
+
+    xvar = plot_params["xvar"]
+    yvar = plot_params["yvar"]
+
+    # Add axis labels
+    fig.update_layout(xaxis_title = xvar, yaxis_title = yvar)
+
+    if plot_params['ptype'] == 'dist':
+        # Main plot
+        fig = utiltr.dist_plot(
+            df_plots_filt, sel_plot["xvar"],
+            sel_plot["hvar"],
+            sel_plot["hvals"],
+            sel_plot["traces"],
+            st.session_state.plot_const["distplot_binnum"],
+            st.session_state.plot_params["hide_legend"],
+        )
+        st.plotly_chart(fig, key=f"key_chart_{plot_id}")
+
+    elif plot_params['ptype'] == 'scatter':
+
+        ## Add data scatter
+        #add_trace_scatter(df, plot_params, fig)
+
+        # Add centile trace
+        add_trace_centile(df, plot_params, fig)
+
+        #st.plotly_chart(fig, key=f"bubble_chart_{plot_id}", on_select=callback_plot_clicked)
+        st.plotly_chart(fig, key=f"bubble_chart_{plot_ind}")
+
+    elif plot_params['ptype'] == 'centile':
+        # Add centile trace
+        add_trace_centile(df, plot_params, fig)
+
+        #st.plotly_chart(fig, key=f"bubble_chart_{plot_id}", on_select=callback_plot_clicked)
+        st.plotly_chart(fig, key=f"bubble_chart_{plot_ind}")
+
+
+    return fig
+
+
 def display_scatter_plot(df, plot_params, sel_mrid, plot_ind):
     """
     Display plot
@@ -368,12 +461,44 @@ def display_scatter_plot(df, plot_params, sel_mrid, plot_ind):
     #add_trace_scatter(df, plot_params, fig)
 
     # Add centile trace
-    add_trace_percentile(df, plot_params, fig)
+    add_trace_centile(df, plot_params, fig)
 
     #st.plotly_chart(fig, key=f"bubble_chart_{plot_id}", on_select=callback_plot_clicked)
     st.plotly_chart(fig, key=f"bubble_chart_{plot_ind}")
 
     return fig
+
+def display_centile_plot(df, plot_params, plot_ind):
+    """
+    Display plot
+    """
+    # Main plot
+    m = st.session_state.plot_const["margin"]
+    hi = st.session_state.plot_const["h_init"]
+    hc = st.session_state.plot_params["h_coeff"]
+    layout = go.Layout(
+        height = hi * hc,
+        margin = dict(l=m, r=m, t=m, b=m),
+    )
+    fig = go.Figure(layout=layout)
+
+    xvar = plot_params["xvar"]
+    yvar = plot_params["yvar"]
+
+    # Add axis labels
+    fig.update_layout(xaxis_title = xvar, yaxis_title = yvar)
+
+    ## Add data scatter
+    #add_trace_scatter(df, plot_params, fig)
+
+    # Add centile trace
+    add_trace_centile(df, plot_params, fig)
+
+    #st.plotly_chart(fig, key=f"bubble_chart_{plot_id}", on_select=callback_plot_clicked)
+    st.plotly_chart(fig, key=f"bubble_chart_{plot_ind}")
+
+    return fig
+
 
 def display_dist_plot(
     df_plots: pd.DataFrame, plot_id: str, show_settings: bool, sel_mrid: str
@@ -601,16 +726,10 @@ def panel_centile_plots(df):
     with st.container(border=True):
         
         if not flag_settings:
-            ptab1, ptab2, ptab3 = st.tabs(
-                ['Plot Settings', 'Variables', 'Others']
+            ptab1, ptab2, = st.tabs(
+                ['Settings', 'Variables']
             )        
             with ptab1:
-                plot_type = st.selectbox(
-                    "Plot Type", ["Scatter Plot", "Distribution Plot"], index=0
-                )
-                if plot_type is not None:
-                    st.session_state.plot_params["plot_type"] = plot_type
-
                 st.session_state.plot_const["num_per_row"] = st.slider(
                     "Plots per row",
                     st.session_state.plot_const["min_per_row"],
@@ -634,6 +753,33 @@ def panel_centile_plots(df):
                     value=st.session_state.plot_params["hide_legend"],
                     disabled=False,
                 )
+
+            with ptab2:
+                # Select roi
+                list_roi = ['GM', 'WM', 'VN']
+                sel_roi = st.selectbox(
+                    "Select ROI",
+                    list_roi,
+                    None,
+                    help="Select an ROI from the list"
+                )
+                if sel_roi is not None:
+                    st.session_state.plot_params['yvar'] = sel_roi
+
+
+                # if st.session_state.sel_roi_img == "":
+                #     sel_ind = None
+                # else:
+                #     sel_ind = list_roi.index(st.session_state.sel_roi_img)
+                # sel_roi_img = st.selectbox(
+                #     "Selected ROI", list_roi, sel_ind, help="Select an ROI from the list"
+                # )
+                # if sel_roi_img is not None:
+                #     st.session_state.sel_roi_img = sel_roi_img
+
+
+
+    st.session_state.plot_params["ptype"] = 'centile'
 
     c1, c2, c3 = st.sidebar.columns(3, vertical_alignment="center")
     with c1:
