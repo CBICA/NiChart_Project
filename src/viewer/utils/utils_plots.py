@@ -624,16 +624,37 @@ def panel_data_plots(df):
     Panel for adding multiple plots with configuration options
     """
     flag_settings = st.sidebar.checkbox('Hide plot settings')
-    flag_params = st.sidebar.checkbox('Hide plot params')
+    flag_data = st.sidebar.checkbox('Hide data settings')
 
     # Add parameters
     with st.container(border=True):
         
         if not flag_settings:
-            ptab1, ptab2, ptab3 = st.tabs(
-                ['Plot Settings', 'Variables', 'Others']
+            ptab1, ptab2 = st.tabs(
+                ['Data', 'Plot Settings']
             )        
             with ptab1:
+
+                # Selected id
+                list_mrid = df.MRID.sort_values().tolist()
+                
+                st.session_state.sel_mrid = df.MRID.values[0]
+                if st.session_state.sel_mrid == "":
+                    sel_ind = None
+                else:
+                    sel_ind = list_mrid.index(st.session_state.sel_mrid)
+                sel_mrid = st.selectbox(
+                    "Selected subject",
+                    list_mrid,
+                    sel_ind,
+                    help="Select a subject from the list, or by clicking on data points on the plots",
+                )
+                if sel_mrid is not None:
+                    st.session_state.sel_mrid = sel_mrid
+                    st.session_state.paths["sel_img"] = ""
+                    st.session_state.paths["sel_seg"] = ""
+
+            with ptab2:
                 plot_type = st.selectbox(
                     "Plot Type", ["Scatter Plot", "Distribution Plot"], index=0
                 )
@@ -663,27 +684,6 @@ def panel_data_plots(df):
                     value=st.session_state.plot_params["hide_legend"],
                     disabled=False,
                 )
-
-            with ptab2:
-
-                # Selected id
-                list_mrid = df.MRID.sort_values().tolist()
-                
-                st.session_state.sel_mrid = df.MRID.values[0]
-                if st.session_state.sel_mrid == "":
-                    sel_ind = None
-                else:
-                    sel_ind = list_mrid.index(st.session_state.sel_mrid)
-                sel_mrid = st.selectbox(
-                    "Selected subject",
-                    list_mrid,
-                    sel_ind,
-                    help="Select a subject from the list, or by clicking on data points on the plots",
-                )
-                if sel_mrid is not None:
-                    st.session_state.sel_mrid = sel_mrid
-                    st.session_state.paths["sel_img"] = ""
-                    st.session_state.paths["sel_seg"] = ""
 
     c1, c2, c3 = st.columns(3, border=True)
     with c1:
@@ -722,14 +722,26 @@ def panel_centile_plots(df):
     """
     flag_settings = st.sidebar.checkbox('Hide plot settings')
 
-    # Add parameters
+    # Add settings tabs
     with st.container(border=True):
         
         if not flag_settings:
             ptab1, ptab2, = st.tabs(
-                ['Settings', 'Variables']
+                ['Data', 'Plot Settings']
             )        
             with ptab1:
+                # Select roi
+                list_roi = ['GM', 'WM', 'VN']
+                sel_roi = st.selectbox(
+                    "Select ROI",
+                    list_roi,
+                    None,
+                    help="Select an ROI from the list"
+                )
+                if sel_roi is not None:
+                    st.session_state.plot_params['yvar'] = sel_roi
+
+            with ptab2:
                 st.session_state.plot_const["num_per_row"] = st.slider(
                     "Plots per row",
                     st.session_state.plot_const["min_per_row"],
@@ -753,34 +765,9 @@ def panel_centile_plots(df):
                     value=st.session_state.plot_params["hide_legend"],
                     disabled=False,
                 )
-
-            with ptab2:
-                # Select roi
-                list_roi = ['GM', 'WM', 'VN']
-                sel_roi = st.selectbox(
-                    "Select ROI",
-                    list_roi,
-                    None,
-                    help="Select an ROI from the list"
-                )
-                if sel_roi is not None:
-                    st.session_state.plot_params['yvar'] = sel_roi
-
-
-                # if st.session_state.sel_roi_img == "":
-                #     sel_ind = None
-                # else:
-                #     sel_ind = list_roi.index(st.session_state.sel_roi_img)
-                # sel_roi_img = st.selectbox(
-                #     "Selected ROI", list_roi, sel_ind, help="Select an ROI from the list"
-                # )
-                # if sel_roi_img is not None:
-                #     st.session_state.sel_roi_img = sel_roi_img
-
-
-
     st.session_state.plot_params["ptype"] = 'centile'
 
+    # Add sidebar options
     c1, c2, c3 = st.sidebar.columns(3, vertical_alignment="center")
     with c1:
         btn_add = st.button("Add Plot")
@@ -789,6 +776,7 @@ def panel_centile_plots(df):
     with c3:
         btn_del_all = st.button("Delete All")
         
+    # Add plot
     if btn_add:
         # Add plot
         st.session_state.plots = add_plot(

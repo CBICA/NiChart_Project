@@ -111,43 +111,36 @@ def init_reference_data() -> None:
         'dlwmls' : dlwmls
     }
 
-def init_roi_definitions() -> None:
-
-    ###################################
-    # ROI dictionaries
-    # List of roi names, indices, etc.
-    st.session_state.rois = {
-        "path": os.path.join(st.session_state.paths["resources"], "lists"),
-        "roi_dict_options": [
-            "",
-            "muse_rois",
-        ],  # This will be extended with additional roi dict.s
-        "roi_csvs": {
-            "muse_rois": "MUSE_listROIs.csv",
-            "muse_derived": "MUSE_mapping_derivedROIs.csv",
-        },
-        "sel_roi_dict": "muse_rois",
-        "sel_derived_dict": "muse_derived",
+def init_muse_roi_def() -> None:
+    # Paths to roi lists
+    muse = {
+        'path': os.path.join(st.session_state.paths['resources'], 'lists', 'MUSE'),
+        'list_rois' : 'MUSE_listROIs.csv',
+        'list_derived' : 'MUSE_mapping_derivedROIs.csv',
+        'list_groups' : 'MUSE_ROI_Groups_v1.csv'
     }
-
-    # Read initial roi lists (default:MUSE) to dictionaries
-    ssroi = st.session_state.rois
+    
+    # Read roi lists to dictionaries
     df_tmp = pd.read_csv(
-        os.path.join(ssroi["path"], ssroi["roi_csvs"][ssroi["sel_roi_dict"]])
+        os.path.join(muse['path'], muse['list_rois'])
     )
     dict1 = dict(zip(df_tmp["Index"].astype(str), df_tmp["Name"].astype(str)))
     dict2 = dict(zip(df_tmp["Name"].astype(str), df_tmp["Index"].astype(str)))
     dict3 = utilroi.muse_derived_to_dict(
-        os.path.join(ssroi["path"], ssroi["roi_csvs"][ssroi["sel_derived_dict"]])
+        os.path.join(muse['path'], muse['list_derived'])
     )
     dict4 = utilroi.muse_derived_to_df(
-        os.path.join(ssroi["path"], ssroi["roi_csvs"][ssroi["sel_derived_dict"]])
+        os.path.join(muse['path'], muse['list_derived'])
     )
-    st.session_state.rois["roi_dict"] = dict1
-    st.session_state.rois["roi_dict_inv"] = dict2
-    st.session_state.rois["roi_dict_derived"] = dict3
-    st.session_state.rois["muse_derived"] = dict4
-
+    muse['dict_roi'] = dict1
+    muse['dict_roi_inv'] = dict2
+    muse['dict_derived'] = dict3
+    muse['df_derived'] = dict4
+    
+    # Read MUSE ROI lists
+    st.session_state.rois = {
+        'muse' : muse
+    }
 
 def update_default_paths() -> None:
     """
@@ -473,7 +466,7 @@ def init_session_state() -> None:
             "T1", "T2", "FL", "DTI", "fMRI"
         ]
 
-        init_roi_definitions()
+        init_muse_roi_def()
         init_pipeline_definitions()
         init_reference_data()
         init_plot_vars()

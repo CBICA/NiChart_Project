@@ -60,9 +60,9 @@ def view_dlmuse() -> None:
         ## FIXME
         ulay = st.session_state.ref_data["t1"]
         olay = st.session_state.ref_data["dlmuse"]
-        df_muse = st.session_state.rois["muse_derived"]
+        df_muse = st.session_state.rois['muse']['df_derived']
         
-        utilmriview.view_mri(ulay, olay, df_muse, sel_roi = 'GM')
+        utilmriview.panel_view_mri(ulay, olay, df_muse, sel_roi = 'GM')
         
     elif sel_res_type == 'Volumes':
         
@@ -71,8 +71,8 @@ def view_dlmuse() -> None:
         #utilpl.panel_data_plots(df)
 
         df = pd.read_csv(
-            # '/home/guraylab/GitHub/gurayerus/NiChart_Project/resources/reference_data/centiles/istag_centiles_CN.csv'
-            '/home/gurayerus/GitHub/gurayerus/NiChart_Project/resources/reference_data/centiles/dlmuse_centiles_CN.csv'
+            '/home/guraylab/GitHub/gurayerus/NiChart_Project/resources/reference_data/centiles/dlmuse_centiles_CN.csv'
+            #'/home/gurayerus/GitHub/gurayerus/NiChart_Project/resources/reference_data/centiles/dlmuse_centiles_CN.csv'
         )
         st.session_state.curr_df = df
         utilpl.panel_centile_plots(df)

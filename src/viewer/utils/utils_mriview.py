@@ -8,6 +8,7 @@ import streamlit as st
 import utils.utils_io as utilio
 import utils.utils_nifti as utilnii
 import utils.utils_session as utilses
+import utils.utils_user_input as utilin
 
 import plotly.graph_objs as go
 import utils.utils_trace as utiltr
@@ -80,47 +81,44 @@ def show_img_slices(
             st.image(img[:, :, slice_index], width=w_img)
 
 
-def view_mri(
+def panel_view_mri(
     ulay,
     olay = None,
     df_rois = None,
     sel_roi = None
 ):
+    flag_settings = st.sidebar.checkbox('Hide plot settings')
+    flag_data = st.sidebar.checkbox('Hide data settings')
+    
+    # Add settings tabs
     with st.container(border=True):
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            # Select ROI name 
-            list_roi_names = df_rois.Name.sort_values().tolist()
-            sel_var = st.selectbox(
-                "ROI", list_roi_names, key="selbox_rois", index=None, disabled=False
-            )        
-        if sel_var is None:
-            return
         
-        # Get indice for the selected roi
-        df_sel  = df_rois[df_rois.Name == sel_var]
-        if 'List' in df_sel:
-            list_roi_indices = df_sel.List.values[0]
-        else:
-            list_roi_indices = [df_sel.Index.values[0]]
+        if not flag_settings:
+            ptab1, ptab2, = st.tabs(
+                ['Data', 'Plot Settings']
+            )        
+            with ptab1:
+                utilin.select_muse_roi()
 
-        with col2:
-            # Create a list of checkbox options
-            list_orient = st.multiselect(
-                "Select viewing planes:",
-                utilnii.img_views, 
-                utilnii.img_views,
-                disabled=False,
-                label_visibility = 'collapsed'
-            )
+            with ptab2:
 
-        with col3:
-            if olay is not None:
-                # View hide overlay
-                is_show_overlay = st.checkbox("Show overlay", True, disabled=False)
-                # Crop to mask area
-                crop_to_mask = st.checkbox("Crop to mask", True, disabled=False)
+                col1, col2 = st.columns(2)
+                with col1:
+                    # Create a list of checkbox options
+                    list_orient = st.multiselect(
+                        "Select viewing planes:",
+                        utilnii.img_views, 
+                        utilnii.img_views,
+                        disabled=False,
+                        label_visibility = 'collapsed'
+                    )
 
+                with col2:
+                    if olay is not None:
+                        # View hide overlay
+                        is_show_overlay = st.checkbox("Show overlay", True, disabled=False)
+                        # Crop to mask area
+                        crop_to_mask = st.checkbox("Crop to mask", True, disabled=False)
 
     with st.container(border=True):
         with st.spinner("Wait for it..."):
