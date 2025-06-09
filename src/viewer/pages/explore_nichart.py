@@ -1,14 +1,7 @@
 import streamlit as st
 import utils.utils_pages as utilpg
-import utils.utils_panels as utilpn
-import utils.utils_doc as utildoc
-import utils.utils_io as utilio
-import utils.utils_session as utilss
-import utils.utils_rois as utilroi
-import utils.utils_nifti as utilni
-import utils.utils_st as utilst
 import utils.utils_plots as utilpl
-import utils.utils_mriview as utilmriview
+import utils.utils_mriview as utilmri
 
 import pandas as pd
 from streamlit_image_select import image_select
@@ -56,122 +49,36 @@ def view_dlmuse() -> None:
     )
     
     if sel_res_type == 'Segmentation':
-        ## FIXME
         ulay = st.session_state.ref_data["t1"]
         olay = st.session_state.ref_data["dlmuse"]        
-        utilpn.panel_view_seg(ulay, olay, 'muse')
+        utilmri.panel_view_seg(ulay, olay, 'muse')
         
     elif sel_res_type == 'Volumes':
-        
-        #df = pd.read_csv('/home/guraylab/GitHub/gurayerus/NiChart_Project/test_data/processed/IXI/DLMUSE/DLMUSE_Volumes.csv')
-        #st.session_state.curr_df = df
-        #utilpl.panel_data_plots(df)
-
         df = pd.read_csv(
             '/home/guraylab/GitHub/gurayerus/NiChart_Project/resources/reference_data/centiles/dlmuse_centiles_CN.csv'
             #'/home/gurayerus/GitHub/gurayerus/NiChart_Project/resources/reference_data/centiles/dlmuse_centiles_CN.csv'
         )
         st.session_state.curr_df = df
-        utilpl.panel_centile_plots(df)
+        utilpl.panel_view_centiles(df, 'muse')
         
-        #with st.container(border=True):
-            #st.write(st.session_state.plots)
-            #for key in st.session_state:
-                #if key.startswith('_key'):
-                    #st.write(f"{key}: {st.session_state[key]}")
-
-
 def view_dlwmls() -> None:
     """
     Panel for viewing dlwmls segmentation
     """
-    with st.container(border=True):
-        
-        col1, col2, col3 = st.columns(3)
-
-        with col1:
-            # Select result type        
-            list_res_type = ['Segmentation', 'Volumes']
-            st.markdown('Output type:')
-            sel_res_type = st.pills(
-                'Select result type',
-                list_res_type,
-                default = None,
-                selection_mode = 'single',
-                label_visibility = 'collapsed',
-            )
-        if sel_res_type is None:
-            return
-        
-        # Select 1 for overlay indice (lesion)
-        list_rois = [1]
-
-        if sel_res_type == 'Segmentation':
-
-            with col3:
-                # Create a list of checkbox options
-                list_orient = st.multiselect(
-                    "Select viewing planes:",
-                    utilni.img_views, 
-                    utilni.img_views,
-                    disabled=False,
-                    label_visibility = 'collapsed'
-                )
-                # View hide overlay
-                is_show_overlay = st.checkbox("Show overlay", True, disabled=False)
-                # Crop to mask area
-                crop_to_mask = st.checkbox("Crop to mask", False, disabled=False)
-
-    with st.container():
-        if sel_res_type == 'Segmentation': 
-
-            # Select images
-            ulay = st.session_state.ref_data["fl"]
-            olay = st.session_state.ref_data["dlwmls"]
-
-            # Select images
-            with st.spinner("Wait for it..."):
-                # Process image and mask to prepare final 3d matrix to display
-                img, mask, img_masked = utilni.prep_image_and_olay(
-                    ulay,
-                    olay,
-                    list_rois,
-                    crop_to_mask,
-                )
-
-                # Detect mask bounds and center in each view
-                mask_bounds = utilni.detect_mask_bounds(mask)
-
-                # Show images
-                blocks = st.columns(len(list_orient))
-                for i, tmp_orient in stqdm(
-                    enumerate(list_orient),
-                    desc="Showing images ...",
-                    total=len(list_orient),
-                ):
-                    with blocks[i]:
-                        ind_view = utilni.img_views.index(tmp_orient)
-                        size_auto = True
-                        if is_show_overlay is False:
-                            utilst.show_img3D(
-                                img,
-                                ind_view,
-                                mask_bounds[ind_view, :],
-                                tmp_orient,
-                                size_auto,
-                            )
-                        else:
-                            utilpl.show_img3D(
-                                img_masked,
-                                ind_view,
-                                mask_bounds[ind_view, :],
-                                tmp_orient,
-                                size_auto,
-                            )
-
-        elif sel_res_type == 'Volumes': 
-            utilpl.panel_plots()
-
+    # Select result type        
+    list_res_type = ['Segmentation']
+    sel_res_type = st.pills(
+        'Select result type',
+        list_res_type,
+        default = None,
+        selection_mode = 'single',
+        label_visibility = 'collapsed',
+    )
+    
+    if sel_res_type == 'Segmentation':
+        ulay = st.session_state.ref_data["fl"]
+        olay = st.session_state.ref_data["dlwmls"]        
+        utilmriview.panel_view_seg(ulay, olay, 'dlwmls')
 
 def view_spare() -> None:
     st.write('Not there yet!')
@@ -184,7 +91,7 @@ st.markdown(
 )
 
 tab1, tab2 = st.tabs(
-    ["Select Pipeline", "View Output"]
+    ["Pipeline", "Output"]
 )
 
 with tab1:

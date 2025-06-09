@@ -14,6 +14,7 @@ import utils.utils_trace as utiltr
 
 ###################################################################
 # Misc utils
+
 def add_items_to_list(my_list: list, items_to_add: list) -> list:
     """Adds multiple items to a list, avoiding duplicates.
 
@@ -28,6 +29,7 @@ def add_items_to_list(my_list: list, items_to_add: list) -> list:
         if item not in my_list:
             my_list.append(item)
     return my_list
+
 
 def remove_items_from_list(my_list: list, items_to_remove: list) -> list:
     """Removes multiple items from a list.
@@ -53,24 +55,10 @@ def get_index_in_list(in_list: list, in_item: str) -> Optional[int]:
         return None
     else:
         return in_list.index(in_item)
-    
-def get_roi_indices(sel_roi, method):
-    '''
-    Detect indices for a selected ROI
-    '''
-    if sel_roi is None:
-        return None
-    
-    # Detect indices
-    if method == 'muse':
-        df_derived = st.session_state.rois['muse']['df_derived']
-        list_roi_indices = df_derived[df_derived.Name == sel_roi].List.values[0]
-        return list_roi_indices
-
-    return None    
 
 ###################################################################
 # Traces
+
 def add_trace_scatter(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
     # Set colormap
     colors = st.session_state.plot_colors["data"]
@@ -279,19 +267,20 @@ def add_trace_dots(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
 
 ###################################################################
 # Plots
+
 def add_plot(df_plots, new_plot_params):
     """
     Adds a new plot 
     (adds a new row to the plots dataframe with new plot params)
     """
-    #new_plot_params['xvar'] = 'Age'
-    #new_plot_params['yvar'] = 'GM'
-    #new_plot_params['traces'] = [
-        #'centile_5', 'centile_50', 'centile_95'
-    #]
-    #df_plots.loc[len(df_plots)] = {'params': new_plot_params}
     
-    df_plots.loc[len(df_plots)] = {'params': new_plot_params.copy()}
+    new_plot_params['xvar'] = 'Age'
+    new_plot_params['yvar'] = 'GM'
+    new_plot_params['traces'] = [
+        'centile_5', 'centile_50', 'centile_95'
+    ]
+    
+    df_plots.loc[len(df_plots)] = {'params': new_plot_params}
     return df_plots
 
 def delete_sel_plots(df_plots):
@@ -310,7 +299,10 @@ def delete_sel_plots(df_plots):
     df_plots = df_plots.drop(list_sel).reset_index().drop(columns=['index'])
     return df_plots
 
-def set_x_bounds(df: pd.DataFrame, df_plots: pd.DataFrame, plot_id: str, xvar: str) -> None:
+
+def set_x_bounds(
+    df: pd.DataFrame, df_plots: pd.DataFrame, plot_id: str, xvar: str
+) -> None:
     # Set x and y min/max if not set
     # Values include some margin added for viewing purposes
     xmin = df[xvar].min()
@@ -326,7 +318,10 @@ def set_x_bounds(df: pd.DataFrame, df_plots: pd.DataFrame, plot_id: str, xvar: s
     df_plots.loc[plot_id, "xmax"] = xmax
     df_plots.loc[plot_id, "xmin"] = xmin
 
-def set_y_bounds(df: pd.DataFrame, df_plots: pd.DataFrame, plot_id: str, yvar: str) -> None:
+
+def set_y_bounds(
+    df: pd.DataFrame, df_plots: pd.DataFrame, plot_id: str, yvar: str
+) -> None:
     # Set x and y min/max if not set
     # Values include some margin added for viewing purposes
     ymin = df[yvar].min()
@@ -441,6 +436,7 @@ def display_plot(df, plot_params, sel_mrid, plot_ind):
 
     return fig
 
+
 def display_scatter_plot(df, plot_params, sel_mrid, plot_ind):
     """
     Display plot
@@ -503,7 +499,10 @@ def display_centile_plot(df, plot_params, plot_ind):
 
     return fig
 
-def display_dist_plot(df_plots: pd.DataFrame, plot_id: str, show_settings: bool, sel_mrid: str) -> Any:
+
+def display_dist_plot(
+    df_plots: pd.DataFrame, plot_id: str, show_settings: bool, sel_mrid: str
+) -> Any:
     """
     Displays the plot with the plot_id
     """
@@ -543,6 +542,47 @@ def display_dist_plot(df_plots: pd.DataFrame, plot_id: str, show_settings: bool,
 
         return fig
 
+def show_img3D(
+    img: np.ndarray,
+    scroll_axis: Any,
+    sel_axis_bounds: Any,
+    img_name: str,
+    size_auto: bool,
+) -> None:
+    """
+    Display a 3D img
+    """
+
+    # Create a slider to select the slice index
+    slice_index = st.slider(
+        f"{img_name}",
+        0,
+        sel_axis_bounds[1] - 1,
+        value=sel_axis_bounds[2],
+        key=f"slider_{img_name}",
+    )
+
+    # Extract the slice and display it
+    if size_auto:
+        if scroll_axis == 0:
+            st.image(img[slice_index, :, :], use_container_width=True)
+        elif scroll_axis == 1:
+            st.image(img[:, slice_index, :], use_container_width=True)
+        else:
+            st.image(img[:, :, slice_index], use_container_width=True)
+    else:
+        w_img = (
+            st.session_state.mriview_const["w_init"]
+            * st.session_state.mriview_var["w_coeff"]
+        )
+        if scroll_axis == 0:
+            # st.image(img[slice_index, :, :], use_container_width=True)
+            st.image(img[slice_index, :, :], width=w_img)
+        elif scroll_axis == 1:
+            st.image(img[:, slice_index, :], width=w_img)
+        else:
+            st.image(img[:, :, slice_index], width=w_img)
+
 def show_plots(df, df_plots):
     """
     Display all plots
@@ -578,46 +618,6 @@ def show_plots(df, df_plots):
     #if st.session_state.plot_params["show_img"]:
     #show_img()
 
-###################################################################
-# Panels
-def panel_select_roi(method):
-    '''
-    User panel to select an ROI
-    '''
-    ## MUSE ROIs
-    if method == 'muse':
-        
-        # Read dictionaries
-        df_derived = st.session_state.rois['muse']['df_derived']
-        df_groups = st.session_state.rois['muse']['df_groups']
-        
-        col1, col2 = st.columns([1,3])
-        
-        # Select roi group
-        with col1:
-            list_group = df_groups.Name.unique()
-            sel_group = st.selectbox(
-                "Select ROI Group",
-                list_group,
-                None,
-                help="Select ROI group"
-            )
-            if sel_group is None:
-                return None
-    
-        # Select roi
-        with col2:
-            sel_indices = df_groups[df_groups.Name == sel_group]['List'].values[0]
-                    
-            list_roi = df_derived[df_derived.Index.isin(sel_indices)].Name.tolist()
-            sel_roi = st.selectbox(
-                "Select ROI",
-                list_roi,
-                None,
-                help="Select an ROI from the list"
-            )
-        
-        return sel_roi
 
 def panel_data_plots(df):
     """
@@ -716,21 +716,30 @@ def panel_data_plots(df):
         st.session_state.plots            
     )
 
-def panel_view_centiles(df, method):
+def panel_view_centiles(df):
     """
     Panel for adding multiple centile plots with configuration options
     """
     flag_settings = st.sidebar.checkbox('Hide plot settings')
-    flag_data = st.sidebar.checkbox('Hide data settings')
 
-    # Add tabs for parameter settings
+    # Add settings tabs
     with st.container(border=True):
+        
         if not flag_settings:
             ptab1, ptab2, = st.tabs(
                 ['Data', 'Plot Settings']
             )        
             with ptab1:
-                sel_roi = panel_select_roi(method)
+                # Select roi
+                list_roi = ['GM', 'WM', 'VN']
+                sel_roi = st.selectbox(
+                    "Select ROI",
+                    list_roi,
+                    None,
+                    help="Select an ROI from the list"
+                )
+                if sel_roi is not None:
+                    st.session_state.plot_params['yvar'] = sel_roi
 
             with ptab2:
                 st.session_state.plot_const["num_per_row"] = st.slider(
@@ -756,17 +765,7 @@ def panel_view_centiles(df, method):
                     value=st.session_state.plot_params["hide_legend"],
                     disabled=False,
                 )
-
-    if sel_roi is None:
-        return
-
-    # Set plot type to centile
-    st.session_state.plot_params['ptype'] = 'centile'
-    st.session_state.plot_params['xvar'] = 'Age'
-    st.session_state.plot_params['traces'] = [
-        'centile_5', 'centile_50', 'centile_95'
-    ]
-    st.session_state.plot_params['yvar'] = sel_roi
+    st.session_state.plot_params["ptype"] = 'centile'
 
     # Add sidebar options
     c1, c2, c3 = st.sidebar.columns(3, vertical_alignment="center")
@@ -777,21 +776,26 @@ def panel_view_centiles(df, method):
     with c3:
         btn_del_all = st.button("Delete All")
         
-    # Add/delete plot
+    # Add plot
     if btn_add:
         # Add plot
         st.session_state.plots = add_plot(
             st.session_state.plots,
             st.session_state.plot_params
         )
+
     if btn_del_sel:
+        # Add plot
         st.session_state.plots = delete_sel_plots(
             st.session_state.plots
         )
+
     if btn_del_all:
+        # Add plot
         st.session_state.plots = pd.DataFrame(columns=['params'])
                     
-    # Show plots
+    # Show plot
     show_plots(
-        st.session_state.curr_df, st.session_state.plots
+        st.session_state.curr_df,
+        st.session_state.plots            
     )
