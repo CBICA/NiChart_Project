@@ -24,27 +24,31 @@ def panel_select_roi(roi_type):
         df_derived = st.session_state.rois['muse']['df_derived']
         df_groups = st.session_state.rois['muse']['df_groups']
         
+        col1, col2 = st.columns([1,3])
+        
         # Select roi group
-        list_group = df_groups.Name.unique()
-        sel_group = st.selectbox(
-            "Select ROI Group",
-            list_group,
-            None,
-            help="Select ROI group"
-        )
-        if sel_group is None:
-            return None
+        with col1:
+            list_group = df_groups.Name.unique()
+            sel_group = st.selectbox(
+                "Select ROI Group",
+                list_group,
+                None,
+                help="Select ROI group"
+            )
+            if sel_group is None:
+                return None
     
         # Select roi
-        sel_indices = df_groups[df_groups.Name == sel_group]['List'].values[0]
-                
-        list_roi = df_derived[df_derived.Index.isin(sel_indices)].Name.tolist()
-        sel_roi = st.selectbox(
-            "Select ROI",
-            list_roi,
-            None,
-            help="Select an ROI from the list"
-        )
+        with col2:
+            sel_indices = df_groups[df_groups.Name == sel_group]['List'].values[0]
+                    
+            list_roi = df_derived[df_derived.Index.isin(sel_indices)].Name.tolist()
+            sel_roi = st.selectbox(
+                "Select ROI",
+                list_roi,
+                None,
+                help="Select an ROI from the list"
+            )
         
         return sel_roi
 
