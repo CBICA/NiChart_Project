@@ -9,6 +9,7 @@ import utils.utils_io as utilio
 import utils.utils_nifti as utilnii
 import utils.utils_session as utilses
 import utils.utils_user_input as utilin
+import utils.utils_panels as utilpn
 
 import plotly.graph_objs as go
 import utils.utils_trace as utiltr
@@ -81,7 +82,7 @@ def show_img_slices(
             st.image(img[:, :, slice_index], width=w_img)
 
 
-def panel_view_mri(
+def panel_view_seg(
     ulay,
     olay = None,
     df_rois = None,
@@ -98,7 +99,7 @@ def panel_view_mri(
                 ['Data', 'Plot Settings']
             )        
             with ptab1:
-                utilin.select_muse_roi()
+                sel_roi = utilpn.panel_select_roi()
 
             with ptab2:
 
@@ -120,40 +121,41 @@ def panel_view_mri(
                         # Crop to mask area
                         crop_to_mask = st.checkbox("Crop to mask", True, disabled=False)
 
-    with st.container(border=True):
-        with st.spinner("Wait for it..."):
-            # Process image (and mask) to prepare final 3d matrix to display
-            if olay is None:
-                img = utilnii.prep_image(ulay)
-                img_bounds = detect_img_bounds(img)
-                
-            else:
-                img, mask, img_masked = utilnii.prep_image_and_olay(
-                    ulay, olay, list_roi_indices, crop_to_mask
-                )
-                img_bounds = detect_mask_bounds(mask)
+    if len(list_roi_indices) > 0:
+        with st.container(border=True):
+            with st.spinner("Wait for it..."):
+                # Process image (and mask) to prepare final 3d matrix to display
+                if olay is None:
+                    img = utilnii.prep_image(ulay)
+                    img_bounds = detect_img_bounds(img)
+                    
+                else:
+                    img, mask, img_masked = utilnii.prep_image_and_olay(
+                        ulay, olay, list_roi_indices, crop_to_mask
+                    )
+                    img_bounds = detect_mask_bounds(mask)
 
-            # Show images
-            blocks = st.columns(len(list_orient))
-            for i, tmp_orient in stqdm(
-                enumerate(list_orient),
-                desc="Showing images ...",
-                total=len(list_orient),
-            ):
-                with blocks[i]:
-                    ind_view = utilnii.img_views.index(tmp_orient)
-                    size_auto = True
-                    if olay is None or is_show_overlay is False:
-                        show_img_slices(
-                            img,
-                            ind_view,
-                            img_bounds[ind_view, :],
-                            tmp_orient,
-                        )
-                    else:
-                        show_img_slices(
-                            img_masked,
-                            ind_view,
-                            img_bounds[ind_view, :],
-                            tmp_orient,
-                        )
+                # Show images
+                blocks = st.columns(len(list_orient))
+                for i, tmp_orient in stqdm(
+                    enumerate(list_orient),
+                    desc="Showing images ...",
+                    total=len(list_orient),
+                ):
+                    with blocks[i]:
+                        ind_view = utilnii.img_views.index(tmp_orient)
+                        size_auto = True
+                        if olay is None or is_show_overlay is False:
+                            show_img_slices(
+                                img,
+                                ind_view,
+                                img_bounds[ind_view, :],
+                                tmp_orient,
+                            )
+                        else:
+                            show_img_slices(
+                                img_masked,
+                                ind_view,
+                                img_bounds[ind_view, :],
+                                tmp_orient,
+                            )

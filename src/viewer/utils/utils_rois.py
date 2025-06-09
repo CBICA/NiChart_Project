@@ -42,12 +42,12 @@ def get_roi_names(csv_rois: str) -> Any:
     return df.Name.tolist()
 
 
-def muse_derived_to_dict(list_derived: list) -> Any:
+def muse_derived_to_dict(in_list: list) -> Any:
     """
     Create a dictionary from derived roi list
     """
     # Read list
-    df = pd.read_csv(list_derived, header=None)
+    df = pd.read_csv(in_list, header=None)
 
 
     dict_derived = {
@@ -63,32 +63,50 @@ def muse_derived_to_dict(list_derived: list) -> Any:
 
     return dict_derived
 
-def muse_derived_to_df(list_derived: list) -> Any:
+def muse_derived_to_df(in_list: list) -> Any:
     """
     Create a df from derived roi list
     """
     # Read list
-    df = pd.read_csv(list_derived, header=None)
+    df = pd.read_csv(in_list, header=None)
 
     # Rename first two columns
     df = df.rename(columns={0: 'Index', 1: 'Name'})
 
     # Create a new column 'List' with the remaining columns as a list
-    df['List'] = df.iloc[:, 2:].values.tolist()
+    df['List'] = df.iloc[:, 2:].apply(lambda row: row.dropna().astype(int).tolist(), axis=1)
 
     # Keep only the desired columns
     df = df[['Index', 'Name', 'List']]
 
     return df
 
+def muse_roi_groups_to_df(in_list: list) -> Any:
+    """
+    Create a df from roi groups list
+    """
+    # Read list
+    df = pd.read_csv(in_list, header=None)
 
-def muse_get_derived(sel_roi: str, list_derived: list) -> Any:
+    # Rename first two columns
+    df = df.rename(columns={0: 'Name'})
+
+    # Create a new column 'List' with the remaining columns as a list
+    df['List'] = df.iloc[:, 1:].apply(lambda row: row.dropna().astype(int).tolist(), axis=1)
+
+    # Keep only the desired columns
+    df = df[['Name', 'List']]
+
+    return df
+
+
+def muse_get_derived(sel_roi: str, in_list: list) -> Any:
     """
     Create a list of derived roi indices for the selected roi
     """
 
     # Read list
-    df = pd.read_csv(list_derived, header=None)
+    df = pd.read_csv(in_list, header=None)
 
     # Keep only selected ROI
     df = df[df[0].astype(str) == sel_roi]

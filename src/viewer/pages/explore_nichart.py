@@ -56,13 +56,10 @@ def view_dlmuse() -> None:
     )
     
     if sel_res_type == 'Segmentation':
-
         ## FIXME
         ulay = st.session_state.ref_data["t1"]
-        olay = st.session_state.ref_data["dlmuse"]
-        df_muse = st.session_state.rois['muse']['df_derived']
-        
-        utilmriview.panel_view_mri(ulay, olay, df_muse, sel_roi = 'GM')
+        olay = st.session_state.ref_data["dlmuse"]        
+        utilpn.panel_view_seg(ulay, olay, 'muse')
         
     elif sel_res_type == 'Volumes':
         

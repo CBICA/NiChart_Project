@@ -129,13 +129,17 @@ def init_muse_roi_def() -> None:
     dict3 = utilroi.muse_derived_to_dict(
         os.path.join(muse['path'], muse['list_derived'])
     )
-    dict4 = utilroi.muse_derived_to_df(
+    df_derived = utilroi.muse_derived_to_df(
         os.path.join(muse['path'], muse['list_derived'])
+    )
+    df_groups = utilroi.muse_roi_groups_to_df(
+        os.path.join(muse['path'], muse['list_groups'])
     )
     muse['dict_roi'] = dict1
     muse['dict_roi_inv'] = dict2
     muse['dict_derived'] = dict3
-    muse['df_derived'] = dict4
+    muse['df_derived'] = df_derived
+    muse['df_groups'] = df_groups
     
     # Read MUSE ROI lists
     st.session_state.rois = {
