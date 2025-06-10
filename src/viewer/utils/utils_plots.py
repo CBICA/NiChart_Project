@@ -67,6 +67,10 @@ def get_roi_indices(sel_roi, method):
         list_roi_indices = df_derived[df_derived.Name == sel_roi].List.values[0]
         return list_roi_indices
 
+    elif method == 'dlwmls':
+        list_roi_indices = [1]
+        return list_roi_indices
+
     return None    
 
 ###################################################################
@@ -634,6 +638,10 @@ def panel_select_roi(method):
         
         return sel_roi
 
+    elif method == 'dlwmls':
+        sel_roi = 'WML'
+        return sel_roi
+
 def panel_select_centile_type():
     '''
     User panel to select centile type
@@ -745,7 +753,7 @@ def panel_data_plots(df):
         st.session_state.plots            
     )
 
-def panel_view_centiles(method):
+def panel_view_centiles(method, var_type):
     """
     Panel for adding multiple centile plots with configuration options
     """
@@ -760,7 +768,15 @@ def panel_view_centiles(method):
                 ['Data', 'Centiles', 'Plot Settings']
             )        
             with ptab1:
-                ss_sel['sel_roi'] = panel_select_roi(method)
+                if var_type == 'rois':
+                    ss_sel['yvar'] = panel_select_roi(method)
+                
+                elif var_type == 'biomarkers':
+                    list_vars = ['WM', 'GM', 'VN']
+                    ss_sel['yvar'] = st.selectbox(
+                        'Select var',
+                        list_vars
+                    )
                 
             with ptab2:
                 ss_sel['centile_type'] = panel_select_centile_type()
@@ -790,7 +806,7 @@ def panel_view_centiles(method):
                     disabled=False,
                 )
 
-    if ss_sel['sel_roi'] is None:
+    if ss_sel['yvar'] is None:
         return
 
     # Set plot type to centile
@@ -800,7 +816,7 @@ def panel_view_centiles(method):
         'centile_5', 'centile_50', 'centile_95'
     ]
     st.session_state.plot_params['method'] = method
-    st.session_state.plot_params['yvar'] = ss_sel['sel_roi']
+    st.session_state.plot_params['yvar'] = ss_sel['yvar']
     st.session_state.plot_params['centile_type'] = ss_sel['centile_type']
         
     # Add buttons to add/delete plots

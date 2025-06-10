@@ -59,12 +59,9 @@ def view_dlmuse() -> None:
             #'/home/gurayerus/GitHub/gurayerus/NiChart_Project/resources/reference_data/centiles/dlmuse_centiles_CN.csv'
         )
         st.session_state.curr_df = df
-        utilpl.panel_view_centiles('dlmuse')
+        utilpl.panel_view_centiles('dlmuse', 'rois')
         
     st.write(st.session_state.selections)
-     
-     
-     
      
 def view_dlwmls() -> None:
     """
@@ -83,7 +80,25 @@ def view_dlwmls() -> None:
     if sel_res_type == 'Segmentation':
         ulay = st.session_state.ref_data["fl"]
         olay = st.session_state.ref_data["dlwmls"]        
-        utilmriview.panel_view_seg(ulay, olay, 'dlwmls')
+        utilmri.panel_view_seg(ulay, olay, 'dlwmls')
+
+def view_dlmuse_biomarkers() -> None:
+    """
+    Panel for viewing dlwmls segmentation
+    """
+    # Select result type        
+    list_res_type = ['Values']
+    sel_res_type = st.pills(
+        'Select result type',
+        list_res_type,
+        default = None,
+        selection_mode = 'single',
+        label_visibility = 'collapsed',
+    )
+    
+    if sel_res_type == 'Values':
+        utilpl.panel_view_centiles('dlmuse', 'biomarkers')
+
 
 def view_spare() -> None:
     st.write('Work in progress!')
@@ -134,13 +149,13 @@ with tab2:
         view_dlwmls()
         
     elif psel == 2:
-        view_spare()
+        view_dlmuse_biomarkers()
 
     elif psel == 3:
-        view_spare()
+        view_dlmuse_biomarkers()
 
     elif psel == 4:
-        view_spare()
+        view_dlmuse_biomarkers()
 
     elif psel == 5:
-        view_surrealgan()
+        view_dlmuse_biomarkers()
