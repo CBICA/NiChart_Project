@@ -734,7 +734,7 @@ def panel_view_centiles(df, method):
 
             with ptab2:
                 st.session_state.plot_const["num_per_row"] = st.slider(
-                    "Plots per row",
+                    "Number of plots per row",
                     st.session_state.plot_const["min_per_row"],
                     st.session_state.plot_const["max_per_row"],
                     st.session_state.plot_const["num_per_row"],

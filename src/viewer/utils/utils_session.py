@@ -14,6 +14,12 @@ from PIL import Image
 
 # from streamlit.web.server.websocket_headers import _get_websocket_headers
 
+def init_selections() -> None:
+    st.session_state.selections = {
+        'list_roi_indices' : None
+    }
+
+
 def init_plot_vars() -> None:
     ###################################
     # Plotting
@@ -474,6 +480,7 @@ def init_session_state() -> None:
         init_pipeline_definitions()
         init_reference_data()
         init_plot_vars()
+        init_selections()
 
         ####################################
         # Process definitions

@@ -221,8 +221,8 @@ def panel_view_seg(ulay, olay, method):
     '''
     Panel to display segmented image overlaid on underlay image
     '''
-    flag_settings = st.sidebar.checkbox('Hide plot settings')
-    flag_data = st.sidebar.checkbox('Hide data settings')
+    flag_settings = st.sidebar.checkbox('Hide settings')
+    ss_sel = st.session_state.selections
     
     # Add tabs for parameter settings
     with st.container(border=True):
@@ -232,13 +232,13 @@ def panel_view_seg(ulay, olay, method):
             )        
             with ptab1:
                 sel_roi = utilpl.panel_select_roi(method)
-                list_roi_indices = utilpl.get_roi_indices(sel_roi, method)
+                ss_sel['list_roi_indices'] = utilpl.get_roi_indices(sel_roi, method)
 
             with ptab2:
                 col1, col2, col3 = st.columns(3)
                 with col1:
                     # Create a list of checkbox options
-                    list_orient = st.multiselect(
+                    ss_sel['list_orient'] = st.multiselect(
                         "Select viewing planes:",
                         img_views, 
                         img_views,
@@ -246,14 +246,13 @@ def panel_view_seg(ulay, olay, method):
                     )
                 with col2:
                     # View hide overlay
-                    is_show_overlay = st.checkbox("Show overlay", True, disabled=False)
+                    ss_sel['is_show_overlay'] = st.checkbox("Show overlay", True, disabled=False)
 
                 with col3:
                     # Crop to mask area
-                    crop_to_mask = st.checkbox("Crop to mask", True, disabled=False)
+                    ss_sel['crop_to_mask'] = st.checkbox("Crop to mask", True, disabled=False)
 
-
-    if list_roi_indices is None:
+    if ss_sel['list_roi_indices'] is None:
         return
 
     # Show images
@@ -261,18 +260,20 @@ def panel_view_seg(ulay, olay, method):
         with st.spinner("Wait for it..."):
             # Process image (and mask) to prepare final 3d matrix to display
             img, mask, img_masked = prep_image_and_olay(
-                ulay, olay, list_roi_indices, crop_to_mask
+                ulay, olay, ss_sel['list_roi_indices'], ss_sel['crop_to_mask']
             )
             img_bounds = detect_mask_bounds(mask)
 
-            cols = st.columns(len(list_orient))
+            cols = st.columns(len(ss_sel['list_orient']))
             for i, tmp_orient in stqdm(
-                enumerate(list_orient), desc="Showing images ...", total=len(list_orient)
+                enumerate(ss_sel['list_orient']),
+                desc="Showing images ...",
+                total=len(ss_sel['list_orient'])
             ):
                 with cols[i]:
                     ind_view = img_views.index(tmp_orient)
                     size_auto = True
-                    if olay is None or is_show_overlay is False:
+                    if olay is None or ss_sel['is_show_overlay'] is False:
                         show_img_slices(
                             img, ind_view, img_bounds[ind_view, :], tmp_orient
                         )

@@ -41,7 +41,7 @@ def view_dlmuse() -> None:
     # Select result type        
     list_res_type = ['Segmentation', 'Volumes']
     sel_res_type = st.pills(
-        'Select result type',
+        'Select output type',
         list_res_type,
         default = None,
         selection_mode = 'single',
@@ -61,6 +61,11 @@ def view_dlmuse() -> None:
         st.session_state.curr_df = df
         utilpl.panel_view_centiles(df, 'muse')
         
+    st.write(st.session_state.selections)
+     
+     
+     
+     
 def view_dlwmls() -> None:
     """
     Panel for viewing dlwmls segmentation
@@ -94,8 +99,9 @@ tab1, tab2 = st.tabs(
     ["Pipeline", "Output"]
 )
 
+# Select pipeline
 with tab1:
-
+    # Show a thumbnail image for each pipeline
     pdict = dict(
         zip(st.session_state.pipelines['Name'], st.session_state.pipelines['Label'])
     )
@@ -112,9 +118,11 @@ with tab1:
         use_container_width = False
     )
     
+    # Show description of the selected pipeline
     if psel >= 0 :
         view_description(list(pdict.values())[psel])
     
+# Show output values for the selected pipeline
 with tab2:
     if psel == 0:
         view_dlmuse()
