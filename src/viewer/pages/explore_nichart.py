@@ -59,7 +59,7 @@ def view_dlmuse() -> None:
             #'/home/gurayerus/GitHub/gurayerus/NiChart_Project/resources/reference_data/centiles/dlmuse_centiles_CN.csv'
         )
         st.session_state.curr_df = df
-        utilpl.panel_view_centiles(df, 'muse')
+        utilpl.panel_view_centiles('dlmuse')
         
     st.write(st.session_state.selections)
      
@@ -86,7 +86,10 @@ def view_dlwmls() -> None:
         utilmriview.panel_view_seg(ulay, olay, 'dlwmls')
 
 def view_spare() -> None:
-    st.write('Not there yet!')
+    st.write('Work in progress!')
+
+def view_surrealgan() -> None:
+    st.write('Work in progress!')
 
 #st.info(
 st.markdown(
@@ -132,3 +135,12 @@ with tab2:
         
     elif psel == 2:
         view_spare()
+
+    elif psel == 3:
+        view_spare()
+
+    elif psel == 4:
+        view_spare()
+
+    elif psel == 5:
+        view_surrealgan()

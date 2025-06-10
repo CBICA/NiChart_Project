@@ -291,7 +291,12 @@ def add_plot(df_plots, new_plot_params):
     #]
     #df_plots.loc[len(df_plots)] = {'params': new_plot_params}
     
+    print('sssss')
+    print(df_plots.shape)
+    
     df_plots.loc[len(df_plots)] = {'params': new_plot_params.copy()}
+
+    print(df_plots.shape)
     return df_plots
 
 def delete_sel_plots(df_plots):
@@ -441,9 +446,9 @@ def display_plot(df, plot_params, sel_mrid, plot_ind):
 
     return fig
 
-def display_scatter_plot(df, plot_params, sel_mrid, plot_ind):
+def display_scatter_plot(df, plot_params, plot_ind):
     """
-    Display plot
+    Display scatter plot
     """
     # Main plot
     m = st.session_state.plot_const["margin"]
@@ -474,8 +479,18 @@ def display_scatter_plot(df, plot_params, sel_mrid, plot_ind):
 
 def display_centile_plot(df, plot_params, plot_ind):
     """
-    Display plot
+    Display centile plot
     """
+    
+    print(plot_params)
+    
+    # Read centile data
+    f_cent = os.path.join(
+        st.session_state.paths['centiles'],
+        f'{plot_params['method']}_centiles_{plot_params['centile_type']}.csv'
+    )
+    df_cent = pd.read_csv(f_cent)
+
     # Main plot
     m = st.session_state.plot_const["margin"]
     hi = st.session_state.plot_const["h_init"]
@@ -492,11 +507,8 @@ def display_centile_plot(df, plot_params, plot_ind):
     # Add axis labels
     fig.update_layout(xaxis_title = xvar, yaxis_title = yvar)
 
-    ## Add data scatter
-    #add_trace_scatter(df, plot_params, fig)
-
     # Add centile trace
-    add_trace_centile(df, plot_params, fig)
+    add_trace_centile(df_cent, plot_params, fig)
 
     #st.plotly_chart(fig, key=f"bubble_chart_{plot_id}", on_select=callback_plot_clicked)
     st.plotly_chart(fig, key=f"bubble_chart_{plot_ind}")
@@ -559,21 +571,24 @@ def show_plots(df, df_plots):
         st.warning("Dataframe is empty, skip plotting!")
         return
 
-    plots_arr = []
-    for i, plot_ind in enumerate(list_plots):
+    #plots_arr = []
+    for i, plot_ind in enumerate(list_plots):        
         column_no = i % plots_per_row
         if column_no == 0:
             blocks = st.columns(plots_per_row)
         sel_params = df_plots.loc[plot_ind, 'params']
         with blocks[column_no]:
             with st.container(border=True):
-                plot_type = sel_params['plot_type']
-                if plot_type == "Scatter Plot":
+                if sel_params['ptype'] == "scatter": 
                     new_plot = display_scatter_plot(
-                        df, sel_params, None, plot_ind
+                        df, sel_params, plot_ind
+                    )
+                elif sel_params['ptype'] == "centile": 
+                    new_plot = display_centile_plot(
+                        df, sel_params, plot_ind
                     )
                 st.checkbox('Select', key = f'_key_plot_sel_{plot_ind}')
-                plots_arr.append(new_plot)
+                #plots_arr.append(new_plot)
     
     #if st.session_state.plot_params["show_img"]:
     #show_img()
@@ -585,7 +600,7 @@ def panel_select_roi(method):
     User panel to select an ROI
     '''
     ## MUSE ROIs
-    if method == 'muse':
+    if method == 'muse' or method == 'dlmuse':
         
         # Read dictionaries
         df_derived = st.session_state.rois['muse']['df_derived']
@@ -597,7 +612,7 @@ def panel_select_roi(method):
         with col1:
             list_group = df_groups.Name.unique()
             sel_group = st.selectbox(
-                "Select ROI Group",
+                "ROI Group",
                 list_group,
                 None,
                 help="Select ROI group"
@@ -611,13 +626,27 @@ def panel_select_roi(method):
                     
             list_roi = df_derived[df_derived.Index.isin(sel_indices)].Name.tolist()
             sel_roi = st.selectbox(
-                "Select ROI",
+                "ROI Name",
                 list_roi,
                 None,
                 help="Select an ROI from the list"
             )
         
         return sel_roi
+
+def panel_select_centile_type():
+    '''
+    User panel to select centile type
+    '''
+    list_types = ['CN', 'CN-Female', 'CN-Males', 'CN-ICVNorm']
+    sel_ind = list_types.index(st.session_state.selections['centile_type'])
+    sel_group = st.selectbox(
+        "Centile Type",
+        list_types,
+        sel_ind,
+        help="Select Centile Type"
+    )
+    return sel_group
 
 def panel_data_plots(df):
     """
@@ -716,23 +745,27 @@ def panel_data_plots(df):
         st.session_state.plots            
     )
 
-def panel_view_centiles(df, method):
+def panel_view_centiles(method):
     """
     Panel for adding multiple centile plots with configuration options
     """
     flag_settings = st.sidebar.checkbox('Hide plot settings')
     flag_data = st.sidebar.checkbox('Hide data settings')
+    ss_sel = st.session_state.selections
 
     # Add tabs for parameter settings
     with st.container(border=True):
         if not flag_settings:
-            ptab1, ptab2, = st.tabs(
-                ['Data', 'Plot Settings']
+            ptab1, ptab2, ptab3 = st.tabs(
+                ['Data', 'Centiles', 'Plot Settings']
             )        
             with ptab1:
-                sel_roi = panel_select_roi(method)
-
+                ss_sel['sel_roi'] = panel_select_roi(method)
+                
             with ptab2:
+                ss_sel['centile_type'] = panel_select_centile_type()
+
+            with ptab3:
                 st.session_state.plot_const["num_per_row"] = st.slider(
                     "Number of plots per row",
                     st.session_state.plot_const["min_per_row"],
@@ -757,7 +790,7 @@ def panel_view_centiles(df, method):
                     disabled=False,
                 )
 
-    if sel_roi is None:
+    if ss_sel['sel_roi'] is None:
         return
 
     # Set plot type to centile
@@ -766,9 +799,11 @@ def panel_view_centiles(df, method):
     st.session_state.plot_params['traces'] = [
         'centile_5', 'centile_50', 'centile_95'
     ]
-    st.session_state.plot_params['yvar'] = sel_roi
-
-    # Add sidebar options
+    st.session_state.plot_params['method'] = method
+    st.session_state.plot_params['yvar'] = ss_sel['sel_roi']
+    st.session_state.plot_params['centile_type'] = ss_sel['centile_type']
+        
+    # Add buttons to add/delete plots
     c1, c2, c3 = st.sidebar.columns(3, vertical_alignment="center")
     with c1:
         btn_add = st.button("Add Plot")
@@ -795,3 +830,4 @@ def panel_view_centiles(df, method):
     show_plots(
         st.session_state.curr_df, st.session_state.plots
     )
+

@@ -14,9 +14,56 @@ from PIL import Image
 
 # from streamlit.web.server.websocket_headers import _get_websocket_headers
 
+def init_paths():
+    # Set paths to data models, etc.
+
+    # Set default directories
+    p_root = os.path.dirname(os.path.dirname(os.getcwd()))
+    p_init = p_root
+    p_resources = os.path.join(
+        p_root, "resources"
+    )
+    p_centiles = os.path.join(
+        p_resources, "reference_data", "centiles"
+    )
+    p_proc_def = os.path.join(
+        p_resources, "process_definitions"
+    )
+    
+    # Set output path
+    user_id = ''
+    if st.session_state.has_cloud_session:
+        user_id = st.session_state.cloud_user_id
+    p_out = os.path.join(
+        p_root, 'output_folder', user_id
+    )
+    if not os.path.exists(p_out):
+        os.makedirs(p_out)
+
+    st.session_state.dicts = {
+        "muse_derived": os.path.join(
+            p_resources, "MUSE", "list_MUSE_mapping_derived.csv"
+        ),
+        "muse_all": os.path.join(p_resources, "MUSE", "list_MUSE_all.csv"),
+        "muse_sel": os.path.join(p_resources, "MUSE", "list_MUSE_primary.csv"),
+    }
+
+    st.session_state.paths = {
+        "root": p_root,
+        "init": p_init,
+        "resources": p_resources,
+        "centiles" : p_centiles,
+        "proc_def": p_proc_def,
+        "file_search_dir": "",
+        "out_dir": p_out,
+        "task": "",
+    }
+
 def init_selections() -> None:
     st.session_state.selections = {
-        'list_roi_indices' : None
+        'sel_roi' : None,
+        'list_roi_indices' : None,
+        'centile_type' : 'CN'
     }
 
 
@@ -279,7 +326,7 @@ def update_task(sel_task) -> None:
 
     # Set task name
     st.session_state.navig['task'] = sel_task
-    st.session_state.flags["task"] = True
+    #st.session_state.flags["task"] = True
     st.session_state.paths['task'] = task_dir
     st.session_state.paths['task_curr_path'] = task_dir
 
@@ -374,64 +421,8 @@ def init_session_state() -> None:
             st.session_state.has_cloud_session = False
 
         ####################################
-        # I/O settings
-
-        # Flags for various i/o
-        st.session_state.flags = {
-            "out_dir": False,
-            "task": False,
-            "dicoms": False,
-            "dicoms_series": False,
-            "nifti": False,
-            "T1": False,
-            "dlmuse": False,
-            "dlmuse_csv": False,
-            "dlwmls_csv": False,
-            "demog_csv": False,
-            "plot_csv": False,
-        }
-
-        # Paths to input/output files/folders
-        st.session_state.paths = {
-            "root": "",
-            "init": "",
-            "resources": "",
-            "proc_def": "",
-            "file_search_dir": "",
-            "out_dir": "",
-            "task": "",
-        }
-
-        # Set default directories
-        st.session_state.paths["root"] = os.path.dirname(os.path.dirname(os.getcwd()))
-        st.session_state.paths["init"] = st.session_state.paths["root"]
-        st.session_state.paths["resources"] = os.path.join(
-            st.session_state.paths["root"], "resources"
-        )
-        st.session_state.paths["proc_def"] = os.path.join(
-            st.session_state.paths["resources"], "process_definitions"
-        )
-        if st.session_state.has_cloud_session:
-            user_id = st.session_state.cloud_user_id
-            st.session_state.paths["out_dir"] = os.path.join(
-                st.session_state.paths["root"], "output_folder", user_id
-            )
-        else:
-            st.session_state.paths["out_dir"] = os.path.join(
-                st.session_state.paths["root"], "output_folder"
-            )
-        if not os.path.exists(st.session_state.paths["out_dir"]):
-            os.makedirs(st.session_state.paths["out_dir"])
-        st.session_state.flags['out_dir'] = True
-
-        res_dir = st.session_state.paths["resources"]
-        st.session_state.dicts = {
-            "muse_derived": os.path.join(
-                res_dir, "MUSE", "list_MUSE_mapping_derived.csv"
-            ),
-            "muse_all": os.path.join(res_dir, "MUSE", "list_MUSE_all.csv"),
-            "muse_sel": os.path.join(res_dir, "MUSE", "list_MUSE_primary.csv"),
-        }
+        # Initialize paths
+        init_paths()
 
 
         # Set default task
