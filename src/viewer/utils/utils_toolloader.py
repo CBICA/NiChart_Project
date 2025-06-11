@@ -247,8 +247,17 @@ def submit_job(
                     "message": "Lambda function error",
                     "error": response_payload.get("errorMessage", "Unknown error")
                 }
-
-            res_job_id = response_payload.get("job_id", None)
+            res_body = response_payload.get("body", None)
+            if res_body is None:
+                return {
+                    "success": False,
+                    "mode": "cloud",
+                    "job_id": None,
+                    "handle": None,
+                    "message": "No message body from Lambda",
+                    "error": str(response_payload)
+                }
+            res_job_id = res_body.get("job_id", None)
             if res_job_id is None:
                 return {
                     "success": False,
