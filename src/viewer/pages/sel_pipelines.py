@@ -7,35 +7,61 @@ from collections import defaultdict
 import utils.utils_pages as utilpg
 import utils.utils_processes as utilprc
 import utils.utils_session as utilses
+from streamlit_image_select import image_select
+import re
+
+def view_input_data(method) -> None:
+    """
+    Panel for viewing input data for a pipeline
+    """
+    with st.container(border=True):
+        fdoc = os.path.join(
+            st.session_state.paths['resources'],
+            'pipelines',
+            method,
+            'data_' + method + '.md'
+        )
+        with open(fdoc, 'r') as f:
+            markdown_content = f.read()
+        #st.markdown(markdown_content)
+        
+        parts = re.split(r"```", markdown_content)
+
+        st.markdown(parts[0])
+        st.code(parts[1].strip(), language="text")
+
 
 def sel_pipeline_from_list():
     with st.container(border=True):
                 
-        # Read pipelines
-        pnames = st.session_state.pipelines.Name.tolist()
-
-        # Let user select steps
-        st.markdown("##### Select Pipeline:")
-        sel_pipeline = st.pills(
-            "Select pipeline:",
-            pnames,
-            selection_mode="single",
-            label_visibility="collapsed",
-            default = None
+        # Show a thumbnail image for each pipeline
+        pdict = dict(
+            zip(st.session_state.pipelines['Name'], st.session_state.pipelines['Label'])
+        )
+        pdir = os.path.join(st.session_state.paths['resources'], 'pipelines')
+        logo_fnames = [
+            os.path.join(pdir, pname, f'logo_{pname}.png') for pname in list(pdict.values())
+        ]
+        psel = image_select(
+            "",
+            images = logo_fnames,
+            captions=list(pdict.keys()),
+            index=-1,
+            return_value="index",
+            use_container_width = False
         )
         
-    if sel_pipeline is None:
-        return
-    
-    with st.container(border=True):
-        st.markdown(f'Current selection: {sel_pipeline}')
+        # Show description of the selected pipeline
+        if psel < 0 :
+            return
+        
+        sel_pipeline = list(pdict.values())[psel]
         if st.button('Select'):
             st.session_state.sel_pipeline = sel_pipeline
             st.success(f'Pipeline selected {sel_pipeline}')
-        
-        
+            view_input_data(sel_pipeline)
+
             
-        
 
 def panel_run_pipeline():
     with st.container(border=True):
@@ -56,18 +82,16 @@ st.markdown(
     """
 )
 
-with st.expander('Select Pipeline', expanded=True):
+list_tasks = ["From List", "Advanced"]
+sel_task = st.pills(
+    "Select Workflow Task", list_tasks, selection_mode="single", label_visibility="collapsed"
+)
+if sel_task == "From List":
+    sel_pipeline_from_list()
 
-    list_tasks = ["Simple", "Advanced"]
-    sel_task = st.pills(
-        "Select Workflow Task", list_tasks, selection_mode="single", label_visibility="collapsed"
-    )
-    if sel_task == "Simple":
-        sel_pipeline_from_list()
-
-    elif sel_task == "Advanced":
-        st.warning('Not implemented yet!')
-        #sel_pipeline_from_graph()
+elif sel_task == "Advanced":
+    st.warning('Not implemented yet!')
+    #sel_pipeline_from_graph()
     
 
 

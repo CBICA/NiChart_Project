@@ -258,7 +258,8 @@ def add_trace_centile(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
     flag_norm = plot_params['flag_norm_centiles']
     
     if flag_norm:
-        norm_val = df_tmp[df_tmp.columns[df_tmp.columns.str.contains('centile')]].max().max()
+        #norm_val = df_tmp[df_tmp.columns[df_tmp.columns.str.contains('centile')]].max().max()
+        norm_val = df_tmp['centile_50'].max()
 
     # Create line traces
     list_tr = [s for s in plot_params['traces'] if "centile" in s]

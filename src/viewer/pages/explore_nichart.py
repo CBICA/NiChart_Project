@@ -131,7 +131,7 @@ with tab1:
         "",
         images = logo_fnames,
         captions=list(pdict.keys()),
-        index=-1,
+        index=0,
         return_value="index",
         use_container_width = False
     )
