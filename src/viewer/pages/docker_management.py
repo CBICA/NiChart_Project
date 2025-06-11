@@ -19,6 +19,7 @@ import utils.utils_pollstatus as ps
 import utils.utils_displayjobs as dj
 from pathlib import Path
 import pathlib
+import time
 from streamlit_autorefresh import st_autorefresh
 
 # Page config should be called for each page
@@ -43,7 +44,7 @@ except:
 st.markdown("This page will refresh automatically every 10 seconds to update the job monitor.")
 
 # Limited to 100 refreshes, in case a user goes AFK.
-count = st_autorefresh(interval=10000, limit=50, key='autorefreshcounter')
+count = st_autorefresh(interval=10000, limit=100, key='autorefreshcounter')
 
 # Pre-defined list of supported images
 SUPPORTED_IMAGES = [
@@ -121,10 +122,36 @@ if st.button("Press me to try submitting a cloud job!"):
     )
     st.text(f"{result}")
 
+if st.button("Press me to try submitting a synchronous cloud job!"):
+    progress_bar = stqdm(total=2, desc="Current step", position=0)
+    progress_bar.set_description("Submitting job...")
+    result = tl.submit_and_run_job_sync(
+        tool_name=example_tool_name,
+        user_params=example_user_params,
+        user_mounts=example_user_mounts,
+        execution_mode='cloud',
+        progress_bar=progress_bar,
+        log=None
+    )
+    if result.successful:
+        st.success(f"Tool {example_tool_name} finished successfully.")
+    else:
+        st.error(f"Tool {example_tool_name} failed, check error logs.")
 
+indicator_one = st.empty()
+indicator_two = st.empty()
 
+def sample_longrunning_task():
+    for i in range(5):
+        indicator_one.markdown(f"Status: running step {i+1}/5")
+        indicator_two.markdown(f"Output: result of step {i+1}")
+        time.sleep(1)
+    indicator_one.markdown("**Status:** Done ✅")
 
-st.title("Docker Image Manager")
+if st.button("Press me to try automatic UI updates"):
+    sample_longrunning_task()
+
+""" st.title("Docker Image Manager")
 
 st.header("Local Docker Images")
 local_images = get_local_images()
@@ -176,3 +203,4 @@ st.code(st.session_state.docker_run_opts or "No options set", language="bash")
 
 
 
+ """

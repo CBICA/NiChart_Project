@@ -1,4 +1,4 @@
-from typing import Dict, List, Union, Optional
+from typing import Dict, List, Union, Optional, Any
 from pydantic import BaseModel, Field, validator
 import os
 import yaml
@@ -9,6 +9,7 @@ import json
 import boto3
 from botocore.exceptions import ClientError
 import utils.utils_pollstatus as ps
+import time
 
 DEFAULT_TOOL_DEFINITION_PATH = Path(__file__).parent.parent.parent.parent / "resources/tools/"
 
@@ -133,6 +134,7 @@ class ToolSpec(BaseModel):
 
 
 def load_tool_spec_from_yaml(yaml_path: Union[str, Path]) -> ToolSpec:
+    print(f"DEBUG: Loading tool spec from yaml at path {yaml_path}")
     with open(yaml_path, 'r') as f:
         raw_data = yaml.safe_load(f)
     return ToolSpec(**raw_data)
@@ -219,7 +221,7 @@ def submit_job(
             print("DEBUG: Cloud mode job submission.")
             id_token = st.session_state.get("cloud_session_token", None)
             if id_token is None:
-                raise ValueError("An ID token must be provided to submit cloud jobs and none was found in the session state.")
+                raise ValueError("Lambda error: An ID token must be provided to submit cloud jobs and none was found in the session state.")
             payload = {
                 "id_token": id_token,
                 "tool_name": tool_name,
@@ -237,15 +239,36 @@ def submit_job(
             response_payload = json.load(response['Payload'])
             print(f"Got response from Lambda: {response_payload}")
             if response.get("FunctionError"):
-                return f"Lambda error: {response_payload.get('errorMessage', 'Unknown error')}"
+                return {
+                    "success": False,
+                    "mode": "cloud",
+                    "job_id": None,
+                    "handle": None,
+                    "message": "Lambda function error",
+                    "error": response_payload.get("errorMessage", "Unknown error")
+                }
 
             res_job_id = response_payload.get("job_id", None)
             if res_job_id is None:
-                return f"No job ID returned from lambda. Lambda response: {response_payload}"
+                return {
+                    "success": False,
+                    "mode": "cloud",
+                    "job_id": None,
+                    "handle": None,
+                    "message": "No job ID returned from lambda",
+                    "error": str(response_payload)
+                }
             else:
                 handle = ps.get_handle(mode='batch', raw_id=res_job_id)
                 ps.add_job_to_session(handle)
-                return f"Added job {res_job_id}"
+                return {
+                    "success": True,
+                    "mode": "cloud",
+                    "job_id": res_job_id,
+                    "handle": handle,
+                    "message": f"Added job {res_job_id}",
+                    "error": None
+                }
 
         else:
             # === LOCAL MODE ===
@@ -275,21 +298,168 @@ def submit_job(
             container_name = inspect_result.stdout.strip().lstrip("/")
             handle = ps.get_handle(mode='docker', raw_id=container_name)
             ps.add_job_to_session(handle)
-            return f"Added job {container_name}"
+            return {
+                "success": True,
+                "mode": "local",
+                "job_id": container_name,
+                "handle": handle,
+                "message": f"Added job {container_name}",
+                "error": None
+            }
 
     except FileNotFoundError as e:
         print(f"File error: {e}")
-        return f"File error: {e}"
+        return {
+            "success": False,
+            "mode": None,
+            "job_id": None,
+            "handle": None,
+            "message": "File error",
+            "error": str(e)
+        }
     except ValueError as e:
         print(f"Validation error: {e}")
-        return f"Validation error: {e}"
+        return {
+            "success": False,
+            "mode": None,
+            "job_id": None,
+            "handle": None,
+            "message": "Validation error",
+            "error": str(e)
+        }
     except TypeError as e:
         print(f"Parameter type error: {e}")
-        return f"Parameter type error: {e}"
+        return {
+            "success": False,
+            "mode": None,
+            "job_id": None,
+            "handle": None,
+            "message": "Parameter type error",
+            "error": str(e)
+        }
     except ClientError as e:
         print(f"AWS Error {e.response['Error']['Message']}")
-        return f"AWS error: {e.response['Error']['Message']}"
+        return {
+            "success": False,
+            "mode": None,
+            "job_id": None,
+            "handle": None,
+            "message": "AWS error",
+            "error": e.response['Error']['Message']
+        }
     except Exception as e:
         print(f"Unexpected error: {str(e)}")
-        return f"Unexpected error: {str(e)}"
+        return {
+            "success": False,
+            "mode": None,
+            "job_id": None,
+            "handle": None,
+            "message": "Unexpected error",
+            "error": str(e)
+        }
 
+
+def submit_and_run_job_sync(
+    tool_name: str,
+    user_params: Dict,
+    user_mounts: Dict[str, str],
+    id_token: str | None = None,
+    execution_mode: str = "any",  # can be "cloud", "local", or "any"
+    progress_bar=None,
+    log=None,
+    poll_interval: int = 5,
+) -> Dict[str, Any]:
+    
+    result = submit_job(
+        tool_name=tool_name,
+        user_params=user_params,
+        user_mounts=user_mounts,
+        id_token=id_token,
+        execution_mode=execution_mode,
+    )
+
+    if not result["success"]:
+        # Submission failed
+        error_message = f"[{result['message']}] {result['error']}"
+        if log:
+            log.error(error_message)
+        if progress_bar:
+            progress_bar.error("Job submission failed.")
+        return {
+            "mode": result.get("mode"),
+            "status": "submission_failed",
+            "error_message": error_message
+        }
+
+    # Submission succeeded
+    handle = result["handle"]
+    job_id = result["job_id"]
+    mode = result["mode"]
+
+    if log:
+        log.info(f"Job {job_id} submitted in {mode} mode.")
+
+    if progress_bar:
+        progress_bar.text(f"Job {job_id} running...")
+
+    # === CLOUD MODE (AWS Batch) ===
+    if mode == "cloud":
+        batch_client = boto3.client("batch", region_name="us-east-1")
+
+        while True:
+            try:
+                response = batch_client.describe_jobs(jobs=[job_id])
+                job_info = response["jobs"][0]
+                status = job_info["status"]
+
+                if log:
+                    log.info(f"Batch job status: {status}")
+                if progress_bar:
+                    progress_bar.text(f"AWS Batch job status: {status}")
+
+                if status in ["SUCCEEDED", "FAILED"]:
+                    break
+
+                time.sleep(poll_interval)
+            except Exception as e:
+                if log:
+                    log.error(f"Error checking job status: {e}")
+                return {
+                    "mode": "cloud",
+                    "status": "error",
+                    "error_message": f"Error polling AWS Batch job: {e}"
+                }
+
+        return {
+            "mode": "cloud",
+            "status": status.lower(),
+            "job_id": job_id
+        }
+
+    # === LOCAL MODE (Docker) ===
+    elif mode == "local":
+        while True:
+            status = handle.get_status()
+            if log:
+                log.info(f"Docker job status: {status}")
+            if progress_bar:
+                progress_bar.text(f"Docker container status: {status}")
+
+            if status in ["exited", "failed", "finished", "dead"]:
+                break
+            time.sleep(poll_interval)
+
+        return {
+            "mode": "local",
+            "status": status,
+            "job_id": job_id
+        }
+
+    else:
+        # Unknown mode
+        return {
+            "mode": mode,
+            "status": "error",
+            "error_message": "Unexpected job execution mode"
+        }
+    
