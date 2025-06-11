@@ -63,7 +63,8 @@ def init_selections() -> None:
     st.session_state.selections = {
         'sel_roi' : None,
         'list_roi_indices' : None,
-        'centile_type' : 'CN'
+        'centile_type' : 'CN',
+        'centile_values' : ['centile_50']
     }
 
 
@@ -121,7 +122,8 @@ def init_plot_vars() -> None:
         "trend": "Linear",
         "traces": ["data", "lin_fit"],
         "lowess_s": 0.5,
-        "centtype": "",
+        "centile_type": None,
+        "centile_values": None,
         "h_coeff": 1.0,
         "ptype": 'scatter'
     }

@@ -95,9 +95,6 @@ def add_trace_scatter(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
 
     if "data" in plot_params['traces']:
         for hname in hvals:
-            
-            print(hvals)
-            
             col_ind = vals_hue_all.index(hname)  # Select index of colour for the category
             dfh = dft[dft[hvar] == hname]
                         
@@ -244,6 +241,13 @@ def add_trace_dot(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
     fig.add_trace(trace)
 
 def add_trace_centile(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
+    # Check centile traces
+    if plot_params['traces'] is None:
+        return fig
+    
+    if not any("centile" in s for s in plot_params['traces']):
+        return fig
+
     # Set colormap
     colors = st.session_state.plot_colors["centile"]
 
@@ -287,20 +291,8 @@ def add_plot(df_plots, new_plot_params):
     """
     Adds a new plot 
     (adds a new row to the plots dataframe with new plot params)
-    """
-    #new_plot_params['xvar'] = 'Age'
-    #new_plot_params['yvar'] = 'GM'
-    #new_plot_params['traces'] = [
-        #'centile_5', 'centile_50', 'centile_95'
-    #]
-    #df_plots.loc[len(df_plots)] = {'params': new_plot_params}
-    
-    print('sssss')
-    print(df_plots.shape)
-    
+    """   
     df_plots.loc[len(df_plots)] = {'params': new_plot_params.copy()}
-
-    print(df_plots.shape)
     return df_plots
 
 def delete_sel_plots(df_plots):
@@ -313,9 +305,7 @@ def delete_sel_plots(df_plots):
         if st.session_state[f'_key_plot_sel_{tmp_ind}']:
             list_sel.append(tmp_ind)
             st.session_state[f'_key_plot_sel_{tmp_ind}'] = False
-    
-    print(f'selected: {list_sel}')
-    
+        
     df_plots = df_plots.drop(list_sel).reset_index().drop(columns=['index'])
     return df_plots
 
@@ -485,9 +475,6 @@ def display_centile_plot(df, plot_params, plot_ind):
     """
     Display centile plot
     """
-    
-    print(plot_params)
-    
     # Read centile data
     f_cent = os.path.join(
         st.session_state.paths['centiles'],
@@ -648,13 +635,29 @@ def panel_select_centile_type():
     '''
     list_types = ['CN', 'CN-Female', 'CN-Males', 'CN-ICVNorm']
     sel_ind = list_types.index(st.session_state.selections['centile_type'])
-    sel_group = st.selectbox(
+    sel_type = st.selectbox(
         "Centile Type",
         list_types,
         sel_ind,
         help="Select Centile Type"
     )
-    return sel_group
+    return sel_type
+
+def panel_select_centile_values():
+    '''
+    User panel to select centile values
+    '''
+    list_values = [
+        'centile_5', 'centile_25', 'centile_50', 'centile_75', 'centile_95'
+    ]
+    sel_vals = st.multiselect(
+        "Centile Values",
+        list_values,
+        None,
+        help="Select Centile Values"
+    )
+    return sel_vals
+
 
 def panel_data_plots(df):
     """
@@ -758,7 +761,6 @@ def panel_view_centiles(method, var_type):
     Panel for adding multiple centile plots with configuration options
     """
     flag_settings = st.sidebar.checkbox('Hide plot settings')
-    flag_data = st.sidebar.checkbox('Hide data settings')
     ss_sel = st.session_state.selections
 
     # Add tabs for parameter settings
@@ -780,6 +782,7 @@ def panel_view_centiles(method, var_type):
                 
             with ptab2:
                 ss_sel['centile_type'] = panel_select_centile_type()
+                ss_sel['centile_values'] = panel_select_centile_values()
 
             with ptab3:
                 st.session_state.plot_const["num_per_row"] = st.slider(
@@ -812,12 +815,11 @@ def panel_view_centiles(method, var_type):
     # Set plot type to centile
     st.session_state.plot_params['ptype'] = 'centile'
     st.session_state.plot_params['xvar'] = 'Age'
-    st.session_state.plot_params['traces'] = [
-        'centile_5', 'centile_50', 'centile_95'
-    ]
+    st.session_state.plot_params['traces'] = st.session_state.plot_params['centile_values']
     st.session_state.plot_params['method'] = method
     st.session_state.plot_params['yvar'] = ss_sel['yvar']
     st.session_state.plot_params['centile_type'] = ss_sel['centile_type']
+    st.session_state.plot_params['centile_values'] = ss_sel['centile_values']
         
     # Add buttons to add/delete plots
     c1, c2, c3 = st.sidebar.columns(3, vertical_alignment="center")

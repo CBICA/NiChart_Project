@@ -60,9 +60,9 @@ def view_dlmuse() -> None:
         )
         st.session_state.curr_df = df
         utilpl.panel_view_centiles('dlmuse', 'rois')
-        
-    st.write(st.session_state.selections)
-     
+         
+    #print(st.session_state.plot_params)
+    
 def view_dlwmls() -> None:
     """
     Panel for viewing dlwmls segmentation
