@@ -216,7 +216,7 @@ def submit_job(
     
     aws_lambda_function_name = "cbica-nichart-submitjob"
     try:
-        if (st.session_state.get("has_cloud_session", False) and execution_mode.lower() == 'cloud'):
+        if (execution_mode.lower() == 'cloud'):
             # === CLOUD MODE ===
             print("DEBUG: Cloud mode job submission.")
             id_token = st.session_state.get("cloud_session_token", None)
@@ -287,7 +287,7 @@ def submit_job(
                 capture_output=True,
                 text=True
             )
-            container_id = result.stdout.strip()
+            container_id = result.stdout.strip() # stdout from detached is just container id
             # Get the container name from inspect
             inspect_result = subprocess.run(
                 ["docker", "inspect", "--format", "{{.Name}}", container_id],
