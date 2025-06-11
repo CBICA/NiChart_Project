@@ -254,12 +254,23 @@ def add_trace_centile(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
     # Get centile values for the selected roi
     df_tmp = df[df.VarName == plot_params['yvar']]
 
+    # Max centile value for normalization
+    flag_norm = plot_params['flag_norm_centiles']
+    
+    if flag_norm:
+        norm_val = df_tmp[df_tmp.columns[df_tmp.columns.str.contains('centile')]].max().max()
+
     # Create line traces
-    for i, cvar in enumerate(df_tmp.columns[2:]):
-        if cvar in plot_params['traces']:
+    list_tr = [s for s in plot_params['traces'] if "centile" in s]
+    for i, cvar in enumerate(list_tr):
+        yvals = df_tmp[cvar]
+        if flag_norm:
+            yvals = yvals * 100 / norm_val
+        
+        if cvar in df_tmp.columns[2:]:
             ctrace = go.Scatter(
                 x=df_tmp[plot_params['xvar']],
-                y=df_tmp[cvar],
+                y=yvals,
                 mode="lines",
                 name=cvar,
                 legendgroup="centiles",
@@ -267,6 +278,7 @@ def add_trace_centile(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
                 showlegend=not plot_params['hide_legend'],
             )
             fig.add_trace(ctrace)  # plot in first row
+
 
     # Update min/max
     #fig.update_layout(xaxis_range=[xmin, xmax])
@@ -648,7 +660,7 @@ def panel_select_centile_values():
     User panel to select centile values
     '''
     list_values = [
-        'centile_5', 'centile_25', 'centile_50', 'centile_75', 'centile_95'
+        'centile_5', 'centile_25', 'centile_50', 'centile_75', 'centile_95',
     ]
     sel_vals = st.multiselect(
         "Centile Values",
@@ -783,6 +795,9 @@ def panel_view_centiles(method, var_type):
             with ptab2:
                 ss_sel['centile_type'] = panel_select_centile_type()
                 ss_sel['centile_values'] = panel_select_centile_values()
+                ss_sel['flag_norm_centiles'] = st.checkbox(
+                    'Normalize Centiles'
+                )
 
             with ptab3:
                 st.session_state.plot_const["num_per_row"] = st.slider(
@@ -820,6 +835,7 @@ def panel_view_centiles(method, var_type):
     st.session_state.plot_params['yvar'] = ss_sel['yvar']
     st.session_state.plot_params['centile_type'] = ss_sel['centile_type']
     st.session_state.plot_params['centile_values'] = ss_sel['centile_values']
+    st.session_state.plot_params['flag_norm_centiles'] = ss_sel['flag_norm_centiles']
         
     # Add buttons to add/delete plots
     c1, c2, c3 = st.sidebar.columns(3, vertical_alignment="center")
