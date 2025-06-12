@@ -103,6 +103,7 @@ def _get_docker_logs(container_name: str) -> str:
 class BatchJobHandle(TaskHandle):
     def __init__(self, job_id: str, region: str = "us-east-1"):
         self.job_id = job_id
+        self.region = region
         self.client = boto3.client("batch", region_name=region)
 
     def status(self) -> str:
