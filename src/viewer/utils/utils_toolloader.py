@@ -257,7 +257,9 @@ def submit_job(
                     "message": "No message body from Lambda",
                     "error": str(response_payload)
                 }
-            res_job_id = res_body.get("job_id", None)
+            else:
+                res_body_json = json.load(res_body)
+            res_job_id = res_body_json.get("job_id", None)
             if res_job_id is None:
                 return {
                     "success": False,
