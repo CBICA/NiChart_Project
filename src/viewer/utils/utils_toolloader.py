@@ -359,7 +359,7 @@ def submit_and_run_job_sync(
         log.info(f"Job {job_id} submitted in {mode} mode.")
 
     if progress_bar:
-        progress_bar.text(f"Job {job_id} running...")
+        progress_bar.set_description(f"Job {job_id} running...")
 
     # === CLOUD MODE (AWS Batch) ===
     if mode == "cloud":
@@ -374,7 +374,7 @@ def submit_and_run_job_sync(
                 if log:
                     log.info(f"Batch job status: {status}")
                 if progress_bar:
-                    progress_bar.text(f"AWS Batch job status: {status}")
+                    progress_bar.set_description(f"AWS Batch job status: {status}")
 
                 if status in ["SUCCEEDED", "FAILED"]:
                     break
