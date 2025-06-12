@@ -257,7 +257,7 @@ def submit_job(
                 "error": str(response_payload)
             }
         else:
-            res_body_json = json.load(res_body)
+            res_body_json = json.loads(res_body)
         res_job_id = res_body_json.get("job_id", None)
         if res_job_id is None:
             return {
