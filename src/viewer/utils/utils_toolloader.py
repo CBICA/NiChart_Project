@@ -215,158 +215,106 @@ def submit_job(
     """
     
     aws_lambda_function_name = "cbica-nichart-submitjob"
-    try:
-        if (execution_mode.lower() == 'cloud'):
-            # === CLOUD MODE ===
-            print("DEBUG: Cloud mode job submission.")
-            id_token = st.session_state.get("cloud_session_token", None)
-            if id_token is None:
-                raise ValueError("Lambda error: An ID token must be provided to submit cloud jobs and none was found in the session state.")
-            payload = {
-                "id_token": id_token,
-                "tool_name": tool_name,
-                "user_params": user_params,
-                "user_mounts": user_mounts
+    if (execution_mode.lower() == 'cloud'):
+        # === CLOUD MODE ===
+        print("DEBUG: Cloud mode job submission.")
+        id_token = st.session_state.get("cloud_session_token", None)
+        if id_token is None:
+            raise ValueError("Lambda error: An ID token must be provided to submit cloud jobs and none was found in the session state.")
+        payload = {
+            "id_token": id_token,
+            "tool_name": tool_name,
+            "user_params": user_params,
+            "user_mounts": user_mounts
+        }
+
+        lambda_client = boto3.client("lambda", region_name='us-east-1')
+        response = lambda_client.invoke(
+            FunctionName=aws_lambda_function_name,
+            InvocationType='RequestResponse',
+            Payload=json.dumps(payload)
+        )
+
+        response_payload = json.load(response['Payload'])
+        print(f"Got response from Lambda: {response_payload}")
+        if response.get("FunctionError"):
+            return {
+                "success": False,
+                "mode": "cloud",
+                "job_id": None,
+                "handle": None,
+                "message": "Lambda function error",
+                "error": response_payload.get("errorMessage", "Unknown error")
             }
-
-            lambda_client = boto3.client("lambda", region_name='us-east-1')
-            response = lambda_client.invoke(
-                FunctionName=aws_lambda_function_name,
-                InvocationType='RequestResponse',
-                Payload=json.dumps(payload)
-            )
-
-            response_payload = json.load(response['Payload'])
-            print(f"Got response from Lambda: {response_payload}")
-            if response.get("FunctionError"):
-                return {
-                    "success": False,
-                    "mode": "cloud",
-                    "job_id": None,
-                    "handle": None,
-                    "message": "Lambda function error",
-                    "error": response_payload.get("errorMessage", "Unknown error")
-                }
-            res_body = response_payload.get("body", None)
-            if res_body is None:
-                return {
-                    "success": False,
-                    "mode": "cloud",
-                    "job_id": None,
-                    "handle": None,
-                    "message": "No message body from Lambda",
-                    "error": str(response_payload)
-                }
-            else:
-                res_body_json = json.load(res_body)
-            res_job_id = res_body_json.get("job_id", None)
-            if res_job_id is None:
-                return {
-                    "success": False,
-                    "mode": "cloud",
-                    "job_id": None,
-                    "handle": None,
-                    "message": "No job ID returned from lambda",
-                    "error": str(response_payload)
-                }
-            else:
-                handle = ps.get_handle(mode='batch', raw_id=res_job_id)
-                ps.add_job_to_session(handle)
-                return {
-                    "success": True,
-                    "mode": "cloud",
-                    "job_id": res_job_id,
-                    "handle": handle,
-                    "message": f"Added job {res_job_id}",
-                    "error": None
-                }
-
+        res_body = response_payload.get("body", None)
+        if res_body is None:
+            return {
+                "success": False,
+                "mode": "cloud",
+                "job_id": None,
+                "handle": None,
+                "message": "No message body from Lambda",
+                "error": str(response_payload)
+            }
         else:
-            # === LOCAL MODE ===
-            print("DEBUG: Local mode job submission.")
-            docker_command = validate_user_request(
-                tool_name=tool_name,
-                user_params=user_params,
-                user_mounts=user_mounts,
-            )
-
-            print(f"Running on local docker: {docker_command}")
-            # Launch container in detached mode
-            result = subprocess.run(
-                docker_command.split(' '),
-                check=True,
-                capture_output=True,
-                text=True
-            )
-            container_id = result.stdout.strip() # stdout from detached is just container id
-            # Get the container name from inspect
-            inspect_result = subprocess.run(
-                ["docker", "inspect", "--format", "{{.Name}}", container_id],
-                check=True,
-                capture_output=True,
-                text=True
-            )
-            container_name = inspect_result.stdout.strip().lstrip("/")
-            handle = ps.get_handle(mode='docker', raw_id=container_name)
+            res_body_json = json.load(res_body)
+        res_job_id = res_body_json.get("job_id", None)
+        if res_job_id is None:
+            return {
+                "success": False,
+                "mode": "cloud",
+                "job_id": None,
+                "handle": None,
+                "message": "No job ID returned from lambda",
+                "error": str(response_payload)
+            }
+        else:
+            handle = ps.get_handle(mode='batch', raw_id=res_job_id)
             ps.add_job_to_session(handle)
             return {
                 "success": True,
-                "mode": "local",
-                "job_id": container_name,
+                "mode": "cloud",
+                "job_id": res_job_id,
                 "handle": handle,
-                "message": f"Added job {container_name}",
+                "message": f"Added job {res_job_id}",
                 "error": None
             }
 
-    except FileNotFoundError as e:
-        print(f"File error: {e}")
+    else:
+        # === LOCAL MODE ===
+        print("DEBUG: Local mode job submission.")
+        docker_command = validate_user_request(
+            tool_name=tool_name,
+            user_params=user_params,
+            user_mounts=user_mounts,
+        )
+
+        print(f"Running on local docker: {docker_command}")
+        # Launch container in detached mode
+        result = subprocess.run(
+            docker_command.split(' '),
+            check=True,
+            capture_output=True,
+            text=True
+        )
+        container_id = result.stdout.strip() # stdout from detached is just container id
+        # Get the container name from inspect
+        inspect_result = subprocess.run(
+            ["docker", "inspect", "--format", "{{.Name}}", container_id],
+            check=True,
+            capture_output=True,
+            text=True
+        )
+        container_name = inspect_result.stdout.strip().lstrip("/")
+        handle = ps.get_handle(mode='docker', raw_id=container_name)
+        ps.add_job_to_session(handle)
         return {
-            "success": False,
-            "mode": None,
-            "job_id": None,
-            "handle": None,
-            "message": "File error",
-            "error": str(e)
-        }
-    except ValueError as e:
-        print(f"Validation error: {e}")
-        return {
-            "success": False,
-            "mode": None,
-            "job_id": None,
-            "handle": None,
-            "message": "Validation error",
-            "error": str(e)
-        }
-    except TypeError as e:
-        print(f"Parameter type error: {e}")
-        return {
-            "success": False,
-            "mode": None,
-            "job_id": None,
-            "handle": None,
-            "message": "Parameter type error",
-            "error": str(e)
-        }
-    except ClientError as e:
-        print(f"AWS Error {e.response['Error']['Message']}")
-        return {
-            "success": False,
-            "mode": None,
-            "job_id": None,
-            "handle": None,
-            "message": "AWS error",
-            "error": e.response['Error']['Message']
-        }
-    except Exception as e:
-        print(f"Unexpected error: {str(e)}")
-        return {
-            "success": False,
-            "mode": None,
-            "job_id": None,
-            "handle": None,
-            "message": "Unexpected error",
-            "error": str(e)
+            "success": True,
+            "mode": "local",
+            "job_id": container_name,
+            "handle": handle,
+            "message": f"Added job {container_name}",
+            "error": None
         }
 
 
