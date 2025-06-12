@@ -34,6 +34,35 @@ def view_description(method) -> None:
             markdown_content = f.read()
         st.markdown(markdown_content)
 
+def view_synthseg() -> None:
+    """
+    Panel for viewing synthseg results
+    """    
+    # Select result type 
+    list_res_type = ['Segmentation', 'Volumes']
+    sel_res_type = st.pills(
+        'Select output type',
+        list_res_type,
+        default = None,
+        selection_mode = 'single',
+        label_visibility = 'collapsed',
+    )
+    
+    if sel_res_type == 'Segmentation':
+        ulay = st.session_state.ref_data["t1"]
+        olay = st.session_state.ref_data["dlmuse"]        
+        utilmri.panel_view_seg(ulay, olay, 'muse')
+        
+    elif sel_res_type == 'Volumes':
+        df = pd.read_csv(
+            '/home/guraylab/GitHub/gurayerus/NiChart_Project/resources/reference_data/centiles/dlmuse_centiles_CN.csv'
+            #'/home/gurayerus/GitHub/gurayerus/NiChart_Project/resources/reference_data/centiles/dlmuse_centiles_CN.csv'
+        )
+        st.session_state.curr_df = df
+        utilpl.panel_view_centiles('dlmuse', 'rois')
+         
+    #print(st.session_state.plot_params)
+
 def view_dlmuse() -> None:
     """
     Panel for viewing dlmuse results
@@ -159,3 +188,6 @@ with tab2:
 
     elif psel == 5:
         view_dlmuse_biomarkers()
+
+    elif psel == 6:
+        view_synthseg()
