@@ -61,10 +61,11 @@ def init_paths():
 
 def init_selections() -> None:
     st.session_state.selections = {
-        'sel_roi' : None,
+        'sel_roi_group' : 'Primary',
+        'sel_roi' : 'GM',
         'list_roi_indices' : None,
         'centile_type' : 'CN',
-        'centile_values' : ['centile_50']
+        'centile_values' : ['centile_25', 'centile_50', 'centile_75']
     }
 
 
@@ -90,7 +91,7 @@ def init_plot_vars() -> None:
         "distplot_trace_types": ["histogram", "density", "rug"],
         "min_per_row": 1,
         "max_per_row": 5,
-        "num_per_row": 3,
+        "num_per_row": 2,
         "margin": 20,
         "h_init": 500,
         "h_coeff": 1.0,

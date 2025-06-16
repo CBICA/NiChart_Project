@@ -52,7 +52,7 @@ def get_index_in_list(in_list: list, in_item: str) -> Optional[int]:
     if in_item not in in_list:
         return None
     else:
-        return in_list.index(in_item)
+        return list(in_list).index(in_item)
     
 def get_roi_indices(sel_roi, method):
     '''
@@ -615,10 +615,11 @@ def panel_select_roi(method):
         # Select roi group
         with col1:
             list_group = df_groups.Name.unique()
+            sel_ind = get_index_in_list(list_group, st.session_state.selections['sel_roi_group'])
             sel_group = st.selectbox(
                 "ROI Group",
                 list_group,
-                None,
+                sel_ind,
                 help="Select ROI group"
             )
             if sel_group is None:
@@ -629,12 +630,18 @@ def panel_select_roi(method):
             sel_indices = df_groups[df_groups.Name == sel_group]['List'].values[0]
                     
             list_roi = df_derived[df_derived.Index.isin(sel_indices)].Name.tolist()
+            sel_ind = get_index_in_list(list_roi, st.session_state.selections['sel_roi'])
             sel_roi = st.selectbox(
                 "ROI Name",
                 list_roi,
-                None,
+                sel_ind,
                 help="Select an ROI from the list"
             )
+            if sel_group is None:
+                return None
+
+            st.session_state.selections['sel_roi_group'] = sel_group
+            st.session_state.selections['sel_roi'] = sel_roi
         
         return sel_roi
 
@@ -654,6 +661,10 @@ def panel_select_centile_type():
         sel_ind,
         help="Select Centile Type"
     )
+    if sel_type is None:
+        return None
+    st.session_state.selections['centile_type'] = sel_type
+    
     return sel_type
 
 def panel_select_centile_values():
@@ -666,9 +677,14 @@ def panel_select_centile_values():
     sel_vals = st.multiselect(
         "Centile Values",
         list_values,
-        None,
+        st.session_state.selections['centile_values'],
         help="Select Centile Values"
     )
+
+    if sel_vals is None:
+        return None
+    st.session_state.selections['centile_values'] = sel_vals
+    
     return sel_vals
 
 
@@ -854,12 +870,22 @@ def panel_view_centiles(method, var_type):
             st.session_state.plots,
             st.session_state.plot_params
         )
+
+    if st.session_state.plots.shape[0] == 0:
+        # Add plot
+        st.session_state.plots = add_plot(
+            st.session_state.plots,
+            st.session_state.plot_params
+        )
+
     if btn_del_sel:
         st.session_state.plots = delete_sel_plots(
             st.session_state.plots
         )
     if btn_del_all:
         st.session_state.plots = pd.DataFrame(columns=['params'])
+
+    st.dataframe(st.session_state.plots)
                     
     # Show plots
     show_plots(
