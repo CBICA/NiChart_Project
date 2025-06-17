@@ -1,0 +1,45 @@
+pname: Harmonize[dti]
+description: Harmonize DTI features
+
+dependencies:
+  - demog_csv
+  - dlmuse_csv
+
+inputs:
+  - name: demog_csv
+    type: file
+
+  - name: dti_csv
+    type: file
+
+outputs:
+  - name: dti_harm_csv
+    type: file
+
+mounts:
+  - name: demog_csv
+    path_in_container: /mnt/data/demog.csv
+    mode: ro
+
+  - name: dti_csv
+    path_in_container: /mnt/output/dti.csv
+    mode: rw
+
+  - name: dti_harm_csv
+    path_in_container: /mnt/output/dti_harm_csv
+    mode: rw
+
+resources:
+  vcpus: 4
+  memory: 16GB
+  gpus: 1
+
+container:
+  image: cbica/sample_tool_container:latest 
+  command: > # Leave blank to use container default entrypoint/command
+    combat --demog {demog_csv} --rois {dti_csv} --output {dti_harm_csv}
+
+parameters:
+  - name: num_features
+    type: int
+    default: 300

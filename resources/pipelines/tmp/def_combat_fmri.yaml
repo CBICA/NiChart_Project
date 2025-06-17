@@ -1,0 +1,45 @@
+pname: Harmonize[fmri]
+description: Harmonize fMRI features
+
+dependencies:
+  - demog_csv
+  - dlmuse_csv
+
+inputs:
+  - name: demog_csv
+    type: file
+
+  - name: fmri_csv
+    type: file
+
+outputs:
+  - name: fmri_harm_csv
+    type: file
+
+mounts:
+  - name: demog_csv
+    path_in_container: /mnt/data/demog.csv
+    mode: ro
+
+  - name: fmri_csv
+    path_in_container: /mnt/output/fmri.csv
+    mode: rw
+
+  - name: fmri_harm_csv
+    path_in_container: /mnt/output/fmri_harm_csv
+    mode: rw
+
+resources:
+  vcpus: 4
+  memory: 16GB
+  gpus: 1
+
+container:
+  image: cbica/sample_tool_container:latest 
+  command: > # Leave blank to use container default entrypoint/command
+    combat --demog {demog_csv} --rois {fmri_csv} --output {fmri_harm_csv}
+
+parameters:
+  - name: num_features
+    type: int
+    default: 300

@@ -1,0 +1,41 @@
+pname: fMRI
+description: Apply fMRI pipeline
+
+dependencies:
+  - fmri_img
+
+inputs:
+  - name: fmri_img
+    type: directory
+
+outputs:
+  - name: fmri_csv
+    type: file
+
+mounts:
+  - name: fmri_img
+    path_in_container: /mnt/data/t1
+    mode: ro
+    
+  - name: fmri_csv
+    path_in_container: /mnt/output/fmri.csv
+    mode: rw
+
+resources:
+  vcpus: 4
+  memory: 16GB
+  gpus: 1
+
+container:
+  image: cbica/sample_tool_container:latest 
+  command: > # Leave blank to use container default entrypoint/command
+    fmriproc --input {fmri_img} --output {fmri_csv} --num_features {num_features}
+
+parameters:
+  - name: some_flag
+    type: bool
+    default: false
+        
+  - name: num_features
+    type: int
+    default: 300

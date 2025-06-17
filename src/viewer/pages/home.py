@@ -1,153 +1,122 @@
 import streamlit as st
-import utils.utils_menu as utilmenu
+import utils.utils_pages as utilpg
 import utils.utils_session as utilss
-import utils.utils_st as utilst
-from streamlit_extras.stylable_container import stylable_container
-from streamlitextras.webutils import stxs_javascript
+import logging
+
+from utils.utils_logger import setup_logger
 
 # Page config should be called for each page
-utilss.config_page()
+utilpg.config_page()
+utilpg.show_menu()
+utilpg.add_sidebar_options()
+
+logger = setup_logger()
+
+logger.debug('Start of Home Screen!')
+
+def view_overview():
+    with st.container(border=True):
+        st.markdown(
+            """
+            NiChart is an **<u>open-source framework</u>** built specifically for deriving **<u>machine learning biomarkers</u>** from **<u>MRI imaging data</u>**.
+            """
+            , unsafe_allow_html=True            
+        )
+        st.image("../resources/nichart1.png", width=300)
+        st.markdown(
+            """
+            - NiChart platform offers tools for **<u>image processing</u>** and **<u>data analysis</u>**.
+
+            - Users can extract **<u>imaging phenotypes</u>** and **<u>machine learning (ML) indices</u>** of disease and aging.
+
+            - Pre-trained **<u>ML models </u>** allow users to quantify complex brain changes and compare results against **<u>normative and disease-specific reference ranges</u>**.
+            """
+            , unsafe_allow_html=True
+        )
+
+def view_quick_start():
+    with st.container(border=True):
+        st.markdown(
+            """
+            ##### Explore Brain Chart (No Data Upload Required):
+            
+            - **<u>Explore the distribution</u>** of imaging variables and machine learning–derived biomarkers **<u>from the NiChart reference dataset</u>**.
+            
+            - This module is designed for visualization only and **<u>does not require user data**</u>.
+            
+            - **<u>Includes:</u>** brain segmentation, region volumes, and biomarkers for aging and disease (e.g., AD, brain age).
+            
+            ##### Analyze Your Own Data:
+
+            - **<u>Upload Your Data: </u>** Navigate to the "Data" page to upload the files you wish to analyze.
+
+            - **<u>Select Your Pipeline: </u>** Go to the "Pipelines" page and choose the analysis workflow you want to apply to your data.
+
+            - **<u>View and/or Download Your Results: </u>** Once the pipeline has finished processing, your findings will be available to view or to download.
 
 
-def set_pipeline() -> None:
-    # Callback function to save the pipeline selection to Session State
-    st.session_state.pipeline = st.session_state._pipeline
+            """
+            , unsafe_allow_html=True
+        )
 
+def view_links():
+    with st.container(border=True):
+        st.markdown(
+            """
+            - Check out [NiChart Web page](https://neuroimagingchart.com)
+            - Visit [NiChart GitHub](https://github.com/CBICA/NiChart_Project)
+            - Jump into [our documentation](https://cbica.github.io/NiChart_Project)
+            - Ask a question in [our community discussions](https://github.com/CBICA/NiChart_Project/discussions)
+            """
+            , unsafe_allow_html=True
+        )
 
-# Initialize session state
-utilss.init_session_state()
+def view_installation():
+    with st.container(border=True):
+    #with st.expander(label='Installation'):
+        st.markdown(
+            """
+            - You can install NiChart Project desktop
+            ```
+            pip install NiChart_Project
+            ```
 
-st.write("# Welcome to NiChart Project!")
+            - Run the application
+            ```
+            cd src/viewer
+            streamlit run NiChartProject.py
+            ```
+
+            - Alternatively, the cloud app can be launched at
+            ```
+            https://cloud.neuroimagingchart.com
+            ```
+            """
+            , unsafe_allow_html=True
+        )
+    
 
 st.markdown(
     """
-    NiChart is an open-source framework built specifically for
-    deriving Machine Learning based indices from MRI data.
+    ### Welcome to NiChart Project!
     """
+    , unsafe_allow_html=True
 )
 
-with st.container(border=True):
-    # Pipeline selection
-    st.markdown(
-        """
-        :point_down: **Please select a pipeline!**
-        """
-    )
-    st.selectbox(
-        "Select pipeline:",
-        st.session_state.pipelines,
-        index=0,
-        key="_pipeline",
-        on_change=set_pipeline,
-        label_visibility="collapsed",
-    )
-    utilmenu.menu()
-    st.markdown(
-        """
-        :point_left: **And select a task from the sidebar to process, analyze and visualize your data!**
-        """
-    )
-
-with st.expander("Want to learn more?", expanded=False):
-    st.markdown(
-        """
-        - Check out [NiChart Web page](https://neuroimagingchart.com)
-        - Visit [NiChart GitHub](https://github.com/CBICA/NiChart_Project)
-        - Jump into [our documentation](https://cbica.github.io/NiChart_Project)
-        - Ask a question in [our community discussions](https://github.com/CBICA/NiChart_Project/discussions)
-            """
-    )
-
-    st.markdown(
-        """
-        You can install NiChart Project desktop
-        ```
-        pip install NiChart_Project
-        ```
-
-        and run the application
-        ```
-        cd src/viewer
-        streamlit run NiChartProject.py
-        ```
-
-        Alternatively, the cloud app can be launched at
-        ```
-        https://cloud.neuroimagingchart.com
-        ```
-        """
-    )
-
-st.sidebar.image("../resources/nichart1.png")
-st.sidebar.info(
-    """
-    Note: This website is based on materials from the [NiChart Project](https://neuroimagingchart.com/).
-    The content and the logo of NiChart are intellectual property of [CBICA](https://www.med.upenn.edu/cbica/).
-    Make sure that you read the [licence](https://github.com/CBICA/NiChart_Project/blob/main/LICENSE).
-    """
+tab1, tab2, tab3, tab4 = st.tabs(
+    ["Overview", "Quick Start", "Links", "Installation"]
 )
 
-with st.sidebar.expander("Acknowledgments"):
-    st.markdown(
-        """
-        The CBICA Dev team
-        """
-    )
+with tab1:
+    view_overview()
 
-# st.markdown("""
-# <style>
-# .st-bb {
-# background-color: #4CAF50; /* Green */
-# color: white;
-# }
-# </style>
-# """, unsafe_allow_html=True)
+with tab2:
+    view_quick_start()
 
-with st.container(border=True):
+with tab3:
+    view_links()
 
-    st.markdown("### NiChart Surveys")
-    st.markdown(
-        "😊 Your opinion matters! Kindly take a moment to complete these two brief surveys!"
-    )
+with tab4:
+    view_installation()
 
-    with stylable_container(
-        key="my_button_container",
-        css_styles="""
-            button {
-                background-color: #FF7944;
-                color: white;
-                border-radius: 20px;
-            }
-            """,
-    ):
-        if st.button(
-            "📝 NiChart User Experience",
-        ):
-            # This code only works locally, not on a container or server.
-            # webbrowser.open_new_tab('https://forms.office.com/r/mM1kx1XsgS')
-            stxs_javascript(
-                """window.open('https://forms.office.com/r/mM1kx1XsgS', '_blank').focus()"""
-            )
-
-        if st.button(
-            "📝 Shaping the Future of NiChart",
-        ):
-            # This code only works locally, not on a container or server.
-            # webbrowser.open_new_tab('https://forms.office.com/r/acwgn2WCc4')
-            stxs_javascript(
-                """window.open('https://forms.office.com/r/acwgn2WCc4', '_blank').focus()"""
-            )
-
-    # Bg color on link_button was not supported in styllable container
-    # st.link_button(
-    # '📝 NiChart User Experience',
-    # 'https://forms.office.com/r/mM1kx1XsgS',
-    # )
-
-    # st.link_button(
-    # '📝 Shaping the Future of NiChart',
-    # 'https://forms.office.com/r/acwgn2WCc4',
-    # )
-
-# FIXME: For DEBUG
-utilst.add_debug_panel()
+    

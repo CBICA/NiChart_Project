@@ -7,7 +7,7 @@ st.set_page_config(
     page_title="NiChart",
     page_icon=nicon,
     layout="wide",
-    #layout="centered",
+    # layout="centered",
     menu_items={
         "Get help": "https://neuroimagingchart.com/",
         "Report a bug": "https://neuroimagingchart.com/",
@@ -20,18 +20,16 @@ st.set_page_config(
 # just call `get_nav_from_toml()`
 
 st.session_state.pipeline = st.sidebar.selectbox(
-    'Pipelines',
-    ['Home', 'Structural MRI', 'Lesion Segmentation'],
-    0
+    "Pipelines", ["Home", "Structural MRI", "Lesion Segmentation"], 0
 )
 
 print(st.session_state.pipeline)
 
-if st.session_state.pipeline  == 'Home':
+if st.session_state.pipeline == "Home":
     nav = get_nav_from_toml(".streamlit/pages_sections_home.toml")
-elif st.session_state.pipeline  == 'Structural MRI':
+elif st.session_state.pipeline == "Structural MRI":
     nav = get_nav_from_toml(".streamlit/pages_sections_dlmuse.toml")
-elif st.session_state.pipeline  == 'Lesion Segmentation':
+elif st.session_state.pipeline == "Lesion Segmentation":
     nav = get_nav_from_toml(".streamlit/pages_sections_dlwmls.toml")
 
 pg = st.navigation(nav)

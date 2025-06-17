@@ -1,13 +1,15 @@
 import streamlit as st
 import utils.utils_menu as utilmenu
-import utils.utils_st as utilst
 import utils.utils_session as utilss
+import utils.utils_st as utilst
 from init_session_state import init_session_state
 from PIL import Image
+
 
 def set_pipeline():
     # Callback function to save the pipeline selection to Session State
     st.session_state.pipeline = st.session_state._pipeline
+
 
 # Initialize session state
 utilss.init_session_state()
@@ -20,7 +22,7 @@ st.set_page_config(
     page_title="NiChart",
     page_icon=nicon,
     layout="wide",
-    #layout="centered",
+    # layout="centered",
     menu_items={
         "Get help": "https://neuroimagingchart.com/",
         "Report a bug": "https://github.com/CBICA/NiChart_Project/issues/new?assignees=&labels=&projects=&template=bug_report.md&title=%5BBUG%5D+",
@@ -49,7 +51,7 @@ st.selectbox(
     index=0,
     key="_pipeline",
     on_change=set_pipeline,
-    label_visibility="collapsed"
+    label_visibility="collapsed",
 )
 utilmenu.menu()
 st.markdown(
@@ -107,4 +109,3 @@ with st.sidebar.expander("Acknowledgments"):
 
 # FIXME: For DEBUG
 utilst.add_debug_panel()
-

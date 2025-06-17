@@ -12,7 +12,9 @@ import sys
 sys.path.insert(0, os.path.abspath("../"))
 
 project = "NiChart_Project"
-copyright = "2024, Guray Erus, George Aidinis, Alexander Getka, Kyunglok Baik Spiros Maggioros"
+copyright = (
+    "2024, Guray Erus, George Aidinis, Alexander Getka, Kyunglok Baik Spiros Maggioros"
+)
 author = " Guray Erus, George Aidinis, Alexander Getka, Kyunglok Baik, Spiros Maggioros"
 release = "2024"
 

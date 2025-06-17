@@ -1,4 +1,3 @@
-
 import streamlit as st
 from menu import menu
 
@@ -8,9 +7,11 @@ if "pipeline" not in st.session_state:
 
 st.session_state._pipeline = st.session_state.pipeline
 
+
 def set_pipeline():
     # Callback function to save the pipeline selection to Session State
     st.session_state.pipeline = st.session_state._pipeline
+
 
 # Selectbox to choose role
 st.selectbox(

@@ -1,3 +1,25 @@
 [client]
 showSidebarNavigation = false
 
+[theme]
+
+base = 'light'
+primaryColor = '#FF0000'
+backgroundColor = '#FFFFFF'
+secondaryBackgroundColor = 'F5F5F5'
+# textColor = 'black'
+# linkColor = 'blue'
+# codeBackgroundColor = '#EEEEEE'
+# font =
+# codeFont =
+# headingFont =
+# fontFaces =
+# baseRadius =
+borderColor = '#620E3B'
+baseFontSize = 16
+
+# [theme.sidebar]
+# primaryColor = '#223344'
+# backgroundColor = '#F0F2F6'
+# secondaryBackgroundColor = 'Green'
+

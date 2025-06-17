@@ -1,0 +1,45 @@
+pname: SPARE[t1img]
+description: Calculate SPARE scores
+
+dependencies:
+  - demog_csv
+  - t1_img
+
+inputs:
+  - name: demog_csv
+    type: file
+
+  - name: t1_img
+    type: directory
+
+outputs:
+  - name: spare_t1img_csv
+    type: file
+
+mounts:
+  - name: demog_csv
+    path_in_container: /mnt/data/demog.csv
+    mode: ro
+
+  - name: t1_img
+    path_in_container: /mnt/data/T1
+    mode: ro
+
+  - name: spare_t1img_csv
+    path_in_container: /mnt/output/spare_t1img.csv
+    mode: rw
+
+resources:
+  vcpus: 4
+  memory: 16GB
+  gpus: 1
+
+container:
+  image: cbica/sample_tool_container:latest 
+  command: > # Leave blank to use container default entrypoint/command
+    combat --demog {demog_csv} --img {t1_img} --output {spare_t1img_csv}
+
+parameters:
+  - name: num_features
+    type: int
+    default: 300

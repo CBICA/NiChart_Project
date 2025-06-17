@@ -1,0 +1,41 @@
+pname: DTI
+description: Apply DTI pipeline
+
+dependencies:
+  - dti_img
+
+inputs:
+  - name: dti_img
+    type: directory
+
+outputs:
+  - name: dti_csv
+    type: file
+
+mounts:
+  - name: dti_img
+    path_in_container: /mnt/data/t1
+    mode: ro
+    
+  - name: dti_csv
+    path_in_container: /mnt/output/dti.csv
+    mode: rw
+
+resources:
+  vcpus: 4
+  memory: 16GB
+  gpus: 1
+
+container:
+  image: cbica/sample_tool_container:latest 
+  command: > # Leave blank to use container default entrypoint/command
+    dtiproc --input {dti_img} --output {dti_csv} --num_features {num_features}
+
+parameters:
+  - name: some_flag
+    type: bool
+    default: false
+        
+  - name: num_features
+    type: int
+    default: 300

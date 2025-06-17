@@ -11,16 +11,21 @@ def get_list_rois(sel_var: str, roi_dict: dict, derived_dict: dict) -> Any:
     """
     Get a list of ROI indices for the selected var
     """
+    if sel_var is None:
+        return None
+
     # Convert ROI name to index
     if sel_var in roi_dict.keys():
         sel_var = roi_dict[sel_var]
+
+    sel_var = int(sel_var)
 
     # Get list of derived ROIs
     if sel_var in derived_dict.keys():
         list_rois = derived_dict[sel_var]
     else:
         if str.isnumeric(sel_var):
-            list_rois = [int(sel_var)]
+            list_rois = [sel_var]
         else:
             list_rois = []
 
@@ -37,30 +42,71 @@ def get_roi_names(csv_rois: str) -> Any:
     return df.Name.tolist()
 
 
-def muse_derived_to_dict(list_derived: list) -> Any:
+def muse_derived_to_dict(in_list: list) -> Any:
     """
     Create a dictionary from derived roi list
     """
     # Read list
-    df = pd.read_csv(list_derived, header=None)
+    df = pd.read_csv(in_list, header=None)
 
-    # Create dict of roi indices and derived indices
-    dict_derived = {}
-    for i, tmp_ind in enumerate(df[0].values):
-        df_tmp = df[df[0] == tmp_ind].drop([0, 1], axis=1)
-        sel_vals = df_tmp.T.dropna().astype(int).values.flatten()
-        dict_derived[str(tmp_ind)] = list(sel_vals)
+
+    dict_derived = {
+        row[0]: [int(x) for x in row[2:] if pd.notna(x)] for _, row in df.iterrows()
+    }
+
+    ## Create dict of roi indices and derived indices
+    #dict_derived = {}
+    #for i, tmp_ind in enumerate(df[0].values):
+        #df_tmp = df[df[] == tmp_ind].drop([0, 1], axis=1)
+        #sel_vals = df_tmp.T.dropna().astype(int).values.flatten()
+        #dict_derived[str(tmp_ind)] = list(sel_vals)
 
     return dict_derived
 
+def muse_derived_to_df(in_list: list) -> Any:
+    """
+    Create a df from derived roi list
+    """
+    # Read list
+    df = pd.read_csv(in_list, header=None)
 
-def muse_get_derived(sel_roi: str, list_derived: list) -> Any:
+    # Rename first two columns
+    df = df.rename(columns={0: 'Index', 1: 'Name'})
+
+    # Create a new column 'List' with the remaining columns as a list
+    df['List'] = df.iloc[:, 2:].apply(lambda row: row.dropna().astype(int).tolist(), axis=1)
+
+    # Keep only the desired columns
+    df = df[['Index', 'Name', 'List']]
+
+    return df
+
+def muse_roi_groups_to_df(in_list: list) -> Any:
+    """
+    Create a df from roi groups list
+    """
+    # Read list
+    df = pd.read_csv(in_list, header=None)
+
+    # Rename first two columns
+    df = df.rename(columns={0: 'Name'})
+
+    # Create a new column 'List' with the remaining columns as a list
+    df['List'] = df.iloc[:, 1:].apply(lambda row: row.dropna().astype(int).tolist(), axis=1)
+
+    # Keep only the desired columns
+    df = df[['Name', 'List']]
+
+    return df
+
+
+def muse_get_derived(sel_roi: str, in_list: list) -> Any:
     """
     Create a list of derived roi indices for the selected roi
     """
 
     # Read list
-    df = pd.read_csv(list_derived, header=None)
+    df = pd.read_csv(in_list, header=None)
 
     # Keep only selected ROI
     df = df[df[0].astype(str) == sel_roi]

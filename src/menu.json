@@ -1,0 +1,44 @@
+{
+  "Menu": [
+    {
+      "label": "Section 1",
+      "children": [
+        {
+          "label": "Subsection A",
+          "children": [
+            {
+              "label": "Page X",
+              "page": "page_x.py"
+            },
+            {
+              "label": "Page Y",
+              "page": "page_y.py"
+            }
+          ]
+        },
+        {
+          "label": "Page Z",
+          "page": "page_z.py"
+        }
+      ]
+    },
+    {
+      "label": "Section 2",
+      "page": "page_section2.py"
+    },
+    {
+      "label": "Section 3",
+      "children": [
+        {
+          "label": "Subsection B",
+          "children": [
+            {
+              "label": "Page W",
+              "page": "page_w.py"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

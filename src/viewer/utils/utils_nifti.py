@@ -105,7 +105,6 @@ def detect_mask_bounds(mask: Any) -> Any:
     Detect the mask start, end and center in each view
     Used later to set the slider in the image viewer
     """
-
     mask_bounds = np.zeros([3, 3]).astype(int)
     for i, axis in enumerate(VIEW_AXES):
         mask_bounds[i, 0] = 0
