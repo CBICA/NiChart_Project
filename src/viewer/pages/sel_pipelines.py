@@ -77,7 +77,7 @@ with tab1:
     sel_pipeline_from_list()
 
 with tab2:
-    st.warning('Not implemented yet!')
+    st.info('Coming soon!')
     #sel_pipeline_from_graph()
     
 

@@ -6,6 +6,7 @@ from graphviz import Digraph
 from collections import defaultdict
 import utils.utils_pages as utilpg
 import utils.utils_processes as utilprc
+import utils.utils_pipelines as utilpipe
 import utils.utils_session as utilses
 
 def panel_conf_pipeline():
@@ -66,8 +67,15 @@ def panel_verify_data():
     """
     Panel for verifying required pipeline data
     """
-    st.success(f'Selected pipeline: {st.session_state.sel_pipeline}')
-    st.info('Coming soon!')
+    sel_method = st.session_state.sel_pipeline
+    st.success(f'Selected pipeline: {sel_method}')
+    
+    if st.button('Verify'):    
+        flag_data = utilpipe.verify_data(sel_method)
+        if flag_data:
+            st.success('Input data verified!')
+        else:
+            st.error('Please check input data!')
 
 def panel_run_pipeline():
     """

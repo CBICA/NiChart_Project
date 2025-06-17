@@ -30,8 +30,7 @@ def select_project():
 
     sel_project = utildata.select_project(out_dir, curr_project)
     
-    if sel_project is not None:
-        
+    if sel_project is not None:        
         st.success(f'Selected Project: {sel_project}')
     
 def view_project_folder():
@@ -39,9 +38,11 @@ def view_project_folder():
     Panel for viewing files in a project folder
     """
     utildata.disp_folder_tree(st.session_state.paths['project'])
-    #utildata.folder_viewer(st.session_state.paths['project'])
     
 def upload_data():
+    """
+    Panel for viewing files in a project folder
+    """
     utildata.panel_load_data()
     
 st.markdown(

@@ -94,7 +94,7 @@ def get_file_count(folder_path: str, file_suff: List[str] = []) -> int:
     return count
 
 def remove_dir(dtype):
-    folder_path = os.path.join(st.session_state.paths['task'], dtype)
+    folder_path = os.path.join(st.session_state.paths['project'], dtype)
     try:
         if os.path.islink(folder_path):
             os.unlink(folder_path)
@@ -247,7 +247,7 @@ def upload_single_file(dtype: str, out_name: str, in_suff: str) -> None:
     Upload user file to target folder
     """
     out_dir = os.path.join(
-        st.session_state.paths['task'], dtype
+        st.session_state.paths['project'], dtype
     )
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
@@ -279,7 +279,7 @@ def upload_multiple_files(dtype: str) -> None:
     Input data may be a folder, multiple files, or a zip file (unzip the zip file if so)
     """
     out_dir = os.path.join(
-        st.session_state.paths['task'], dtype
+        st.session_state.paths['project'], dtype
     )
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
@@ -302,7 +302,7 @@ def create_img_list(dtype: str) -> None:
     Create a list of input images
     """
     out_dir = os.path.join(
-        st.session_state.paths['task'], dtype
+        st.session_state.paths['project'], dtype
     )
 
     # Get all NIfTI files
@@ -336,7 +336,7 @@ def panel_input_multi(dtype: str) -> None:
     Panel for selecting multiple input files or folder(s)
     """
     out_dir = os.path.join(
-        st.session_state.paths['task'], dtype
+        st.session_state.paths['project'], dtype
     )
     with st.container(border=True):
         if st.session_state.app_type == "cloud":

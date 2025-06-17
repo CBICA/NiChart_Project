@@ -57,31 +57,6 @@ def _is_valid_imaging_dicom(dicom_header: Any) -> bool:
     except (KeyError, AttributeError):
         return False
 
-
-# Adapted from dicom2nifti
-def _remove_accents(unicode_filename: str) -> Any:
-    """
-    Function that will try to remove accents from a unicode string to be used in a filename.
-    input filename should be either an ascii or unicode string
-    """
-    # noinspection PyBroadException
-    try:
-        unicode_filename = unicode_filename.replace(" ", "_")
-        cleaned_filename = (
-            unicodedata.normalize("NFKD", unicode_filename)
-            .encode("ASCII", "ignore")
-            .decode("ASCII")
-        )
-
-        cleaned_filename = re.sub(r"[^\w\s-]", "", cleaned_filename.strip().lower())
-        cleaned_filename = re.sub(r"[-\s]+", "-", cleaned_filename)
-
-        return cleaned_filename
-    except:
-        traceback.print_exc()
-        return unicode_filename
-
-
 # Adapted from dicom2nifti
 def _remove_accents_(unicode_filename: str) -> str:
     """
@@ -101,7 +76,6 @@ def _remove_accents_(unicode_filename: str) -> str:
             new_filename += char_byte.decode()
 
     return new_filename
-
 
 # Adapted from dicom2nifti
 def detect_series(in_dir: str) -> Any:
@@ -151,9 +125,7 @@ def detect_series(in_dir: str) -> Any:
 
     return df_dicoms
 
-
 def select_series(df_dicoms: pd.DataFrame, dict_series: pd.Series) -> Any:
-
     # Select dicom files for which series desc. contains user keywords
     df_sel_list = []
     dict_out = {}
@@ -168,7 +140,6 @@ def select_series(df_dicoms: pd.DataFrame, dict_series: pd.Series) -> Any:
 
     # Return selected files, series descriptions, and all series in the folder
     return df_sel_list, dict_out
-
 
 def convert_single_series(
     list_files: list,
@@ -251,6 +222,105 @@ def convert_sel_series(
             list_files, out_dir, out_suff, compression=True, reorient=True
         )
 
+def panel_detect_dicom_series() -> None:
+    """
+    Panel for detecting dicom series
+    """
+    dicom_folder = os.path.join(st.session_state.paths['project'], 'dicoms')
+    
+    with st.container(border=True):
+        # Detect dicom series
+        btn_detect = st.button("Detect Series")
+        if btn_detect:
+            with st.spinner("Wait for it..."):
+                df_dicoms = utildcm.detect_series(dicom_folder)
+                list_series = df_dicoms.SeriesDesc.unique()
+                num_dicom_scans = (
+                    df_dicoms[["PatientID", "StudyDate", "SeriesDesc"]]
+                    .drop_duplicates()
+                    .shape[0]
+                )
+                st.session_state.list_series = list_series
+                st.session_state.num_dicom_scans = num_dicom_scans
+                st.session_state.df_dicoms = df_dicoms
+
+        if len(st.session_state.list_series) > 0:
+            st.session_state.flags["dicoms_series"] = True
+            st.success(
+                f"Detected {st.session_state.num_dicom_scans} scans in {len(st.session_state.list_series)} series!",
+                icon=":material/thumb_up:",
+            )
+
+        with st.expander("Show dicom metadata", expanded=False):
+            st.dataframe(st.session_state.df_dicoms)
+
+        #utilst.util_help_dialog(utildoc.title_dicoms_detect, utildoc.def_dicoms_detect)
+
+def panel_extract_dicoms() -> None:
+    """
+    Panel for extracting dicoms
+    """
+    sel_mod = "T1"
+
+    dicom_folder = os.path.join(st.session_state.paths['project'], 'dicoms')
+    out_folder = os.path.join(st.session_state.paths['project'], sel_mod.lower())
+    
+    with st.container(border=True):
+
+        # Check if data exists
+        if st.session_state.flags[sel_mod]:
+            st.success(
+                f"Data is ready: {out_folder}",
+                icon=":material/thumb_up:",
+            )
+
+            df_files = utilio.get_file_names(out_folder, ".nii.gz")
+            with st.expander("View NIFTI image list"):
+                st.dataframe(df_files)
+
+            # Delete folder if user wants to reload
+            if st.button("Reset", key="reset_extraction"):
+                try:
+                    if os.path.islink(out_folder):
+                        os.unlink(out_folder)
+                    else:
+                        shutil.rmtree(out_folder)
+                    st.session_state.flags[sel_mod] = False
+                    st.success(f"Removed dir: {out_folder}")
+                except:
+                    st.error(f"Could not delete folder: {out_folder}")
+                time.sleep(4)
+                st.rerun()
+
+        else:
+            # Create out dir
+            if not os.path.exists(out_folder):
+                os.makedirs(out_folder)
+
+            # Selection of dicom series
+            st.session_state.sel_series = st.multiselect(
+                "Select series for the T1 scan:", st.session_state.list_series, None
+            )
+            btn_convert = st.button("Convert Series")
+            if btn_convert:
+                with st.spinner("Wait for it..."):
+                    try:
+                        utildcm.convert_sel_series(
+                            st.session_state.df_dicoms,
+                            st.session_state.sel_series,
+                            out_folder,
+                            f"_{sel_mod}.nii.gz",
+                        )
+
+                    except:
+                        st.warning(":material/thumb_down: NIfTI conversion failed!")
+
+                time.sleep(1)
+                st.rerun()
+
+        #utilst.util_help_dialog(
+            #utildoc.title_dicoms_extract, utildoc.def_dicoms_extract
+        #)
 
 # def convert_dicoms_to_nifti(in_dir, out_dir):
 # Detect files
