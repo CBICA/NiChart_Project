@@ -1,6 +1,5 @@
 import streamlit as st
 import utils.utils_pages as utilpg
-import utils.utils_panels as utilpn
 import utils.utils_doc as utildoc
 import utils.utils_io as utilio
 import utils.utils_session as utilss

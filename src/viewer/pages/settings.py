@@ -1,7 +1,6 @@
 import streamlit as st
 import utils.utils_pages as utilpg
-import utils.utils_panels as utilpn
-import utils.utils_doc as utildoc
+#import utils.utils_doc as utildoc
 import utils.utils_io as utilio
 import utils.utils_session as utilss
 import os
@@ -113,7 +112,7 @@ def panel_resources_path():
                     icon=":material/thumb_up:",
                 )
 
-            utildoc.util_help_dialog(utildoc.title_out, utildoc.def_out)
+            #utildoc.util_help_dialog(utildoc.title_out, utildoc.def_out)
 
 def panel_out_dir():
     """
@@ -151,7 +150,7 @@ def panel_out_dir():
                 icon=":material/thumb_up:",
             )
 
-        utildoc.util_help_dialog(utildoc.title_out, utildoc.def_out)
+        #utildoc.util_help_dialog(utildoc.title_out, utildoc.def_out)
 
 def update_task() -> None:
     """

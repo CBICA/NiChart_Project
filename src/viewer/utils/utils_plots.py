@@ -10,7 +10,7 @@ import utils.utils_session as utilses
 
 import plotly.graph_objs as go
 import plotly.figure_factory as ff
-import utils.utils_trace as utiltr
+import utils.utils_traces as utiltr
 
 ###################################################################
 # Misc utils
