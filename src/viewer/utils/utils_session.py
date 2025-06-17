@@ -123,8 +123,8 @@ def init_plot_vars() -> None:
         "trend": "Linear",
         "traces": ["data", "lin_fit"],
         "lowess_s": 0.5,
-        "centile_type": None,
-        "centile_values": None,
+        "centile_type": 'CN',
+        "centile_values": ['centile_25', 'centile_50', 'centile_75'],
         "h_coeff": 1.0,
         "ptype": 'scatter'
     }

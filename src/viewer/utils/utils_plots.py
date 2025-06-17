@@ -571,9 +571,10 @@ def show_plots(df, df_plots):
     #  - iterates over plots;
     #  - for every "plots_per_row" plots, creates a new columns block, resets column index, and displays the plot
 
-    if df.shape[0] == 0:
-        st.warning("Dataframe is empty, skip plotting!")
-        return
+    if df is not None:
+        if df.shape[0] == 0:
+            st.warning("Dataframe is empty, skip plotting!")
+            return
 
     #plots_arr = []
     for i, plot_ind in enumerate(list_plots):        
@@ -878,6 +879,11 @@ def panel_view_centiles(method, var_type):
             st.session_state.plot_params
         )
 
+    print('plots info')
+    print(st.session_state.plots.params[0])
+    print('plots info2')
+
+
     if btn_del_sel:
         st.session_state.plots = delete_sel_plots(
             st.session_state.plots
@@ -885,7 +891,7 @@ def panel_view_centiles(method, var_type):
     if btn_del_all:
         st.session_state.plots = pd.DataFrame(columns=['params'])
 
-    st.dataframe(st.session_state.plots)
+    # st.dataframe(st.session_state.plots)
                     
     # Show plots
     show_plots(

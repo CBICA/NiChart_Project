@@ -83,11 +83,11 @@ def view_dlmuse() -> None:
         utilmri.panel_view_seg(ulay, olay, 'muse')
         
     elif sel_res_type == 'Volumes':
-        df = pd.read_csv(
-            '/home/guraylab/GitHub/gurayerus/NiChart_Project/resources/reference_data/centiles/dlmuse_centiles_CN.csv'
-            #'/home/gurayerus/GitHub/gurayerus/NiChart_Project/resources/reference_data/centiles/dlmuse_centiles_CN.csv'
-        )
-        st.session_state.curr_df = df
+        # df = pd.read_csv(
+        #     '/home/guraylab/GitHub/gurayerus/NiChart_Project/resources/reference_data/centiles/dlmuse_centiles_CN.csv'
+        #     #'/home/gurayerus/GitHub/gurayerus/NiChart_Project/resources/reference_data/centiles/dlmuse_centiles_CN.csv'
+        # )
+        st.session_state.curr_df = None
         utilpl.panel_view_centiles('dlmuse', 'rois')
          
     print(st.session_state.selections)
