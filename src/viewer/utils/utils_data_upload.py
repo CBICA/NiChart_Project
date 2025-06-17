@@ -2,6 +2,7 @@ import streamlit as st
 #import utils.utils_dicoms as utildcm
 import utils.utils_panels as utilpn
 import utils.utils_doc as utildoc
+import utils.utils_dicom as utildcm
 import utils.utils_io as utilio
 import utils.utils_session as utilss
 import os
@@ -22,7 +23,7 @@ def disp_folder_tree(root_path):
 
     folders = sorted([f for f in os.listdir(root_path) if os.path.isdir(os.path.join(root_path, f))])
     if not folders:
-        st.info("Project directory is empty")
+        st.info("Project folder is empty")
         return
 
     sel_folder = st.pills(
@@ -82,7 +83,7 @@ def disp_folder_tree(root_path):
         
 def select_project(out_dir, curr_project):
     """
-    Panel for creating/selecting project (to keep all data for the current task)
+    Panel for creating/selecting project (to keep all data for the current project)
     """
     sel_mode = st.pills(
         'Select mode',
@@ -120,13 +121,11 @@ def select_project(out_dir, curr_project):
             utilss.update_project(sel_project)
         return sel_project
             
-
-def panel_detect() -> None:
+def panel_detect_dicom_series() -> None:
     """
     Panel for detecting dicom series
     """
-    
-    dicom_folder = os.path.join(st.session_state.paths['task'], 'dicoms')
+    dicom_folder = os.path.join(st.session_state.paths['project'], 'dicoms')
     
     with st.container(border=True):
         # Detect dicom series
@@ -156,14 +155,14 @@ def panel_detect() -> None:
 
         #utilst.util_help_dialog(utildoc.title_dicoms_detect, utildoc.def_dicoms_detect)
 
-def panel_extract() -> None:
+def panel_extract_dicoms() -> None:
     """
     Panel for extracting dicoms
     """
     sel_mod = "T1"
 
-    dicom_folder = os.path.join(st.session_state.paths['task'], 'dicoms')
-    out_folder = os.path.join(st.session_state.paths['task'], sel_mod.lower())
+    dicom_folder = os.path.join(st.session_state.paths['project'], 'dicoms')
+    out_folder = os.path.join(st.session_state.paths['project'], sel_mod.lower())
     
     with st.container(border=True):
 
@@ -211,11 +210,6 @@ def panel_extract() -> None:
                             out_folder,
                             f"_{sel_mod}.nii.gz",
                         )
-                        st.session_state.flags[sel_mod] = True
-                        # if st.session_state.has_cloud_session:
-                        #     utilcloud.update_stats_db(
-                        #         st.session_state.cloud_user_id, "NIFTIfromDICOM", num_nifti
-                        #     )
 
                     except:
                         st.warning(":material/thumb_down: NIfTI conversion failed!")
@@ -233,7 +227,7 @@ def panel_view(dtype:str) -> None:
     Panel for viewing nifti images
     """
     in_dir = os.path.join(
-        st.session_state.paths['task'], dtype.lower()
+        st.session_state.paths['project'], dtype.lower()
     )
     
     with st.container(border=True):
@@ -337,13 +331,13 @@ def panel_nifti():
         return
 
     folder_path = os.path.join(
-        st.session_state.paths['task'], sel_mod.lower()
+        st.session_state.paths['project'], sel_mod.lower()
     )
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
 
     lists_path = os.path.join(
-        st.session_state.paths['task'], 'lists'
+        st.session_state.paths['project'], 'lists'
     )
     if not os.path.exists(lists_path):
         os.makedirs(lists_path)
@@ -395,7 +389,7 @@ def panel_in_covars() -> None:
     """    
     #Check out files
     file_path = os.path.join(
-        st.session_state.paths['task'], 'lists', 'covars.csv'
+        st.session_state.paths['project'], 'lists', 'covars.csv'
     )
     
     list_options = ['Upload', 'Enter Manually', 'View', 'Reset']
@@ -412,7 +406,7 @@ def panel_in_covars() -> None:
 
     elif sel_step == 'Enter Manually':
         id_list = os.path.join(
-            st.session_state.paths['task'], 'lists', 'list_nifti.csv'
+            st.session_state.paths['project'], 'lists', 'list_nifti.csv'
         )
         try:
             df = pd.read_csv(id_list)
@@ -459,3 +453,53 @@ def panel_in_covars() -> None:
         
     elif sel_step == "Reset":
         utilio.remove_dir('lists')
+
+
+def panel_load_data():
+    list_dtype = [
+        "Nifti",
+        "Dicom",
+        "csv",
+    ]
+    sel_dtype = st.pills(
+        "Select Data Type",
+        list_dtype,
+        default = None,        
+        selection_mode="single",
+        label_visibility="collapsed"
+    )
+
+    if sel_dtype is None:
+        return
+
+    if sel_dtype == "Nifti":
+        with st.container(border=True):
+            st.markdown(
+                """
+                ***NIfTI Images***
+                - Upload NIfTI images
+                """
+            )
+            panel_nifti()
+
+    elif sel_dtype == "Dicom":
+        with st.container(border=True):
+            st.markdown(
+                """
+                ***DICOM Files***
+                
+                - Upload a folder containing raw DICOM files
+                - DICOM files will be converted to NIfTI scans
+                """
+            )
+            panel_dicoms()
+            
+    elif sel_dtype == "csv":
+        with st.container(border=True):
+            st.markdown(
+                """
+                ***Covariate File***
+                - Upload a ***:red[csv file with covariate info]*** (Age, Sex, DX, etc.)
+                """
+            )
+            panel_in_covars()

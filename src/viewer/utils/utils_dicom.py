@@ -109,7 +109,6 @@ def detect_series(in_dir: str) -> Any:
     This function selects dicom files that match the selection keywords
     Selection is done using the "SeriesDescription"
     """
-
     # Sort dicom files and detect series
     list_files = []
     for root, _, files in os.walk(in_dir):

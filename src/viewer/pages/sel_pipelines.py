@@ -56,7 +56,7 @@ def sel_pipeline_from_list():
     sel_pipeline = list(pdict.values())[psel]
     if st.button('Select'):
         st.session_state.sel_pipeline = sel_pipeline
-        st.success(f'Pipeline selected {sel_pipeline}')
+        st.success(f'Pipeline selected: {sel_pipeline}')
         view_input_data(sel_pipeline)
 
 # Page config should be called for each page
