@@ -655,7 +655,7 @@ def panel_select_centile_type():
     User panel to select centile type
     '''
     list_types = ['CN', 'CN-Female', 'CN-Males', 'CN-ICVNorm']
-    sel_ind = list_types.index(st.session_state.selections['centile_type'])
+    sel_ind = list_types.index(st.session_state.plot_params['centile_type'])
     sel_type = st.selectbox(
         "Centile Type",
         list_types,
@@ -664,7 +664,7 @@ def panel_select_centile_type():
     )
     if sel_type is None:
         return None
-    st.session_state.selections['centile_type'] = sel_type
+    st.session_state.plot_params['centile_type'] = sel_type
     
     return sel_type
 
@@ -678,13 +678,13 @@ def panel_select_centile_values():
     sel_vals = st.multiselect(
         "Centile Values",
         list_values,
-        st.session_state.selections['centile_values'],
+        st.session_state.plot_params['centile_values'],
         help="Select Centile Values"
     )
 
     if sel_vals is None:
         return None
-    st.session_state.selections['centile_values'] = sel_vals
+    st.session_state.plot_params['centile_values'] = sel_vals
     
     return sel_vals
 

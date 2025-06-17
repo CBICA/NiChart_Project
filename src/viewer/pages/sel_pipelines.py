@@ -32,45 +32,32 @@ def view_input_data(method) -> None:
 
 
 def sel_pipeline_from_list():
-    with st.container(border=True):
-                
-        # Show a thumbnail image for each pipeline
-        pdict = dict(
-            zip(st.session_state.pipelines['Name'], st.session_state.pipelines['Label'])
-        )
-        pdir = os.path.join(st.session_state.paths['resources'], 'pipelines')
-        logo_fnames = [
-            os.path.join(pdir, pname, f'logo_{pname}.png') for pname in list(pdict.values())
-        ]
-        psel = image_select(
-            "",
-            images = logo_fnames,
-            captions=list(pdict.keys()),
-            index=-1,
-            return_value="index",
-            use_container_width = False
-        )
-        
-        # Show description of the selected pipeline
-        if psel < 0 :
-            return
-        
-        sel_pipeline = list(pdict.values())[psel]
-        if st.button('Select'):
-            st.session_state.sel_pipeline = sel_pipeline
-            st.success(f'Pipeline selected {sel_pipeline}')
-            view_input_data(sel_pipeline)
-
-            
-
-def panel_run_pipeline():
-    with st.container(border=True):
-        st.markdown(
-            """
-            ### Work in prog ...
-            """
-        )
-
+    # Show a thumbnail image for each pipeline
+    pdict = dict(
+        zip(st.session_state.pipelines['Name'], st.session_state.pipelines['Label'])
+    )
+    pdir = os.path.join(st.session_state.paths['resources'], 'pipelines')
+    logo_fnames = [
+        os.path.join(pdir, pname, f'logo_{pname}.png') for pname in list(pdict.values())
+    ]
+    psel = image_select(
+        "",
+        images = logo_fnames,
+        captions=list(pdict.keys()),
+        index=-1,
+        return_value="index",
+        use_container_width = False
+    )
+    
+    # Show description of the selected pipeline
+    if psel < 0 :
+        return
+    
+    sel_pipeline = list(pdict.values())[psel]
+    if st.button('Select'):
+        st.session_state.sel_pipeline = sel_pipeline
+        st.success(f'Pipeline selected {sel_pipeline}')
+        view_input_data(sel_pipeline)
 
 # Page config should be called for each page
 utilpg.config_page()
@@ -82,14 +69,14 @@ st.markdown(
     """
 )
 
-list_tasks = ["From List", "Advanced"]
-sel_task = st.pills(
-    "Select Workflow Task", list_tasks, selection_mode="single", label_visibility="collapsed"
+tab1, tab2 = st.tabs(
+    ["List View", "Graph View"]
 )
-if sel_task == "From List":
+
+with tab1:
     sel_pipeline_from_list()
 
-elif sel_task == "Advanced":
+with tab2:
     st.warning('Not implemented yet!')
     #sel_pipeline_from_graph()
     

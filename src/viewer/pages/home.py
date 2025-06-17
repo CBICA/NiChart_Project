@@ -14,41 +14,27 @@ logger = setup_logger()
 
 logger.debug('Start of Home Screen!')
 
-
-# utilpg.select_main_menu()
-
-#st.info(
-st.markdown(
-    """
-    ### Welcome to NiChart Project!
-    - NiChart is an **<u>open-source framework</u>** built specifically for deriving **<u>machine learning biomarkers </u>** from **<u>MRI imaging data</u>**.
-    """
-    , unsafe_allow_html=True
-)
-
-st.image("../resources/nichart1.png", width=300)
-
-sel = st.pills(
-    'Select an option',
-    ['Overview', 'Quick Start Guide', 'Links', 'Installation'],
-    default = 'Overview',
-    label_visibility="collapsed"
-)
-
-if sel == 'Overview':
+def view_overview():
     with st.container(border=True):
         st.markdown(
             """
-            - NiChart is a modular platform offering tools for **<u>image processing </u>** and **<u>data analysis</u>**.
+            NiChart is an **<u>open-source framework</u>** built specifically for deriving **<u>machine learning biomarkers</u>** from **<u>MRI imaging data</u>**.
+            """
+            , unsafe_allow_html=True            
+        )
+        st.image("../resources/nichart1.png", width=300)
+        st.markdown(
+            """
+            - NiChart platform offers tools for **<u>image processing</u>** and **<u>data analysis</u>**.
 
-            - Users can extract **<u>imaging phenotypes </u>** and **<u>machine learning (ML) indices </u>** of disease and aging.
+            - Users can extract **<u>imaging phenotypes</u>** and **<u>machine learning (ML) indices</u>** of disease and aging.
 
             - Pre-trained **<u>ML models </u>** allow users to quantify complex brain changes and compare results against **<u>normative and disease-specific reference ranges</u>**.
             """
             , unsafe_allow_html=True
         )
 
-elif sel == 'Quick Start Guide':
+def view_quick_start():
     with st.container(border=True):
         st.markdown(
             """
@@ -73,7 +59,7 @@ elif sel == 'Quick Start Guide':
             , unsafe_allow_html=True
         )
 
-elif sel == 'Links':
+def view_links():
     with st.container(border=True):
         st.markdown(
             """
@@ -85,7 +71,7 @@ elif sel == 'Links':
             , unsafe_allow_html=True
         )
 
-elif sel == 'Installation':
+def view_installation():
     with st.container(border=True):
     #with st.expander(label='Installation'):
         st.markdown(
@@ -108,4 +94,29 @@ elif sel == 'Installation':
             """
             , unsafe_allow_html=True
         )
+    
+
+st.markdown(
+    """
+    ### Welcome to NiChart Project!
+    """
+    , unsafe_allow_html=True
+)
+
+tab1, tab2, tab3, tab4 = st.tabs(
+    ["Overview", "Quick Start", "Links", "Installation"]
+)
+
+with tab1:
+    view_overview()
+
+with tab2:
+    view_quick_start()
+
+with tab3:
+    view_links()
+
+with tab4:
+    view_installation()
+
     

@@ -14,4 +14,4 @@ st.markdown(
     """
 )
 
-st.warning('Coming Soon!')
+st.info('Coming Soon!')

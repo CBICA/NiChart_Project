@@ -39,29 +39,7 @@ def view_synthseg() -> None:
     Panel for viewing synthseg results
     """    
     # Select result type 
-    list_res_type = ['Segmentation', 'Volumes']
-    sel_res_type = st.pills(
-        'Select output type',
-        list_res_type,
-        default = None,
-        selection_mode = 'single',
-        label_visibility = 'collapsed',
-    )
-    
-    if sel_res_type == 'Segmentation':
-        ulay = st.session_state.ref_data["t1"]
-        olay = st.session_state.ref_data["dlmuse"]        
-        utilmri.panel_view_seg(ulay, olay, 'muse')
-        
-    elif sel_res_type == 'Volumes':
-        df = pd.read_csv(
-            '/home/guraylab/GitHub/gurayerus/NiChart_Project/resources/reference_data/centiles/dlmuse_centiles_CN.csv'
-            #'/home/gurayerus/GitHub/gurayerus/NiChart_Project/resources/reference_data/centiles/dlmuse_centiles_CN.csv'
-        )
-        st.session_state.curr_df = df
-        utilpl.panel_view_centiles('dlmuse', 'rois')
-         
-    #print(st.session_state.plot_params)
+    st.info('Coming soon!')
 
 def view_dlmuse() -> None:
     """
@@ -114,27 +92,21 @@ def view_dlwmls() -> None:
 
 def view_dlmuse_biomarkers() -> None:
     """
-    Panel for viewing dlwmls segmentation
+    Panel for viewing biomarkers
     """
-    # Select result type        
-    list_res_type = ['Values']
-    sel_res_type = st.pills(
-        'Select result type',
-        list_res_type,
-        default = None,
-        selection_mode = 'single',
-        label_visibility = 'collapsed',
-    )
-    
-    if sel_res_type == 'Values':
-        utilpl.panel_view_centiles('dlmuse', 'biomarkers')
-
+    st.info('Coming soon!')
 
 def view_spare() -> None:
-    st.write('Work in progress!')
+    """
+    Panel for viewing biomarkers
+    """
+    st.info('Coming soon!')
 
 def view_surrealgan() -> None:
-    st.write('Work in progress!')
+    """
+    Panel for viewing biomarkers
+    """
+    st.info('Coming soon!')
 
 #st.info(
 st.markdown(

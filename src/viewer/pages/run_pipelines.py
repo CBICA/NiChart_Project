@@ -62,14 +62,24 @@ def panel_conf_pipeline():
                     st.json(parameter_values)                
 
 
-def panel_run_pipeline():
-    with st.container(border=True):
-        st.markdown(
-            """
-            ### Work in prog ...
-            """
-        )
+def panel_verify_data():
+    """
+    Panel for verifying required pipeline data
+    """
+    st.success(f'Selected pipeline: {st.session_state.sel_pipeline}')
+    st.info('Coming soon!')
 
+def panel_run_pipeline():
+    """
+    Panel for running a pipeline
+    """
+    st.info('Coming soon!')
+
+def panel_view_status():
+    """
+    Panel to view status of pipeline
+    """
+    st.info('Coming soon!')
 
 # Page config should be called for each page
 utilpg.config_page()
@@ -77,26 +87,21 @@ utilpg.show_menu()
 
 st.markdown(
     """
-    ### Configure and run a pipeline
+    ### Run a pipeline
     """
 )
 
-if st.session_state.sel_pipeline is None:
-    st.warning('Please select a pipeline and upload your data first!')
-else:
-    st.success(f'Selected pipeline: {st.session_state.sel_pipeline}')
-    list_tasks = ["Configure", "Run"]
-    sel_task = st.pills(
-        "Select Task",
-        list_tasks,
-        selection_mode="single",
-        label_visibility="collapsed"
-    )
-    if sel_task == "Configure":
-        panel_conf_pipeline()
-        
-    elif sel_task == "Run":
-        panel_run_pipeline()
+tab1, tab2, tab3 = st.tabs(
+    ["Check Data", "Run", "View Status"]
+)
 
+with tab1:
+    panel_verify_data()
+    
+with tab2:
+    panel_run_pipeline()
+
+with tab3:
+    panel_view_status()
 
 

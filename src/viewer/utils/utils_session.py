@@ -56,16 +56,13 @@ def init_paths():
         "proc_def": p_proc_def,
         "file_search_dir": "",
         "out_dir": p_out,
-        "task": "",
+        "project": "",
     }
 
 def init_selections() -> None:
     st.session_state.selections = {
         'sel_roi_group' : 'Primary',
         'sel_roi' : 'GM',
-        'list_roi_indices' : None,
-        'centile_type' : 'CN',
-        'centile_values' : ['centile_25', 'centile_50', 'centile_75']
     }
 
 
@@ -214,7 +211,7 @@ def reset_flags() -> None:
     """
     for tmp_key in st.session_state.flags.keys():
         st.session_state.flags[tmp_key] = False
-    st.session_state.flags["task"] = True
+    st.session_state.flags["project"] = True
 
     # Check dicom folder
     fcount = utilio.get_file_count(st.session_state.paths["dicoms"])
@@ -300,38 +297,38 @@ def update_out_dir(sel_outdir) -> None:
     st.session_state.flags["out_dir"] = True
 
     # Reset other vars
-    st.session_state.navig['task'] = None
+    st.session_state.navig['project'] = None
 
-def update_task(sel_task) -> None:
+def update_project(sel_project) -> None:
     """
     Updates when outdir changes
     """
-    if sel_task is None:
+    if sel_project is None:
         return
 
-    if sel_task == st.session_state.navig['task']:
+    if sel_project == st.session_state.navig['project']:
         return
 
-    # Create task dir
-    task_dir = os.path.join(
+    # Create project dir
+    project_dir = os.path.join(
         st.session_state.paths['out_dir'],
-        sel_task
+        sel_project
     )
     
     try:
-        if not os.path.exists(task_dir):
-            os.makedirs(task_dir)
-            #st.success(f'Created folder {task_dir}')
+        if not os.path.exists(project_dir):
+            os.makedirs(project_dir)
+            #st.success(f'Created folder {project_dir}')
             #time.sleep(3)
     except:
-        st.error(f'Could not create task folder: {task_dir}')
+        st.error(f'Could not create project folder: {project_dir}')
         return
 
-    # Set task name
-    st.session_state.navig['task'] = sel_task
-    #st.session_state.flags["task"] = True
-    st.session_state.paths['task'] = task_dir
-    st.session_state.paths['task_curr_path'] = task_dir
+    # Set project name
+    st.session_state.navig['project'] = sel_project
+    #st.session_state.flags["project"] = True
+    st.session_state.paths['project'] = project_dir
+    st.session_state.paths['project_curr_path'] = project_dir
 
     # Reset other vars
     update_default_paths()
@@ -384,8 +381,8 @@ def init_session_state() -> None:
 
         st.session_state.user = {
             'setup_sel_item': None,
-            'setup_task_update': False,
-            'setup_task_mode': 0,
+            'setup_project_update': False,
+            'setup_project_mode': 0,
         }
 
 
@@ -393,7 +390,7 @@ def init_session_state() -> None:
             'main_menu': "Home",
             'workflow': None,
             'pipeline_step': None,
-            'task': None
+            'project': None
         }
 
         ####################################
@@ -428,9 +425,9 @@ def init_session_state() -> None:
         init_paths()
 
 
-        # Set default task
-        sel_task = 'Experiment_1'
-        update_task(sel_task)
+        # Set default project
+        sel_project = 'Experiment_1'
+        update_project(sel_project)
 
         # Copy demo folders into user folders as needed
         if st.session_state.has_cloud_session:
