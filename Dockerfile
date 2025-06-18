@@ -55,6 +55,7 @@ RUN git clone https://github.com/CBICA/CCL_NMF_Prediction.git && cd CCL_NMF_Pred
 ## Cache DLMUSE and DLICV models with an empty job so no download is needed later
 RUN DLMUSE -i ~/dummyinput -o ~/dummyoutput && DLICV -i ~/dummyinput -o ~/dummyoutput
 USER root
+RUN apt-get install -y awscli
 COPY . /app/
 RUN useradd -s /bin/bash streamlit && \
     chmod -R a+rw /app/output_folder && chmod a-rw / && chmod a-w /app && touch /app/src/viewer/pipeline.log && \
