@@ -2,15 +2,12 @@ import streamlit as st
 import utils.utils_pages as utilpg
 import utils.utils_plots as utilpl
 import utils.utils_mriview as utilmri
-
 import pandas as pd
 from streamlit_image_select import image_select
-
 from stqdm import stqdm
-
 import os
-
 from utils.utils_logger import setup_logger
+
 logger = setup_logger()
 
 logger.debug('Start of setup!')

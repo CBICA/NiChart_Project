@@ -19,12 +19,8 @@ def select_project():
     Panel for selecting a project
     """
     out_dir = st.session_state.paths["out_dir"]
-    curr_project = st.session_state.navig['project']            
-
-    sel_project = utildata.select_project(out_dir, curr_project)
-    
-    if sel_project is not None:        
-        st.success(f'Selected Project: {sel_project}')
+    sel_project = utildata.select_project(out_dir, st.session_state.project)
+    st.success(f'Project Name: {st.session_state.project}')
     
 def view_project_folder():
     """

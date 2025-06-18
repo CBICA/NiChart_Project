@@ -68,7 +68,11 @@ def panel_verify_data():
     Panel for verifying required pipeline data
     """
     sel_method = st.session_state.sel_pipeline
-    st.success(f'Selected pipeline: {sel_method}')
+    sel_project = st.session_state.project
+    in_dir = st.session_state.paths[sel_project]
+    
+    st.success(f'Pipeline: {sel_method}')
+    st.success(f'Project: {sel_project}')
     
     if st.button('Verify'):    
         flag_data = utilpipe.verify_data(sel_method)
@@ -100,7 +104,7 @@ st.markdown(
 )
 
 tab1, tab2, tab3 = st.tabs(
-    ["Check Data", "Run", "View Status"]
+    ["Verify Input Data", "Run Pipeline", "View Status"]
 )
 
 with tab1:
