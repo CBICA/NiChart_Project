@@ -14,6 +14,18 @@ from PIL import Image
 
 # from streamlit.web.server.websocket_headers import _get_websocket_headers
 
+def init_out_dirs():
+    ### Project folders
+    dnames = [
+        "t1", "fl", "participants", "dlmuse_seg", "dlmuse_vol"
+    ]
+    dtypes = [
+        "in_img", "in_img", "in_csv", "out_img", "out_csv"
+    ]
+    st.session_state.df_outdirs = pd.DataFrame(
+        {"dname": dnames, "dtype": dtypes}
+    )
+
 def init_session_vars():
     ####################################    
     ### Misc variables
@@ -484,6 +496,9 @@ def init_session_state() -> None:
         
         # Set initial session variables
         init_session_vars()
+
+        # Set output files
+        init_out_dirs()
 
         # Initialize paths
         init_paths()
