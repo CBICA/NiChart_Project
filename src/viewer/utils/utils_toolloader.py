@@ -49,7 +49,7 @@ class MountConfig(BaseModel):
 
 class ResourceSpec(BaseModel):
     vcpus: int
-    memory: str  # e.g., "8GB"
+    memory: int  # in MB, e.g 16000 for 16GB
     gpus: int = 0
 
 
