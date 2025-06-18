@@ -10,14 +10,19 @@ inputs:
 
 outputs:
   dlmuse_csv:
-    type: file
+    type: directory
+  dlmuse_seg:
+    type: directory
 
 mounts:
   t1_img:
     path_in_container: /input
     mode: ro
-  dlmuse_output:
-    path_in_container: /output
+  dlmuse_csv:
+    path_in_container: /output_csv
+    mode: rw
+  dlmuse_seg:
+    path_in_container: /output_seg
     mode: rw
 
 resources: # Used to allocate jobs on the cloud. Please be diligent.
@@ -27,4 +32,5 @@ resources: # Used to allocate jobs on the cloud. Please be diligent.
 
 container:
   image: cbica/nichart_dlmuse:1.0.8
+  command: NiChart_DLMUSE --input {t1_img} --output-csvs {dlmuse_csv} --output-segs {dlmuse_seg}
 
