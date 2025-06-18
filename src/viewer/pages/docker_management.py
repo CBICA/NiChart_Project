@@ -17,6 +17,7 @@ import humanize
 import utils.utils_toolloader as tl
 import utils.utils_pollstatus as ps
 import utils.utils_displayjobs as dj
+import utils.utils_stlogbox as stlogbox
 from pathlib import Path
 import pathlib
 import time
@@ -44,7 +45,8 @@ except:
 st.markdown("This page will refresh automatically every 10 seconds to update the job monitor.")
 
 # Limited to 100 refreshes, in case a user goes AFK.
-count = st_autorefresh(interval=10000, limit=100, key='autorefreshcounter')
+# DISABLED for testing synchronous jobs.
+#count = st_autorefresh(interval=10000, limit=100, key='autorefreshcounter')
 
 # Pre-defined list of supported images
 SUPPORTED_IMAGES = [
@@ -137,6 +139,7 @@ if st.button("Press me to try submitting a synchronous cloud job!"):
         st.success(f"Tool {example_tool_name} finished successfully.")
     else:
         st.error(f"Tool {example_tool_name} failed, check error logs.")
+        raise RuntimeError(result.error)
 
 indicator_one = st.empty()
 indicator_two = st.empty()
@@ -150,6 +153,34 @@ def sample_longrunning_task():
 
 if st.button("Press me to try automatic UI updates"):
     sample_longrunning_task()
+
+
+with st.container():
+    st.subheader("Pipeline Logs")
+    with st.expander("View all pipeline logs"):
+        with st.container():
+            log_committed_box = st.empty()
+    with st.expander("View current step live logs"):
+        with st.container():
+            log_live_box = st.empty()
+
+if st.button("Press me to try synchronous pipeline execution"):
+    pipeline_progress_bar = stqdm(total=2, desc="Submitting pipeline...", position=0)
+    process_progress_bar = stqdm(total=2, desc="Waiting...", position=0)
+
+    pipeline_to_run = "run_dlmuse"
+
+    log = stlogbox.StreamlitJobLogger(log_committed_box, log_live_box)
+
+    result = tl.run_pipeline(
+        pipeline_id=pipeline_to_run, ##TODO EDIT THIS
+        global_vars={"STUDY": st.session_state.paths["dir_out"]},
+        pipeline_progress_bar=pipeline_progress_bar,
+        process_progress_bar=process_progress_bar,
+        log=log
+    )
+
+    st.success(f"Pipeline {pipeline_to_run} finished successfully.")
 
 """ st.title("Docker Image Manager")
 

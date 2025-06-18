@@ -14,6 +14,13 @@ class TaskHandle(ABC):
         pass
 
     @abstractmethod
+    def exitcode(self) -> int:
+        """Returns the exit code, if available. 
+        In general a failed job will have exit code > 0.
+        Running jobs will always have exit code as 0, so check accordingly."""
+        pass
+
+    @abstractmethod
     def exists(self) -> bool:
         """Returns True if the task resource still exists."""
         pass
@@ -43,6 +50,9 @@ class DummyHandle(TaskHandle):
     def status(self) -> str:
         return "dummystatus"
     
+    def exitcode(self) -> int:
+        return 0
+    
     def exists(self) -> bool:
         return True
     
@@ -66,6 +76,16 @@ class DockerContainerHandle(TaskHandle):
             return container.status
         except docker.errors.NotFound:
             return "deleted"
+
+    def exitcode(self) -> int:
+        currentstatus = self.status()
+        if currentstatus.lower() == 'exited':
+            container = self.client.containers.get(self.container_name)
+            state_dict = container.wait(timeout=5)
+            return state_dict["StatusCode"]
+        else:
+            return 0
+            
 
     def exists(self) -> bool:
         try:
@@ -111,6 +131,15 @@ class BatchJobHandle(TaskHandle):
         if not response["jobs"]:
             return "deleted"
         return response["jobs"][0]["status"]
+    
+    def exitcode(self) -> int:
+        current_status = self.status()
+
+        if current_status == "FAILED":
+            return 1
+        else:
+            return 0
+
 
     def exists(self) -> bool:
         response = self.client.describe_jobs(jobs=[self.job_id])

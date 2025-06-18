@@ -10,8 +10,11 @@ import boto3
 from botocore.exceptions import ClientError
 import utils.utils_pollstatus as ps
 import time
+import re
+from collections import defaultdict, deque
 
 DEFAULT_TOOL_DEFINITION_PATH = Path(__file__).parent.parent.parent.parent / "resources/tools/"
+DEFAULT_PIPELINE_DEFINITION_PATH = Path(__file__).parent.parent.parent.parent / "resources/pipelines"
 
 
 def is_safe_path(base_dir: Union[str, Path], target_path: Union[str, Path]) -> bool:
@@ -93,7 +96,14 @@ class ToolSpec(BaseModel):
             validated[key] = value
         return validated
 
-
+    def pull_image(self):
+        image_tag = self.container["image"]
+        print(f"DEBUG: Pulling image {image_tag} for local run")
+        result_code = os.system(f"docker pull {image_tag}")
+        if result_code != 0:
+            return False # Pull failed for one reason or another
+        return True # Pull success
+    
     def generate_docker_command(self, param_values: Dict[str, Union[int, float, bool, str]], mount_paths: Dict[str, str]) -> str:
         # This line will throw if validation fails
         param_values = self.validate_params(param_values)
@@ -186,7 +196,8 @@ def validate_user_request(tool_name: str, user_params: Dict, user_mounts: Dict[s
         raise FileNotFoundError(f"Tool definition {tool_name} not found in registry at location {tool_dir}.")
     
     tool_spec = load_tool_spec_from_yaml(yaml_file)
-    
+    tool_spec.pull_image()
+
     input_labels = set(tool_spec.inputs.keys())
     output_labels = set(tool_spec.outputs.keys())
 
@@ -208,6 +219,7 @@ def submit_job(
     user_mounts: Dict[str, str],
     id_token: str | None = None,
     execution_mode: str = "any", #"cloud", "local",
+    do_s3_cli_transfer: bool = False # True will bypass FSX to use direct S3 file upload/download
 ) -> Union[str, subprocess.Popen]:
     """
     Submits a job either locally or via an AWS Lambda depending on Streamlit session state.
@@ -221,11 +233,23 @@ def submit_job(
         id_token = st.session_state.get("cloud_session_token", None)
         if id_token is None:
             raise ValueError("Lambda error: An ID token must be provided to submit cloud jobs and none was found in the session state.")
+        
+        # Handle S3 upload, if needed
+        
+        if do_s3_cli_transfer:
+            print("DEBUG: Syncing mount paths to S3 via AWS CLI.")
+            for mount_dir in user_mounts.values():
+                print(f"DEBUG: Syncing user-mount path {mount_dir}")
+                cmd = f"aws s3 sync {mount_dir} s3://cbica-nichart-io/{mount_dir} --delete"
+                os.system(cmd)
+            print("DEBUG: Done syncing to S3 in preparation for job submission.")
+        # Payload for job-submission lambda    
         payload = {
             "id_token": id_token,
             "tool_name": tool_name,
             "user_params": user_params,
-            "user_mounts": user_mounts
+            "user_mounts": user_mounts,
+            "do_s3_cli_transfer": str(do_s3_cli_transfer)
         }
 
         lambda_client = boto3.client("lambda", region_name='us-east-1')
@@ -271,6 +295,7 @@ def submit_job(
         else:
             handle = ps.get_handle(mode='batch', raw_id=res_job_id)
             ps.add_job_to_session(handle)
+
             return {
                 "success": True,
                 "mode": "cloud",
@@ -327,6 +352,7 @@ def submit_and_run_job_sync(
     progress_bar=None,
     log=None,
     poll_interval: int = 5,
+    do_s3_cli_transfer: bool = False # True will bypass FSX to use direct S3 file upload/download
 ) -> Dict[str, Any]:
     
     result = submit_job(
@@ -335,6 +361,7 @@ def submit_and_run_job_sync(
         user_mounts=user_mounts,
         id_token=id_token,
         execution_mode=execution_mode,
+        do_s3_cli_transfer=do_s3_cli_transfer
     )
 
     if not result["success"]:
@@ -371,12 +398,17 @@ def submit_and_run_job_sync(
                 job_info = response["jobs"][0]
                 status = job_info["status"]
 
-                if log:
-                    log.info(f"Batch job status: {status}")
                 if progress_bar:
-                    progress_bar.set_description(f"AWS Batch job status: {status}")
+                    progress_bar.set_description(f"Cloud job status: {status}")
+
+                if log:
+                    current_logs = handle.get_logs()
+                    log.update_live(current_logs)
 
                 if status in ["SUCCEEDED", "FAILED"]:
+                    if log:
+                        log.commit(current_logs)
+                        log.clear_live()
                     break
 
                 time.sleep(poll_interval)
@@ -389,36 +421,166 @@ def submit_and_run_job_sync(
                     "error_message": f"Error polling AWS Batch job: {e}"
                 }
 
-        return {
-            "mode": "cloud",
-            "status": status.lower(),
-            "job_id": job_id
-        }
+        # Sync dirs back
+       
+        if do_s3_cli_transfer:
+            if log:
+                log.info(f"Performing post-job sync for job {job_id}.")
+            print("DEBUG: Syncing from S3 to mount paths via AWS CLI.")
+            for mount_path in user_mounts.values():
+                #absolute_mount_path = Path(mount_path).resolve()
+                print(f"DEBUG: Syncing user-mount path {mount_path}")
+                cmd = f"aws s3 sync s3://cbica-nichart-io/{mount_path} {mount_path}"
+                returncode = os.system(cmd)
+                if returncode > 0:
+                    print(f"DEBUG: Post-job sync failed!")
+                    log.error(f"Post job sync failed for job {job_id}.")
+                    raise RuntimeError(f"Cloud job {job_id} completed successfully, but post-job sync failed. Please submit an issue report.")
+            print("DEBUG: Done syncing from S3 after job completion.")  
+            if log:
+                log.info(f"Done post-job sync for job {job_id}.")  
+
+        if status.lower() == "succeeded":
+            return {
+                "mode": "cloud",
+                "status": "success",
+                "job_id": job_id,
+            }
+        else: 
+            raise RuntimeError(f"Cloud job {job_id} failed. Please see error logs and submit an issue report.")
+            return {
+                "mode": "cloud",
+                "status": "error",
+                "job_id": job_id
+            }
 
     # === LOCAL MODE (Docker) ===
     elif mode == "local":
         while True:
-            status = handle.get_status()
+            status = handle.status()
             if log:
-                log.info(f"Docker job status: {status}")
+                current_logs = handle.get_logs()
+                log.update_live(current_logs)
             if progress_bar:
-                progress_bar.text(f"Docker container status: {status}")
+                progress_bar.text(f"Local container job status: {status}")
 
-            if status in ["exited", "failed", "finished", "dead"]:
+            if status in ["exited", "paused", "removing", "dead"]:
+                exitcode = handle.exitcode()
+                log.commit(current_logs)
+                log.clear_live()
                 break
             time.sleep(poll_interval)
 
-        return {
-            "mode": "local",
-            "status": status,
-            "job_id": job_id
-        }
+        if status.lower() == 'exited' and exitcode == 0:
+            return {
+                "mode": "local",
+                "status": "success",
+                "job_id": job_id
+            }
+        else: ## Job failed, fail loudly
+            raise RuntimeError(f"Docker container job {job_id} failed with exit code {exitcode}")
+            
 
     else:
         # Unknown mode
+        raise RuntimeError("An unexpected job execution mode was passed. Please submit an issue report.")
         return {
             "mode": mode,
             "status": "error",
             "error_message": "Unexpected job execution mode"
         }
+
+
+
+def resolve_vars(template: Dict[str, str], global_vars: Dict[str, str], step_outputs: Dict[str, Dict[str, str]]) -> Dict[str, str]:
+    def repl(match):
+        var = match.group(1)
+        if ".outputs." in var:
+            step_id, key = var.split(".outputs.")
+            return step_outputs[step_id][key]
+        return global_vars.get(var, match.group(0))
     
+    return {k: re.sub(r"\$\{([^}]+)\}", repl, v) for k, v in template.items()}
+
+def parse_pipeline_steps(pipeline_yaml):
+    steps = pipeline_yaml["steps"]
+    step_map = {s["id"]: s for s in steps}
+    graph = defaultdict(list)
+    in_degree = defaultdict(int)
+
+    for s in steps:
+        matches = re.findall(r"\$\{(\w+)\.outputs\.(\w+)\}", yaml.dump(s.get("inputs", {})))
+        for dep_id, _ in matches:
+            graph[dep_id].append(s["id"])
+            in_degree[s["id"]] += 1
+
+    queue = deque([s["id"] for s in steps if in_degree[s["id"]] == 0])
+    execution_order = []
+    while queue:
+        sid = queue.popleft()
+        execution_order.append(sid)
+        for neighbor in graph[sid]:
+            in_degree[neighbor] -= 1
+            if in_degree[neighbor] == 0:
+                queue.append(neighbor)
+
+    return execution_order, step_map
+
+def run_pipeline(pipeline_id: str,
+                global_vars: Dict[str, str],
+                pipeline_progress_bar=None,
+                process_progress_bar=None,
+                execution_mode='cloud',
+                log=None
+                ):
+    # Resolve pipeline file
+    pipeline_path = DEFAULT_PIPELINE_DEFINITION_PATH / f"{pipeline_id}.yaml"
+    if not pipeline_path.exists():
+        raise FileNotFoundError(f"Pipeline definition '{pipeline_id}' not found at {pipeline_path}")
+
+    with open(pipeline_path, 'r') as f:
+        pipeline_yaml = yaml.safe_load(f)
+
+    log.info(f"Starting pipeline {pipeline_id}.")
+    order, step_map = parse_pipeline_steps(pipeline_yaml)
+    step_outputs = {}
+    total_steps = len(order)
+    current_step = 0
+    for sid in order:
+        if pipeline_progress_bar:
+            pipeline_progress_bar.progress(current_step / total_steps)
+        step = step_map[sid]
+        tool_id = step["tool"]
+        log.info(f"Starting execution of pipeline step {tool_id}.")
+        tool_yaml = DEFAULT_TOOL_DEFINITION_PATH / f"{tool_id}.yaml"
+        tool = load_tool_spec_from_yaml(tool_yaml)
+
+        # Resolve input/output paths with variable substitution
+        resolved_inputs = resolve_vars(step.get("inputs", {}), global_vars, step_outputs)
+        resolved_outputs = resolve_vars(step.get("outputs", {}), global_vars, step_outputs)
+        resolved_total_mounts = stringify_mounts({**resolved_inputs, **resolved_outputs})
+        resolved_params = step.get("params", {})
+       
+        print(f"Submitting job: {sid} ({tool.name})")
+        if process_progress_bar:
+            process_progress_bar.set_description(f"Running tool {tool_id}...")
+            process_progress_bar.progress(0)
+        result = submit_and_run_job_sync(
+                    tool_name=tool_id,
+                    user_params=resolved_params,
+                    user_mounts=resolved_total_mounts,
+                    execution_mode=execution_mode,
+                    progress_bar=process_progress_bar,
+                    log=log,
+        )
+        if result['status'] == 'success':
+            print(f"Step {sid}, {tool_id} finished succesfully.")
+            log.info(f"Pipeline step {tool_id} finished successfully")
+        else: # Step failed, loudly fail
+            log.error(f"Pipeline step {tool_id} failed.")
+            print(f"Step {sid}, {tool_id} failed with status {result["status"]}, see error log:")
+            print(f"Error message: {result["error_message"]}")
+            raise RuntimeError(result["error_message"])
+        step_outputs[sid] = resolved_outputs  # Used for future interpolation
+    log.info(f"Pipeline {pipeline_id} completed successfully.")
+    return step_outputs
