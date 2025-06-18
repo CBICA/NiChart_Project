@@ -240,7 +240,7 @@ def submit_job(
             print("DEBUG: Syncing mount paths to S3 via AWS CLI.")
             for mount_dir in user_mounts.values():
                 print(f"DEBUG: Syncing user-mount path {mount_dir}")
-                cmd = f"aws s3 sync {mount_dir} s3://cbica-nichart-io/{mount_dir} --delete"
+                cmd = f"aws s3 sync {mount_dir} s3://cbica-nichart-io/{mount_dir} --delete --exact-timestamps"
                 os.system(cmd)
             print("DEBUG: Done syncing to S3 in preparation for job submission.")
         # Payload for job-submission lambda    
@@ -430,7 +430,7 @@ def submit_and_run_job_sync(
             for mount_path in user_mounts.values():
                 #absolute_mount_path = Path(mount_path).resolve()
                 print(f"DEBUG: Syncing user-mount path {mount_path}")
-                cmd = f"aws s3 sync s3://cbica-nichart-io/{mount_path} {mount_path}"
+                cmd = f"aws s3 sync s3://cbica-nichart-io/{mount_path} {mount_path} --exact-timestamps"
                 returncode = os.system(cmd)
                 if returncode > 0:
                     print(f"DEBUG: Post-job sync failed!")
