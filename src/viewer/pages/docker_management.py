@@ -167,6 +167,8 @@ with st.container():
 if st.button("Press me to try synchronous pipeline execution"):
     pipeline_progress_bar = stqdm(total=2, desc="Submitting pipeline...", position=0)
     process_progress_bar = stqdm(total=2, desc="Waiting...", position=0)
+    #pipeline_progress_bar_slot = st.empty()
+    #process_progress_bar_slot = st.empty()
 
     pipeline_to_run = "run_dlmuse"
 

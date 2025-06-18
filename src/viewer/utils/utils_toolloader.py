@@ -369,8 +369,6 @@ def submit_and_run_job_sync(
         error_message = f"[{result['message']}] {result['error']}"
         if log:
             log.error(error_message)
-        if progress_bar:
-            progress_bar.error("Job submission failed.")
         return {
             "mode": result.get("mode"),
             "status": "submission_failed",
@@ -462,7 +460,7 @@ def submit_and_run_job_sync(
                 current_logs = handle.get_logs()
                 log.update_live(current_logs)
             if progress_bar:
-                progress_bar.text(f"Local container job status: {status}")
+                progress_bar.set_description(f"Local container job status: {status}")
 
             if status in ["exited", "paused", "removing", "dead"]:
                 exitcode = handle.exitcode()
@@ -546,9 +544,13 @@ def run_pipeline(pipeline_id: str,
     step_outputs = {}
     total_steps = len(order)
     current_step = 0
+    if pipeline_progress_bar:
+        pipeline_progress_bar.reset(total=total_steps)
     for sid in order:
+        if process_progress_bar:
+            process_progress_bar.reset(total=4)
         if pipeline_progress_bar:
-            pipeline_progress_bar.progress(current_step / total_steps)
+            pipeline_progress_bar.update(1)
         step = step_map[sid]
         tool_id = step["tool"]
         log.info(f"Starting execution of pipeline step {tool_id}.")
@@ -564,7 +566,7 @@ def run_pipeline(pipeline_id: str,
         print(f"Submitting job: {sid} ({tool.name})")
         if process_progress_bar:
             process_progress_bar.set_description(f"Running tool {tool_id}...")
-            process_progress_bar.progress(0)
+
         result = submit_and_run_job_sync(
                     tool_name=tool_id,
                     user_params=resolved_params,
@@ -573,6 +575,7 @@ def run_pipeline(pipeline_id: str,
                     progress_bar=process_progress_bar,
                     log=log,
         )
+
         if result['status'] == 'success':
             print(f"Step {sid}, {tool_id} finished succesfully.")
             log.info(f"Pipeline step {tool_id} finished successfully")
