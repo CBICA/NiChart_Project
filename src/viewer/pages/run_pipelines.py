@@ -69,10 +69,10 @@ def panel_verify_data():
     """
     sel_method = st.session_state.sel_pipeline
     sel_project = st.session_state.project
-    in_dir = st.session_state.paths[sel_project]
+    in_dir = st.session_state.paths['project']
     
-    st.success(f'Pipeline: {sel_method}')
-    st.success(f'Project: {sel_project}')
+    st.success(f'Project Name: {sel_project}')
+    st.success(f'Pipeline Name: {sel_method}')
     
     if st.button('Verify'):    
         flag_data = utilpipe.verify_data(sel_method)
