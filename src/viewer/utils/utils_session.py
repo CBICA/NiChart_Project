@@ -34,6 +34,7 @@ def init_paths():
     user_id = ''
     if st.session_state.has_cloud_session:
         user_id = st.session_state.cloud_user_id
+
     p_out = os.path.join(
         p_root, 'output_folder', user_id
     )
@@ -572,17 +573,17 @@ def init_session_state() -> None:
         st.session_state.paths["init"] = st.session_state.paths["root"]
         if st.session_state.has_cloud_session:
             user_id = st.session_state.cloud_user_id
-            st.session_state.paths["dir_out"] = os.path.join(
+            st.session_state.paths["out_dir"] = os.path.join(
                 #st.session_state.paths["root"], "output_folder", user_id
                 "/fsx", user_id
             )
         else:
-            st.session_state.paths["dir_out"] = os.path.join(
+            st.session_state.paths["out_dir"] = os.path.join(
                 st.session_state.paths["root"], "output_folder"
             )
 
-        if not os.path.exists(st.session_state.paths["dir_out"]):
-            os.makedirs(st.session_state.paths["dir_out"])
+        if not os.path.exists(st.session_state.paths["out_dir"]):
+            os.makedirs(st.session_state.paths["out_dir"])
 
         # Copy demo folders into user folders as needed
         if st.session_state.has_cloud_session:
