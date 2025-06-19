@@ -24,6 +24,7 @@ streamlit_plotly_events
 streamlit-base-extras
 streamlit-extras
 streamlit-autorefresh
+streamlit-option-menu
 chart_studio
 Jinja2
 plotly-express
