@@ -167,7 +167,8 @@ def _get_batch_logs(job_id: str, region: str = "us-east-1") -> str:
     job_detail = batch_client.describe_jobs(jobs=[job_id])["jobs"][0]
     print("JOB_DETAIL FROM BATCH LOG COLLECTOR:")
     print(job_detail)
-    log_stream = job_detail.get("container", {}).get("logStreamName")
+    
+    log_stream = job_detail.get("ecsProperties", {}).get("taskProperties", [])[0].get("containers", [])[0].get("logStreamName", None)
     if not log_stream:
         return "[No log stream available yet]"
 
