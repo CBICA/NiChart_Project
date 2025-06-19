@@ -159,7 +159,6 @@ class BatchJobHandle(TaskHandle):
         return _get_batch_logs(self.job_id, self.region)
 
 
-@st.cache_data(ttl=15)
 def _get_batch_logs(job_id: str, region: str = "us-east-1") -> str:
     batch_client = boto3.client("batch", region_name=region)
     logs_client = boto3.client("logs", region_name=region)

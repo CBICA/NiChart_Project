@@ -351,7 +351,7 @@ def submit_and_run_job_sync(
     execution_mode: str = "any",  # can be "cloud", "local", or "any"
     progress_bar=None,
     log=None,
-    poll_interval: int = 5,
+    poll_interval: int = 15,
     do_s3_cli_transfer: bool = False # True will bypass FSX to use direct S3 file upload/download
 ) -> Dict[str, Any]:
     
