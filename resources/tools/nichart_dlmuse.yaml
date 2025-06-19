@@ -34,6 +34,6 @@ resources: # Used to allocate jobs on the cloud. Please be diligent.
   gpus: 1
 
 container:
-  image: cbica/nichart_dlmuse:1.1.0
-  command: NiChart_DLMUSE -d cuda --in_dir {t1_img} --out_csvs {dlmuse_csv} --out_segs {dlmuse_seg}
+  image: cbica/nichart_dlmuse:1.0.9
+  command: python /app/scripts/wrapper.py -d cuda --in_dir {t1_img} --out_csvs {dlmuse_csv} --out_segs {dlmuse_seg}
 

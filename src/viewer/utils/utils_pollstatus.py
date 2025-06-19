@@ -165,6 +165,8 @@ def _get_batch_logs(job_id: str, region: str = "us-east-1") -> str:
     logs_client = boto3.client("logs", region_name=region)
 
     job_detail = batch_client.describe_jobs(jobs=[job_id])["jobs"][0]
+    print("JOB_DETAIL FROM BATCH LOG COLLECTOR:")
+    print(job_detail)
     log_stream = job_detail.get("container", {}).get("logStreamName")
     if not log_stream:
         return "[No log stream available yet]"
