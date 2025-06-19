@@ -114,7 +114,7 @@ def panel_run_pipeline():
 
         result = tl.run_pipeline(
             pipeline_id=pipeline_to_run, ##TODO EDIT THIS
-            global_vars={"STUDY": st.session_state.paths["out_dir"]},
+            global_vars={"STUDY": st.session_state.paths["project"]},
             pipeline_progress_bar=pipeline_progress_bar,
             process_progress_bar=process_progress_bar,
             log=log
