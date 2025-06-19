@@ -439,7 +439,7 @@ def init_session_state() -> None:
         # Set default project
         sel_project = 'Experiment_1'
         update_project(sel_project)
-        ###################################
+ """        ###################################
         # Pipelines
         st.session_state.pipelines = [
             "Home",
@@ -565,7 +565,7 @@ def init_session_state() -> None:
         # Flags to keep updates in user input/output
         st.session_state.is_updated = {
             "csv_plot": False,
-        }
+        } """
 
         # Set initial values for paths
         st.session_state.paths["root"] = os.path.dirname(os.path.dirname(os.getcwd()))
