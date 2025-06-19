@@ -231,7 +231,7 @@ def panel_view_seg(ulay, olay, method):
                 ['Data', 'Plot Settings']
             )        
             with ptab1:
-                ss_sel['sel_roi'] = utilpl.panel_select_roi(method)
+                ss_sel['sel_roi'] = utilpl.panel_select_roi(method, '_seg')
                 ss_sel['list_roi_indices'] = utilpl.get_roi_indices(ss_sel['sel_roi'], method)
 
             with ptab2:

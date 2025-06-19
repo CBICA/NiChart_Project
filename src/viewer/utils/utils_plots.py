@@ -600,7 +600,7 @@ def show_plots(df, df_plots):
 
 ###################################################################
 # Panels
-def panel_select_roi(method):
+def panel_select_roi(method, key):
     '''
     User panel to select an ROI
     '''
@@ -621,7 +621,8 @@ def panel_select_roi(method):
                 "ROI Group",
                 list_group,
                 sel_ind,
-                help="Select ROI group"
+                help="Select ROI group",
+                key = f'_sel_roigroup_{key}'
             )
             if sel_group is None:
                 return None
@@ -636,7 +637,8 @@ def panel_select_roi(method):
                 "ROI Name",
                 list_roi,
                 sel_ind,
-                help="Select an ROI from the list"
+                help="Select an ROI from the list",
+                key = f'_sel_roiname_{key}'
             )
             if sel_group is None:
                 return None
@@ -801,7 +803,7 @@ def panel_view_centiles(method, var_type):
             )        
             with ptab1:
                 if var_type == 'rois':
-                    ss_sel['yvar'] = panel_select_roi(method)
+                    ss_sel['yvar'] = panel_select_roi(method, '_centiles')
                 
                 elif var_type == 'biomarkers':
                     list_vars = ['WM', 'GM', 'VN']

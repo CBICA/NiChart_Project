@@ -18,19 +18,26 @@ def count_files_with_suffix(in_dir, suffixes):
             count += 1
     return count
 
-def data_overview(in_dir, df_outdirs):
+def data_overview(in_dir):
+    '''
+    Show overview of project data
+    '''
+    df_out = st.session_state.project_folders
+    
+    st.markdown(f'##### Project name: {st.session_state.project} — `{st.session_state.paths['project']}`')
 
+    st.markdown("---")
     st.markdown('##### Input Lists:')
-    for dname in df_outdirs[df_outdirs.dtype == 'in_csv'].dname.tolist():
+    for dname in df_out[df_out.dtype == 'in_csv'].dname.tolist():
         dpath = os.path.join(
             in_dir, dname, dname + '.csv'
         )
         if os.path.exists(dpath):
             df = pd.read_csv(dpath)
-            st.write(f'📁 `{dname + '.csv'}` — {df.shape[0]} rows × {df.shape[1]} columns')
+            st.write(f'📁 `{dname}/{dname + '.csv'}` — {df.shape[0]} rows × {df.shape[1]} columns')
 
     st.markdown('##### Input Images:')
-    for dname in df_outdirs[df_outdirs.dtype == 'in_img'].dname.tolist():
+    for dname in df_out[df_out.dtype == 'in_img'].dname.tolist():
         dpath = os.path.join(
             in_dir, dname
         )
@@ -38,8 +45,9 @@ def data_overview(in_dir, df_outdirs):
             nimg = count_files_with_suffix(dpath, ['.nii.gz', '.nii'])
             st.write(f'📁 `{dname}` — {nimg} image files')
     
+    st.markdown("---")
     st.markdown('##### Output Images:')
-    for dname in df_outdirs[df_outdirs.dtype == 'out_img'].dname.tolist():
+    for dname in df_out[df_out.dtype == 'out_img'].dname.tolist():
         dpath = os.path.join(
             in_dir, dname
         )
@@ -48,18 +56,23 @@ def data_overview(in_dir, df_outdirs):
             st.write(f'📁 `{dname}` — {nimg} image files')
 
     st.markdown('##### Output Lists:')
-    for dname in df_outdirs[df_outdirs.dtype == 'out_csv'].dname.tolist():
+    for dname in df_out[df_out.dtype == 'out_csv'].dname.tolist():
         dpath = os.path.join(
             in_dir, dname, dname + '.csv'
         )
         if os.path.exists(dpath):
             df = pd.read_csv(dpath)
-            st.write(f'📁 `{dname + '.csv'}` — {df.shape[0]} rows × {df.shape[1]} columns')
+            st.write(f'📁 `{dname}/{dname + '.csv'}` — {df.shape[0]} rows × {df.shape[1]} columns')
 
-def data_merge(in_dir, df_outdirs, primary_key = 'MRID'):
+def data_merge(in_dir):
+    '''
+    Merge data csv files
+    '''
+    df_out = st.session_state.project_folders
+    primary_key = 'MRID'
 
     list_csv = []
-    for dname in df_outdirs[df_outdirs.dtype.str.contains('csv')].dname.tolist():
+    for dname in df_out[df_out.dtype.str.contains('csv')].dname.tolist():
         dpath = os.path.join(
             in_dir, dname, dname + '.csv'
         )
@@ -82,9 +95,7 @@ def data_merge(in_dir, df_outdirs, primary_key = 'MRID'):
         return
 
     if st.button('Merge'):
-        
         st.write(sel_csv)
-        
         df_all = []
         for dname in sel_csv:
             try:
@@ -105,4 +116,9 @@ def data_merge(in_dir, df_outdirs, primary_key = 'MRID'):
             st.success(f"✅ Merged DataFrame has {merged_df.shape[0]} rows and {merged_df.shape[1]} columns")
             st.dataframe(merged_df.head(10))
 
-            return merged_df
+            # Save merged data
+            try:
+                merged_df.to_csv(st.session_state.paths['plot_data'])
+            except:
+                st.error(f'Could not write merged data: {st.session_state.paths['plot_data']}')
+

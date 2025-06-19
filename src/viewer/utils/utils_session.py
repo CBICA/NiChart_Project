@@ -14,7 +14,7 @@ from PIL import Image
 
 # from streamlit.web.server.websocket_headers import _get_websocket_headers
 
-def init_out_dirs():
+def init_project_folders():
     ### Project folders
     dnames = [
         "t1", "fl", "participants", "dlmuse_seg", "dlmuse_vol"
@@ -22,7 +22,7 @@ def init_out_dirs():
     dtypes = [
         "in_img", "in_img", "in_csv", "out_img", "out_csv"
     ]
-    st.session_state.df_outdirs = pd.DataFrame(
+    st.session_state.project_folders = pd.DataFrame(
         {"dname": dnames, "dtype": dtypes}
     )
 
@@ -99,7 +99,6 @@ def init_session_vars():
     else:
         st.session_state.has_cloud_session = False
 
-
 def copy_test_folders():
     '''
     Copy demo folders into user folders as needed
@@ -153,11 +152,23 @@ def init_paths():
     )
     if not os.path.exists(p_out):
         os.makedirs(p_out)
+    
+    # Paths specific to project
     p_prj = os.path.join(
         p_out, st.session_state.project
     )
     if not os.path.exists(p_prj):
         os.makedirs(p_prj)
+
+    p_plot = os.path.join(
+        p_prj, 'plot_data'
+    )
+    if not os.path.exists(p_plot):
+        os.makedirs(p_plot)
+
+    d_plot = os.path.join(
+        p_plot, 'plot_data.csv'
+    )
 
     st.session_state.dicts = {
         "muse_derived": os.path.join(
@@ -176,6 +187,8 @@ def init_paths():
         "file_search_dir": "",
         "out_dir": p_out,
         "project": p_prj,
+        "plot_dir": p_plot,
+        "plot_data": d_plot
     }
     
     ############
@@ -437,27 +450,38 @@ def update_project(sel_project) -> None:
         return
 
     # Create project dir
-    project_dir = os.path.join(
-        st.session_state.paths['out_dir'],
-        sel_project
+    p_prj = os.path.join(
+        st.session_state.paths['out_dir'], sel_project
     )
-    
+
+    if not os.path.exists(p_prj):
+        os.makedirs(p_prj)
+
     try:
-        if not os.path.exists(project_dir):
-            os.makedirs(project_dir)
-            #st.success(f'Created folder {project_dir}')
-            #time.sleep(3)
+        if not os.path.exists(p_prj):
+            os.makedirs(p_prj)
+            st.success(f'Created folder {p_prj}')
+            time.sleep(1)
     except:
-        st.error(f'Could not create project folder: {project_dir}')
+        st.error(f'Could not create project folder: {p_prj}')
         return
+
+    # Create plot dir
+    p_plot = os.path.join(
+        p_prj, 'plot_data'
+    )
+    if not os.path.exists(p_plot):
+        os.makedirs(p_plot)
+
+    d_plot = os.path.join(
+        p_plot, 'plot_data.csv'
+    )
 
     # Set project name
     st.session_state.project = sel_project
-    st.session_state.paths['project'] = project_dir
-    st.session_state.paths['project_curr_path'] = project_dir
-
-    # Reset other vars
-    update_default_paths()
+    st.session_state.paths['project'] = p_prj
+    st.session_state.paths['plot_dir'] = p_plot
+    st.session_state.paths['plot_data'] = d_plot
 
 def config_page() -> None:
     st.set_page_config(
@@ -498,7 +522,7 @@ def init_session_state() -> None:
         init_session_vars()
 
         # Set output files
-        init_out_dirs()
+        init_project_folders()
 
         # Initialize paths
         init_paths()
