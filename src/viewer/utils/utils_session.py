@@ -575,7 +575,7 @@ def init_session_state() -> None:
             user_id = st.session_state.cloud_user_id
             st.session_state.paths["out_dir"] = os.path.join(
                 #st.session_state.paths["root"], "output_folder", user_id
-                "/fsx", user_id
+                "/fsx/fsx", user_id
             )
         else:
             st.session_state.paths["out_dir"] = os.path.join(
