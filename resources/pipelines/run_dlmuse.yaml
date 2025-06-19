@@ -6,7 +6,7 @@ steps:
   - id: run_nichart_dlmuse
     tool: nichart_dlmuse # MUST CORRESPOND EXACTLY to a tool in resources/tools dir
     inputs:
-      t1_img: ${STUDY}/T1
+      t1_img: ${STUDY}/t1
     outputs:
       dlmuse_seg: ${STUDY}/DLMUSE_seg
       dlmuse_csv: ${STUDY}/DLMUSE_csv

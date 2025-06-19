@@ -96,7 +96,7 @@ def panel_run_pipeline():
 
     pipeline_to_run = sel_pipeline_to_id[sel_method]
 
-    if st.button("Press me to try synchronous pipeline execution"):
+    if st.button("Run pipeline"):
         with st.container():
             st.subheader("Pipeline Logs")
             with st.expander("View all pipeline logs"):
@@ -114,7 +114,7 @@ def panel_run_pipeline():
 
         result = tl.run_pipeline(
             pipeline_id=pipeline_to_run, ##TODO EDIT THIS
-            global_vars={"STUDY": st.session_state.paths["dir_out"]},
+            global_vars={"STUDY": st.session_state.paths["out_dir"]},
             pipeline_progress_bar=pipeline_progress_bar,
             process_progress_bar=process_progress_bar,
             log=log
