@@ -1,0 +1,49 @@
+# APPLICATION CONFIG
+# This file contains "definitions" for all containers that are allowable to run under NiChart.
+# This file should be uploaded to a fixed location which cloud providers should also reference.
+# E.g. for validation that a requested application is actually in the list.
+# This information is used to validate job submission requests
+# and perform the correct value substitutions. 
+sample_app: # Do not actually invoke this one, it's just an example. 
+  container: "my-docker-image:latest"
+  entrypoint: "/bin/bash"
+  cmd_base: "app_cmd"
+  description: "Example app that takes input dir, input file, and output dir"
+  cpu: 2
+  memory: 4096
+  parameters:
+    input_dir:
+      role: "input"
+      arg_flag: "-i"
+      type: "dir"
+      mount_to: "/mnt/data/input"
+    input_file:
+      role: "input"
+      arg_flag: "-f"
+      type: "file"
+      mount_to: "/mnt/data/file.csv"
+    output_dir:
+      role: "output"
+      arg_flag: "-o"
+      mount_to: "/mnt/data/output"
+    sample_fixed_flag:
+      role: "fixed"
+      arg_flag: "-p"
+      default: "placeholder"
+nichart_dlmuse:
+  container: "cbica/nichart_dlmuse:1.0.8"
+  cmd_base: "-d cuda"
+  cpu: 4
+  gpus: 1
+  memory: 28000
+  parameters:
+    input:
+      role: "input"
+      arg_flag: "-i"
+      type: "dir"
+      mount_to: "/input"
+    output:
+      role: "output"
+      arg_flag: "-o"
+      type: "dir"
+      mount_to: "/output"

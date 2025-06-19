@@ -1,0 +1,39 @@
+name: sample_tool 
+description: A sample tool definition taking some input, output and parameters. Modify this to fit the given tool.
+
+dependencies:
+  - t1_img
+
+inputs:
+  t1_img:
+    type: directory
+
+outputs:
+  dlmuse_csv:
+    type: file
+
+mounts:
+  t1_img:
+    path_in_container: /mnt/data/t1
+    mode: ro
+  dlmuse_csv:
+    path_in_container: /mnt/output/dlmuse.csv
+    mode: rw
+
+resources: # Used to allocate jobs on the cloud. Please be diligent.
+  vcpus: 4
+  memory: 16000 # Amount must be in MiB, see https://docs.aws.amazon.com/batch/latest/APIReference/API_ResourceRequirement.html
+  gpus: 1
+
+container:
+  image: cbica/sample_tool_container:latest 
+  command: > # Remove this field to use container default command
+    sample_tool --input {t1_img} --output {dlmuse_csv} --num_features {num_features}
+
+parameters:
+  some_flag:
+    type: bool
+    default: false
+  num_features:
+    type: int
+    default: 300

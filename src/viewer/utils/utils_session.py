@@ -351,18 +351,28 @@ def process_session_token() -> Any:
     # headers = _get_websocket_headers()
     headers = st.context.headers
     if not headers or "X-Amzn-Oidc-Data" not in headers:
-        return {}
-    return jwt.decode(
-        headers["X-Amzn-Oidc-Data"],
-        algorithms=["ES256"],
-        options={"verify_signature": False},
-    )
+        return ""
+    return headers["X-Amzn-Oidc-Data"]
 
 def process_session_user_id() -> Any:
     headers = st.context.headers
     if not headers or "X-Amzn-Oidc-Identity" not in headers:
         return "NO_USER_FOUND"
     return headers["X-Amzn-Oidc-Identity"]
+
+def process_session_user_email() -> Any:
+    headers = st.context.headers
+    if not headers or "X-Amzn-Oidc-Data" not in headers:
+        return "NO_EMAIL_FOUND"
+    raw_token = headers['X-Amzn-Oidc-Data']
+    decoded_token = jwt.decode(
+        raw_token,
+        algorithms=["ES256"],
+        options={"verify_signature": False},
+    )
+    if not decoded_token or 'email' not in decoded_token:
+        return "NO_EMAIL_FOUND"
+    return decoded_token['email']
 
 def init_session_state() -> None:
     # Initiate Session State Values
@@ -415,6 +425,7 @@ def init_session_state() -> None:
             if st.session_state.cloud_session_token:
                 st.session_state.has_cloud_session = True
                 st.session_state.cloud_user_id = process_session_user_id()
+                st.session_state.cloud_user_email = process_session_user_email()
             else:
                 st.session_state.has_cloud_session = False
         else:
@@ -428,6 +439,150 @@ def init_session_state() -> None:
         # Set default project
         sel_project = 'Experiment_1'
         update_project(sel_project)
+        ###################################
+        # Pipelines
+        st.session_state.pipelines = [
+            "Home",
+            "sMRI Biomarkers (T1)",
+            "WM Lesion Segmentation (FL)",
+            "DTI Biomarkers (DTI)",
+            "Resting State fMRI Biomarkers (rsfMRI)",
+            "Sample Container Workflow"
+        ]
+        st.session_state.pipeline = "Home"
+        st.session_state._pipeline = st.session_state.pipeline
+        ###################################
+
+        ###################################
+        # General
+        # Study name
+        st.session_state.dset = ""
+
+        # Icons for panels
+        st.session_state.icon_thumb = {
+            False: ":material/thumb_down:",
+            True: ":material/thumb_up:",
+        }
+
+        # Flags for checkbox states
+        st.session_state.checkbox = {
+            "dicoms_wdir": False,
+            "dicoms_in": False,
+            "dicoms_series": False,
+            "dicoms_run": False,
+            "dicoms_view": False,
+            "dicoms_download": False,
+            "dlmuse_wdir": False,
+            "dlmuse_in": False,
+            "dlmuse_run": False,
+            "dlmuse_view": False,
+            "dlmuse_download": False,
+            "dlwmls_wdir": False,
+            "dlwmls_in": False,
+            "dlwmls_run": False,
+            "dlwmls_view": False,
+            "dlwmls_download": False,
+            "ml_wdir": False,
+            "ml_inrois": False,
+            "ml_indemog": False,
+            "ml_run": False,
+            "ml_download": False,
+            "view_wdir": False,
+            "view_in": False,
+            "view_select": False,
+            "view_plot": False,
+        }
+
+        # Flags for various i/o
+        st.session_state.flags = {
+            "dset": False,
+            "dir_out": False,
+            "dir_dicom": False,
+            "dicom_series": False,
+            "dir_nifti": False,
+            "dir_t1": False,
+            "dir_dlmuse": False,
+            "csv_dlmuse": False,
+            "csv_dlwmls": False,
+            "csv_demog": False,
+            "csv_dlmuse+demog": False,
+            "dir_download": False,
+            "csv_mlscores": False,
+            "csv_plot": False,
+        }
+
+        # Predefined paths for different tasks in the final results
+        # The path structure allows nested folders with two levels
+        # This should be good enough to keep results organized
+        st.session_state.dict_paths = {
+            "lists": ["", "Lists"],
+            "dicom": ["", "Dicoms"],
+            "nifti": ["", "Nifti"],
+            "T1": ["Nifti", "T1"],
+            "T2": ["Nifti", "T2"],
+            "FL": ["Nifti", "FL"],
+            "DTI": ["Nifti", "DTI"],
+            "fMRI": ["Nifti", "fMRI"],
+            "dlmuse": ["", "DLMUSE"],
+            "dlwmls": ["", "DLWMLS"],
+            "mlscores": ["", "MLScores"],
+            "plots": ["", "Plots"],
+            "download": ["", "Download"],
+        }
+
+        # Paths to input/output files/folders
+        st.session_state.paths = {
+            "root": "",
+            "init": "",
+            "file_search_dir": "",
+            "target_dir": "",
+            "target_file": "",
+            "dset": "",
+            "dir_out": "",
+            "lists": "",
+            "dicom": "",
+            "nifti": "",
+            "T1": "",
+            "T2": "",
+            "FL": "",
+            "DTI": "",
+            "fMRI": "",
+            "dlmuse": "",
+            "dlwmls": "",
+            "mlscores": "",
+            "download": "",
+            "plots": "",
+            "sel_img": "",
+            "sel_seg": "",
+            "csv_demog": "",
+            "csv_dlmuse": "",
+            "csv_dlwmls": "",
+            "csv_plot": "",
+            "csv_roidict": "",
+            "csv_mlscores": "",
+        }
+
+        # Flags to keep updates in user input/output
+        st.session_state.is_updated = {
+            "csv_plot": False,
+        }
+
+        # Set initial values for paths
+        st.session_state.paths["root"] = os.path.dirname(os.path.dirname(os.getcwd()))
+        st.session_state.paths["init"] = st.session_state.paths["root"]
+        if st.session_state.has_cloud_session:
+            user_id = st.session_state.cloud_user_id
+            st.session_state.paths["dir_out"] = os.path.join(
+                #st.session_state.paths["root"], "output_folder", user_id
+                "/fsx", user_id
+            )
+        else:
+            st.session_state.paths["dir_out"] = os.path.join(
+                st.session_state.paths["root"], "output_folder"
+            )
+
+        if not os.path.exists(st.session_state.paths["dir_out"]):
+            os.makedirs(st.session_state.paths["dir_out"])
 
         # Copy demo folders into user folders as needed
         if st.session_state.has_cloud_session:
