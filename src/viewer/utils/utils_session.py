@@ -439,7 +439,7 @@ def init_session_state() -> None:
         # Set default project
         sel_project = 'Experiment_1'
         update_project(sel_project)
- """        ###################################
+        """ ###################################
         # Pipelines
         st.session_state.pipelines = [
             "Home",
