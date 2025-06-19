@@ -34,7 +34,7 @@ def data_overview(in_dir):
         )
         if os.path.exists(dpath):
             df = pd.read_csv(dpath)
-            st.write(f'📁 `{dname}/{dname + '.csv'}` — {df.shape[0]} rows × {df.shape[1]} columns')
+            st.write(f'📄 `{dname}/{dname + '.csv'}` — {df.shape[0]} rows × {df.shape[1]} columns')
 
     st.markdown('##### Input Images:')
     for dname in df_out[df_out.dtype == 'in_img'].dname.tolist():
@@ -62,7 +62,7 @@ def data_overview(in_dir):
         )
         if os.path.exists(dpath):
             df = pd.read_csv(dpath)
-            st.write(f'📁 `{dname}/{dname + '.csv'}` — {df.shape[0]} rows × {df.shape[1]} columns')
+            st.write(f'📄 `{dname}/{dname + '.csv'}` — {df.shape[0]} rows × {df.shape[1]} columns')
 
 def data_merge(in_dir):
     '''

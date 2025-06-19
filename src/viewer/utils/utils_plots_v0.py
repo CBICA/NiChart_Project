@@ -7,36 +7,330 @@ import numpy as np
 import streamlit as st
 import utils.utils_io as utilio
 import utils.utils_session as utilses
-import utils.utils_misc as utilmisc
 
 import plotly.graph_objs as go
 import plotly.figure_factory as ff
 import utils.utils_traces as utiltr
 
-def add_plot(
-    df_plots, new_plot_params
-):
+###################################################################
+# Misc utils
+def add_items_to_list(my_list: list, items_to_add: list) -> list:
+    """Adds multiple items to a list, avoiding duplicates.
+
+    Args:
+      my_list: The list to add items to.
+      items_to_add: A list of items to add.
+
+    Returns:
+      The modified list.
     """
-    Adds a new plot (new row to the plots dataframe)
+    for item in items_to_add:
+        if item not in my_list:
+            my_list.append(item)
+    return my_list
+
+def remove_items_from_list(my_list: list, items_to_remove: list) -> list:
+    """Removes multiple items from a list.
+
+    Args:
+      my_list: The list to remove items from.
+      items_to_remove: A list of items to remove.
+
+    Returns:
+      The modified list.
+    """
+    out_list = []
+    for item in my_list:
+        if item not in items_to_remove:
+            out_list.append(item)
+    return out_list
+
+def get_index_in_list(in_list: list, in_item: str) -> Optional[int]:
+    """
+    Returns the index of the item in list, or None if item not found
+    """
+    if in_item not in in_list:
+        return None
+    else:
+        return list(in_list).index(in_item)
+    
+def get_roi_indices(sel_roi, method):
+    '''
+    Detect indices for a selected ROI
+    '''
+    if sel_roi is None:
+        return None
+    
+    # Detect indices
+    if method == 'muse':
+        df_derived = st.session_state.rois['muse']['df_derived']
+        list_roi_indices = df_derived[df_derived.Name == sel_roi].List.values[0]
+        return list_roi_indices
+
+    elif method == 'dlwmls':
+        list_roi_indices = [1]
+        return list_roi_indices
+
+    return None    
+
+###################################################################
+# Traces
+def add_trace_scatter(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
+    # Set colormap
+    colors = st.session_state.plot_colors["data"]
+
+    # Get hue params
+    hvar = plot_params['hvar']
+    hvals = plot_params['hvals']
+
+    # Add a tmp column if group var is not set
+    dft = df.copy()
+    if hvar == "":
+        hvar = "grouping_var"
+        dft["grouping_var"] = "Data"
+    vals_hue_all = sorted(dft[hvar].unique())
+
+    if hvals == []:
+        hvals = vals_hue_all
+                
+    #st.write(plot_params)
+
+    if "data" in plot_params['traces']:
+        for hname in hvals:
+            col_ind = vals_hue_all.index(hname)  # Select index of colour for the category
+            dfh = dft[dft[hvar] == hname]
+
+            #st.dataframe(dft)
+            #st.write(hvals)
+            #st.write(plot_params)
+                        
+            trace = go.Scatter(
+                x=dfh[plot_params['xvar']],
+                y=dfh[plot_params['yvar']],
+                mode="markers",
+                marker={"color": colors[col_ind]},
+                name=hname,
+                legendgroup=hname,
+                showlegend=not plot_params['hide_legend'],
+            )
+            fig.add_trace(trace)
+
+        #fig.update_layout(xaxis_range=[xmin, xmax])
+        #fig.update_layout(yaxis_range=[ymin, ymax])
+
+def add_trace_linreg(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
+    """
+    Add linear fit and confidence interval
+    """
+    # Set colormap
+    colors = st.session_state.plot_colors["data"]
+
+    # Get hue params
+    hvar = plot_params['hvar']
+    hvals = plot_params['hvals']
+
+    # Add a tmp column if group var is not set
+    dft = df.copy()
+    if hvar == "":
+        hvar = "All"
+        dft["All"] = "data"
+        vals_hue_all = ["All"]
+
+    vals_hue_all = sorted(dft[hvar].unique())
+    if hvals == []:
+        hvals = vals_hue_all
+
+    # Calculate fit
+    dict_fit = utilstat.linreg_model(
+        dft, plot_params['xvar'], plot_params['yvar'], hvar
+    )
+
+    # Add traces for the fit and confidence intervals
+    if "lin_fit" in plot_params['traces']:
+        for hname in hvals:
+            col_ind = vals_hue_all.index(
+                hname
+            )  # Select index of colour for the category
+            x_hat = dict_fit[hname]["x_hat"]
+            y_hat = dict_fit[hname]["y_hat"]
+            trace = go.Scatter(
+                x=x_hat,
+                y=y_hat,
+                mode="lines",
+                line={"color": colors[col_ind]},
+                name=f"lin_{hname}",
+                legendgroup=hname,
+                showlegend=not plot_params['hide_legend'],
+            )
+            fig.add_trace(trace)
+
+    if "conf_95%" in traces:
+        for hname in hvals:
+            col_ind = vals_hue_all.index(
+                hname
+            )  # Select index of colour for the category
+            x_hat = dict_fit[hname]["x_hat"]
+            y_hat = dict_fit[hname]["y_hat"]
+            conf_int = dict_fit[hname]["conf_int"]
+            trace = go.Scatter(
+                x=np.concatenate([x_hat, x_hat[::-1]]),
+                y=np.concatenate([conf_int[:, 0], conf_int[:, 1][::-1]]),
+                fill="toself",
+                fillcolor=f"rgba({colors[col_ind][4:-1]}, 0.2)",  # Add alpha channel
+                line=dict(color=f"rgba({colors[col_ind][4:-1]}, 0)"),
+                hoverinfo="skip",
+                name=f"lin_conf95_{hname}",
+                legendgroup=hname,
+                showlegend=not plot_params['hide_legend'],
+            )
+            fig.add_trace(trace)
+
+    # fig.update_layout(xaxis_range=[xmin, xmax])
+    # fig.update_layout(yaxis_range=[ymin, ymax])
+    return fig
+
+def add_trace_lowess(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
+    # Set colormap
+    colors = st.session_state.plot_colors["data"]
+
+    # Get hue params
+    hvar = plot_params['hvar']
+    hvals = plot_params['hvals']
+
+    # Add a tmp column if group var is not set
+    dft = df.copy()
+    if hvar == "":
+        hvar = "All"
+        dft["All"] = "data"
+        vals_hue_all = ["All"]
+
+    vals_hue_all = sorted(dft[hvar].unique())
+    if hvals == []:
+        hvals = vals_hue_all
+
+    dict_fit = utilstat.lowess_model(
+        dft, plot_params['xvar'], plot_params['yvar'], hvar, lowess_s
+    )
+
+    # Add traces for the fit and confidence intervals
+    for hname in hvals:
+        col_ind = vals_hue_all.index(hname)  # Select index of colour for the category
+        x_hat = dict_fit[hname]["x_hat"]
+        y_hat = dict_fit[hname]["y_hat"]
+        trace = go.Scatter(
+            x=x_hat,
+            y=y_hat,
+            # showlegend=False,
+            mode="lines",
+            line={"color": colors[col_ind]},
+            name=f"lowess_{hname}",
+            legendgroup=hname,
+            showlegend=not plot_params['hide_legend'],
+        )
+        fig.add_trace(trace)
+
+    # fig.update_layout(xaxis_range=[xmin, xmax])
+    # fig.update_layout(yaxis_range=[ymin, ymax])
+
+def add_trace_dot(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
+    df_tmp = df[df.MRID == sel_mrid]
+    trace = go.Scatter(
+        x=df_tmp[plot_params['xvar']],
+        y=df_tmp[plot_params['yvar']],
+        mode="markers",
+        name="Selected",
+        marker=dict(
+            color="rgba(250, 50, 50, 0.5)", size=12, line=dict(color="Red", width=3)
+        ),
+        showlegend=not plot_params['hide_legend'],
+    )
+    fig.add_trace(trace)
+
+def add_trace_centile(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
+    # Check centile traces
+    if plot_params['traces'] is None:
+        return fig
+    
+    if not any("centile" in s for s in plot_params['traces']):
+        return fig
+
+    # Set colormap
+    colors = st.session_state.plot_colors["centile"]
+
+    # Get centile values for the selected roi
+    df_tmp = df[df.VarName == plot_params['yvar']]
+
+    # Max centile value for normalization
+    flag_norm = plot_params['flag_norm_centiles']
+    
+    if flag_norm:
+        #norm_val = df_tmp[df_tmp.columns[df_tmp.columns.str.contains('centile')]].max().max()
+        norm_val = df_tmp['centile_50'].max()
+
+    # Create line traces
+    list_tr = [s for s in plot_params['traces'] if "centile" in s]
+    for i, cvar in enumerate(list_tr):
+        yvals = df_tmp[cvar]
+        if flag_norm:
+            yvals = yvals * 100 / norm_val
+        
+        if cvar in df_tmp.columns[2:]:
+            ctrace = go.Scatter(
+                x=df_tmp[plot_params['xvar']],
+                y=yvals,
+                mode="lines",
+                name=cvar,
+                legendgroup="centiles",
+                line=dict(color=colors[i]),
+                showlegend=not plot_params['hide_legend'],
+            )
+            fig.add_trace(ctrace)  # plot in first row
+
+
+    # Update min/max
+    #fig.update_layout(xaxis_range=[xmin, xmax])
+    #fig.update_layout(yaxis_range=[ymin, ymax])
+
+    return fig
+
+def add_trace_dots(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
+    trace = go.Scatter(
+        x=df[plot_params['xvar']],
+        y=df[plot_params['yvar']],
+        showlegend=False,
+        mode="markers",
+        name="datapoint",
+        line=dict(color="rgb(0,160,250)"),
+    )
+    return trace
+
+###################################################################
+# Plots
+def add_plot(df_plots, new_plot_params):
+    """
+    Adds a new plot 
+    (adds a new row to the plots dataframe with new plot params)
     """   
     df_plots.loc[len(df_plots)] = {'params': new_plot_params.copy()}
     return df_plots
 
-def delete_sel_plots(
-    df_plots, list_sel
-):
+def delete_sel_plots(df_plots):
     """
     Removes plots selected by the user
+    (removes the row with the given index from the plots dataframe)
     """
+    list_sel = []
+    for tmp_ind in df_plots.index.tolist():
+        if st.session_state[f'_key_plot_sel_{tmp_ind}']:
+            list_sel.append(tmp_ind)
+            st.session_state[f'_key_plot_sel_{tmp_ind}'] = False
+        
     df_plots = df_plots.drop(list_sel).reset_index().drop(columns=['index'])
     return df_plots
 
-def set_x_bounds(
-    df: pd.DataFrame, df_plots: pd.DataFrame, plot_id: str, xvar: str
-) -> None:
-    '''
-    Set x and y min/max, if not set
-    '''
+def set_x_bounds(df: pd.DataFrame, df_plots: pd.DataFrame, plot_id: str, xvar: str) -> None:
+    # Set x and y min/max if not set
+    # Values include some margin added for viewing purposes
     xmin = df[xvar].min()
     xmax = df[xvar].max()
     dx = xmax - xmin
@@ -46,15 +340,13 @@ def set_x_bounds(
     else:  # Margin defined based on the delta otherwise
         xmin = xmin - dx / 5
         xmax = xmax + dx / 5
+
     df_plots.loc[plot_id, "xmax"] = xmax
     df_plots.loc[plot_id, "xmin"] = xmin
 
-def set_y_bounds(
-    df: pd.DataFrame, df_plots: pd.DataFrame, plot_id: str, yvar: str
-) -> None:
-    '''
-    Set x and y min/max, if not set
-    '''
+def set_y_bounds(df: pd.DataFrame, df_plots: pd.DataFrame, plot_id: str, yvar: str) -> None:
+    # Set x and y min/max if not set
+    # Values include some margin added for viewing purposes
     ymin = df[yvar].min()
     ymax = df[yvar].max()
     dy = ymax - ymin
@@ -64,33 +356,23 @@ def set_y_bounds(
     else:  # Margin defined based on the delta otherwise
         ymin = ymin - dy / 5
         ymax = ymax + dy / 5
+
     df_plots.loc[plot_id, "ymax"] = ymax
     df_plots.loc[plot_id, "ymin"] = ymin
 
-def display_dist_plot(df, plot_params, plot_ind, plot_settings):
-    '''
-    Display dist plot
-    '''
-    # Read color map for data
-    colors = plot_settings['cmap']['data']
+def dist_plot(df, plot_params, plot_ind):
+    # Set colormap
+    colors = st.session_state.plot_colors["data"]
 
-    # Read plot params
-    xvar = plot_params["xvar"]
-    yvar = plot_params["yvar"]
-    hvar = plot_params["hvar"]
-    hvals = plot_params["hvals"]
-    traces = plot_params['traces']
-
-    # Add a temp column if group var is not set
+    # Add a tmp column if group var is not set
     dft = df.copy()
-    if hvar is None:
+    if hvar == "":
         hvar = "All"
-        hvals = None
         dft["All"] = "Data"
         vals_hue_all = ["All"]
 
     vals_hue_all = sorted(dft[hvar].unique())
-    if hvals is None:
+    if hvals == []:
         hvals = vals_hue_all
 
     data = []
@@ -119,17 +401,19 @@ def display_dist_plot(df, plot_params, plot_ind, plot_settings):
         show_hist=show_hist,
         show_rug=show_rug,
         show_curve=show_curve,
+        # hide_legend=hide_legend  ## THIS IS NOT AVAILABLE IN FF
     )
+
     return fig
 
-def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
-    '''
+def display_scatter_plot(df, plot_params, plot_ind):
+    """
     Display scatter plot
-    '''
+    """
     # Main plot
-    m = plot_settings["margin"]
-    hi = plot_settings["h_init"]
-    hc = plot_params["h_coeff"]
+    m = st.session_state.plot_settings["margin"]
+    hi = st.session_state.plot_settings["h_init"]
+    hc = st.session_state.plot_params["h_coeff"]
     layout = go.Layout(
         height = hi * hc,
         margin = dict(l=m, r=m, t=m, b=m),
@@ -143,7 +427,7 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
     fig.update_layout(xaxis_title = xvar, yaxis_title = yvar)
 
     # Add data scatter
-    utiltr.add_trace_scatter(df, plot_params, plot_settings, fig)
+    add_trace_scatter(df, plot_params, fig)
 
     ## Add centile trace
     #add_trace_centile(df, plot_params, fig)
@@ -188,49 +472,47 @@ def display_centile_plot(df, plot_params, plot_ind):
 
     return fig
 
-#def display_dist_plot(
-    #df_plots: pd.DataFrame, plot_id: str, show_settings: bool, sel_mrid: str
-#) -> Any:
-    #"""
-    #Displays the plot with the plot_id
-    #"""
-    ## Main container for the plot
-    #with st.container(border=True):
+def display_dist_plot(df_plots: pd.DataFrame, plot_id: str, show_settings: bool, sel_mrid: str) -> Any:
+    """
+    Displays the plot with the plot_id
+    """
+    # Main container for the plot
+    with st.container(border=True):
 
-        ## Tabs for plot parameters
-        #df_plots_filt = df_plots
-        #if show_settings:
-            #df_plots_filt = add_plot_tabs(df_plots, st.session_state.plots, plot_id)
+        # Tabs for plot parameters
+        df_plots_filt = df_plots
+        if show_settings:
+            df_plots_filt = add_plot_tabs(df_plots, st.session_state.plots, plot_id)
 
-        #sel_plot = st.session_state.plots.loc[plot_id]
+        sel_plot = st.session_state.plots.loc[plot_id]
 
-        ## Main plot
-        #fig = utiltr.dist_plot(
-            #df_plots_filt,
-            #sel_plot["xvar"],
-            #sel_plot["hvar"],
-            #sel_plot["hvals"],
-            #sel_plot["traces"],
-            #st.session_state.plot_settings["distplot_binnum"],
-            #st.session_state.plot_params["hide_legend"],
-        #)
+        # Main plot
+        fig = utiltr.dist_plot(
+            df_plots_filt,
+            sel_plot["xvar"],
+            sel_plot["hvar"],
+            sel_plot["hvals"],
+            sel_plot["traces"],
+            st.session_state.plot_settings["distplot_binnum"],
+            st.session_state.plot_params["hide_legend"],
+        )
 
-        #fig.update_layout(
-            ## height=st.session_state.plot_settings['h_init']
-            #height=st.session_state.plot_settings["h_init"]
-            #* st.session_state.plot_params["h_coeff"],
-            #margin=dict(
-                #l=st.session_state.plot_settings["margin"],
-                #r=st.session_state.plot_settings["margin"],
-                #t=st.session_state.plot_settings["margin"],
-                #b=st.session_state.plot_settings["margin"],
-            #),
-        #)
-        #st.plotly_chart(fig, key=f"key_chart_{plot_id}")
+        fig.update_layout(
+            # height=st.session_state.plot_settings['h_init']
+            height=st.session_state.plot_settings["h_init"]
+            * st.session_state.plot_params["h_coeff"],
+            margin=dict(
+                l=st.session_state.plot_settings["margin"],
+                r=st.session_state.plot_settings["margin"],
+                t=st.session_state.plot_settings["margin"],
+                b=st.session_state.plot_settings["margin"],
+            ),
+        )
+        st.plotly_chart(fig, key=f"key_chart_{plot_id}")
 
-        #return fig
+        return fig
 
-def show_plots(df, df_plots, plot_settings):
+def show_plots(df, df_plots):
     """
     Display all plots
     """
@@ -255,17 +537,13 @@ def show_plots(df, df_plots, plot_settings):
         sel_params = df_plots.loc[plot_ind, 'params']
         with blocks[column_no]:
             with st.container(border=True):
-                if sel_params['ptype'] == "dist": 
-                    new_plot = display_dist_plot(
-                        df, sel_params, plot_ind, plot_settings
-                    )
-                elif sel_params['ptype'] == "scatter": 
+                if sel_params['ptype'] == "scatter": 
                     new_plot = display_scatter_plot(
-                        df, sel_params, plot_ind, plot_settings
+                        df, sel_params, plot_ind
                     )
                 elif sel_params['ptype'] == "centile": 
                     new_plot = display_centile_plot(
-                        df, sel_params, plot_ind, plot_settings
+                        df, sel_params, plot_ind
                     )
                 st.checkbox('Select', key = f'_key_plot_sel_{plot_ind}')
                 #plots_arr.append(new_plot)
@@ -291,9 +569,7 @@ def panel_select_roi(method, key):
         # Select roi group
         with col1:
             list_group = df_groups.Name.unique()
-            sel_ind = utilmisc.get_index_in_list(
-                list_group, st.session_state.selections['sel_roi_group']
-            )
+            sel_ind = get_index_in_list(list_group, st.session_state.selections['sel_roi_group'])
             sel_group = st.selectbox(
                 "ROI Group",
                 list_group,
@@ -309,9 +585,7 @@ def panel_select_roi(method, key):
             sel_indices = df_groups[df_groups.Name == sel_group]['List'].values[0]
                     
             list_roi = df_derived[df_derived.Index.isin(sel_indices)].Name.tolist()
-            sel_ind = utilmisc.get_index_in_list(
-                list_roi, st.session_state.selections['sel_roi']
-            )
+            sel_ind = get_index_in_list(list_roi, st.session_state.selections['sel_roi'])
             sel_roi = st.selectbox(
                 "ROI Name",
                 list_roi,
@@ -336,7 +610,7 @@ def panel_select_var(df, sel_var, key):
     User panel to select a variable
     '''
     list_vars = df.columns.tolist()
-    sel_ind = utilmisc.get_index_in_list(list_vars, sel_var)
+    sel_ind = get_index_in_list(list_vars, sel_var)
     sel_var = st.selectbox(
         "Variable",
         list_vars,
@@ -385,11 +659,10 @@ def panel_select_centile_values():
     return sel_vals
 
 
-def panel_view_data():
+def panel_view_data(df_data):
     """
     Panel to plot data variables in the input dataframe
     """
-    df_data = st.session_state.plot_data['df_data']
     flag_settings = st.sidebar.checkbox('Hide plot settings')
     ss_sel = st.session_state.selections
 
@@ -486,7 +759,7 @@ def panel_view_data():
                     
     # Show plots
     show_plots(
-        df_data, st.session_state.plots, st.session_state.plot_settings
+        st.session_state.curr_df, st.session_state.plots
     )
 
 def panel_view_centiles(method, var_type):

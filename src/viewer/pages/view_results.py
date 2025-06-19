@@ -4,6 +4,7 @@ import utils.utils_io as utilio
 import utils.utils_plots as utilpl
 import utils.utils_mriview as utilmri
 import utils.utils_data_view as utildv
+import pandas as pd
 import os
 from pathlib import Path
 
@@ -30,8 +31,9 @@ def plot_vars():
     """
     Panel for viewing dlmuse results
     """    
-    st.session_state.curr_df = None
-    utilpl.panel_view_centiles('dlmuse', 'rois')
+    #st.session_state.curr_df = pd.read_csv(st.session_state.paths['plot_data'])
+    st.session_state.plot_data['df_data'] = pd.read_csv(st.session_state.paths['plot_data']) 
+    utilpl.panel_view_data()
 
 def view_images():
     ulay = st.session_state.ref_data["t1"]

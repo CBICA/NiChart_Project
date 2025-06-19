@@ -207,25 +207,45 @@ def init_selections() -> None:
 
 
 def init_plot_vars() -> None:
-    ###################################
-    # Plotting
-    # Dictionary with plot info
+    '''
+    Set plotting variables
+    '''
+    # Dataframe that keeps parameters for all plots
     st.session_state.plots = pd.DataFrame(columns=['params'])
     st.session_state.plot_curr = -1
 
-    # Constant plot settings
-    st.session_state.plot_const = {
+    # Color maps for plots
+    cmaps = {
+        "data": px.colors.qualitative.Set1,
+        "centile": [
+            "rgba(0, 0, 120, 0.5)",
+            "rgba(0, 0, 90, 0.7)",
+            "rgba(0, 0, 60, 0.9)",
+            "rgba(0, 0, 90, 0.7)",
+            "rgba(0, 0, 120, 0.5)",
+        ],
+    }
+
+    # Plot data
+    #st.session_state.curr_df = pd.DataFrame()
+    st.session_state.plot_data = {
+        'df_data': None,
+        'df_cent': None
+    }
+
+    # Plot settings
+    st.session_state.plot_settings = {
         "trend_types": ["", "Linear", "Smooth LOWESS Curve"],
         "centile_types": ["", "CN", "CN_Males", "CN_Females", "CN_ICV_Corrected"],
-        "linfit_trace_types": ["lin_fit", "conf_95%"],
-        "centile_trace_types": [
-            "centile_5",
-            "centile_25",
-            "centile_50",
-            "centile_75",
-            "centile_95",
+        "linfit_trace_types": [
+            "lin_fit", "conf_95%"
         ],
-        "distplot_trace_types": ["histogram", "density", "rug"],
+        "centile_trace_types": [
+            "centile_5", "centile_25", "centile_50", "centile_75", "centile_95",
+        ],
+        "distplot_trace_types": [
+            "histogram", "density", "rug"
+        ],
         "min_per_row": 1,
         "max_per_row": 5,
         "num_per_row": 2,
@@ -236,25 +256,23 @@ def init_plot_vars() -> None:
         "h_coeff_min": 0.6,
         "h_coeff_step": 0.2,
         "distplot_binnum": 100,
+        "cmaps": cmaps
     }
 
-    # Plot data
-    st.session_state.curr_df = pd.DataFrame()
-
-    # Plot variables
+    # Plot parameters specific to each plot
     st.session_state.plot_params = {
         "hide_settings": False,
         "hide_legend": False,
         "show_img": False,
-        "plot_type": "Scatter Plot",
-        "xvar": "",
-        "xmin": -1.0,
-        "xmax": -1.0,
-        "yvar": "",
-        "ymin": -1.0,
-        "ymax": -1.0,
-        "hvar": "",
-        "hvals": [],
+        "plot_type": "scatter",
+        "xvar": None,
+        "xmin": None,
+        "xmax": None,
+        "yvar": None,
+        "ymin": None,
+        "ymax": None,
+        "hvar": None,
+        "hvals": None,
         "corr_icv": False,
         "plot_cent_normalized": False,
         "trend": "Linear",
@@ -263,22 +281,8 @@ def init_plot_vars() -> None:
         "centile_type": 'CN',
         "centile_values": ['centile_25', 'centile_50', 'centile_75'],
         "h_coeff": 1.0,
-        "ptype": 'scatter'
     }
-    ###################################
 
-    ###################################
-    # Color maps for plots
-    st.session_state.plot_colors = {
-        "data": px.colors.qualitative.Set1,
-        "centile": [
-            "rgba(0, 0, 120, 0.5)",
-            "rgba(0, 0, 90, 0.7)",
-            "rgba(0, 0, 60, 0.9)",
-            "rgba(0, 0, 90, 0.7)",
-            "rgba(0, 0, 120, 0.5)",
-        ],
-    }
     ###################################
     
 def init_pipeline_definitions() -> None:

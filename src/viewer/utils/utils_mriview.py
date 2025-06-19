@@ -9,6 +9,7 @@ import nibabel as nib
 from nibabel.orientations import axcodes2ornt, ornt_transform
 from scipy import ndimage
 import utils.utils_plots as utilpl
+import utils.utils_misc as utilmisc
 
 import streamlit as st
 from stqdm import stqdm
@@ -232,7 +233,7 @@ def panel_view_seg(ulay, olay, method):
             )        
             with ptab1:
                 ss_sel['sel_roi'] = utilpl.panel_select_roi(method, '_seg')
-                ss_sel['list_roi_indices'] = utilpl.get_roi_indices(ss_sel['sel_roi'], method)
+                ss_sel['list_roi_indices'] = utilmisc.get_roi_indices(ss_sel['sel_roi'], method)
 
             with ptab2:
                 col1, col2, col3 = st.columns(3)
