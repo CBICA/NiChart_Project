@@ -3,10 +3,10 @@ import yaml
 from pathlib import Path
 import os
 
-def find_yaml_files(directory: Path):
+def find_yaml_files(directory):
     return list(directory.rglob("*.yaml")) + list(directory.rglob("*.yml"))
 
-def extract_image_from_yaml(file_path: Path):
+def extract_image_from_yaml(file_path):
     try:
         with open(file_path, "r") as f:
             content = yaml.safe_load(f)
