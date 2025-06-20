@@ -58,12 +58,12 @@ def add_trace_scatter(
         #fig.update_layout(xaxis_range=[xmin, xmax])
         #fig.update_layout(yaxis_range=[ymin, ymax])
 
-def add_trace_linreg(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
+def add_trace_linreg(df: pd.DataFrame, plot_params: dict, plot_settings: dict, fig: Any) -> None:
     """
     Add linear fit and confidence interval
     """
     # Set colormap
-    colors = st.session_state.plot_colors["data"]
+    colors = plot_settings['cmaps']['data']
 
     # Get hue params
     hvar = plot_params['hvar']
@@ -129,9 +129,9 @@ def add_trace_linreg(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
     # fig.update_layout(yaxis_range=[ymin, ymax])
     return fig
 
-def add_trace_lowess(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
+def add_trace_lowess(df: pd.DataFrame, plot_params: dict, plot_settings: dict, fig: Any) -> None:
     # Set colormap
-    colors = st.session_state.plot_colors["data"]
+    colors = plot_settings['cmaps']['data']
 
     # Get hue params
     hvar = plot_params['hvar']
@@ -172,7 +172,7 @@ def add_trace_lowess(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
     # fig.update_layout(xaxis_range=[xmin, xmax])
     # fig.update_layout(yaxis_range=[ymin, ymax])
 
-def add_trace_dot(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
+def add_trace_dot(df: pd.DataFrame, plot_params: dict, plot_settings: dict, fig: Any) -> None:
     df_tmp = df[df.MRID == sel_mrid]
     trace = go.Scatter(
         x=df_tmp[plot_params['xvar']],
@@ -186,7 +186,7 @@ def add_trace_dot(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
     )
     fig.add_trace(trace)
 
-def add_trace_centile(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
+def add_trace_centile(df: pd.DataFrame, plot_params: dict, plot_settings: dict, fig: Any) -> None:
     # Check centile traces
     if plot_params['traces'] is None:
         return fig
@@ -195,7 +195,7 @@ def add_trace_centile(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
         return fig
 
     # Set colormap
-    colors = st.session_state.plot_colors["centile"]
+    colors = plot_settings['cmaps']['centile']
 
     # Get centile values for the selected roi
     df_tmp = df[df.VarName == plot_params['yvar']]

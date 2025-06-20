@@ -13,27 +13,21 @@ import plotly.graph_objs as go
 import plotly.figure_factory as ff
 import utils.utils_traces as utiltr
 
-def add_plot(
-    df_plots, new_plot_params
-):
+def add_plot(df_plots, new_plot_params):
     """
     Adds a new plot (new row to the plots dataframe)
     """   
     df_plots.loc[len(df_plots)] = {'params': new_plot_params.copy()}
     return df_plots
 
-def delete_sel_plots(
-    df_plots, list_sel
-):
+def delete_sel_plots(df_plots, list_sel):
     """
     Removes plots selected by the user
     """
     df_plots = df_plots.drop(list_sel).reset_index().drop(columns=['index'])
     return df_plots
 
-def set_x_bounds(
-    df: pd.DataFrame, df_plots: pd.DataFrame, plot_id: str, xvar: str
-) -> None:
+def set_x_bounds(df: pd.DataFrame, df_plots: pd.DataFrame, plot_id: str, xvar: str) -> None:
     '''
     Set x and y min/max, if not set
     '''
@@ -49,9 +43,7 @@ def set_x_bounds(
     df_plots.loc[plot_id, "xmax"] = xmax
     df_plots.loc[plot_id, "xmin"] = xmin
 
-def set_y_bounds(
-    df: pd.DataFrame, df_plots: pd.DataFrame, plot_id: str, yvar: str
-) -> None:
+def set_y_bounds(df: pd.DataFrame, df_plots: pd.DataFrame, plot_id: str, yvar: str) -> None:
     '''
     Set x and y min/max, if not set
     '''
@@ -126,6 +118,13 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
     '''
     Display scatter plot
     '''
+    # Read centile data
+    f_cent = os.path.join(
+        st.session_state.paths['centiles'],
+        f'{plot_params['method']}_centiles_{plot_params['centile_type']}.csv'
+    )
+    df_cent = pd.read_csv(f_cent)
+
     # Main plot
     m = plot_settings["margin"]
     hi = plot_settings["h_init"]
@@ -143,92 +142,16 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
     fig.update_layout(xaxis_title = xvar, yaxis_title = yvar)
 
     # Add data scatter
-    utiltr.add_trace_scatter(df, plot_params, plot_settings, fig)
-
-    ## Add centile trace
-    #add_trace_centile(df, plot_params, fig)
-
-    #st.plotly_chart(fig, key=f"bubble_chart_{plot_id}", on_select=callback_plot_clicked)
-    st.plotly_chart(fig, key=f"bubble_chart_{plot_ind}")
-
-    return fig
-
-def display_centile_plot(df, plot_params, plot_ind):
-    """
-    Display centile plot
-    """
-    # Read centile data
-    f_cent = os.path.join(
-        st.session_state.paths['centiles'],
-        f'{plot_params['method']}_centiles_{plot_params['centile_type']}.csv'
-    )
-    df_cent = pd.read_csv(f_cent)
-
-    # Main plot
-    m = st.session_state.plot_settings["margin"]
-    hi = st.session_state.plot_settings["h_init"]
-    hc = st.session_state.plot_params["h_coeff"]
-    layout = go.Layout(
-        height = hi * hc,
-        margin = dict(l=m, r=m, t=m, b=m),
-    )
-    fig = go.Figure(layout=layout)
-
-    xvar = plot_params["xvar"]
-    yvar = plot_params["yvar"]
-
-    # Add axis labels
-    fig.update_layout(xaxis_title = xvar, yaxis_title = yvar)
+    if df is not None:
+        utiltr.add_trace_scatter(df, plot_params, plot_settings, fig)
 
     # Add centile trace
-    add_trace_centile(df_cent, plot_params, fig)
+    utiltr.add_trace_centile(df_cent, plot_params, plot_settings, fig)
 
     #st.plotly_chart(fig, key=f"bubble_chart_{plot_id}", on_select=callback_plot_clicked)
     st.plotly_chart(fig, key=f"bubble_chart_{plot_ind}")
 
     return fig
-
-#def display_dist_plot(
-    #df_plots: pd.DataFrame, plot_id: str, show_settings: bool, sel_mrid: str
-#) -> Any:
-    #"""
-    #Displays the plot with the plot_id
-    #"""
-    ## Main container for the plot
-    #with st.container(border=True):
-
-        ## Tabs for plot parameters
-        #df_plots_filt = df_plots
-        #if show_settings:
-            #df_plots_filt = add_plot_tabs(df_plots, st.session_state.plots, plot_id)
-
-        #sel_plot = st.session_state.plots.loc[plot_id]
-
-        ## Main plot
-        #fig = utiltr.dist_plot(
-            #df_plots_filt,
-            #sel_plot["xvar"],
-            #sel_plot["hvar"],
-            #sel_plot["hvals"],
-            #sel_plot["traces"],
-            #st.session_state.plot_settings["distplot_binnum"],
-            #st.session_state.plot_params["hide_legend"],
-        #)
-
-        #fig.update_layout(
-            ## height=st.session_state.plot_settings['h_init']
-            #height=st.session_state.plot_settings["h_init"]
-            #* st.session_state.plot_params["h_coeff"],
-            #margin=dict(
-                #l=st.session_state.plot_settings["margin"],
-                #r=st.session_state.plot_settings["margin"],
-                #t=st.session_state.plot_settings["margin"],
-                #b=st.session_state.plot_settings["margin"],
-            #),
-        #)
-        #st.plotly_chart(fig, key=f"key_chart_{plot_id}")
-
-        #return fig
 
 def show_plots(df, df_plots, plot_settings):
     """
@@ -241,13 +164,6 @@ def show_plots(df, df_plots, plot_settings):
     # Render plots
     #  - iterates over plots;
     #  - for every "plots_per_row" plots, creates a new columns block, resets column index, and displays the plot
-
-    if df is not None:
-        if df.shape[0] == 0:
-            st.warning("Dataframe is empty, skip plotting!")
-            return
-
-    #plots_arr = []
     for i, plot_ind in enumerate(list_plots):        
         column_no = i % plots_per_row
         if column_no == 0:
@@ -263,12 +179,7 @@ def show_plots(df, df_plots, plot_settings):
                     new_plot = display_scatter_plot(
                         df, sel_params, plot_ind, plot_settings
                     )
-                elif sel_params['ptype'] == "centile": 
-                    new_plot = display_centile_plot(
-                        df, sel_params, plot_ind, plot_settings
-                    )
                 st.checkbox('Select', key = f'_key_plot_sel_{plot_ind}')
-                #plots_arr.append(new_plot)
     
     #if st.session_state.plot_params["show_img"]:
     #show_img()
@@ -331,11 +242,10 @@ def panel_select_roi(method, key):
         sel_roi = 'WML'
         return sel_roi
 
-def panel_select_var(df, sel_var, key):
+def panel_select_var(list_vars, sel_var, key):
     '''
     User panel to select a variable
     '''
-    list_vars = df.columns.tolist()
     sel_ind = utilmisc.get_index_in_list(list_vars, sel_var)
     sel_var = st.selectbox(
         "Variable",
@@ -384,12 +294,20 @@ def panel_select_centile_values():
     
     return sel_vals
 
-
 def panel_view_data():
     """
     Panel to plot data variables in the input dataframe
     """
     df_data = st.session_state.plot_data['df_data']
+    df_cent = st.session_state.plot_data['df_cent']
+    
+    if df_data is not None:
+        list_vars = df_data.columns.tolist()
+    elif df_cent is not None:
+        list_vars = df_cent.columns.tolist()
+    else:
+        list_vars = []
+    
     flag_settings = st.sidebar.checkbox('Hide plot settings')
     ss_sel = st.session_state.selections
 
@@ -400,7 +318,7 @@ def panel_view_data():
                 ['Data', 'Centiles', 'Plot Settings']
             )        
             with ptab1:
-                ss_sel['yvar'] = panel_select_var(df_data, None, '_data')
+                ss_sel['yvar'] = panel_select_var(list_vars, None, '_data')
                 
             with ptab2:
                 ss_sel['centile_type'] = panel_select_centile_type()
@@ -491,7 +409,7 @@ def panel_view_data():
 
 def panel_view_centiles(method, var_type):
     """
-    Panel for adding multiple centile plots with configuration options
+    Panel for viewing data centiles
     """
     flag_settings = st.sidebar.checkbox('Hide plot settings')
     ss_sel = st.session_state.selections
@@ -549,7 +467,7 @@ def panel_view_centiles(method, var_type):
         return
 
     # Set plot type to centile
-    st.session_state.plot_params['ptype'] = 'centile'
+    st.session_state.plot_params['ptype'] = 'scatter'
     st.session_state.plot_params['xvar'] = 'Age'
     st.session_state.plot_params['traces'] = st.session_state.plot_params['centile_values']
     st.session_state.plot_params['method'] = method
@@ -598,6 +516,8 @@ def panel_view_centiles(method, var_type):
                     
     # Show plots
     show_plots(
-        st.session_state.curr_df, st.session_state.plots
+        st.session_state.curr_df,
+        st.session_state.plots,
+        st.session_state.plot_settings,
     )
 

@@ -29,7 +29,9 @@ def init_project_folders():
 def init_session_vars():
     ####################################    
     ### Misc variables
-    st.session_state.project = 'nichart_project'
+    #st.session_state.project = 'nichart_project'
+    st.session_state.project = 'IXI'
+
     st.session_state.sel_pipeline = None
     st.session_state.list_mods = ["T1", "T2", "FL", "DTI", "fMRI"]
     st.session_state.params = {
