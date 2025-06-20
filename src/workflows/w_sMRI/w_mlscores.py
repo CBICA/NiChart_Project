@@ -4,6 +4,7 @@ import os
 
 import numpy as np
 import pandas as pd
+import re
 from stqdm import stqdm
 
 
@@ -274,6 +275,11 @@ def run_workflow(
         f_in = os.path.join(out_wdir, f"{dset_name}_combat.csv")
         df_in = pd.read_csv(f_in, dtype={"MRID": str})
 
+        df_modified = df_in.rename(columns=lambda x: x[5:] if x.startswith('MUSE_') else x)
+        df_modified = df_modified.rename(columns={"ICV": "702"})
+        alt_f_in = os.path.join(out_wdir, f"{dset_name}_combat_alt.csv")
+        df_modified.to_csv(alt_f_in, index=False)
+
         # Apply spare
         df_spare = df_in[["MRID"]]
         for spare_type in spare_types:
@@ -281,7 +287,10 @@ def run_workflow(
             f_spare_out = os.path.join(
                 out_wdir, f"{dset_name}_combat_spare_{spare_type}.csv"
             )
-            os.system(f"spare_score -a test -i {f_in} -m {spare_mdl} -o {f_spare_out}")
+            if spare_type in ["AD", "Age"]:
+                os.system(f"spare_score -a test -i {alt_f_in} -m {spare_mdl} -o {f_spare_out}")
+            else:
+                os.system(f"spare_score -a test -i {f_in} -m {spare_mdl} -o {f_spare_out}")
 
             # Change column name for the spare output
             df = pd.read_csv(f_spare_out)
@@ -325,9 +334,10 @@ def run_workflow(
         df_in = pd.read_csv(f_in, dtype={"MRID": str})
 
         # Select input
-        sel_demog_vars = ["MRID", "Age", "Sex", "DLICV"]
-        sel_vars = ["MRID"] + list_muse_single
-        df_self = df_in[sel_vars]
+        sel_demog_vars = ["MRID", "Age", "Sex"]
+        sel_vars = ["MRID"] + list_muse_single + ["DLICV"]
+        df_sel = df_in[sel_vars].rename(columns={"DLICV": "702"}) # Needed for CCL_NMF_Prediction
+        df_sel = df_sel.rename(columns=lambda x: x[5:] if x.startswith('MUSE_') else x)
         df_demog_sel = df_in[sel_demog_vars]
         f_cclnmf_in = os.path.join(out_wdir, f"{dset_name}_cclnmf_in.csv")
         df_sel.to_csv(f_cclnmf_in, index=False)
@@ -336,15 +346,16 @@ def run_workflow(
 
         # Run prediction
         f_cclnmf_out = os.path.join(out_wdir, f"{dset_name}_cclnmf_init.csv")
-        cmd = f"ccl_nmf_prediction -i {f_cclnmf_in} -o {f_cclnmf_demog_in} -o {f_cclnmf_out}"
+        cmd = f"ccl_nmf_prediction -i {f_cclnmf_in} -d {f_cclnmf_demog_in} -o {f_cclnmf_out}"
         print(f"About to run {cmd}")
         os.system(cmd)
 
         # Edit columns
         df_cclnmf = pd.read_csv(f_cclnmf_out)
-        df_cclnmf_columns = ["MRID"] + df_cclnmf.add_prefix("CCLNMF_").columns[
-            1:
-        ].tolist()
+        df_cclnmf.rename(columns={
+            col: re.sub(r"CCL_NMF_(\d+)", r"CCL-NMF\1", col)
+            for col in df.columns
+        }, inplace=True)
 
         # Export to csv
         f_cclnmf = os.path.join(out_wdir, f"{dset_name}_cclnmf.csv")
@@ -429,6 +440,10 @@ def run_workflow(
     df_sgan = pd.read_csv(f_sgan, dtype={"MRID": str})
     df_out = df_out.merge(df_sgan, on="MRID")
 
+    f_cclnmf = os.path.join(out_wdir, f"{dset_name}_cclnmf.csv")
+    df_cclnmf = pd.read_csv(f_cclnmf, dtype={"MRID": str})
+    df_out = df_out.merge(df_cclnmf, on="MRID")
+
     # Write out file
     f_results = os.path.join(out_dir, f"{dset_name}_DLMUSE+MLScores.csv")
     df_out.to_csv(f_results, index=False)
@@ -496,13 +511,21 @@ def run_workflow_noharmonization(
         f_in = os.path.join(out_wdir, f"{dset_name}_rois_init.csv")
         df_in = pd.read_csv(f_in, dtype={"MRID": str})
 
+        df_modified = df_in.rename(columns=lambda x: x[5:] if x.startswith('MUSE_') else x)
+        df_modified = df_modified.rename(columns={"ICV": "702"})
+        alt_f_in = os.path.join(out_wdir, f"{dset_name}_combat_alt.csv")
+        df_modified.to_csv(alt_f_in, index=False)
+
         # Apply spare
         df_spare = df_in[["MRID"]]
         for spare_type in spare_types:
             spare_mdl = os.path.join(spare_dir, f"{spare_pref}{spare_type}{spare_suff}")
             f_spare_out = os.path.join(out_wdir, f"{dset_name}_spare_{spare_type}.csv")
-            os.system(f"spare_score -a test -i {f_in} -m {spare_mdl} -o {f_spare_out}")
-
+            
+            if spare_type in ["AD", "Age"]:
+                os.system(f"spare_score -a test -i {alt_f_in} -m {spare_mdl} -o {f_spare_out}")
+            else:
+                os.system(f"spare_score -a test -i {f_in} -m {spare_mdl} -o {f_spare_out}")
             # Change column name for the spare output
             df = pd.read_csv(f_spare_out)
             df = df[df.columns[0:2]]
@@ -545,10 +568,13 @@ def run_workflow_noharmonization(
         df_in = pd.read_csv(f_in, dtype={"MRID": str})
 
         # Select input
-        sel_demog_vars = ["MRID", "Age", "Sex", "DLICV"]
-        sel_vars = ["MRID"] + list_muse_single
-        df_self = df_in[sel_vars]
+        sel_demog_vars = ["MRID", "Age", "Sex"]
+        sel_vars = ["MRID"] + list_muse_single + ["DLICV"]
+        df_sel = df_in[sel_vars]
         df_demog_sel = df_in[sel_demog_vars]
+        df_sel = df_in[sel_vars].rename(columns={"DLICV": "702"}) # Needed for CCL_NMF_Prediction
+        df_sel = df_sel.rename(columns=lambda x: x[5:] if x.startswith('MUSE_') else x)
+
         f_cclnmf_in = os.path.join(out_wdir, f"{dset_name}_cclnmf_in.csv")
         df_sel.to_csv(f_cclnmf_in, index=False)
         f_cclnmf_demog_in = os.path.join(out_wdir, f"{dset_name}_cclnmf_demographics.csv")
@@ -556,15 +582,16 @@ def run_workflow_noharmonization(
 
         # Run prediction
         f_cclnmf_out = os.path.join(out_wdir, f"{dset_name}_cclnmf_init.csv")
-        cmd = f"ccl_nmf_prediction -i {f_cclnmf_in} -o {f_cclnmf_demog_in} -o {f_cclnmf_out}"
+        cmd = f"ccl_nmf_prediction -i {f_cclnmf_in} -d {f_cclnmf_demog_in} -o {f_cclnmf_out}"
         print(f"About to run {cmd}")
         os.system(cmd)
 
         # Edit columns
         df_cclnmf = pd.read_csv(f_cclnmf_out)
-        df_cclnmf_columns = ["MRID"] + df_cclnmf.add_prefix("CCLNMF_").columns[
-            1:
-        ].tolist()
+        df_cclnmf.rename(columns={
+            col: re.sub(r"CCL_NMF_(\d+)", r"CCL-NMF\1", col)
+            for col in df.columns
+        }, inplace=True)
 
         # Export to csv
         f_cclnmf = os.path.join(out_wdir, f"{dset_name}_cclnmf.csv")
@@ -648,6 +675,10 @@ def run_workflow_noharmonization(
     f_sgan = os.path.join(out_wdir, f"{dset_name}_sgan.csv")
     df_sgan = pd.read_csv(f_sgan, dtype={"MRID": str})
     df_out = df_out.merge(df_sgan, on="MRID")
+
+    f_cclnmf = os.path.join(out_wdir, f"{dset_name}_cclnmf.csv")
+    df_cclnmf = pd.read_csv(f_cclnmf, dtype={"MRID": str})
+    df_out = df_out.merge(df_cclnmf, on="MRID")
 
     # Write out file
     f_results = os.path.join(out_dir, f"{dset_name}_DLMUSE+MLScores.csv")
