@@ -170,13 +170,15 @@ def _get_batch_logs(job_id: str, region: str = "us-east-1") -> str:
     log_stream = job_detail.get("ecsProperties", {}).get("taskProperties", [])[0].get("containers", [])[0].get("logStreamName", None)
     if not log_stream:
         return "[No log stream available yet]"
-
-    logs = logs_client.get_log_events(
-        logGroupName="/aws/batch/job",
-        logStreamName=log_stream,
-        startFromHead=False,
-        limit=100
-    )
+    try:
+        logs = logs_client.get_log_events(
+            logGroupName="/aws/batch/job",
+            logStreamName=log_stream,
+            startFromHead=False,
+            limit=100
+        )
+    except:
+        return "[No log stream available yet]"
     return "\n".join(event["message"] for event in logs["events"])
     
 
