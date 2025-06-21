@@ -4,6 +4,7 @@ from typing import Any
 
 import jwt
 import time
+import yaml
 import pandas as pd
 import plotly.express as px
 import streamlit as st
@@ -61,7 +62,7 @@ def init_paths():
 
 def init_selections() -> None:
     st.session_state.selections = {
-        'sel_roi_group' : 'Primary',
+        'sel_roi_group' : 'MUSE_Primary',
         'sel_roi' : 'GM',
     }
 
@@ -163,6 +164,29 @@ def init_reference_data() -> None:
         'dlmuse' : dlmuse,
         'dlwmls' : dlwmls
     }
+
+def init_var_groups() -> None:
+    '''
+    Read variable groups to a dataframe
+    '''
+    f_vars = os.path.join(
+        st.session_state.paths['resources'], 'lists', 'dict_var_groups.yaml'
+    )
+
+    with open(f_vars, 'r') as file:
+        data = yaml.safe_load(file)
+
+    rows = []
+    for group_name, group_info in data.items():
+        rows.append({
+            'group': group_name,
+            'vtype': group_info.get('vtype'),
+            'atlas': group_info.get('atlas'),
+            'vars': group_info.get('vars')
+        })
+
+    df = pd.DataFrame(rows)
+    st.session_state.dicts['df_var_groups'] = df
 
 def init_muse_roi_def() -> None:
     # Paths to roi lists
@@ -420,9 +444,11 @@ def init_session_state() -> None:
         else:
             st.session_state.has_cloud_session = False
 
-        ####################################
         # Initialize paths
         init_paths()
+
+        # Initialize variable groups
+        init_var_groups()
 
 
         # Set default project

@@ -609,13 +609,15 @@ def panel_select_roi(method):
         
         # Read dictionaries
         df_derived = st.session_state.rois['muse']['df_derived']
-        df_groups = st.session_state.rois['muse']['df_groups']
-        
+
+        # df_groups = st.session_state.rois['muse']['df_groups']
+        df_groups = st.session_state.dicts['df_var_groups']
+
         col1, col2 = st.columns([1,3])
         
         # Select roi group
         with col1:
-            list_group = df_groups.Name.unique()
+            list_group = df_groups.group.unique()
             sel_ind = get_index_in_list(list_group, st.session_state.selections['sel_roi_group'])
             sel_group = st.selectbox(
                 "ROI Group",
@@ -628,7 +630,7 @@ def panel_select_roi(method):
     
         # Select roi
         with col2:
-            sel_indices = df_groups[df_groups.Name == sel_group]['List'].values[0]
+            sel_indices = df_groups[df_groups['group'] == sel_group]['vars'].values[0]
                     
             list_roi = df_derived[df_derived.Index.isin(sel_indices)].Name.tolist()
             sel_ind = get_index_in_list(list_roi, st.session_state.selections['sel_roi'])

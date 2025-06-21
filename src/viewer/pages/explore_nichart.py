@@ -164,3 +164,5 @@ with tab2:
 
     elif psel == 6:
         view_synthseg()
+
+st.write(st.session_state.dicts)
