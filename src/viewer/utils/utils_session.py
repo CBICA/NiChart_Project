@@ -11,6 +11,7 @@ import streamlit as st
 import utils.utils_io as utilio
 import utils.utils_rois as utilroi
 import utils.utils_processes as utilproc
+import os
 from PIL import Image
 
 # from streamlit.web.server.websocket_headers import _get_websocket_headers
@@ -30,8 +31,8 @@ def init_project_folders():
 def init_session_vars():
     ####################################    
     ### Misc variables
-    #st.session_state.project = 'nichart_project'
-    st.session_state.project = 'IXI'
+    st.session_state.project = 'nichart_project'
+    #st.session_state.project = 'IXI'
 
     st.session_state.sel_pipeline = None
     st.session_state.list_mods = ["T1", "T2", "FL", "DTI", "fMRI"]
@@ -208,7 +209,6 @@ def init_selections() -> None:
         'sel_roi' : 'GM',
     }
 
-
 def init_plot_vars() -> None:
     '''
     Set plotting variables
@@ -324,15 +324,32 @@ def init_var_groups() -> None:
 
     rows = []
     for group_name, group_info in data.items():
+        raw_values = group_info.get('values', [])
+        str_values = [str(v) for v in raw_values]  # ensure uniform type
         rows.append({
             'group': group_name,
+            'category': group_info.get('category'),
             'vtype': group_info.get('vtype'),
             'atlas': group_info.get('atlas'),
-            'vars': group_info.get('vars')
+            'values': str_values
         })
 
     df = pd.DataFrame(rows)
     st.session_state.dicts['df_var_groups'] = df
+
+    print(df)
+    st.dataframe(df)
+
+def init_dicts() -> None:
+    '''
+    Initialize all data dictionaries (atlas roi def.s etc.)
+    '''
+    # MUSE dictionaries
+    muse = utilroi.read_muse_dicts()
+    st.session_state.dicts = {
+        'muse': muse
+    }
+
 
 def init_muse_roi_def() -> None:
     # Paths to roi lists
@@ -556,6 +573,9 @@ def init_session_state() -> None:
 
         # Initialize paths
         init_paths()
+
+        # Initialize dicts
+        init_dicts()
 
         # Initialize variable groups
         init_var_groups()

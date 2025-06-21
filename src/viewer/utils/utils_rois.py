@@ -2,6 +2,7 @@ from typing import Any
 
 import pandas as pd
 import streamlit as st
+import os
 
 # from stqdm import stqdm
 
@@ -74,10 +75,11 @@ def muse_derived_to_df(in_list: list) -> Any:
     df = df.rename(columns={0: 'Index', 1: 'Name'})
 
     # Create a new column 'List' with the remaining columns as a list
-    df['List'] = df.iloc[:, 2:].apply(lambda row: row.dropna().astype(int).tolist(), axis=1)
+    df['List'] = df.iloc[:, 2:].apply(lambda row: row.dropna().astype(str).tolist(), axis=1)
 
     # Keep only the desired columns
     df = df[['Index', 'Name', 'List']]
+    df.Index = df.Index.astype(str)
 
     return df
 
@@ -118,3 +120,40 @@ def muse_get_derived(sel_roi: str, in_list: list) -> Any:
     sel_vals = df.drop([0, 1], axis=1).T.dropna().astype(int).values.flatten()
 
     return sel_vals
+
+def read_muse_dicts():
+    '''
+    Function to read muse dictionaries and save in session state
+    '''
+    f_muse = os.path.join(
+        st.session_state.paths['resources'], 'dicts', 'muse', 'muse_dict.csv'
+    )
+    f_muse_derived = os.path.join(
+        st.session_state.paths['resources'], 'dicts', 'muse', 'muse_mapping_derived.csv'
+    )
+
+    # Read muse roi list to dictionaries (ind->name, name->ind)
+    df_muse = pd.read_csv(f_muse)
+
+    # Remove duplicate entries
+    d1 = dict(zip(df_muse["Index"].astype(str), df_muse["Name"].astype(str)))
+    d2 = dict(zip(df_muse["Name"].astype(str), df_muse["Index"].astype(str)))
+
+    # Read derived roi lists to dict
+    d3 = muse_derived_to_dict(f_muse_derived)
+
+    out_dicts = {
+        'ind_to_name' : d1,
+        'name_to_ind' : d2,
+        'derived' : d3
+    }
+
+    return out_dicts
+
+
+    muse['dict_roi'] = dict1
+    muse['dict_roi_inv'] = dict2
+    muse['dict_derived'] = dict3
+    muse['df_derived'] = df_derived
+    muse['df_groups'] = df_groups
+

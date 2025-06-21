@@ -31,9 +31,13 @@ def plot_vars():
     """
     Panel for viewing dlmuse results
     """    
-    #st.session_state.curr_df = pd.read_csv(st.session_state.paths['plot_data'])
+    # st.write(st.session_state.plot_params)
+
     st.session_state.plot_data['df_data'] = pd.read_csv(st.session_state.paths['plot_data']) 
-    utilpl.panel_view_data()
+    var_groups = ['roi']
+    pipeline = 'dlmuse'
+    utilpl.panel_view_data(var_groups, pipeline)
+
 
 def view_images():
     ulay = st.session_state.ref_data["t1"]

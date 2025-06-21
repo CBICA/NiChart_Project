@@ -95,7 +95,6 @@ def data_merge(in_dir):
         return
 
     if st.button('Merge'):
-        st.write(sel_csv)
         df_all = []
         for dname in sel_csv:
             try:
@@ -103,9 +102,16 @@ def data_merge(in_dir):
                     in_dir, dname, dname + '.csv'
                 )
                 df = pd.read_csv(dpath)
-                df_all.append(df)
+
             except Exception as e:
-                st.error(f"Failed to read {fname}: {e}")
+                st.error(f"Failed to read {dname}: {e}")
+
+            # Rename columns if dict for data exists
+            if dname == 'dlmuse_vol':
+                df = df.rename(
+                    columns = st.session_state.dicts['muse']['ind_to_name']
+                )
+            df_all.append(df)
 
         if df_all:
             # Merge on the primary key
