@@ -375,8 +375,6 @@ def panel_input_multi(dtype: str) -> None:
         
         return False
     
-
-
 def get_subfolders(path: str) -> list:
     '''
     Returns a list of subfolders in input folder

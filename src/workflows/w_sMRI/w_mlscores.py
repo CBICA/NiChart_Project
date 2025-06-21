@@ -319,6 +319,37 @@ def run_workflow(
         f_sgan = os.path.join(out_wdir, f"{dset_name}_sgan.csv")
         df_sgan.to_csv(f_sgan, index=False)
 
+    def step_cclnmf() -> None:
+        # Read input
+        f_in = os.path.join(out_wdir, f"{dset_name}_rois_init.csv")
+        df_in = pd.read_csv(f_in, dtype={"MRID": str})
+
+        # Select input
+        sel_demog_vars = ["MRID", "Age", "Sex", "DLICV"]
+        sel_vars = ["MRID"] + list_muse_single
+        df_self = df_in[sel_vars]
+        df_demog_sel = df_in[sel_demog_vars]
+        f_cclnmf_in = os.path.join(out_wdir, f"{dset_name}_cclnmf_in.csv")
+        df_sel.to_csv(f_cclnmf_in, index=False)
+        f_cclnmf_demog_in = os.path.join(out_wdir, f"{dset_name}_cclnmf_demographics.csv")
+        df_demog_sel.to_csv(f_cclnmf_demog_in, index=False)
+
+        # Run prediction
+        f_cclnmf_out = os.path.join(out_wdir, f"{dset_name}_cclnmf_init.csv")
+        cmd = f"ccl_nmf_prediction -i {f_cclnmf_in} -o {f_cclnmf_demog_in} -o {f_cclnmf_out}"
+        print(f"About to run {cmd}")
+        os.system(cmd)
+
+        # Edit columns
+        df_cclnmf = pd.read_csv(f_cclnmf_out)
+        df_cclnmf_columns = ["MRID"] + df_cclnmf.add_prefix("CCLNMF_").columns[
+            1:
+        ].tolist()
+
+        # Export to csv
+        f_cclnmf = os.path.join(out_wdir, f"{dset_name}_cclnmf.csv")
+        df_cclnmf.to_csv(f_cclnmf, index=False)
+
     # Make out dir
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
@@ -354,12 +385,13 @@ def run_workflow(
     f_raw = os.path.join(out_wdir, f"{dset_name}_rois_init.csv")
     df_raw.to_csv(f_raw, index=False)
 
-    list_func = [step_combat, step_centiles, step_spare, step_sgan]
+    list_func = [step_combat, step_centiles, step_spare, step_sgan, step_cclnmf]
     # list_fnames = [
     # "COMBAT harmonization",
     # "Centile calculation",
     # "SPARE index calculation",
     # "SurrealGAN index calculation",
+    # "CCL_NMF calculation",
     # ]
 
     for i, sel_func in stqdm(
@@ -506,6 +538,38 @@ def run_workflow_noharmonization(
         ].tolist()
         f_sgan = os.path.join(out_wdir, f"{dset_name}_sgan.csv")
         df_sgan.to_csv(f_sgan, index=False)
+    
+    def step_cclnmf() -> None:
+        # Read input
+        f_in = os.path.join(out_wdir, f"{dset_name}_rois_init.csv")
+        df_in = pd.read_csv(f_in, dtype={"MRID": str})
+
+        # Select input
+        sel_demog_vars = ["MRID", "Age", "Sex", "DLICV"]
+        sel_vars = ["MRID"] + list_muse_single
+        df_self = df_in[sel_vars]
+        df_demog_sel = df_in[sel_demog_vars]
+        f_cclnmf_in = os.path.join(out_wdir, f"{dset_name}_cclnmf_in.csv")
+        df_sel.to_csv(f_cclnmf_in, index=False)
+        f_cclnmf_demog_in = os.path.join(out_wdir, f"{dset_name}_cclnmf_demographics.csv")
+        df_demog_sel.to_csv(f_cclnmf_demog_in, index=False)
+
+        # Run prediction
+        f_cclnmf_out = os.path.join(out_wdir, f"{dset_name}_cclnmf_init.csv")
+        cmd = f"ccl_nmf_prediction -i {f_cclnmf_in} -o {f_cclnmf_demog_in} -o {f_cclnmf_out}"
+        print(f"About to run {cmd}")
+        os.system(cmd)
+
+        # Edit columns
+        df_cclnmf = pd.read_csv(f_cclnmf_out)
+        df_cclnmf_columns = ["MRID"] + df_cclnmf.add_prefix("CCLNMF_").columns[
+            1:
+        ].tolist()
+
+        # Export to csv
+        f_cclnmf = os.path.join(out_wdir, f"{dset_name}_cclnmf.csv")
+        df_cclnmf.to_csv(f_cclnmf, index=False)
+    
 
     # Make out dir
     if not os.path.exists(out_dir):
@@ -542,11 +606,12 @@ def run_workflow_noharmonization(
     f_raw = os.path.join(out_wdir, f"{dset_name}_rois_init.csv")
     df_raw.to_csv(f_raw, index=False)
 
-    list_func = [step_centiles, step_spare, step_sgan]
+    list_func = [step_centiles, step_spare, step_sgan, step_cclnmf]
     # list_fnames = [
     # "Centile calculation",
     # "SPARE index calculation",
     # "SurrealGAN index calculation",
+    # "CCL_NMF calculation",
     # ]
 
     for i, sel_func in stqdm(
