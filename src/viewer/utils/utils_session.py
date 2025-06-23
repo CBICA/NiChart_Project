@@ -338,9 +338,6 @@ def init_var_groups() -> None:
     df = pd.DataFrame(rows)
     st.session_state.dicts['df_var_groups'] = df
 
-    print(df)
-    st.dataframe(df)
-
 def init_dicts() -> None:
     '''
     Initialize all data dictionaries (atlas roi def.s etc.)

@@ -14,7 +14,13 @@ import plotly.figure_factory as ff
 # Traces
 def add_trace_scatter(
     df: pd.DataFrame, plot_params: dict, plot_settings: dict, fig: Any
-) -> None:
+) -> None:    
+    # Check data
+    if df is None:
+        return fig
+    if df.shape[0] == 0:
+        return fig
+
     # Set colormap
     colors = plot_settings['cmaps']['data']
 
@@ -28,12 +34,12 @@ def add_trace_scatter(
         hvar = "grouping_var"
         hvals = None
         dft["grouping_var"] = "Data"
-    vals_hue_all = sorted(dft[hvar].unique())
+    vals_hue_all = dft[hvar].sort_values().unique().tolist()
 
     if hvals is None:
         hvals = vals_hue_all
-                
-    #st.write(plot_params)
+
+    st.write(hvals)
 
     if "data" in plot_params['traces']:
         for hname in hvals:
