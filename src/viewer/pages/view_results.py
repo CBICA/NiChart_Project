@@ -34,12 +34,12 @@ def plot_vars():
     # st.write(st.session_state.plot_params)
 
     st.session_state.plot_data['df_data'] = pd.read_csv(st.session_state.paths['plot_data']) 
-    var_groups_data = ['roi']
+    var_groups_data = ['demog', 'roi']
     var_groups_hue = ['cat_vars']
     pipeline = 'dlmuse'
 
     utilpl.panel_set_plot_params(
-        var_groups_data, var_groups_hue, pipeline
+        st.session_state.plot_params, var_groups_data, var_groups_hue, pipeline
     )
         
     utilpl.panel_show_plots()
@@ -51,15 +51,15 @@ def plot_vars():
 
     with st.expander('hello'):
         # st.write(st.session_state.plot_settings)
-        st.write(st.session_state.plots)
-        st.write(st.session_state.selections)
+        #st.write(st.session_state.plots)
+        #st.write(st.session_state.selections)
         st.write(st.session_state.plot_params)
 
 
 def view_images():
     ulay = st.session_state.ref_data["t1"]
     olay = st.session_state.ref_data["dlmuse"]        
-    utilmri.panel_view_seg(ulay, olay, 'muse')
+    #utilmri.panel_view_seg(ulay, olay, 'muse')
 
 st.markdown(
     """

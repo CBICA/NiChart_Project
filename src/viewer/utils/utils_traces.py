@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 import streamlit as st
 import utils.utils_io as utilio
+import utils.utils_stats as utilstat
 
 import plotly.graph_objs as go
 import plotly.figure_factory as ff
@@ -64,7 +65,9 @@ def add_trace_scatter(
         #fig.update_layout(xaxis_range=[xmin, xmax])
         #fig.update_layout(yaxis_range=[ymin, ymax])
 
-def add_trace_linreg(df: pd.DataFrame, plot_params: dict, plot_settings: dict, fig: Any) -> None:
+def add_trace_linreg(
+    df: pd.DataFrame, plot_params: dict, plot_settings: dict, fig: Any
+) -> None:
     """
     Add linear fit and confidence interval
     """
@@ -74,16 +77,19 @@ def add_trace_linreg(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
     # Get hue params
     hvar = plot_params['hvar']
     hvals = plot_params['hvals']
+    traces = plot_params['traces']
 
     # Add a tmp column if group var is not set
     dft = df.copy()
-    if hvar == "":
-        hvar = "All"
-        dft["All"] = "data"
-        vals_hue_all = ["All"]
-
-    vals_hue_all = sorted(dft[hvar].unique())
-    if hvals == []:
+    if hvar is None:
+        hvar = "grouping_var"
+        hvals = None        
+        dft["grouping_var"] = "Data"
+        
+    dft = dft.dropna(subset = hvar)
+    vals_hue_all = dft[hvar].sort_values().unique().tolist()
+    
+    if hvals is None:
         hvals = vals_hue_all
 
     # Calculate fit
@@ -92,7 +98,7 @@ def add_trace_linreg(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
     )
 
     # Add traces for the fit and confidence intervals
-    if "lin_fit" in plot_params['traces']:
+    if "lin_fit" in traces:
         for hname in hvals:
             col_ind = vals_hue_all.index(
                 hname

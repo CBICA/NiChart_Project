@@ -240,7 +240,7 @@ def init_plot_vars() -> None:
         "hide_settings": False,
         "hide_legend": False,
         "show_img": False,
-        "trend_types": ["", "Linear", "Smooth LOWESS Curve"],
+        "trend_types": ["None", "Linear", "Smooth LOWESS Curve"],
         "centile_types": ["", "CN", "CN_Males", "CN_Females", "CN_ICV_Corrected"],
         "linfit_trace_types": [
             "lin_fit", "conf_95%"
@@ -267,7 +267,7 @@ def init_plot_vars() -> None:
     # Plot parameters specific to each plot
     st.session_state.plot_params = {
         "plot_type": "scatter",
-        "xvar_group": None,
+        "xvar_group": 'demog',
         "xvar": 'Age',
         "xmin": None,
         "xmax": None,
@@ -286,6 +286,7 @@ def init_plot_vars() -> None:
         "lowess_s": 0.5,
         "centile_type": 'CN',
         "centile_values": ['centile_25', 'centile_50', 'centile_75'],
+        "flag_norm_centiles": False
     }
 
     ###################################

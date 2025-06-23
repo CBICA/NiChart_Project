@@ -2,6 +2,11 @@
 # Each group has a vtype, atlas name if they list roi indices and a list of variable names/indices
 
 demog:
+  category: demog
+  vtype: name
+  values: [Age, Sex]
+
+cat_vars:
   category: cat_vars
   vtype: name
   values: [Sex, DX]

@@ -146,13 +146,6 @@ def delete_sel_plots(df_plots):
     df_plots = df_plots.drop(list_sel).reset_index().drop(columns=['index'])
     return df_plots
 
-# def delete_sel_plot(df_plots, list_sel):
-#     """
-#     Removes plots selected by the user
-#     """
-#     df_plots = df_plots.drop(list_sel).reset_index().drop(columns=['index'])
-#     return df_plots
-
 def delete_all_plots(df_plots):
     """
     Removes plots selected by the user
@@ -276,8 +269,11 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
     # Add data scatter
     utiltr.add_trace_scatter(df, plot_params, plot_settings, fig)
 
-    # Add centile trace
-    utiltr.add_trace_centile(df_cent, plot_params, plot_settings, fig)
+    # Add linear fit
+    utiltr.add_trace_linreg(df, plot_params, plot_settings, fig)
+
+    ## Add centile trace
+    #utiltr.add_trace_centile(df_cent, plot_params, plot_settings, fig)
 
     #st.plotly_chart(fig, key=f"bubble_chart_{plot_id}", on_select=callback_plot_clicked)
     st.plotly_chart(fig, key=f"bubble_chart_{plot_ind}")
@@ -290,7 +286,7 @@ def show_plots(df, df_plots, plot_settings):
     """
     # Read plot ids
     list_plots = df_plots.index.tolist()
-    plots_per_row = st.session_state.plot_settings["num_per_row"]
+    plots_per_row = plot_settings["num_per_row"]
 
     # Render plots
     #  - iterates over plots;
@@ -317,32 +313,35 @@ def show_plots(df, df_plots, plot_settings):
 
 ###################################################################
 # Panels
-def panel_select_var(sel_var_groups, key):
+def panel_select_var(sel_var_groups, plot_params, var_type, header_txt):
     '''
-    User panel to select a variable
+    User panel to update a plot variable
     '''
     # Select var groups
     df_groups = st.session_state.dicts['df_var_groups'].copy()
     df_groups = df_groups[df_groups.category.isin(sel_var_groups)]
+
+    st.markdown(f'##### {header_txt}')
 
     col1, col2 = st.columns([1,3])
 
     # Select var group
     with col1:
         list_group = df_groups.group.unique()
+        curr_group = plot_params[f'{var_type}_group']
         sel_ind = utilmisc.get_index_in_list(
-            list_group, st.session_state.selections['sel_roi_group']
+            list_group, curr_group
         )
         sel_group = st.selectbox(
             "Variable Group",
             list_group,
             sel_ind,
             help="Select ROI group",
-            key = f'_sel_roigroup_{key}'
+            key = f'_sel_roigroup_{var_type}'
         )
         if sel_group is None:
-            return None
-
+            return
+        
     # Select var name
     with col2:
         sel_atlas = df_groups[df_groups['group'] == sel_group]['atlas'].values[0]
@@ -351,29 +350,30 @@ def panel_select_var(sel_var_groups, key):
         # Convert MUSE ROI variables from index to name
         if sel_atlas == 'muse':
             roi_dict = st.session_state.dicts['muse']['ind_to_name']
-            #st.write(roi_dict)
             list_vars = [roi_dict[k] for k in list_vars]
-
-        # st.write(sel_indices)
-        # st.write(list_vars)
-
+    
+        curr_var = plot_params[var_type]
         sel_ind = utilmisc.get_index_in_list(
-            list_vars, st.session_state.selections['sel_roi']
+            list_vars, curr_var
         )
         sel_var = st.selectbox(
             "Variable Name",
             list_vars,
             sel_ind,
             help="Select a variable from the list",
-            key = f'_sel_varname_{key}'
+            key = f'_sel_varname_{var_type}'
         )
+
         if sel_var is None:
-            return None
+            return
 
-        st.session_state.selections['sel_roi_group'] = sel_group
-        st.session_state.selections['sel_roi'] = sel_var
-
-    return sel_var
+        plot_params[f'{var_type}_group'] = sel_group
+        plot_params[f'{var_type}'] = sel_var
+        
+        #print('changed plot_params')
+        #print(var_type)
+        #print(plot_params[f'{var_type}'])
+        #print(st.session_state.plot_plot_params)
 
 def panel_select_centile_type():
     '''
@@ -413,28 +413,39 @@ def panel_select_centile_values():
     
     return sel_vals
 
-def panel_select_trend():
-    list_trends = st.session_state.plot_settings["trend_types"]
+def panel_select_trend(plot_params):
+    '''
+    Panel to select trend variable
+    '''
+    cols = st.columns(2)
     
-    sel_trend = st.selectbox(
-        "Trend Line",
-        list_trends
-    )
+    with cols[0]:
+        list_trends = st.session_state.plot_settings["trend_types"]
+        curr_trend = plot_params['trend']
+        sel_ind = list_trends.index(curr_trend)
+        sel_trend = st.selectbox(
+            "Trend Line",
+            list_trends,
+            sel_ind
+        )
+        if sel_trend is None:
+            return
+
+    with cols[1]:
+        if sel_trend == 'Linear':
+            show_conf = st.checkbox(
+                'Add conf int',
+                value = plot_params['show_conf']
+            )
     
-    if sel_trend is None:
-        return
+    plot_params['trend'] = sel_trend
+    plot_params['show_conf'] = show_conf
 
-    st.session_state.plot_params['trend'] = sel_trend
-    
-    return sel_trend
-
-
-def panel_set_plot_params(var_groups_data, var_groups_hue, pipeline):
+def panel_set_plot_params(plot_params, var_groups_data, var_groups_hue, pipeline):
     """
     Panel to set plotting parameters
     """
     flag_settings = st.sidebar.checkbox('Hide plot settings')
-    ss_sel = st.session_state.selections
 
     # Add tabs for parameter settings
     with st.container(border=True):
@@ -443,20 +454,27 @@ def panel_set_plot_params(var_groups_data, var_groups_hue, pipeline):
                 ['Data', 'Fit', 'Groups', 'Centiles', 'Plot Settings']
             )
             with ptabs[0]:
-                ss_sel['yvar'] = panel_select_var(var_groups_data, '_yvar')
+                panel_select_var(
+                    var_groups_data, plot_params, 'xvar', 'X Variable'
+                )
+                panel_select_var(
+                    var_groups_data, plot_params, 'yvar', 'Y Variable'
+                )
 
             with ptabs[1]:
-                ss_sel['trend'] = panel_select_trend()
+                panel_select_trend(plot_params)
 
             with ptabs[2]:
-                ss_sel['hvar'] = panel_select_var(var_groups_hue, '_hvar')
-
-            with ptabs[3]:
-                ss_sel['centile_type'] = panel_select_centile_type()
-                ss_sel['centile_values'] = panel_select_centile_values()
-                ss_sel['flag_norm_centiles'] = st.checkbox(
-                    'Normalize Centiles'
+                panel_select_var(
+                    var_groups_data, plot_params, 'hvar', 'Hue Variable'
                 )
+
+            #with ptabs[3]:
+                #ss_sel['centile_type'] = panel_select_centile_type()
+                #ss_sel['centile_values'] = panel_select_centile_values()
+                #ss_sel['flag_norm_centiles'] = st.checkbox(
+                    #'Normalize Centiles'
+                #)
 
             with ptabs[4]:
                 st.session_state.plot_settings["num_per_row"] = st.slider(
@@ -467,7 +485,7 @@ def panel_set_plot_params(var_groups_data, var_groups_hue, pipeline):
                     disabled=False,
                 )
 
-                st.session_state.plot_params["h_coeff"] = st.slider(
+                plot_params["h_coeff"] = st.slider(
                     "Plot height",
                     min_value=st.session_state.plot_settings["h_coeff_min"],
                     max_value=st.session_state.plot_settings["h_coeff_max"],
@@ -477,24 +495,27 @@ def panel_set_plot_params(var_groups_data, var_groups_hue, pipeline):
                 )
 
                 # Checkbox to show/hide plot legend
-                st.session_state.plot_params["hide_legend"] = st.checkbox(
+                plot_params["hide_legend"] = st.checkbox(
                     "Hide legend",
                     value=st.session_state.plot_settings["hide_legend"],
                     disabled=False,
                 )
 
     # Set plot type to centile
-    st.session_state.plot_params['ptype'] = 'scatter'
-    st.session_state.plot_params['xvar'] = 'Age'
-    st.session_state.plot_params['traces'] = ['data'] + st.session_state.plot_params['centile_values']
-    st.session_state.plot_params['method'] = pipeline
-    if ss_sel['yvar'] is not None:
-        st.session_state.plot_params['yvar'] = ss_sel['yvar']
-    if ss_sel['hvar'] is not None:
-        st.session_state.plot_params['hvar'] = ss_sel['hvar']
-    st.session_state.plot_params['centile_type'] = ss_sel['centile_type']
-    st.session_state.plot_params['centile_values'] = ss_sel['centile_values']
-    st.session_state.plot_params['flag_norm_centiles'] = ss_sel['flag_norm_centiles']
+    plot_params['ptype'] = 'scatter'
+    plot_params['traces'] = ['data'] + plot_params['centile_values']
+    if plot_params['trend'] == 'Linear':
+        plot_params['traces'] = plot_params['traces'] + ['lin_fit']
+    if plot_params['show_conf'] == True:
+        plot_params['traces'] = plot_params['traces'] + ['conf_95%']
+        
+    plot_params['method'] = pipeline
+    #plot_params['centile_type'] = ss_sel['centile_type']
+    #plot_params['centile_values'] = ss_sel['centile_values']
+    #plot_params['flag_norm_centiles'] = ss_sel['flag_norm_centiles']
+    plot_params['flag_norm_centiles'] = False
+
+    print(plot_params)
 
 def panel_show_plots():
     '''
