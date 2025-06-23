@@ -20,11 +20,32 @@ def add_plot(df_plots, new_plot_params):
     df_plots.loc[len(df_plots)] = {'params': new_plot_params.copy()}
     return df_plots
 
-def delete_sel_plots(df_plots, list_sel):
+def delete_sel_plots(df_plots):
+    """
+    Removes plots selected by the user
+    (removes the row with the given index from the plots dataframe)
+    """
+    list_sel = []
+    for tmp_ind in df_plots.index.tolist():
+        if st.session_state[f'_key_plot_sel_{tmp_ind}']:
+            list_sel.append(tmp_ind)
+            st.session_state[f'_key_plot_sel_{tmp_ind}'] = False
+
+    df_plots = df_plots.drop(list_sel).reset_index().drop(columns=['index'])
+    return df_plots
+
+# def delete_sel_plot(df_plots, list_sel):
+#     """
+#     Removes plots selected by the user
+#     """
+#     df_plots = df_plots.drop(list_sel).reset_index().drop(columns=['index'])
+#     return df_plots
+
+def delete_all_plots(df_plots):
     """
     Removes plots selected by the user
     """
-    df_plots = df_plots.drop(list_sel).reset_index().drop(columns=['index'])
+    df_plots = pd.DataFrame(columns=['params'])
     return df_plots
 
 def set_x_bounds(df: pd.DataFrame, df_plots: pd.DataFrame, plot_id: str, xvar: str) -> None:
@@ -170,7 +191,10 @@ def show_plots(df, df_plots, plot_settings):
             blocks = st.columns(plots_per_row)
         sel_params = df_plots.loc[plot_ind, 'params']
         with blocks[column_no]:
-            with st.container(border=True):
+            border = False
+            if st.session_state.plot_settings['sel_plot'] == plot_ind:
+                border = True
+            with st.container(border=border):
                 if sel_params['ptype'] == "dist": 
                     new_plot = display_dist_plot(
                         df, sel_params, plot_ind, plot_settings
@@ -180,7 +204,10 @@ def show_plots(df, df_plots, plot_settings):
                         df, sel_params, plot_ind, plot_settings
                     )
                 st.checkbox('Select', key = f'_key_plot_sel_{plot_ind}')
-    
+                # if st.button('Select', key = f'_key_plot_sel_{plot_ind}'):
+                #     st.success('Selected!')
+                #     st.session_state.plot_settings['sel_plot'] = plot_ind
+
     #if st.session_state.plot_params["show_img"]:
     #show_img()
 
@@ -276,8 +303,11 @@ def panel_select_var(sel_var_groups, key):
     # Select roi
     with col2:
         sel_indices = df_groups[df_groups['group'] == sel_group]['values'].values[0]
-
         list_roi = df_derived[df_derived.Index.isin(sel_indices)].Name.tolist()
+
+        # st.write(sel_indices)
+        # st.write(list_roi)
+
         sel_ind = utilmisc.get_index_in_list(
             list_roi, st.session_state.selections['sel_roi']
         )
@@ -288,7 +318,7 @@ def panel_select_var(sel_var_groups, key):
             help="Select an ROI from the list",
             key = f'_sel_roiname_{key}'
         )
-        if sel_group is None:
+        if sel_roi is None:
             return None
 
         st.session_state.selections['sel_roi_group'] = sel_group
@@ -448,10 +478,14 @@ def panel_view_data_v0():
     print('plots info2')
 
     if btn_del_sel:
-        st.session_state.plots = delete_sel_plots(
+        st.session_state.plots = delete_sel_plot(
             st.session_state.plots
         )
     if btn_del_all:
+        st.session_state.plots = delete_sel_plot(
+            st.session_state.plots
+        )
+
         st.session_state.plots = pd.DataFrame(columns=['params'])
 
     # st.dataframe(st.session_state.plots)
@@ -577,12 +611,10 @@ def panel_view_centiles(method, var_type):
 
 
 
-def panel_view_data(var_groups, pipeline):
+def panel_set_plot_params(var_groups, pipeline):
     """
-    Panel to plot data variables in the input dataframe
+    Panel to set plotting parameters
     """
-    df_data = st.session_state.plot_data['df_data']
-
     flag_settings = st.sidebar.checkbox('Hide plot settings')
     ss_sel = st.session_state.selections
 
@@ -640,7 +672,17 @@ def panel_view_data(var_groups, pipeline):
     st.session_state.plot_params['centile_values'] = ss_sel['centile_values']
     st.session_state.plot_params['flag_norm_centiles'] = ss_sel['flag_norm_centiles']
 
-    # Add buttons to add/delete plots
+def panel_show_plots():
+    '''
+    Panel to add/delete/show plots
+    '''
+    # Update selected plots
+    for tmp_ind in st.session_state.plots.index.tolist():
+        if f'_key_plot_sel_{tmp_ind}' in st.session_state:
+            if st.session_state[f'_key_plot_sel_{tmp_ind}']:
+                st.write(f'updated {tmp_ind}')
+                st.session_state.plots.at[tmp_ind, 'params'] = st.session_state.plot_params
+
     c1, c2, c3 = st.sidebar.columns(3, vertical_alignment="center")
     with c1:
         btn_add = st.button("Add Plot")
@@ -649,36 +691,30 @@ def panel_view_data(var_groups, pipeline):
     with c3:
         btn_del_all = st.button("Delete All")
 
-    # Add/delete plot
     if btn_add:
-        # Add plot
         st.session_state.plots = add_plot(
-            st.session_state.plots,
-            st.session_state.plot_params
+            st.session_state.plots, st.session_state.plot_params.copy()
         )
 
+    # Add a single plot if there is none
     if st.session_state.plots.shape[0] == 0:
-        # Add plot
         st.session_state.plots = add_plot(
-            st.session_state.plots,
-            st.session_state.plot_params
+            st.session_state.plots, st.session_state.plot_params.copy()
         )
-
-    # print('plots info')
-    # print(st.session_state.plots.params[0])
-    # print('plots info2')
 
     if btn_del_sel:
         st.session_state.plots = delete_sel_plots(
             st.session_state.plots
         )
     if btn_del_all:
-        st.session_state.plots = pd.DataFrame(columns=['params'])
-
-    # st.dataframe(st.session_state.plots)
+        st.session_state.plots = delete_all_plots(
+            st.session_state.plots
+        )
 
     # Show plots
     show_plots(
-        df_data, st.session_state.plots, st.session_state.plot_settings
+        st.session_state.plot_data['df_data'],
+        st.session_state.plots,
+        st.session_state.plot_settings
     )
 

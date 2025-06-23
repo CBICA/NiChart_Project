@@ -36,7 +36,18 @@ def plot_vars():
     st.session_state.plot_data['df_data'] = pd.read_csv(st.session_state.paths['plot_data']) 
     var_groups = ['roi']
     pipeline = 'dlmuse'
-    utilpl.panel_view_data(var_groups, pipeline)
+
+    utilpl.panel_set_plot_params(var_groups, pipeline)
+    utilpl.panel_show_plots()
+
+    with st.expander('hello2'):
+        for i in [0,1,2,3]:
+            if f'_key_plot_sel_{i}' in st.session_state:
+                st.write(st.session_state[f'_key_plot_sel_{i}'])
+
+    with st.expander('hello'):
+        # st.write(st.session_state.plot_settings)
+        st.write(st.session_state.plots)
 
 
 def view_images():

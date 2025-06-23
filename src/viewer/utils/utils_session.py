@@ -251,7 +251,7 @@ def init_plot_vars() -> None:
         ],
         "min_per_row": 1,
         "max_per_row": 5,
-        "num_per_row": 2,
+        "num_per_row": 4,
         "margin": 20,
         "h_init": 500,
         "h_coeff": 1.0,
@@ -259,7 +259,8 @@ def init_plot_vars() -> None:
         "h_coeff_min": 0.6,
         "h_coeff_step": 0.2,
         "distplot_binnum": 100,
-        "cmaps": cmaps
+        "cmaps": cmaps,
+        "sel_plot": 0
     }
 
     # Plot parameters specific to each plot
