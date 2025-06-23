@@ -230,7 +230,6 @@ def init_plot_vars() -> None:
     }
 
     # Plot data
-    #st.session_state.curr_df = pd.DataFrame()
     st.session_state.plot_data = {
         'df_data': None,
         'df_cent': None
@@ -238,6 +237,9 @@ def init_plot_vars() -> None:
 
     # Plot settings
     st.session_state.plot_settings = {
+        "hide_settings": False,
+        "hide_legend": False,
+        "show_img": False,
         "trend_types": ["", "Linear", "Smooth LOWESS Curve"],
         "centile_types": ["", "CN", "CN_Males", "CN_Females", "CN_ICV_Corrected"],
         "linfit_trace_types": [
@@ -260,31 +262,30 @@ def init_plot_vars() -> None:
         "h_coeff_step": 0.2,
         "distplot_binnum": 100,
         "cmaps": cmaps,
-        "sel_plot": 0
     }
 
     # Plot parameters specific to each plot
     st.session_state.plot_params = {
-        "hide_settings": False,
-        "hide_legend": False,
-        "show_img": False,
         "plot_type": "scatter",
-        "xvar": None,
+        "xvar_group": None,
+        "xvar": 'Age',
         "xmin": None,
         "xmax": None,
-        "yvar": None,
+        "yvar_group": 'MUSE_Primary',
+        "yvar": 'GM',
         "ymin": None,
         "ymax": None,
-        "hvar": None,
+        "hvar_group": 'demog',
+        "hvar": 'Sex',
         "hvals": None,
         "corr_icv": False,
         "plot_cent_normalized": False,
         "trend": "Linear",
-        "traces": ["data", "lin_fit"],
+        "show_conf": False,
+        "traces": None,
         "lowess_s": 0.5,
         "centile_type": 'CN',
         "centile_values": ['centile_25', 'centile_50', 'centile_75'],
-        "h_coeff": 1.0,
     }
 
     ###################################

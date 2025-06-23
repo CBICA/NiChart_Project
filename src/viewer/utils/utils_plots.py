@@ -13,6 +13,118 @@ import plotly.graph_objs as go
 import plotly.figure_factory as ff
 import utils.utils_traces as utiltr
 
+def panel_view_centiles(method, var_type):
+    """
+    Panel for viewing data centiles
+    """
+    flag_settings = st.sidebar.checkbox('Hide plot settings')
+    ss_sel = st.session_state.selections
+
+    # Add tabs for parameter settings
+    with st.container(border=True):
+        if not flag_settings:
+            ptab1, ptab2, ptab3 = st.tabs(
+                ['Data', 'Centiles', 'Plot Settings']
+            )        
+            with ptab1:
+                if var_type == 'rois':
+                    ss_sel['yvar'] = panel_select_roi(method, '_centiles')
+                
+                elif var_type == 'biomarkers':
+                    list_vars = ['WM', 'GM', 'VN']
+                    ss_sel['yvar'] = st.selectbox(
+                        'Select var',
+                        list_vars
+                    )
+                
+            with ptab2:
+                ss_sel['centile_type'] = panel_select_centile_type()
+                ss_sel['centile_values'] = panel_select_centile_values()
+                ss_sel['flag_norm_centiles'] = st.checkbox(
+                    'Normalize Centiles'
+                )
+
+            with ptab3:
+                st.session_state.plot_settings["num_per_row"] = st.slider(
+                    "Number of plots per row",
+                    st.session_state.plot_settings["min_per_row"],
+                    st.session_state.plot_settings["max_per_row"],
+                    st.session_state.plot_settings["num_per_row"],
+                    disabled=False,
+                )
+
+                st.session_state.plot_params["h_coeff"] = st.slider(
+                    "Plot height",
+                    min_value=st.session_state.plot_settings["h_coeff_min"],
+                    max_value=st.session_state.plot_settings["h_coeff_max"],
+                    value=st.session_state.plot_settings["h_coeff"],
+                    step=st.session_state.plot_settings["h_coeff_step"],
+                    disabled=False,
+                )
+
+                # Checkbox to show/hide plot legend
+                st.session_state.plot_params["hide_legend"] = st.checkbox(
+                    "Hide legend",
+                    value=st.session_state.plot_params["hide_legend"],
+                    disabled=False,
+                )
+
+    if ss_sel['yvar'] is None:
+        return
+
+    # Set plot type to centile
+    st.session_state.plot_params['ptype'] = 'scatter'
+    st.session_state.plot_params['xvar'] = 'Age'
+    st.session_state.plot_params['traces'] = st.session_state.plot_params['centile_values']
+    st.session_state.plot_params['method'] = method
+    st.session_state.plot_params['yvar'] = ss_sel['yvar']
+    st.session_state.plot_params['centile_type'] = ss_sel['centile_type']
+    st.session_state.plot_params['centile_values'] = ss_sel['centile_values']
+    st.session_state.plot_params['flag_norm_centiles'] = ss_sel['flag_norm_centiles']
+        
+    # Add buttons to add/delete plots
+    c1, c2, c3 = st.sidebar.columns(3, vertical_alignment="center")
+    with c1:
+        btn_add = st.button("Add Plot")
+    with c2:
+        btn_del_sel = st.button("Delete Selected")
+    with c3:
+        btn_del_all = st.button("Delete All")
+        
+    # Add/delete plot
+    if btn_add:
+        # Add plot
+        st.session_state.plots = add_plot(
+            st.session_state.plots,
+            st.session_state.plot_params
+        )
+
+    if st.session_state.plots.shape[0] == 0:
+        # Add plot
+        st.session_state.plots = add_plot(
+            st.session_state.plots,
+            st.session_state.plot_params
+        )
+
+    if btn_del_sel:
+        st.session_state.plots = delete_sel_plots(
+            st.session_state.plots
+        )
+    if btn_del_all:
+        st.session_state.plots = pd.DataFrame(columns=['params'])
+
+    # st.dataframe(st.session_state.plots)
+                    
+    # Show plots
+    show_plots(
+        st.session_state.curr_df,
+        st.session_state.plots,
+        st.session_state.plot_settings,
+    )
+
+
+
+
 def add_plot(df_plots, new_plot_params):
     """
     Adds a new plot (new row to the plots dataframe)
@@ -189,10 +301,7 @@ def show_plots(df, df_plots, plot_settings):
             blocks = st.columns(plots_per_row)
         sel_params = df_plots.loc[plot_ind, 'params']
         with blocks[column_no]:
-            border = False
-            if st.session_state.plot_settings['sel_plot'] == plot_ind:
-                border = True
-            with st.container(border=border):
+            with st.container(border=True):
                 if sel_params['ptype'] == "dist": 
                     new_plot = display_dist_plot(
                         df, sel_params, plot_ind, plot_settings
@@ -304,118 +413,23 @@ def panel_select_centile_values():
     
     return sel_vals
 
-def panel_view_centiles(method, var_type):
-    """
-    Panel for viewing data centiles
-    """
-    flag_settings = st.sidebar.checkbox('Hide plot settings')
-    ss_sel = st.session_state.selections
-
-    # Add tabs for parameter settings
-    with st.container(border=True):
-        if not flag_settings:
-            ptab1, ptab2, ptab3 = st.tabs(
-                ['Data', 'Centiles', 'Plot Settings']
-            )        
-            with ptab1:
-                if var_type == 'rois':
-                    ss_sel['yvar'] = panel_select_roi(method, '_centiles')
-                
-                elif var_type == 'biomarkers':
-                    list_vars = ['WM', 'GM', 'VN']
-                    ss_sel['yvar'] = st.selectbox(
-                        'Select var',
-                        list_vars
-                    )
-                
-            with ptab2:
-                ss_sel['centile_type'] = panel_select_centile_type()
-                ss_sel['centile_values'] = panel_select_centile_values()
-                ss_sel['flag_norm_centiles'] = st.checkbox(
-                    'Normalize Centiles'
-                )
-
-            with ptab3:
-                st.session_state.plot_settings["num_per_row"] = st.slider(
-                    "Number of plots per row",
-                    st.session_state.plot_settings["min_per_row"],
-                    st.session_state.plot_settings["max_per_row"],
-                    st.session_state.plot_settings["num_per_row"],
-                    disabled=False,
-                )
-
-                st.session_state.plot_params["h_coeff"] = st.slider(
-                    "Plot height",
-                    min_value=st.session_state.plot_settings["h_coeff_min"],
-                    max_value=st.session_state.plot_settings["h_coeff_max"],
-                    value=st.session_state.plot_settings["h_coeff"],
-                    step=st.session_state.plot_settings["h_coeff_step"],
-                    disabled=False,
-                )
-
-                # Checkbox to show/hide plot legend
-                st.session_state.plot_params["hide_legend"] = st.checkbox(
-                    "Hide legend",
-                    value=st.session_state.plot_params["hide_legend"],
-                    disabled=False,
-                )
-
-    if ss_sel['yvar'] is None:
+def panel_select_trend():
+    list_trends = st.session_state.plot_settings["trend_types"]
+    
+    sel_trend = st.selectbox(
+        "Trend Line",
+        list_trends
+    )
+    
+    if sel_trend is None:
         return
 
-    # Set plot type to centile
-    st.session_state.plot_params['ptype'] = 'scatter'
-    st.session_state.plot_params['xvar'] = 'Age'
-    st.session_state.plot_params['traces'] = st.session_state.plot_params['centile_values']
-    st.session_state.plot_params['method'] = method
-    st.session_state.plot_params['yvar'] = ss_sel['yvar']
-    st.session_state.plot_params['centile_type'] = ss_sel['centile_type']
-    st.session_state.plot_params['centile_values'] = ss_sel['centile_values']
-    st.session_state.plot_params['flag_norm_centiles'] = ss_sel['flag_norm_centiles']
-        
-    # Add buttons to add/delete plots
-    c1, c2, c3 = st.sidebar.columns(3, vertical_alignment="center")
-    with c1:
-        btn_add = st.button("Add Plot")
-    with c2:
-        btn_del_sel = st.button("Delete Selected")
-    with c3:
-        btn_del_all = st.button("Delete All")
-        
-    # Add/delete plot
-    if btn_add:
-        # Add plot
-        st.session_state.plots = add_plot(
-            st.session_state.plots,
-            st.session_state.plot_params
-        )
+    st.session_state.plot_params['trend'] = sel_trend
+    
+    return sel_trend
 
-    if st.session_state.plots.shape[0] == 0:
-        # Add plot
-        st.session_state.plots = add_plot(
-            st.session_state.plots,
-            st.session_state.plot_params
-        )
 
-    if btn_del_sel:
-        st.session_state.plots = delete_sel_plots(
-            st.session_state.plots
-        )
-    if btn_del_all:
-        st.session_state.plots = pd.DataFrame(columns=['params'])
-
-    # st.dataframe(st.session_state.plots)
-                    
-    # Show plots
-    show_plots(
-        st.session_state.curr_df,
-        st.session_state.plots,
-        st.session_state.plot_settings,
-    )
-
-def panel_set_plot_params(
-    var_groups_data, var_groups_hue, pipeline
-):
+def panel_set_plot_params(var_groups_data, var_groups_hue, pipeline):
     """
     Panel to set plotting parameters
     """
@@ -432,6 +446,9 @@ def panel_set_plot_params(
                 ss_sel['yvar'] = panel_select_var(var_groups_data, '_yvar')
 
             with ptabs[1]:
+                ss_sel['trend'] = panel_select_trend()
+
+            with ptabs[2]:
                 ss_sel['hvar'] = panel_select_var(var_groups_hue, '_hvar')
 
             with ptabs[3]:
@@ -462,7 +479,7 @@ def panel_set_plot_params(
                 # Checkbox to show/hide plot legend
                 st.session_state.plot_params["hide_legend"] = st.checkbox(
                     "Hide legend",
-                    value=st.session_state.plot_params["hide_legend"],
+                    value=st.session_state.plot_settings["hide_legend"],
                     disabled=False,
                 )
 
@@ -483,19 +500,20 @@ def panel_show_plots():
     '''
     Panel to add/delete/show plots
     '''
-    # Update selected plots
+    ## Update selected plots
     for tmp_ind in st.session_state.plots.index.tolist():
         if f'_key_plot_sel_{tmp_ind}' in st.session_state:
             if st.session_state[f'_key_plot_sel_{tmp_ind}']:
                 st.write(f'updated {tmp_ind}')
                 st.session_state.plots.at[tmp_ind, 'params'] = st.session_state.plot_params
 
-    c1, c2, c3 = st.sidebar.columns(3, vertical_alignment="center")
-    with c1:
+    ## Sidebar options
+    cols = st.sidebar.columns(3, vertical_alignment="center")
+    with cols[0]:
         btn_add = st.button("Add Plot")
-    with c2:
+    with cols[1]:
         btn_del_sel = st.button("Delete Selected")
-    with c3:
+    with cols[2]:
         btn_del_all = st.button("Delete All")
 
     if btn_add:
@@ -524,4 +542,9 @@ def panel_show_plots():
         st.session_state.plots,
         st.session_state.plot_settings
     )
+
+
+
+
+
 
