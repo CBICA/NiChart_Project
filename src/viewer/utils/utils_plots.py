@@ -272,8 +272,8 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
     # Add linear fit
     utiltr.add_trace_linreg(df, plot_params, plot_settings, fig)
 
-    ## Add centile trace
-    #utiltr.add_trace_centile(df_cent, plot_params, plot_settings, fig)
+    # Add centile trace
+    utiltr.add_trace_centile(df_cent, plot_params, plot_settings, fig)
 
     #st.plotly_chart(fig, key=f"bubble_chart_{plot_id}", on_select=callback_plot_clicked)
     st.plotly_chart(fig, key=f"bubble_chart_{plot_ind}")
@@ -375,12 +375,14 @@ def panel_select_var(sel_var_groups, plot_params, var_type, header_txt):
         #print(plot_params[f'{var_type}'])
         #print(st.session_state.plot_plot_params)
 
-def panel_select_centile_type():
+def panel_select_centile_type(plot_params):
     '''
     User panel to select centile type
     '''
-    list_types = ['CN', 'CN-Female', 'CN-Males', 'CN-ICVNorm']
-    sel_ind = list_types.index(st.session_state.plot_params['centile_type'])
+    #FIXME (move to session state)
+    list_types = ['None', 'CN', 'CN-Females', 'CN-Males', 'CN-ICVNorm']
+    
+    sel_ind = list_types.index(plot_params['centile_type'])
     sel_type = st.selectbox(
         "Centile Type",
         list_types,
@@ -388,58 +390,82 @@ def panel_select_centile_type():
         help="Select Centile Type"
     )
     if sel_type is None:
-        return None
-    st.session_state.plot_params['centile_type'] = sel_type
-    
-    return sel_type
+        return
+    plot_params['centile_type'] = sel_type
 
-def panel_select_centile_values():
+def panel_select_centile_params(plot_params):
     '''
-    User panel to select centile values
+    User panel to select centile params
     '''
-    list_values = [
-        'centile_5', 'centile_25', 'centile_50', 'centile_75', 'centile_95',
-    ]
-    sel_vals = st.multiselect(
-        "Centile Values",
-        list_values,
-        st.session_state.plot_params['centile_values'],
-        help="Select Centile Values"
+    #FIXME (move to session state)
+    list_values = ['centile_5', 'centile_25', 'centile_50', 'centile_75', 'centile_95']
+
+    if plot_params['centile_type'] != 'None':
+        sel_vals = st.multiselect(
+            "Centile Values",
+            list_values,
+            plot_params['centile_values'],
+            help="Select Centile Values"
+        )
+        if sel_vals is None:
+            return
+        plot_params['centile_values'] = sel_vals
+
+def panel_select_trend_v0(plot_params):
+    '''
+    Panel to select trend
+    '''
+    list_trends = st.session_state.plot_settings["trend_types"]
+    curr_trend = plot_params['trend']
+    sel_ind = list_trends.index(curr_trend)
+    sel_trend = st.selectbox(
+        "Trend Line",
+        list_trends,
+        sel_ind
     )
-
-    if sel_vals is None:
-        return None
-    st.session_state.plot_params['centile_values'] = sel_vals
-    
-    return sel_vals
+    if sel_trend is None:
+        return
+    plot_params['trend'] = sel_trend
 
 def panel_select_trend(plot_params):
     '''
-    Panel to select trend variable
+    Panel to select trend
     '''
-    cols = st.columns(2)
-    
-    with cols[0]:
-        list_trends = st.session_state.plot_settings["trend_types"]
-        curr_trend = plot_params['trend']
-        sel_ind = list_trends.index(curr_trend)
-        sel_trend = st.selectbox(
-            "Trend Line",
-            list_trends,
-            sel_ind
-        )
-        if sel_trend is None:
-            return
+    list_trends = st.session_state.plot_settings["trend_types"]    
+    if '_sel_trend' not in st.session_state:
+        st.session_state['_sel_trend'] = plot_params['trend']
+    st.selectbox(
+        "Select trend type",
+        options = list_trends,
+        key='_sel_trend'
+    )
+    plot_params['trend'] = st.session_state['_sel_trend']
 
-    with cols[1]:
-        if sel_trend == 'Linear':
-            show_conf = st.checkbox(
-                'Add conf int',
-                value = plot_params['show_conf']
-            )
-    
-    plot_params['trend'] = sel_trend
-    plot_params['show_conf'] = show_conf
+def panel_select_trend_params(plot_params):
+    '''
+    Panel to select trend params
+    '''
+    if plot_params['trend'] == 'Linear':
+        if '_show_conf' not in st.session_state:
+            st.session_state['_show_conf'] = plot_params['show_conf']
+        else:
+            print(f'aaaa {st.session_state['_show_conf']}')
+        st.checkbox(
+            "Add confidence interval", 
+            key='_show_conf',
+            value = plot_params['show_conf']
+        )
+        plot_params['show_conf'] = st.session_state['_show_conf']
+
+    elif plot_params['trend'] == 'Smooth LOWESS Curve':
+        lowess_s = st.slider(
+            "Smoothness",
+            min_value=0.4,
+            max_value=1.0,
+            value=plot_params['lowess_s'],
+            step=0.1
+        )
+        plot_params['lowess_s'] = lowess_s
 
 def panel_set_plot_params(plot_params, var_groups_data, var_groups_hue, pipeline):
     """
@@ -463,18 +489,16 @@ def panel_set_plot_params(plot_params, var_groups_data, var_groups_hue, pipeline
 
             with ptabs[1]:
                 panel_select_trend(plot_params)
+                panel_select_trend_params(plot_params)
 
             with ptabs[2]:
                 panel_select_var(
                     var_groups_data, plot_params, 'hvar', 'Hue Variable'
                 )
 
-            #with ptabs[3]:
-                #ss_sel['centile_type'] = panel_select_centile_type()
-                #ss_sel['centile_values'] = panel_select_centile_values()
-                #ss_sel['flag_norm_centiles'] = st.checkbox(
-                    #'Normalize Centiles'
-                #)
+            with ptabs[3]:
+                panel_select_centile_type(plot_params)
+                panel_select_centile_params(plot_params)
 
             with ptabs[4]:
                 st.session_state.plot_settings["num_per_row"] = st.slider(

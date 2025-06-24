@@ -283,7 +283,7 @@ def init_plot_vars() -> None:
         "trend": "Linear",
         "show_conf": False,
         "traces": None,
-        "lowess_s": 0.5,
+        "lowess_s": 0.7,
         "centile_type": 'CN',
         "centile_values": ['centile_25', 'centile_50', 'centile_75'],
         "flag_norm_centiles": False
