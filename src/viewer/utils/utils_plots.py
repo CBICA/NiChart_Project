@@ -283,10 +283,10 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
     utiltr.add_trace_scatter(df, plot_params, plot_settings, fig)
 
     # Add linear fit
-    #utiltr.add_trace_linreg(df, plot_params, plot_settings, fig)
+    utiltr.add_trace_linreg(df, plot_params, plot_settings, fig)
 
-    ## Add centile trace
-    #utiltr.add_trace_centile(df_cent, plot_params, plot_settings, fig)
+    # Add centile trace
+    utiltr.add_trace_centile(df_cent, plot_params, plot_settings, fig)
 
     #st.plotly_chart(fig, key=f"bubble_chart_{plot_id}", on_select=callback_plot_clicked)
     st.plotly_chart(fig, key=f"bubble_chart_{plot_ind}")
@@ -346,8 +346,7 @@ def panel_select_var(sel_var_groups, plot_params, var_type, add_none = False):
             curr_index = 0
             
         if f'_{var_type}_group' not in st.session_state:
-            st.session_state[f'_{var_type}_group'] = plot_params[f'{var_type}_group']            
-        
+            st.session_state[f'_{var_type}_group'] = plot_params[f'{var_type}_group']                    
         st.selectbox(
             "Variable Group",
             list_group,
@@ -385,59 +384,6 @@ def panel_select_var(sel_var_groups, plot_params, var_type, add_none = False):
         
         plot_params[var_type] = st.session_state[f'_{var_type}']
 
-
-def panel_select_centile_type(plot_params):
-    '''
-    User panel to select centile type
-    '''
-    #FIXME (move to session state)
-    list_types = ['None', 'CN', 'CN-Females', 'CN-Males', 'CN-ICVNorm']
-    
-    sel_ind = list_types.index(plot_params['centile_type'])
-    sel_type = st.selectbox(
-        "Centile Type",
-        list_types,
-        sel_ind,
-        help="Select Centile Type"
-    )
-    if sel_type is None:
-        return
-    plot_params['centile_type'] = sel_type
-
-def panel_select_centile_params(plot_params):
-    '''
-    User panel to select centile params
-    '''
-    #FIXME (move to session state)
-    list_values = ['centile_5', 'centile_25', 'centile_50', 'centile_75', 'centile_95']
-
-    if plot_params['centile_type'] != 'None':
-        sel_vals = st.multiselect(
-            "Centile Values",
-            list_values,
-            plot_params['centile_values'],
-            help="Select Centile Values"
-        )
-        if sel_vals is None:
-            return
-        plot_params['centile_values'] = sel_vals
-
-def panel_select_trend_v0(plot_params):
-    '''
-    Panel to select trend
-    '''
-    list_trends = st.session_state.plot_settings["trend_types"]
-    curr_trend = plot_params['trend']
-    sel_ind = list_trends.index(curr_trend)
-    sel_trend = st.selectbox(
-        "Trend Line",
-        list_trends,
-        sel_ind
-    )
-    if sel_trend is None:
-        return
-    plot_params['trend'] = sel_trend
-
 def panel_select_trend(plot_params):
     '''
     Panel to select trend
@@ -452,10 +398,12 @@ def panel_select_trend(plot_params):
     )
     plot_params['trend'] = st.session_state['_sel_trend']
 
-def panel_select_trend_params(plot_params):
-    '''
-    Panel to select trend params
-    '''
+    if plot_params['trend'] is None:
+        return
+
+    if plot_params['trend'] == 'None':
+        return
+
     if plot_params['trend'] == 'Linear':
         if '_show_conf' not in st.session_state:
             st.session_state['_show_conf'] = plot_params['show_conf']
@@ -467,29 +415,93 @@ def panel_select_trend_params(plot_params):
         plot_params['show_conf'] = st.session_state['_show_conf']
 
     elif plot_params['trend'] == 'Smooth LOWESS Curve':
-        lowess_s = st.slider(
+        if '_lowess_s' not in st.session_state:
+            st.session_state['_lowess_s'] = plot_params['lowess_s']
+        st.slider(
             "Smoothness",
             min_value=0.4,
             max_value=1.0,
+            step=0.1,
+            key = '_lowess_s',
             value=plot_params['lowess_s'],
-            step=0.1
         )
-        plot_params['lowess_s'] = lowess_s
+        plot_params['lowess_s'] = st.session_state['_lowess_s']
 
-def panel_select_flag_hue(plot_params):
+def panel_select_centiles(plot_params):
     '''
-    Panel to select hue flag
+    User panel to select centile values
     '''
-    if '_flag_hue' not in st.session_state:
-        st.session_state['_flag_hue'] = plot_params['flag_hue']
-    st.checkbox(
-        "Group Data", 
-        key='_flag_hue',
-        value = plot_params['flag_hue']
+    #FIXME (move to session state)
+    list_types = ['None', 'CN', 'CN-Females', 'CN-Males', 'CN-ICVNorm']
+    list_values = ['centile_5', 'centile_25', 'centile_50', 'centile_75', 'centile_95']
+
+    ## Select centile type
+    try:
+        curr_value = plot_params['centile_type']
+        curr_index = list_types.index(curr_value)
+    except ValueError:
+        curr_index = 0
+    
+    if '_centile_type' not in st.session_state:
+        st.session_state['_centile_type'] = plot_params['centile_type']
+    st.selectbox(
+        "Centile Type",
+        list_types,
+        key = '_centile_type',
+        index = curr_index
     )
-    plot_params['flag_hue'] = st.session_state['_flag_hue']
+    plot_params['centile_type'] = st.session_state['_centile_type']
+    
+    if plot_params['centile_type'] is None:
+        return
 
-def panel_set_plot_params(plot_params, var_groups_data, var_groups_hue, pipeline):
+    if plot_params['centile_type'] == 'None':
+        return
+
+    ## Select centile values
+    if '_centile_values' not in st.session_state:
+        st.session_state['_centile_values'] = plot_params['centile_values']
+    st.multiselect(
+        "Centile Values",
+        list_values,
+        key = '_centile_values',
+        default = plot_params['centile_values']
+    )
+    plot_params['centile_values'] = st.session_state['_centile_values']
+
+
+def panel_select_settings(plot_params):
+    '''
+    Panel to select plot settings
+    '''
+    st.session_state.plot_settings["num_per_row"] = st.slider(
+        "Number of plots per row",
+        st.session_state.plot_settings["min_per_row"],
+        st.session_state.plot_settings["max_per_row"],
+        st.session_state.plot_settings["num_per_row"],
+        disabled=False,
+    )
+
+    plot_params["h_coeff"] = st.slider(
+        "Plot height",
+        min_value=st.session_state.plot_settings["h_coeff_min"],
+        max_value=st.session_state.plot_settings["h_coeff_max"],
+        value=st.session_state.plot_settings["h_coeff"],
+        step=st.session_state.plot_settings["h_coeff_step"],
+        disabled=False,
+    )
+
+    # Checkbox to show/hide plot legend
+    plot_params["hide_legend"] = st.checkbox(
+        "Hide legend",
+        value=st.session_state.plot_settings["hide_legend"],
+        disabled=False,
+    )
+
+
+def panel_set_plot_params(
+    plot_params, var_groups_data, var_groups_hue, pipeline
+):
     """
     Panel to set plotting parameters
     """
@@ -510,56 +522,33 @@ def panel_set_plot_params(plot_params, var_groups_data, var_groups_hue, pipeline
 
             with ptabs[1]:
                 # Select h var
-                panel_select_var(var_groups_data, plot_params, 'hvar', add_none = True)
-
+                panel_select_var(var_groups_hue, plot_params, 'hvar', add_none = True)
 
             with ptabs[2]:
                 panel_select_trend(plot_params)
-                panel_select_trend_params(plot_params)
 
             with ptabs[3]:
-                panel_select_centile_type(plot_params)
-                panel_select_centile_params(plot_params)
+                panel_select_centiles(plot_params)
 
             with ptabs[4]:
-                st.session_state.plot_settings["num_per_row"] = st.slider(
-                    "Number of plots per row",
-                    st.session_state.plot_settings["min_per_row"],
-                    st.session_state.plot_settings["max_per_row"],
-                    st.session_state.plot_settings["num_per_row"],
-                    disabled=False,
-                )
-
-                plot_params["h_coeff"] = st.slider(
-                    "Plot height",
-                    min_value=st.session_state.plot_settings["h_coeff_min"],
-                    max_value=st.session_state.plot_settings["h_coeff_max"],
-                    value=st.session_state.plot_settings["h_coeff"],
-                    step=st.session_state.plot_settings["h_coeff_step"],
-                    disabled=False,
-                )
-
-                # Checkbox to show/hide plot legend
-                plot_params["hide_legend"] = st.checkbox(
-                    "Hide legend",
-                    value=st.session_state.plot_settings["hide_legend"],
-                    disabled=False,
-                )
-
-    # Set plot type to centile
+                panel_select_settings(plot_params)
+                
+    # Set plot type
     plot_params['ptype'] = 'scatter'
-    plot_params['traces'] = ['data'] + plot_params['centile_values']
+    
+    # Set plot traces
+    plot_params['traces'] = ['data']
+
+    if plot_params['centile_values'] is not None:
+        plot_params['traces'] = plot_params['traces'] + plot_params['centile_values']
+
     if plot_params['trend'] == 'Linear':
         plot_params['traces'] = plot_params['traces'] + ['lin_fit']
-    #if plot_params['trend'] == 'Smooth LOWESS Curve':
-        #plot_params['traces'] = plot_params['traces'] + ['']
-    if plot_params['show_conf'] == True:
+
+    if plot_params['show_conf']:
         plot_params['traces'] = plot_params['traces'] + ['conf_95%']
         
     plot_params['method'] = pipeline
-    #plot_params['centile_type'] = ss_sel['centile_type']
-    #plot_params['centile_values'] = ss_sel['centile_values']
-    #plot_params['flag_norm_centiles'] = ss_sel['flag_norm_centiles']
     plot_params['flag_norm_centiles'] = False
 
     print(plot_params)

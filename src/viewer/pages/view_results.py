@@ -39,7 +39,10 @@ def plot_vars():
     pipeline = 'dlmuse'
 
     utilpl.panel_set_plot_params(
-        st.session_state.plot_params, var_groups_data, var_groups_hue, pipeline
+        st.session_state.plot_params,
+        var_groups_data,
+        var_groups_hue,
+        pipeline
     )
         
     utilpl.panel_show_plots()
