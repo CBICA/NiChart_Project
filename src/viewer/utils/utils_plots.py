@@ -123,6 +123,18 @@ def panel_view_centiles(method, var_type):
     )
 
 
+def read_data(fdata):
+    '''
+    Read data file and add column for hue
+    '''
+    # Read data file
+    df = pd.read_csv(fdata)
+    
+    # Add column to handle hue var = None
+    if 'grouping_var' not in df:
+        df["grouping_var"] = "Data"
+    
+    return df
 
 
 def add_plot(df_plots, new_plot_params):
@@ -184,6 +196,7 @@ def set_y_bounds(df: pd.DataFrame, df_plots: pd.DataFrame, plot_id: str, yvar: s
         ymax = ymax + dy / 5
     df_plots.loc[plot_id, "ymax"] = ymax
     df_plots.loc[plot_id, "ymin"] = ymin
+    
 
 def display_dist_plot(df, plot_params, plot_ind, plot_settings):
     '''
@@ -265,15 +278,15 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
     fig.update_layout(
         xaxis_title = plot_params["xvar"], yaxis_title = plot_params["yvar"]
     )
-
+    
     # Add data scatter
     utiltr.add_trace_scatter(df, plot_params, plot_settings, fig)
 
     # Add linear fit
-    utiltr.add_trace_linreg(df, plot_params, plot_settings, fig)
+    #utiltr.add_trace_linreg(df, plot_params, plot_settings, fig)
 
-    # Add centile trace
-    utiltr.add_trace_centile(df_cent, plot_params, plot_settings, fig)
+    ## Add centile trace
+    #utiltr.add_trace_centile(df_cent, plot_params, plot_settings, fig)
 
     #st.plotly_chart(fig, key=f"bubble_chart_{plot_id}", on_select=callback_plot_clicked)
     st.plotly_chart(fig, key=f"bubble_chart_{plot_ind}")
@@ -313,67 +326,134 @@ def show_plots(df, df_plots, plot_settings):
 
 ###################################################################
 # Panels
-def panel_select_var(sel_var_groups, plot_params, var_type, header_txt):
+def panel_select_var_group(sel_var_groups, plot_params, var_type):
     '''
-    User panel to update a plot variable
+    User panel to update var group
     '''
     # Select var groups
     df_groups = st.session_state.dicts['df_var_groups'].copy()
     df_groups = df_groups[df_groups.category.isin(sel_var_groups)]
 
-    st.markdown(f'##### {header_txt}')
+    list_group = df_groups.group.unique()
+    curr_group = plot_params[f'{var_type}_group']
+    sel_ind = utilmisc.get_index_in_list(
+        list_group, curr_group
+    )
+    sel_group = st.selectbox(
+        "Variable Group",
+        list_group,
+        sel_ind,
+        help="Select ROI group",
+        key = f'_sel_roigroup_{var_type}'
+    )
+    if sel_group is None:
+        return
 
-    col1, col2 = st.columns([1,3])
+    plot_params[f'{var_type}_group'] = sel_group    
 
-    # Select var group
-    with col1:
-        list_group = df_groups.group.unique()
-        curr_group = plot_params[f'{var_type}_group']
-        sel_ind = utilmisc.get_index_in_list(
-            list_group, curr_group
-        )
-        sel_group = st.selectbox(
+def panel_select_var_value(plot_params, var_type, add_none = False):
+    '''
+    User panel to update a variable
+    '''
+    sel_group = plot_params[f'{var_type}_group']
+    if sel_group is None:
+        return
+    
+    df_groups = st.session_state.dicts['df_var_groups']
+    sel_atlas = df_groups[df_groups['group'] == sel_group]['atlas'].values[0]
+    list_vars = df_groups[df_groups['group'] == sel_group]['values'].values[0]
+        
+    # Convert MUSE ROI variables from index to name
+    if sel_atlas == 'muse':
+        roi_dict = st.session_state.dicts['muse']['ind_to_name']
+        list_vars = [roi_dict[k] for k in list_vars]
+
+    if add_none:
+        list_vars = ['None'] + list_vars
+
+    curr_var = plot_params[var_type]
+    sel_ind = utilmisc.get_index_in_list(list_vars, curr_var)
+    
+    sel_var = st.selectbox(
+        "Variable Name",
+        list_vars,
+        sel_ind,
+        help="Select a variable from the list",
+        key = f'_sel_varname_{var_type}'
+    )
+
+    if sel_var is None:
+        return
+
+    plot_params[f'{var_type}'] = sel_var
+
+def panel_select_var_v0(sel_var_groups, plot_params, var_type, add_none = False):
+    '''
+    User panel to update var
+    '''
+    st.markdown(f'##### Variable: {var_type}')
+    cols = st.columns([1,3])
+    with cols[0]:
+        panel_select_var_group(sel_var_groups, plot_params, var_type)
+    with cols[1]:
+        panel_select_var_value(plot_params, var_type, add_none)
+
+
+def panel_select_var(sel_var_groups, plot_params, var_type, add_none = False):
+    '''
+    User panel to update var
+    '''
+    df_groups = st.session_state.dicts['df_var_groups'].copy()
+    df_groups = df_groups[df_groups.category.isin(sel_var_groups)]
+
+    st.markdown(f'##### Variable: {var_type}')
+    cols = st.columns([1,3])
+    with cols[0]:
+        list_group = df_groups.group.unique().tolist()
+        if f'_{var_type}_group' not in st.session_state:
+            st.session_state[f'_{var_type}_group'] = plot_params[f'{var_type}_group']
+        
+        try:
+            curr_value = plot_params[f'{var_type}_group']
+            curr_index = list_group.index(curr_value)
+        except ValueError:
+            curr_index = 0
+            
+        st.selectbox(
             "Variable Group",
             list_group,
-            sel_ind,
-            help="Select ROI group",
-            key = f'_sel_roigroup_{var_type}'
+            key = f'_{var_type}_group',
+            index = curr_index
         )
+        plot_params[f'{var_type}_group'] = st.session_state[f'_{var_type}_group']
+
+    with cols[1]:
+
+        sel_group = plot_params[f'{var_type}_group']
         if sel_group is None:
             return
         
-    # Select var name
-    with col2:
         sel_atlas = df_groups[df_groups['group'] == sel_group]['atlas'].values[0]
         list_vars = df_groups[df_groups['group'] == sel_group]['values'].values[0]
-        
+            
         # Convert MUSE ROI variables from index to name
         if sel_atlas == 'muse':
             roi_dict = st.session_state.dicts['muse']['ind_to_name']
             list_vars = [roi_dict[k] for k in list_vars]
-    
-        curr_var = plot_params[var_type]
-        sel_ind = utilmisc.get_index_in_list(
-            list_vars, curr_var
-        )
-        sel_var = st.selectbox(
+
+        if add_none:
+            list_vars = ['None'] + list_vars
+
+        if f'_{var_type}' not in st.session_state:
+            st.session_state[f'_{var_type}'] = plot_params[f'{var_type}']
+        st.selectbox(
             "Variable Name",
             list_vars,
-            sel_ind,
-            help="Select a variable from the list",
-            key = f'_sel_varname_{var_type}'
+            key = f'_{var_type}',
         )
+        plot_params[var_type] = st.session_state[f'_{var_type}']
 
-        if sel_var is None:
-            return
 
-        plot_params[f'{var_type}_group'] = sel_group
-        plot_params[f'{var_type}'] = sel_var
-        
-        #print('changed plot_params')
-        #print(var_type)
-        #print(plot_params[f'{var_type}'])
-        #print(st.session_state.plot_plot_params)
 
 def panel_select_centile_type(plot_params):
     '''
@@ -448,8 +528,6 @@ def panel_select_trend_params(plot_params):
     if plot_params['trend'] == 'Linear':
         if '_show_conf' not in st.session_state:
             st.session_state['_show_conf'] = plot_params['show_conf']
-        else:
-            print(f'aaaa {st.session_state['_show_conf']}')
         st.checkbox(
             "Add confidence interval", 
             key='_show_conf',
@@ -467,6 +545,19 @@ def panel_select_trend_params(plot_params):
         )
         plot_params['lowess_s'] = lowess_s
 
+def panel_select_flag_hue(plot_params):
+    '''
+    Panel to select hue flag
+    '''
+    if '_flag_hue' not in st.session_state:
+        st.session_state['_flag_hue'] = plot_params['flag_hue']
+    st.checkbox(
+        "Group Data", 
+        key='_flag_hue',
+        value = plot_params['flag_hue']
+    )
+    plot_params['flag_hue'] = st.session_state['_flag_hue']
+
 def panel_set_plot_params(plot_params, var_groups_data, var_groups_hue, pipeline):
     """
     Panel to set plotting parameters
@@ -477,24 +568,23 @@ def panel_set_plot_params(plot_params, var_groups_data, var_groups_hue, pipeline
     with st.container(border=True):
         if not flag_settings:
             ptabs = st.tabs(
-                ['Data', 'Fit', 'Groups', 'Centiles', 'Plot Settings']
+                ['Data', 'Groups', 'Fit', 'Centiles', 'Plot Settings']
             )
             with ptabs[0]:
-                panel_select_var(
-                    var_groups_data, plot_params, 'xvar', 'X Variable'
-                )
-                panel_select_var(
-                    var_groups_data, plot_params, 'yvar', 'Y Variable'
-                )
+                # Select x var
+                panel_select_var(var_groups_data, plot_params, 'xvar')
+                    
+                # Select y var
+                panel_select_var(var_groups_data, plot_params, 'yvar')
 
             with ptabs[1]:
-                panel_select_trend(plot_params)
-                panel_select_trend_params(plot_params)
+                # Select h var
+                panel_select_var(var_groups_data, plot_params, 'hvar', add_none = True)
+
 
             with ptabs[2]:
-                panel_select_var(
-                    var_groups_data, plot_params, 'hvar', 'Hue Variable'
-                )
+                panel_select_trend(plot_params)
+                panel_select_trend_params(plot_params)
 
             with ptabs[3]:
                 panel_select_centile_type(plot_params)
@@ -530,6 +620,8 @@ def panel_set_plot_params(plot_params, var_groups_data, var_groups_hue, pipeline
     plot_params['traces'] = ['data'] + plot_params['centile_values']
     if plot_params['trend'] == 'Linear':
         plot_params['traces'] = plot_params['traces'] + ['lin_fit']
+    #if plot_params['trend'] == 'Smooth LOWESS Curve':
+        #plot_params['traces'] = plot_params['traces'] + ['']
     if plot_params['show_conf'] == True:
         plot_params['traces'] = plot_params['traces'] + ['conf_95%']
         

@@ -27,30 +27,16 @@ def add_trace_scatter(
 
     # Get hue params
     hvar = plot_params['hvar']
-    hvals = plot_params['hvals']
-
-    # Add a tmp column if group var is not set
-    dft = df.copy()
-    if hvar is None:
-        hvar = "grouping_var"
-        hvals = None
-        dft["grouping_var"] = "Data"
-    vals_hue_all = dft[hvar].sort_values().unique().tolist()
-
+    hvals = plot_params['hvals']    
+    if hvar is None or hvar == 'None':
+        hvar = 'grouping_var'
     if hvals is None:
-        hvals = vals_hue_all
-
-    st.write(hvals)
+        hvals = df[hvar].dropna().sort_values().unique().tolist()
 
     if "data" in plot_params['traces']:
         for hname in hvals:
-            col_ind = vals_hue_all.index(hname)  # Select index of colour for the category
-            dfh = dft[dft[hvar] == hname]
-
-            #st.dataframe(dft)
-            #st.write(hvals)
-            #st.write(plot_params)
-                        
+            col_ind = hvals.index(hname)  # Select index of colour for the category
+            dfh = df[df[hvar] == hname]
             trace = go.Scatter(
                 x=dfh[plot_params['xvar']],
                 y=dfh[plot_params['yvar']],
