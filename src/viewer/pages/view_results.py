@@ -44,6 +44,8 @@ def plot_vars():
         var_groups_hue,
         pipeline
     )
+
+    print(st.session_state.plot_params)
         
     utilpl.panel_show_plots()
 

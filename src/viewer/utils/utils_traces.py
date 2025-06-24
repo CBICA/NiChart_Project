@@ -78,6 +78,9 @@ def add_trace_linreg(
     if hvals is None:
         hvals = vals_hue_all
 
+    print(hvar)
+    print(hvals)
+
     # Calculate fit
     dict_fit = utilstat.linreg_model(
         dft, plot_params['xvar'], plot_params['yvar'], hvar

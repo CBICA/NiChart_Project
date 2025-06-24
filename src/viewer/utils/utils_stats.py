@@ -16,6 +16,8 @@ def linreg_model(df: pd.DataFrame, xvar: str, yvar: str, hvar: str) -> Any:
     else:
         dft = df[[xvar, yvar, hvar]].sort_values(xvar)
 
+    dft = dft.dropna()
+
     # Add traces for the fit
     dict_out = {}
     for hname, dfh in dft.groupby(hvar):
