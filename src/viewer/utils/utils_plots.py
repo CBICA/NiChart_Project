@@ -326,82 +326,10 @@ def show_plots(df, df_plots, plot_settings):
 
 ###################################################################
 # Panels
-def panel_select_var_group(sel_var_groups, plot_params, var_type):
-    '''
-    User panel to update var group
-    '''
-    # Select var groups
-    df_groups = st.session_state.dicts['df_var_groups'].copy()
-    df_groups = df_groups[df_groups.category.isin(sel_var_groups)]
-
-    list_group = df_groups.group.unique()
-    curr_group = plot_params[f'{var_type}_group']
-    sel_ind = utilmisc.get_index_in_list(
-        list_group, curr_group
-    )
-    sel_group = st.selectbox(
-        "Variable Group",
-        list_group,
-        sel_ind,
-        help="Select ROI group",
-        key = f'_sel_roigroup_{var_type}'
-    )
-    if sel_group is None:
-        return
-
-    plot_params[f'{var_type}_group'] = sel_group    
-
-def panel_select_var_value(plot_params, var_type, add_none = False):
-    '''
-    User panel to update a variable
-    '''
-    sel_group = plot_params[f'{var_type}_group']
-    if sel_group is None:
-        return
-    
-    df_groups = st.session_state.dicts['df_var_groups']
-    sel_atlas = df_groups[df_groups['group'] == sel_group]['atlas'].values[0]
-    list_vars = df_groups[df_groups['group'] == sel_group]['values'].values[0]
-        
-    # Convert MUSE ROI variables from index to name
-    if sel_atlas == 'muse':
-        roi_dict = st.session_state.dicts['muse']['ind_to_name']
-        list_vars = [roi_dict[k] for k in list_vars]
-
-    if add_none:
-        list_vars = ['None'] + list_vars
-
-    curr_var = plot_params[var_type]
-    sel_ind = utilmisc.get_index_in_list(list_vars, curr_var)
-    
-    sel_var = st.selectbox(
-        "Variable Name",
-        list_vars,
-        sel_ind,
-        help="Select a variable from the list",
-        key = f'_sel_varname_{var_type}'
-    )
-
-    if sel_var is None:
-        return
-
-    plot_params[f'{var_type}'] = sel_var
-
-def panel_select_var_v0(sel_var_groups, plot_params, var_type, add_none = False):
-    '''
-    User panel to update var
-    '''
-    st.markdown(f'##### Variable: {var_type}')
-    cols = st.columns([1,3])
-    with cols[0]:
-        panel_select_var_group(sel_var_groups, plot_params, var_type)
-    with cols[1]:
-        panel_select_var_value(plot_params, var_type, add_none)
-
-
 def panel_select_var(sel_var_groups, plot_params, var_type, add_none = False):
     '''
-    User panel to update var
+    User panel to select a variable 
+    Variables are grouped in categories
     '''
     df_groups = st.session_state.dicts['df_var_groups'].copy()
     df_groups = df_groups[df_groups.category.isin(sel_var_groups)]
@@ -409,22 +337,24 @@ def panel_select_var(sel_var_groups, plot_params, var_type, add_none = False):
     st.markdown(f'##### Variable: {var_type}')
     cols = st.columns([1,3])
     with cols[0]:
-        list_group = df_groups.group.unique().tolist()
-        if f'_{var_type}_group' not in st.session_state:
-            st.session_state[f'_{var_type}_group'] = plot_params[f'{var_type}_group']
         
+        list_group = df_groups.group.unique().tolist()
         try:
             curr_value = plot_params[f'{var_type}_group']
             curr_index = list_group.index(curr_value)
         except ValueError:
             curr_index = 0
             
+        if f'_{var_type}_group' not in st.session_state:
+            st.session_state[f'_{var_type}_group'] = plot_params[f'{var_type}_group']            
+        
         st.selectbox(
             "Variable Group",
             list_group,
             key = f'_{var_type}_group',
             index = curr_index
         )
+        
         plot_params[f'{var_type}_group'] = st.session_state[f'_{var_type}_group']
 
     with cols[1]:
@@ -446,13 +376,14 @@ def panel_select_var(sel_var_groups, plot_params, var_type, add_none = False):
 
         if f'_{var_type}' not in st.session_state:
             st.session_state[f'_{var_type}'] = plot_params[f'{var_type}']
+            
         st.selectbox(
             "Variable Name",
             list_vars,
             key = f'_{var_type}',
         )
+        
         plot_params[var_type] = st.session_state[f'_{var_type}']
-
 
 
 def panel_select_centile_type(plot_params):
