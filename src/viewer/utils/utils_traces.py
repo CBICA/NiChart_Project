@@ -58,7 +58,8 @@ def add_trace_linreg(
     Add linear fit and confidence interval
     """
     # Set colormap
-    colors = plot_settings['cmaps']['data']
+    #colors = plot_settings['cmaps']['data']
+    colors = plot_settings['cmaps2']
 
     # Get hue params
     hvar = plot_params['hvar']
@@ -77,43 +78,45 @@ def add_trace_linreg(
 
     # Add traces for the fit and confidence intervals
     if "lin_fit" in traces:
-        for hname in hvals:
+        for i, hname in enumerate(hvals):
             col_ind = hvals.index(
                 hname
             )  # Select index of colour for the category
             x_hat = dict_fit[hname]["x_hat"]
             y_hat = dict_fit[hname]["y_hat"]
+            #line = {"color": colors[col_ind]}
+            line = {"color": colors[f'Data {i+1}']}
             trace = go.Scatter(
                 x=x_hat,
                 y=y_hat,
                 mode="lines",
-                line={"color": colors[col_ind]},
+                line=line,
                 name=f"lin_{hname}",
                 legendgroup=hname,
                 showlegend=not plot_params['hide_legend'],
             )
             fig.add_trace(trace)
 
-    if "conf_95%" in traces:
-        for hname in hvals:
-            col_ind = hvals.index(
-                hname
-            )  # Select index of colour for the category
-            x_hat = dict_fit[hname]["x_hat"]
-            y_hat = dict_fit[hname]["y_hat"]
-            conf_int = dict_fit[hname]["conf_int"]
-            trace = go.Scatter(
-                x=np.concatenate([x_hat, x_hat[::-1]]),
-                y=np.concatenate([conf_int[:, 0], conf_int[:, 1][::-1]]),
-                fill="toself",
-                fillcolor=f"rgba({colors[col_ind][4:-1]}, 0.2)",  # Add alpha channel
-                line=dict(color=f"rgba({colors[col_ind][4:-1]}, 0)"),
-                hoverinfo="skip",
-                name=f"lin_conf95_{hname}",
-                legendgroup=hname,
-                showlegend=not plot_params['hide_legend'],
-            )
-            fig.add_trace(trace)
+    #if "conf_95%" in traces:
+        #for hname in hvals:
+            #col_ind = hvals.index(
+                #hname
+            #)  # Select index of colour for the category
+            #x_hat = dict_fit[hname]["x_hat"]
+            #y_hat = dict_fit[hname]["y_hat"]
+            #conf_int = dict_fit[hname]["conf_int"]
+            #trace = go.Scatter(
+                #x=np.concatenate([x_hat, x_hat[::-1]]),
+                #y=np.concatenate([conf_int[:, 0], conf_int[:, 1][::-1]]),
+                #fill="toself",
+                #fillcolor=f"rgba({colors[col_ind][4:-1]}, 0.2)",  # Add alpha channel
+                #line=dict(color=f"rgba({colors[col_ind][4:-1]}, 0)"),
+                #hoverinfo="skip",
+                #name=f"lin_conf95_{hname}",
+                #legendgroup=hname,
+                #showlegend=not plot_params['hide_legend'],
+            #)
+            #fig.add_trace(trace)
 
     # fig.update_layout(xaxis_range=[xmin, xmax])
     # fig.update_layout(yaxis_range=[ymin, ymax])
