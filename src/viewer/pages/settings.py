@@ -3,6 +3,7 @@ import utils.utils_pages as utilpg
 #import utils.utils_doc as utildoc
 import utils.utils_io as utilio
 import utils.utils_session as utilss
+import utils.utils_cmaps as utilcmap    
 import os
 
 from utils.utils_logger import setup_logger
@@ -237,7 +238,7 @@ sel_config_cat = st.radio(
 if sel_config_cat == "Basic":
     sel_config = st.selectbox(
         "Select Basic Config",
-        ["Output Dir", "Task Name", "Misc"],
+        ["Output Dir", "Task Name", "Misc", "cmap"],
         index=None,
         #selection_mode="single",
         #default=None,
@@ -253,6 +254,12 @@ if sel_config_cat == "Basic":
 
     if sel_config == "Misc":
         panel_misc()
+
+    if sel_config == "cmap":
+        sel_cmap = utilcmap.panel_update_cmap(
+            st.session_state.plot_settings['cmaps2']
+        )
+        st.session_state.plot_settings['cmaps2'] = sel_cmap
 
 elif sel_config_cat == "Advanced":
     del st.session_state["_sel_config_cat"]

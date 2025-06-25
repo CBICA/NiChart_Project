@@ -285,6 +285,9 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
     # Add linear fit
     utiltr.add_trace_linreg(df, plot_params, plot_settings, fig)
 
+    # Add non-linear fit
+    utiltr.add_trace_lowess(df, plot_params, plot_settings, fig)
+
     # Add centile trace
     utiltr.add_trace_centile(df_cent, plot_params, plot_settings, fig)
 
@@ -345,15 +348,12 @@ def panel_select_var(sel_var_groups, plot_params, var_type, add_none = False):
         except ValueError:
             curr_index = 0
             
-        if f'_{var_type}_group' not in st.session_state:
-            st.session_state[f'_{var_type}_group'] = plot_params[f'{var_type}_group']                    
         st.selectbox(
             "Variable Group",
             list_group,
             key = f'_{var_type}_group',
             index = curr_index
         )
-        
         plot_params[f'{var_type}_group'] = st.session_state[f'_{var_type}_group']
 
     with cols[1]:
@@ -364,7 +364,7 @@ def panel_select_var(sel_var_groups, plot_params, var_type, add_none = False):
         
         sel_atlas = df_groups[df_groups['group'] == sel_group]['atlas'].values[0]
         list_vars = df_groups[df_groups['group'] == sel_group]['values'].values[0]
-            
+        
         # Convert MUSE ROI variables from index to name
         if sel_atlas == 'muse':
             roi_dict = st.session_state.dicts['muse']['ind_to_name']
@@ -373,13 +373,17 @@ def panel_select_var(sel_var_groups, plot_params, var_type, add_none = False):
         if add_none:
             list_vars = ['None'] + list_vars
 
-        if f'_{var_type}' not in st.session_state:
-            st.session_state[f'_{var_type}'] = plot_params[f'{var_type}']
+        try:
+            curr_value = plot_params[var_type]
+            curr_index = list_vars.index(curr_value)
+        except ValueError:
+            curr_index = 0
             
         st.selectbox(
             "Variable Name",
             list_vars,
             key = f'_{var_type}',
+            index = curr_index
         )
         
         plot_params[var_type] = st.session_state[f'_{var_type}']
@@ -388,13 +392,18 @@ def panel_select_trend(plot_params):
     '''
     Panel to select trend
     '''
-    list_trends = st.session_state.plot_settings["trend_types"]    
-    if '_sel_trend' not in st.session_state:
-        st.session_state['_sel_trend'] = plot_params['trend']
+    list_trends = st.session_state.plot_settings["trend_types"]
+    try:
+        curr_value = plot_params['trend']
+        curr_index = list_trends.index(curr_value)
+    except ValueError:
+        curr_index = 0
+    
     st.selectbox(
         "Select trend type",
         options = list_trends,
-        key='_sel_trend'
+        key='_sel_trend',
+        index = curr_index
     )
     plot_params['trend'] = st.session_state['_sel_trend']
 
@@ -405,8 +414,8 @@ def panel_select_trend(plot_params):
         return
 
     if plot_params['trend'] == 'Linear':
-        if '_show_conf' not in st.session_state:
-            st.session_state['_show_conf'] = plot_params['show_conf']
+        #if '_show_conf' not in st.session_state:
+            #st.session_state['_show_conf'] = plot_params['show_conf']
         st.checkbox(
             "Add confidence interval", 
             key='_show_conf',
@@ -415,8 +424,8 @@ def panel_select_trend(plot_params):
         plot_params['show_conf'] = st.session_state['_show_conf']
 
     elif plot_params['trend'] == 'Smooth LOWESS Curve':
-        if '_lowess_s' not in st.session_state:
-            st.session_state['_lowess_s'] = plot_params['lowess_s']
+        #if '_lowess_s' not in st.session_state:
+            #st.session_state['_lowess_s'] = plot_params['lowess_s']
         st.slider(
             "Smoothness",
             min_value=0.4,
@@ -442,8 +451,8 @@ def panel_select_centiles(plot_params):
     except ValueError:
         curr_index = 0
     
-    if '_centile_type' not in st.session_state:
-        st.session_state['_centile_type'] = plot_params['centile_type']
+    #if '_centile_type' not in st.session_state:
+        #st.session_state['_centile_type'] = plot_params['centile_type']
     st.selectbox(
         "Centile Type",
         list_types,
@@ -459,8 +468,8 @@ def panel_select_centiles(plot_params):
         return
 
     ## Select centile values
-    if '_centile_values' not in st.session_state:
-        st.session_state['_centile_values'] = plot_params['centile_values']
+    #if '_centile_values' not in st.session_state:
+        #st.session_state['_centile_values'] = plot_params['centile_values']
     st.multiselect(
         "Centile Values",
         list_values,
@@ -547,6 +556,9 @@ def panel_set_plot_params(
 
     if plot_params['show_conf']:
         plot_params['traces'] = plot_params['traces'] + ['conf_95%']
+
+    if plot_params['trend'] == 'Smooth LOWESS Curve':
+        plot_params['traces'] = plot_params['traces'] + ['lowess']
         
     plot_params['method'] = pipeline
     plot_params['flag_norm_centiles'] = False

@@ -63,33 +63,22 @@ def add_trace_linreg(
     # Get hue params
     hvar = plot_params['hvar']
     hvals = plot_params['hvals']
-    traces = plot_params['traces']
-
-    # Add a tmp column if group var is not set
-    dft = df.copy()
-    if hvar is None:
-        hvar = "grouping_var"
-        hvals = None        
-        dft["grouping_var"] = "Data"
-        
-    dft = dft.dropna(subset = hvar)
-    vals_hue_all = dft[hvar].sort_values().unique().tolist()
-    
+    if hvar is None or hvar == 'None':
+        hvar = 'grouping_var'
     if hvals is None:
-        hvals = vals_hue_all
+        hvals = df[hvar].dropna().sort_values().unique().tolist()
 
-    print(hvar)
-    print(hvals)
-
+    traces = plot_params['traces']
+        
     # Calculate fit
     dict_fit = utilstat.linreg_model(
-        dft, plot_params['xvar'], plot_params['yvar'], hvar
+        df, plot_params['xvar'], plot_params['yvar'], hvar
     )
 
     # Add traces for the fit and confidence intervals
     if "lin_fit" in traces:
         for hname in hvals:
-            col_ind = vals_hue_all.index(
+            col_ind = hvals.index(
                 hname
             )  # Select index of colour for the category
             x_hat = dict_fit[hname]["x_hat"]
@@ -107,7 +96,7 @@ def add_trace_linreg(
 
     if "conf_95%" in traces:
         for hname in hvals:
-            col_ind = vals_hue_all.index(
+            col_ind = hvals.index(
                 hname
             )  # Select index of colour for the category
             x_hat = dict_fit[hname]["x_hat"]
@@ -131,31 +120,31 @@ def add_trace_linreg(
     return fig
 
 def add_trace_lowess(df: pd.DataFrame, plot_params: dict, plot_settings: dict, fig: Any) -> None:
+    # Check trace
+    traces = plot_params['traces']
+    if 'lowess' not in traces:
+        return fig
+
     # Set colormap
     colors = plot_settings['cmaps']['data']
 
     # Get hue params
     hvar = plot_params['hvar']
     hvals = plot_params['hvals']
+    if hvar is None or hvar == 'None':
+        hvar = 'grouping_var'
+    if hvals is None:
+        hvals = df[hvar].dropna().sort_values().unique().tolist()
 
-    # Add a tmp column if group var is not set
-    dft = df.copy()
-    if hvar == "":
-        hvar = "All"
-        dft["All"] = "data"
-        vals_hue_all = ["All"]
-
-    vals_hue_all = sorted(dft[hvar].unique())
-    if hvals == []:
-        hvals = vals_hue_all
-
+    lowess_s = plot_params['lowess_s']
+        
     dict_fit = utilstat.lowess_model(
-        dft, plot_params['xvar'], plot_params['yvar'], hvar, lowess_s
+        df, plot_params['xvar'], plot_params['yvar'], hvar, lowess_s
     )
 
     # Add traces for the fit and confidence intervals
     for hname in hvals:
-        col_ind = vals_hue_all.index(hname)  # Select index of colour for the category
+        col_ind = hvals.index(hname)  # Select index of colour for the category
         x_hat = dict_fit[hname]["x_hat"]
         y_hat = dict_fit[hname]["y_hat"]
         trace = go.Scatter(

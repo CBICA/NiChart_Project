@@ -9,14 +9,10 @@ import streamlit as st
 
 @st.cache_data()  # type:ignore
 def linreg_model(df: pd.DataFrame, xvar: str, yvar: str, hvar: str) -> Any:
-    if hvar == "":
-        dft = df[[xvar, yvar]].sort_values(xvar)
-        hvar = "All"
-        dft["All"] = "Data"
-    else:
-        dft = df[[xvar, yvar, hvar]].sort_values(xvar)
-
-    dft = dft.dropna()
+    '''
+    Fit linear regression model to data
+    '''
+    dft = df[[xvar, yvar, hvar]].dropna().sort_values(xvar)
 
     # Add traces for the fit
     dict_out = {}

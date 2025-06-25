@@ -219,6 +219,11 @@ def init_plot_vars() -> None:
 
     # Color maps for plots
     cmaps = {
+        "dset": {
+            'd1': '#E69F00',
+            'd2': '#E69F00',
+            'd3': '#333333'
+        },
         "data": px.colors.qualitative.Set1,
         "centile": [
             "rgba(0, 0, 120, 0.5)",
@@ -228,6 +233,21 @@ def init_plot_vars() -> None:
             "rgba(0, 0, 120, 0.5)",
         ],
     }
+
+    cmaps2 = {
+        "Data 1": '#E69F00',
+        "Data 2": '#E69F00',
+        "Data 3": '#E69F00',
+        "Data 4": '#E69F00',
+        "Data 5": '#E69F00',
+        "Data 6": '#E69F00',
+        "Centile 5": '#000066',
+        "Centile 25": '#000066',
+        "Centile 50": '#000066',
+        "Centile 75": '#000066',
+        "Centile 95": '#000066'
+    }
+
 
     # Plot data
     st.session_state.plot_data = {
@@ -262,6 +282,7 @@ def init_plot_vars() -> None:
         "h_coeff_step": 0.2,
         "distplot_binnum": 100,
         "cmaps": cmaps,
+        "cmaps2": cmaps2,
     }
 
     # Plot parameters specific to each plot
@@ -275,17 +296,17 @@ def init_plot_vars() -> None:
         "yvar": 'GM',
         "ymin": None,
         "ymax": None,
-        "hvar_group": None,
-        "hvar": None,
+        "hvar_group": 'cat_vars',
+        "hvar": 'Sex',
         "hvals": None,
         "corr_icv": False,
         "plot_cent_normalized": False,
         "trend": "Linear",
-        "show_conf": False,
+        "show_conf": True,
         "traces": None,
         "lowess_s": 0.7,
         "centile_type": 'CN',
-        "centile_values": ['centile_25', 'centile_50', 'centile_75'],
+        "centile_values": ['centile_50'],
         "flag_norm_centiles": False
     }
 
