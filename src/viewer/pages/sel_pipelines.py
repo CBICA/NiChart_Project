@@ -9,6 +9,10 @@ import utils.utils_processes as utilprc
 import utils.utils_session as utilses
 from streamlit_image_select import image_select
 import re
+from utils.utils_logger import setup_logger
+
+logger = setup_logger()
+logger.debug('Page: Select Pipelines')
 
 def view_input_data(method) -> None:
     """

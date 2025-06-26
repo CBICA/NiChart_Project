@@ -258,7 +258,7 @@ def init_plot_vars() -> None:
         ],
         "min_per_row": 1,
         "max_per_row": 5,
-        "num_per_row": 1,
+        "num_per_row": 3,
         "margin": 20,
         "h_init": 500,
         "h_coeff": 1.0,
@@ -293,7 +293,8 @@ def init_plot_vars() -> None:
         "lowess_s": 0.7,
         "centile_type": 'CN',
         "centile_values": ['centile_50'],
-        "flag_norm_centiles": False
+        "flag_norm_centiles": False,
+        'flag_select': True
     }
 
     ###################################

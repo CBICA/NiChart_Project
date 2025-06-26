@@ -2,6 +2,10 @@ import streamlit as st
 import utils.utils_pages as utilpg
 import utils.utils_session as utilses
 import os
+from utils.utils_logger import setup_logger
+
+logger = setup_logger()
+logger.debug('Page: Download Results')
 
 
 

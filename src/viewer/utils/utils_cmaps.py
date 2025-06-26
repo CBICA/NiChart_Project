@@ -6,33 +6,32 @@ import plotly.express as px
 # Color maps for plots
 cmaps_init = {
     'data': {
-        'd1': 'rgba(230, 0, 0, 1.0)',
-        'd2': 'rgba(0, 230, 0, 1.0)',
-        'd3': 'rgba(0, 0, 230, 1.0)',
-        'd4': 'rgba(230, 0, 0, 1.0)',
-        'd5': 'rgba(0, 230, 0, 1.0)',
-        'd6': 'rgba(0, 0, 230, 1.0)',
+        'd1': [230, 0, 0, 1.0],
+        'd2': [0, 230, 0, 1.0],
+        'd3': [0, 0, 230, 1.0],
+        'd4': [230, 0, 0, 1.0],
+        'd5': [0, 230, 0, 1.0],
+        'd6': [0, 0, 230, 1.0],
     },
     'centiles': {
-        'Centile 5': 'rgba(0, 0, 17, 1.0)',
-        'Centile 25': 'rgba(0, 0, 51, 1.0)',
-        'Centile 50': 'rgba(0, 0, 102, 1.0)',
-        'Centile 75': 'rgba(0, 0, 153, 1.0)',
-        'Centile 95': 'rgba(0, 0, 221, 1.0)',
+        'Centile 5': [0, 0, 17, 1.0],
+        'Centile 25': [0, 0, 51, 1.0],
+        'Centile 50': [0, 0, 102, 1.0],
+        'Centile 75': [0, 0, 153, 1.0],
+        'Centile 95': [0, 0, 221, 1.0],
     },
     'fit lines': {
-        'linfit': 'rgba(221, 0, 0, 1.0)',
-        'conf95': 'rgba(153, 0, 0, 1.0)',
-        'lowess': 'rgba(51, 0, 0, 1.0)',
+        'linfit': [221, 0, 0, 1.0],
+        'conf95': [153, 0, 0, 1.0],
+        'lowess': [51, 0, 0, 1.0],
     }
 }
 
-def rgba_picker(rgba_init='rgba(255, 0, 0, 1.0)', label="Pick a color"):
+def rgba_picker(rgba_init=[255, 0, 0, 1.0], label="Pick a color"):
     '''
     Pick a color and alpha value
     '''
-    rgba_list = rgba_init.replace('rgba(', '').replace(')', '').split(',')
-    [r, g, b, a] = [float(x) if '.' in x else int(x) for x in rgba_list]
+    [r, g, b, a] = rgba_init
     hex_color = '#%02x%02x%02x' % (r, g, b)
     
     picked_color = st.color_picker(
@@ -53,7 +52,7 @@ def rgba_picker(rgba_init='rgba(255, 0, 0, 1.0)', label="Pick a color"):
     g = int(picked_color[3:5], 16)
     b = int(picked_color[5:7], 16)
     
-    rgba_new = f'rgba({r}, {g}, {b}, {alpha})'
+    rgba_new = [r, g, b, alpha]
     
     return rgba_new
 

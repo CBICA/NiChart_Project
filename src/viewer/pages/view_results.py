@@ -8,6 +8,10 @@ import utils.utils_session as utilses
 import pandas as pd
 import os
 from pathlib import Path
+from utils.utils_logger import setup_logger
+
+logger = setup_logger()
+logger.debug('Page: View Results')
 
 # Page config should be called for each page
 utilpg.config_page()
@@ -44,6 +48,7 @@ def plot_vars():
         pipeline
     )
 
+    # utilpl.panel_show_plots(st.session_state.plots)
     utilpl.panel_show_plots()
 
 def view_images():

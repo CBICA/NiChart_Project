@@ -13,9 +13,10 @@ import plotly.figure_factory as ff
 
 ###################################################################
 # Traces
-def add_trace_scatter(
-    df: pd.DataFrame, plot_params: dict, plot_settings: dict, fig: Any
-) -> None:    
+def add_trace_scatter(df: pd.DataFrame, plot_params: dict, plot_settings: dict, fig: Any) -> None:
+    '''
+    Add trace with data points
+    '''
     # Check data
     if df is None:
         return fig
@@ -35,30 +36,26 @@ def add_trace_scatter(
 
     if "data" in plot_params['traces']:
         for hname in hvals:
-            col_ind = hvals.index(hname)  # Select index of colour for the category
+            c_ind = hvals.index(hname)  # Select index of colour for the category
+            c = colors[f'd{c_ind+1}']
+            c_txt = f'rgba({c[0]},{c[1]},{c[2]},{c[3]})'
             dfh = df[df[hvar] == hname]
             trace = go.Scatter(
                 x=dfh[plot_params['xvar']],
                 y=dfh[plot_params['yvar']],
                 mode="markers",
-                marker={"color": colors[f'd{col_ind+1}']},
+                marker={"color": c_txt},
                 name=hname,
                 legendgroup=hname,
                 showlegend=not plot_params['hide_legend'],
             )
             fig.add_trace(trace)
 
-        #fig.update_layout(xaxis_range=[xmin, xmax])
-        #fig.update_layout(yaxis_range=[ymin, ymax])
-
-def add_trace_linreg(
-    df: pd.DataFrame, plot_params: dict, plot_settings: dict, fig: Any
-) -> None:
-    """
-    Add linear fit and confidence interval
-    """
+def add_trace_linreg(df: pd.DataFrame, plot_params: dict, plot_settings: dict, fig: Any) -> None:
+    '''
+    Add trace for linear fit and confidence interval
+    '''
     # Set colormap
-    #colors = plot_settings['cmaps']['data']
     colors = plot_settings['cmaps']['data']
 
     # Get hue params
@@ -79,12 +76,12 @@ def add_trace_linreg(
     # Add traces for the fit and confidence intervals
     if "lin_fit" in traces:
         for i, hname in enumerate(hvals):
-            col_ind = hvals.index(
-                hname
-            )  # Select index of colour for the category
+            c_ind = hvals.index(hname)  # Select index of colour for the category
+            c = colors[f'd{c_ind+1}']
+            c_txt = f'rgba({c[0]},{c[1]},{c[2]},{c[3]})'
             x_hat = dict_fit[hname]["x_hat"]
             y_hat = dict_fit[hname]["y_hat"]
-            line = {"color": colors[f'd{col_ind+1}']}
+            line = {"color": c_txt}
             trace = go.Scatter(
                 x=x_hat,
                 y=y_hat,
@@ -98,13 +95,12 @@ def add_trace_linreg(
 
     if "conf_95%" in traces:
         for hname in hvals:
-            col_ind = hvals.index(
-                hname
-            )  # Select index of colour for the category
+            c_ind = hvals.index(hname)  # Select index of colour for the category
+            c = colors[f'd{c_ind+1}']
+            c_txt = f'rgba({c[0]},{c[1]},{c[2]},{c[3]})'
             x_hat = dict_fit[hname]["x_hat"]
             y_hat = dict_fit[hname]["y_hat"]
             conf_int = dict_fit[hname]["conf_int"]
-            color = colors[f'd{col_ind+1}']
             trace = go.Scatter(
                 x=np.concatenate([x_hat, x_hat[::-1]]),
                 y=np.concatenate([conf_int[:, 0], conf_int[:, 1][::-1]]),
@@ -112,7 +108,7 @@ def add_trace_linreg(
                 #fillcolor=f"rgba({colors[col_ind][4:-1]}, 0.2)",  # Add alpha channel
                 #line=dict(color=f"rgba({colors[col_ind][4:-1]}, 0)"),
                 #fillcolor = color
-                line=dict(color = color),
+                line=dict(color = c_txt),
                 hoverinfo="skip",
                 name=f"lin_conf95_{hname}",
                 legendgroup=hname,
@@ -120,11 +116,12 @@ def add_trace_linreg(
             )
             fig.add_trace(trace)
 
-    # fig.update_layout(xaxis_range=[xmin, xmax])
-    # fig.update_layout(yaxis_range=[ymin, ymax])
     return fig
 
 def add_trace_lowess(df: pd.DataFrame, plot_params: dict, plot_settings: dict, fig: Any) -> None:
+    '''
+    Add trace for non-linear fit
+    '''
     # Check trace
     traces = plot_params['traces']
     if 'lowess' not in traces:
@@ -149,10 +146,12 @@ def add_trace_lowess(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
 
     # Add traces for the fit and confidence intervals
     for hname in hvals:
-        col_ind = hvals.index(hname)  # Select index of colour for the category
+        c_ind = hvals.index(hname)  # Select index of colour for the category
+        c = colors[f'd{c_ind+1}']
+        c_txt = f'rgba({c[0]},{c[1]},{c[2]},{c[3]})'
         x_hat = dict_fit[hname]["x_hat"]
         y_hat = dict_fit[hname]["y_hat"]
-        line = {"color": colors[f'd{col_ind+1}']}  
+        line = {"color": ctxt}
         trace = go.Scatter(
             x=x_hat,
             y=y_hat,
@@ -165,10 +164,10 @@ def add_trace_lowess(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
         )
         fig.add_trace(trace)
 
-    # fig.update_layout(xaxis_range=[xmin, xmax])
-    # fig.update_layout(yaxis_range=[ymin, ymax])
-
 def add_trace_dot(df: pd.DataFrame, plot_params: dict, plot_settings: dict, fig: Any) -> None:
+    '''
+    Add trace for a single dot
+    '''
     df_tmp = df[df.MRID == sel_mrid]
     trace = go.Scatter(
         x=df_tmp[plot_params['xvar']],
@@ -183,6 +182,9 @@ def add_trace_dot(df: pd.DataFrame, plot_params: dict, plot_settings: dict, fig:
     fig.add_trace(trace)
 
 def add_trace_centile(df: pd.DataFrame, plot_params: dict, plot_settings: dict, fig: Any) -> None:
+    '''
+    Add trace for centile curves
+    '''
     # Check centile traces
     if plot_params['traces'] is None:
         return fig
@@ -192,6 +194,9 @@ def add_trace_centile(df: pd.DataFrame, plot_params: dict, plot_settings: dict, 
 
     # Set colormap
     colors = plot_settings['cmaps']['centile']
+    # c_ind = hvals.index(hname)  # Select index of colour for the category
+    # c = colors[f'd{c_ind+1}']
+    # c_txt = f'rgba({c[0]},{c[1]},{c[2]},{c[3]})'
 
     # Get centile values for the selected roi
     df_tmp = df[df.VarName == plot_params['yvar']]
@@ -230,6 +235,9 @@ def add_trace_centile(df: pd.DataFrame, plot_params: dict, plot_settings: dict, 
     return fig
 
 def add_trace_dots(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
+    '''
+    Add trace for multiple dots
+    '''
     trace = go.Scatter(
         x=df[plot_params['xvar']],
         y=df[plot_params['yvar']],

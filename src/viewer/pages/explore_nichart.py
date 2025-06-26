@@ -10,8 +10,7 @@ import os
 from utils.utils_logger import setup_logger
 
 logger = setup_logger()
-
-logger.debug('Start of setup!')
+logger.debug('Page: Explore Nichart')
 
 # Page config should be called for each page
 utilpg.config_page()

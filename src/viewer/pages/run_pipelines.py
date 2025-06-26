@@ -8,6 +8,10 @@ import utils.utils_pages as utilpg
 import utils.utils_processes as utilprc
 import utils.utils_pipelines as utilpipe
 import utils.utils_session as utilses
+from utils.utils_logger import setup_logger
+
+logger = setup_logger()
+logger.debug('Page: Run Pipelines')
 
 def panel_conf_pipeline():
     with st.container(border=True):

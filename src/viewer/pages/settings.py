@@ -7,9 +7,9 @@ import utils.utils_cmaps as utilcmap
 import os
 
 from utils.utils_logger import setup_logger
-logger = setup_logger()
 
-logger.debug('Start of Config Screen!')
+logger = setup_logger()
+logger.debug('Page: Settings')
 
 # Page config should be called for each page
 utilpg.config_page()
