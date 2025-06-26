@@ -32,8 +32,6 @@ def plot_vars():
     """
     Panel for viewing dlmuse results
     """    
-    # st.write(st.session_state.plot_params)
-
     st.session_state.plot_data['df_data'] = utilpl.read_data(st.session_state.paths['plot_data']) 
     var_groups_data = ['demog', 'roi']
     var_groups_hue = ['cat_vars']
@@ -46,21 +44,7 @@ def plot_vars():
         pipeline
     )
 
-    print(st.session_state.plot_params)
-        
     utilpl.panel_show_plots()
-
-    with st.expander('hello2'):
-        for i in [0,1,2,3]:
-            if f'_key_plot_sel_{i}' in st.session_state:
-                st.write(st.session_state[f'_key_plot_sel_{i}'])
-
-    with st.expander('hello'):
-        # st.write(st.session_state.plot_settings)
-        #st.write(st.session_state.plots)
-        #st.write(st.session_state.selections)
-        st.write(st.session_state.plot_params)
-
 
 def view_images():
     ulay = st.session_state.ref_data["t1"]

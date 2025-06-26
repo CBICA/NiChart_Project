@@ -563,8 +563,6 @@ def panel_set_plot_params(
     plot_params['method'] = pipeline
     plot_params['flag_norm_centiles'] = False
 
-    print(plot_params)
-
 def panel_show_plots():
     '''
     Panel to add/delete/show plots
@@ -573,7 +571,7 @@ def panel_show_plots():
     for tmp_ind in st.session_state.plots.index.tolist():
         if f'_key_plot_sel_{tmp_ind}' in st.session_state:
             if st.session_state[f'_key_plot_sel_{tmp_ind}']:
-                st.write(f'updated {tmp_ind}')
+                st.write(f'Updated {tmp_ind}')
                 st.session_state.plots.at[tmp_ind, 'params'] = st.session_state.plot_params
 
     ## Sidebar options

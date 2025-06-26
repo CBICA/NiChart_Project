@@ -33,34 +33,20 @@ def add_trace_scatter(
     if hvals is None:
         hvals = df[hvar].dropna().sort_values().unique().tolist()
 
-    print('HHHHHHHHHHHHHHHH')
-
     if "data" in plot_params['traces']:
         for hname in hvals:
-            print(f'aaa {hname}')
-
             col_ind = hvals.index(hname)  # Select index of colour for the category
             dfh = df[df[hvar] == hname]
-
-            c = colors[f'd{col_ind+1}']
-            ctxt = f'rgba({c[0]}, {c[1]}, {c[2]}, {c[3]})'
-
-            ctmp = [250,0,0]
-            print(f'cccc {f'd{col_ind+1}'}')
-            print(f'cccc {ctmp}')
-
             trace = go.Scatter(
                 x=dfh[plot_params['xvar']],
                 y=dfh[plot_params['yvar']],
                 mode="markers",
                 marker={"color": colors[f'd{col_ind+1}']},
-                #marker={"color": '#AABBCC'},
                 name=hname,
                 legendgroup=hname,
                 showlegend=not plot_params['hide_legend'],
             )
             fig.add_trace(trace)
-
 
         #fig.update_layout(xaxis_range=[xmin, xmax])
         #fig.update_layout(yaxis_range=[ymin, ymax])
