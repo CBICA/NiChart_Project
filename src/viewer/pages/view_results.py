@@ -4,6 +4,7 @@ import utils.utils_io as utilio
 import utils.utils_plots as utilpl
 import utils.utils_mriview as utilmri
 import utils.utils_data_view as utildv
+import utils.utils_session as utilses
 import pandas as pd
 import os
 from pathlib import Path
@@ -87,3 +88,8 @@ with my_tabs[2]:
 
 with my_tabs[3]:
     view_images()
+
+# Show session state vars
+if st.session_state.mode == 'debug':
+    if st.sidebar.button('Show Session State'):
+        utilses.disp_session_state()

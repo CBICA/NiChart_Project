@@ -4,7 +4,7 @@ import pandas as pd
 import streamlit as st
 import utils.utils_pages as utilpg
 import utils.utils_plots as utilpl
-import utils.utils_session as utilss
+import utils.utils_session as utilses
 import utils.utils_mriview as utilmri
 from streamlit_image_select import image_select
 import logging
@@ -125,4 +125,7 @@ with tab3:
 with tab4:
     view_installation()
 
-    
+# Show session state vars
+if st.session_state.mode == 'debug':
+    if st.sidebar.button('Show Session State'):
+        utilses.disp_session_state()

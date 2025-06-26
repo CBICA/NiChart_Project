@@ -16,6 +16,18 @@ from PIL import Image
 
 # from streamlit.web.server.websocket_headers import _get_websocket_headers
 
+def disp_session_state():
+    sel_ssvars = st.pills(
+        "Select Session State Variable(s) to View",
+        sorted(st.session_state.keys()),
+        selection_mode="multi",
+        default=None,
+        #label_visibility="collapsed",
+    )
+    for sel_var in sel_ssvars:
+        st.markdown('➤ ' + sel_var + ':')
+        st.write(st.session_state[sel_var])
+
 def init_project_folders():
     ### Project folders
     dnames = [
@@ -31,6 +43,9 @@ def init_project_folders():
 def init_session_vars():
     ####################################    
     ### Misc variables
+    # st.session_state.mode = 'release'
+    st.session_state.mode = 'debug'
+
     st.session_state.project = 'nichart_project'
     #st.session_state.project = 'IXI'
 
@@ -241,11 +256,26 @@ def init_plot_vars() -> None:
         "Data 4": '#E69F00',
         "Data 5": '#E69F00',
         "Data 6": '#E69F00',
-        "Centile 5": '#000066',
-        "Centile 25": '#000066',
-        "Centile 50": '#000066',
-        "Centile 75": '#000066',
-        "Centile 95": '#000066'
+    }
+
+    cmaps3 = {
+        'data': {
+            'd1': [230, 159, 0, 1],
+            'd2': [230, 159, 0, 1],
+            'd3': [230, 159, 0, 1],
+        },
+        'centiles': {
+            'Centile 5': [0, 0, 17, 1],
+            'Centile 25': [0, 0, 51, 1],
+            'Centile 50': [0, 0, 102, 1],
+            'Centile 75': [0, 0, 153, 1],
+            'Centile 95': [0, 0, 221, 1],
+        },
+        'fit lines': {
+            'linfit': [221, 0, 0, 1],
+            'conf95': [153, 0, 0, 1],
+            'lowess': [51, 0, 0, 1],
+        }
     }
 
 
@@ -283,6 +313,8 @@ def init_plot_vars() -> None:
         "distplot_binnum": 100,
         "cmaps": cmaps,
         "cmaps2": cmaps2,
+        "cmaps3": cmaps3,
+        "alphas": alphas3
     }
 
     # Plot parameters specific to each plot

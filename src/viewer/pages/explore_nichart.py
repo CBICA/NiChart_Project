@@ -2,6 +2,7 @@ import streamlit as st
 import utils.utils_pages as utilpg
 import utils.utils_plots as utilpl
 import utils.utils_mriview as utilmri
+import utils.utils_session as utilses
 import pandas as pd
 from streamlit_image_select import image_select
 from stqdm import stqdm
@@ -162,4 +163,6 @@ with tab2:
     elif psel == 6:
         view_synthseg()
 
-st.write(st.session_state.dicts)
+if st.session_state.mode == 'debug':
+    if st.sidebar.button('Show Session State'):
+        utilses.disp_session_state()

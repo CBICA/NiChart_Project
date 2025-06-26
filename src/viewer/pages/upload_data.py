@@ -6,6 +6,7 @@ from typing import Any
 import streamlit as st
 import utils.utils_pages as utilpg
 import utils.utils_data_upload as utildata
+import utils.utils_session as utilses
 from stqdm import stqdm
 import pandas as pd
 import numpy as np
@@ -52,3 +53,8 @@ with tab2:
 
 with tab3:
     upload_data()
+
+# Show session state vars
+if st.session_state.mode == 'debug':
+    if st.sidebar.button('Show Session State'):
+        utilses.disp_session_state()

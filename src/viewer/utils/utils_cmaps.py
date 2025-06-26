@@ -1,5 +1,6 @@
 import streamlit as st
 import matplotlib.colors as mcolors
+import streamlit_antd_components as sac
 
 def color_picker_with_alpha(
     init_color="#ff0000",
@@ -21,7 +22,7 @@ def color_picker_with_alpha(
     
     return rgba
 
-def panel_update_cmap(cmap):
+def panel_update_cmap(cmap, alpha):
     '''
     Update color map for plots
     '''
@@ -29,20 +30,33 @@ def panel_update_cmap(cmap):
 
     # Create a section with color pickers
     cmap_out = cmap.copy()
-    
-    cols = st.columns(len(cmap))
-    for i,item in enumerate(cmap.items()):
-        with cols[i]:
-            cmap_out[item[0]] = st.color_picker(f"{item[0]}", value=item[1])
+    alpha_out = alpha.copy()
 
-    bcols = st.columns([1,1,10])
-    with bcols[0]:
-        if st.button('Reset'):
-            st.success('Reset to init vals')
-            
-    with bcols[1]:
-        if st.button('Select'):
-            st.success('Updated vals')
-            return cmap_out
-        
+    for mcat in cmap.keys():
+        with st.container(border=True):
+            st.markdown(f'{mcat}')
+            cols = st.columns(5)
+            for i, (key,val) in enumerate(cmap[mcat].items()):
+                st.write(f'{i}  {key} {val}')
+                with cols[i]:
+                    new_col = st.color_picker(
+                        f"{key}",
+                        value = val
+                    )
+                    new_alpha = st.slider(
+                        f"{key}",
+                        value = alpha[mcat][key],
+                        min_value = 0,
+                        max_value = 100
+                    )
+                cmap_out[mcat][key] = new_col
+                alpha_out[mcat][key] = new_alpha
+
+    if st.button('Reset'):
+        st.success('Reset to init vals')
+
+    if st.button('Select'):
+        st.success('Updated vals')
+        return cmap_out
+
     return cmap

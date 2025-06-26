@@ -1,5 +1,6 @@
 import streamlit as st
 import utils.utils_pages as utilpg
+import utils.utils_session as utilses
 import os
 
 
@@ -15,3 +16,8 @@ st.markdown(
 )
 
 st.info('Coming Soon!')
+
+# Show session state vars
+if st.session_state.mode == 'debug':
+    if st.sidebar.button('Show Session State'):
+        utilses.disp_session_state()

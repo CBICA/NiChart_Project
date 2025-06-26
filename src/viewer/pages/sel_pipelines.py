@@ -81,5 +81,10 @@ with tab2:
     #sel_pipeline_from_graph()
     
 
+# Show session state vars
+if st.session_state.mode == 'debug':
+    if st.sidebar.button('Show Session State'):
+        utilses.disp_session_state()
+
 
 

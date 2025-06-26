@@ -214,5 +214,9 @@ elif sel_task == "Configure":
 elif sel_task == "Run":
     panel_run_pipeline()
 
+# Show session state vars
+if st.session_state.mode == 'debug':
+    if st.sidebar.button('Show Session State'):
+        utilses.disp_session_state()
 
 

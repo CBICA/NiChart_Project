@@ -116,4 +116,8 @@ with tab2:
 with tab3:
     panel_view_status()
 
+# Show session state vars
+if st.session_state.mode == 'debug':
+    if st.sidebar.button('Show Session State'):
+        utilses.disp_session_state()
 
