@@ -6,11 +6,11 @@ import jwt
 import time
 import yaml
 import pandas as pd
-import plotly.express as px
 import streamlit as st
 import utils.utils_io as utilio
 import utils.utils_rois as utilroi
 import utils.utils_processes as utilproc
+import utils.utils_cmaps as utilcmap
 import os
 from PIL import Image
 
@@ -232,51 +232,6 @@ def init_plot_vars() -> None:
     st.session_state.plots = pd.DataFrame(columns=['params'])
     st.session_state.plot_curr = -1
 
-    # Color maps for plots
-    cmaps = {
-        "dset": {
-            'd1': '#E69F00',
-            'd2': '#E69F00',
-            'd3': '#333333'
-        },
-        "data": px.colors.qualitative.Set1,
-        "centile": [
-            "rgba(0, 0, 120, 0.5)",
-            "rgba(0, 0, 90, 0.7)",
-            "rgba(0, 0, 60, 0.9)",
-            "rgba(0, 0, 90, 0.7)",
-            "rgba(0, 0, 120, 0.5)",
-        ],
-    }
-
-    cmaps2 = {
-        "Data 1": '#E69F00',
-        "Data 2": '#E69F00',
-        "Data 3": '#E69F00',
-        "Data 4": '#E69F00',
-        "Data 5": '#E69F00',
-        "Data 6": '#E69F00',
-    }
-
-    cmaps3 = {
-        'data': {
-            'd1': [230, 159, 0, 1],
-            'd2': [230, 159, 0, 1],
-            'd3': [230, 159, 0, 1],
-        },
-        'centiles': {
-            'Centile 5': [0, 0, 17, 1],
-            'Centile 25': [0, 0, 51, 1],
-            'Centile 50': [0, 0, 102, 1],
-            'Centile 75': [0, 0, 153, 1],
-            'Centile 95': [0, 0, 221, 1],
-        },
-        'fit lines': {
-            'linfit': [221, 0, 0, 1],
-            'conf95': [153, 0, 0, 1],
-            'lowess': [51, 0, 0, 1],
-        }
-    }
 
 
     # Plot data
@@ -311,10 +266,9 @@ def init_plot_vars() -> None:
         "h_coeff_min": 0.6,
         "h_coeff_step": 0.2,
         "distplot_binnum": 100,
-        "cmaps": cmaps,
-        "cmaps2": cmaps2,
-        "cmaps3": cmaps3,
-        "alphas": alphas3
+        "cmaps": utilcmap.cmaps_init,
+        #"cmaps2": utilcmap.cmaps2,
+        #"cmaps3": utilcmap.cmaps3,
     }
 
     # Plot parameters specific to each plot

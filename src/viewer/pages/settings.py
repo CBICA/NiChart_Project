@@ -3,7 +3,7 @@ import utils.utils_pages as utilpg
 #import utils.utils_doc as utildoc
 import utils.utils_io as utilio
 import utils.utils_session as utilses
-import utils.utils_cmaps as utilcmap    
+import utils.utils_cmaps as utilcmap
 import os
 
 from utils.utils_logger import setup_logger
@@ -14,44 +14,6 @@ logger.debug('Start of Config Screen!')
 # Page config should be called for each page
 utilpg.config_page()
 utilpg.show_menu()
-
-def disp_folder_tree(allowed_extensions=None):
-    root_path = st.session_state.paths['task']
-    curr_path = st.session_state.paths['task_curr_path']
-
-    # Prevent access outside root
-    def is_within_root(path):
-        return os.path.commonpath([root_path, path]) == root_path
-
-    entries = sorted(os.listdir(curr_path))
-    folders = [e for e in entries if os.path.isdir(os.path.join(curr_path, e))]
-    files = [e for e in entries if os.path.isfile(os.path.join(curr_path, e))]
-
-    if allowed_extensions:
-        files = [f for f in files if any(f.endswith(ext) for ext in allowed_extensions)]
-    
-    st.markdown(f"##### 📂 `{curr_path}`")
-
-    with st.container(border=True):
-        # Show subfolders
-        for folder in folders:
-            folder_path = os.path.join(curr_path, folder)
-            if is_within_root(folder_path):
-                if st.button(f"📁 {folder}", key=f'_key_folder_{folder}'):
-                    st.session_state.paths['task_curr_path'] = folder_path
-                    st.rerun()
-
-        # Show files
-        selected_file = None
-        for f in files:
-            st.write(f"📝 {f}")
-
-    # Go Up Button (only if not already at root)
-    parent_path = os.path.abspath(os.path.join(curr_path, ".."))
-    if is_within_root(parent_path) and curr_path != root_path:
-        if st.button("⬆️ Go Up", key='_key_btn_up'):
-            st.session_state.paths['task_curr_path'] = parent_path
-            st.rerun()
 
 def panel_models_path():
     """
@@ -134,11 +96,7 @@ def panel_debug_options():
             disp_folder_tree()
 
 def panel_plot_colors():
-    sel_cmap = utilcmap.panel_update_cmap(
-        st.session_state.plot_settings['cmaps3'],
-        st.session_state.plot_settings['alphas']
-    )
-    st.session_state.plot_settings['cmaps3'] = sel_cmap
+    utilcmap.panel_update_cmap()
 
 
 #st.info(

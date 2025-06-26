@@ -282,14 +282,14 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
     # Add data scatter
     utiltr.add_trace_scatter(df, plot_params, plot_settings, fig)
 
-    # Add linear fit
-    utiltr.add_trace_linreg(df, plot_params, plot_settings, fig)
+    ## Add linear fit
+    #utiltr.add_trace_linreg(df, plot_params, plot_settings, fig)
 
-    # Add non-linear fit
-    utiltr.add_trace_lowess(df, plot_params, plot_settings, fig)
+    ## Add non-linear fit
+    #utiltr.add_trace_lowess(df, plot_params, plot_settings, fig)
 
-    # Add centile trace
-    utiltr.add_trace_centile(df_cent, plot_params, plot_settings, fig)
+    ## Add centile trace
+    #utiltr.add_trace_centile(df_cent, plot_params, plot_settings, fig)
 
     #st.plotly_chart(fig, key=f"bubble_chart_{plot_id}", on_select=callback_plot_clicked)
     st.plotly_chart(fig, key=f"bubble_chart_{plot_ind}")
