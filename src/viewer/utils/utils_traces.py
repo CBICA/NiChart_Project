@@ -58,7 +58,6 @@ def add_trace_linreg(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
     '''
     # Set colormap
     colors = plot_settings['cmaps']['data']
-    alpha = plot_settings['alphas']['fit lines']
 
     # Get hue params
     hvar = plot_params['hvar']
@@ -77,6 +76,8 @@ def add_trace_linreg(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
 
     # Add traces for the fit and confidence intervals
     if "lin_fit" in traces:
+        alpha = plot_settings['alphas']['lin_fit']
+
         for i, hname in enumerate(hvals):
             c_ind = hvals.index(hname)  # Select index of colour for the category
             c = colors[f'd{c_ind+1}']
@@ -96,6 +97,7 @@ def add_trace_linreg(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
             fig.add_trace(trace)
 
     if "conf_95%" in traces:
+        alpha = plot_settings['alphas']['conf_95%']
         for hname in hvals:
             c_ind = hvals.index(hname)  # Select index of colour for the category
             c = colors[f'd{c_ind+1}']
@@ -129,7 +131,7 @@ def add_trace_lowess(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
 
     # Set colormap
     colors = plot_settings['cmaps']['data']
-    alpha = plot_settings['alphas']['fit lines']
+    alpha = plot_settings['alphas']['lowess']
 
     # Get hue params
     hvar = plot_params['hvar']

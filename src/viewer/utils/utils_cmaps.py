@@ -20,17 +20,14 @@ cmaps_init = {
         'centile_75': [130, 180, 240],
         'centile_95': [200, 225, 255],
     },
-    'fit lines': {
-        'linfit': [221, 0, 0],
-        'conf95': [153, 0, 0],
-        'lowess': [51, 0, 0],
-    }
 }
 
 alphas_init = {
     'data': 1.0,
     'centiles': 1.0,
-    'fit lines': 1.0
+    'lin_fit': 1.0,
+    'conf_95%': 0.4,
+    'lowess': 1.0,
 }
 
 
