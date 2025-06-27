@@ -229,7 +229,7 @@ def init_plot_vars() -> None:
     Set plotting variables
     '''
     # Dataframe that keeps parameters for all plots
-    st.session_state.plots = pd.DataFrame(columns=['params'])
+    st.session_state.plots = pd.DataFrame(columns=['flag_sel', 'params'])
     st.session_state.plot_curr = -1
 
 
@@ -267,6 +267,7 @@ def init_plot_vars() -> None:
         "h_coeff_step": 0.2,
         "distplot_binnum": 100,
         "cmaps": utilcmap.cmaps_init,
+        "alphas": utilcmap.alphas_init,
         #"cmaps2": utilcmap.cmaps2,
         #"cmaps3": utilcmap.cmaps3,
     }
@@ -294,7 +295,6 @@ def init_plot_vars() -> None:
         "centile_type": 'CN',
         "centile_values": ['centile_50'],
         "flag_norm_centiles": False,
-        'flag_select': True
     }
 
     ###################################

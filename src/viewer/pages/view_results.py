@@ -48,7 +48,6 @@ def plot_vars():
         pipeline
     )
 
-    # utilpl.panel_show_plots(st.session_state.plots)
     utilpl.panel_show_plots()
 
 def view_images():
@@ -82,3 +81,6 @@ with my_tabs[3]:
 if st.session_state.mode == 'debug':
     if st.sidebar.button('Show Session State'):
         utilses.disp_session_state()
+
+    if st.sidebar.button('Show Plot'):
+        st.dataframe(st.session_state.plots)

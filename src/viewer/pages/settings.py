@@ -96,8 +96,7 @@ def panel_debug_options():
             disp_folder_tree()
 
 def panel_plot_colors():
-    utilcmap.panel_update_cmap()
-
+    utilcmap.panel_update_cmaps()
 
 #st.info(
 st.markdown(

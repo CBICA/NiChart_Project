@@ -13,114 +13,8 @@ import plotly.graph_objs as go
 import plotly.figure_factory as ff
 import utils.utils_traces as utiltr
 
-def panel_view_centiles(method, var_type):
-    """
-    Panel for viewing data centiles
-    """
-    flag_settings = st.sidebar.checkbox('Hide plot settings')
-    ss_sel = st.session_state.selections
-
-    # Add tabs for parameter settings
-    with st.container(border=True):
-        if not flag_settings:
-            ptab1, ptab2, ptab3 = st.tabs(
-                ['Data', 'Centiles', 'Plot Settings']
-            )        
-            with ptab1:
-                if var_type == 'rois':
-                    ss_sel['yvar'] = panel_select_roi(method, '_centiles')
-                
-                elif var_type == 'biomarkers':
-                    list_vars = ['WM', 'GM', 'VN']
-                    ss_sel['yvar'] = st.selectbox(
-                        'Select var',
-                        list_vars
-                    )
-                
-            with ptab2:
-                ss_sel['centile_type'] = panel_select_centile_type()
-                ss_sel['centile_values'] = panel_select_centile_values()
-                ss_sel['flag_norm_centiles'] = st.checkbox(
-                    'Normalize Centiles'
-                )
-
-            with ptab3:
-                st.session_state.plot_settings["num_per_row"] = st.slider(
-                    "Number of plots per row",
-                    st.session_state.plot_settings["min_per_row"],
-                    st.session_state.plot_settings["max_per_row"],
-                    st.session_state.plot_settings["num_per_row"],
-                    disabled=False,
-                )
-
-                st.session_state.plot_params["h_coeff"] = st.slider(
-                    "Plot height",
-                    min_value=st.session_state.plot_settings["h_coeff_min"],
-                    max_value=st.session_state.plot_settings["h_coeff_max"],
-                    value=st.session_state.plot_settings["h_coeff"],
-                    step=st.session_state.plot_settings["h_coeff_step"],
-                    disabled=False,
-                )
-
-                # Checkbox to show/hide plot legend
-                st.session_state.plot_params["hide_legend"] = st.checkbox(
-                    "Hide legend",
-                    value=st.session_state.plot_params["hide_legend"],
-                    disabled=False,
-                )
-
-    if ss_sel['yvar'] is None:
-        return
-
-    # Set plot type to centile
-    st.session_state.plot_params['ptype'] = 'scatter'
-    st.session_state.plot_params['xvar'] = 'Age'
-    st.session_state.plot_params['traces'] = st.session_state.plot_params['centile_values']
-    st.session_state.plot_params['method'] = method
-    st.session_state.plot_params['yvar'] = ss_sel['yvar']
-    st.session_state.plot_params['centile_type'] = ss_sel['centile_type']
-    st.session_state.plot_params['centile_values'] = ss_sel['centile_values']
-    st.session_state.plot_params['flag_norm_centiles'] = ss_sel['flag_norm_centiles']
-        
-    # Add buttons to add/delete plots
-    c1, c2, c3 = st.sidebar.columns(3, vertical_alignment="center")
-    with c1:
-        btn_add = st.button("Add Plot")
-    with c2:
-        btn_del_sel = st.button("Delete Selected")
-    with c3:
-        btn_del_all = st.button("Delete All")
-        
-    # Add/delete plot
-    if btn_add:
-        # Add plot
-        st.session_state.plots = add_plot(
-            st.session_state.plots,
-            st.session_state.plot_params
-        )
-
-    if st.session_state.plots.shape[0] == 0:
-        # Add plot
-        st.session_state.plots = add_plot(
-            st.session_state.plots,
-            st.session_state.plot_params
-        )
-
-    if btn_del_sel:
-        st.session_state.plots = delete_sel_plots(
-            st.session_state.plots
-        )
-    if btn_del_all:
-        st.session_state.plots = pd.DataFrame(columns=['params'])
-
-    # st.dataframe(st.session_state.plots)
-                    
-    # Show plots
-    show_plots(
-        st.session_state.curr_df,
-        st.session_state.plots,
-        st.session_state.plot_settings,
-    )
+pd.set_option('display.expand_frame_repr', False)
+pd.set_option('display.max_colwidth', None)  # or use a large number like 500
 
 
 def read_data(fdata):
@@ -141,7 +35,10 @@ def add_plot(df_plots, new_plot_params):
     """
     Adds a new plot (new row to the plots dataframe)
     """   
-    df_plots.loc[len(df_plots)] = {'params': new_plot_params.copy()}
+    df_plots.loc[len(df_plots)] = {
+        'params': new_plot_params.copy(),
+        'flag_sel': True
+    }
     return df_plots
 
 def delete_sel_plots(df_plots):
@@ -151,18 +48,20 @@ def delete_sel_plots(df_plots):
     """
     list_sel = []
     for tmp_ind in df_plots.index.tolist():
-        if st.session_state[f'_key_plot_sel_{tmp_ind}']:
+        if st.session_state[f'_flag_sel_{tmp_ind}']:
             list_sel.append(tmp_ind)
-            st.session_state[f'_key_plot_sel_{tmp_ind}'] = False
+            del st.session_state[f'_flag_sel_{tmp_ind}']
 
     df_plots = df_plots.drop(list_sel).reset_index().drop(columns=['index'])
     return df_plots
 
-def delete_all_plots(df_plots):
+def delete_all_plots():
     """
-    Removes plots selected by the user
+    Removes all plots
     """
-    df_plots = pd.DataFrame(columns=['params'])
+    for tmp_ind in st.session_state.plots.index.tolist():
+        del st.session_state[f'_flag_sel_{tmp_ind}']
+    df_plots = pd.DataFrame(columns=['flag_sel', 'params'])
     return df_plots
 
 def set_x_bounds(df: pd.DataFrame, df_plots: pd.DataFrame, plot_id: str, xvar: str) -> None:
@@ -288,8 +187,8 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
     # Add non-linear fit
     utiltr.add_trace_lowess(df, plot_params, plot_settings, fig)
 
-    ## Add centile trace
-    #utiltr.add_trace_centile(df_cent, plot_params, plot_settings, fig)
+    # Add centile trace
+    utiltr.add_trace_centile(df_cent, plot_params, plot_settings, fig)
 
     #st.plotly_chart(fig, key=f"bubble_chart_{plot_id}", on_select=callback_plot_clicked)
     st.plotly_chart(fig, key=f"bubble_chart_{plot_ind}")
@@ -322,7 +221,12 @@ def show_plots(df, df_plots, plot_settings):
                     new_plot = display_scatter_plot(
                         df, sel_params, plot_ind, plot_settings
                     )
-                st.checkbox('Select', key = f'_key_plot_sel_{plot_ind}')
+                st.checkbox(
+                    'Select',
+                    key = f'_flag_sel_{plot_ind}',
+                    value = df_plots.loc[plot_ind, 'flag_sel']
+                )
+                df_plots.loc[plot_ind, 'flag_sel'] = st.session_state[f'_flag_sel_{plot_ind}']
 
     #if st.session_state.plot_params["show_img"]:
     #show_img()
@@ -569,10 +473,8 @@ def panel_show_plots():
     '''
     ## Update selected plots
     for tmp_ind in st.session_state.plots.index.tolist():
-        if f'_key_plot_sel_{tmp_ind}' in st.session_state:
-            if st.session_state[f'_key_plot_sel_{tmp_ind}']:
-                st.write(f'Updated {tmp_ind}')
-                st.session_state.plots.at[tmp_ind, 'params'] = st.session_state.plot_params
+        if st.session_state.plots.loc[tmp_ind, 'flag_sel']:
+            st.session_state.plots.at[tmp_ind, 'params'] = st.session_state.plot_params.copy()
 
     ## Sidebar options
     cols = st.sidebar.columns(3, vertical_alignment="center")
@@ -585,13 +487,13 @@ def panel_show_plots():
 
     if btn_add:
         st.session_state.plots = add_plot(
-            st.session_state.plots, st.session_state.plot_params.copy()
+            st.session_state.plots, st.session_state.plot_params
         )
 
     # Add a single plot if there is none
     if st.session_state.plots.shape[0] == 0:
         st.session_state.plots = add_plot(
-            st.session_state.plots, st.session_state.plot_params.copy()
+            st.session_state.plots, st.session_state.plot_params
         )
 
     if btn_del_sel:
@@ -599,9 +501,7 @@ def panel_show_plots():
             st.session_state.plots
         )
     if btn_del_all:
-        st.session_state.plots = delete_all_plots(
-            st.session_state.plots
-        )
+        st.session_state.plots = delete_all_plots()
 
     # Show plots
     show_plots(

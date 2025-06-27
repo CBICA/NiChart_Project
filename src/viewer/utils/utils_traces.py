@@ -25,6 +25,7 @@ def add_trace_scatter(df: pd.DataFrame, plot_params: dict, plot_settings: dict, 
 
     # Set colormap
     colors = plot_settings['cmaps']['data']
+    alpha = plot_settings['alphas']['data']
 
     # Get hue params
     hvar = plot_params['hvar']
@@ -38,7 +39,7 @@ def add_trace_scatter(df: pd.DataFrame, plot_params: dict, plot_settings: dict, 
         for hname in hvals:
             c_ind = hvals.index(hname)  # Select index of colour for the category
             c = colors[f'd{c_ind+1}']
-            c_txt = f'rgba({c[0]},{c[1]},{c[2]},{c[3]})'
+            c_txt = f'rgba({c[0]},{c[1]},{c[2]},{alpha})'
             dfh = df[df[hvar] == hname]
             trace = go.Scatter(
                 x=dfh[plot_params['xvar']],
@@ -57,6 +58,7 @@ def add_trace_linreg(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
     '''
     # Set colormap
     colors = plot_settings['cmaps']['data']
+    alpha = plot_settings['alphas']['fit lines']
 
     # Get hue params
     hvar = plot_params['hvar']
@@ -78,7 +80,7 @@ def add_trace_linreg(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
         for i, hname in enumerate(hvals):
             c_ind = hvals.index(hname)  # Select index of colour for the category
             c = colors[f'd{c_ind+1}']
-            c_txt = f'rgba({c[0]},{c[1]},{c[2]},{c[3]})'
+            c_txt = f'rgba({c[0]},{c[1]},{c[2]},{alpha})'
             x_hat = dict_fit[hname]["x_hat"]
             y_hat = dict_fit[hname]["y_hat"]
             line = {"color": c_txt}
@@ -97,7 +99,7 @@ def add_trace_linreg(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
         for hname in hvals:
             c_ind = hvals.index(hname)  # Select index of colour for the category
             c = colors[f'd{c_ind+1}']
-            c_txt = f'rgba({c[0]},{c[1]},{c[2]},{c[3]})'
+            c_txt = f'rgba({c[0]},{c[1]},{c[2]},{alpha})'
             x_hat = dict_fit[hname]["x_hat"]
             y_hat = dict_fit[hname]["y_hat"]
             conf_int = dict_fit[hname]["conf_int"]
@@ -105,9 +107,7 @@ def add_trace_linreg(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
                 x=np.concatenate([x_hat, x_hat[::-1]]),
                 y=np.concatenate([conf_int[:, 0], conf_int[:, 1][::-1]]),
                 fill="toself",
-                #fillcolor=f"rgba({colors[col_ind][4:-1]}, 0.2)",  # Add alpha channel
-                #line=dict(color=f"rgba({colors[col_ind][4:-1]}, 0)"),
-                #fillcolor = color
+                fillcolor=c_txt,
                 line=dict(color = c_txt),
                 hoverinfo="skip",
                 name=f"lin_conf95_{hname}",
@@ -129,6 +129,7 @@ def add_trace_lowess(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
 
     # Set colormap
     colors = plot_settings['cmaps']['data']
+    alpha = plot_settings['alphas']['fit lines']
 
     # Get hue params
     hvar = plot_params['hvar']
@@ -148,10 +149,10 @@ def add_trace_lowess(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
     for hname in hvals:
         c_ind = hvals.index(hname)  # Select index of colour for the category
         c = colors[f'd{c_ind+1}']
-        c_txt = f'rgba({c[0]},{c[1]},{c[2]},{c[3]})'
+        c_txt = f'rgba({c[0]},{c[1]},{c[2]},{alpha})'
         x_hat = dict_fit[hname]["x_hat"]
         y_hat = dict_fit[hname]["y_hat"]
-        line = {"color": ctxt}
+        line = {"color": c_txt}
         trace = go.Scatter(
             x=x_hat,
             y=y_hat,
@@ -185,6 +186,8 @@ def add_trace_centile(df: pd.DataFrame, plot_params: dict, plot_settings: dict, 
     '''
     Add trace for centile curves
     '''
+    cvals = st.session_state.plot_settings['centile_trace_types']
+
     # Check centile traces
     if plot_params['traces'] is None:
         return fig
@@ -193,7 +196,10 @@ def add_trace_centile(df: pd.DataFrame, plot_params: dict, plot_settings: dict, 
         return fig
 
     # Set colormap
-    colors = plot_settings['cmaps']['centile']
+    colors = plot_settings['cmaps']['centiles']
+    alpha = plot_settings['alphas']['centiles']
+
+    # Set colormap
     # c_ind = hvals.index(hname)  # Select index of colour for the category
     # c = colors[f'd{c_ind+1}']
     # c_txt = f'rgba({c[0]},{c[1]},{c[2]},{c[3]})'
@@ -210,22 +216,27 @@ def add_trace_centile(df: pd.DataFrame, plot_params: dict, plot_settings: dict, 
 
     # Create line traces
     list_tr = [s for s in plot_params['traces'] if "centile" in s]
-    for i, cvar in enumerate(list_tr):
-        yvals = df_tmp[cvar]
-        if flag_norm:
-            yvals = yvals * 100 / norm_val
+    for i, cvar in enumerate(cvals):
+        if cvar in plot_params['traces']:
+            if cvar in df_tmp.columns[2:]:
+                yvals = df_tmp[cvar]
+                if flag_norm:
+                    yvals = yvals * 100 / norm_val
         
-        if cvar in df_tmp.columns[2:]:
-            ctrace = go.Scatter(
-                x=df_tmp[plot_params['xvar']],
-                y=yvals,
-                mode="lines",
-                name=cvar,
-                legendgroup="centiles",
-                line=dict(color=colors[i]),
-                showlegend=not plot_params['hide_legend'],
-            )
-            fig.add_trace(ctrace)  # plot in first row
+                c_ind = cvals.index(cvar)  # Select index for the centile
+                c = colors[cvar]
+                c_txt = f'rgba({c[0]},{c[1]},{c[2]},{alpha})'
+
+                ctrace = go.Scatter(
+                    x=df_tmp[plot_params['xvar']],
+                    y=yvals,
+                    mode="lines",
+                    name=cvar,
+                    legendgroup="centiles",
+                    line=dict(color=c_txt),
+                    showlegend=not plot_params['hide_legend'],
+                )
+                fig.add_trace(ctrace)  # plot in first row
 
 
     # Update min/max
