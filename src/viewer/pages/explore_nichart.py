@@ -18,7 +18,7 @@ logger.debug('Page: Explore Nichart')
 utilpg.config_page()
 utilpg.show_menu()
 
-def view_description(pipeline) -> None:
+def show_description(pipeline) -> None:
     """
     Panel for viewing pipeline description
     """
@@ -36,22 +36,18 @@ def view_description(pipeline) -> None:
         with cols[1]:
             st.image(f_logo)
 
-def pipeline_overviews():
+def pipeline_overview():
     '''
     Select a pipeline and show overview
     '''
     with st.container(border=True):
-        pdict = dict(
-            zip(st.session_state.pipelines['Name'], st.session_state.pipelines['Label'])
-        )
-        
+        pipelines = st.session_state.pipelines
         sitems = []
-        colors = ['blue', 'red', 'pink', 'teal', 'grape', 'indigo', 'lime', 'orange']
-        #'#25C3B0'
-        for i, tmp_key in enumerate(pdict.keys()):
+        colors = st.session_state.pipeline_colors
+        for i, ptmp in enumerate(pipelines.Name.tolist()):
             sitems.append(
                 sac.ButtonsItem(
-                    label=tmp_key, color = colors[i]
+                    label=ptmp, color = colors[i%len(colors)]
                 )
             )
         
@@ -60,11 +56,11 @@ def pipeline_overviews():
             size='lg',
             radius='xl',
             align='left'
-        )
+        )        
+        pname = pipelines.loc[pipelines.Name == sel_pipeline, 'Label'].values[0]
             
         # Show description of the selected pipeline
-        view_description(pdict[sel_pipeline])
-        
+        show_description(pname)
         return(sel_pipeline)
 
 
@@ -151,30 +147,15 @@ sel_pipeline = 'dlmuse'
 
 # Select pipeline
 if tab == 'Pipelines':
-    sel_pipeline = pipeline_overviews()
+    st.session_state.sel_pipeline = pipeline_overview()
     
 # Show output values for the selected pipeline
 if tab == 'View Sample Distributions':
-    if sel_pipeline == 'dlmuse':
+    if st.session_state.sel_pipeline == 'DLMUSE':
         view_dlmuse()
 
-    #elif psel == 1:
-        #view_dlwmls()
-        
-    #elif psel == 2:
-        #view_dlmuse_biomarkers()
-
-    #elif psel == 3:
-        #view_dlmuse_biomarkers()
-
-    #elif psel == 4:
-        #view_dlmuse_biomarkers()
-
-    #elif psel == 5:
-        #view_dlmuse_biomarkers()
-
-    #elif psel == 6:
-        #view_synthseg()
+    elif st.session_state.sel_pipeline == 'DLWMLS':
+        view_dlwmls()
 
 if st.session_state.mode == 'debug':
     utilses.disp_session_state()
