@@ -8,6 +8,8 @@ import os
 
 from utils.utils_logger import setup_logger
 
+import streamlit_antd_components as sac
+
 logger = setup_logger()
 logger.debug('Page: Settings')
 
@@ -105,21 +107,29 @@ st.markdown(
     """
 )
 
-tabs = st.tabs(
-    ['Paths', 'Plot Colors', 'Debug', 'Misc']
+tab = sac.segmented(
+    items=[
+        sac.SegmentedItem(label='Paths'),
+        sac.SegmentedItem(label='Plot Colors'),
+        sac.SegmentedItem(label='Debug'),
+        sac.SegmentedItem(label='Misc'),
+    ],
+    size='sm',
+    radius='lg',
+    align='left'
 )
 
-with tabs[0]:
+if tab == 'Paths':
     panel_resources_path()
     panel_models_path()
 
-with tabs[1]:
+elif tab == 'Plot Colors':
     panel_plot_colors()
 
-with tabs[2]:
+elif tab == 'Debug':
     panel_debug_options()
 
-with tabs[3]:
+elif tab == 'Misc':
     panel_misc()
 
 # Show session state vars

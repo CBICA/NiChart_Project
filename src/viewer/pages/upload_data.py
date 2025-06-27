@@ -11,6 +11,8 @@ from stqdm import stqdm
 import pandas as pd
 import numpy as np
 
+import streamlit_antd_components as sac
+
 # Page config should be called for each page
 utilpg.config_page()
 utilpg.show_menu()
@@ -41,17 +43,24 @@ st.markdown(
     """
 )
 
-tab1, tab2, tab3 = st.tabs(
-    ["Select Project Name", "View Project Folder", "Upload Data"]
+tab = sac.segmented(
+    items=[
+        sac.SegmentedItem(label='Select Project Name'),
+        sac.SegmentedItem(label='View Project Folder'),
+        sac.SegmentedItem(label='Upload Data')
+    ],
+    size='sm',
+    radius='lg',
+    align='left'
 )
 
-with tab1:
+if tab == 'Select Project Name':
     select_project()
 
-with tab2:
+elif tab == 'View Project Folder':
     view_project_folder()
 
-with tab3:
+elif tab == 'Upload Data':
     upload_data()
 
 # Show session state vars

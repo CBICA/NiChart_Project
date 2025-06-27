@@ -10,6 +10,8 @@ import utils.utils_pipelines as utilpipe
 import utils.utils_session as utilses
 from utils.utils_logger import setup_logger
 
+import streamlit_antd_components as sac
+
 logger = setup_logger()
 logger.debug('Page: Run Pipelines')
 
@@ -107,17 +109,24 @@ st.markdown(
     """
 )
 
-tab1, tab2, tab3 = st.tabs(
-    ["Verify Input Data", "Run Pipeline", "View Status"]
+tab = sac.segmented(
+    items=[
+        sac.SegmentedItem(label='Verify Input Data'),
+        sac.SegmentedItem(label='Run Pipeline'),
+        sac.SegmentedItem(label='View Status')
+    ],
+    size='sm',
+    radius='lg',
+    align='left'
 )
 
-with tab1:
+if tab == 'Verify Input Data':
     panel_verify_data()
     
-with tab2:
+elif tab == 'Run Pipeline':
     panel_run_pipeline()
 
-with tab3:
+elif tab == 'View Status':
     panel_view_status()
 
 # Show session state vars

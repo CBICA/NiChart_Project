@@ -228,14 +228,21 @@ def panel_view_seg(ulay, olay, method):
     # Add tabs for parameter settings
     with st.container(border=True):
         if not flag_settings:
-            ptab1, ptab2, = st.tabs(
-                ['Data', 'Plot Settings']
-            )        
-            with ptab1:
+            tab = sac.segmented(
+                items=[
+                    sac.SegmentedItem(label='Data'),
+                    sac.SegmentedItem(label='Plot Settings')
+                ],
+                size='sm',
+                radius='lg',
+                align='left'
+            )
+            
+            if tab == 'Data':
                 ss_sel['sel_roi'] = utilpl.panel_select_var(['muse'], '_seg')
                 ss_sel['list_roi_indices'] = utilmisc.get_roi_indices(ss_sel['sel_roi'], method)
 
-            with ptab2:
+            elif tab == 'Plot Settings':
                 col1, col2, col3 = st.columns(3)
                 with col1:
                     # Create a list of checkbox options

@@ -11,6 +11,8 @@ import logging
 from stqdm import stqdm
 from utils.utils_logger import setup_logger
 
+import streamlit_antd_components as sac
+
 # Page config should be called for each page
 utilpg.config_page()
 utilpg.show_menu()
@@ -109,20 +111,29 @@ st.markdown(
     , unsafe_allow_html=True
 )
 
-tab1, tab2, tab3, tab4 = st.tabs(
-    ["Overview", "Quick Start", "Links", "Installation"]
+tab = sac.segmented(
+    items=[
+        sac.SegmentedItem(label='Overview'),
+        sac.SegmentedItem(label='Quick Start'),
+        sac.SegmentedItem(label='Links'),
+        sac.SegmentedItem(label='Installation'),
+    ],
+    size='sm',
+    radius='lg',
+    align='left'
 )
 
-with tab1:
+
+if tab == 'Overview':
     view_overview()
 
-with tab2:
+elif tab == 'Quick Start':
     view_quick_start()
 
-with tab3:
+elif tab == 'Links':
     view_links()
 
-with tab4:
+elif tab == 'Installation':
     view_installation()
 
 # Show session state vars

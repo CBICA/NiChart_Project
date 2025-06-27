@@ -423,27 +423,37 @@ def panel_set_plot_params(
     # Add tabs for parameter settings
     with st.container(border=True):
         if not flag_settings:
-            ptabs = st.tabs(
-                ['Data', 'Groups', 'Fit', 'Centiles', 'Plot Settings']
+            tab = sac.segmented(
+                items=[
+                    sac.SegmentedItem(label='Data'),
+                    sac.SegmentedItem(label='Groups'),
+                    sac.SegmentedItem(label='Fit'),
+                    sac.SegmentedItem(label='Centiles'),
+                    sac.SegmentedItem(label='Plot Settings')
+                ],
+                size='sm',
+                radius='lg',
+                align='left'
             )
-            with ptabs[0]:
+            
+            if tab == 'Data':
                 # Select x var
                 panel_select_var(var_groups_data, plot_params, 'xvar')
                     
                 # Select y var
                 panel_select_var(var_groups_data, plot_params, 'yvar')
 
-            with ptabs[1]:
+            elif tab == 'Groups':
                 # Select h var
                 panel_select_var(var_groups_hue, plot_params, 'hvar', add_none = True)
 
-            with ptabs[2]:
+            elif tab == 'Fit':
                 panel_select_trend(plot_params)
 
-            with ptabs[3]:
+            elif tab == 'Centiles':
                 panel_select_centiles(plot_params)
 
-            with ptabs[4]:
+            elif tab == 'Plot Settings':
                 panel_select_settings(plot_params)
                 
     # Set plot type

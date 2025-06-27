@@ -10,6 +10,8 @@ import os
 from pathlib import Path
 from utils.utils_logger import setup_logger
 
+import streamlit_antd_components as sac
+
 logger = setup_logger()
 logger.debug('Page: View Results')
 
@@ -61,20 +63,28 @@ st.markdown(
     """
 )
 
-my_tabs = st.tabs(
-    ["Overview", "Prepare Data", "Plot Data", "View Images"]
+tab = sac.segmented(
+    items=[
+        sac.SegmentedItem(label='Overview'),
+        sac.SegmentedItem(label='Prepare Data'),
+        sac.SegmentedItem(label='Plot Data'),
+        sac.SegmentedItem(label='View Images'),
+    ],
+    size='sm',
+    radius='lg',
+    align='left'
 )
 
-with my_tabs[0]:
+if tab == 'Overview':
     panel_data_overview()
 
-with my_tabs[1]:
+elif tab == 'Prepare Data':
     panel_data_merge()
 
-with my_tabs[2]:
+elif tab == 'Plot Data':
     plot_vars()
 
-with my_tabs[3]:
+elif tab == 'View Images':
     view_images()
 
 # Show session state vars

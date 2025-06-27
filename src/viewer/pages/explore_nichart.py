@@ -9,6 +9,8 @@ from stqdm import stqdm
 import os
 from utils.utils_logger import setup_logger
 
+import streamlit_antd_components as sac
+
 logger = setup_logger()
 logger.debug('Page: Explore Nichart')
 
@@ -109,12 +111,18 @@ st.markdown(
     """
 )
 
-tab1, tab2 = st.tabs(
-    ["Pipeline", "Output"]
+tab = sac.segmented(
+    items=[
+        sac.SegmentedItem(label='Pipeline'),
+        sac.SegmentedItem(label='Output'),
+    ],
+    size='sm',
+    radius='lg',
+    align='left'
 )
 
 # Select pipeline
-with tab1:
+if tab == 'Pipeline':
     # Show a thumbnail image for each pipeline
     pdict = dict(
         zip(st.session_state.pipelines['Name'], st.session_state.pipelines['Label'])
@@ -137,7 +145,7 @@ with tab1:
         view_description(list(pdict.values())[psel])
     
 # Show output values for the selected pipeline
-with tab2:
+if tab == 'Output':
     if psel == 0:
         view_dlmuse()
 

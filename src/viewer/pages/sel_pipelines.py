@@ -11,6 +11,8 @@ from streamlit_image_select import image_select
 import re
 from utils.utils_logger import setup_logger
 
+import streamlit_antd_components as sac
+
 logger = setup_logger()
 logger.debug('Page: Select Pipelines')
 
@@ -73,14 +75,20 @@ st.markdown(
     """
 )
 
-tab1, tab2 = st.tabs(
-    ["List View", "Graph View"]
+tab = sac.segmented(
+    items=[
+        sac.SegmentedItem(label='List View'),
+        sac.SegmentedItem(label='Graph View'),
+    ],
+    size='sm',
+    radius='lg',
+    align='left'
 )
 
-with tab1:
+if tab == 'List View':
     sel_pipeline_from_list()
 
-with tab2:
+elif tab == 'Graph View':
     st.info('Coming soon!')
     #sel_pipeline_from_graph()
     
