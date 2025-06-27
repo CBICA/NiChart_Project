@@ -13,6 +13,8 @@ import plotly.graph_objs as go
 import plotly.figure_factory as ff
 import utils.utils_traces as utiltr
 
+import streamlit_antd_components as sac
+
 pd.set_option('display.expand_frame_repr', False)
 pd.set_option('display.max_colwidth', None)  # or use a large number like 500
 
@@ -166,7 +168,7 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
     # Main plot
     m = plot_settings["margin"]
     hi = plot_settings["h_init"]
-    hc = plot_params["h_coeff"]
+    hc = plot_settings["h_coeff"]
     layout = go.Layout(
         height = hi * hc,
         margin = dict(l=m, r=m, t=m, b=m),
@@ -174,9 +176,10 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
     fig = go.Figure(layout=layout)
 
     # Add axis labels
-    fig.update_layout(
+    fig.update_layout(        
         xaxis_title = plot_params["xvar"], yaxis_title = plot_params["yvar"]
     )
+    
     
     # Add data scatter
     utiltr.add_trace_scatter(df, plot_params, plot_settings, fig)
@@ -213,11 +216,11 @@ def show_plots(df, df_plots, plot_settings):
         sel_params = df_plots.loc[plot_ind, 'params']
         with blocks[column_no]:
             with st.container(border=True):
-                if sel_params['ptype'] == "dist": 
+                if sel_params['plot_type'] == "dist": 
                     new_plot = display_dist_plot(
                         df, sel_params, plot_ind, plot_settings
                     )
-                elif sel_params['ptype'] == "scatter": 
+                elif sel_params['plot_type'] == "scatter": 
                     new_plot = display_scatter_plot(
                         df, sel_params, plot_ind, plot_settings
                     )
@@ -457,7 +460,7 @@ def panel_set_plot_params(
                 panel_select_settings(plot_params)
                 
     # Set plot type
-    plot_params['ptype'] = 'scatter'
+    plot_params['plot_type'] = 'scatter'
     
     # Set plot traces
     plot_params['traces'] = ['data']

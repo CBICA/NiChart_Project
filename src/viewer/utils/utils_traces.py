@@ -48,7 +48,7 @@ def add_trace_scatter(df: pd.DataFrame, plot_params: dict, plot_settings: dict, 
                 marker={"color": c_txt},
                 name=hname,
                 legendgroup=hname,
-                showlegend=not plot_params['hide_legend'],
+                showlegend=not plot_settings['hide_legend'],
             )
             fig.add_trace(trace)
 
@@ -91,7 +91,7 @@ def add_trace_linreg(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
                 line=line,
                 name=f"lin_{hname}",
                 legendgroup=hname,
-                showlegend=not plot_params['hide_legend'],
+                showlegend=not plot_settings['hide_legend'],
             )
             fig.add_trace(trace)
 
@@ -112,7 +112,7 @@ def add_trace_linreg(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
                 hoverinfo="skip",
                 name=f"lin_conf95_{hname}",
                 legendgroup=hname,
-                showlegend=not plot_params['hide_legend'],
+                showlegend=not plot_settings['hide_legend'],
             )
             fig.add_trace(trace)
 
@@ -234,7 +234,7 @@ def add_trace_centile(df: pd.DataFrame, plot_params: dict, plot_settings: dict, 
                     name=cvar,
                     legendgroup="centiles",
                     line=dict(color=c_txt),
-                    showlegend=not plot_params['hide_legend'],
+                    showlegend=not plot_settings['hide_legend'],
                 )
                 fig.add_trace(ctrace)  # plot in first row
 

@@ -17,6 +17,7 @@ from PIL import Image
 # from streamlit.web.server.websocket_headers import _get_websocket_headers
 
 def disp_session_state():
+    st.divider()
     sel_ssvars = st.pills(
         "Select Session State Variable(s) to View",
         sorted(st.session_state.keys()),
