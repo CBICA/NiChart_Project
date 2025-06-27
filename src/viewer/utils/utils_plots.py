@@ -490,15 +490,23 @@ def panel_show_plots():
             st.session_state.plots.at[tmp_ind, 'params'] = st.session_state.plot_params.copy()
 
     ## Sidebar options
-    cols = st.sidebar.columns(3, vertical_alignment="center")
-    with cols[0]:
-        btn_add = st.button("Add Plot")
-    with cols[1]:
-        btn_del_sel = st.button("Delete Selected")
-    with cols[2]:
-        btn_del_all = st.button("Delete All")
+    with st.sidebar:
+        tab = sac.buttons(
+            items=[
+                sac.ButtonsItem(label='Add Plot'),
+                sac.ButtonsItem(label='Delete Selected'),
+                sac.ButtonsItem(label='Delete All')
+            ],
+            size='lg',
+            radius='xl',
+            gap='sm',
+            align='left',
+            #color='blue',
+            variant='outline',
+            index=None
+        )
 
-    if btn_add:
+    if tab == 'Add Plot':
         st.session_state.plots = add_plot(
             st.session_state.plots, st.session_state.plot_params
         )
@@ -509,11 +517,11 @@ def panel_show_plots():
             st.session_state.plots, st.session_state.plot_params
         )
 
-    if btn_del_sel:
+    elif tab == 'Delete Selected':
         st.session_state.plots = delete_sel_plots(
             st.session_state.plots
         )
-    if btn_del_all:
+    elif tab == 'Delete All':
         st.session_state.plots = delete_all_plots()
 
     # Show plots

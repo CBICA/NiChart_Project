@@ -111,15 +111,14 @@ st.markdown(
     , unsafe_allow_html=True
 )
 
-tab = sac.segmented(
+tab = sac.tabs(
     items=[
-        sac.SegmentedItem(label='Overview'),
-        sac.SegmentedItem(label='Quick Start'),
-        sac.SegmentedItem(label='Links'),
-        sac.SegmentedItem(label='Installation'),
+        sac.TabsItem(label='Overview'),
+        sac.TabsItem(label='Quick Start'),
+        sac.TabsItem(label='Links'),
+        sac.TabsItem(label='Installation'),
     ],
-    size='sm',
-    radius='lg',
+    size='lg',
     align='left'
 )
 
@@ -138,5 +137,4 @@ elif tab == 'Installation':
 
 # Show session state vars
 if st.session_state.mode == 'debug':
-    if st.sidebar.button('Show Session State'):
-        utilses.disp_session_state()
+    utilses.disp_session_state()

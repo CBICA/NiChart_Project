@@ -63,17 +63,17 @@ st.markdown(
     """
 )
 
-tab = sac.segmented(
+tab = sac.tabs(
     items=[
-        sac.SegmentedItem(label='Overview'),
-        sac.SegmentedItem(label='Prepare Data'),
-        sac.SegmentedItem(label='Plot Data'),
-        sac.SegmentedItem(label='View Images'),
+        sac.TabsItem(label='Overview'),
+        sac.TabsItem(label='Prepare Data'),
+        sac.TabsItem(label='Plot Data'),
+        sac.TabsItem(label='View Images'),
     ],
-    size='sm',
-    radius='lg',
+    size='lg',
     align='left'
 )
+
 
 if tab == 'Overview':
     panel_data_overview()
@@ -89,8 +89,7 @@ elif tab == 'View Images':
 
 # Show session state vars
 if st.session_state.mode == 'debug':
-    if st.sidebar.button('Show Session State'):
-        utilses.disp_session_state()
+    utilses.disp_session_state()
 
-    if st.sidebar.button('Show Plot'):
-        st.dataframe(st.session_state.plots)
+if st.sidebar.button('Show Plot'):
+    st.dataframe(st.session_state.plots)

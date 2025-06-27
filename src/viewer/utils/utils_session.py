@@ -17,17 +17,33 @@ from PIL import Image
 # from streamlit.web.server.websocket_headers import _get_websocket_headers
 
 def disp_session_state():
-    st.divider()
-    sel_ssvars = st.pills(
-        "Select Session State Variable(s) to View",
-        sorted(st.session_state.keys()),
-        selection_mode="multi",
-        default=None,
-        #label_visibility="collapsed",
+    '''
+    Show session state variables
+    '''
+    st.sidebar.divider()
+    st.sidebar.checkbox(
+        'Show Session State',
+        key = '_debug_flag_show',
+        value = st.session_state['debug']['flag_show'] 
     )
-    for sel_var in sel_ssvars:
-        st.markdown('➤ ' + sel_var + ':')
-        st.write(st.session_state[sel_var])
+    st.session_state['debug']['flag_show'] = st.session_state['_debug_flag_show']
+    
+    if st.session_state['debug']['flag_show']:
+        with st.container(border=True):
+            st.markdown('##### Session State:')
+            st.pills(
+                "Select Session State Variable(s) to View",
+                sorted(st.session_state.keys()),
+                selection_mode="multi",
+                key='_debug_sel_vars',
+                default=st.session_state['debug']['sel_vars'],
+                label_visibility="collapsed",
+            )
+            st.session_state['debug']['sel_vars'] = st.session_state['_debug_sel_vars']
+
+            for sel_var in st.session_state['debug']['sel_vars']:
+                st.markdown('➤ ' + sel_var + ':')
+                st.write(st.session_state['debug']['sel_vars'])
 
 def init_project_folders():
     ### Project folders
@@ -62,6 +78,13 @@ def init_session_vars():
             True: ":material/thumb_up:",
         }
     }
+
+    ## Debug vars
+    st.session_state['debug'] = {
+        'flag_show': False,
+        'sel_vars': []
+    }
+
 
     ####################################
     # Process definitions

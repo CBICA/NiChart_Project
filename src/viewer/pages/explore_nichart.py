@@ -18,20 +18,52 @@ logger.debug('Page: Explore Nichart')
 utilpg.config_page()
 utilpg.show_menu()
 
-def view_description(method) -> None:
+def view_description(pipeline) -> None:
     """
-    Panel for viewing method description
+    Panel for viewing pipeline description
     """
     with st.container(border=True):
-        fdoc = os.path.join(
-            st.session_state.paths['resources'],
-            'pipelines',
-            method,
-            'overview_' + method + '.md'
+        f_logo = os.path.join(
+            st.session_state.paths['resources'], 'pipelines', pipeline, f'logo_{pipeline}.png'
         )
-        with open(fdoc, 'r') as f:
-            markdown_content = f.read()
-        st.markdown(markdown_content)
+        fdoc = os.path.join(
+            st.session_state.paths['resources'], 'pipelines', pipeline, f'overview_{pipeline}.md'
+        )
+        cols = st.columns([6, 1])
+        with cols[0]:
+            with open(fdoc, 'r') as f:
+                st.markdown(f.read())
+        with cols[1]:
+            st.image(f_logo)
+
+def pipeline_overviews():
+    '''
+    Select a pipeline and show overview
+    '''
+    pdict = dict(
+        zip(st.session_state.pipelines['Name'], st.session_state.pipelines['Label'])
+    )
+    
+    sitems = []
+    colors = ['blue', 'red', 'pink', 'teal', 'grape', 'indigo', 'lime', 'orange']
+    #'#25C3B0'
+    for i, tmp_key in enumerate(pdict.keys()):
+        sitems.append(
+            sac.ButtonsItem(
+                label=tmp_key, color = colors[i]
+            )
+        )
+    
+    tab = sac.buttons(
+        items=sitems,
+        size='xl',
+        radius='lg',
+        align='left'
+    )
+        
+    # Show description of the selected pipeline
+    view_description(pdict[tab])
+
 
 def view_synthseg() -> None:
     """
@@ -104,25 +136,10 @@ def view_surrealgan() -> None:
     """
     st.info('Coming soon!')
 
-#st.info(
-st.markdown(
-    """
-    ### Explore Neuroimaging Chart
-    """
-)
-
-tab = sac.segmented(
-    items=[
-        sac.SegmentedItem(label='Pipeline'),
-        sac.SegmentedItem(label='Output'),
-    ],
-    size='sm',
-    radius='lg',
-    align='left'
-)
-
-# Select pipeline
-if tab == 'Pipeline':
+def pipeline_overviews_v0():
+    '''
+    Select a pipeline and show overview
+    '''
     # Show a thumbnail image for each pipeline
     pdict = dict(
         zip(st.session_state.pipelines['Name'], st.session_state.pipelines['Label'])
@@ -144,8 +161,29 @@ if tab == 'Pipeline':
     if psel >= 0 :
         view_description(list(pdict.values())[psel])
     
+
+#st.info(
+st.markdown(
+    """
+    ### Explore Neuroimaging Chart
+    """
+)
+
+tab = sac.tabs(
+    items=[
+        sac.TabsItem(label='Pipelines'),
+        sac.TabsItem(label='View Sample Distributions'),
+    ],
+    size='lg',
+    align='left'
+)
+
+# Select pipeline
+if tab == 'Pipelines':
+    pipeline_overviews()
+    
 # Show output values for the selected pipeline
-if tab == 'Output':
+if tab == 'View Sample Distributions':
     if psel == 0:
         view_dlmuse()
 
@@ -168,5 +206,4 @@ if tab == 'Output':
         view_synthseg()
 
 if st.session_state.mode == 'debug':
-    if st.sidebar.button('Show Session State'):
-        utilses.disp_session_state()
+    utilses.disp_session_state()

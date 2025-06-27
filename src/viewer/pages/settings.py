@@ -107,15 +107,14 @@ st.markdown(
     """
 )
 
-tab = sac.segmented(
+tab = sac.tabs(
     items=[
-        sac.SegmentedItem(label='Paths'),
-        sac.SegmentedItem(label='Plot Colors'),
-        sac.SegmentedItem(label='Debug'),
-        sac.SegmentedItem(label='Misc'),
+        sac.TabsItem(label='Paths'),
+        sac.TabsItem(label='Plot Colors'),
+        sac.TabsItem(label='Debug'),
+        sac.TabsItem(label='Misc'),
     ],
-    size='sm',
-    radius='lg',
+    size='lg',
     align='left'
 )
 
@@ -134,6 +133,5 @@ elif tab == 'Misc':
 
 # Show session state vars
 if st.session_state.mode == 'debug':
-    if st.sidebar.button('Show Session State'):
-        utilses.disp_session_state()
+    utilses.disp_session_state()
 

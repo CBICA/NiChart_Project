@@ -75,13 +75,12 @@ st.markdown(
     """
 )
 
-tab = sac.segmented(
+tab = sac.tabs(
     items=[
-        sac.SegmentedItem(label='List View'),
-        sac.SegmentedItem(label='Graph View'),
+        sac.TabsItem(label='List View'),
+        sac.TabsItem(label='Graph View'),
     ],
-    size='sm',
-    radius='lg',
+    size='lg',
     align='left'
 )
 
@@ -95,8 +94,7 @@ elif tab == 'Graph View':
 
 # Show session state vars
 if st.session_state.mode == 'debug':
-    if st.sidebar.button('Show Session State'):
-        utilses.disp_session_state()
+    utilses.disp_session_state()
 
 
 

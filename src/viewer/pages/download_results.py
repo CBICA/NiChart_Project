@@ -23,5 +23,4 @@ st.info('Coming Soon!')
 
 # Show session state vars
 if st.session_state.mode == 'debug':
-    if st.sidebar.button('Show Session State'):
-        utilses.disp_session_state()
+    utilses.disp_session_state()
