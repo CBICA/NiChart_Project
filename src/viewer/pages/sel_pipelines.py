@@ -38,32 +38,32 @@ def view_input_data(method) -> None:
 
 
 def sel_pipeline_from_list():
-    # Show a thumbnail image for each pipeline
-    pdict = dict(
-        zip(st.session_state.pipelines['Name'], st.session_state.pipelines['Label'])
-    )
-    pdir = os.path.join(st.session_state.paths['resources'], 'pipelines')
-    logo_fnames = [
-        os.path.join(pdir, pname, f'logo_{pname}.png') for pname in list(pdict.values())
-    ]
-    psel = image_select(
-        "",
-        images = logo_fnames,
-        captions=list(pdict.keys()),
-        index=-1,
-        return_value="index",
-        use_container_width = False
-    )
-    
-    # Show description of the selected pipeline
-    if psel < 0 :
-        return
-    
-    sel_pipeline = list(pdict.values())[psel]
+    '''
+    Select a pipeline
+    '''
+    with st.container(border=True):
+        pipelines = st.session_state.pipelines
+        sitems = []
+        colors = st.session_state.pipeline_colors
+        for i, ptmp in enumerate(pipelines.Name.tolist()):
+            sitems.append(
+                sac.ButtonsItem(
+                    label=ptmp, color = colors[i%len(colors)]
+                )
+            )
+
+        sel_pipeline = sac.buttons(
+            items=sitems,
+            size='lg',
+            radius='xl',
+            align='left'
+        )
+        pname = pipelines.loc[pipelines.Name == sel_pipeline, 'Label'].values[0]
+
     if st.button('Select'):
-        st.session_state.sel_pipeline = sel_pipeline
-        st.success(f'Pipeline selected: {sel_pipeline}')
-        view_input_data(sel_pipeline)
+        st.session_state.sel_pipeline = pname
+        st.success(f'Pipeline selected: {pname}')
+        view_input_data(pname)
 
 # Page config should be called for each page
 utilpg.config_page()
@@ -84,13 +84,13 @@ tab = sac.tabs(
     align='left'
 )
 
+# List view
 if tab == 'List View':
     sel_pipeline_from_list()
 
-elif tab == 'Graph View':
+# Graph view
+if tab == 'Graph View':
     st.info('Coming soon!')
-    #sel_pipeline_from_graph()
-    
 
 # Show session state vars
 if st.session_state.mode == 'debug':

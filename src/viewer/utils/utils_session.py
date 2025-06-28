@@ -43,7 +43,7 @@ def disp_session_state():
 
             for sel_var in st.session_state['debug']['sel_vars']:
                 st.markdown('➤ ' + sel_var + ':')
-                st.write(st.session_state['debug']['sel_vars'])
+                st.write(st.session_state[sel_var])
 
 def init_project_folders():
     ### Project folders
@@ -253,6 +253,17 @@ def init_selections() -> None:
     st.session_state.selections = {
         'sel_roi_group' : 'MUSE_Primary',
         'sel_roi' : 'GM',
+    }
+
+def init_mri_vars() -> None:
+    # MRI viewer parameters
+    st.session_state.mri_params = {
+        "roi_group": 'MUSE_Primary',
+        "roi": 'GM',
+        "list_roi_indices": [601],
+        "list_orient": ["axial", "coronal", "sagittal"],
+        "is_show_overlay": True,
+        "crop_to_mask": True
     }
 
 def init_plot_vars() -> None:
@@ -630,6 +641,7 @@ def init_session_state() -> None:
         init_pipeline_definitions()
         init_reference_data()
         init_plot_vars()
+        init_mri_vars()
         init_selections()
         
         # Set flag

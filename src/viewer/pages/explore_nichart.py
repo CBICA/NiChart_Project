@@ -84,8 +84,16 @@ def view_dlmuse() -> None:
     if sel_res_type == 'Segmentation':
         ulay = st.session_state.ref_data["t1"]
         olay = st.session_state.ref_data["dlmuse"]        
-        utilmri.panel_view_seg(ulay, olay, 'muse')
-        
+        mri_params = st.session_state.mri_params
+
+        utilmri.panel_set_params(
+            mri_params, ['roi']
+        )
+
+        utilmri.panel_view_seg(
+            ulay, olay, mri_params
+        )
+
     elif sel_res_type == 'Volumes':
         st.session_state.curr_df = None
         utilpl.panel_view_centiles('dlmuse', 'rois')
@@ -106,8 +114,16 @@ def view_dlwmls() -> None:
     
     if sel_res_type == 'Segmentation':
         ulay = st.session_state.ref_data["fl"]
-        olay = st.session_state.ref_data["dlwmls"]        
-        utilmri.panel_view_seg(ulay, olay, 'dlwmls')
+        olay = st.session_state.ref_data["dlwmls"]
+        mri_params = st.session_state.mri_params
+
+        utilmri.panel_set_params(
+            mri_params, ['roi']
+        )
+
+        utilmri.panel_view_seg(
+            ulay, olay, mri_params
+        )
 
 def view_dlmuse_biomarkers() -> None:
     """
@@ -137,20 +153,18 @@ st.markdown(
 tab = sac.tabs(
     items=[
         sac.TabsItem(label='Pipelines'),
-        sac.TabsItem(label='View Sample Distributions'),
+        sac.TabsItem(label='View Output'),
     ],
     size='lg',
     align='left'
 )
-
-sel_pipeline = 'dlmuse'
 
 # Select pipeline
 if tab == 'Pipelines':
     st.session_state.sel_pipeline = pipeline_overview()
     
 # Show output values for the selected pipeline
-if tab == 'View Sample Distributions':
+if tab == 'View Output':
     if st.session_state.sel_pipeline == 'DLMUSE':
         view_dlmuse()
 
