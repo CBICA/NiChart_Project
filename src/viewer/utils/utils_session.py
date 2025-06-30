@@ -64,8 +64,8 @@ def init_session_vars():
     # st.session_state.mode = 'release'
     st.session_state.mode = 'debug'
 
-    st.session_state.project = 'nichart_project'
-    #st.session_state.project = 'IXI'
+    #st.session_state.project = 'nichart_project'
+    st.session_state.project = 'IXI'
     
     st.session_state.sel_pipeline = 'dlmuse'
 
@@ -261,7 +261,7 @@ def init_mri_vars() -> None:
     st.session_state.mri_params = {
         "roi_group": 'MUSE_Primary',
         "roi": 'GM',
-        "list_roi_indices": [601],
+        "list_roi_indices": [81, 82],
         "list_orient": ["axial", "coronal", "sagittal"],
         "is_show_overlay": True,
         "crop_to_mask": True
@@ -287,8 +287,8 @@ def init_plot_vars() -> None:
     # Plot settings
     st.session_state.plot_settings = {
         "hide_settings": False,
-        "hide_legend": False,
         "show_img": False,
+        "hide_legend": False,
         "trend_types": ["None", "Linear", "Smooth LOWESS Curve"],
         "centile_types": ["", "CN", "CN_Males", "CN_Females", "CN_ICV_Corrected"],
         "linfit_trace_types": [

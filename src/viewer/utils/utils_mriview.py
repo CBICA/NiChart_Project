@@ -120,6 +120,10 @@ def prep_image_and_olay(f_img: np.ndarray, f_mask: Any, list_rois: list, crop_to
     Read images from files and create 3D matrices for display
     """
 
+    print(f_img)
+    print(f_mask)
+    print(list_rois)
+
     # Read nifti
     nii_img = nib.load(f_img)
     nii_mask = nib.load(f_mask)
@@ -220,7 +224,6 @@ def show_img_slices(img, scroll_axis, sel_axis_bounds, orientation, wimg = None)
         else:
             st.image(img[:, :, slice_index], width=w_img)
 
-
 def panel_select_var(sel_var_groups, plot_params, var_type, add_none = False):
     '''
     User panel to select a variable
@@ -280,9 +283,7 @@ def panel_select_var(sel_var_groups, plot_params, var_type, add_none = False):
 
         plot_params[var_type] = st.session_state[f'_{var_type}']
 
-def panel_set_params(
-    mri_params, var_groups_data
-):
+def panel_set_params(mri_params, var_groups_data):
     """
     Panel to set mriview parameters
     """
@@ -326,6 +327,9 @@ def panel_view_seg(ulay, olay, mri_params):
     '''
     Panel to display segmented image overlaid on underlay image
     '''
+    
+    print(mri_params)
+    
     if mri_params['list_roi_indices'] is None:
         return
 

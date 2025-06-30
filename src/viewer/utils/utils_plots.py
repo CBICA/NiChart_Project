@@ -8,6 +8,7 @@ import streamlit as st
 import utils.utils_io as utilio
 import utils.utils_session as utilses
 import utils.utils_misc as utilmisc
+import utils.utils_mriview as utilmri
 
 import plotly.graph_objs as go
 import plotly.figure_factory as ff
@@ -31,7 +32,6 @@ def read_data(fdata):
         df["grouping_var"] = "Data"
     
     return df
-
 
 def add_plot(df_plots, new_plot_params):
     """
@@ -158,14 +158,41 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
     '''
     Display scatter plot
     '''
+    #def callback_plot_clicked() -> None:
+        #"""
+        #Set the active plot id to plot that was clicked
+        #"""
+        #st.session_state.plot_active = plot_ind
+
+
     def callback_plot_clicked() -> None:
         """
         Set the active plot id to plot that was clicked
         """
         st.session_state.plot_active = plot_ind
 
-        print(f'Clicked {plot_ind}')
-        print(f'Clicked {st.session_state.plot_active}')
+        # Detect MRID from the click info and save to session_state
+        hind = utilmisc.get_index_in_list(df.columns.tolist(), curr_params['hvar'])
+        
+        sel_info = st.session_state[f"bubble_chart_{plot_ind}"]
+        if len(sel_info["selection"]["points"]) > 0:
+            sind = sel_info["selection"]["point_indices"][0]
+            if hind is None:
+                sel_mrid = df.iloc[sind]["MRID"]
+            else:
+                lgroup = sel_info["selection"]["points"][0]["legendgroup"]
+                sel_mrid = df[df[curr_params["hvar"]] == lgroup].iloc[sind][
+                    "MRID"
+                ]
+            sel_roi = st.session_state.plots.loc[st.session_state.plot_active, 'params']['yvar']
+            st.session_state.sel_mrid = sel_mrid
+            st.session_state.sel_roi = sel_roi
+            #st.session_state.sel_roi_img = sel_roi
+            # st.rerun()
+
+        print(f'Clicked {sel_mrid}')
+
+    curr_params = st.session_state.plots.loc[plot_ind, 'params']
 
     # Read centile data
     f_cent = os.path.join(
@@ -240,8 +267,20 @@ def show_plots(df, df_plots, plot_settings):
                 )
                 df_plots.loc[plot_ind, 'flag_sel'] = st.session_state[f'_flag_sel_{plot_ind}']
 
-    #if st.session_state.plot_params["show_img"]:
-    #show_img()
+    if st.sidebar.button('sss'):
+        st.session_state.plot_settings["show_img"] = True
+    
+    if st.session_state.plot_settings["show_img"]:
+        in_dir = st.session_state.paths['project']
+        mri_params = st.session_state.mri_params
+        mrid = st.session_state.sel_mrid
+        ulay = os.path.join(
+            in_dir, 't1', f'{mrid}_T1.nii.gz'
+        )
+        olay = os.path.join(
+            in_dir, 'dlmuse_seg', f'{mrid}_T1_DLMUSE.nii.gz'
+        )
+        utilmri.panel_view_seg(ulay, olay, mri_params)
 
 ###################################################################
 # Panels
@@ -394,7 +433,6 @@ def panel_select_centiles(plot_params):
     )
     plot_params['centile_values'] = st.session_state['_centile_values']
 
-
 def panel_select_settings(plot_params):
     '''
     Panel to select plot settings
@@ -423,10 +461,7 @@ def panel_select_settings(plot_params):
         disabled=False,
     )
 
-
-def panel_set_plot_params(
-    plot_params, var_groups_data, var_groups_hue, pipeline
-):
+def panel_set_plot_params(plot_params, var_groups_data, var_groups_hue, pipeline):
     """
     Panel to set plotting parameters
     """
@@ -435,16 +470,15 @@ def panel_set_plot_params(
     # Add tabs for parameter settings
     with st.container(border=True):
         if not flag_settings:
-            tab = sac.segmented(
+            tab = sac.tabs(
                 items=[
-                    sac.SegmentedItem(label='Data'),
-                    sac.SegmentedItem(label='Groups'),
-                    sac.SegmentedItem(label='Fit'),
-                    sac.SegmentedItem(label='Centiles'),
-                    sac.SegmentedItem(label='Plot Settings')
+                    sac.TabsItem(label='Data'),
+                    sac.TabsItem(label='Groups'),
+                    sac.TabsItem(label='Fit'),
+                    sac.TabsItem(label='Centiles'),
+                    sac.TabsItem(label='Plot Settings')
                 ],
                 size='sm',
-                radius='lg',
                 align='left'
             )
             
@@ -503,54 +537,32 @@ def panel_show_plots():
 
     ## Sidebar options
     with st.sidebar:
-        sac.buttons(
-            items=[
-                sac.ButtonsItem(label='Add Plot'),
-                sac.ButtonsItem(label='Delete Selected'),
-                sac.ButtonsItem(label='Delete All')
-            ],
-            size='lg',
-            radius='xl',
-            gap='sm',
-            align='left',
-            #color='blue',
-            variant='outline',
-            index=None,
-            key='_tmp_key',
-            on_change = tmp_fun()
-        )
 
+        if st.button('Add Plot'):
+            st.session_state.plots = add_plot(
+                st.session_state.plots, st.session_state.plot_params
+            )
+        
+        # Add a single plot if there is none
+        if st.session_state.plots.shape[0] == 0:
+            st.session_state.plots = add_plot(
+                st.session_state.plots, st.session_state.plot_params
+            )
+        
+        if st.button('Delete Selected'):
+            st.session_state.plots = delete_sel_plots(
+                st.session_state.plots
+            )
+        
+        if st.button('Delete All'):
+            st.session_state.plots = delete_all_plots()
 
-
-    # print(f'rrrrr {sel_btn}')
-    # if sel_btn == 'add_plot':
-    #     print('aaaa')
-    #     st.session_state.plots = add_plot(
-    #         st.session_state.plots, st.session_state.plot_params
-    #     )
-    # print(f'ppprrrrr {sel_btn}')
-    #
-    # # Add a single plot if there is none
-    # if st.session_state.plots.shape[0] == 0:
-    #     print('bbbb')
-    #     st.session_state.plots = add_plot(
-    #         st.session_state.plots, st.session_state.plot_params
-    #     )
-    #
-    # elif sel_btn == 'del_sel_plot':
-    #     st.session_state.plots = delete_sel_plots(
-    #         st.session_state.plots
-    #     )
-    #
-    # elif sel_btn == 'del_all_plot':
-    #     st.session_state.plots = delete_all_plots()
-    #
-    # # Show plots
-    # show_plots(
-    #     st.session_state.plot_data['df_data'],
-    #     st.session_state.plots,
-    #     st.session_state.plot_settings
-    # )
+    # Show plots
+    show_plots(
+        st.session_state.plot_data['df_data'],
+        st.session_state.plots,
+        st.session_state.plot_settings
+    )
 
 
 
