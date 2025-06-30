@@ -21,21 +21,24 @@ def select_project():
     """
     Panel for selecting a project
     """
-    out_dir = st.session_state.paths["out_dir"]
-    sel_project = utildata.select_project(out_dir, st.session_state.project)
-    st.success(f'Project Name: {st.session_state.project}')
+    with st.container(border=True):
+        out_dir = st.session_state.paths["out_dir"]
+        sel_project = utildata.select_project(out_dir, st.session_state.project)
+        st.success(f'Project Name: {st.session_state.project}')
     
 def view_project_folder():
     """
     Panel for viewing files in a project folder
     """
-    utildata.disp_folder_tree(st.session_state.paths['project'])
+    with st.container(border=True):
+        utildata.disp_folder_tree(st.session_state.paths['project'])
     
 def upload_data():
     """
     Panel for viewing files in a project folder
     """
-    utildata.panel_load_data()
+    with st.container(border=True):    
+        utildata.panel_load_data()
     
 st.markdown(
     """

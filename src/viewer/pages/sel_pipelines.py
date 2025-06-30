@@ -60,10 +60,10 @@ def sel_pipeline_from_list():
         )
         pname = pipelines.loc[pipelines.Name == sel_pipeline, 'Label'].values[0]
 
-    if st.button('Select'):
-        st.session_state.sel_pipeline = pname
-        st.success(f'Pipeline selected: {pname}')
-        view_input_data(pname)
+        if st.button('Select'):
+            st.session_state.sel_pipeline = pname
+            st.success(f'Pipeline selected: {pname}')
+            view_input_data(pname)
 
 # Page config should be called for each page
 utilpg.config_page()

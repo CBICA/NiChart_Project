@@ -175,11 +175,12 @@ if tab == 'Pipelines':
     
 # Show output values for the selected pipeline
 if tab == 'View Output':
-    if st.session_state.sel_pipeline == 'DLMUSE':
-        view_dlmuse()
+    with st.container(border=True):
+        if st.session_state.sel_pipeline == 'DLMUSE':
+            view_dlmuse()
 
-    elif st.session_state.sel_pipeline == 'DLWMLS':
-        view_dlwmls()
+        elif st.session_state.sel_pipeline == 'DLWMLS':
+            view_dlwmls()
 
 if st.session_state.mode == 'debug':
     utilses.disp_session_state()

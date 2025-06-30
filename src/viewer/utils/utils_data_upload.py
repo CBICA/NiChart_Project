@@ -4,6 +4,7 @@ import utils.utils_io as utilio
 import utils.utils_session as utilss
 import os
 import pandas as pd
+import streamlit_antd_components as sac
 
 from utils.utils_logger import setup_logger
 logger = setup_logger()
@@ -12,13 +13,23 @@ def select_project(out_dir, curr_project):
     """
     Panel for creating/selecting project (to keep all data for the current project)
     """
-    sel_mode = st.pills(
-        'Select mode',
-        ['Create New', 'Select Existing'],
-        default = None,
-        selection_mode = 'single',
-        label_visibility = 'collapsed',
+    #sel_mode = st.pills(
+        #'Select mode',
+        #['Create New', 'Select Existing'],
+        #default = None,
+        #selection_mode = 'single',
+        #label_visibility = 'collapsed',
+    #)
+    sel_mode = sac.tabs(
+        items=[
+            sac.TabsItem(label='Create New'),
+            sac.TabsItem(label='Select Existing'),
+        ],
+        size='lg',
+        align='left'
     )
+    
+    
     if sel_mode is None:
         return None
 
@@ -259,17 +270,14 @@ def panel_load_data():
     '''
     Panel for loading user data
     '''
-    list_dtype = [
-        "Nifti",
-        "Dicom",
-        "Lists",
-    ]
-    sel_dtype = st.pills(
-        "Select Data Type",
-        list_dtype,
-        default = None,        
-        selection_mode="single",
-        label_visibility="collapsed"
+    sel_dtype = sac.tabs(
+        items=[
+            sac.TabsItem(label='Nifti'),
+            sac.TabsItem(label='Dicom'),
+            sac.TabsItem(label='Lists')
+        ],
+        size='lg',
+        align='left'
     )
 
     if sel_dtype is None:
