@@ -31,9 +31,10 @@ def disp_session_state():
     if st.session_state['debug']['flag_show']:
         with st.container(border=True):
             st.markdown('##### Session State:')
+            list_items = [x for x in st.session_state.keys() if not x.startswith('_')]
             st.pills(
                 "Select Session State Variable(s) to View",
-                sorted(st.session_state.keys()),
+                list_items,
                 selection_mode="multi",
                 key='_debug_sel_vars',
                 default=st.session_state['debug']['sel_vars'],

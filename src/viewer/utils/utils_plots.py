@@ -498,9 +498,12 @@ def panel_show_plots():
         if st.session_state.plots.loc[tmp_ind, 'flag_sel']:
             st.session_state.plots.at[tmp_ind, 'params'] = st.session_state.plot_params.copy()
 
+    def tmp_fun():
+        print(f'Clicked')
+
     ## Sidebar options
     with st.sidebar:
-        tab = sac.buttons(
+        sac.buttons(
             items=[
                 sac.ButtonsItem(label='Add Plot'),
                 sac.ButtonsItem(label='Delete Selected'),
@@ -512,33 +515,42 @@ def panel_show_plots():
             align='left',
             #color='blue',
             variant='outline',
-            index=None
+            index=None,
+            key='_tmp_key',
+            on_change = tmp_fun()
         )
 
-    if tab == 'Add Plot':
-        st.session_state.plots = add_plot(
-            st.session_state.plots, st.session_state.plot_params
-        )
 
-    # Add a single plot if there is none
-    if st.session_state.plots.shape[0] == 0:
-        st.session_state.plots = add_plot(
-            st.session_state.plots, st.session_state.plot_params
-        )
 
-    elif tab == 'Delete Selected':
-        st.session_state.plots = delete_sel_plots(
-            st.session_state.plots
-        )
-    elif tab == 'Delete All':
-        st.session_state.plots = delete_all_plots()
-
-    # Show plots
-    show_plots(
-        st.session_state.plot_data['df_data'],
-        st.session_state.plots,
-        st.session_state.plot_settings
-    )
+    # print(f'rrrrr {sel_btn}')
+    # if sel_btn == 'add_plot':
+    #     print('aaaa')
+    #     st.session_state.plots = add_plot(
+    #         st.session_state.plots, st.session_state.plot_params
+    #     )
+    # print(f'ppprrrrr {sel_btn}')
+    #
+    # # Add a single plot if there is none
+    # if st.session_state.plots.shape[0] == 0:
+    #     print('bbbb')
+    #     st.session_state.plots = add_plot(
+    #         st.session_state.plots, st.session_state.plot_params
+    #     )
+    #
+    # elif sel_btn == 'del_sel_plot':
+    #     st.session_state.plots = delete_sel_plots(
+    #         st.session_state.plots
+    #     )
+    #
+    # elif sel_btn == 'del_all_plot':
+    #     st.session_state.plots = delete_all_plots()
+    #
+    # # Show plots
+    # show_plots(
+    #     st.session_state.plot_data['df_data'],
+    #     st.session_state.plots,
+    #     st.session_state.plot_settings
+    # )
 
 
 
