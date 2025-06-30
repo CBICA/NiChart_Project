@@ -87,7 +87,7 @@ def view_dlmuse() -> None:
         mri_params = st.session_state.mri_params
 
         utilmri.panel_set_params(
-            mri_params, ['roi']
+            mri_params, ['roi'], 'muse'
         )
 
         utilmri.panel_view_seg(
@@ -128,7 +128,7 @@ def view_dlwmls() -> None:
         mri_params = st.session_state.mri_params
 
         utilmri.panel_set_params(
-            mri_params, ['roi']
+            mri_params, ['roi'], 'wmls'
         )
 
         utilmri.panel_view_seg(

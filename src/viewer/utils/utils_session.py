@@ -414,7 +414,7 @@ def init_muse_roi_def() -> None:
     
     # Read roi lists to dictionaries
     df_tmp = pd.read_csv(
-        os.path.join(muse['path'], muse['list_rois'])
+        os.path.join(muse['path'], muse['list_rois']),
     )
     dict1 = dict(zip(df_tmp["Index"].astype(str), df_tmp["Name"].astype(str)))
     dict2 = dict(zip(df_tmp["Name"].astype(str), df_tmp["Index"].astype(str)))

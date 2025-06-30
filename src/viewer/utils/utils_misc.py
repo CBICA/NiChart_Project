@@ -46,7 +46,7 @@ def get_index_in_list(in_list: list, in_item: str) -> Optional[int]:
     else:
         return list(in_list).index(in_item)
     
-def get_roi_indices(sel_roi, method):
+def get_roi_indices(sel_roi, atlas):
     '''
     Detect indices for a selected ROI
     '''
@@ -54,12 +54,17 @@ def get_roi_indices(sel_roi, method):
         return None
     
     # Detect indices
-    if method == 'muse':
+    if atlas == 'muse':
         df_derived = st.session_state.rois['muse']['df_derived']
+        
+        print(df_derived[df_derived.Name == sel_roi])
+        
         list_roi_indices = df_derived[df_derived.Name == sel_roi].List.values[0]
+        
+        print(list_roi_indices)
         return list_roi_indices
 
-    elif method == 'dlwmls':
+    elif atlas == 'wmls':
         list_roi_indices = [1]
         return list_roi_indices
 

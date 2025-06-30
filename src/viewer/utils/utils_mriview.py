@@ -283,7 +283,7 @@ def panel_select_var(sel_var_groups, plot_params, var_type, add_none = False):
 
         plot_params[var_type] = st.session_state[f'_{var_type}']
 
-def panel_set_params(mri_params, var_groups_data):
+def panel_set_params(mri_params, var_groups_data, atlas):
     """
     Panel to set mriview parameters
     """
@@ -304,6 +304,9 @@ def panel_set_params(mri_params, var_groups_data):
             if tab == 'Data':
                 # Select roi
                 panel_select_var(var_groups_data, mri_params, 'roi')
+                mri_params['list_roi_indices'] = utilmisc.get_roi_indices(
+                    mri_params['roi'], atlas
+                )
 
             elif tab == 'Plot Settings':
                 col1, col2, col3 = st.columns(3)

@@ -75,7 +75,7 @@ def muse_derived_to_df(in_list: list) -> Any:
     df = df.rename(columns={0: 'Index', 1: 'Name'})
 
     # Create a new column 'List' with the remaining columns as a list
-    df['List'] = df.iloc[:, 2:].apply(lambda row: row.dropna().astype(str).tolist(), axis=1)
+    df['List'] = df.iloc[:, 2:].apply(lambda row: row.dropna().astype(int).tolist(), axis=1)
 
     # Keep only the desired columns
     df = df[['Index', 'Name', 'List']]
