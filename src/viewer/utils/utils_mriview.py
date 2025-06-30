@@ -291,13 +291,12 @@ def panel_set_params(
     # Add tabs for parameter settings
     with st.container(border=True):
         if not flag_settings:
-            tab = sac.segmented(
+            tab = sac.tabs(
                 items=[
-                    sac.SegmentedItem(label='Data'),
-                    sac.SegmentedItem(label='Plot Settings')
+                    sac.TabsItem(label='Data'),
+                    sac.TabsItem(label='Plot Settings')
                 ],
                 size='sm',
-                radius='lg',
                 align='left'
             )
             ## FIXME

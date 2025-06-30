@@ -95,9 +95,19 @@ def view_dlmuse() -> None:
         )
 
     elif sel_res_type == 'Volumes':
-        st.session_state.curr_df = None
-        utilpl.panel_view_centiles('dlmuse', 'rois')
-        
+        st.session_state.plot_data['df_data'] = utilpl.read_data(st.session_state.paths['plot_data'])
+        var_groups_data = ['demog', 'roi']
+        var_groups_hue = ['cat_vars']
+        pipeline = 'dlmuse'
+
+        utilpl.panel_set_plot_params(
+            st.session_state.plot_params,
+            var_groups_data,
+            var_groups_hue,
+            pipeline
+        )
+        utilpl.panel_show_plots()
+
 def view_dlwmls() -> None:
     """
     Panel for viewing dlwmls segmentation

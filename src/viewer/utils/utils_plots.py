@@ -158,6 +158,15 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
     '''
     Display scatter plot
     '''
+    def callback_plot_clicked() -> None:
+        """
+        Set the active plot id to plot that was clicked
+        """
+        st.session_state.plot_active = plot_ind
+
+        print(f'Clicked {plot_ind}')
+        print(f'Clicked {st.session_state.plot_active}')
+
     # Read centile data
     f_cent = os.path.join(
         st.session_state.paths['centiles'],
@@ -193,8 +202,8 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
     # Add centile trace
     utiltr.add_trace_centile(df_cent, plot_params, plot_settings, fig)
 
-    #st.plotly_chart(fig, key=f"bubble_chart_{plot_id}", on_select=callback_plot_clicked)
-    st.plotly_chart(fig, key=f"bubble_chart_{plot_ind}")
+    st.plotly_chart(fig, key=f"bubble_chart_{plot_ind}", on_select=callback_plot_clicked)
+    # st.plotly_chart(fig, key=f"bubble_chart_{plot_ind}")
 
     return fig
 

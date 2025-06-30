@@ -274,6 +274,7 @@ def init_plot_vars() -> None:
     st.session_state.plots = pd.DataFrame(columns=['flag_sel', 'params'])
     st.session_state.plot_curr = -1
 
+    st.session_state.plot_active = None
 
 
     # Plot data
