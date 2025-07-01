@@ -50,8 +50,8 @@ st.markdown(
 tab = sac.tabs(
     items=[
         sac.TabsItem(label='Select Project Name'),
+        sac.TabsItem(label='Upload Data'),
         sac.TabsItem(label='View Project Folder'),
-        sac.TabsItem(label='Upload Data')
     ],
     size='lg',
     align='left'
@@ -60,11 +60,11 @@ tab = sac.tabs(
 if tab == 'Select Project Name':
     select_project()
 
-elif tab == 'View Project Folder':
-    view_project_folder()
-
-elif tab == 'Upload Data':
+if tab == 'Upload Data':
     upload_data()
+
+if tab == 'View Project Folder':
+    view_project_folder()
 
 # Show session state vars
 if st.session_state.mode == 'debug':

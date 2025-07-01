@@ -114,19 +114,18 @@ def show_description(pipeline) -> None:
     """
     Panel for viewing pipeline description
     """
-    with st.container(border=True):
-        f_logo = os.path.join(
-            st.session_state.paths['resources'], 'pipelines', pipeline, f'logo_{pipeline}.png'
-        )
-        fdoc = os.path.join(
-            st.session_state.paths['resources'], 'pipelines', pipeline, f'overview_{pipeline}.md'
-        )
-        cols = st.columns([6, 1])
-        with cols[0]:
-            with open(fdoc, 'r') as f:
-                st.markdown(f.read())
-        with cols[1]:
-            st.image(f_logo)
+    f_logo = os.path.join(
+        st.session_state.paths['resources'], 'pipelines', pipeline, f'logo_{pipeline}.png'
+    )
+    fdoc = os.path.join(
+        st.session_state.paths['resources'], 'pipelines', pipeline, f'overview_{pipeline}.md'
+    )
+    cols = st.columns([6, 1])
+    with cols[0]:
+        with open(fdoc, 'r') as f:
+            st.markdown(f.read())
+    with cols[1]:
+        st.image(f_logo)
 
 def data_overview():
     '''
@@ -140,6 +139,7 @@ def pipeline_overview():
     Select a pipeline and show overview
     '''
     with st.container(border=True):
+
         pipelines = st.session_state.pipelines
         sitems = []
         colors = st.session_state.pipeline_colors
@@ -163,6 +163,9 @@ def pipeline_overview():
         )        
         pname = pipelines.loc[pipelines.Name == sel_pipeline, 'Label'].values[0]
         st.session_state.sel_pipeline = sel_pipeline
+        
+        #sac.divider(label='Description', align='center', color='gray')
+        
         show_description(pname)
 
 def results_overview():

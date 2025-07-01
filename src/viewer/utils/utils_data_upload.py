@@ -13,17 +13,10 @@ def select_project(out_dir, curr_project):
     """
     Panel for creating/selecting project (to keep all data for the current project)
     """
-    #sel_mode = st.pills(
-        #'Select mode',
-        #['Create New', 'Select Existing'],
-        #default = None,
-        #selection_mode = 'single',
-        #label_visibility = 'collapsed',
-    #)
     sel_mode = sac.tabs(
         items=[
-            sac.TabsItem(label='Create New'),
             sac.TabsItem(label='Select Existing'),
+            sac.TabsItem(label='Create New'),
         ],
         size='lg',
         align='left'
@@ -33,13 +26,6 @@ def select_project(out_dir, curr_project):
     if sel_mode is None:
         return None
 
-    if sel_mode == 'Create New':
-        sel_project = st.text_input(
-            "Task name:",
-            None,
-            placeholder="My_new_study",
-            label_visibility = 'collapsed'
-        )   
     if sel_mode == 'Select Existing':
         list_projects = utilio.get_subfolders(out_dir)
         if len(list_projects) > 0:
@@ -50,6 +36,14 @@ def select_project(out_dir, curr_project):
                 index = sel_ind,
                 label_visibility = 'collapsed',
             )
+
+    if sel_mode == 'Create New':
+        sel_project = st.text_input(
+            "Task name:",
+            None,
+            placeholder="My_new_study",
+            label_visibility = 'collapsed'
+        )   
 
     if sel_project is None:
         return
@@ -151,13 +145,21 @@ def load_dicoms():
         #utilio.remove_dir('dicoms')
 
 def load_nifti():
-    sel_mod = st.pills(
-        "Select Modality",
-        st.session_state.list_mods,
-        selection_mode="single",
-        label_visibility="collapsed",
-        default = None,
+
+    #sel_mod = st.pills(
+        #"Select Modality",
+        #st.session_state.list_mods,
+        #selection_mode="single",
+        #label_visibility="collapsed",
+        #default = None,
+    #)
+
+    sel_mod = sac.tabs(
+        items=st.session_state.list_mods,
+        size='lg',
+        align='left'
     )
+    
     if sel_mod is None:
         return
 
@@ -285,12 +287,12 @@ def panel_load_data():
 
     if sel_dtype == "Nifti":
         with st.container(border=True):
-            st.markdown(
-                """
-                ***NIfTI Images***
-                - Upload NIfTI images
-                """
-            )
+            #st.markdown(
+                #"""
+                #***NIfTI Images***
+                #- Upload NIfTI images
+                #"""
+            #)
             load_nifti()
 
     elif sel_dtype == "Dicom":
