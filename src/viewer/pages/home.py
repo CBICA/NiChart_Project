@@ -134,6 +134,9 @@ elif tab == 'Links':
 elif tab == 'Installation':
     view_installation()
 
+# Show selections
+utilses.disp_selections()
+    
 # Show session state vars
 if st.session_state.mode == 'debug':
     utilses.disp_session_state()

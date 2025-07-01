@@ -88,9 +88,10 @@ elif tab == 'Plot Data':
 elif tab == 'View Images':
     view_images()
 
+# Show selections
+utilses.disp_selections()
+
 # Show session state vars
 if st.session_state.mode == 'debug':
     utilses.disp_session_state()
 
-if st.sidebar.button('Show Plot'):
-    st.dataframe(st.session_state.plots)

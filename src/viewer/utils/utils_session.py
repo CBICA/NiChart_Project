@@ -13,14 +13,28 @@ import utils.utils_processes as utilproc
 import utils.utils_cmaps as utilcmap
 import os
 from PIL import Image
+import streamlit_antd_components as sac
 
 # from streamlit.web.server.websocket_headers import _get_websocket_headers
+
+def disp_selections():
+    '''
+    Show major selections 
+    '''
+    with st.sidebar:
+        sac.divider(label='Selections', icon = 'person', align='center', color='gray')
+        if st.session_state.project is not None:
+            st.markdown(f'`Project Name: {st.session_state.project}`')
+        if st.session_state.sel_pipeline is not None:
+            st.markdown(f'`Pipeline: {st.session_state.sel_pipeline}`')
+    
 
 def disp_session_state():
     '''
     Show session state variables
     '''
-    st.sidebar.divider()
+    with st.sidebar:
+        sac.divider(label='Debug', icon = 'gear',  align='center', color='gray')
     st.sidebar.checkbox(
         'Show Session State',
         key = '_debug_flag_show',

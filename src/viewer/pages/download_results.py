@@ -21,6 +21,9 @@ st.markdown(
 
 st.info('Coming Soon!')
 
+# Show selections
+utilses.disp_selections()
+
 # Show session state vars
 if st.session_state.mode == 'debug':
     utilses.disp_session_state()

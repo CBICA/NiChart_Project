@@ -217,5 +217,8 @@ if tab == 'Pipelines':
 if tab == 'Results Preview':
     results_overview()
     
+# Show selections
+utilses.disp_selections()
+    
 if st.session_state.mode == 'debug':
     utilses.disp_session_state()

@@ -129,6 +129,9 @@ elif tab == 'Run Pipeline':
 elif tab == 'View Status':
     panel_view_status()
 
+# Show selections
+utilses.disp_selections()
+
 # Show session state vars
 if st.session_state.mode == 'debug':
     utilses.disp_session_state()

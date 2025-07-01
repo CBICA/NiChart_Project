@@ -31,6 +31,10 @@ def view_doc(pipeline, dtype) -> None:
         pipeline,
         f'{pipeline}_{dtype}.md'
     )
+    if not os.path.exists(fdoc):
+        st.warning('Could not find doc file!')
+        return
+    
     if dtype == 'input' or dtype == 'output':
         with open(fdoc, 'r') as f:
             markdown_content = f.read()
@@ -63,7 +67,7 @@ def sel_pipeline_from_list():
             align='left'
         )
         pname = pipelines.loc[pipelines.Name == sel_pipeline, 'Label'].values[0]
-
+    
         tab = sac.tabs(
             items=[
                 sac.TabsItem(label='Input Data'),
@@ -113,6 +117,9 @@ st.markdown(
     #st.info('Coming soon!')
 
 sel_pipeline_from_list()
+
+# Show selections
+utilses.disp_selections()
 
 # Show session state vars
 if st.session_state.mode == 'debug':

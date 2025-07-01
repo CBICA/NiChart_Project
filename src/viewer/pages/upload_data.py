@@ -66,6 +66,9 @@ if tab == 'Upload Data':
 if tab == 'View Project Folder':
     view_project_folder()
 
+# Show selections
+utilses.disp_selections()
+
 # Show session state vars
 if st.session_state.mode == 'debug':
     utilses.disp_session_state()

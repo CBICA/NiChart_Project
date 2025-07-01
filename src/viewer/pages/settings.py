@@ -135,6 +135,9 @@ elif tab == 'Misc':
     with st.container(border=True):
         panel_misc()
 
+# Show selections
+utilses.disp_selections()
+
 # Show session state vars
 if st.session_state.mode == 'debug':
     utilses.disp_session_state()
