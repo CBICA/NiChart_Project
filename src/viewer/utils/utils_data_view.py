@@ -4,6 +4,7 @@ import utils.utils_io as utilio
 import utils.utils_session as utilss
 import os
 import pandas as pd
+import streamlit_antd_components as sac
 
 from utils.utils_logger import setup_logger
 logger = setup_logger()
@@ -18,7 +19,133 @@ def count_files_with_suffix(in_dir, suffixes):
             count += 1
     return count
 
+def build_tree_items(path, file_limit=10):
+    tree_items = []
+
+    try:
+        entries = sorted(os.listdir(path))
+        files = []
+        dirs = []
+
+        for name in entries:
+            full_path = os.path.join(path, name)
+            if os.path.isdir(full_path):
+                dirs.append(name)
+            else:
+                files.append(name)
+
+        # First add subfolders
+        for d in dirs:
+            full_path = os.path.join(path, d)
+            children = build_tree_items(full_path, file_limit=file_limit)
+            tree_items.append(
+                sac.TreeItem(
+                    label=d,
+                    icon='folder',
+                    children=children,
+                    tooltip=f'{len(children)} items inside'
+                )
+            )
+
+        # Then add files (limit shown files)
+        for i, name in enumerate(files[:file_limit]):
+            full_path = os.path.join(path, name)
+            ext = os.path.splitext(name)[1].lower()
+            tags = []
+            if ext == '.csv':
+                tags.append(sac.Tag('CSV', color='red'))
+
+            tree_items.append(
+                sac.TreeItem(
+                    label=name,
+                    icon='file',
+                    description=f'{ext[1:]} file',
+                    tag=tags,
+                    tooltip=f'File: {name}'
+                )
+            )
+
+        # Add collapsed summary node if too many files
+        if len(files) > file_limit:
+            tree_items.append(
+                sac.TreeItem(
+                    label=f"... and {len(files) - file_limit} more files",
+                    icon='ellipsis',
+                    disabled=True
+                )
+            )
+
+    except Exception as e:
+        sac.message.error(f"Error reading {path}: {e}")
+
+    return tree_items
+
+#def build_tree_items(path):
+    #tree_items = []
+
+    #try:
+        #for name in sorted(os.listdir(path)):
+            #full_path = os.path.join(path, name)
+            #if os.path.isdir(full_path):
+                ## Folder node
+                #children = build_tree_items(full_path)
+                #tree_items.append(
+                    #sac.TreeItem(
+                        #label=name,
+                        #icon='folder',
+                        #children=children,
+                        #tooltip=f'{len(children)} items inside'
+                    #)
+                #)
+            #else:
+                ## File node
+                #ext = os.path.splitext(name)[1].lower()
+                #tags = []
+                #if ext == '.csv':
+                    #tags.append(sac.Tag('CSV', color='red'))
+                ## Add more tags for other extensions if needed
+
+                #tree_items.append(
+                    #sac.TreeItem(
+                        #label=name,
+                        #icon='file',
+                        #description=f'{ext[1:]} file',
+                        #tag=tags,
+                        #tooltip=f'File: {name}'
+                    #)
+                #)
+    #except Exception as e:
+        #st.error(f"Error reading {path}: {e}")
+
+    #return tree_items
+
+
+def get_folder_tree(in_dir):
+    tree_items = build_tree_items(in_dir, 5)
+    sac.tree(
+        items=tree_items,
+        label='label',
+        index=0,
+        align='center', size='md', icon='table', open_all=True, checkbox=True
+    )
+    
 def data_overview(in_dir):
+        
+    if os.path.exists(in_dir):
+        tree_data = get_folder_tree(in_dir)
+        selected = sac.tree(
+            items=tree_data,
+            label='Browse Results',
+            checkbox=False,
+            height=500
+        )
+        if selected:
+            st.success(f"You selected: `{selected}`")
+    else:
+        st.error(f"Folder `{in_dir}` not found.")
+    
+    
+def data_overview2(in_dir):
     '''
     Show overview of project data
     '''
