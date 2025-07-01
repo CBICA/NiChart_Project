@@ -182,7 +182,7 @@ tab = sac.tabs(
     items=[
         sac.TabsItem(label='Data'),
         sac.TabsItem(label='Pipelines'),
-        sac.TabsItem(label='Imaging Output Variables'),
+        sac.TabsItem(label='Results Preview'),
     ],
     size='lg',
     align='left'
@@ -195,7 +195,7 @@ if tab == 'Data':
 if tab == 'Pipelines':
     pipeline_overview()
 
-if tab == 'Imaging Output Variables':
+if tab == 'Results Preview':
     results_overview()
     
 if st.session_state.mode == 'debug':
