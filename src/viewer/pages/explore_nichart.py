@@ -1,6 +1,7 @@
 import streamlit as st
 import utils.utils_pages as utilpg
 import utils.utils_plots as utilpl
+import utils.utils_misc as utilmisc
 import utils.utils_mriview as utilmri
 import utils.utils_session as utilses
 import pandas as pd
@@ -149,21 +150,27 @@ def pipeline_overview():
                 )
             )
         
+        sel_index = utilmisc.get_index_in_list(
+            pipelines.Name.tolist(), st.session_state.sel_pipeline
+        )
         sel_pipeline = sac.buttons(
             items=sitems,
             size='lg',
             radius='xl',
             align='left',
-            #style={'height': '60px', 'fontSize': '16px'}
+            index =  sel_index,
+            key = '_sel_pipeline'
         )        
         pname = pipelines.loc[pipelines.Name == sel_pipeline, 'Label'].values[0]
-            
+        st.session_state.sel_pipeline = sel_pipeline
         show_description(pname)
 
 def results_overview():
     '''
     Select a pipeline and show overview
     '''
+    print(st.session_state.sel_pipeline)
+    
     with st.container(border=True):
         if st.session_state.sel_pipeline == 'DLMUSE':
             view_dlmuse()

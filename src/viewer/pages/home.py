@@ -46,24 +46,24 @@ def view_overview():
 def view_quick_start():
     with st.container(border=True):
         st.markdown(
-            """
-            ##### Explore NiChart (No Data Upload Required):
+            f'###### Explore NiChart {utilmisc.styled_text('(No Data Upload Required)')}', unsafe_allow_html=True
+        )
+        st.markdown(
+            f'- Visualize distributions of imaging variables and biomarkers (pre-computed using NiChart reference data)', unsafe_allow_html=True
+        )
+
+        st.markdown(
+            '''
+            ###### Apply NiChart to Your Data
             
-            - `Visualize distributions` of imaging variables and biomarkers from the large `NiChart reference dataset`, processed through various pipelines.
+            - Select Your Pipeline
             
-            - This module is for `visualization of the output values` from processing pipelines and `does not require any user data`.
-
-            ##### Analyze Your Own Data:
-
-            - **<u>Upload Your Data: </u>** Navigate to the "Data" page to upload the files you wish to analyze.
-
-            - **<u>Select Your Pipeline: </u>** Go to the "Pipelines" page and choose the analysis workflow you want to apply to your data.
-
-            - **<u>View and/or Download Your Results: </u>** Once the pipeline has finished processing, your findings will be available to view or to download.
-
-
-            """
-            , unsafe_allow_html=True
+            - Upload Your Data
+            
+            - Run pipeline
+            
+            - View / Download Your Results
+            ''', unsafe_allow_html=True
         )
 
 def view_links():

@@ -8,7 +8,7 @@ import streamlit as st
 # Misc utils
 
 def styled_text(text):
-    return f'<span style="color:darkgreen; font-weight:bold; background-color: #ffffCC; padding: 4px 4px; border-radius: 3px;">{text}</span>'
+    return f'<span style="color:teal; font-weight:600; background-color: #f5f5fa; padding: 4px 4px; border-radius: 3px;">{text}</span>'
 
 
 def add_items_to_list(my_list: list, items_to_add: list) -> list:
