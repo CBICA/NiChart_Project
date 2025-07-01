@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 import utils.utils_pages as utilpg
+import utils.utils_misc as utilmisc
 import utils.utils_plots as utilpl
 import utils.utils_session as utilses
 import utils.utils_mriview as utilmri
@@ -17,43 +18,41 @@ import streamlit_antd_components as sac
 utilpg.config_page()
 utilpg.show_menu()
 utilpg.add_sidebar_options()
+utilpg.set_global_style()
 
 logger = setup_logger()
 
 logger.debug('Start of Home Screen!')
 
+#def styled_text(text):
+    #return f'<span style="color:darkgreen; font-weight:bold;">{text}</span>'
+
 def view_overview():
     with st.container(border=True):
         st.markdown(
-            """
-            NiChart is an **<u>open-source framework</u>** built specifically for deriving **<u>machine learning biomarkers</u>** from **<u>MRI imaging data</u>**.
-            """
-            , unsafe_allow_html=True            
+            f'NiChart is an {utilmisc.styled_text('open-source framework')} built specifically for deriving {utilmisc.styled_text('machine learning biomarkers')} from {utilmisc.styled_text('MRI imaging data')}', unsafe_allow_html=True
         )
         st.image("../resources/nichart1.png", width=300)
         st.markdown(
-            """
-            - NiChart platform offers tools for **<u>image processing</u>** and **<u>data analysis</u>**.
-
-            - Users can extract **<u>imaging phenotypes</u>** and **<u>machine learning (ML) indices</u>** of disease and aging.
-
-            - Pre-trained **<u>ML models </u>** allow users to quantify complex brain changes and compare results against **<u>normative and disease-specific reference ranges</u>**.
-            """
-            , unsafe_allow_html=True
+            f'- NiChart platform offers tools for {utilmisc.styled_text('image processing')} and {utilmisc.styled_text('data analysis')}', unsafe_allow_html=True
+        )
+        st.markdown(
+            f'- Users can extract {utilmisc.styled_text('imaging phenotypes')} and {utilmisc.styled_text('machine learning (ML) indices')} of disease and aging', unsafe_allow_html=True
+        )
+        st.markdown(
+            f'- Pre-trained {utilmisc.styled_text('ML models')} allow users to quantify complex brain changes and compare results against {utilmisc.styled_text('normative and disease-specific reference ranges')}', unsafe_allow_html=True
         )
 
 def view_quick_start():
     with st.container(border=True):
         st.markdown(
             """
-            ##### Explore Brain Chart (No Data Upload Required):
+            ##### Explore NiChart (No Data Upload Required):
             
-            - **<u>Explore the distribution</u>** of imaging variables and machine learning–derived biomarkers **<u>from the NiChart reference dataset</u>**.
+            - `Visualize distributions` of imaging variables and biomarkers from the large `NiChart reference dataset`, processed through various pipelines.
             
-            - This module is designed for visualization only and **<u>does not require user data**</u>.
-            
-            - **<u>Includes:</u>** brain segmentation, region volumes, and biomarkers for aging and disease (e.g., AD, brain age).
-            
+            - This module is for `visualization of the output values` from processing pipelines and `does not require any user data`.
+
             ##### Analyze Your Own Data:
 
             - **<u>Upload Your Data: </u>** Navigate to the "Data" page to upload the files you wish to analyze.

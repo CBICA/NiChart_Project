@@ -16,6 +16,7 @@ logger.debug('Page: Settings')
 # Page config should be called for each page
 utilpg.config_page()
 utilpg.show_menu()
+utilpg.set_global_style()
 
 def panel_models_path():
     """

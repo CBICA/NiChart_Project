@@ -15,6 +15,11 @@ import streamlit_antd_components as sac
 logger = setup_logger()
 logger.debug('Page: Run Pipelines')
 
+# Page config should be called for each page
+utilpg.config_page()
+utilpg.show_menu()
+utilpg.set_global_style()
+
 def panel_conf_pipeline():
     with st.container(border=True):
         st.markdown(
@@ -98,10 +103,6 @@ def panel_view_status():
     Panel to view status of pipeline
     """
     st.info('Coming soon!')
-
-# Page config should be called for each page
-utilpg.config_page()
-utilpg.show_menu()
 
 st.markdown(
     """

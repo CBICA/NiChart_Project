@@ -16,6 +16,11 @@ import streamlit_antd_components as sac
 logger = setup_logger()
 logger.debug('Page: Select Pipelines')
 
+# Page config should be called for each page
+utilpg.config_page()
+utilpg.show_menu()
+utilpg.set_global_style()
+
 def view_input_data(method) -> None:
     """
     Panel for viewing input data for a pipeline
@@ -64,10 +69,6 @@ def sel_pipeline_from_list():
             st.session_state.sel_pipeline = pname
             st.success(f'Pipeline selected: {pname}')
             view_input_data(pname)
-
-# Page config should be called for each page
-utilpg.config_page()
-utilpg.show_menu()
 
 st.markdown(
     """

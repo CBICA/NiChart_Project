@@ -17,52 +17,7 @@ logger.debug('Page: Explore Nichart')
 # Page config should be called for each page
 utilpg.config_page()
 utilpg.show_menu()
-
-def show_description(pipeline) -> None:
-    """
-    Panel for viewing pipeline description
-    """
-    with st.container(border=True):
-        f_logo = os.path.join(
-            st.session_state.paths['resources'], 'pipelines', pipeline, f'logo_{pipeline}.png'
-        )
-        fdoc = os.path.join(
-            st.session_state.paths['resources'], 'pipelines', pipeline, f'overview_{pipeline}.md'
-        )
-        cols = st.columns([6, 1])
-        with cols[0]:
-            with open(fdoc, 'r') as f:
-                st.markdown(f.read())
-        with cols[1]:
-            st.image(f_logo)
-
-def pipeline_overview():
-    '''
-    Select a pipeline and show overview
-    '''
-    with st.container(border=True):
-        pipelines = st.session_state.pipelines
-        sitems = []
-        colors = st.session_state.pipeline_colors
-        for i, ptmp in enumerate(pipelines.Name.tolist()):
-            sitems.append(
-                sac.ButtonsItem(
-                    label=ptmp, color = colors[i%len(colors)]
-                )
-            )
-        
-        sel_pipeline = sac.buttons(
-            items=sitems,
-            size='lg',
-            radius='xl',
-            align='left'
-        )        
-        pname = pipelines.loc[pipelines.Name == sel_pipeline, 'Label'].values[0]
-            
-        # Show description of the selected pipeline
-        show_description(pname)
-        return(sel_pipeline)
-
+utilpg.set_global_style()
 
 def view_synthseg() -> None:
     """
@@ -75,26 +30,14 @@ def view_dlmuse() -> None:
     """
     Panel for viewing dlmuse results
     """
-    list_res_type = ['Segmentation', 'Volumes']
+    list_res_type = ['Regional Volumes', 'Segmentation']
     sel_res_type = sac.tabs(
         list_res_type,
         size='lg',
         align='left'
     )   
-    if sel_res_type == 'Segmentation':
-        ulay = st.session_state.ref_data["t1"]
-        olay = st.session_state.ref_data["dlmuse"]        
-        mri_params = st.session_state.mri_params
 
-        utilmri.panel_set_params(
-            mri_params, ['roi'], 'muse'
-        )
-
-        utilmri.panel_view_seg(
-            ulay, olay, mri_params
-        )
-
-    elif sel_res_type == 'Volumes':
+    if sel_res_type == 'Regional Volumes':
         st.session_state.plot_data['df_data'] = utilpl.read_data(st.session_state.paths['plot_data'])
         var_groups_data = ['demog', 'roi']
         var_groups_hue = ['cat_vars']
@@ -107,6 +50,19 @@ def view_dlmuse() -> None:
             pipeline
         )
         utilpl.panel_show_plots()
+
+    elif sel_res_type == 'Segmentation':
+        ulay = st.session_state.ref_data["t1"]
+        olay = st.session_state.ref_data["dlmuse"]        
+        mri_params = st.session_state.mri_params
+
+        utilmri.panel_set_params(
+            mri_params, ['roi'], 'muse'
+        )
+
+        utilmri.panel_view_seg(
+            ulay, olay, mri_params
+        )
 
 def view_dlwmls() -> None:
     """
@@ -153,6 +109,68 @@ def view_surrealgan() -> None:
     """
     st.info('Coming soon!')
 
+def show_description(pipeline) -> None:
+    """
+    Panel for viewing pipeline description
+    """
+    with st.container(border=True):
+        f_logo = os.path.join(
+            st.session_state.paths['resources'], 'pipelines', pipeline, f'logo_{pipeline}.png'
+        )
+        fdoc = os.path.join(
+            st.session_state.paths['resources'], 'pipelines', pipeline, f'overview_{pipeline}.md'
+        )
+        cols = st.columns([6, 1])
+        with cols[0]:
+            with open(fdoc, 'r') as f:
+                st.markdown(f.read())
+        with cols[1]:
+            st.image(f_logo)
+
+def data_overview():
+    '''
+    Description of NiChart data
+    '''
+    with st.container(border=True):
+        st.info('NiChart Data')
+
+def pipeline_overview():
+    '''
+    Select a pipeline and show overview
+    '''
+    with st.container(border=True):
+        pipelines = st.session_state.pipelines
+        sitems = []
+        colors = st.session_state.pipeline_colors
+        for i, ptmp in enumerate(pipelines.Name.tolist()):
+            sitems.append(
+                sac.ButtonsItem(
+                    label=ptmp, color = colors[i%len(colors)]
+                )
+            )
+        
+        sel_pipeline = sac.buttons(
+            items=sitems,
+            size='lg',
+            radius='xl',
+            align='left',
+            #style={'height': '60px', 'fontSize': '16px'}
+        )        
+        pname = pipelines.loc[pipelines.Name == sel_pipeline, 'Label'].values[0]
+            
+        show_description(pname)
+
+def results_overview():
+    '''
+    Select a pipeline and show overview
+    '''
+    with st.container(border=True):
+        if st.session_state.sel_pipeline == 'DLMUSE':
+            view_dlmuse()
+
+        elif st.session_state.sel_pipeline == 'DLWMLS':
+            view_dlwmls()
+
 #st.info(
 st.markdown(
     """
@@ -162,25 +180,23 @@ st.markdown(
 
 tab = sac.tabs(
     items=[
+        sac.TabsItem(label='Data'),
         sac.TabsItem(label='Pipelines'),
-        sac.TabsItem(label='View Output'),
+        sac.TabsItem(label='Imaging Output Variables'),
     ],
     size='lg',
     align='left'
 )
 
 # Select pipeline
-if tab == 'Pipelines':
-    st.session_state.sel_pipeline = pipeline_overview()
+if tab == 'Data':
+    data_overview()
     
-# Show output values for the selected pipeline
-if tab == 'View Output':
-    with st.container(border=True):
-        if st.session_state.sel_pipeline == 'DLMUSE':
-            view_dlmuse()
+if tab == 'Pipelines':
+    pipeline_overview()
 
-        elif st.session_state.sel_pipeline == 'DLWMLS':
-            view_dlwmls()
-
+if tab == 'Imaging Output Variables':
+    results_overview()
+    
 if st.session_state.mode == 'debug':
     utilses.disp_session_state()
