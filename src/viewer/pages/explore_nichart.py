@@ -132,7 +132,16 @@ def data_overview():
     Description of NiChart data
     '''
     with st.container(border=True):
-        st.info('NiChart Data')
+        st.markdown(
+            ''' NiChart Reference Dataset is a large and diverse collection of MRI images from multiple studies. It was created as part of the ISTAGING project to develop a system for identifying imaging biomarkers of aging and neurodegenerative diseases. The dataset includes multi-modal MRI data, as well as carefully curated demographic, clinical, and cognitive variables from participants with a variety of health conditions. The reference dataset is a key component of NiChart for training machine learning models and for creating reference distributions of imaging measures and signatures, which can be used to compare NiChart values that are computed from the user data to normative or disease-related reference values.
+            '''
+        )
+        st.image(
+            os.path.join(
+                st.session_state.paths['resources'], 'images', 'nichart_data.png'
+            ),
+            width=1200
+        )
 
 def pipeline_overview():
     '''
