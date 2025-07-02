@@ -340,15 +340,15 @@ def init_plot_vars() -> None:
     # Plot parameters specific to each plot
     st.session_state.plot_params = {
         "plot_type": "scatter",
-        "xvar_group": 'demog',
+        "xvargroup": ['age', 'Age'],
         "xvar": 'Age',
         "xmin": None,
         "xmax": None,
-        "yvar_group": 'MUSE_Primary',
+        "yvargroup": ['MUSE_Primary', 'GM'],
         "yvar": 'GM',
         "ymin": None,
         "ymax": None,
-        "hvar_group": 'cat_vars',
+        "hvargroup": ['cat_vars', 'Sex'],
         "hvar": 'Sex',
         "hvals": None,
         "corr_icv": False,
@@ -488,13 +488,16 @@ def reset_plots() -> None:
     st.session_state.plot_var["hide_legend"] = False
     st.session_state.plot_var["show_img"] = False
     st.session_state.plot_var["plot_type"] = False
-    st.session_state.plot_var["xvar"] = ""
+    st.session_state.plot_var["xvargroup"] = ['age', 'Age']
+    st.session_state.plot_var["xvar"] = 'Age'
     st.session_state.plot_var["xmin"] = -1.0
     st.session_state.plot_var["xmax"] = -1.0
-    st.session_state.plot_var["yvar"] = ""
+    st.session_state.plot_var["yvargroup"] = ['MUSE_Primary', 'GM']
+    st.session_state.plot_var["yvar"] = 'GM'
     st.session_state.plot_var["ymin"] = -1.0
     st.session_state.plot_var["ymax"] = -1.0
-    st.session_state.plot_var["hvar"] = ""
+    st.session_state.plot_var["hvargroup"] = ['cat_vars', 'Sex']
+    st.session_state.plot_var["hvar"] = 'Sex'
     st.session_state.plot_var["hvals"] = []
     st.session_state.plot_var["corr_icv"] = False
     st.session_state.plot_var["plot_cent_normalized"] = False

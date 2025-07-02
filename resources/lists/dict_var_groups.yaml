@@ -1,6 +1,11 @@
 # Variable group definitions for data visualization
 # Each group has a vtype, atlas name if they list roi indices and a list of variable names/indices
 
+age:
+  category: age
+  vtype: name
+  values: [Age]
+
 demog:
   category: demog
   vtype: name

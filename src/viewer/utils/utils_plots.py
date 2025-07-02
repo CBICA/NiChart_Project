@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 import streamlit as st
 import utils.utils_io as utilio
+import utils.utils_user_select as utiluser
 import utils.utils_session as utilses
 import utils.utils_misc as utilmisc
 import utils.utils_mriview as utilmri
@@ -158,13 +159,6 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
     '''
     Display scatter plot
     '''
-    #def callback_plot_clicked() -> None:
-        #"""
-        #Set the active plot id to plot that was clicked
-        #"""
-        #st.session_state.plot_active = plot_ind
-
-
     def callback_plot_clicked() -> None:
         """
         Set the active plot id to plot that was clicked
@@ -287,7 +281,7 @@ def show_plots(df, df_plots, plot_settings):
 
 ###################################################################
 # User selections
-def user_select_var(sel_var_groups, plot_params, var_type, add_none = False):
+def user_select_var2(sel_var_groups, plot_params, var_type, add_none = False):
     '''
     User panel to select a variable 
     Variables are grouped in categories
@@ -346,10 +340,9 @@ def user_select_var(sel_var_groups, plot_params, var_type, add_none = False):
         
         plot_params[var_type] = st.session_state[f'_{var_type}']
 
-def user_select_var2(sel_var_groups, plot_params, var_type, add_none = False):
+def user_select_var(sel_var_groups, plot_params, var_type, add_none = False):
     '''
-    User panel to select a variable 
-    Variables are grouped in categories
+    User panel to select a variable grouped in categories
     '''
     df_groups = st.session_state.dicts['df_var_groups'].copy()
     df_groups = df_groups[df_groups.category.isin(sel_var_groups)]
@@ -548,11 +541,11 @@ def panel_set_params_plot(plot_params, var_groups_data, var_groups_hue, pipeline
     plot_params['flag_norm_centiles'] = False
 
 def panel_set_params_centile_plot(
-    plot_params, var_groups_data, var_groups_hue, pipeline, flag_hide_settings = False
+    plot_params, var_groups_data, pipeline, flag_hide_settings = False
 ):
     """
     Panel to select centile plot args from the user
-    """
+    """    
     # Add tabs for parameter settings
     with st.container(border=True):
         if not flag_hide_settings:
@@ -565,22 +558,30 @@ def panel_set_params_centile_plot(
                 size='sm',
                 align='left'
             )
-            
             if tab == 'Data':
                 # Select x var
-                user_select_var2(var_groups_data, plot_params, 'xvar')
+                sel_var = utiluser.select_var_from_group(
+                    st.session_state.dicts['df_var_groups'],
+                    ['age'],
+                    'xvar', 
+                    st.session_state.plot_params['xvargroup'],
+                    False,
+                    st.session_state.dicts['muse']['ind_to_name']
+                )
+                st.session_state.plot_params['xvargroup'] = sel_var
+                st.session_state.plot_params['xvar'] = sel_var[1]
                 
-                return
-                    
                 # Select y var
-                user_select_var(var_groups_data, plot_params, 'yvar')
-
-            elif tab == 'Groups':
-                # Select h var
-                user_select_var(var_groups_hue, plot_params, 'hvar', add_none = True)
-
-            elif tab == 'Fit':
-                user_select_trend(plot_params)
+                sel_var = utiluser.select_var_from_group(
+                    st.session_state.dicts['df_var_groups'],
+                    ['roi'],
+                    'yvar', 
+                    st.session_state.plot_params['yvargroup'],
+                    False,
+                    st.session_state.dicts['muse']['ind_to_name']
+                )
+                st.session_state.plot_params['yvargroup'] = sel_var
+                st.session_state.plot_params['yvar'] = sel_var[1]
 
             elif tab == 'Centiles':
                 user_select_centiles(plot_params)
@@ -596,15 +597,6 @@ def panel_set_params_centile_plot(
 
     if plot_params['centile_values'] is not None:
         plot_params['traces'] = plot_params['traces'] + plot_params['centile_values']
-
-    if plot_params['trend'] == 'Linear':
-        plot_params['traces'] = plot_params['traces'] + ['lin_fit']
-
-    if plot_params['show_conf']:
-        plot_params['traces'] = plot_params['traces'] + ['conf_95%']
-
-    if plot_params['trend'] == 'Smooth LOWESS Curve':
-        plot_params['traces'] = plot_params['traces'] + ['lowess']
         
     plot_params['method'] = pipeline
     plot_params['flag_norm_centiles'] = False
