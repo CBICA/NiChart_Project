@@ -465,10 +465,10 @@ def panel_set_plot_params(plot_params, var_groups_data, var_groups_hue, pipeline
     """
     Panel to set plotting parameters
     """
-    flag_settings = st.sidebar.checkbox('Hide plot settings')
 
     # Add tabs for parameter settings
     with st.container(border=True):
+        flag_settings = True  #FIXME
         if not flag_settings:
             tab = sac.tabs(
                 items=[
@@ -537,11 +537,17 @@ def panel_show_plots():
 
     ## Sidebar options
     with st.sidebar:
-
-        if st.button('Add Plot'):
-            st.session_state.plots = add_plot(
-                st.session_state.plots, st.session_state.plot_params
-            )
+        
+        sac.divider(label='Actions', icon = 'arrow-right-circle', align='center', color='gray')
+        
+        flag_settings = st.sidebar.checkbox('Hide plot settings')
+        
+        cols = st.columns([2,3,2])
+        with cols[0]:
+            if st.button('Add Plot'):
+                st.session_state.plots = add_plot(
+                    st.session_state.plots, st.session_state.plot_params
+                )
         
         # Add a single plot if there is none
         if st.session_state.plots.shape[0] == 0:
@@ -549,13 +555,15 @@ def panel_show_plots():
                 st.session_state.plots, st.session_state.plot_params
             )
         
-        if st.button('Delete Selected'):
-            st.session_state.plots = delete_sel_plots(
-                st.session_state.plots
-            )
+        with cols[1]:
+            if st.button('Delete Selected'):
+                st.session_state.plots = delete_sel_plots(
+                    st.session_state.plots
+                )
         
-        if st.button('Delete All'):
-            st.session_state.plots = delete_all_plots()
+        with cols[2]:
+            if st.button('Delete All'):
+                st.session_state.plots = delete_all_plots()
 
     # Show plots
     show_plots(

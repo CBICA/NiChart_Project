@@ -7,6 +7,7 @@ import streamlit as st
 import utils.utils_pages as utilpg
 import utils.utils_data_upload as utildata
 import utils.utils_session as utilses
+import utils.utils_data_view as utildv
 from stqdm import stqdm
 import pandas as pd
 import numpy as np
@@ -34,6 +35,14 @@ def view_project_folder():
     with st.container(border=True):
         utildata.disp_folder_tree(st.session_state.paths['project'])
     
+def view_project_folder2():
+    """
+    Panel for viewing files in a project folder
+    """
+    with st.container(border=True):
+        in_dir = st.session_state.paths['project']
+        utildv.data_overview(in_dir)
+
 def upload_data():
     """
     Panel for viewing files in a project folder
@@ -52,6 +61,7 @@ tab = sac.tabs(
         sac.TabsItem(label='Select Project Name'),
         sac.TabsItem(label='Upload Data'),
         sac.TabsItem(label='View Project Folder'),
+        sac.TabsItem(label='View Project Folder2'),
     ],
     size='lg',
     align='left'
@@ -65,6 +75,9 @@ if tab == 'Upload Data':
 
 if tab == 'View Project Folder':
     view_project_folder()
+
+if tab == 'View Project Folder2':
+    view_project_folder2()
 
 # Show selections
 utilses.disp_selections()

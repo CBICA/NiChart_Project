@@ -255,6 +255,14 @@ def init_paths():
         "plot_data": d_plot
     }
     
+    # List of output folders
+    st.session_state.out_dirs = [
+        'participants',
+        'dicoms', 't1', 't2', 'fl', 'fmri', 'dti',
+        'dlmuse_seg', 'dlmuse_vol', 'dlwmls', 'spare',
+        'plot_data'
+    ]
+    
     ############
     # FIXME : set init folder to test folder outside repo
     st.session_state.paths["init"] = os.path.join(
