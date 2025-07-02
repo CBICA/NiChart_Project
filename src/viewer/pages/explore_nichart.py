@@ -39,18 +39,20 @@ def view_dlmuse() -> None:
     )   
 
     if sel_res_type == 'Regional Volumes':
-        st.session_state.plot_data['df_data'] = utilpl.read_data(st.session_state.paths['plot_data'])
         var_groups_data = ['demog', 'roi']
         var_groups_hue = ['cat_vars']
         pipeline = 'dlmuse'
 
-        utilpl.panel_set_plot_params(
+        # Set centile seelctions
+        st.session_state.plot_params['centile_values'] = st.session_state.plot_settings['centile_trace_types']
+
+        utilpl.panel_set_params_centile_plot(
             st.session_state.plot_params,
             var_groups_data,
             var_groups_hue,
             pipeline
         )
-        utilpl.panel_show_plots()
+        #utilpl.panel_show_centile_plots()
 
     elif sel_res_type == 'Segmentation':
         ulay = st.session_state.ref_data["t1"]

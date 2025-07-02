@@ -216,18 +216,21 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
         xaxis_title = plot_params["xvar"], yaxis_title = plot_params["yvar"]
     )
     
-    
     # Add data scatter
-    utiltr.add_trace_scatter(df, plot_params, plot_settings, fig)
+    if df is not None:
+        utiltr.add_trace_scatter(df, plot_params, plot_settings, fig)
 
     # Add linear fit
-    utiltr.add_trace_linreg(df, plot_params, plot_settings, fig)
+    if df is not None:
+        utiltr.add_trace_linreg(df, plot_params, plot_settings, fig)
 
     # Add non-linear fit
-    utiltr.add_trace_lowess(df, plot_params, plot_settings, fig)
+    if df is not None:
+        utiltr.add_trace_lowess(df, plot_params, plot_settings, fig)
 
     # Add centile trace
-    utiltr.add_trace_centile(df_cent, plot_params, plot_settings, fig)
+    if df_cent is not None:
+        utiltr.add_trace_centile(df_cent, plot_params, plot_settings, fig)
 
     st.plotly_chart(fig, key=f"bubble_chart_{plot_ind}", on_select=callback_plot_clicked)
     # st.plotly_chart(fig, key=f"bubble_chart_{plot_ind}")
@@ -283,8 +286,8 @@ def show_plots(df, df_plots, plot_settings):
         utilmri.panel_view_seg(ulay, olay, mri_params)
 
 ###################################################################
-# Panels
-def panel_select_var(sel_var_groups, plot_params, var_type, add_none = False):
+# User selections
+def user_select_var(sel_var_groups, plot_params, var_type, add_none = False):
     '''
     User panel to select a variable 
     Variables are grouped in categories
@@ -343,7 +346,29 @@ def panel_select_var(sel_var_groups, plot_params, var_type, add_none = False):
         
         plot_params[var_type] = st.session_state[f'_{var_type}']
 
-def panel_select_trend(plot_params):
+def user_select_var2(sel_var_groups, plot_params, var_type, add_none = False):
+    '''
+    User panel to select a variable 
+    Variables are grouped in categories
+    '''
+    df_groups = st.session_state.dicts['df_var_groups'].copy()
+    df_groups = df_groups[df_groups.category.isin(sel_var_groups)]
+
+    # Create nested var lists
+    sac_items = []
+    for tmpg in df_groups.group.unique().tolist():
+        tmpl = df_groups[df_groups['group'] == tmpg]['values'].values[0]
+        tmp_item = sac.CasItem(tmpg, icon='app', children=tmpl)
+        sac_items.append(tmp_item)
+
+    sel = sac.cascader(
+        items = sac_items,
+        label=f'Variable: {var_type}', index=[0,1], multiple=False, search=True, clear=True
+    )
+        
+    st.write(sel)
+
+def user_select_trend(plot_params):
     '''
     Panel to select trend
     '''
@@ -391,7 +416,7 @@ def panel_select_trend(plot_params):
         )
         plot_params['lowess_s'] = st.session_state['_lowess_s']
 
-def panel_select_centiles(plot_params):
+def user_select_centiles(plot_params):
     '''
     User panel to select centile values
     '''
@@ -433,9 +458,9 @@ def panel_select_centiles(plot_params):
     )
     plot_params['centile_values'] = st.session_state['_centile_values']
 
-def panel_select_settings(plot_params):
+def user_select_plot_settings(plot_params):
     '''
-    Panel to select plot settings
+    Panel to select plot args from the user
     '''
     st.session_state.plot_settings["num_per_row"] = st.slider(
         "Number of plots per row",
@@ -461,11 +486,10 @@ def panel_select_settings(plot_params):
         disabled=False,
     )
 
-def panel_set_plot_params(plot_params, var_groups_data, var_groups_hue, pipeline):
+def panel_set_params_plot(plot_params, var_groups_data, var_groups_hue, pipeline):
     """
     Panel to set plotting parameters
     """
-
     # Add tabs for parameter settings
     with st.container(border=True):
         flag_settings = True  #FIXME
@@ -484,23 +508,23 @@ def panel_set_plot_params(plot_params, var_groups_data, var_groups_hue, pipeline
             
             if tab == 'Data':
                 # Select x var
-                panel_select_var(var_groups_data, plot_params, 'xvar')
+                user_select_var(var_groups_data, plot_params, 'xvar')
                     
                 # Select y var
-                panel_select_var(var_groups_data, plot_params, 'yvar')
+                user_select_var(var_groups_data, plot_params, 'yvar')
 
             elif tab == 'Groups':
                 # Select h var
-                panel_select_var(var_groups_hue, plot_params, 'hvar', add_none = True)
+                user_select_var(var_groups_hue, plot_params, 'hvar', add_none = True)
 
             elif tab == 'Fit':
-                panel_select_trend(plot_params)
+                user_select_trend(plot_params)
 
             elif tab == 'Centiles':
-                panel_select_centiles(plot_params)
+                user_select_centiles(plot_params)
 
             elif tab == 'Plot Settings':
-                panel_select_settings(plot_params)
+                user_select_plot_settings(plot_params)
                 
     # Set plot type
     plot_params['plot_type'] = 'scatter'
@@ -523,17 +547,77 @@ def panel_set_plot_params(plot_params, var_groups_data, var_groups_hue, pipeline
     plot_params['method'] = pipeline
     plot_params['flag_norm_centiles'] = False
 
+def panel_set_params_centile_plot(
+    plot_params, var_groups_data, var_groups_hue, pipeline, flag_hide_settings = False
+):
+    """
+    Panel to select centile plot args from the user
+    """
+    # Add tabs for parameter settings
+    with st.container(border=True):
+        if not flag_hide_settings:
+            tab = sac.tabs(
+                items=[
+                    sac.TabsItem(label='Data'),
+                    sac.TabsItem(label='Centiles'),
+                    sac.TabsItem(label='Plot Settings')
+                ],
+                size='sm',
+                align='left'
+            )
+            
+            if tab == 'Data':
+                # Select x var
+                user_select_var2(var_groups_data, plot_params, 'xvar')
+                
+                return
+                    
+                # Select y var
+                user_select_var(var_groups_data, plot_params, 'yvar')
+
+            elif tab == 'Groups':
+                # Select h var
+                user_select_var(var_groups_hue, plot_params, 'hvar', add_none = True)
+
+            elif tab == 'Fit':
+                user_select_trend(plot_params)
+
+            elif tab == 'Centiles':
+                user_select_centiles(plot_params)
+
+            elif tab == 'Plot Settings':
+                user_select_plot_settings(plot_params)
+                
+    # Set plot type
+    plot_params['plot_type'] = 'scatter'
+    
+    # Set plot traces
+    plot_params['traces'] = ['data']
+
+    if plot_params['centile_values'] is not None:
+        plot_params['traces'] = plot_params['traces'] + plot_params['centile_values']
+
+    if plot_params['trend'] == 'Linear':
+        plot_params['traces'] = plot_params['traces'] + ['lin_fit']
+
+    if plot_params['show_conf']:
+        plot_params['traces'] = plot_params['traces'] + ['conf_95%']
+
+    if plot_params['trend'] == 'Smooth LOWESS Curve':
+        plot_params['traces'] = plot_params['traces'] + ['lowess']
+        
+    plot_params['method'] = pipeline
+    plot_params['flag_norm_centiles'] = False
+
+
 def panel_show_plots():
     '''
-    Panel to add/delete/show plots
+    Panel to show plots
     '''
     ## Update selected plots
     for tmp_ind in st.session_state.plots.index.tolist():
         if st.session_state.plots.loc[tmp_ind, 'flag_sel']:
             st.session_state.plots.at[tmp_ind, 'params'] = st.session_state.plot_params.copy()
-
-    def tmp_fun():
-        print(f'Clicked')
 
     ## Sidebar options
     with st.sidebar:
@@ -568,6 +652,52 @@ def panel_show_plots():
     # Show plots
     show_plots(
         st.session_state.plot_data['df_data'],
+        st.session_state.plots,
+        st.session_state.plot_settings
+    )
+
+def panel_show_centile_plots():
+    '''
+    Panel to show centile plots
+    '''
+    ## Update selected plots
+    for tmp_ind in st.session_state.plots.index.tolist():
+        if st.session_state.plots.loc[tmp_ind, 'flag_sel']:
+            st.session_state.plots.at[tmp_ind, 'params'] = st.session_state.plot_params.copy()
+
+    ## Sidebar options
+    with st.sidebar:
+        
+        sac.divider(label='Actions', icon = 'arrow-right-circle', align='center', color='gray')
+        
+        flag_settings = st.sidebar.checkbox('Hide plot settings')
+        
+        cols = st.columns([2,3,2])
+        with cols[0]:
+            if st.button('Add Plot'):
+                st.session_state.plots = add_plot(
+                    st.session_state.plots, st.session_state.plot_params
+                )
+        
+        # Add a single plot if there is none
+        if st.session_state.plots.shape[0] == 0:
+            st.session_state.plots = add_plot(
+                st.session_state.plots, st.session_state.plot_params
+            )
+        
+        with cols[1]:
+            if st.button('Delete Selected'):
+                st.session_state.plots = delete_sel_plots(
+                    st.session_state.plots
+                )
+        
+        with cols[2]:
+            if st.button('Delete All'):
+                st.session_state.plots = delete_all_plots()
+
+    # Show plots
+    show_plots(
+        None,
         st.session_state.plots,
         st.session_state.plot_settings
     )
