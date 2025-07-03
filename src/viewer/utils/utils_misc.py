@@ -62,8 +62,6 @@ def get_roi_indices(sel_roi, atlas):
     if atlas == 'muse':
         df_derived = st.session_state.rois['muse']['df_derived']
         
-        print(df_derived[df_derived.Name == sel_roi])
-        
         list_roi_indices = df_derived[df_derived.Name == sel_roi].List.values[0]
         
         print(list_roi_indices)

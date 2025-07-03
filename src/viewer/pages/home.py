@@ -226,8 +226,8 @@ if tab == 'Links':
 if tab == 'Installation':
     view_installation()
 
-if tab == 'Test':
-    view_test()
+#if tab == 'Test':
+    #view_test()
 
 # Show selections
 utilses.disp_selections()

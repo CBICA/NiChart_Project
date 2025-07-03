@@ -10,6 +10,7 @@ from nibabel.orientations import axcodes2ornt, ornt_transform
 from scipy import ndimage
 import utils.utils_plots as utilpl
 import utils.utils_misc as utilmisc
+import utils.utils_user_select as utiluser
 
 import streamlit_antd_components as sac
 
@@ -283,15 +284,15 @@ def panel_select_var(sel_var_groups, plot_params, var_type, add_none = False):
 
         plot_params[var_type] = st.session_state[f'_{var_type}']
 
-def panel_set_params(mri_params, var_groups_data, atlas):
+def panel_set_params(plot_params, var_groups_data, atlas, flag_hide_settings = False):
     """
     Panel to set mriview parameters
     """
-    flag_settings = st.sidebar.checkbox('Hide mri view settings')
+    flag_hide_settings = st.sidebar.checkbox('Hide mri view settings')
 
     # Add tabs for parameter settings
     with st.container(border=True):
-        if not flag_settings:
+        if not flag_hide_settings:
             tab = sac.tabs(
                 items=[
                     sac.TabsItem(label='Data'),
@@ -303,16 +304,25 @@ def panel_set_params(mri_params, var_groups_data, atlas):
             ## FIXME
             if tab == 'Data':
                 # Select roi
-                panel_select_var(var_groups_data, mri_params, 'roi')
-                mri_params['list_roi_indices'] = utilmisc.get_roi_indices(
-                    mri_params['roi'], atlas
+                sel_var = utiluser.select_var_from_group(
+                    st.session_state.dicts['df_var_groups'],
+                    ['roi'],
+                    'ROI', 
+                    plot_params['yvargroup'],
+                    False,
+                    st.session_state.dicts['muse']['ind_to_name']
                 )
+                plot_params['yvargroup'] = sel_var
+                plot_params['yvar'] = sel_var[1]
+                plot_params['roi_indices'] = utilmisc.get_roi_indices(
+                    sel_var[1], 'muse'
+                )                
 
             elif tab == 'Plot Settings':
                 col1, col2, col3 = st.columns(3)
                 with col1:
                     # Create a list of checkbox options
-                    mri_params['list_orient'] = st.multiselect(
+                    plot_params['list_orient'] = st.multiselect(
                         "Select viewing planes:",
                         img_views,
                         img_views,
@@ -320,20 +330,20 @@ def panel_set_params(mri_params, var_groups_data, atlas):
                     )
                 with col2:
                     # View hide overlay
-                    mri_params['is_show_overlay'] = st.checkbox("Show overlay", True, disabled=False)
+                    plot_params['is_show_overlay'] = st.checkbox("Show overlay", True, disabled=False)
 
                 with col3:
                     # Crop to mask area
-                    mri_params['crop_to_mask'] = st.checkbox("Crop to mask", True, disabled=False)
+                    plot_params['crop_to_mask'] = st.checkbox("Crop to mask", True, disabled=False)
 
-def panel_view_seg(ulay, olay, mri_params):
+def panel_view_seg(ulay, olay, plot_params):
     '''
     Panel to display segmented image overlaid on underlay image
     '''
     
-    print(mri_params)
+    print(plot_params)
     
-    if mri_params['list_roi_indices'] is None:
+    if plot_params['roi_indices'] is None:
         return
 
     # Show images
@@ -341,20 +351,20 @@ def panel_view_seg(ulay, olay, mri_params):
         with st.spinner("Wait for it..."):
             # Process image (and mask) to prepare final 3d matrix to display
             img, mask, img_masked = prep_image_and_olay(
-                ulay, olay, mri_params['list_roi_indices'], mri_params['crop_to_mask']
+                ulay, olay, plot_params['roi_indices'], plot_params['crop_to_mask']
             )
             img_bounds = detect_mask_bounds(mask)
 
-            cols = st.columns(len(mri_params['list_orient']))
+            cols = st.columns(len(plot_params['list_orient']))
             for i, tmp_orient in stqdm(
-                enumerate(mri_params['list_orient']),
+                enumerate(plot_params['list_orient']),
                 desc="Showing images ...",
-                total=len(mri_params['list_orient'])
+                total=len(plot_params['list_orient'])
             ):
                 with cols[i]:
                     ind_view = img_views.index(tmp_orient)
                     size_auto = True
-                    if olay is None or mri_params['is_show_overlay'] is False:
+                    if olay is None or plot_params['is_show_overlay'] is False:
                         show_img_slices(
                             img, ind_view, img_bounds[ind_view, :], tmp_orient
                         )

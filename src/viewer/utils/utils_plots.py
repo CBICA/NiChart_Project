@@ -269,7 +269,7 @@ def show_plots(df, df_plots, plot_settings):
     
     if st.session_state.plot_settings["show_img"]:
         in_dir = st.session_state.paths['project']
-        mri_params = st.session_state.mri_params
+        plot_params = st.session_state.plot_params
         mrid = st.session_state.sel_mrid
         ulay = os.path.join(
             in_dir, 't1', f'{mrid}_T1.nii.gz'
@@ -277,7 +277,7 @@ def show_plots(df, df_plots, plot_settings):
         olay = os.path.join(
             in_dir, 'dlmuse_seg', f'{mrid}_T1_DLMUSE.nii.gz'
         )
-        utilmri.panel_view_seg(ulay, olay, mri_params)
+        utilmri.panel_view_seg(ulay, olay, plot_params)
 
 ###################################################################
 # User selections
@@ -564,24 +564,27 @@ def panel_set_params_centile_plot(
                     st.session_state.dicts['df_var_groups'],
                     ['age'],
                     'xvar', 
-                    st.session_state.plot_params['xvargroup'],
+                    plot_params['xvargroup'],
                     False,
                     st.session_state.dicts['muse']['ind_to_name']
                 )
-                st.session_state.plot_params['xvargroup'] = sel_var
-                st.session_state.plot_params['xvar'] = sel_var[1]
+                plot_params['xvargroup'] = sel_var
+                plot_params['xvar'] = sel_var[1]
                 
                 # Select y var
                 sel_var = utiluser.select_var_from_group(
                     st.session_state.dicts['df_var_groups'],
                     ['roi'],
                     'yvar', 
-                    st.session_state.plot_params['yvargroup'],
+                    plot_params['yvargroup'],
                     False,
                     st.session_state.dicts['muse']['ind_to_name']
                 )
-                st.session_state.plot_params['yvargroup'] = sel_var
-                st.session_state.plot_params['yvar'] = sel_var[1]
+                plot_params['yvargroup'] = sel_var
+                plot_params['yvar'] = sel_var[1]
+                plot_params['roi_indices'] = utilmisc.get_roi_indices(
+                    sel_var[1], 'muse'
+                )
 
             elif tab == 'Centiles':
                 user_select_centiles(plot_params)

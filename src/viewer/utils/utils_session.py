@@ -277,17 +277,6 @@ def init_selections() -> None:
         'sel_roi' : 'GM',
     }
 
-def init_mri_vars() -> None:
-    # MRI viewer parameters
-    st.session_state.mri_params = {
-        "roi_group": 'MUSE_Primary',
-        "roi": 'GM',
-        "list_roi_indices": [81, 82],
-        "list_orient": ["axial", "coronal", "sagittal"],
-        "is_show_overlay": True,
-        "crop_to_mask": True
-    }
-
 def init_plot_vars() -> None:
     '''
     Set plotting variables
@@ -360,6 +349,10 @@ def init_plot_vars() -> None:
         "centile_type": 'CN',
         "centile_values": ['centile_50'],
         "flag_norm_centiles": False,
+        "list_roi_indices": [81, 82],
+        "list_orient": ["axial", "coronal", "sagittal"],
+        "is_show_overlay": True,
+        "crop_to_mask": True        
     }
 
     ###################################
@@ -667,7 +660,6 @@ def init_session_state() -> None:
         init_pipeline_definitions()
         init_reference_data()
         init_plot_vars()
-        init_mri_vars()
         init_selections()
         
         # Set flag

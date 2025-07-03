@@ -55,14 +55,15 @@ def view_dlmuse() -> None:
     elif sel_res_type == 'Segmentation':
         ulay = st.session_state.ref_data["t1"]
         olay = st.session_state.ref_data["dlmuse"]        
-        mri_params = st.session_state.mri_params
 
         utilmri.panel_set_params(
-            mri_params, ['roi'], 'muse'
+            st.session_state.plot_params,
+            ['roi'],
+            'muse'
         )
 
         utilmri.panel_view_seg(
-            ulay, olay, mri_params
+            ulay, olay, st.session_state.plot_params
         )
 
 def view_dlwmls() -> None:

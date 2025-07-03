@@ -19,34 +19,61 @@ def count_files_with_suffix(in_dir, suffixes):
             count += 1
     return count
 
-def build_project_tree(path, file_limit=10):
+def build_folder_tree(
+    path,
+    list_dirs = None,
+    list_suff = None,
+    file_limit=5,
+    list_ignore = None,
+    flag_dir_disabled = False,
+):
     tree_items = []
-
+    list_paths = []
     try:
+        # Read files
         entries = os.listdir(path)
-        entries = [x for x in st.session_state.out_dirs if x in entries]        
+
+        # Sort using given list
+        if list_dirs is not None:
+            e1 = [x for x in st.session_state.out_dirs if x in entries]
+            e2 = [x for x in entries if x not in st.session_state.out_dirs]
+            entries = e1 + e2
+
+        # Remove given items
+        if list_ignore is not None:
+            entries = [x for x in entries if x not in list_ignore]
+
         files = []
         dirs = []
-
         for name in entries:
             full_path = os.path.join(path, name)
             if os.path.isdir(full_path):
-                dirs.append(name)
+                # Only add if directory contains at least one file with given suffix
+                list_files = os.listdir(full_path)
+                if not list_suff or any(f.endswith(s) for f in list_files for s in list_suff):
+                    dirs.append(name)
+                
             else:
-                files.append(name)
+                if not list_suff or any(name.endswith(s) for s in list_suff):
+                    files.append(name)
 
         # Add subfolders
         for d in dirs:
-            full_path = os.path.join(path, d)
-            children = build_tree_items(full_path, file_limit=file_limit)
+            full_path = os.path.join(path, d)            
+            children, tmp_list = build_folder_tree(
+                full_path, list_dirs, list_suff, file_limit, list_ignore, flag_dir_disabled
+            )
             tree_items.append(
                 sac.TreeItem(
                     label=d,
                     icon='folder',
                     children=children,
+                    disabled=flag_dir_disabled,
                     tooltip=f'{len(children)} items inside'
                 )
             )
+            list_paths.append(full_path)
+            list_paths = list_paths + tmp_list
 
         # Add files (limit shown files)
         for i, name in enumerate(files[:file_limit]):
@@ -65,6 +92,7 @@ def build_project_tree(path, file_limit=10):
                     tooltip=f'File: {name}'
                 )
             )
+            list_paths.append(full_path)
 
         # Add collapsed summary node if too many files
         if len(files) > file_limit:
@@ -75,216 +103,46 @@ def build_project_tree(path, file_limit=10):
                     disabled=True
                 )
             )
+            list_paths.append('...extra...')
 
     except Exception as e:
-        sac.message.error(f"Error reading {path}: {e}")
+        st.error(f"Error reading {path}: {e}")
 
-    return tree_items
-
-#def build_tree_items(path):
-    #tree_items = []
-
-    #try:
-        #for name in sorted(os.listdir(path)):
-            #full_path = os.path.join(path, name)
-            #if os.path.isdir(full_path):
-                ## Folder node
-                #children = build_tree_items(full_path)
-                #tree_items.append(
-                    #sac.TreeItem(
-                        #label=name,
-                        #icon='folder',
-                        #children=children,
-                        #tooltip=f'{len(children)} items inside'
-                    #)
-                #)
-            #else:
-                ## File node
-                #ext = os.path.splitext(name)[1].lower()
-                #tags = []
-                #if ext == '.csv':
-                    #tags.append(sac.Tag('CSV', color='red'))
-                ## Add more tags for other extensions if needed
-
-                #tree_items.append(
-                    #sac.TreeItem(
-                        #label=name,
-                        #icon='file',
-                        #description=f'{ext[1:]} file',
-                        #tag=tags,
-                        #tooltip=f'File: {name}'
-                    #)
-                #)
-    #except Exception as e:
-        #st.error(f"Error reading {path}: {e}")
-
-    #return tree_items
-
-
-def build_tree_items(path, file_limit=10):
-    tree_items = []
-
-    try:
-        entries = sorted(os.listdir(path))
-        files = []
-        dirs = []
-
-        for name in entries:
-            full_path = os.path.join(path, name)
-            if os.path.isdir(full_path):
-                dirs.append(name)
-            else:
-                files.append(name)
-
-        # Add subfolders
-        for d in dirs:
-            full_path = os.path.join(path, d)
-            children = build_tree_items(full_path, file_limit=file_limit)
-            tree_items.append(
-                sac.TreeItem(
-                    label=d,
-                    icon='folder',
-                    children=children,
-                    tooltip=f'{len(children)} items inside'
-                )
-            )
-
-        # Add files (limit shown files)
-        for i, name in enumerate(files[:file_limit]):
-            full_path = os.path.join(path, name)
-            ext = os.path.splitext(name)[1].lower()
-            tags = []
-            if ext == '.csv':
-                tags.append(sac.Tag('CSV', color='red'))
-
-            tree_items.append(
-                sac.TreeItem(
-                    label=name,
-                    icon='table',
-                    #description=f'{ext[1:]} file',
-                    tag=tags,
-                    tooltip=f'File: {name}'
-                )
-            )
-
-        # Add collapsed summary node if too many files
-        if len(files) > file_limit:
-            tree_items.append(
-                sac.TreeItem(
-                    label=f"... and {len(files) - file_limit} more files",
-                    icon='ellipsis',
-                    disabled=True
-                )
-            )
-
-    except Exception as e:
-        sac.message.error(f"Error reading {path}: {e}")
-
-    return tree_items
-
-#def build_tree_items(path):
-    #tree_items = []
-
-    #try:
-        #for name in sorted(os.listdir(path)):
-            #full_path = os.path.join(path, name)
-            #if os.path.isdir(full_path):
-                ## Folder node
-                #children = build_tree_items(full_path)
-                #tree_items.append(
-                    #sac.TreeItem(
-                        #label=name,
-                        #icon='folder',
-                        #children=children,
-                        #tooltip=f'{len(children)} items inside'
-                    #)
-                #)
-            #else:
-                ## File node
-                #ext = os.path.splitext(name)[1].lower()
-                #tags = []
-                #if ext == '.csv':
-                    #tags.append(sac.Tag('CSV', color='red'))
-                ## Add more tags for other extensions if needed
-
-                #tree_items.append(
-                    #sac.TreeItem(
-                        #label=name,
-                        #icon='file',
-                        #description=f'{ext[1:]} file',
-                        #tag=tags,
-                        #tooltip=f'File: {name}'
-                    #)
-                #)
-    #except Exception as e:
-        #st.error(f"Error reading {path}: {e}")
-
-    #return tree_items
-
+    return tree_items, list_paths
 
 def data_overview(in_dir):
-        
     if os.path.exists(in_dir):
         st.markdown(f"##### 📂 `{in_dir}`")
-        tree_items = build_project_tree(in_dir, 5)
+        tree_items, list_paths = build_folder_tree(in_dir, st.session_state.out_dirs)
         selected = sac.tree(
             items=tree_items,
             #label='Project Folder',
-            index=0,
-            align='left', size='xl', icon='table', open_all=False, checkbox=False,
-            height=500
+            index=None,
+            align='left', size='xl', icon='table',
+            checkbox=False,
+            #checkbox_strict = True,
+            open_all = False,
+            return_index = True
+            #height=400
         )
+        
+        st.write(f'ssss {type(list_paths)}  tttt')
+        st.write(f'ssss {len(list_paths)}  tttt')
+        
         if selected:
-            st.success(f"You selected: `{selected}`")
+            if isinstance(selected, list):
+                selected = selected[0]
+            fname = list_paths[selected]
+            if fname.endswith('.csv'):
+                try:
+                    df_tmp = pd.read_csv(fname)
+                    st.info(f'Data file: {fname}')
+                    st.dataframe(df_tmp)
+                except:
+                    st.warning(f'Could not read csv file: {fname}')
+
     else:
         st.error(f"Folder `{in_dir}` not found.")
-    
-    
-def data_overview2(in_dir):
-    '''
-    Show overview of project data
-    '''
-    df_out = st.session_state.project_folders
-    
-    st.markdown(f'##### Project name: {st.session_state.project} — `{st.session_state.paths['project']}`')
-
-    st.markdown("---")
-    st.markdown('##### Input Lists:')
-    for dname in df_out[df_out.dtype == 'in_csv'].dname.tolist():
-        dpath = os.path.join(
-            in_dir, dname, dname + '.csv'
-        )
-        if os.path.exists(dpath):
-            df = pd.read_csv(dpath)
-            st.write(f'📄 `{dname}/{dname + '.csv'}` — {df.shape[0]} rows × {df.shape[1]} columns')
-
-    st.markdown('##### Input Images:')
-    for dname in df_out[df_out.dtype == 'in_img'].dname.tolist():
-        dpath = os.path.join(
-            in_dir, dname
-        )
-        if os.path.exists(dpath):
-            nimg = count_files_with_suffix(dpath, ['.nii.gz', '.nii'])
-            st.write(f'📁 `{dname}` — {nimg} image files')
-    
-    st.markdown("---")
-    st.markdown('##### Output Images:')
-    for dname in df_out[df_out.dtype == 'out_img'].dname.tolist():
-        dpath = os.path.join(
-            in_dir, dname
-        )
-        if os.path.exists(dpath):
-            nimg = count_files_with_suffix(dpath, ['.nii.gz', '.nii'])
-            st.write(f'📁 `{dname}` — {nimg} image files')
-
-    st.markdown('##### Output Lists:')
-    for dname in df_out[df_out.dtype == 'out_csv'].dname.tolist():
-        dpath = os.path.join(
-            in_dir, dname, dname + '.csv'
-        )
-        if os.path.exists(dpath):
-            df = pd.read_csv(dpath)
-            st.write(f'📄 `{dname}/{dname + '.csv'}` — {df.shape[0]} rows × {df.shape[1]} columns')
 
 def data_merge(in_dir):
     '''
