@@ -1,0 +1,12 @@
+pipeline_name: SPARE Scores: Brain Age Estimation
+description: |
+  Pipeline which uses harmonized DLMUSE to produce brain age estimation via SPARE.
+
+steps:
+  - id: run_spare_ba
+    tool: spare_ba_harmonized # MUST CORRESPOND EXACTLY to a tool in resources/tools dir
+    inputs:
+      harmonized_dlmuse_csv: ${STUDY}/DLMUSE_csv_harmonized/Harmonized_DLMUSE_Volumes.csv
+    outputs:
+      spare_ba_csv: ${STUDY}/spare_ba_csv_harmonized/SPARE_BA.csv
+    

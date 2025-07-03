@@ -1,0 +1,12 @@
+pipeline_name: Image-to-Biomarker Brain Aging Scores
+description: |
+  Brain age regression pipeline starting from input T1 scans. Also outputs attention maps.
+
+steps:
+  - id: run_nichart_bascores
+    tool: nichart_bascores # MUST CORRESPOND EXACTLY to a tool in resources/tools dir
+    inputs:
+      t1_img: ${STUDY}/t1
+    outputs:
+      out_csv: ${STUDY}/bascores_csv/BAScores.csv
+      out_attention: ${STUDY}/bascores_attention

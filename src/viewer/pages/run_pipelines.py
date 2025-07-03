@@ -87,12 +87,24 @@ def panel_run_pipeline():
     # For now, just hardcode the mapping from sel_pipeline to a pipeline in resources/pipelines.
     sel_method = st.session_state.sel_pipeline
     st.success(f'Selected pipeline: {sel_method}')
-
+    harmonize = st.checkbox("Harmonize to reference data? (Requires >= 3 scans)")
     ## TODO: Retrieve dynamically/match between front end and toolloader code
+    ## This a nice and simple placeholder for now
     sel_pipeline_to_id = {
         'dlmuse': 'run_dlmuse',
+        'spare-ad': 'run_spare_ad',
+        'spare-ba': 'run_spare_ba',
+        'bascores': 'run_bascores',
         ## Add additional lines here ({sel_pipeline value} : {name of pipeline yaml} )
     }
+    if harmonize:
+        sel_pipeline_to_id = {
+            'dlmuse': 'run_dlmuse_harmonized',
+            'spare-ad': 'run_spare_ad_harmonized',
+            'spare-ba': 'run_spare_ba_harmonized',
+            'bascores': 'run_bascores',
+            ## Add additional lines here ({sel_pipeline value} : {name of pipeline yaml} )
+        }
 
     pipeline_to_run = sel_pipeline_to_id[sel_method]
 

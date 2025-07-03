@@ -1,0 +1,13 @@
+pipeline_name: SPARE Scores: Alzheimer's Disease (Unharmonized)
+description: |
+  Pipeline which uses DLMUSE and input demographics to produce Alzheimer's Disease SPARE scores.
+
+steps:
+  - id: run_spare_ad
+    tool: spare_ad # MUST CORRESPOND EXACTLY to a tool in resources/tools dir
+    inputs:
+      dlmuse_csv: ${STUDY}/DLMUSE_csv/DLMUSE_Volumes.csv
+      demog_csv: ${STUDY}/lists/demog.csv
+    outputs:
+      spare_ad_csv: ${STUDY}/spare_ad_csv/SPARE_AD.csv
+    
