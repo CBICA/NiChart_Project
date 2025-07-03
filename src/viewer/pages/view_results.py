@@ -20,13 +20,21 @@ utilpg.config_page()
 utilpg.show_menu()
 utilpg.set_global_style()
 
-def panel_data_overview():
-    '''
-    Detect all csv files and merge them
-    '''
+def view_project_folder():
+    """
+    Panel for viewing files in a project folder
+    """
     with st.container(border=True):
         in_dir = st.session_state.paths['project']
         utildv.data_overview(in_dir)
+
+def select_data_files():
+    """
+    Panel for merging selected data files
+    """
+    with st.container(border=True):
+        in_dir = st.session_state.paths['project']
+        utildv.select_files(in_dir)
 
 def panel_data_merge():
     '''
@@ -66,8 +74,8 @@ st.markdown(
 
 tab = sac.tabs(
     items=[
-        sac.TabsItem(label='Overview'),
-        sac.TabsItem(label='Prepare Data'),
+        sac.TabsItem(label='View Project Folder'),
+        sac.TabsItem(label='Select Data Files'),
         sac.TabsItem(label='Plot Data'),
         sac.TabsItem(label='View Images'),
     ],
@@ -76,11 +84,11 @@ tab = sac.tabs(
 )
 
 
-if tab == 'Overview':
-    panel_data_overview()
+if tab == 'View Project Folder':
+    view_project_folder()
 
-elif tab == 'Prepare Data':
-    panel_data_merge()
+elif tab == 'Select Data Files':
+    select_data_files()
 
 elif tab == 'Plot Data':
     plot_vars()

@@ -53,6 +53,7 @@ def sel_pipeline_from_list():
         pipelines = st.session_state.pipelines
         sitems = []
         colors = st.session_state.pipeline_colors
+
         for i, ptmp in enumerate(pipelines.Name.tolist()):
             sitems.append(
                 sac.ButtonsItem(
@@ -67,7 +68,7 @@ def sel_pipeline_from_list():
             align='left'
         )
         pname = pipelines.loc[pipelines.Name == sel_pipeline, 'Label'].values[0]
-    
+
         tab = sac.tabs(
             items=[
                 sac.TabsItem(label='Input Data'),
