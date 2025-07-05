@@ -302,21 +302,24 @@ def panel_set_params(plot_params, var_groups_data, atlas, flag_hide_settings = F
                 align='left'
             )
             ## FIXME
+            df_vars = st.session_state.dicts['df_var_groups']
             if tab == 'Data':
                 # Select roi
                 sel_var = utiluser.select_var_from_group(
-                    st.session_state.dicts['df_var_groups'],
-                    ['roi'],
-                    'ROI', 
+                    'Select ROI variable:',
+                    df_vars[df_vars.category.isin(['roi'])],
                     plot_params['yvargroup'],
-                    False,
-                    st.session_state.dicts['muse']['ind_to_name']
+                    plot_params['yvar'],
+                    flag_add_none = False,
+                    dicts_rename = {
+                        'muse': st.session_state.dicts['muse']['ind_to_name']
+                    }
                 )
-                plot_params['yvargroup'] = sel_var
+                plot_params['yvargroup'] = sel_var[0]
                 plot_params['yvar'] = sel_var[1]
                 plot_params['roi_indices'] = utilmisc.get_roi_indices(
                     sel_var[1], 'muse'
-                )                
+                )
 
             elif tab == 'Plot Settings':
                 col1, col2, col3 = st.columns(3)

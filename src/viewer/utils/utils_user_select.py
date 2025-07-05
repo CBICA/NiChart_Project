@@ -17,6 +17,76 @@ import utils.utils_traces as utiltr
 import streamlit_antd_components as sac
 
 def select_var_from_group(
+    label,
+    df_vars,
+    init_group,
+    init_var,
+    flag_add_none = False,
+    dicts_rename = None
+):
+
+    # print(flag_add_none )
+    # return [init_group, init_var]
+
+    '''
+    Panel for user to select a variable grouped in categories
+    Variable groups are given in df_vars
+    If a variable is an ROI index a dictionary for renaming should be given in dicts_rename
+    '''
+    # Create nested var lists
+    sac_items = []
+    init_ind = None
+
+    ind_count = 0
+    for i, row in df_vars.iterrows():
+        tmp_group = row['group']
+        tmp_list = row['values']
+        tmp_atlas = row['atlas']
+
+        # Convert ROI variables from index to name
+        if tmp_atlas is not None:
+            tmp_list = [dicts_rename[tmp_atlas][k] for k in tmp_list]
+
+        # Add a None item in var list
+        if flag_add_none:
+            tmp_list = ['None'] + tmp_list
+
+        tmp_item = sac.CasItem(tmp_group, icon='app', children=tmp_list)
+        sac_items.append(tmp_item)
+
+        # Detect index of selected items
+        # !!! CasItem keeps a linear (flattened) index of nested items
+        # !!! For each group, the index is moved to:
+        #     curr_index + #items in group + 1
+        print(f'zzzz {init_group} {tmp_group}')
+        print(f'yyyzzzz {init_var} {tmp_list}')
+
+        if init_group == tmp_group:
+            if init_var in tmp_list:
+                init_ind = [ind_count, ind_count + 1 + tmp_list.index(init_var)]
+        ind_count = ind_count + 1 + len(tmp_list)
+
+        print(f'aaayyyzzzz {init_ind}')
+
+
+    # Show var selector
+    sel_var = sac.cascader(
+        items = sac_items,
+        label=label,
+        index=init_ind,
+        return_index=False,
+        multiple=False,
+        search=True,
+        clear=True,
+        key=f'_sel_{label}'
+    )
+    #st.success(f'Selected: {sel_var}')
+
+    print(f'yyyy {sel_var}')
+    return sel_var
+
+
+def select_var_from_group2(
     df_groups,
     sel_groups,
     var_type,

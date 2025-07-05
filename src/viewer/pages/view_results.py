@@ -52,7 +52,7 @@ def plot_vars():
     var_groups_hue = ['cat_vars']
     pipeline = 'dlmuse'
 
-    utilpl.panel_set_plot_params(
+    utilpl.panel_set_params_plot(
         st.session_state.plot_params,
         var_groups_data,
         var_groups_hue,
