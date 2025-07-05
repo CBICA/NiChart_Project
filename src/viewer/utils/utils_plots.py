@@ -264,9 +264,15 @@ def show_plots(df, df_plots, plot_settings):
                 )
                 df_plots.loc[plot_ind, 'flag_sel'] = st.session_state[f'_flag_sel_{plot_ind}']
 
-    if st.sidebar.button('sss'):
-        st.session_state.plot_settings["show_img"] = True
-    
+    with st.sidebar:
+        sel_flag = sac.segmented(
+            items=['Hide', 'Show'],
+            label='MRI Viewer',
+            align='left',
+            size = 'sm'
+        )
+        st.session_state.plot_settings["show_img"] = sel_flag
+
     if st.session_state.plot_settings["show_img"]:
         in_dir = st.session_state.paths['project']
         plot_params = st.session_state.plot_params
@@ -539,7 +545,7 @@ def panel_set_params_plot(plot_params, var_groups_data, var_groups_hue, pipeline
                 # Select y var
                 sel_var = utiluser.select_var_from_group(
                     'Select group variable:',
-                    df_vars[df_vars.category.isin(['roi'])],
+                    df_vars[df_vars.category.isin(['cat_vars'])],
                     plot_params['hvargroup'],
                     plot_params['hvar'],
                     flag_add_none = True,

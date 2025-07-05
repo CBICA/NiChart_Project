@@ -58,16 +58,10 @@ def select_var_from_group(
         # !!! CasItem keeps a linear (flattened) index of nested items
         # !!! For each group, the index is moved to:
         #     curr_index + #items in group + 1
-        print(f'zzzz {init_group} {tmp_group}')
-        print(f'yyyzzzz {init_var} {tmp_list}')
-
         if init_group == tmp_group:
             if init_var in tmp_list:
                 init_ind = [ind_count, ind_count + 1 + tmp_list.index(init_var)]
         ind_count = ind_count + 1 + len(tmp_list)
-
-        print(f'aaayyyzzzz {init_ind}')
-
 
     # Show var selector
     sel_var = sac.cascader(
