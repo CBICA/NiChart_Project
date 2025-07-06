@@ -76,11 +76,6 @@ def plot_vars():
 
     utilpl.panel_show_plots()
 
-def view_images():
-    ulay = st.session_state.ref_data["t1"]
-    olay = st.session_state.ref_data["dlmuse"]        
-    #utilmri.panel_view_seg(ulay, olay, 'muse')
-
 st.markdown(
     """
     ### View Results 
@@ -92,7 +87,6 @@ tab = sac.tabs(
         sac.TabsItem(label='View Project Folder'),
         sac.TabsItem(label='Select Data Files'),
         sac.TabsItem(label='Plot Data'),
-        sac.TabsItem(label='View Images'),
     ],
     size='lg',
     align='left'
@@ -107,9 +101,6 @@ elif tab == 'Select Data Files':
 
 elif tab == 'Plot Data':
     plot_vars()
-
-elif tab == 'View Images':
-    view_images()
 
 # Show selections
 utilses.disp_selections()
