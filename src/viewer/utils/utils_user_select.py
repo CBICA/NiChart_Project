@@ -76,7 +76,6 @@ def select_var_from_group(
     )
     #st.success(f'Selected: {sel_var}')
 
-    print(f'yyyy {sel_var}')
     return sel_var
 
 

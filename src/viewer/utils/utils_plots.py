@@ -233,7 +233,7 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
 
 def show_plots(df, df_plots, plot_settings):
     """
-    Display all plots
+    Display data plots
     """
     # Read plot ids
     list_plots = df_plots.index.tolist()
@@ -264,6 +264,15 @@ def show_plots(df, df_plots, plot_settings):
                 )
                 df_plots.loc[plot_ind, 'flag_sel'] = st.session_state[f'_flag_sel_{plot_ind}']
 
+
+def show_mri():
+    '''
+    Display mri plot
+    '''
+    mrid = st.session_state.sel_mrid
+    if mrid is None:
+        return
+
     with st.sidebar:
         sel_flag = sac.segmented(
             items=['Hide', 'Show'],
@@ -271,19 +280,20 @@ def show_plots(df, df_plots, plot_settings):
             align='left',
             size = 'sm'
         )
-        st.session_state.plot_settings["show_img"] = sel_flag
+        st.session_state.plot_settings["flag_show_img"] = sel_flag == 'Show'
 
-    if st.session_state.plot_settings["show_img"]:
-        in_dir = st.session_state.paths['project']
-        plot_params = st.session_state.plot_params
-        mrid = st.session_state.sel_mrid
-        ulay = os.path.join(
-            in_dir, 't1', f'{mrid}_T1.nii.gz'
-        )
-        olay = os.path.join(
-            in_dir, 'dlmuse_seg', f'{mrid}_T1_DLMUSE.nii.gz'
-        )
-        utilmri.panel_view_seg(ulay, olay, plot_params)
+    if st.session_state.plot_settings["flag_show_img"] == False:
+        return
+
+    in_dir = st.session_state.paths['project']
+    plot_params = st.session_state.plot_params
+    ulay = os.path.join(
+        in_dir, 't1', f'{mrid}_T1.nii.gz'
+    )
+    olay = os.path.join(
+        in_dir, 'dlmuse_seg', f'{mrid}_T1_DLMUSE.nii.gz'
+    )
+    utilmri.panel_view_seg(ulay, olay, plot_params)
 
 ###################################################################
 # User selections
@@ -479,91 +489,122 @@ def user_select_plot_settings(plot_params):
     )
 
     # Checkbox to show/hide plot legend
-    plot_params["hide_legend"] = st.checkbox(
+    plot_params['flag_hide_legend'] = st.checkbox(
         "Hide legend",
-        value=st.session_state.plot_settings["hide_legend"],
+        value=st.session_state.plot_settings['flag_hide_legend'],
         disabled=False,
     )
+
+def user_add_plots(plot_params):
+    '''
+    Panel to select plot args from the user
+    '''
+    # flag_settings = st.sidebar.checkbox('Hide plot settings')
+
+    cols = st.columns([2,3,2])
+    with cols[0]:
+        if st.button('Add Plot'):
+            st.session_state.plots = add_plot(
+                st.session_state.plots, st.session_state.plot_params
+            )
+
+    # Add a single plot if there is none
+    if st.session_state.plots.shape[0] == 0:
+        st.session_state.plots = add_plot(
+            st.session_state.plots, st.session_state.plot_params
+        )
+
+    with cols[1]:
+        if st.button('Delete Selected'):
+            st.session_state.plots = delete_sel_plots(
+                st.session_state.plots
+            )
+
+    with cols[2]:
+        if st.button('Delete All'):
+            st.session_state.plots = delete_all_plots()
+
 
 def panel_set_params_plot(plot_params, var_groups_data, var_groups_hue, pipeline):
     """
     Panel to set plotting parameters
     """
+    if st.session_state.plot_settings['flag_hide_settings']:
+        return
+
     # Add tabs for parameter settings
     with st.container(border=True):
-        flag_settings = False  #FIXME
-        if not flag_settings:
-            tab = sac.tabs(
-                items=[
-                    sac.TabsItem(label='Data'),
-                    sac.TabsItem(label='Groups'),
-                    sac.TabsItem(label='Fit'),
-                    sac.TabsItem(label='Centiles'),
-                    sac.TabsItem(label='Plot Settings')
-                ],
-                size='sm',
-                align='left'
+        tab = sac.tabs(
+            items=[
+                sac.TabsItem(label='Data'),
+                sac.TabsItem(label='Groups'),
+                sac.TabsItem(label='Fit'),
+                sac.TabsItem(label='Centiles'),
+                sac.TabsItem(label='Plot Settings')
+            ],
+            size='sm',
+            align='left'
+        )
+
+        df_vars = st.session_state.dicts['df_var_groups']
+        if tab == 'Data':
+            # Select x var
+            # Select x var
+            sel_var = utiluser.select_var_from_group(
+                'Select x variable:',
+                df_vars[df_vars.group.isin(['demog'])],
+                plot_params['xvargroup'],
+                plot_params['xvar'],
+                flag_add_none = False,
+                dicts_rename = {
+                    'muse': st.session_state.dicts['muse']['ind_to_name']
+                }
             )
-            
-            df_vars = st.session_state.dicts['df_var_groups']
-            if tab == 'Data':
-                # Select x var
-                # Select x var
-                sel_var = utiluser.select_var_from_group(
-                    'Select x variable:',
-                    df_vars[df_vars.group.isin(['demog'])],
-                    plot_params['xvargroup'],
-                    plot_params['xvar'],
-                    flag_add_none = False,
-                    dicts_rename = {
-                        'muse': st.session_state.dicts['muse']['ind_to_name']
-                    }
-                )
-                plot_params['xvargroup'] = sel_var[0]
-                plot_params['xvar'] = sel_var[1]
+            plot_params['xvargroup'] = sel_var[0]
+            plot_params['xvar'] = sel_var[1]
 
-                # Select y var
-                # Select y var
-                sel_var = utiluser.select_var_from_group(
-                    'Select y variable:',
-                    df_vars[df_vars.category.isin(['roi'])],
-                    plot_params['yvargroup'],
-                    plot_params['yvar'],
-                    flag_add_none = False,
-                    dicts_rename = {
-                        'muse': st.session_state.dicts['muse']['ind_to_name']
-                    }
-                )
-                plot_params['yvargroup'] = sel_var[0]
-                plot_params['yvar'] = sel_var[1]
-                plot_params['roi_indices'] = utilmisc.get_roi_indices(
-                    sel_var[1], 'muse'
-                )
+            # Select y var
+            # Select y var
+            sel_var = utiluser.select_var_from_group(
+                'Select y variable:',
+                df_vars[df_vars.category.isin(['roi'])],
+                plot_params['yvargroup'],
+                plot_params['yvar'],
+                flag_add_none = False,
+                dicts_rename = {
+                    'muse': st.session_state.dicts['muse']['ind_to_name']
+                }
+            )
+            plot_params['yvargroup'] = sel_var[0]
+            plot_params['yvar'] = sel_var[1]
+            plot_params['roi_indices'] = utilmisc.get_roi_indices(
+                sel_var[1], 'muse'
+            )
 
-            elif tab == 'Groups':
-                # Select h var
-                # Select y var
-                sel_var = utiluser.select_var_from_group(
-                    'Select group variable:',
-                    df_vars[df_vars.category.isin(['cat_vars'])],
-                    plot_params['hvargroup'],
-                    plot_params['hvar'],
-                    flag_add_none = True,
-                    dicts_rename = {
-                        'muse': st.session_state.dicts['muse']['ind_to_name']
-                    }
-                )
-                plot_params['hvargroup'] = sel_var[0]
-                plot_params['hvar'] = sel_var[1]
+        elif tab == 'Groups':
+            # Select h var
+            # Select y var
+            sel_var = utiluser.select_var_from_group(
+                'Select group variable:',
+                df_vars[df_vars.category.isin(['cat_vars'])],
+                plot_params['hvargroup'],
+                plot_params['hvar'],
+                flag_add_none = True,
+                dicts_rename = {
+                    'muse': st.session_state.dicts['muse']['ind_to_name']
+                }
+            )
+            plot_params['hvargroup'] = sel_var[0]
+            plot_params['hvar'] = sel_var[1]
 
-            elif tab == 'Fit':
-                user_select_trend(plot_params)
+        elif tab == 'Fit':
+            user_select_trend(plot_params)
 
-            elif tab == 'Centiles':
-                user_select_centiles(plot_params)
+        elif tab == 'Centiles':
+            user_select_centiles(plot_params)
 
-            elif tab == 'Plot Settings':
-                user_select_plot_settings(plot_params)
+        elif tab == 'Plot Settings':
+            user_select_plot_settings(plot_params)
                 
     # Set plot type
     plot_params['plot_type'] = 'scatter'
@@ -592,57 +633,63 @@ def panel_set_params_centile_plot(
     """
     Panel to select centile plot args from the user
     """    
+    if st.session_state.plot_settings['flag_hide_settings']:
+        return
+
     # Add tabs for parameter settings
     with st.container(border=True):
-        if not flag_hide_settings:
-            tab = sac.tabs(
-                items=[
-                    sac.TabsItem(label='Data'),
-                    sac.TabsItem(label='Centiles'),
-                    sac.TabsItem(label='Plot Settings')
-                ],
-                size='sm',
-                align='left'
+        tab = sac.tabs(
+            items=[
+                sac.TabsItem(label='Data'),
+                sac.TabsItem(label='Centiles'),
+                sac.TabsItem(label='Plot Settings'),
+                sac.TabsItem(label='Add/Delete Plots')
+            ],
+            size='sm',
+            align='left'
+        )
+        df_vars = st.session_state.dicts['df_var_groups']
+        if tab == 'Data':
+            # Select x var
+            sel_var = utiluser.select_var_from_group(
+                'Select x variable:',
+                df_vars[df_vars.group.isin(['demog'])],
+                plot_params['xvargroup'],
+                plot_params['xvar'],
+                flag_add_none = False,
+                dicts_rename = {
+                    'muse': st.session_state.dicts['muse']['ind_to_name']
+                }
             )
-            df_vars = st.session_state.dicts['df_var_groups']
-            if tab == 'Data':
-                # Select x var
-                sel_var = utiluser.select_var_from_group(
-                    'Select x variable:',
-                    df_vars[df_vars.group.isin(['demog'])],
-                    plot_params['xvargroup'],
-                    plot_params['xvar'],
-                    flag_add_none = False,
-                    dicts_rename = {
-                        'muse': st.session_state.dicts['muse']['ind_to_name']
-                    }
-                )
-                plot_params['xvargroup'] = sel_var[0]
-                plot_params['xvar'] = sel_var[1]
-                
-                # Select y var
-                sel_var = utiluser.select_var_from_group(
-                    'Select y variable:',
-                    df_vars[df_vars.category.isin(['roi'])],
-                    plot_params['yvargroup'],
-                    plot_params['yvar'],
-                    flag_add_none = False,
-                    dicts_rename = {
-                        'muse': st.session_state.dicts['muse']['ind_to_name']
-                    }
-                )
-                plot_params['yvargroup'] = sel_var[0]
-                plot_params['yvar'] = sel_var[1]
-                plot_params['roi_indices'] = utilmisc.get_roi_indices(
-                    sel_var[1], 'muse'
-                )
+            plot_params['xvargroup'] = sel_var[0]
+            plot_params['xvar'] = sel_var[1]
 
-            elif tab == 'Centiles':
-                user_select_centiles(plot_params)
+            # Select y var
+            sel_var = utiluser.select_var_from_group(
+                'Select y variable:',
+                df_vars[df_vars.category.isin(['roi'])],
+                plot_params['yvargroup'],
+                plot_params['yvar'],
+                flag_add_none = False,
+                dicts_rename = {
+                    'muse': st.session_state.dicts['muse']['ind_to_name']
+                }
+            )
+            plot_params['yvargroup'] = sel_var[0]
+            plot_params['yvar'] = sel_var[1]
+            plot_params['roi_indices'] = utilmisc.get_roi_indices(
+                sel_var[1], 'muse'
+            )
 
-            elif tab == 'Plot Settings':
-                user_select_plot_settings(plot_params)
-                
+        elif tab == 'Centiles':
+            user_select_centiles(plot_params)
+
+        elif tab == 'Plot Settings':
+            user_select_plot_settings(plot_params)
+
+        elif tab == 'Add/Delete Plots':
+            user_add_plots(plot_params)
+
     # Set plot type
     plot_params['plot_type'] = 'scatter'
     
@@ -655,7 +702,6 @@ def panel_set_params_centile_plot(
     plot_params['method'] = pipeline
     plot_params['flag_norm_centiles'] = False
 
-
 def panel_show_plots():
     '''
     Panel to show plots
@@ -665,35 +711,11 @@ def panel_show_plots():
         if st.session_state.plots.loc[tmp_ind, 'flag_sel']:
             st.session_state.plots.at[tmp_ind, 'params'] = st.session_state.plot_params.copy()
 
-    ## Sidebar options
-    with st.sidebar:
-        
-        sac.divider(label='Actions', icon = 'arrow-right-circle', align='center', color='gray')
-        
-        flag_settings = st.sidebar.checkbox('Hide plot settings')
-        
-        cols = st.columns([2,3,2])
-        with cols[0]:
-            if st.button('Add Plot'):
-                st.session_state.plots = add_plot(
-                    st.session_state.plots, st.session_state.plot_params
-                )
-        
-        # Add a single plot if there is none
-        if st.session_state.plots.shape[0] == 0:
-            st.session_state.plots = add_plot(
-                st.session_state.plots, st.session_state.plot_params
-            )
-        
-        with cols[1]:
-            if st.button('Delete Selected'):
-                st.session_state.plots = delete_sel_plots(
-                    st.session_state.plots
-                )
-        
-        with cols[2]:
-            if st.button('Delete All'):
-                st.session_state.plots = delete_all_plots()
+    # Add a single plot if there is none
+    if st.session_state.plots.shape[0] == 0:
+        st.session_state.plots = add_plot(
+            st.session_state.plots, st.session_state.plot_params
+        )
 
     # Show plots
     show_plots(
@@ -701,6 +723,9 @@ def panel_show_plots():
         st.session_state.plots,
         st.session_state.plot_settings
     )
+
+    if st.session_state.sel_mrid is not None:
+        show_mri()
 
 def panel_show_centile_plots():
     '''
@@ -711,35 +736,11 @@ def panel_show_centile_plots():
         if st.session_state.plots.loc[tmp_ind, 'flag_sel']:
             st.session_state.plots.at[tmp_ind, 'params'] = st.session_state.plot_params.copy()
 
-    ## Sidebar options
-    with st.sidebar:
-        
-        sac.divider(label='Actions', icon = 'arrow-right-circle', align='center', color='gray')
-        
-        flag_settings = st.sidebar.checkbox('Hide plot settings')
-        
-        cols = st.columns([2,3,2])
-        with cols[0]:
-            if st.button('Add Plot'):
-                st.session_state.plots = add_plot(
-                    st.session_state.plots, st.session_state.plot_params
-                )
-        
-        # Add a single plot if there is none
-        if st.session_state.plots.shape[0] == 0:
-            st.session_state.plots = add_plot(
-                st.session_state.plots, st.session_state.plot_params
-            )
-        
-        with cols[1]:
-            if st.button('Delete Selected'):
-                st.session_state.plots = delete_sel_plots(
-                    st.session_state.plots
-                )
-        
-        with cols[2]:
-            if st.button('Delete All'):
-                st.session_state.plots = delete_all_plots()
+    # Add a single plot if there is none
+    if st.session_state.plots.shape[0] == 0:
+        st.session_state.plots = add_plot(
+            st.session_state.plots, st.session_state.plot_params
+        )
 
     # Show plots
     show_plots(

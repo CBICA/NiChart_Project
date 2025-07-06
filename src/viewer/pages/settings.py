@@ -25,49 +25,6 @@ def panel_models_path():
     with st.container(border=True):
         st.write('Work in progress!')
 
-def panel_resources_path():
-    """
-    Panel for selecting resource directories
-    """
-    sel_res = sac.tabs(
-        items=[
-            sac.TabsItem(label='Process Definitions'),
-            sac.TabsItem(label='ROI Lists'),
-        ],
-        size='lg',
-        align='left'
-    )
-
-    if sel_res is None:
-        return
-    
-    if sel_res == "process definitions":
-        out_dir = st.session_state.paths["proc_def"]
-
-        # Browse output folder
-        if st.button('Browse path'):
-            sel_dir = utilio.browse_folder(out_dir)
-            utilss.update_out_dir(sel_dir)
-            st.rerun()
-
-        # Enter output folder
-        sel_dir = st.text_input(
-            'Enter path',
-            value=out_dir,
-            # label_visibility='collapsed',
-        )
-        if sel_dir != out_dir:
-            utilss.update_out_dir(sel_dir)
-            st.rerun()
-
-        if st.session_state.flags["out_dir"]:
-            st.success(
-                f"Output directory: {st.session_state.paths['out_dir']}",
-                icon=":material/thumb_up:",
-            )
-
-            #utildoc.util_help_dialog(utildoc.title_out, utildoc.def_out)
-
 def panel_misc() -> None:
     """
     Panel for setting various parameters
@@ -118,12 +75,7 @@ tab = sac.tabs(
     align='left'
 )
 
-if tab == 'Paths':
-    with st.container(border=True):
-        panel_resources_path()
-        panel_models_path()
-
-elif tab == 'Plot Colors':
+if tab == 'Plot Colors':
     with st.container(border=True):
         panel_plot_colors()
 

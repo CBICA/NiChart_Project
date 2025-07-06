@@ -55,7 +55,6 @@ def view_dlmuse() -> None:
     elif sel_res_type == 'Segmentation':
         ulay = st.session_state.ref_data["t1"]
         olay = st.session_state.ref_data["dlmuse"]        
-
         utilmri.panel_set_params(
             st.session_state.plot_params,
             ['roi'],
@@ -182,8 +181,22 @@ def results_overview():
     '''
     Select a pipeline and show overview
     '''
-    print(st.session_state.sel_pipeline)
+    # Set flag for hiding the settings
+    if '_flag_hide_settings' not in st.session_state:
+        st.session_state['_flag_hide_settings'] = st.session_state.plot_settings['flag_hide_settings']
+
+    def update_val():
+        st.session_state.plot_settings['flag_hide_settings'] = st.session_state['_flag_hide_settings']
+
+    with st.sidebar:
+        sac.divider(label='Plot Settings', align='center', color='gray')
+        st.checkbox(
+            'Hide Plot Settings',
+            key = '_flag_hide_settings',
+            on_change = update_val
+        )
     
+    # Show results
     with st.container(border=True):
         if st.session_state.sel_pipeline == 'DLMUSE':
             view_dlmuse()

@@ -19,7 +19,7 @@ import streamlit_antd_components as sac
 
 def disp_selections():
     '''
-    Show major selections 
+    Show user selections
     '''
     with st.sidebar:
         sac.divider(label='Selections', icon = 'person', align='center', color='gray')
@@ -28,24 +28,28 @@ def disp_selections():
         if st.session_state.sel_pipeline is not None:
             st.markdown(f'`Pipeline: {st.session_state.sel_pipeline}`')
     
-
 def disp_session_state():
     '''
     Show session state variables
     '''
+    if '_debug_flag_show' not in st.session_state:
+        st.session_state['_debug_flag_show'] = st.session_state['debug']['flag_show']
+
+    def update_val():
+        st.session_state['debug']['flag_show'] = st.session_state['_debug_flag_show']
+
     with st.sidebar:
-        sac.divider(label='Debug', icon = 'gear',  align='center', color='gray')
-    st.sidebar.checkbox(
-        'Show Session State',
-        key = '_debug_flag_show',
-        value = st.session_state['debug']['flag_show'] 
-    )
-    st.session_state['debug']['flag_show'] = st.session_state['_debug_flag_show']
+        # sac.divider(label='Debug', icon = 'gear',  align='center', color='gray')
+        st.checkbox(
+            'Show Session State',
+            key = '_debug_flag_show',
+            on_change = update_val
+        )
     
     if st.session_state['debug']['flag_show']:
         with st.container(border=True):
             st.markdown('##### Session State:')
-            list_items = [x for x in st.session_state.keys() if not x.startswith('_')]
+            list_items = sorted([x for x in st.session_state.keys() if not x.startswith('_')])
             st.pills(
                 "Select Session State Variable(s) to View",
                 list_items,
@@ -61,7 +65,9 @@ def disp_session_state():
                 st.write(st.session_state[sel_var])
 
 def init_project_folders():
-    ### Project folders
+    '''
+    Set initial values for project folders
+    '''
     dnames = [
         "t1", "fl", "participants", "dlmuse_seg", "dlmuse_vol"
     ]
@@ -73,8 +79,10 @@ def init_project_folders():
     )
 
 def init_session_vars():
-    ####################################    
-    ### Misc variables
+    '''
+    Set initial values for session variables
+    '''
+    ## Misc variables
     # st.session_state.mode = 'release'
     st.session_state.mode = 'debug'
 
@@ -82,6 +90,8 @@ def init_session_vars():
     st.session_state.project = 'IXI'
     
     st.session_state.sel_pipeline = 'DLMUSE'
+
+    st.session_state.sel_mrid = None
 
     st.session_state.pipeline_colors = [
         'red', 'pink', 'grape', 'violet', 'indigo', 'blue',
@@ -106,22 +116,7 @@ def init_session_vars():
         'sel_vars': []
     }
 
-
-    ####################################
-    # Process definitions
-    # Used to keep process info provided in yaml files
-    st.session_state.processes = {
-        'steps': None,
-        'roles': None,
-        'in_files': None,
-        'out_files': None,
-        'sel_inputs': [],
-        'sel_steps': [],
-    }
-    #update_process_def(st.session_state.paths['proc_def'])
-
-    ####################################
-    ### Page settings
+    ## Page settings
 
     # App icon image
     st.session_state.nicon = Image.open("../resources/nichart1.png")
@@ -271,12 +266,6 @@ def init_paths():
     st.session_state.paths["file_search_dir"] = st.session_state.paths["init"]
     ############    
 
-def init_selections() -> None:
-    st.session_state.selections = {
-        'sel_roi_group' : 'MUSE_Primary',
-        'sel_roi' : 'GM',
-    }
-
 def init_plot_vars() -> None:
     '''
     Set plotting variables
@@ -296,9 +285,9 @@ def init_plot_vars() -> None:
 
     # Plot settings
     st.session_state.plot_settings = {
-        "hide_settings": False,
-        "show_img": False,
-        "hide_legend": False,
+        "flag_hide_settings": False,
+        "flag_hide_mri": False,
+        "flag_hide_legend": False,
         "trend_types": ["None", "Linear", "Smooth LOWESS Curve"],
         "centile_types": ["", "CN", "CN_Males", "CN_Females", "CN_ICV_Corrected"],
         "linfit_trace_types": [
@@ -416,7 +405,6 @@ def init_dicts() -> None:
         'muse': muse
     }
 
-
 def init_muse_roi_def() -> None:
     # Paths to roi lists
     muse = {
@@ -452,112 +440,9 @@ def init_muse_roi_def() -> None:
         'muse' : muse
     }
 
-def update_default_paths() -> None:
-    """
-    Update default paths in session state if the working dir changed
-    """
-    print('FIXME')
-
-def reset_flags() -> None:
-    """
-    Resets flags if the working dir changed
-    """
-    for tmp_key in st.session_state.flags.keys():
-        st.session_state.flags[tmp_key] = False
-    st.session_state.flags["project"] = True
-
-    # Check dicom folder
-    fcount = utilio.get_file_count(st.session_state.paths["dicoms"])
-    if fcount > 0:
-        st.session_state.flags["dicoms"] = True
-
-def reset_plots() -> None:
-    """
-    Reset plot variables when data file changes
-    """
-    st.session_state.plots = pd.DataFrame(columns=st.session_state.plots.columns)
-    st.session_state.plot_sel_vars = []
-    st.session_state.plot_var["hide_settings"] = False
-    st.session_state.plot_var["hide_legend"] = False
-    st.session_state.plot_var["show_img"] = False
-    st.session_state.plot_var["plot_type"] = False
-    st.session_state.plot_var["xvargroup"] = 'demog'
-    st.session_state.plot_var["xvar"] = 'Age'
-    st.session_state.plot_var["xmin"] = -1.0
-    st.session_state.plot_var["xmax"] = -1.0
-    st.session_state.plot_var["yvargroup"] = 'MUSE_Primary'
-    st.session_state.plot_var["yvar"] = 'GM'
-    st.session_state.plot_var["ymin"] = -1.0
-    st.session_state.plot_var["ymax"] = -1.0
-    st.session_state.plot_var["hvargroup"] = 'cat_vars'
-    st.session_state.plot_var["hvar"] = 'Sex'
-    st.session_state.plot_var["hvals"] = []
-    st.session_state.plot_var["corr_icv"] = False
-    st.session_state.plot_var["plot_cent_normalized"] = False
-    st.session_state.plot_var["trend"] = "Linear"
-    st.session_state.plot_var["traces"] = ["data", "lin_fit"]
-    st.session_state.plot_var["lowess_s"] = 0.5
-    st.session_state.plot_var["centtype"] = ""
-    st.session_state.plot_var["h_coeff"] = 1.0
-
-def update_process_def(sel_dir) -> None:
-    """
-    Updates process definitions
-    """
-    if sel_dir is None:
-        return
-
-    sel_dir = os.path.abspath(sel_dir)
-
-    # Update process data
-    steps = utilproc.load_steps_from_yaml(st.session_state.paths["proc_def"])
-
-    # Create process graph
-    graph = utilproc.build_graph(steps)
-
-    # Detect file roles
-    file_roles = utilproc.get_file_roles(steps)
-    
-    # Exclude files that are outputs of any step (only allow true source files)
-    out_files = {f for step in steps.values() for f in step['out_list']}
-    in_files = sorted(set(file_roles.keys()) - out_files)
-    
-    st.session_state.processes['steps'] = steps
-    st.session_state.processes['graph'] = graph
-    st.session_state.processes['roles'] = file_roles
-    st.session_state.processes['in_files'] = in_files
-    st.session_state.processes['out_files'] = out_files
-    st.session_state.processes['sel_inputs'] = []
-    st.session_state.processes['sel_steps'] = []
-
-def update_out_dir(sel_outdir) -> None:
-    """
-    Updates when outdir changes
-    """
-    if sel_outdir is None:
-        return
-
-    if sel_outdir == st.session_state.paths['out_dir']:
-        return
-
-    sel_outdir = os.path.abspath(sel_outdir)
-    if not os.path.exists(sel_outdir):
-        try:
-            os.makedirs(sel_outdir)
-        except:
-            st.error(f'Could not create folder: {sel_outdir}')
-            return
-
-    # Set out dir path
-    st.session_state.paths['out_dir'] = sel_outdir
-    st.session_state.flags["out_dir"] = True
-
-    # Reset other vars
-    st.session_state.project = None
-
 def update_project(sel_project) -> None:
     """
-    Updates when outdir changes
+    Updates when project changes
     """
     if sel_project is None:
         return
@@ -660,7 +545,6 @@ def init_session_state() -> None:
         init_pipeline_definitions()
         init_reference_data()
         init_plot_vars()
-        init_selections()
         
         # Set flag
         st.session_state.instantiated = True
