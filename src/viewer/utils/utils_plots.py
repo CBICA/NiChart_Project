@@ -226,6 +226,11 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
     if df_cent is not None:
         utiltr.add_trace_centile(df_cent, plot_params, plot_settings, fig)
 
+    # Add selected dot
+    sel_mrid = st.session_state.sel_mrid
+    if sel_mrid is not None:
+        utiltr.add_trace_dot(df, sel_mrid, plot_params, plot_settings, fig)
+
     st.plotly_chart(fig, key=f"bubble_chart_{plot_ind}", on_select=callback_plot_clicked)
     # st.plotly_chart(fig, key=f"bubble_chart_{plot_ind}")
 
@@ -540,7 +545,8 @@ def panel_set_params_plot(plot_params, var_groups_data, var_groups_hue, pipeline
                 sac.TabsItem(label='Groups'),
                 sac.TabsItem(label='Fit'),
                 sac.TabsItem(label='Centiles'),
-                sac.TabsItem(label='Plot Settings')
+                sac.TabsItem(label='Plot Settings'),
+                sac.TabsItem(label='Add/Delete Plots')
             ],
             size='sm',
             align='left'
@@ -605,7 +611,10 @@ def panel_set_params_plot(plot_params, var_groups_data, var_groups_hue, pipeline
 
         elif tab == 'Plot Settings':
             user_select_plot_settings(plot_params)
-                
+
+        elif tab == 'Add/Delete Plots':
+            user_add_plots(plot_params)
+
     # Set plot type
     plot_params['plot_type'] = 'scatter'
     

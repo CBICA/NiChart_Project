@@ -167,11 +167,14 @@ def add_trace_lowess(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
         )
         fig.add_trace(trace)
 
-def add_trace_dot(df: pd.DataFrame, plot_params: dict, plot_settings: dict, fig: Any) -> None:
+def add_trace_dot(df: pd.DataFrame, sel_mrid: str, plot_params: dict, plot_settings: dict, fig: Any) -> None:
     '''
     Add trace for a single dot
     '''
     df_tmp = df[df.MRID == sel_mrid]
+    if df_tmp.shape[0] == 0:
+        return fig
+
     trace = go.Scatter(
         x=df_tmp[plot_params['xvar']],
         y=df_tmp[plot_params['yvar']],
