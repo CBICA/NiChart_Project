@@ -9,8 +9,19 @@ import utils.utils_pages as utilpg
 import utils.utils_processes as utilprc
 import utils.utils_pipelines as utilpipe
 import utils.utils_session as utilses
+from utils.utils_logger import setup_logger
 import utils.utils_stlogbox as stlogbox
 import utils.utils_toolloader as tl
+
+import streamlit_antd_components as sac
+
+logger = setup_logger()
+logger.debug('Page: Run Pipelines')
+
+# Page config should be called for each page
+utilpg.config_page()
+utilpg.show_menu()
+utilpg.set_global_style()
 
 def panel_conf_pipeline():
     with st.container(border=True):
@@ -71,7 +82,11 @@ def panel_verify_data():
     Panel for verifying required pipeline data
     """
     sel_method = st.session_state.sel_pipeline
-    st.success(f'Selected pipeline: {sel_method}')
+    sel_project = st.session_state.project
+    in_dir = st.session_state.paths['project']
+    
+    st.success(f'Project Name: {sel_project}')
+    st.success(f'Pipeline Name: {sel_method}')
     
     if st.button('Verify'):    
         flag_data = utilpipe.verify_data(sel_method)
@@ -129,27 +144,35 @@ def panel_view_status():
     """
     st.info('Coming soon!')
 
-# Page config should be called for each page
-utilpg.config_page()
-utilpg.show_menu()
-
 st.markdown(
     """
     ### Run a pipeline
     """
 )
 
-tab1, tab2, tab3 = st.tabs(
-    ["Check Data", "Run", "View Status"]
+tab = sac.tabs(
+    items=[
+        sac.TabsItem(label='Verify Input Data'),
+        sac.TabsItem(label='Run Pipeline'),
+        sac.TabsItem(label='View Status')
+    ],
+    size='lg',
+    align='left'
 )
 
-with tab1:
+if tab == 'Verify Input Data':
     panel_verify_data()
     
-with tab2:
+elif tab == 'Run Pipeline':
     panel_run_pipeline()
 
-with tab3:
+elif tab == 'View Status':
     panel_view_status()
 
+# Show selections
+utilses.disp_selections()
+
+# Show session state vars
+if st.session_state.mode == 'debug':
+    utilses.disp_session_state()
 

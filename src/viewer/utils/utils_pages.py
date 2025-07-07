@@ -17,6 +17,28 @@ dict_menu = {
 dict_workflow = {
 }
 
+def set_global_style():
+    #st.markdown("""
+        #<style>
+        #body, html, .stMarkdown, .stText, .stTextInput > label {
+            #font-size: 18px !important;
+        #}
+        #h1, h2, h3 {
+            #font-size: 28px;
+        #}
+        #</style>
+    #""", unsafe_allow_html=True)
+    st.markdown(
+        """
+        <style>
+        html, body, [class*="css"]  {
+            font-size: 20px;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
 def show_menu() -> None:
     with st.sidebar:
         list_options = list(dict_menu.keys())
