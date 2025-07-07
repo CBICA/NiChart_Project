@@ -51,9 +51,11 @@ RUN mkdir ~/dummyinput && mkdir ~/dummyoutput
 RUN git clone https://github.com/CBICA/PredCRD.git && cd PredCRD && pip install -e .
 RUN git clone https://github.com/CBICA/DLWMLS.git && cd DLWMLS && pip install -e . && DLWMLS -i ~/dummyinput -o ~/dummyoutput
 RUN pip uninstall -y torch && pip install --verbose torch==2.3.1 --index-url https://download.pytorch.org/whl/cu${CUDA_VERSION}
+RUN git clone https://github.com/CBICA/CCL_NMF_Prediction.git && cd CCL_NMF_Prediction && pip install -e .
 ## Cache DLMUSE and DLICV models with an empty job so no download is needed later
 RUN DLMUSE -i ~/dummyinput -o ~/dummyoutput && DLICV -i ~/dummyinput -o ~/dummyoutput
 USER root
+RUN apt-get install -y awscli
 COPY . /app/
 RUN useradd -s /bin/bash streamlit && \
     chmod -R a+rw /app/output_folder && chmod a-rw / && chmod a-w /app && touch /app/src/viewer/pipeline.log && \

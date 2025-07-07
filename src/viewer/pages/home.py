@@ -193,6 +193,9 @@ def user_select_var2(sel_var_groups, plot_params, var_type, add_none = False):
         
     st.write(sel)
 
+utilss.init_session_state()
+st.warning("The NiChart Cloud platform is currently undergoing maintenance while we deploy new infrastructure. Please be advised that service may be interrupted at any time.")
+st.write("# Welcome to NiChart Project!")
 
 st.markdown(
     """

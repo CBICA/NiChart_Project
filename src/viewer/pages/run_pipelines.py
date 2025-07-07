@@ -1,4 +1,5 @@
 import streamlit as st
+from stqdm import stqdm
 import os
 import yaml
 from pathlib import Path
@@ -9,6 +10,8 @@ import utils.utils_processes as utilprc
 import utils.utils_pipelines as utilpipe
 import utils.utils_session as utilses
 from utils.utils_logger import setup_logger
+import utils.utils_stlogbox as stlogbox
+import utils.utils_toolloader as tl
 
 import streamlit_antd_components as sac
 
@@ -96,7 +99,44 @@ def panel_run_pipeline():
     """
     Panel for running a pipeline
     """
-    st.info('Coming soon!')
+    # For now, just hardcode the mapping from sel_pipeline to a pipeline in resources/pipelines.
+    sel_method = st.session_state.sel_pipeline
+    st.success(f'Selected pipeline: {sel_method}')
+
+    ## TODO: Retrieve dynamically/match between front end and toolloader code
+    sel_pipeline_to_id = {
+        'dlmuse': 'run_dlmuse',
+        ## Add additional lines here ({sel_pipeline value} : {name of pipeline yaml} )
+    }
+
+    pipeline_to_run = sel_pipeline_to_id[sel_method]
+
+    if st.button("Run pipeline"):
+        with st.container():
+            st.subheader("Pipeline Logs")
+            with st.expander("View all pipeline logs"):
+                with st.container():
+                    log_committed_box = st.empty()
+            with st.expander("View current step live logs"):
+                with st.container():
+                    log_live_box = st.empty()
+        pipeline_progress_bar = stqdm(total=2, desc="Submitting pipeline...", position=0)
+        process_progress_bar = stqdm(total=2, desc="Waiting...", position=0)
+        #pipeline_progress_bar_slot = st.empty()
+        #process_progress_bar_slot = st.empty()
+
+        log = stlogbox.StreamlitJobLogger(log_committed_box, log_live_box)
+
+        result = tl.run_pipeline(
+            pipeline_id=pipeline_to_run, ##TODO EDIT THIS
+            global_vars={"STUDY": st.session_state.paths["project"]},
+            pipeline_progress_bar=pipeline_progress_bar,
+            process_progress_bar=process_progress_bar,
+            log=log
+        )
+
+        st.success(f"Pipeline {pipeline_to_run} finished successfully.")
+
 
 def panel_view_status():
     """

@@ -206,6 +206,7 @@ def init_paths():
     user_id = ''
     if st.session_state.has_cloud_session:
         user_id = st.session_state.cloud_user_id
+
     p_out = os.path.join(
         p_root, 'output_folder', user_id
     )
@@ -502,18 +503,28 @@ def process_session_token() -> Any:
     # headers = _get_websocket_headers()
     headers = st.context.headers
     if not headers or "X-Amzn-Oidc-Data" not in headers:
-        return {}
-    return jwt.decode(
-        headers["X-Amzn-Oidc-Data"],
-        algorithms=["ES256"],
-        options={"verify_signature": False},
-    )
+        return ""
+    return headers["X-Amzn-Oidc-Data"]
 
 def process_session_user_id() -> Any:
     headers = st.context.headers
     if not headers or "X-Amzn-Oidc-Identity" not in headers:
         return "NO_USER_FOUND"
     return headers["X-Amzn-Oidc-Identity"]
+
+def process_session_user_email() -> Any:
+    headers = st.context.headers
+    if not headers or "X-Amzn-Oidc-Data" not in headers:
+        return "NO_EMAIL_FOUND"
+    raw_token = headers['X-Amzn-Oidc-Data']
+    decoded_token = jwt.decode(
+        raw_token,
+        algorithms=["ES256"],
+        options={"verify_signature": False},
+    )
+    if not decoded_token or 'email' not in decoded_token:
+        return "NO_EMAIL_FOUND"
+    return decoded_token['email']
 
 def init_session_state() -> None:
     # Initiate Session State Values
@@ -525,6 +536,36 @@ def init_session_state() -> None:
         # Set output files
         init_project_folders()
 
+        ####################################
+        # Settings specific to desktop/cloud
+        
+        # App type ('desktop' or 'cloud')
+        if os.getenv("NICHART_FORCE_CLOUD", "0") == "1":
+            st.session_state.forced_cloud = True
+            st.session_state.app_type = "cloud"
+        else:
+            st.session_state.forced_cloud = False
+            st.session_state.app_type = "desktop"
+
+        st.session_state.app_config = {
+            "cloud": {"msg_infile": "Upload"},
+            "desktop": {"msg_infile": "Select"},
+        }
+
+        # Store user session info for later retrieval
+        if st.session_state.app_type == "cloud":
+            st.session_state.cloud_session_token = process_session_token()
+            if st.session_state.cloud_session_token:
+                st.session_state.has_cloud_session = True
+                st.session_state.cloud_user_id = process_session_user_id()
+                st.session_state.cloud_user_email = process_session_user_email()
+            else:
+                st.session_state.has_cloud_session = False
+        else:
+            st.session_state.has_cloud_session = False
+
+        ####################################
+
         # Initialize paths
         init_paths()
 
@@ -533,6 +574,37 @@ def init_session_state() -> None:
 
         # Initialize variable groups
         init_var_groups()
+
+
+        # Copy demo folders into user folders as needed
+        if st.session_state.has_cloud_session:
+            # Copy demo dirs to user folder (TODO: make this less hardcoded)
+            demo_dir_paths = [
+                os.path.join(
+                    st.session_state.paths["root"],
+                    "output_folder",
+                    "NiChart_sMRI_Demo1",
+                ),
+                os.path.join(
+                    st.session_state.paths["root"],
+                    "output_folder",
+                    "NiChart_sMRI_Demo2",
+                ),
+            ]
+            for demo in demo_dir_paths:
+                demo_name = os.path.basename(demo)
+                destination_path = os.path.join(
+                    st.session_state.paths["out_dir"], demo_name
+                )
+                if os.path.exists(destination_path):
+                    shutil.rmtree(destination_path)
+                shutil.copytree(demo, destination_path, dirs_exist_ok=True)
+
+        # FIXME : set init folder to test folder outside repo
+        st.session_state.paths["init"] = os.path.join(
+            st.session_state.paths["root"], "test_data"
+        )
+        st.session_state.paths["file_search_dir"] = st.session_state.paths["init"]
 
         # Update project variables
         update_project(st.session_state.project)

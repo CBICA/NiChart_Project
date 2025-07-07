@@ -5,6 +5,7 @@ import utils.utils_session as utilss
 import os
 import pandas as pd
 import streamlit_antd_components as sac
+import shutil
 
 from utils.utils_logger import setup_logger
 logger = setup_logger()
@@ -13,10 +14,11 @@ def select_project(out_dir, curr_project):
     """
     Panel for creating/selecting project (to keep all data for the current project)
     """
+    items = ['Create New', 'Select Existing']
+    if st.session_state.has_cloud_session:
+        items.append('Generate Demo Data')
     sel_mode = sac.tabs(
-        items=[
-            sac.TabsItem(label='Select Existing'),
-            sac.TabsItem(label='Create New'),
+        items=items,
         ],
         size='lg',
         align='left'
@@ -26,6 +28,40 @@ def select_project(out_dir, curr_project):
     if sel_mode is None:
         return None
 
+    if sel_mode == 'Generate Demo Data':  
+        # Copy demo dirs to user folder (TODO: make this less hardcoded)
+        demo_dir_paths = [
+            os.path.join(
+                st.session_state.paths["root"],
+                "output_folder",
+                "NiChart_sMRI_Demo1",
+            ),
+            os.path.join(
+                st.session_state.paths["root"],
+                "output_folder",
+                "NiChart_sMRI_Demo2",
+            ),
+        ]
+        demo_names = []
+        for demo in demo_dir_paths:
+            demo_name = os.path.basename(demo)
+            demo_names.append(demo_name)
+            destination_path = os.path.join(
+                st.session_state.paths["out_dir"], demo_name
+            )
+            if os.path.exists(destination_path):
+                shutil.rmtree(destination_path)
+            shutil.copytree(demo, destination_path, dirs_exist_ok=True)
+        st.success(f"NiChart demonstration projects have been added to your projects list: {', '.join(demo_names)} ")
+        return
+      
+    if sel_mode == 'Create New':
+        sel_project = st.text_input(
+            "Task name:",
+            None,
+            placeholder="My_new_study",
+            label_visibility = 'collapsed'
+        )   
     if sel_mode == 'Select Existing':
         list_projects = utilio.get_subfolders(out_dir)
         if len(list_projects) > 0:
@@ -36,17 +72,9 @@ def select_project(out_dir, curr_project):
                 index = sel_ind,
                 label_visibility = 'collapsed',
             )
-
-    if sel_mode == 'Create New':
-        sel_project = st.text_input(
-            "Task name:",
-            None,
-            placeholder="My_new_study",
-            label_visibility = 'collapsed'
-        )   
-
     if sel_project is None:
         return
+    
     
     if st.button("Select"):
         if sel_project != curr_project:
