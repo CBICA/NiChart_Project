@@ -167,13 +167,18 @@ def add_trace_lowess(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
         )
         fig.add_trace(trace)
 
-def add_trace_dot(df: pd.DataFrame, sel_mrid: str, plot_params: dict, plot_settings: dict, fig: Any) -> None:
+def add_trace_dot(
+    df: pd.DataFrame, sel_mrid: str, plot_params: dict, plot_settings: dict, fig: Any
+) -> None:
     '''
     Add trace for a single dot
     '''
     df_tmp = df[df.MRID == sel_mrid]
     if df_tmp.shape[0] == 0:
         return fig
+
+    print('aab')
+    print(plot_settings['flag_hide_legend'])
 
     trace = go.Scatter(
         x=df_tmp[plot_params['xvar']],
@@ -183,7 +188,7 @@ def add_trace_dot(df: pd.DataFrame, sel_mrid: str, plot_params: dict, plot_setti
         marker=dict(
             color="rgba(250, 50, 50, 0.5)", size=12, line=dict(color="Red", width=3)
         ),
-        showlegend=not plot_params['flag_hide_legend'],
+        showlegend=not plot_settings['flag_hide_legend']
     )
     fig.add_trace(trace)
 

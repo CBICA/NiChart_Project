@@ -207,7 +207,7 @@ tab = sac.tabs(
         sac.TabsItem(label='Quick Start'),
         sac.TabsItem(label='Links'),
         sac.TabsItem(label='Installation'),
-        sac.TabsItem(label='Test'),
+        #sac.TabsItem(label='Test'),
     ],
     size='lg',
     align='left'

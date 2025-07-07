@@ -39,7 +39,7 @@ def disp_session_state():
         st.session_state['debug']['flag_show'] = st.session_state['_debug_flag_show']
 
     with st.sidebar:
-        # sac.divider(label='Debug', icon = 'gear',  align='center', color='gray')
+        sac.divider(label='Debug', icon = 'gear',  align='center', color='gray')
         st.checkbox(
             'Show Session State',
             key = '_debug_flag_show',
