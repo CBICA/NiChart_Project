@@ -4,6 +4,7 @@ import utils.utils_io as utilio
 import utils.utils_session as utilss
 import os
 import pandas as pd
+import streamlit_antd_components as sac
 import shutil
 
 from utils.utils_logger import setup_logger
@@ -13,18 +14,20 @@ def select_project(out_dir, curr_project):
     """
     Panel for creating/selecting project (to keep all data for the current project)
     """
-    modes = ['Create New', 'Select Existing']
+    items = ['Create New', 'Select Existing']
     if st.session_state.has_cloud_session:
-        modes.append('Generate Demo Data')
-    sel_mode = st.pills(
-        'Select mode',
-        modes,
-        default = None,
-        selection_mode = 'single',
-        label_visibility = 'collapsed',
+        items.append('Generate Demo Data')
+    sel_mode = sac.tabs(
+        items=items,
+        ],
+        size='lg',
+        align='left'
     )
+    
+    
     if sel_mode is None:
         return None
+
     if sel_mode == 'Generate Demo Data':  
         # Copy demo dirs to user folder (TODO: make this less hardcoded)
         demo_dir_paths = [
@@ -51,6 +54,7 @@ def select_project(out_dir, curr_project):
             shutil.copytree(demo, destination_path, dirs_exist_ok=True)
         st.success(f"NiChart demonstration projects have been added to your projects list: {', '.join(demo_names)} ")
         return
+      
     if sel_mode == 'Create New':
         sel_project = st.text_input(
             "Task name:",
@@ -68,7 +72,6 @@ def select_project(out_dir, curr_project):
                 index = sel_ind,
                 label_visibility = 'collapsed',
             )
-    
     if sel_project is None:
         return
     
@@ -170,13 +173,21 @@ def load_dicoms():
         #utilio.remove_dir('dicoms')
 
 def load_nifti():
-    sel_mod = st.pills(
-        "Select Modality",
-        st.session_state.list_mods,
-        selection_mode="single",
-        label_visibility="collapsed",
-        default = None,
+
+    #sel_mod = st.pills(
+        #"Select Modality",
+        #st.session_state.list_mods,
+        #selection_mode="single",
+        #label_visibility="collapsed",
+        #default = None,
+    #)
+
+    sel_mod = sac.tabs(
+        items=st.session_state.list_mods,
+        size='lg',
+        align='left'
     )
+    
     if sel_mod is None:
         return
 
@@ -289,17 +300,14 @@ def panel_load_data():
     '''
     Panel for loading user data
     '''
-    list_dtype = [
-        "Nifti",
-        "Dicom",
-        "Lists",
-    ]
-    sel_dtype = st.pills(
-        "Select Data Type",
-        list_dtype,
-        default = None,        
-        selection_mode="single",
-        label_visibility="collapsed"
+    sel_dtype = sac.tabs(
+        items=[
+            sac.TabsItem(label='Nifti'),
+            sac.TabsItem(label='Dicom'),
+            sac.TabsItem(label='Lists')
+        ],
+        size='lg',
+        align='left'
     )
 
     if sel_dtype is None:
@@ -307,12 +315,12 @@ def panel_load_data():
 
     if sel_dtype == "Nifti":
         with st.container(border=True):
-            st.markdown(
-                """
-                ***NIfTI Images***
-                - Upload NIfTI images
-                """
-            )
+            #st.markdown(
+                #"""
+                #***NIfTI Images***
+                #- Upload NIfTI images
+                #"""
+            #)
             load_nifti()
 
     elif sel_dtype == "Dicom":

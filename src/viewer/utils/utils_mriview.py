@@ -9,6 +9,10 @@ import nibabel as nib
 from nibabel.orientations import axcodes2ornt, ornt_transform
 from scipy import ndimage
 import utils.utils_plots as utilpl
+import utils.utils_misc as utilmisc
+import utils.utils_user_select as utiluser
+
+import streamlit_antd_components as sac
 
 import streamlit as st
 from stqdm import stqdm
@@ -117,6 +121,10 @@ def prep_image_and_olay(f_img: np.ndarray, f_mask: Any, list_rois: list, crop_to
     Read images from files and create 3D matrices for display
     """
 
+    print(f_img)
+    print(f_mask)
+    print(list_rois)
+
     # Read nifti
     nii_img = nib.load(f_img)
     nii_mask = nib.load(f_mask)
@@ -217,42 +225,128 @@ def show_img_slices(img, scroll_axis, sel_axis_bounds, orientation, wimg = None)
         else:
             st.image(img[:, :, slice_index], width=w_img)
 
-def panel_view_seg(ulay, olay, method):
+def panel_select_var(sel_var_groups, plot_params, var_type, add_none = False):
+    '''
+    User panel to select a variable
+    Variables are grouped in categories
+    '''
+    df_groups = st.session_state.dicts['df_var_groups'].copy()
+    df_groups = df_groups[df_groups.category.isin(sel_var_groups)]
+
+    st.markdown(f'##### Variable: {var_type}')
+    cols = st.columns([1,3])
+    with cols[0]:
+
+        list_group = df_groups.group.unique().tolist()
+        try:
+            curr_value = plot_params[f'{var_type}_group']
+            curr_index = list_group.index(curr_value)
+        except ValueError:
+            curr_index = 0
+
+        st.selectbox(
+            "Variable Group",
+            list_group,
+            key = f'_{var_type}_group',
+            index = curr_index
+        )
+        plot_params[f'{var_type}_group'] = st.session_state[f'_{var_type}_group']
+
+    with cols[1]:
+
+        sel_group = plot_params[f'{var_type}_group']
+        if sel_group is None:
+            return
+
+        sel_atlas = df_groups[df_groups['group'] == sel_group]['atlas'].values[0]
+        list_vars = df_groups[df_groups['group'] == sel_group]['values'].values[0]
+
+        # Convert MUSE ROI variables from index to name
+        if sel_atlas == 'muse':
+            roi_dict = st.session_state.dicts['muse']['ind_to_name']
+            list_vars = [roi_dict[k] for k in list_vars]
+
+        if add_none:
+            list_vars = ['None'] + list_vars
+
+        try:
+            curr_value = plot_params[var_type]
+            curr_index = list_vars.index(curr_value)
+        except ValueError:
+            curr_index = 0
+
+        st.selectbox(
+            "Variable Name",
+            list_vars,
+            key = f'_{var_type}',
+            index = curr_index
+        )
+
+        plot_params[var_type] = st.session_state[f'_{var_type}']
+
+def panel_set_params(plot_params, var_groups_data, atlas, flag_hide_settings = False):
+    """
+    Panel to set mriview parameters
+    """
+    if st.session_state.plot_settings['flag_hide_settings']:
+        return
+
+    else:
+        print(st.session_state.plot_settings['flag_hide_settings'])
+
+    # Add tabs for parameter settings
+    with st.container(border=True):
+        tab = sac.tabs(
+            items=[
+                sac.TabsItem(label='Data'),
+                sac.TabsItem(label='Plot Settings')
+            ],
+            size='sm',
+            align='left'
+        )
+        ## FIXME
+        df_vars = st.session_state.dicts['df_var_groups']
+        if tab == 'Data':
+            # Select roi
+            sel_var = utiluser.select_var_from_group(
+                'Select ROI variable:',
+                df_vars[df_vars.category.isin(['roi'])],
+                plot_params['yvargroup'],
+                plot_params['yvar'],
+                flag_add_none = False,
+                dicts_rename = {
+                    'muse': st.session_state.dicts['muse']['ind_to_name']
+                }
+            )
+            plot_params['yvargroup'] = sel_var[0]
+            plot_params['yvar'] = sel_var[1]
+            plot_params['roi_indices'] = utilmisc.get_roi_indices(
+                sel_var[1], 'muse'
+            )
+
+        elif tab == 'Plot Settings':
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                # Create a list of checkbox options
+                plot_params['list_orient'] = st.multiselect(
+                    "Select viewing planes:",
+                    img_views,
+                    img_views,
+                    label_visibility = 'collapsed'
+                )
+            with col2:
+                # View hide overlay
+                plot_params['is_show_overlay'] = st.checkbox("Show overlay", True, disabled=False)
+
+            with col3:
+                # Crop to mask area
+                plot_params['crop_to_mask'] = st.checkbox("Crop to mask", True, disabled=False)
+
+def panel_view_seg(ulay, olay, plot_params):
     '''
     Panel to display segmented image overlaid on underlay image
     '''
-    flag_settings = st.sidebar.checkbox('Hide settings')
-    ss_sel = st.session_state.selections
-    
-    # Add tabs for parameter settings
-    with st.container(border=True):
-        if not flag_settings:
-            ptab1, ptab2, = st.tabs(
-                ['Data', 'Plot Settings']
-            )        
-            with ptab1:
-                ss_sel['sel_roi'] = utilpl.panel_select_roi(method)
-                ss_sel['list_roi_indices'] = utilpl.get_roi_indices(ss_sel['sel_roi'], method)
-
-            with ptab2:
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    # Create a list of checkbox options
-                    ss_sel['list_orient'] = st.multiselect(
-                        "Select viewing planes:",
-                        img_views, 
-                        img_views,
-                        label_visibility = 'collapsed'
-                    )
-                with col2:
-                    # View hide overlay
-                    ss_sel['is_show_overlay'] = st.checkbox("Show overlay", True, disabled=False)
-
-                with col3:
-                    # Crop to mask area
-                    ss_sel['crop_to_mask'] = st.checkbox("Crop to mask", True, disabled=False)
-
-    if ss_sel['list_roi_indices'] is None:
+    if plot_params['roi_indices'] is None:
         return
 
     # Show images
@@ -260,20 +354,20 @@ def panel_view_seg(ulay, olay, method):
         with st.spinner("Wait for it..."):
             # Process image (and mask) to prepare final 3d matrix to display
             img, mask, img_masked = prep_image_and_olay(
-                ulay, olay, ss_sel['list_roi_indices'], ss_sel['crop_to_mask']
+                ulay, olay, plot_params['roi_indices'], plot_params['crop_to_mask']
             )
             img_bounds = detect_mask_bounds(mask)
 
-            cols = st.columns(len(ss_sel['list_orient']))
+            cols = st.columns(len(plot_params['list_orient']))
             for i, tmp_orient in stqdm(
-                enumerate(ss_sel['list_orient']),
+                enumerate(plot_params['list_orient']),
                 desc="Showing images ...",
-                total=len(ss_sel['list_orient'])
+                total=len(plot_params['list_orient'])
             ):
                 with cols[i]:
                     ind_view = img_views.index(tmp_orient)
                     size_auto = True
-                    if olay is None or ss_sel['is_show_overlay'] is False:
+                    if olay is None or plot_params['is_show_overlay'] is False:
                         show_img_slices(
                             img, ind_view, img_bounds[ind_view, :], tmp_orient
                         )
