@@ -21,6 +21,28 @@ pd.set_option('display.expand_frame_repr', False)
 pd.set_option('display.max_colwidth', None)  # or use a large number like 500
 
 
+def sidebar_flags(list_flags):
+    for ftmp in list_flags:
+        if ftmp == 'flag_show_img':
+            with st.sidebar:
+                sel_flag = sac.segmented(
+                    items=['Hide', 'Show'],
+                    label='MRI Viewer',
+                    align='left',
+                    size = 'sm'
+                )
+                st.session_state.plot_settings["flag_hide_img"] = sel_flag == 'Hide'
+
+        if ftmp == 'flag_settings':
+            with st.sidebar:
+                sel_flag = sac.segmented(
+                    items=['Hide', 'Show'],
+                    label='Plot Settings',
+                    align='left',
+                    size = 'sm'
+                )
+                st.session_state.plot_settings["flag_hide_settings"] = sel_flag == 'Hide'
+
 def read_data(fdata):
     '''
     Read data file and add column for hue
@@ -227,9 +249,10 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
         utiltr.add_trace_centile(df_cent, plot_params, plot_settings, fig)
 
     # Add selected dot
-    sel_mrid = st.session_state.sel_mrid
-    if sel_mrid is not None:
-        utiltr.add_trace_dot(df, sel_mrid, plot_params, plot_settings, fig)
+    if df is not None:
+        sel_mrid = st.session_state.sel_mrid
+        if sel_mrid is not None:
+            utiltr.add_trace_dot(df, sel_mrid, plot_params, plot_settings, fig)
 
     st.plotly_chart(fig, key=f"bubble_chart_{plot_ind}", on_select=callback_plot_clicked)
     # st.plotly_chart(fig, key=f"bubble_chart_{plot_ind}")
@@ -277,15 +300,6 @@ def show_mri():
     mrid = st.session_state.sel_mrid
     if mrid is None:
         return
-
-    with st.sidebar:
-        sel_flag = sac.segmented(
-            items=['Hide', 'Show'],
-            label='MRI Viewer',
-            align='left',
-            size = 'sm'
-        )
-        st.session_state.plot_settings["flag_show_img"] = sel_flag == 'Show'
 
     if st.session_state.plot_settings["flag_show_img"] == False:
         return

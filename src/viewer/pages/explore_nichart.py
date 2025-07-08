@@ -45,6 +45,8 @@ def view_dlmuse() -> None:
         # Set centile selections
         st.session_state.plot_params['centile_values'] = st.session_state.plot_settings['centile_trace_types']
 
+        utilpl.sidebar_flags(['flag_settings'])
+
         utilpl.panel_set_params_centile_plot(
             st.session_state.plot_params,
             var_groups_data,
