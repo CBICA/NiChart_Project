@@ -110,6 +110,11 @@ def panel_run_pipeline():
         'spare-ad': 'run_spare_ad',
         'spare-ba': 'run_spare_ba',
         'bascores': 'run_bascores',
+        'dlwmls': None,
+        'spare-cvm': None,
+        'surrealgan': None,
+        'synthseg': None,
+        'ccl-nmf': None,
         ## Add additional lines here ({sel_pipeline value} : {name of pipeline yaml} )
     }
     if harmonize:
@@ -118,11 +123,19 @@ def panel_run_pipeline():
             'spare-ad': 'run_spare_ad_harmonized',
             'spare-ba': 'run_spare_ba_harmonized',
             'bascores': 'run_bascores',
+            'dlwmls': None,
+            'spare-cvm': None,
+            'surrealgan': None,
+            'synthseg': None,
+            'ccl-nmf': None,
             ## Add additional lines here ({sel_pipeline value} : {name of pipeline yaml} )
         }
 
-    pipeline_to_run = sel_pipeline_to_id[sel_method]
-
+    pipeline_to_run = sel_pipeline_to_id.get(sel_method, None)
+    if pipeline_to_run is None:
+        st.error("The currently selected pipeline doesn't have an associated tool configuration. Please submit a bug report!")
+        return
+    
     if st.button("Run pipeline"):
         with st.container():
             st.subheader("Pipeline Logs")
