@@ -89,7 +89,7 @@ def init_session_vars():
     #st.session_state.project = 'nichart_project'
     st.session_state.project = 'IXI'
     
-    st.session_state.sel_pipeline = 'DLMUSE'
+    st.session_state.sel_pipeline = 'dlmuse'
 
     st.session_state.sel_mrid = None
 
@@ -206,10 +206,13 @@ def init_paths():
     user_id = ''
     if st.session_state.has_cloud_session:
         user_id = st.session_state.cloud_user_id
-
-    p_out = os.path.join(
-        p_root, 'output_folder', user_id
-    )
+        p_out = os.path.join(
+            "/fsx/fsx/", user_id
+        )
+    else:
+        p_out = os.path.join(
+            p_root, 'output_folder', user_id
+        )
     if not os.path.exists(p_out):
         os.makedirs(p_out)
     
@@ -574,31 +577,6 @@ def init_session_state() -> None:
 
         # Initialize variable groups
         init_var_groups()
-
-
-        # Copy demo folders into user folders as needed
-        if st.session_state.has_cloud_session:
-            # Copy demo dirs to user folder (TODO: make this less hardcoded)
-            demo_dir_paths = [
-                os.path.join(
-                    st.session_state.paths["root"],
-                    "output_folder",
-                    "NiChart_sMRI_Demo1",
-                ),
-                os.path.join(
-                    st.session_state.paths["root"],
-                    "output_folder",
-                    "NiChart_sMRI_Demo2",
-                ),
-            ]
-            for demo in demo_dir_paths:
-                demo_name = os.path.basename(demo)
-                destination_path = os.path.join(
-                    st.session_state.paths["out_dir"], demo_name
-                )
-                if os.path.exists(destination_path):
-                    shutil.rmtree(destination_path)
-                shutil.copytree(demo, destination_path, dirs_exist_ok=True)
 
         # FIXME : set init folder to test folder outside repo
         st.session_state.paths["init"] = os.path.join(
