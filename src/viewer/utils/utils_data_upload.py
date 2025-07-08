@@ -19,7 +19,6 @@ def select_project(out_dir, curr_project):
         items.append('Generate Demo Data')
     sel_mode = sac.tabs(
         items=items,
-        ],
         size='lg',
         align='left'
     )
