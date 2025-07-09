@@ -102,32 +102,36 @@ def panel_run_pipeline():
     # For now, just hardcode the mapping from sel_pipeline to a pipeline in resources/pipelines.
     sel_method = st.session_state.sel_pipeline
     st.success(f'Selected pipeline: {sel_method}')
-    harmonize = st.checkbox("Harmonize to reference data? (Requires >= 3 scans)")
+    harmonize = False
+    not_harmonizable = ['cclnmf', 'dlwmls', 'bascores', 'surrealgan']
+    if sel_method not in not_harmonizable:
+        harmonize = st.checkbox("Harmonize to reference data? (Requires >= 3 scans)")
     ## TODO: Retrieve dynamically/match between front end and toolloader code
     ## This a nice and simple placeholder for now
+    
     sel_pipeline_to_id = {
         'dlmuse': 'run_dlmuse',
         'spare-ad': 'run_spare_ad',
         'spare-ba': 'run_spare_ba',
         'bascores': 'run_bascores',
-        'dlwmls': None,
+        'dlwmls': 'run_dlwmls',
         'spare-cvm': None,
-        'surrealgan': None,
+        'surrealgan': 'run_predcrd_surrealgan',
         'synthseg': None,
-        'ccl-nmf': None,
+        'cclnmf': 'run_cclnmf',
         ## Add additional lines here ({sel_pipeline value} : {name of pipeline yaml} )
     }
     if harmonize:
         sel_pipeline_to_id = {
             'dlmuse': 'run_dlmuse_harmonized',
+            'dlwmls': 'run_dlwmls',
             'spare-ad': 'run_spare_ad_harmonized',
             'spare-ba': 'run_spare_ba_harmonized',
             'bascores': 'run_bascores',
-            'dlwmls': None,
             'spare-cvm': None,
-            'surrealgan': None,
+            'surrealgan': 'run_predcrd_surrealgan',
             'synthseg': None,
-            'ccl-nmf': None,
+            'cclnmf': 'run_cclnmf',
             ## Add additional lines here ({sel_pipeline value} : {name of pipeline yaml} )
         }
 
