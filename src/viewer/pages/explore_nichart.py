@@ -45,7 +45,11 @@ def view_dlmuse() -> None:
         # Set centile selections
         st.session_state.plot_params['centile_values'] = st.session_state.plot_settings['centile_trace_types']
 
-        utilpl.sidebar_flags(['flag_settings'])
+        with st.sidebar:
+            sac.divider(label='Viewing Options', align='center', color='gray')
+
+        utilpl.sidebar_flag_hide_setting()
+        utilpl.sidebar_flag_hide_legend()
 
         utilpl.panel_set_params_centile_plot(
             st.session_state.plot_params,
@@ -183,20 +187,20 @@ def results_overview():
     '''
     Select a pipeline and show overview
     '''
-    # Set flag for hiding the settings
-    if '_flag_hide_settings' not in st.session_state:
-        st.session_state['_flag_hide_settings'] = st.session_state.plot_settings['flag_hide_settings']
+    ## Set flag for hiding the settings
+    #if '_flag_hide_settings' not in st.session_state:
+        #st.session_state['_flag_hide_settings'] = st.session_state.plot_settings['flag_hide_settings']
 
-    def update_val():
-        st.session_state.plot_settings['flag_hide_settings'] = st.session_state['_flag_hide_settings']
+    #def update_val():
+        #st.session_state.plot_settings['flag_hide_settings'] = st.session_state['_flag_hide_settings']
 
-    with st.sidebar:
-        sac.divider(label='Plot Settings', align='center', color='gray')
-        st.checkbox(
-            'Hide Plot Settings',
-            key = '_flag_hide_settings',
-            on_change = update_val
-        )
+    #with st.sidebar:
+        #sac.divider(label='Plot Settings', align='center', color='gray')
+        #st.checkbox(
+            #'Hide Plot Settings',
+            #key = '_flag_hide_settings',
+            #on_change = update_val
+        #)
     
     # Show results
     with st.container(border=True):

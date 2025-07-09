@@ -20,28 +20,44 @@ import streamlit_antd_components as sac
 pd.set_option('display.expand_frame_repr', False)
 pd.set_option('display.max_colwidth', None)  # or use a large number like 500
 
+def sidebar_flag_hide_setting():
+    '''
+    Set flag for hiding the settings
+    '''
+    if '_flag_hide_settings' not in st.session_state:
+        st.session_state['_flag_hide_settings'] = st.session_state.plot_settings['flag_hide_settings']
 
-def sidebar_flags(list_flags):
-    for ftmp in list_flags:
-        if ftmp == 'flag_show_img':
-            with st.sidebar:
-                sel_flag = sac.segmented(
-                    items=['Hide', 'Show'],
-                    label='MRI Viewer',
-                    align='left',
-                    size = 'sm'
-                )
-                st.session_state.plot_settings["flag_hide_img"] = sel_flag == 'Hide'
+    def update_val():
+        st.session_state.plot_settings['flag_hide_settings'] = st.session_state['_flag_hide_settings']
 
-        if ftmp == 'flag_settings':
-            with st.sidebar:
-                sel_flag = sac.segmented(
-                    items=['Hide', 'Show'],
-                    label='Plot Settings',
-                    align='left',
-                    size = 'sm'
-                )
-                st.session_state.plot_settings["flag_hide_settings"] = sel_flag == 'Hide'
+    with st.sidebar:
+        st.radio(
+            'Plot Settings',
+            ['Hide', 'Show'],
+            key = '_flag_hide_settings',
+            horizontal = True,
+            on_change = update_val
+        )
+
+def sidebar_flag_hide_legend():
+    '''
+    Set flag for hiding the settings
+    '''
+    if '_flag_hide_legend' not in st.session_state:
+        st.session_state['_flag_hide_legend'] = st.session_state.plot_settings['flag_hide_legend']
+
+    def update_val():
+        st.session_state.plot_settings['flag_hide_legend'] = st.session_state['_flag_hide_legend']
+
+    with st.sidebar:
+        st.radio(
+            'Legend',
+            ['Hide', 'Show'],
+            key = '_flag_hide_legend',
+            horizontal = True,
+            on_change = update_val
+        )
+
 
 def read_data(fdata):
     '''
@@ -551,6 +567,9 @@ def panel_set_params_plot(plot_params, var_groups_data, var_groups_hue, pipeline
     if st.session_state.plot_settings['flag_hide_settings']:
         return
 
+    plot_params['method'] = pipeline
+    plot_params['flag_norm_centiles'] = False    
+
     # Add tabs for parameter settings
     with st.container(border=True):
         tab = sac.tabs(
@@ -647,16 +666,18 @@ def panel_set_params_plot(plot_params, var_groups_data, var_groups_hue, pipeline
     if plot_params['trend'] == 'Smooth LOWESS Curve':
         plot_params['traces'] = plot_params['traces'] + ['lowess']
         
-    plot_params['method'] = pipeline
-    plot_params['flag_norm_centiles'] = False
-
 def panel_set_params_centile_plot(
     plot_params, var_groups_data, pipeline, flag_hide_settings = False
 ):
     """
     Panel to select centile plot args from the user
     """    
-    if st.session_state.plot_settings['flag_hide_settings']:
+    plot_params['method'] = pipeline
+    plot_params['flag_norm_centiles'] = False    
+
+    print(st.session_state.plot_settings['flag_hide_settings'])
+    
+    if st.session_state.plot_settings['flag_hide_settings'] == 'Hide':
         return
 
     # Add tabs for parameter settings
@@ -722,8 +743,6 @@ def panel_set_params_centile_plot(
     if plot_params['centile_values'] is not None:
         plot_params['traces'] = plot_params['traces'] + plot_params['centile_values']
         
-    plot_params['method'] = pipeline
-    plot_params['flag_norm_centiles'] = False
 
 def panel_show_plots():
     '''

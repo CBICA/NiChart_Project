@@ -286,9 +286,9 @@ def init_plot_vars() -> None:
 
     # Plot settings
     st.session_state.plot_settings = {
-        "flag_hide_settings": False,
-        "flag_hide_mri": False,
-        "flag_hide_legend": False,
+        "flag_hide_settings": 'Show',
+        "flag_hide_legend": 'Show',
+        "flag_hide_mri": 'Show',
         "trend_types": ["None", "Linear", "Smooth LOWESS Curve"],
         "centile_types": ["", "CN", "CN_Males", "CN_Females", "CN_ICV_Corrected"],
         "linfit_trace_types": [

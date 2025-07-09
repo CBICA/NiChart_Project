@@ -52,20 +52,20 @@ def plot_vars():
     var_groups_hue = ['cat_vars']
     pipeline = 'dlmuse'
 
-    # Set flag for hiding the settings
-    if '_flag_hide_settings' not in st.session_state:
-        st.session_state['_flag_hide_settings'] = st.session_state.plot_settings['flag_hide_settings']
+    ## Set flag for hiding the settings
+    #if '_flag_hide_settings' not in st.session_state:
+        #st.session_state['_flag_hide_settings'] = st.session_state.plot_settings['flag_hide_settings']
 
-    def update_val():
-        st.session_state.plot_settings['flag_hide_settings'] = st.session_state['_flag_hide_settings']
+    #def update_val():
+        #st.session_state.plot_settings['flag_hide_settings'] = st.session_state['_flag_hide_settings']
 
-    with st.sidebar:
-        sac.divider(label='Plot Settings', align='center', color='gray')
-        st.checkbox(
-            'Hide Plot Settings',
-            key = '_flag_hide_settings',
-            on_change = update_val
-        )
+    #with st.sidebar:
+        #sac.divider(label='Plot Settings', align='center', color='gray')
+        #st.checkbox(
+            #'Hide Plot Settings',
+            #key = '_flag_hide_settings',
+            #on_change = update_val
+        #)
 
     utilpl.panel_set_params_plot(
         st.session_state.plot_params,
