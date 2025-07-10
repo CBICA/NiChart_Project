@@ -5,7 +5,6 @@ from typing import Any, Optional
 import pandas as pd
 import numpy as np
 import streamlit as st
-import utils.utils_io as utilio
 import utils.utils_stats as utilstat
 
 import plotly.graph_objs as go
@@ -48,7 +47,7 @@ def add_trace_scatter(df: pd.DataFrame, plot_params: dict, plot_settings: dict, 
                 marker={"color": c_txt},
                 name=hname,
                 legendgroup=hname,
-                showlegend=not plot_settings['flag_hide_legend'],
+                showlegend = plot_settings['flag_hide_legend'] == 'Show',
             )
             fig.add_trace(trace)
 
@@ -92,7 +91,7 @@ def add_trace_linreg(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
                 line=line,
                 name=f"lin_{hname}",
                 legendgroup=hname,
-                showlegend=not plot_settings['flag_hide_legend'],
+                showlegend = plot_settings['flag_hide_legend'] == 'Show',
             )
             fig.add_trace(trace)
 
@@ -114,7 +113,7 @@ def add_trace_linreg(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
                 hoverinfo="skip",
                 name=f"lin_conf95_{hname}",
                 legendgroup=hname,
-                showlegend=not plot_settings['flag_hide_legend'],
+                showlegend = plot_settings['flag_hide_legend'] == 'Show',
             )
             fig.add_trace(trace)
 
@@ -158,12 +157,11 @@ def add_trace_lowess(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
         trace = go.Scatter(
             x=x_hat,
             y=y_hat,
-            # showlegend=False,
             mode="lines",
             line = line,
             name=f"lowess_{hname}",
             legendgroup=hname,
-            showlegend=not plot_params['flag_hide_legend'],
+            showlegend = plot_settings['flag_hide_legend'] == 'Show'
         )
         fig.add_trace(trace)
 
@@ -188,7 +186,7 @@ def add_trace_dot(
         marker=dict(
             color="rgba(250, 50, 50, 0.5)", size=12, line=dict(color="Red", width=3)
         ),
-        showlegend=not plot_settings['flag_hide_legend']
+        showlegend = plot_settings['flag_hide_legend'] == 'Show'
     )
     fig.add_trace(trace)
 
@@ -244,7 +242,7 @@ def add_trace_centile(df: pd.DataFrame, plot_params: dict, plot_settings: dict, 
                     name=cvar,
                     legendgroup="centiles",
                     line=dict(color=c_txt),
-                    showlegend=not plot_settings['flag_hide_legend'],
+                    showlegend = plot_settings['flag_hide_legend']=='Show',
                 )
                 fig.add_trace(ctrace)  # plot in first row
 

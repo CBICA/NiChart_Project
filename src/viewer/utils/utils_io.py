@@ -1,24 +1,22 @@
-import os
-import shutil
-import tkinter as tk
-import zipfile
-from tkinter import filedialog
-from typing import Any, BinaryIO, List, Optional
 import streamlit as st
-import time
-
+import utils.utils_dicoms as utildcm
+import utils.utils_session as utilss
+import os
 import pandas as pd
+import streamlit_antd_components as sac
+import shutil
+from typing import Any, BinaryIO, List, Optional
 
-# https://stackoverflow.com/questions/64719918/how-to-write-streamlit-uploadedfile-to-temporary-in_dir-with-original-filenam
-# https://gist.github.com/benlansdell/44000c264d1b373c77497c0ea73f0ef2
-# https://stackoverflow.com/questions/65612750/how-can-i-specify-the-exact-folder-in-streamlit-for-the-uploaded-file-to-be-save
+from utils.utils_logger import setup_logger
+logger = setup_logger()
 
-
+##############################################################
+## Generic IO functions
 def browse_file(path_init: str) -> Any:
-    """
+    '''
     File selector
     Returns the file name selected by the user and the parent folder
-    """
+    '''
     root = tk.Tk()
     root.withdraw()  # Hide the main window
     out_file = filedialog.askopenfilename(initialdir=path_init)
@@ -28,10 +26,10 @@ def browse_file(path_init: str) -> Any:
     return out_file
 
 def browse_folder(path_init: str) -> Any:
-    """
+    '''
     Folder selector
     Returns the folder name selected by the user
-    """
+    '''
     root = tk.Tk()
     root.withdraw()  # Hide the main window
     out_path = filedialog.askdirectory(initialdir=path_init)
@@ -41,9 +39,9 @@ def browse_folder(path_init: str) -> Any:
     return out_path
 
 def zip_folder(in_dir: str, f_out: str) -> Optional[bytes]:
-    """
+    '''
     Zips a folder and its contents.
-    """
+    '''
     if not os.path.exists(in_dir):
         return None
     else:
@@ -57,9 +55,9 @@ def zip_folder(in_dir: str, f_out: str) -> Optional[bytes]:
         return download_dir
 
 def unzip_zip_files(in_dir: str) -> None:
-    """
+    '''
     Unzips all ZIP files in the input dir and removes the original ZIP files.
-    """
+    '''
     if os.path.exists(in_dir):
         for filename in os.listdir(in_dir):
             if filename.endswith(".zip"):
@@ -68,100 +66,10 @@ def unzip_zip_files(in_dir: str) -> None:
                     zip_ref.extractall(in_dir)
                     os.remove(zip_path)
 
-def copy_uploaded_file(in_file: BinaryIO, out_file: str) -> None:
-    """
-    Save uploaded file to the output path
-    """
-    if in_file is not None:
-        with open(out_file, "wb") as f:
-            shutil.copyfileobj(in_file, f)
-
-def get_file_count(folder_path: str, file_suff: List[str] = []) -> int:
-    """
-    Returns the count of files matching any of the suffixes in `file_suff`
-    within the output folder. If `file_suff` is empty, all files are counted.
-    """
-    count = 0
-    if not os.path.exists(folder_path):
-        return 0
-
-    for root, dirs, files in os.walk(folder_path):
-        if file_suff:
-            count += sum(any(file.endswith(suffix) for suffix in file_suff) for file in files)
-        else:
-            count += len(files)
-
-    return count
-
-def remove_dir(dtype):
-    folder_path = os.path.join(st.session_state.paths['project'], dtype)
-    try:
-        if os.path.islink(folder_path):
-            os.unlink(folder_path)
-        else:
-            shutil.rmtree(folder_path)
-        st.success(f"Removed dir: {folder_path}")
-        time.sleep(2)
-        return True
-    except:
-        st.error(f"Could not delete folder: {folder_path}")
-        return False
-
-def remove_file(fname):
-    try:
-        if os.path.islink(fname):
-            os.unlink(fname)
-        else:
-            os.remove(fname)
-        st.success(f"Removed file: {fname}")
-        time.sleep(2)
-        return True
-    except:
-        st.error(f"Could not delete file: {fname}")
-        return False
-    
-def select_dir(out_dir: str, key_txt: str) -> Any:
-    """
-    Panel to select a folder from the file system
-    """
-    sel_dir = None
-    sel_opt = st.radio(
-        "Options:",
-        ["Browse Path", "Enter Path"],
-        horizontal=True,
-        label_visibility="collapsed",
-    )
-    if sel_opt == "Browse Path":
-        if st.button(
-            "Browse",
-            key=f"_key_btn_{key_txt}",
-        ):
-            sel_dir = browse_folder(out_dir)
-
-    elif sel_opt == "Enter Path":
-        sel_dir = st.text_input(
-            "",
-            key=f"_key_sel_{key_txt}",
-            value=out_dir,
-            label_visibility="collapsed",
-        )
-        if sel_dir is not None:
-            sel_dir = os.path.abspath(sel_dir)
-
-    if sel_dir is not None:
-        sel_dir = os.path.abspath(sel_dir)
-        if not os.path.exists(sel_dir):
-            try:
-                os.makedirs(sel_dir)
-                st.info(f"Created directory: {sel_dir}")
-            except:
-                st.error(f"Could not create directory: {sel_dir}")
-    return sel_dir
-
 def copy_and_unzip_uploaded_files(in_files: list, d_out: str) -> None:
-    """
+    '''
     Copy uploaded files to the output dir and unzip zip files
-    """
+    '''
     # Save uploaded files
     print("Saving uploaded files")
     if in_files is not None:
@@ -174,133 +82,173 @@ def copy_and_unzip_uploaded_files(in_files: list, d_out: str) -> None:
     print("Extracting zip files")
     if os.path.exists(d_out):
         unzip_zip_files(d_out)
+
+def disp_folder_tree(root_path):
+    '''
+    View contents of folder
+    '''
+    if not os.path.isdir(root_path):
+        st.error("Invalid root path.")
+        return
+
+    st.markdown(f"##### 📂 `{root_path}`")
+
+    folders = sorted([f for f in os.listdir(root_path) if os.path.isdir(os.path.join(root_path, f))])
+    if not folders:
+        st.info("Project folder is empty")
+        return
+
+    sel_folder = st.pills(
+        'Select folder',
+        folders,
+        default = None,
+        selection_mode = 'single',
+        label_visibility = 'collapsed',
+    )
+    
+    if sel_folder is None:
+        return
+
+    selected_path = os.path.join(root_path, sel_folder)
+    st.markdown(f"---\n##### 📄 Files in `{sel_folder}`")
+
+    try:
+        files = sorted([
+            f for f in os.listdir(selected_path)
+            if os.path.isfile(os.path.join(selected_path, f))
+        ])
+        if not files:
+            st.info("No files in this folder.")
+        else:
+            # Scrollable container
+            data = [{
+                "Filename": f,
+            } for f in files]
+
+            df = pd.DataFrame(data)
+            st.dataframe(df, use_container_width=True)
+
+        csv_files = [f for f in files if f.lower().endswith(".csv")]
         
-def copy_uploaded_to_dir() -> None:
+        if len(csv_files) > 0:
+            st.markdown("##### 📊 Preview data files")
+            sel_file = st.pills(
+                'Select csv file',
+                csv_files,
+                default = None,
+                selection_mode = 'single',
+                label_visibility = 'collapsed',
+            )        
+            if sel_file is None:
+                return
+
+            csv_path = os.path.join(root_path, sel_folder, sel_file)
+            try:
+                df_csv = pd.read_csv(csv_path)
+                st.success(f"Showing preview of `{sel_file}`")
+                st.dataframe(df_csv, use_container_width=True)
+            except Exception as e:
+                st.error(f"Failed to read `{sel_file}`: {e}")            
+            
+    except Exception as e:
+        st.error(f"Error reading files: {e}")
+
+def get_subfolders(path: str) -> list:
+    '''
+    Returns a list of subfolders in input folder
+    '''
+    subdirs = []
+    for item in os.listdir(path):
+        item_path = os.path.join(path, item)
+        if os.path.isdir(item_path):
+            subdirs.append(item)
+    return sorted(subdirs)
+
+def copy_uploaded_to_dir():
     '''
     Copies files to local storage
     '''
-    if len(st.session_state["uploaded_input"]) > 0:
+    if len(st.session_state['_uploaded_input']) > 0:
         copy_and_unzip_uploaded_files(
-            st.session_state["uploaded_input"], st.session_state.paths["target_path"]
+            st.session_state['_uploaded_input'], st.session_state.paths["target"]
         )
 
-def upload_file(
-    out_file: str, title_txt: str, key_uploader: str
-) -> bool:
-    """
-    Upload user data to target folder
-    Input data is a single file
-    """
-    # Upload input
-    in_file = st.file_uploader(
-        title_txt,
-        key=key_uploader,
-        accept_multiple_files=False,
-    )
-    if in_file is None:
-        return False
-
-    # Create parent dir of out file
-    if not os.path.exists(os.path.dirname(out_file)):
-        os.makedirs(os.path.dirname(out_file))
-    # Remove existing output file
-    if os.path.exists(out_file):
-        os.remove(out_file)
-    # Copy selected input file to destination
-    copy_uploaded_file(in_file, out_file)
-    return True
-
-def select_file(out_dir: str, key_txt: str) -> Any:
-    """
-    Select a file
-    """
-    sel_file = None
-    sel_opt = st.radio(
-        "Options:",
-        ["Browse File", "Enter File Path"],
-        horizontal=True,
-        label_visibility="collapsed",
-    )
-    if sel_opt == "Browse File":
-        if st.button("Browse", key=f"_key_btn_{key_txt}"):
-            sel_file = browse_file(out_dir)  # FIXME
-
-    elif sel_opt == "Enter Path":
-        sel_file = st.text_input(
-            "",
-            key=f"_key_sel_{key_txt}",
-            value=out_dir,
-            label_visibility="collapsed",
-        )
-    if sel_file is None:
-        return
-
-    sel_file = os.path.abspath(sel_file)
-    if not os.path.exists(sel_file):
-        return
-
-    return sel_file
-
-
-def upload_single_file(dtype: str, out_name: str, in_suff: str) -> None:
-    """
-    Upload user file to target folder
-    """
-    out_dir = os.path.join(
-        st.session_state.paths['project'], dtype
-    )
-    if not os.path.exists(out_dir):
-        os.makedirs(out_dir)
-
-    out_file = os.path.join(out_dir, out_name)
-
-    # Set target path
-    st.session_state.paths["target_path"] = out_dir
-
-    # Upload data
-    with st.container(border=True):
-        sel_file = st.file_uploader(
-            "Input demographics file",
-            key="uploaded_input_csv",
-            accept_multiple_files=False
-        )        
-        if sel_file is not None:
-            try:
-                with open(out_file, "wb") as f:
-                    f.write(sel_file.getbuffer())
-                st.success(f"File '{sel_file.name}' saved to {out_file}")
-            except:
-                st.warning(f'Could not upload file: {sel_file}')
-
-
-def upload_multiple_files(dtype: str) -> None:
-    """
+def upload_multiple_files(out_dir):
+    '''
     Upload user data to target folder
     Input data may be a folder, multiple files, or a zip file (unzip the zip file if so)
-    """
-    out_dir = os.path.join(
-        st.session_state.paths['project'], dtype
-    )
+    '''
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
 
     # Set target path
-    st.session_state.paths["target_path"] = out_dir
+    st.session_state.paths["target"] = out_dir
 
     # Upload data
     with st.container(border=True):
         st.file_uploader(
             "Input files or folders",
-            key="uploaded_input",
+            key="_uploaded_input",
             accept_multiple_files=True,
             on_change=copy_uploaded_to_dir,
             help="Input files can be uploaded as a folder, multiple files, or a single zip file",
         )
 
+#def delete_folder():
+    ## Delete folder if user wants to reload
+    #if st.button("Reset", f"key_btn_reset_{dtype}"):
+        #try:
+            #if os.path.islink(out_dir):
+                #os.unlink(out_dir)
+            #else:
+                #shutil.rmtree(out_dir)
+            #st.session_state.flags[dtype] = False
+            #st.success(f"Removed dir: {out_dir}")
+            #time.sleep(4)
+        #except:
+            #st.error(f"Could not delete folder: {out_dir}")
+        #st.rerun()
+
+def upload_multi(out_dir):
+    """
+    Panel for uploading multiple input files or folder(s)
+    """
+    # Check if data exists
+    if st.session_state.app_type == "cloud":
+        # Upload data
+        upload_folder(
+            st.session_state.paths["dicoms"],
+            "Input files or folders",
+            False,
+            "Input files can be uploaded as a folder, multiple files, or a single zip file",
+        )
+
+    else:  # st.session_state.app_type == 'desktop'
+        if not os.path.exists(out_dir):
+            try:
+                os.symlink(sel_dir, out_dir)
+            except:
+                st.error(
+                    f"Could not link user input to destination folder: {out_dir}"
+                )
+
+    # Check out files
+    fcount = get_file_count(st.session_state.paths[dtype])
+    if fcount > 0:
+        st.session_state.flags[dtype] = True
+        p_dicom = st.session_state.paths[dtype]
+        st.success(
+            f" Uploaded data: ({p_dicom}, {fcount} files)",
+            icon=":material/thumb_up:",
+        )
+        time.sleep(4)
+
+        st.rerun()
+
 def create_img_list(dtype: str) -> None:
-    """
+    '''
     Create a list of input images
-    """
+    '''
     out_dir = os.path.join(
         st.session_state.paths['project'], dtype
     )
@@ -329,102 +277,284 @@ def create_img_list(dtype: str) -> None:
             'FileName': nifti_files
         })
         return df
-    
 
-def panel_input_multi(dtype: str) -> None:
-    """
-    Panel for selecting multiple input files or folder(s)
-    """
-    out_dir = os.path.join(
-        st.session_state.paths['project'], dtype
+def load_dicoms():
+    tab = sac.tabs(
+        items=[
+            sac.TabsItem(label='Load Data'),
+            sac.TabsItem(label='Detect Series'),
+            sac.TabsItem(label='Extract Scans'),
+            sac.TabsItem(label='View Scans'),
+        ],
+        size='lg',
+        align='left'
     )
-    with st.container(border=True):
-        if st.session_state.app_type == "cloud":
-            # Upload data
-            upload_folder(
-                out_dir,
-                "Input files or folders",
-                "Input files can be uploaded as a folder, multiple files, or a single zip file",
-            )
-
-        else:  # st.session_state.app_type == 'desktop'
-            # Get user input
-            sel_dir = select_dir(
-                st.session_state.paths['init'], "sel_folder"
-            )
-            
-            print(sel_dir)
-            print(out_dir)
-
-            if sel_dir is None:
-                return False
-
-            # Link it to out folder
-            if not os.path.exists(out_dir):
-                
-                try:
-                    os.symlink(sel_dir, out_dir)
-                except:
-                    st.error(
-                        f"Could not link user input to destination folder: {out_dir}"
-                    )
-                    return False
-
-        if get_file_count(out_dir, ['.nii', '.nii.gz']) > 0:
-            return True
-        
-        return False
     
-def get_subfolders(path: str) -> list:
-    '''
-    Returns a list of subfolders in input folder
-    '''
-    subdirs = []
-    for item in os.listdir(path):
-        item_path = os.path.join(path, item)
-        if os.path.isdir(item_path):
-            subdirs.append(item)
-    return sorted(subdirs)
+    if tab == "Load Data":
+        out_dir = os.path.join(
+            st.session_state.paths['project'], 'dicoms'
+        )
+        upload_multi(out_dir)
+        
+    elif tab == "Detect Series":
+        panel_detect()
+        
+    elif tab == "Extract Scans":
+        panel_extract()
+        
+    elif tab == "View Scans":
+        panel_view('T1')
 
-def get_file_names(folder_path: str, file_suff: str = "") -> pd.DataFrame:
+def load_nifti():
+    sel_mod = sac.tabs(
+        items=st.session_state.list_mods,
+        size='lg',
+        align='left'
+    )
+    
+    if sel_mod is None:
+        return
+
+    out_dir = os.path.join(
+        st.session_state.paths['project'], sel_mod.lower()
+    )
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
+
+    lists_path = os.path.join(
+        st.session_state.paths['project'], 'lists'
+    )
+    if not os.path.exists(lists_path):
+        os.makedirs(lists_path)
+    
+    if st.button("Upload"):
+        # Upload data
+        upload_multiple_files(sel_mod.lower())
+        
+        # Create list of scans
+        df = create_img_list(sel_mod.lower())
+        if df is not None:
+            out_file = os.path.join(
+                lists_path, 'list_nifti.csv'
+            )
+            df.to_csv(out_file, index=False)
+            
+    if st.button("Reset"):
+        remove_dir(sel_mod.lower())
+    
+    fcount = get_file_count(out_dir, ['.nii', '.nii.gz'])
+    if fcount > 0:
+        st.success(
+            f" Input data available: ({fcount} nifti image files)",
+            icon=":material/thumb_up:",
+        )
+
+def load_csv():
+    """
+    Panel for uploading covariates
+    """    
+    #Check out files
+    file_path = os.path.join(
+        st.session_state.paths['project'], 'lists', 'covars.csv'
+    )
+    
+    list_options = ['Upload', 'Enter Manually', 'Reset']
+    sel_step = st.pills(
+        "Select Step",
+        list_options,
+        selection_mode="single",
+        label_visibility="collapsed",
+        default = None,
+        key = '_key_sel_input_covar'
+    )       
+    if sel_step == "Upload":
+        upload_single_file('lists', 'demog.csv', '.csv')
+
+    elif sel_step == 'Enter Manually':
+        id_list = os.path.join(
+            st.session_state.paths['project'], 'lists', 'list_nifti.csv'
+        )
+        try:
+            df = pd.read_csv(id_list)
+            df = df[['MRID']]
+            
+        except:
+            st.warning('Could not read id list')
+            return
+
+        df['Age'] = pd.Series([np.nan] * len(df), dtype='float')
+        df['Sex'] = pd.Series([''] * len(df), dtype='string')
+            
+        st.info("Please enter values for your sample")
+        
+        # Define column options
+        column_config = {
+            "Sex": st.column_config.SelectboxColumn(
+                "Sex",
+                help="Select sex",
+                options=["M", "F", "Other"],
+                required=True
+            )
+        }
+        df_user = st.data_editor(
+            df,
+            column_config=column_config,
+            num_rows="dynamic",  # allows adding rows if you want
+            use_container_width=True
+        )
+        if st.button('Save'):
+            df_user.to_csv(file_path, index=False)
+            st.success(f'Created demographic file: {file_path}')
+        
+
+    elif sel_step == "View":
+        if not os.path.exists(file_path):
+            st.warning('Covariate file not found!')
+            return
+        try:
+            df_cov = pd.read_csv(file_path)
+            st.dataframe(df_cov)
+        except:
+            st.warning(f'Could not load covariate file: {file_path}')
+        
+    elif sel_step == "Reset":
+        remove_dir('lists')
+
+def get_file_count(folder_path: str, file_suff: List[str] = []) -> int:
     '''
-    Returns a dataframe with image names with given suffix and input path
+    Returns the count of files matching any of the suffixes in `file_suff`
+    within the output folder. If `file_suff` is empty, all files are counted.
     '''
-    f_names = []
-    if os.path.exists(folder_path):
-        if file_suff == "":
-            for root, dirs, files in os.walk(folder_path):
-                f_names.append(files)
+    count = 0
+    if not os.path.exists(folder_path):
+        return 0
+
+    for root, dirs, files in os.walk(folder_path):
+        if file_suff:
+            count += sum(any(file.endswith(suffix) for suffix in file_suff) for file in files)
         else:
-            for root, dirs, files in os.walk(folder_path):
-                for file in files:
-                    if file.endswith(file_suff):
-                        f_names.append([file])
-    df_out = pd.DataFrame(columns=["FileName"], data=f_names)
-    return df_out
+            count += len(files)
 
-def get_file_list(folder_path: str, file_suff: str = "") -> List:
-    '''
-    Returns list of image names with given suffix and input path
-    '''
-    list_files: List[str] = []
-    if not os.path.exists(folder_path):
-        return list_files
-    for f in os.listdir(folder_path):
-        if f.endswith(file_suff):
-            list_files.append(f)
-    return list_files
+    return count
 
-def get_image_path(
-    folder_path: str, file_pref: str, file_suff_list: list
-) -> str:
+
+##############################################################
+## Streamlit panels for IO
+
+def panel_select_project(out_dir, curr_project):
     '''
-    Returns full image name with given suffix, prefix and input path
+    Panel for creating/selecting a project name/folder (to keep all data for the current project)
     '''
-    if not os.path.exists(folder_path):
-        return ""
-    for tmp_suff in file_suff_list:
-        for f in os.listdir(folder_path):
-            if f.startswith(file_pref) and f.endswith(tmp_suff):
-                return os.path.join(folder_path, f)
-    return ""
+    items = ['Create New', 'Select Existing']
+    if st.session_state.has_cloud_session:
+        items.append('Generate Demo Data')
+    sel_mode = sac.tabs(
+        items=items,
+        size='lg',
+        align='left'
+    )
+    
+    if sel_mode is None:
+        return None
+
+    if sel_mode == 'Generate Demo Data':  
+        # Copy demo dirs to user folder (TODO: make this less hardcoded)
+        demo_dir_paths = [
+            os.path.join(
+                st.session_state.paths["root"],
+                "output_folder",
+                "NiChart_sMRI_Demo1",
+            ),
+            os.path.join(
+                st.session_state.paths["root"],
+                "output_folder",
+                "NiChart_sMRI_Demo2",
+            ),
+        ]
+        demo_names = []
+        for demo in demo_dir_paths:
+            demo_name = os.path.basename(demo)
+            demo_names.append(demo_name)
+            destination_path = os.path.join(
+                st.session_state.paths["out_dir"], demo_name
+            )
+            if os.path.exists(destination_path):
+                shutil.rmtree(destination_path)
+            shutil.copytree(demo, destination_path, dirs_exist_ok=True)
+        st.success(f"NiChart demonstration projects have been added to your projects list: {', '.join(demo_names)} ")
+        return
+      
+    if sel_mode == 'Create New':
+        sel_project = st.text_input(
+            "Task name:",
+            None,
+            placeholder="My_new_study",
+            label_visibility = 'collapsed'
+        )   
+    if sel_mode == 'Select Existing':
+        list_projects = get_subfolders(out_dir)
+        if len(list_projects) > 0:
+            sel_ind = list_projects.index(curr_project)
+            sel_project = st.selectbox(
+                "Select Existing Project",
+                options = list_projects,
+                index = sel_ind,
+                label_visibility = 'collapsed',
+            )
+    if sel_project is None:
+        return
+    
+    
+    if st.button("Select"):
+        if sel_project != curr_project:
+            utilss.update_project(sel_project)
+        return sel_project
+
+def panel_load_data():
+    '''
+    Panel for loading user data
+    '''
+    sel_dtype = sac.tabs(
+        items=[
+            sac.TabsItem(label='Nifti'),
+            sac.TabsItem(label='Dicom'),
+            sac.TabsItem(label='Lists')
+        ],
+        size='lg',
+        align='left'
+    )
+
+    if sel_dtype is None:
+        return
+
+    if sel_dtype == "Nifti":
+        with st.container(border=True):
+            #st.markdown(
+                #"""
+                #***NIfTI Images***
+                #- Upload NIfTI images
+                #"""
+            #)
+            load_nifti()
+
+    elif sel_dtype == "Dicom":
+        with st.container(border=True):
+            st.markdown(
+                """
+                ***DICOM Files***
+                
+                - Upload a folder containing raw DICOM files
+                - DICOM files will be converted to NIfTI scans
+                """
+            )
+            load_dicoms()
+            
+    elif sel_dtype == "Lists":
+        with st.container(border=True):
+            st.markdown(
+                """
+                ***Covariate File***
+                - Upload a ***:red[csv file with covariate info]*** (Age, Sex, DX, etc.)
+                """
+            )
+            load_csv()

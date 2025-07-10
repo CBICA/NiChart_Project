@@ -1,6 +1,5 @@
 import streamlit as st
 import utils.utils_pages as utilpg
-import utils.utils_io as utilio
 import utils.utils_plots as utilpl
 import utils.utils_mriview as utilmri
 import utils.utils_data_view as utildv

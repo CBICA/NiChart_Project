@@ -47,7 +47,6 @@ def view_dlmuse() -> None:
 
         with st.sidebar:
             sac.divider(label='Viewing Options', align='center', color='gray')
-
         utilpl.sidebar_flag_hide_setting()
         utilpl.sidebar_flag_hide_legend()
 
@@ -61,6 +60,11 @@ def view_dlmuse() -> None:
     elif sel_res_type == 'Segmentation':
         ulay = st.session_state.ref_data["t1"]
         olay = st.session_state.ref_data["dlmuse"]        
+
+        with st.sidebar:
+            sac.divider(label='Viewing Options', align='center', color='gray')
+        utilpl.sidebar_flag_hide_setting()
+
         utilmri.panel_set_params(
             st.session_state.plot_params,
             ['roi'],

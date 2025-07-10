@@ -148,38 +148,115 @@ def disp_folder_tree(root_path):
             
     except Exception as e:
         st.error(f"Error reading files: {e}")
+
+
+def copy_uploaded_to_dir():
+    '''
+    Copies files to local storage
+    '''
+    if len(st.session_state['_uploaded_input']) > 0:
+        utilio.copy_and_unzip_uploaded_files(
+            st.session_state['_uploaded_input'], st.session_state.paths["target"]
+        )
+
+#def delete_folder():
+    ## Delete folder if user wants to reload
+    #if st.button("Reset", f"key_btn_reset_{dtype}"):
+        #try:
+            #if os.path.islink(out_dir):
+                #os.unlink(out_dir)
+            #else:
+                #shutil.rmtree(out_dir)
+            #st.session_state.flags[dtype] = False
+            #st.success(f"Removed dir: {out_dir}")
+            #time.sleep(4)
+        #except:
+            #st.error(f"Could not delete folder: {out_dir}")
+        #st.rerun()
+
+def upload_folder(out_dir, title_txt):
+    '''
+    Upload user data to target folder
+    Input data may be a folder, multiple files, or a zip file (unzip the zip file if so)
+    '''
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
+    
+    st.session_state.paths['target'] = out_dir
+
+    # Upload data
+    st.file_uploader(
+        title_txt,
+        key='_uploaded_input',
+        accept_multiple_files=True,
+        on_change = copy_uploaded_to_dir,
+    )
+
+def upload_multi(out_dir):
+    """
+    Panel for uploading multiple input files or folder(s)
+    """
+    # Check if data exists
+    if st.session_state.app_type == "cloud":
+        # Upload data
+        upload_folder(
+            st.session_state.paths["dicoms"],
+            "Input files or folders",
+            False,
+            "Input files can be uploaded as a folder, multiple files, or a single zip file",
+        )
+
+    else:  # st.session_state.app_type == 'desktop'
+        if not os.path.exists(out_dir):
+            try:
+                os.symlink(sel_dir, out_dir)
+            except:
+                st.error(
+                    f"Could not link user input to destination folder: {out_dir}"
+                )
+
+    # Check out files
+    fcount = utilio.get_file_count(st.session_state.paths[dtype])
+    if fcount > 0:
+        st.session_state.flags[dtype] = True
+        p_dicom = st.session_state.paths[dtype]
+        st.success(
+            f" Uploaded data: ({p_dicom}, {fcount} files)",
+            icon=":material/thumb_up:",
+        )
+        time.sleep(4)
+
+        st.rerun()
+
         
 def load_dicoms():
-    st.info('Coming soon!')
-    #list_opt = ["Upload", "Detect Series", "Extract Scans", "View", "Reset"]
-    #sel_step = st.pills(
-        #"Select Step", list_opt, selection_mode="single", label_visibility="collapsed"
-    #)
-    #if sel_step == "Upload":
-        #utilio.upload_multiple_files('dicoms')
-
-    #elif sel_step == "Detect Series":
-        #panel_detect()
+    tab = sac.tabs(
+        items=[
+            sac.TabsItem(label='Load Data'),
+            sac.TabsItem(label='Detect Series'),
+            sac.TabsItem(label='Extract Scans'),
+            sac.TabsItem(label='View Scans'),
+        ],
+        size='lg',
+        align='left'
+    )
+    
+    if tab == "Load Data":
+        out_dir = os.path.join(
+            st.session_state.paths['project'], 'dicoms'
+        )
+        upload_multi(out_dir)
         
-    #elif sel_step == "Extract Scans":
-        #panel_extract()
+    elif tab == "Detect Series":
+        panel_detect()
         
-    #elif sel_step == "View":
-        #panel_view('T1')
+    elif tab == "Extract Scans":
+        panel_extract()
         
-    #elif sel_step == "Reset":
-        #utilio.remove_dir('dicoms')
+    elif tab == "View Scans":
+        panel_view('T1')
 
 def load_nifti():
-
-    #sel_mod = st.pills(
-        #"Select Modality",
-        #st.session_state.list_mods,
-        #selection_mode="single",
-        #label_visibility="collapsed",
-        #default = None,
-    #)
-
     sel_mod = sac.tabs(
         items=st.session_state.list_mods,
         size='lg',

@@ -5,7 +5,7 @@ from typing import Any
 
 import streamlit as st
 import utils.utils_pages as utilpg
-import utils.utils_data_upload as utildata
+import utils.utils_io as utilio
 import utils.utils_session as utilses
 import utils.utils_data_view as utildv
 from stqdm import stqdm
@@ -25,7 +25,7 @@ def select_project():
     """
     with st.container(border=True):
         out_dir = st.session_state.paths["out_dir"]
-        sel_project = utildata.select_project(out_dir, st.session_state.project)
+        sel_project = utilio.panel_select_project(out_dir, st.session_state.project)
         st.success(f'Project Name: {st.session_state.project}')
     
 def view_project_folder():
@@ -41,7 +41,7 @@ def upload_data():
     Panel for viewing files in a project folder
     """
     with st.container(border=True):    
-        utildata.panel_load_data()
+        utilio.panel_load_data()
     
 st.markdown(
     """

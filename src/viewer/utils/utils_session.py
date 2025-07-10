@@ -7,7 +7,6 @@ import time
 import yaml
 import pandas as pd
 import streamlit as st
-import utils.utils_io as utilio
 import utils.utils_rois as utilroi
 import utils.utils_processes as utilproc
 import utils.utils_cmaps as utilcmap
@@ -248,7 +247,8 @@ def init_paths():
         "out_dir": p_out,
         "project": p_prj,
         "plot_dir": p_plot,
-        "plot_data": d_plot
+        "plot_data": d_plot,
+        'target': None
     }
     
     # List of output folders

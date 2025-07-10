@@ -288,11 +288,8 @@ def panel_set_params(plot_params, var_groups_data, atlas, flag_hide_settings = F
     """
     Panel to set mriview parameters
     """
-    if st.session_state.plot_settings['flag_hide_settings']:
+    if st.session_state.plot_settings['flag_hide_settings'] == 'Hide':
         return
-
-    else:
-        print(st.session_state.plot_settings['flag_hide_settings'])
 
     # Add tabs for parameter settings
     with st.container(border=True):

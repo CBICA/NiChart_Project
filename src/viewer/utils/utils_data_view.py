@@ -1,6 +1,5 @@
 import streamlit as st
 import utils.utils_dicoms as utildcm
-import utils.utils_io as utilio
 import utils.utils_session as utilss
 import os
 import pandas as pd
