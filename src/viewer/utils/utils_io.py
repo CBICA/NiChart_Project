@@ -38,6 +38,17 @@ def browse_folder(path_init: str) -> Any:
         return None
     return out_path
 
+def get_subfolders(path: str) -> list:
+    '''
+    Returns a list of subfolders in input folder
+    '''
+    subdirs = []
+    for item in os.listdir(path):
+        item_path = os.path.join(path, item)
+        if os.path.isdir(item_path):
+            subdirs.append(item)
+    return sorted(subdirs)
+
 def zip_folder(in_dir: str, f_out: str) -> Optional[bytes]:
     '''
     Zips a folder and its contents.
@@ -83,88 +94,7 @@ def copy_and_unzip_uploaded_files(in_files: list, d_out: str) -> None:
     if os.path.exists(d_out):
         unzip_zip_files(d_out)
 
-def disp_folder_tree(root_path):
-    '''
-    View contents of folder
-    '''
-    if not os.path.isdir(root_path):
-        st.error("Invalid root path.")
-        return
-
-    st.markdown(f"##### 📂 `{root_path}`")
-
-    folders = sorted([f for f in os.listdir(root_path) if os.path.isdir(os.path.join(root_path, f))])
-    if not folders:
-        st.info("Project folder is empty")
-        return
-
-    sel_folder = st.pills(
-        'Select folder',
-        folders,
-        default = None,
-        selection_mode = 'single',
-        label_visibility = 'collapsed',
-    )
-    
-    if sel_folder is None:
-        return
-
-    selected_path = os.path.join(root_path, sel_folder)
-    st.markdown(f"---\n##### 📄 Files in `{sel_folder}`")
-
-    try:
-        files = sorted([
-            f for f in os.listdir(selected_path)
-            if os.path.isfile(os.path.join(selected_path, f))
-        ])
-        if not files:
-            st.info("No files in this folder.")
-        else:
-            # Scrollable container
-            data = [{
-                "Filename": f,
-            } for f in files]
-
-            df = pd.DataFrame(data)
-            st.dataframe(df, use_container_width=True)
-
-        csv_files = [f for f in files if f.lower().endswith(".csv")]
-        
-        if len(csv_files) > 0:
-            st.markdown("##### 📊 Preview data files")
-            sel_file = st.pills(
-                'Select csv file',
-                csv_files,
-                default = None,
-                selection_mode = 'single',
-                label_visibility = 'collapsed',
-            )        
-            if sel_file is None:
-                return
-
-            csv_path = os.path.join(root_path, sel_folder, sel_file)
-            try:
-                df_csv = pd.read_csv(csv_path)
-                st.success(f"Showing preview of `{sel_file}`")
-                st.dataframe(df_csv, use_container_width=True)
-            except Exception as e:
-                st.error(f"Failed to read `{sel_file}`: {e}")            
-            
-    except Exception as e:
-        st.error(f"Error reading files: {e}")
-
-def get_subfolders(path: str) -> list:
-    '''
-    Returns a list of subfolders in input folder
-    '''
-    subdirs = []
-    for item in os.listdir(path):
-        item_path = os.path.join(path, item)
-        if os.path.isdir(item_path):
-            subdirs.append(item)
-    return sorted(subdirs)
-
-def copy_uploaded_to_dir():
+def callback_copy_uploaded():
     '''
     Copies files to local storage
     '''
@@ -190,24 +120,9 @@ def upload_multiple_files(out_dir):
             "Input files or folders",
             key="_uploaded_input",
             accept_multiple_files=True,
-            on_change=copy_uploaded_to_dir,
+            on_change = callback_copy_uploaded,
             help="Input files can be uploaded as a folder, multiple files, or a single zip file",
         )
-
-#def delete_folder():
-    ## Delete folder if user wants to reload
-    #if st.button("Reset", f"key_btn_reset_{dtype}"):
-        #try:
-            #if os.path.islink(out_dir):
-                #os.unlink(out_dir)
-            #else:
-                #shutil.rmtree(out_dir)
-            #st.session_state.flags[dtype] = False
-            #st.success(f"Removed dir: {out_dir}")
-            #time.sleep(4)
-        #except:
-            #st.error(f"Could not delete folder: {out_dir}")
-        #st.rerun()
 
 def upload_multi(out_dir):
     """
@@ -217,7 +132,7 @@ def upload_multi(out_dir):
     if st.session_state.app_type == "cloud":
         # Upload data
         upload_folder(
-            st.session_state.paths["dicoms"],
+            out_dir,
             "Input files or folders",
             False,
             "Input files can be uploaded as a folder, multiple files, or a single zip file",
@@ -289,21 +204,29 @@ def load_dicoms():
         size='lg',
         align='left'
     )
+
+    dicom_dir = os.path.join(
+        st.session_state.paths['project'], 'dicoms'
+    )
     
     if tab == "Load Data":
-        out_dir = os.path.join(
-            st.session_state.paths['project'], 'dicoms'
-        )
-        upload_multi(out_dir)
+        upload_multiple_files(dicom_dir)
+
+        fcount = get_file_count(dicom_dir)
+        if fcount > 0:
+            st.success(
+                f"Data is ready ({dicom_dir}, {fcount} files)",
+                icon=":material/thumb_up:",
+            )
         
     elif tab == "Detect Series":
-        panel_detect()
+        utildcm.panel_detect_dicom_series(dicom_dir)
         
-    elif tab == "Extract Scans":
-        panel_extract()
+    #elif tab == "Extract Scans":
+        #panel_extract()
         
-    elif tab == "View Scans":
-        panel_view('T1')
+    #elif tab == "View Scans":
+        #panel_view('T1')
 
 def load_nifti():
     sel_mod = sac.tabs(
@@ -320,27 +243,21 @@ def load_nifti():
     )
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
-
-    lists_path = os.path.join(
-        st.session_state.paths['project'], 'lists'
-    )
-    if not os.path.exists(lists_path):
-        os.makedirs(lists_path)
     
     if st.button("Upload"):
         # Upload data
-        upload_multiple_files(sel_mod.lower())
+        upload_multiple_files(out_dir)
         
-        # Create list of scans
-        df = create_img_list(sel_mod.lower())
-        if df is not None:
-            out_file = os.path.join(
-                lists_path, 'list_nifti.csv'
-            )
-            df.to_csv(out_file, index=False)
+        ## Create list of scans
+        #df = create_img_list(sel_mod.lower())
+        #if df is not None:
+            #out_file = os.path.join(
+                #lists_path, 'list_nifti.csv'
+            #)
+            #df.to_csv(out_file, index=False)
             
     if st.button("Reset"):
-        remove_dir(sel_mod.lower())
+        remove_dir(out_dir)
     
     fcount = get_file_count(out_dir, ['.nii', '.nii.gz'])
     if fcount > 0:
@@ -437,6 +354,21 @@ def get_file_count(folder_path: str, file_suff: List[str] = []) -> int:
 
     return count
 
+def remove_dir(out_dir):
+    '''
+    Delete a folder
+    '''
+    try:
+        if os.path.islink(out_dir):
+            os.unlink(out_dir)
+        else:
+            shutil.rmtree(out_dir)
+        st.success(f"Removed dir: {out_dir}")
+        time.sleep(2)
+        return True
+    except:
+        st.error(f"Could not delete folder: {out_dir}")
+        return False
 
 ##############################################################
 ## Streamlit panels for IO
