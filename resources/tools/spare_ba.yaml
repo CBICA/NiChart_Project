@@ -11,6 +11,18 @@ outputs:
   spare_ba_csv:
     type: file
 
+
+mounts:
+  demog_csv:
+    path_in_container: /demographics.csv
+    mode: ro
+  dlmuse_vol:
+    path_in_container: /dlmuse_vol
+    mode: ro
+  spare_ba_csv:
+    path_in_container: /SPARE_BA.csv
+    mode: rw
+  
 parameters:
   {} # Empty dictionary to signify no parameters
 
