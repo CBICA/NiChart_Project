@@ -3,11 +3,8 @@ DLMUSE,dlmuse
 DLWMLS,dlwmls
 SPARE-AD,spare-ad
 SPARE-BA,spare-ba
-SPARE-CVM,spare-cvm
 SurrealGAN,surrealgan
-BAScores,bascores
-SynthSeg,synthseg
-DL-SPARE-BA,dl-spare-ba
+SPARE-BA-Image,spare-ba-image
 CCL-NMF,cclnmf
 
 

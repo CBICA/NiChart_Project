@@ -1,4 +1,4 @@
-pipeline_name: SPARE Scores: Alzheimer's Disease
+pipeline_name: SPARE Scores - Alzheimer's Disease
 description: |
   Pipeline which uses harmonized DLMUSE to produce Alzheimer's Disease SPARE scores.
 
@@ -6,7 +6,7 @@ steps:
   - id: run_spare_ad
     tool: spare_ad_harmonized # MUST CORRESPOND EXACTLY to a tool in resources/tools dir
     inputs:
-      harmonized_dlmuse_csv: ${STUDY}/DLMUSE_csv_harmonized/Harmonized_DLMUSE_Volumes.csv
+      harmonized_dlmuse_vol: ${STUDY}/DLMUSE_vol_harmonized/Harmonized_DLMUSE_Volumes.csv
     outputs:
       spare_ad_csv: ${STUDY}/spare_ad_csv_harmonized/SPARE_AD.csv
     

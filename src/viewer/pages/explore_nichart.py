@@ -171,7 +171,7 @@ def pipeline_overview():
             key = '_sel_pipeline'
         )        
         pname = pipelines.loc[pipelines.Name == sel_pipeline, 'Label'].values[0]
-        st.session_state.sel_pipeline = sel_pipeline
+        st.session_state.sel_pipeline = pname
         
         #sac.divider(label='Description', align='center', color='gray')
         
@@ -198,10 +198,10 @@ def results_overview():
     
     # Show results
     with st.container(border=True):
-        if st.session_state.sel_pipeline == 'DLMUSE':
+        if st.session_state.sel_pipeline == 'dlmuse':
             view_dlmuse()
 
-        elif st.session_state.sel_pipeline == 'DLWMLS':
+        elif st.session_state.sel_pipeline == 'dlwmls':
             view_dlwmls()
 
 #st.info(

@@ -2,7 +2,7 @@ name: spare_ba_harmonized
 description: This tool takes a harmonized DLMUSE CSV and uses SPARE to produce brain age estimate.
 
 inputs:
-  harmonized_dlmuse_csv:
+  harmonized_dlmuse_vol:
     type: file
 
 outputs:
@@ -21,5 +21,5 @@ resources: # Used to allocate jobs on the cloud. Please be diligent.
 
 container:
   image: cbica/nichart_spare_score:0.0.1
-  command: "-i {harmonized_dlmuse_csv} -m /spare_score/spare_scores/mdl/SPARE_BA_harmonized.pkl.gz -o {spare_ba_csv}"
+  command: "-i {harmonized_dlmuse_vol} -m /spare_score/spare_scores/mdl/SPARE_BA_harmonized.pkl.gz -o {spare_ba_csv}"
 

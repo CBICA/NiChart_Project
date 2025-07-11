@@ -11,7 +11,7 @@ inputs:
 outputs:
   dlwmls_seg:
     type: directory
-  dlwmls_csv:
+  dlwmls_vol:
     type: file
 
 mounts:
@@ -19,7 +19,10 @@ mounts:
     path_in_container: /input
     mode: ro
   dlwmls_seg:
-    path_in_container: /output
+    path_in_container: /output_seg
+    mode: rw
+  dlwmls_vol:
+    path_in_container: /output_vol/DLWMLS_Volumes.csv
     mode: rw
 
 parameters:
@@ -32,5 +35,5 @@ resources: # Used to allocate jobs on the cloud. Please be diligent.
 
 container:
   image: cbica/dlwmls_wrapped:0.0.1
-  command: --in_dir {fl_img} --out_seg {dlwmls_seg} --out_csv {dlwmls_csv} -device cuda
+  command: --in_dir {fl_img} --out_seg {dlwmls_seg} --out_csv {dlwmls_vol} -device cuda
 

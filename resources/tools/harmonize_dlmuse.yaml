@@ -5,23 +5,23 @@ dependencies: # Names of dependencies. To make another tool's output a dependenc
   - t1_img
 
 inputs:
-  dlmuse_csv_unharmonized:
+  dlmuse_vol_unharmonized:
     type: file
   covariate_csv:
     type: file
   
 outputs: # "Harmonized_DLMUSE_Volumes.csv"
-  dlmuse_csv_harmonized: # Application expects output location to be a dir, places file inside
+  dlmuse_vol_harmonized: # Application expects output location to be a dir, places file inside
     type: directory # Just so that we can recreate the individual subject-level CSVs if we want
 
 mounts:
-  dlmuse_csv_unharmonized:
+  dlmuse_vol_unharmonized:
     path_in_container: /input/unharmonized_DLMUSE_Volumes.csv
     mode: ro
   covariate_csv:
     path_in_container: /input/covariates.csv
     mode: ro
-  dlmuse_csv_harmonized:
+  dlmuse_vol_harmonized:
     path_in_container: /output
     mode: rw
 
@@ -36,4 +36,4 @@ resources: # Used to allocate jobs on the cloud. Please be diligent.
 
 container:
   image: cbica/combatfam_harmonize_dlmuse:0.0.1
-  command: -i {dlmuse_csv_unharmonized} -c {covariate_csv} -o {dlmuse_csv_harmonized} 
+  command: -i {dlmuse_vol_unharmonized} -c {covariate_csv} -o {dlmuse_vol_harmonized} 

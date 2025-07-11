@@ -9,4 +9,4 @@ steps:
       fl_img: ${STUDY}/fl
     outputs:
       dlwmls_seg: ${STUDY}/DLWMLS_seg
-      dlwmls_csv: ${STUDY}/DLWMLS_csv/WMLS_Volumes.csv
+      dlwmls_vol: ${STUDY}/DLWMLS_vol/DLWMLS_Volumes.csv

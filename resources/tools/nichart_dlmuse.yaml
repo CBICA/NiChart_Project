@@ -9,7 +9,7 @@ inputs:
     type: directory
 
 outputs:
-  dlmuse_csv:
+  dlmuse_vol:
     type: directory
   dlmuse_seg:
     type: directory
@@ -18,8 +18,8 @@ mounts:
   t1_img:
     path_in_container: /input
     mode: ro
-  dlmuse_csv:
-    path_in_container: /output_csv
+  dlmuse_vol:
+    path_in_container: /output_vol
     mode: rw
   dlmuse_seg:
     path_in_container: /output_seg
@@ -35,5 +35,5 @@ resources: # Used to allocate jobs on the cloud. Please be diligent.
 
 container:
   image: cbica/nichart_dlmuse:1.0.9-wrapped
-  command: -d cuda --in_dir {t1_img} --out_csvs {dlmuse_csv} --out_segs {dlmuse_seg} --cores 1
+  command: -d cuda --in_dir {t1_img} --out_csvs {dlmuse_vol} --out_segs {dlmuse_seg} --cores 1
 

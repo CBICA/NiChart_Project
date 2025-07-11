@@ -2,7 +2,7 @@ name: predcrd_surrealgan
 description: This tool uses PredCRD to predict SurrealGAN dimensions for subjects based on DLMUSE ROIs.
 
 inputs:
-  dlmuse_csv:
+  dlmuse_vol:
     type: file
   demog_csv:
     type: file
@@ -12,7 +12,7 @@ outputs:
     type: file
 
 mounts:
-  dlmuse_csv:
+  dlmuse_vol:
     path_in_container: /input/dlmuse.csv
     mode: ro
   demog_csv:
@@ -32,4 +32,4 @@ resources: # Used to allocate jobs on the cloud. Please be diligent.
 
 container:
   image: cbica/ccl_nmf_prediction_wrapped:0.0.1
-  command: --roi_csv {dlmuse_csv} --demog_csv {demog_csv} --out_csv {surrealgan_csv}
+  command: --roi_csv {dlmuse_vol} --demog_csv {demog_csv} --out_csv {surrealgan_csv}

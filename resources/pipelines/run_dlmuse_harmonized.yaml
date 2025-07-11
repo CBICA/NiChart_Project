@@ -9,11 +9,11 @@ steps:
       t1_img: ${STUDY}/t1
     outputs:
       dlmuse_seg: ${STUDY}/DLMUSE_seg
-      dlmuse_csv: ${STUDY}/DLMUSE_csv
+      dlmuse_vol: ${STUDY}/DLMUSE_vol
   - id: harmonize_dlmuse
     tool: harmonize_dlmuse
     inputs:
-      dlmuse_csv_unharmonized: ${STUDY}/DLMUSE_csv_unharmonized/DLMUSE_Volumes.csv
+      dlmuse_csv_unharmonized: ${STUDY}/DLMUSE_vol_unharmonized/DLMUSE_Volumes.csv
       covariate_csv: ${STUDY}/lists/demog.csv
     outputs: # Harmonization wrapper expects output location as dir
-      dlmuse_csv_harmonized: ${STUDY}/DLMUSE_csv_harmonized
+      dlmuse_csv_harmonized: ${STUDY}/DLMUSE_vol_harmonized
