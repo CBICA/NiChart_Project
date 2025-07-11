@@ -13,6 +13,53 @@ logger = setup_logger()
 
 ##############################################################
 ## Generic IO functions
+def get_file_count(folder_path: str, file_suff: List[str] = []) -> int:
+    '''
+    Returns the count of files matching any of the suffixes in `file_suff`
+    within the output folder. If `file_suff` is empty, all files are counted.
+    '''
+    count = 0
+    if not os.path.exists(folder_path):
+        return 0
+
+    for root, dirs, files in os.walk(folder_path):
+        if file_suff:
+            count += sum(any(file.endswith(suffix) for suffix in file_suff) for file in files)
+        else:
+            count += len(files)
+
+    return count
+
+def get_file_names(folder_path: str, file_suff: str = "") -> pd.DataFrame:
+    f_names = []
+    if os.path.exists(folder_path):
+        if file_suff == "":
+            for root, dirs, files in os.walk(folder_path):
+                f_names.append(files)
+        else:
+            for root, dirs, files in os.walk(folder_path):
+                for file in files:
+                    if file.endswith(file_suff):
+                        f_names.append([file])
+    df_out = pd.DataFrame(columns=["FileName"], data=f_names)
+    return df_out
+
+def remove_dir(out_dir):
+    '''
+    Delete a folder
+    '''
+    try:
+        if os.path.islink(out_dir):
+            os.unlink(out_dir)
+        else:
+            shutil.rmtree(out_dir)
+        st.success(f"Removed dir: {out_dir}")
+        time.sleep(2)
+        return True
+    except:
+        st.error(f"Could not delete folder: {out_dir}")
+        return False
+
 def browse_file(path_init: str) -> Any:
     '''
     File selector
@@ -161,6 +208,37 @@ def upload_multi(out_dir):
 
         st.rerun()
 
+def upload_single_file(dtype: str, out_name: str, in_suff: str) -> None:
+    '''
+    Upload user file to target folder
+    '''
+    out_dir = os.path.join(
+        st.session_state.paths['project'], dtype
+    )
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
+
+    out_file = os.path.join(out_dir, out_name)
+
+    # Set target path
+    st.session_state.paths["target_path"] = out_dir
+
+    # Upload data
+    with st.container(border=True):
+        sel_file = st.file_uploader(
+            "Input demographics file",
+            key="uploaded_input_csv",
+            accept_multiple_files=False
+        )        
+        if sel_file is not None:
+            try:
+                with open(out_file, "wb") as f:
+                    f.write(sel_file.getbuffer())
+                st.success(f"File '{sel_file.name}' saved to {out_file}")
+            except:
+                st.warning(f'Could not upload file: {sel_file}')
+
+
 def create_img_list(dtype: str) -> None:
     '''
     Create a list of input images
@@ -200,7 +278,7 @@ def load_dicoms():
             sac.TabsItem(label='Load Data'),
             sac.TabsItem(label='Detect Series'),
             sac.TabsItem(label='Extract Scans'),
-            sac.TabsItem(label='View Scans'),
+            #sac.TabsItem(label='View Scans'),
         ],
         size='lg',
         align='left'
@@ -272,27 +350,30 @@ def load_nifti():
         )
 
 def load_csv():
-    """
+    '''
     Panel for uploading covariates
-    """    
-    #Check out files
-    file_path = os.path.join(
-        st.session_state.paths['project'], 'lists', 'covars.csv'
-    )
-    
+    '''    
     list_options = ['Upload', 'Enter Manually', 'Reset']
-    sel_step = st.pills(
-        "Select Step",
-        list_options,
-        selection_mode="single",
-        label_visibility="collapsed",
-        default = None,
-        key = '_key_sel_input_covar'
-    )       
-    if sel_step == "Upload":
+    
+    tab = sac.tabs(
+        items=[
+            sac.TabsItem(label='Upload'),
+            sac.TabsItem(label='Enter Manually'),
+            sac.TabsItem(label='View'),
+            sac.TabsItem(label='Reset'),
+        ],
+        size='lg',
+        align='left'
+    )
+
+    #dicom_dir = os.path.join(
+        #st.session_state.paths['project'], 'dicoms'
+    #)
+    
+    if tab == 'Upload':
         upload_single_file('lists', 'demog.csv', '.csv')
 
-    elif sel_step == 'Enter Manually':
+    elif tab == 'Enter Manually':
         id_list = os.path.join(
             st.session_state.paths['project'], 'lists', 'list_nifti.csv'
         )
@@ -341,54 +422,6 @@ def load_csv():
         
     elif sel_step == "Reset":
         remove_dir('lists')
-
-def get_file_count(folder_path: str, file_suff: List[str] = []) -> int:
-    '''
-    Returns the count of files matching any of the suffixes in `file_suff`
-    within the output folder. If `file_suff` is empty, all files are counted.
-    '''
-    count = 0
-    if not os.path.exists(folder_path):
-        return 0
-
-    for root, dirs, files in os.walk(folder_path):
-        if file_suff:
-            count += sum(any(file.endswith(suffix) for suffix in file_suff) for file in files)
-        else:
-            count += len(files)
-
-    return count
-
-def get_file_names(folder_path: str, file_suff: str = "") -> pd.DataFrame:
-    f_names = []
-    if os.path.exists(folder_path):
-        if file_suff == "":
-            for root, dirs, files in os.walk(folder_path):
-                f_names.append(files)
-        else:
-            for root, dirs, files in os.walk(folder_path):
-                for file in files:
-                    if file.endswith(file_suff):
-                        f_names.append([file])
-    df_out = pd.DataFrame(columns=["FileName"], data=f_names)
-    return df_out
-
-
-def remove_dir(out_dir):
-    '''
-    Delete a folder
-    '''
-    try:
-        if os.path.islink(out_dir):
-            os.unlink(out_dir)
-        else:
-            shutil.rmtree(out_dir)
-        st.success(f"Removed dir: {out_dir}")
-        time.sleep(2)
-        return True
-    except:
-        st.error(f"Could not delete folder: {out_dir}")
-        return False
 
 ##############################################################
 ## Streamlit panels for IO
