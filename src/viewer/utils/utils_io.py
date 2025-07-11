@@ -3,6 +3,7 @@ import utils.utils_dicoms as utildcm
 import utils.utils_session as utilss
 import os
 import pandas as pd
+import zipfile
 import streamlit_antd_components as sac
 import shutil
 from typing import Any, BinaryIO, List, Optional
@@ -220,10 +221,14 @@ def load_dicoms():
             )
         
     elif tab == "Detect Series":
-        utildcm.panel_detect_dicom_series(dicom_dir)
+        utildcm.panel_detect_dicom_series(
+            dicom_dir
+        )
         
-    #elif tab == "Extract Scans":
-        #panel_extract()
+    elif tab == "Extract Scans":
+        utildcm.panel_extract_nifti(
+            st.session_state.paths['project']
+        )
         
     #elif tab == "View Scans":
         #panel_view('T1')
@@ -353,6 +358,21 @@ def get_file_count(folder_path: str, file_suff: List[str] = []) -> int:
             count += len(files)
 
     return count
+
+def get_file_names(folder_path: str, file_suff: str = "") -> pd.DataFrame:
+    f_names = []
+    if os.path.exists(folder_path):
+        if file_suff == "":
+            for root, dirs, files in os.walk(folder_path):
+                f_names.append(files)
+        else:
+            for root, dirs, files in os.walk(folder_path):
+                for file in files:
+                    if file.endswith(file_suff):
+                        f_names.append([file])
+    df_out = pd.DataFrame(columns=["FileName"], data=f_names)
+    return df_out
+
 
 def remove_dir(out_dir):
     '''

@@ -10,9 +10,11 @@ import dicom2nifti.common as common
 import dicom2nifti.convert_dicom as convert_dicom
 import dicom2nifti.settings
 import pandas as pd
+import time
 from pydicom import dcmread
 from pydicom.tag import Tag
 from stqdm import stqdm
+import utils.utils_io as utilio
 
 # Useful links
 # https://github.com/rordenlab/dcm2niix/blob/master/FILENAMING.md
@@ -59,7 +61,7 @@ def _is_valid_imaging_dicom(dicom_header: Any) -> bool:
         return False
 
 # Adapted from dicom2nifti
-def _remove_accents_(unicode_filename: str) -> str:
+def _remove_accents(unicode_filename: str) -> str:
     """
     Function that will try to remove accents from a unicode string to be used in a filename.
     input filename should be either an ascii or unicode string
@@ -80,10 +82,10 @@ def _remove_accents_(unicode_filename: str) -> str:
 
 # Adapted from dicom2nifti
 def detect_series(in_dir: str) -> Any:
-    """
+    '''
     This function selects dicom files that match the selection keywords
     Selection is done using the "SeriesDescription"
-    """
+    '''
     # Sort dicom files and detect series
     list_files = []
     for root, _, files in os.walk(in_dir):
@@ -223,70 +225,6 @@ def convert_sel_series(
             list_files, out_dir, out_suff, compression=True, reorient=True
         )
 
-
-def panel_extract_dicoms() -> None:
-    """
-    Panel for extracting dicoms
-    """
-    sel_mod = "T1"
-
-    dicom_folder = os.path.join(st.session_state.paths['project'], 'dicoms')
-    out_folder = os.path.join(st.session_state.paths['project'], sel_mod.lower())
-    
-    with st.container(border=True):
-
-        # Check if data exists
-        if st.session_state.flags[sel_mod]:
-            st.success(
-                f"Data is ready: {out_folder}",
-                icon=":material/thumb_up:",
-            )
-
-            df_files = utilio.get_file_names(out_folder, ".nii.gz")
-            with st.expander("View NIFTI image list"):
-                st.dataframe(df_files)
-
-            # Delete folder if user wants to reload
-            if st.button("Reset", key="reset_extraction"):
-                try:
-                    if os.path.islink(out_folder):
-                        os.unlink(out_folder)
-                    else:
-                        shutil.rmtree(out_folder)
-                    st.session_state.flags[sel_mod] = False
-                    st.success(f"Removed dir: {out_folder}")
-                except:
-                    st.error(f"Could not delete folder: {out_folder}")
-                time.sleep(4)
-                st.rerun()
-
-        else:
-            # Create out dir
-            if not os.path.exists(out_folder):
-                os.makedirs(out_folder)
-
-            # Selection of dicom series
-            st.session_state.sel_series = st.multiselect(
-                "Select series for the T1 scan:", st.session_state.list_series, None
-            )
-            btn_convert = st.button("Convert Series")
-            if btn_convert:
-                with st.spinner("Wait for it..."):
-                    try:
-                        utildcm.convert_sel_series(
-                            st.session_state.df_dicoms,
-                            st.session_state.sel_series,
-                            out_folder,
-                            f"_{sel_mod}.nii.gz",
-                        )
-
-                    except:
-                        st.warning(":material/thumb_down: NIfTI conversion failed!")
-
-                time.sleep(1)
-                st.rerun()
-
-
 def panel_detect_dicom_series(in_dir) -> None:
     """
     Panel for detecting dicom series
@@ -307,7 +245,6 @@ def panel_detect_dicom_series(in_dir) -> None:
             st.session_state.df_dicoms = df_dicoms
 
     if len(st.session_state.list_series) > 0:
-        st.session_state.flags["dicom_series"] = True
         st.success(
             f"Detected {st.session_state.num_dicom_scans} scans in {len(st.session_state.list_series)} series!",
             icon=":material/thumb_up:",
@@ -317,96 +254,69 @@ def panel_detect_dicom_series(in_dir) -> None:
         st.dataframe(st.session_state.df_dicoms)
 
 
-def panel_extract() -> None:
+def panel_extract_nifti(out_dir):
     """
     Panel for extracting dicoms
     """
-    icon = st.session_state.icon_thumb[st.session_state.flags["dir_nifti"]]
-    st.checkbox(
-        f":material/auto_awesome_motion: Extract Scans {icon}",
-        disabled=not st.session_state.flags["dicom_series"],
-        key="_check_dicoms_run",
-        value=st.session_state.checkbox["dicoms_run"],
+    # Selection of img modality
+    sel_mod = st.selectbox(
+        "Image Modality",
+        st.session_state.list_mods,
+        key = "key_select_modality",
     )
-    if not st.session_state._check_dicoms_run:
-        return
-
-    with st.container(border=True):
-
-        flag_disabled = not st.session_state.flags["dicom_series"]
-
-        # Selection of img modality
-        sel_mod = utilst.user_input_select(
-            "Image Modality",
-            "key_select_modality",
-            st.session_state.list_mods,
-            None,
-            "Modality of the extracted images",
-            flag_disabled,
+    
+    if sel_mod is not None:
+        st.session_state.sel_mod = sel_mod
+        dout = os.path.join(
+            out_dir, sel_mod.lower()
         )
-        if sel_mod is not None:
-            st.session_state.sel_mod = sel_mod
-            if not os.path.exists(st.session_state.paths[st.session_state.sel_mod]):
-                os.makedirs(st.session_state.paths[st.session_state.sel_mod])
+        if not os.path.exists(dout):
+            os.makedirs(dout)
 
-        # Selection of dicom series
-        st.session_state.sel_series = utilst.user_input_multiselect(
-            "Select series:",
-            "key_multiselect_dseries",
-            st.session_state.list_series,
-            [],
-            "",
-            flag_disabled=flag_disabled,
-        )
+    # Selection of dicom series
+    st.session_state.sel_series = st.multiselect(
+        "Select series:",
+        st.session_state.list_series,
+        key = "key_multiselect_dseries",
+    )
 
-        btn_convert = st.button("Convert Series", disabled=flag_disabled)
-        if btn_convert:
-            with st.spinner("Wait for it..."):
-                try:
-                    utildcm.convert_sel_series(
-                        st.session_state.df_dicoms,
-                        st.session_state.sel_series,
-                        st.session_state.paths[st.session_state.sel_mod],
-                        f"_{st.session_state.sel_mod}.nii.gz",
-                    )
-                except:
-                    st.warning(":material/thumb_down: Nifti conversion failed!")
-
-            num_nifti = utilio.get_file_count(
-                st.session_state.paths[st.session_state.sel_mod], ".nii.gz"
-            )
-            if num_nifti == 0:
-                st.warning(
-                    ":material/thumb_down: The extraction process did not produce any Nifti images!"
+    btn_convert = st.button("Convert Series")
+    if btn_convert:
+        with st.spinner("Wait for it..."):
+            try:
+                convert_sel_series(
+                    st.session_state.df_dicoms,
+                    st.session_state.sel_series,
+                    dout,
+                    f"_{st.session_state.sel_mod}.nii.gz",
                 )
-            else:
-                if st.session_state.has_cloud_session:
-                    utilcloud.update_stats_db(
-                        st.session_state.cloud_user_id, "NIFTIfromDICOM", num_nifti
-                    )
+            except:
+                st.warning(":material/thumb_down: Nifti conversion failed!")
 
-        df_files = utilio.get_file_names(
-            st.session_state.paths[st.session_state.sel_mod], ".nii.gz"
+        num_nifti = utilio.get_file_count(
+            dout, ".nii.gz"
         )
-        num_nifti = df_files.shape[0]
-
-        if num_nifti > 0:
-            st.session_state.flags["dir_nifti"] = True
-            st.session_state.flags[st.session_state.sel_mod] = True
-            st.success(
-                f"Nifti images are ready ({st.session_state.paths[st.session_state.sel_mod]}, {num_nifti} scan(s))",
-                icon=":material/thumb_up:",
+        if num_nifti == 0:
+            st.warning(
+                ":material/thumb_down: The extraction process did not produce any Nifti images!"
             )
+        else:
+            if st.session_state.has_cloud_session:
+                utilcloud.update_stats_db(
+                    st.session_state.cloud_user_id, "NIFTIfromDICOM", num_nifti
+                )
 
-            with st.expander("View NIFTI image list"):
-                st.dataframe(df_files)
+    df_files = utilio.get_file_names(
+        dout, ".nii.gz"
+    )
+    num_nifti = df_files.shape[0]
 
-        s_title = "Nifti Conversion"
-        s_text = """
-        - The user specifies the desired modality and selects the associated series.
-        - Selected series are converted into Nifti image format.
-        - Nifti images are renamed with the following format: **{PatientID}_{StudyDate}_{modality}.nii.gz**
-        """
-        utilst.util_get_help(s_title, s_text)
+    if num_nifti > 0:
+        st.success(
+            f"Nifti images are ready ({dout}, {num_nifti} scan(s))",
+            icon=":material/thumb_up:",
+        )
 
+        with st.expander("View NIFTI image list"):
+            st.dataframe(df_files)
 
