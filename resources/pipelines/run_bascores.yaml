@@ -8,5 +8,5 @@ steps:
     inputs:
       t1_img: ${STUDY}/t1
     outputs:
-      out_csv: ${STUDY}/bascores_csv/BAScores.csv
-      out_attention: ${STUDY}/bascores_attention
+      out_csv: ${STUDY}/SPARE_BA_Image_csv/SPARE_BA_Image_scores.csv
+      out_attention: ${STUDY}/SPARE_BA_Image_attention
