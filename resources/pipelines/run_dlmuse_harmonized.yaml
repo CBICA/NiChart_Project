@@ -13,7 +13,7 @@ steps:
   - id: harmonize_dlmuse
     tool: harmonize_dlmuse
     inputs:
-      dlmuse_vol_unharmonized: ${STUDY}/DLMUSE_vol_unharmonized/DLMUSE_Volumes.csv
+      dlmuse_vol_unharmonized: ${STUDY}/DLMUSE_vol/DLMUSE_Volumes.csv
       covariate_csv: ${STUDY}/lists/demog.csv
     outputs: # Harmonization wrapper expects output location as dir
       dlmuse_vol_harmonized: ${STUDY}/DLMUSE_vol_harmonized
