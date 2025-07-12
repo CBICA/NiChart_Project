@@ -8,7 +8,7 @@ import shutil
 import streamlit as st
 import json
 import boto3
-import datetime
+from datetime import datetime
 from botocore.exceptions import ClientError
 import utils.utils_pollstatus as ps
 import time
