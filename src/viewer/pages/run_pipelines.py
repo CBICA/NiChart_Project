@@ -103,7 +103,7 @@ def panel_run_pipeline():
     sel_method = st.session_state.sel_pipeline
     st.success(f'Selected pipeline: {sel_method}')
     harmonize = False
-    not_harmonizable = ['cclnmf', 'dlwmls', 'bascores', 'surrealgan']
+    not_harmonizable = ['cclnmf', 'dlwmls', 'spare-ba-image', 'surrealgan']
     if sel_method not in not_harmonizable:
         harmonize = st.checkbox("Harmonize to reference data? (Requires >= 3 scans)")
     ## TODO: Retrieve dynamically/match between front end and toolloader code
@@ -127,7 +127,7 @@ def panel_run_pipeline():
             'dlwmls': 'run_dlwmls',
             'spare-ad': 'run_spare_ad_harmonized',
             'spare-ba': 'run_spare_ba_harmonized',
-            'bascores': 'run_bascores',
+            'spare-ba-image': 'run_bascores',
             'spare-cvm': None,
             'surrealgan': 'run_predcrd_surrealgan',
             'synthseg': None,
@@ -139,7 +139,8 @@ def panel_run_pipeline():
     if pipeline_to_run is None:
         st.error("The currently selected pipeline doesn't have an associated tool configuration. Please submit a bug report!")
         return
-    
+    skip_steps_when_possible = True
+    skip_steps_when_possible = st.checkbox("Accelerate pipeline via caching? (Uncheck to force re-runs)", value=True)
     if st.button("Run pipeline"):
         with st.container():
             st.subheader("Pipeline Logs")
@@ -161,7 +162,9 @@ def panel_run_pipeline():
             global_vars={"STUDY": st.session_state.paths["project"]},
             pipeline_progress_bar=pipeline_progress_bar,
             process_progress_bar=process_progress_bar,
-            log=log
+            log=log,
+            metadata_location=os.path.join(st.session_state.paths["project"], "metadata.json"),
+            reuse_cached_steps=skip_steps_when_possible
         )
 
         st.success(f"Pipeline {pipeline_to_run} finished successfully.")

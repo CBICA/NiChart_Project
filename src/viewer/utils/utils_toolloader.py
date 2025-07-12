@@ -539,6 +539,8 @@ def parse_pipeline_steps(pipeline_yaml):
     return execution_order, step_map
 
 def load_metadata(metadata_path: Path) -> Dict:
+    if metadata_path is None:
+        return {}
     if metadata_path.exists():
         with open(metadata_path, 'r') as f:
             return json.load(f)
