@@ -9,7 +9,13 @@ outputs:
   spare_ba_csv:
     type: file
 
-
+mounts:
+  harmonized_dlmuse_vol:
+    path_in_container: /dlmuse_vol
+    mode: ro
+  spare_ba_csv:
+    path_in_container: /SPARE_AD.csv
+    mode: rw
 
 parameters:
   {} # Empty dictionary to signify no parameters
