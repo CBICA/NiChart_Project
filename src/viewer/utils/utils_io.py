@@ -290,11 +290,13 @@ def load_dicoms():
     )
     
     if tab == "Upload":
-        upload_multiple_files(out_dir)
+        if st.button("Upload"):
+            # Upload data
+            upload_multiple_files(out_dir)
 
         fcount = get_file_count(out_dir)
         if fcount > 0:
-            st.info(f'Output folder {out_dir} contains {fcount} files')
+            st.success(f'Dicom data available ({fcount} files)')
         
     elif tab == "Detect Series":
         utildcm.panel_detect_dicom_series(out_dir)
