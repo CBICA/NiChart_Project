@@ -22,7 +22,7 @@ mounts:
     path_in_container: /input/covariates.csv
     mode: ro
   dlmuse_vol_harmonized:
-    path_in_container: /output
+    path_in_container: /output/dlmuse_vol_harmonized
     mode: rw
 
 

@@ -14,13 +14,13 @@ outputs:
 
 mounts:
   t1_img:
-    path_in_container: /input
+    path_in_container: /input/t1
     mode: ro
   out_csv:
-    path_in_container: /output_csv/BAScores.csv
+    path_in_container: /output/BAScores.csv
     mode: rw
   out_attention:
-    path_in_container: /output_attention
+    path_in_container: /output/output_attention
     mode: rw
 
 parameters:

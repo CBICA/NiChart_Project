@@ -16,13 +16,13 @@ outputs:
 
 mounts:
   t1_img:
-    path_in_container: /input
+    path_in_container: /input/t1
     mode: ro
   dlmuse_vol:
-    path_in_container: /output_vol
+    path_in_container: /output/dlmuse_vol
     mode: rw
   dlmuse_seg:
-    path_in_container: /output_seg
+    path_in_container: /output/dlmuse_seg
     mode: rw
 
 parameters:

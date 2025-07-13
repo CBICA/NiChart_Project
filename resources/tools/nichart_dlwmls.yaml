@@ -16,13 +16,13 @@ outputs:
 
 mounts:
   fl_img:
-    path_in_container: /input
+    path_in_container: /input/fl
     mode: ro
   dlwmls_seg:
-    path_in_container: /output_seg
+    path_in_container: /output/DLWMLS_seg
     mode: rw
   dlwmls_vol:
-    path_in_container: /output_vol/DLWMLS_Volumes.csv
+    path_in_container: /output/DLWMLS_Volumes.csv
     mode: rw
 
 parameters:

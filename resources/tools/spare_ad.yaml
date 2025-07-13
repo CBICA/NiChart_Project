@@ -13,13 +13,13 @@ outputs:
 
 mounts:
   demog_csv:
-    path_in_container: /demographics.csv
+    path_in_container: /input/demographics.csv
     mode: ro
   dlmuse_vol:
-    path_in_container: /dlmuse_vol
+    path_in_container: /input/dlmuse_vol
     mode: ro
   spare_ad_csv:
-    path_in_container: /SPARE_AD.csv
+    path_in_container: /output/SPARE_AD.csv
     mode: rw
 
 parameters:
