@@ -9,7 +9,9 @@ inputs:
     type: directory
 
 outputs:
-  out:
+  out_csv:
+    type: file
+  out_attention:
     type: directory
 
 mounts:
