@@ -208,25 +208,22 @@ def upload_multi(out_dir):
 
         st.rerun()
 
-def upload_single_file(dtype: str, out_name: str, in_suff: str) -> None:
+def upload_single_file(out_dir, out_name, label) -> None:
     '''
     Upload user file to target folder
     '''
-    out_dir = os.path.join(
-        st.session_state.paths['project'], dtype
-    )
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
 
     out_file = os.path.join(out_dir, out_name)
 
     # Set target path
-    st.session_state.paths["target_path"] = out_dir
+    st.session_state.paths["target"] = out_dir
 
     # Upload data
     with st.container(border=True):
         sel_file = st.file_uploader(
-            "Input demographics file",
+            label,
             key="uploaded_input_csv",
             accept_multiple_files=False
         )        
@@ -272,13 +269,17 @@ def create_img_list(dtype: str) -> None:
         })
         return df
 
+##############################################################
+## Panels for IO
+
 def load_dicoms():
     tab = sac.tabs(
         items=[
-            sac.TabsItem(label='Load Data'),
+            sac.TabsItem(label='Upload'),
             sac.TabsItem(label='Detect Series'),
             sac.TabsItem(label='Extract Scans'),
-            #sac.TabsItem(label='View Scans'),
+            sac.TabsItem(label='View'),
+            sac.TabsItem(label='Reset'),
         ],
         size='lg',
         align='left'
@@ -288,7 +289,7 @@ def load_dicoms():
         st.session_state.paths['project'], 'dicoms'
     )
     
-    if tab == "Load Data":
+    if tab == "Upload":
         upload_multiple_files(dicom_dir)
 
         fcount = get_file_count(dicom_dir)
@@ -308,16 +309,35 @@ def load_dicoms():
             st.session_state.paths['project']
         )
         
-    #elif tab == "View Scans":
-        #panel_view('T1')
+    elif tab == "View":
+        st.info('not there yet')
+        # panel_view('T1')
+
+    elif tab == "Reset":
+        st.info(f'Out folder name: {out_dir}')
+        if st.button("Delete"):
+            remove_dir(out_dir)
 
 def load_nifti():
-    sel_mod = sac.tabs(
-        items=st.session_state.list_mods,
+    '''
+    Panel to load nifti images
+    '''
+    tab = sac.tabs(
+        items=[
+            sac.TabsItem(label='Upload'),
+            sac.TabsItem(label='View'),
+            sac.TabsItem(label='Reset'),
+        ],
         size='lg',
         align='left'
     )
-    
+
+    sel_mod = sac.segmented(
+        items=st.session_state.list_mods,
+        size='sm',
+        align='left'
+    )
+
     if sel_mod is None:
         return
 
@@ -327,9 +347,10 @@ def load_nifti():
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
     
-    if st.button("Upload"):
-        # Upload data
-        upload_multiple_files(out_dir)
+    if tab == 'Upload':
+        if st.button("Upload"):
+            # Upload data
+            upload_multiple_files(out_dir)
         
         ## Create list of scans
         #df = create_img_list(sel_mod.lower())
@@ -339,8 +360,13 @@ def load_nifti():
             #)
             #df.to_csv(out_file, index=False)
             
-    if st.button("Reset"):
-        remove_dir(out_dir)
+    elif tab == 'View':
+        st.info('Not there yet')
+
+    elif tab == 'Reset':
+        st.info(f'Out folder name: {out_dir}')
+        if st.button("Delete"):
+            remove_dir(out_dir)
     
     fcount = get_file_count(out_dir, ['.nii', '.nii.gz'])
     if fcount > 0:
@@ -353,8 +379,6 @@ def load_csv():
     '''
     Panel for uploading covariates
     '''    
-    list_options = ['Upload', 'Enter Manually', 'Reset']
-    
     tab = sac.tabs(
         items=[
             sac.TabsItem(label='Upload'),
@@ -366,19 +390,16 @@ def load_csv():
         align='left'
     )
 
-    #dicom_dir = os.path.join(
-        #st.session_state.paths['project'], 'dicoms'
-    #)
+    out_dir = os.path.join(st.session_state.paths['project'], 'demog')
+    fname = 'demog.csv'
+    out_csv = os.path.join(out_dir, fname)
     
     if tab == 'Upload':
-        upload_single_file('lists', 'demog.csv', '.csv')
+        upload_single_file(out_dir, fname, 'Select demog file')
 
     elif tab == 'Enter Manually':
-        id_list = os.path.join(
-            st.session_state.paths['project'], 'lists', 'list_nifti.csv'
-        )
         try:
-            df = pd.read_csv(id_list)
+            df = pd.read_csv(out_csv)
             df = df[['MRID']]
             
         except:
@@ -406,22 +427,23 @@ def load_csv():
             use_container_width=True
         )
         if st.button('Save'):
-            df_user.to_csv(file_path, index=False)
-            st.success(f'Created demographic file: {file_path}')
+            df_user.to_csv(out_csv, index=False)
+            st.success(f'Updated demographic file: {out_csv}')
         
 
-    elif sel_step == "View":
-        if not os.path.exists(file_path):
+    elif tab == "View":
+        if not os.path.exists(out_csv):
             st.warning('Covariate file not found!')
             return
         try:
-            df_cov = pd.read_csv(file_path)
+            df_cov = pd.read_csv(out_csv)
             st.dataframe(df_cov)
         except:
-            st.warning(f'Could not load covariate file: {file_path}')
+            st.warning(f'Could not load covariate file: {out_csv}')
         
-    elif sel_step == "Reset":
-        remove_dir('lists')
+    elif tab == "Reset":
+        if st.button('Delete demog file'):
+            remove_dir(out_dir)
 
 ##############################################################
 ## Streamlit panels for IO
@@ -514,12 +536,12 @@ def panel_load_data():
 
     if sel_dtype == "Nifti":
         with st.container(border=True):
-            #st.markdown(
-                #"""
-                #***NIfTI Images***
-                #- Upload NIfTI images
-                #"""
-            #)
+            st.markdown(
+                """
+                ***NIfTI Images***
+                - Upload NIfTI images
+                """
+            )
             load_nifti()
 
     elif sel_dtype == "Dicom":
