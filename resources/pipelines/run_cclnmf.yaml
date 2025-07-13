@@ -10,7 +10,7 @@ steps:
     outputs:
       dlmuse_seg: ${STUDY}/DLMUSE_seg
       dlmuse_vol: ${STUDY}/DLMUSE_vol
-  - id: run_cclnmf_prediction
+  - id: run_cclnmf
     tool: cclnmf_prediction # MUST CORRESPOND EXACTLY to a tool in resources/tools dir
     inputs:
       demog_csv: ${STUDY}/lists/demog.csv
