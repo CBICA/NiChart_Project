@@ -267,6 +267,18 @@ def init_paths():
     st.session_state.paths["file_search_dir"] = st.session_state.paths["init"]
     ############    
 
+def init_dicom_vars() -> None:
+    '''
+    Set dicom variables
+    '''
+    st.session_state.dicoms = {
+        'list_series': None,
+        'num_dicom_scans': 0,
+        'df_dicoms': None
+    }
+
+    print('AAAA')
+
 def init_plot_vars() -> None:
     '''
     Set plotting variables
@@ -617,6 +629,7 @@ def init_session_state() -> None:
         init_pipeline_definitions()
         init_reference_data()
         init_plot_vars()
+        init_dicom_vars()
         
         # Set flag
         st.session_state.instantiated = True

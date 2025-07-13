@@ -285,29 +285,22 @@ def load_dicoms():
         align='left'
     )
 
-    dicom_dir = os.path.join(
+    out_dir = os.path.join(
         st.session_state.paths['project'], 'dicoms'
     )
     
     if tab == "Upload":
-        upload_multiple_files(dicom_dir)
+        upload_multiple_files(out_dir)
 
-        fcount = get_file_count(dicom_dir)
+        fcount = get_file_count(out_dir)
         if fcount > 0:
-            st.success(
-                f"Data is ready ({dicom_dir}, {fcount} files)",
-                icon=":material/thumb_up:",
-            )
+            st.info(f'Output folder {out_dir} contains {fcount} files')
         
     elif tab == "Detect Series":
-        utildcm.panel_detect_dicom_series(
-            dicom_dir
-        )
+        utildcm.panel_detect_dicom_series(out_dir)
         
     elif tab == "Extract Scans":
-        utildcm.panel_extract_nifti(
-            st.session_state.paths['project']
-        )
+        utildcm.panel_extract_nifti(st.session_state.paths['project'])
         
     elif tab == "View":
         st.info('not there yet')

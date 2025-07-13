@@ -226,13 +226,12 @@ def convert_sel_series(
         )
 
 def panel_detect_dicom_series(in_dir) -> None:
-    """
+    '''
     Panel for detecting dicom series
-    """
+    '''
     # Detect dicom series
-    btn_detect = st.button("Detect Series")
-    if btn_detect:
-        with st.spinner("Wait for it..."):
+    if st.button("Detect Series"):
+        with st.spinner("Detecting series ..."):
             df_dicoms = detect_series(in_dir)
             list_series = df_dicoms.SeriesDesc.unique()
             num_dicom_scans = (
@@ -240,18 +239,23 @@ def panel_detect_dicom_series(in_dir) -> None:
                 .drop_duplicates()
                 .shape[0]
             )
-            st.session_state.list_series = list_series
-            st.session_state.num_dicom_scans = num_dicom_scans
-            st.session_state.df_dicoms = df_dicoms
+            st.session_state.dicoms['list_series'] = list_series
+            st.session_state.dicoms['num_dicom_scans'] = num_dicom_scans
+            st.session_state.dicoms['df_dicoms'] = df_dicoms
 
-    if len(st.session_state.list_series) > 0:
-        st.success(
-            f"Detected {st.session_state.num_dicom_scans} scans in {len(st.session_state.list_series)} series!",
-            icon=":material/thumb_up:",
-        )
+    if st.session_state.dicoms['list_series'] is None:
+        return
+
+    if len(st.session_state.dicoms['list_series']) == 0:
+        return
+
+    st.success(
+        f"Detected {st.session_state.dicoms['num_dicom_scans']} scans in {len(st.session_state.dicoms['list_series'])} series!",
+        icon=":material/thumb_up:",
+    )
 
     with st.expander("Show dicom metadata", expanded=False):
-        st.dataframe(st.session_state.df_dicoms)
+        st.dataframe(st.session_state.dicoms['df_dicoms'])
 
 
 def panel_extract_nifti(out_dir):
@@ -274,9 +278,9 @@ def panel_extract_nifti(out_dir):
             os.makedirs(dout)
 
     # Selection of dicom series
-    st.session_state.sel_series = st.multiselect(
+    st.session_state.dicoms['sel_series'] = st.multiselect(
         "Select series:",
-        st.session_state.list_series,
+        st.session_state.dicoms['list_series'],
         key = "key_multiselect_dseries",
     )
 
@@ -285,8 +289,8 @@ def panel_extract_nifti(out_dir):
         with st.spinner("Wait for it..."):
             try:
                 convert_sel_series(
-                    st.session_state.df_dicoms,
-                    st.session_state.sel_series,
+                    st.session_state.dicoms['df_dicoms'],
+                    st.session_state.dicoms['sel_series'],
                     dout,
                     f"_{st.session_state.sel_mod}.nii.gz",
                 )
