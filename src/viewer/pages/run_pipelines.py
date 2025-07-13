@@ -113,7 +113,7 @@ def panel_run_pipeline():
         'dlmuse': 'run_dlmuse',
         'spare-ad': 'run_spare_ad',
         'spare-ba': 'run_spare_ba',
-        'bascores': 'run_bascores',
+        'spare-ba-image': 'run_bascores',
         'dlwmls': 'run_dlwmls',
         'spare-cvm': None,
         'surrealgan': 'run_predcrd_surrealgan',
