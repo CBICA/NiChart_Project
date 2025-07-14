@@ -354,6 +354,17 @@ def load_nifti():
                 #lists_path, 'list_nifti.csv'
             #)
             #df.to_csv(out_file, index=False)
+
+        fcount = get_file_count(out_dir, ['.nii', '.nii.gz'])
+        if fcount > 0:
+            st.success(
+                f" Detected {fcount} nifti image files", icon=":material/thumb_up:"
+            )
+        else:
+            st.info(
+                f" No nifti image files", icon=":material/thumb_down:"
+            )
+
             
     elif tab == 'View':
         st.info('Not there yet')
@@ -363,12 +374,6 @@ def load_nifti():
         if st.button("Delete"):
             remove_dir(out_dir)
     
-    fcount = get_file_count(out_dir, ['.nii', '.nii.gz'])
-    if fcount > 0:
-        st.success(
-            f" Input data available: ({fcount} nifti image files)",
-            icon=":material/thumb_up:",
-        )
 
 def load_csv():
     '''
