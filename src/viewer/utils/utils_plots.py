@@ -69,7 +69,7 @@ def sidebar_flag_hide_mri():
 
     with st.sidebar:
         st.radio(
-            'Legend',
+            'MRI Viewer',
             ['Hide', 'Show'],
             key = '_flag_hide_mri',
             horizontal = True,
