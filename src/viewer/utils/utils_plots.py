@@ -57,6 +57,25 @@ def sidebar_flag_hide_legend():
             on_change = update_val
         )
 
+def sidebar_flag_hide_mri():
+    '''
+    Set flag for hiding the settings
+    '''
+    if '_flag_hide_mri' not in st.session_state:
+        st.session_state['_flag_hide_mri'] = st.session_state.plot_settings['flag_hide_mri']
+
+    def update_val():
+        st.session_state.plot_settings['flag_hide_mri'] = st.session_state['_flag_hide_mri']
+
+    with st.sidebar:
+        st.radio(
+            'Legend',
+            ['Hide', 'Show'],
+            key = '_flag_hide_mri',
+            horizontal = True,
+            on_change = update_val
+        )
+
 
 def read_data(fdata):
     '''
@@ -316,7 +335,7 @@ def show_mri():
     if mrid is None:
         return
 
-    if st.session_state.plot_settings["flag_show_img"] == False:
+    if st.session_state.plot_settings["flag_hide_mri"] == 'Hide':
         return
 
     in_dir = st.session_state.paths['project']
@@ -325,7 +344,7 @@ def show_mri():
         in_dir, 't1', f'{mrid}_T1.nii.gz'
     )
     olay = os.path.join(
-        in_dir, 'dlmuse_seg', f'{mrid}_T1_DLMUSE.nii.gz'
+        in_dir, 'DLMUSE_seg', f'{mrid}_T1_DLMUSE.nii.gz'
     )
     utilmri.panel_view_seg(ulay, olay, plot_params)
 
@@ -563,7 +582,7 @@ def panel_set_params_plot(plot_params, var_groups_data, var_groups_hue, pipeline
     """
     Panel to set plotting parameters
     """
-    if st.session_state.plot_settings['flag_hide_settings']:
+    if st.session_state.plot_settings['flag_hide_settings'] == 'Hide':
         return
 
     plot_params['method'] = pipeline

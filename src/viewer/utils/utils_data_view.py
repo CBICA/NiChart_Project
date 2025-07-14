@@ -190,7 +190,7 @@ def select_files(in_dir):
                 st.error(f"Failed to read {dname}: {e}")
 
             # Rename columns if dict for data exists
-            if dname.endswith('dlmuse_vol.csv'):
+            if dname.endswith('DLMUSE_Volumes.csv'):
                 df = df.rename(
                     columns = st.session_state.dicts['muse']['ind_to_name']
                 )
