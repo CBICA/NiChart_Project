@@ -3,9 +3,11 @@ import utils.utils_dicoms as utildcm
 import utils.utils_session as utilss
 import os
 import pandas as pd
+import numpy as np
 import zipfile
 import streamlit_antd_components as sac
 import shutil
+import time
 from typing import Any, BinaryIO, List, Optional
 
 from utils.utils_logger import setup_logger
@@ -269,6 +271,40 @@ def create_img_list(dtype: str) -> None:
         })
         return df
 
+def create_mrid_list() -> None:
+    '''
+    Create a list of MRIDs
+    '''
+    out_dir = os.path.join(
+        st.session_state.paths['project'], 'lists'
+    )
+
+    # Remove common suffix to get mrid
+    def remove_common_suffix(files):
+        reversed_names = [f[::-1] for f in files]
+        common_suffix = os.path.commonprefix(reversed_names)[::-1]
+        return [f[:-len(common_suffix)] if common_suffix else f for f in files]
+
+    # Get all NIfTI files
+    dfs = []
+    for mod in ['t1', 't2', 'fl', 'dti', 'fmri']:
+        img_dir = os.path.join(
+            st.session_state.paths['project'], mod
+        )
+        if os.path.exists(img_dir):
+            nifti_files = [
+                f for f in os.listdir(img_dir) if f.endswith('.nii') or f.endswith('.nii.gz')
+            ]
+            if len(nifti_files)>0:
+                mrids = remove_common_suffix(nifti_files)
+                df = pd.DataFrame({'MRID': mrids})
+                dfs.append(df)
+    if len(dfs) == 0:
+        return None
+    
+    df = pd.concat(dfs, axis=0).sort_values(by='MRID').drop_duplicates().reset_index().drop('index', axis=1)
+    return df
+
 ##############################################################
 ## Panels for IO
 
@@ -305,8 +341,10 @@ def load_dicoms():
         utildcm.panel_extract_nifti(st.session_state.paths['project'])
         
     elif tab == "View":
-        st.info('not there yet')
-        # panel_view('T1')
+        # Create list of scans
+        sel_mod='T1'
+        df = create_img_list(sel_mod.lower())
+        st.dataframe(df)
 
     elif tab == "Reset":
         st.info(f'Out folder name: {out_dir}')
@@ -347,14 +385,6 @@ def load_nifti():
             # Upload data
             upload_multiple_files(out_dir)
         
-        ## Create list of scans
-        #df = create_img_list(sel_mod.lower())
-        #if df is not None:
-            #out_file = os.path.join(
-                #lists_path, 'list_nifti.csv'
-            #)
-            #df.to_csv(out_file, index=False)
-
         fcount = get_file_count(out_dir, ['.nii', '.nii.gz'])
         if fcount > 0:
             st.success(
@@ -364,10 +394,11 @@ def load_nifti():
             st.info(
                 f" No nifti image files", icon=":material/thumb_down:"
             )
-
             
     elif tab == 'View':
-        st.info('Not there yet')
+        # Create list of scans
+        df = create_img_list(sel_mod.lower())
+        st.dataframe(df)        
 
     elif tab == 'Reset':
         st.info(f'Out folder name: {out_dir}')
@@ -390,7 +421,10 @@ def load_csv():
         align='left'
     )
 
-    out_dir = os.path.join(st.session_state.paths['project'], 'demog')
+    out_dir = os.path.join(st.session_state.paths['project'], 'lists')
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
+        
     fname = 'demog.csv'
     out_csv = os.path.join(out_dir, fname)
     
@@ -398,14 +432,7 @@ def load_csv():
         upload_single_file(out_dir, fname, 'Select demog file')
 
     elif tab == 'Enter Manually':
-        try:
-            df = pd.read_csv(out_csv)
-            df = df[['MRID']]
-            
-        except:
-            st.warning('Could not read id list')
-            return
-
+        df = create_mrid_list()
         df['Age'] = pd.Series([np.nan] * len(df), dtype='float')
         df['Sex'] = pd.Series([''] * len(df), dtype='string')
             
