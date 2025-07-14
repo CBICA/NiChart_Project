@@ -3,10 +3,30 @@ description: |
   Brain age regression pipeline starting from input T1 scans. Also outputs attention maps.
 
 steps:
-  - id: run_nichart_bascores
-    tool: nichart_bascores # MUST CORRESPOND EXACTLY to a tool in resources/tools dir
+  - id: run_dlmuse
+    tool: nichart_dlmuse
     inputs:
       t1_img: ${STUDY}/t1
     outputs:
-      out_csv: ${STUDY}/SPARE_BA_Image_csv/SPARE_BA_Image_scores.csv
+      dlmuse_vol: ${STUDY}/DLMUSE_vol
+      dlmuse_seg: ${STUDY}/DLMUSE_seg
+  - id: binarize_DLMUSE_to_DLICV
+    tool: binarize_seg_to_mask
+    inputs:
+      seg_dir: ${STUDY}/DLMUSE_seg
+    outputs:
+      mask_dir: ${STUDY}/DLICV_mask
+  - id: align_dlicv_to_MNI
+    tool: dlicv_to_mni
+    inputs:
+      img_dir: ${STUDY}/t1 # Dir of NIFTI scans
+      mask_dir: ${STUDY}/DLICV_mask # Dir of masks associated with img_dir's images
+    outputs:
+      mni_dir: ${STUDY}/t1_mni # Dir of MNI-aligned NIFTI scans
+  - id: run_nichart_bascores
+    tool: nichart_bascores # MUST CORRESPOND EXACTLY to a tool in resources/tools dir
+    inputs:
+      t1_img: ${STUDY}/t1_mni
+    outputs:
+      out_csv: ${STUDY}/SPARE_BA_Image_csv/SPARE_BA_Image.csv
       out_attention: ${STUDY}/SPARE_BA_Image_attention
