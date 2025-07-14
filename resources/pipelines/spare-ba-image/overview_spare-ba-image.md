@@ -1,4 +1,4 @@
-### DL-SPARE-BA: Aging Related Patterns of Brain Atrophy 
+### SPARE-BA-Image: Brain Aging Estimation from raw MRI images
 
 #### Source:
 
@@ -11,5 +11,5 @@ https://github.com/CBICA/DL-SPARE
 
 #### Output
 
-- DL-SPARE-BA scores (csv file)
+- SPARE-BA-Image scores (csv file)
 
