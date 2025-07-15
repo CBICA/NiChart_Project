@@ -271,14 +271,20 @@ def create_img_list(dtype: str) -> None:
         })
         return df
 
-def create_mrid_list() -> None:
+def create_scan_csv() -> None:
     '''
-    Create a list of MRIDs
+    Create a csv with MRID (and other demog fields if available)
     '''
     out_dir = os.path.join(
         st.session_state.paths['project'], 'lists'
     )
 
+    # Detect common suffix
+    def detect_common_suffix(files):
+        reversed_names = [f[::-1] for f in files]
+        common_suffix = os.path.commonprefix(reversed_names)[::-1]
+        return common_suffix
+    
     # Remove common suffix to get mrid
     def remove_common_suffix(files):
         reversed_names = [f[::-1] for f in files]
@@ -295,9 +301,22 @@ def create_mrid_list() -> None:
             nifti_files = [
                 f for f in os.listdir(img_dir) if f.endswith('.nii') or f.endswith('.nii.gz')
             ]
-            if len(nifti_files)>0:
-                mrids = remove_common_suffix(nifti_files)
-                df = pd.DataFrame({'MRID': mrids})
+            suff = detect_common_suffix(nifti_files)
+            for fname in nifti_files:
+
+
+                # Read info from csv file if exists
+                fcsv = os.path.join(
+                    img_dir, f'{fname.replace('.nii.gz','').replace('.nii','')}.csv'
+                )
+                if os.path.exists(fcsv):
+                    df = pd.read_csv(fcsv)
+
+                else:
+                    # Detect mrid from file name otherwise
+                    mrid = fname.replace(suff,'')
+                    df = pd.DataFrame({'MRID': [mrid], 'Age': [None], 'Sex': [None]})
+                
                 dfs.append(df)
     if len(dfs) == 0:
         return None
@@ -432,9 +451,7 @@ def load_csv():
         upload_single_file(out_dir, fname, 'Select demog file')
 
     elif tab == 'Enter Manually':
-        df = create_mrid_list()
-        df['Age'] = pd.Series([np.nan] * len(df), dtype='float')
-        df['Sex'] = pd.Series([''] * len(df), dtype='string')
+        df = create_scan_csv()
             
         st.info("Please enter values for your sample")
         

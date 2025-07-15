@@ -66,18 +66,18 @@ def _remove_accents(unicode_filename: str) -> str:
     Function that will try to remove accents from a unicode string to be used in a filename.
     input filename should be either an ascii or unicode string
     """
-    valid_characters = bytes(b"-_.() 1234567890abcdefghijklmnopqrstuvwxyz")
+    unicode_filename = unicode_filename.replace(' ','_')
+    valid_characters = bytes(
+        b"-_.()1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    )    
     cleaned_filename = unicodedata.normalize("NFKD", unicode_filename).encode(
         "ASCII", "ignore"
     )
-
     new_filename = ""
-
     for char_int in bytes(cleaned_filename):
         char_byte = bytes([char_int])
         if char_byte in valid_characters:
             new_filename += char_byte.decode()
-
     return new_filename
 
 # Adapted from dicom2nifti
@@ -186,6 +186,8 @@ def convert_single_series(
             base_filename = ""
             if "PatientID" in dicom_input[0]:
                 base_filename = _remove_accents("%s" % dicom_input[0].PatientID)
+                print(dicom_input[0].PatientID)
+                print(base_filename)
 
             # FIXME: Check also "AcquisitionDate"
             if "StudyDate" in dicom_input[0]:
@@ -217,11 +219,9 @@ def convert_single_series(
                 psex = dicom_input[0].PatientSex
             df_demog = pd.DataFrame({'MRID': [base_filename], 'Age': [page], 'Sex': [psex]})
             csv_file = os.path.join(
-                out_dir, f'{base_filename}.csv'
+                out_dir, f'{base_filename}{out_suff.replace('.nii.gz', '').replace('.nii','')}.csv'
             )
             df_demog.to_csv(csv_file, index=False)
-            
-            st.dataframe(df_demog)
             
             gc.collect()
         except:  # Explicitly capturing app exceptions here to be able to continue processing
