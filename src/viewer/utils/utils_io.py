@@ -479,7 +479,7 @@ def panel_select_project(out_dir, curr_project):
     '''
     Panel for creating/selecting a project name/folder (to keep all data for the current project)
     '''
-    items = ['Create New', 'Select Existing']
+    items = ['Select Existing', 'Create New']
     if st.session_state.has_cloud_session:
         items.append('Generate Demo Data')
     sel_mode = sac.tabs(

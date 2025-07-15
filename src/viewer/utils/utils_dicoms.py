@@ -114,6 +114,8 @@ def detect_series(in_dir: str) -> Any:
                         dicom_headers.PatientID,
                         dicom_headers.StudyDate,
                         dicom_headers.SeriesDescription,
+                        dicom_headers.PatientAge,
+                        dicom_headers.PatientSex
                     ]
             list_dfields.append(dfields)
 
@@ -123,9 +125,9 @@ def detect_series(in_dir: str) -> Any:
 
     # Create dataframe with file name and dicom series description
     df_dicoms = pd.DataFrame(
-        data=list_dfields, columns=["fname", "PatientID", "StudyDate", "SeriesDesc"]
+        data=list_dfields,
+        columns=["fname", "PatientID", "StudyDate", "SeriesDesc","Age", "Sex"]
     )
-
     return df_dicoms
 
 def select_series(df_dicoms: pd.DataFrame, dict_series: pd.Series) -> Any:
@@ -204,6 +206,23 @@ def convert_single_series(
             else:
                 nifti_file = os.path.join(out_dir, base_filename + out_suff)
             convert_dicom.dicom_array_to_nifti(dicom_input, nifti_file, reorient)
+            
+            # Create demog info csv from dicoms
+            page = None
+            if "PatientAge" in dicom_input[0]:
+                page = dicom_input[0].PatientAge
+                page = page.replace('Y','')
+            psex = None
+            if "PatientSex" in dicom_input[0]:
+                psex = dicom_input[0].PatientSex
+            df_demog = pd.DataFrame({'MRID': [base_filename], 'Age': [page], 'Sex': [psex]})
+            csv_file = os.path.join(
+                out_dir, f'{base_filename}.csv'
+            )
+            df_demog.to_csv(csv_file, index=False)
+            
+            st.dataframe(df_demog)
+            
             gc.collect()
         except:  # Explicitly capturing app exceptions here to be able to continue processing
             print(f"Unable to convert: {base_filename}")
