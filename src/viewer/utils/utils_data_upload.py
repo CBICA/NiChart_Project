@@ -26,6 +26,9 @@ def select_project(out_dir, curr_project):
     
     if sel_mode is None:
         return None
+    
+    # Default
+    sel_project = None
 
     if sel_mode == 'Generate Demo Data':
         generate_button = st.button("Generate")
@@ -54,7 +57,7 @@ def select_project(out_dir, curr_project):
                     shutil.rmtree(destination_path)
                 shutil.copytree(demo, destination_path, dirs_exist_ok=True)
             st.success(f"NiChart demonstration projects have been added to your projects list: {', '.join(demo_names)} ")
-            return
+            return None
       
     if sel_mode == 'Create New':
         sel_project = st.text_input(
@@ -73,6 +76,7 @@ def select_project(out_dir, curr_project):
                 index = sel_ind,
                 label_visibility = 'collapsed',
             )
+
     if sel_project is None:
         return
     
