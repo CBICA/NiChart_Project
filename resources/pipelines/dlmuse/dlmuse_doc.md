@@ -15,9 +15,10 @@
 │   └── 📄 scan2_T1.nii.gz
 │
 📤 Output
-├── 📁  dlmuse_seg
-│   ├── 📄 scan1_T1_dlmuse.nii.gz
-│   └── 📄 scan2_T1_dlmuse.nii.gz
-├── 📁 dlmuse_vol
-│   └── 📄 my_project_dlmuse.csv
+├── 📁  DLMUSE_seg
+│   ├── 📄 scan1_T1_DLMUSE.nii.gz
+│   └── 📄 scan2_T1_DLMUSE.nii.gz
+└── 📁 DLMUSE_vol
+    └── 📄 DLMUSE_Volumes.csv
+```
 

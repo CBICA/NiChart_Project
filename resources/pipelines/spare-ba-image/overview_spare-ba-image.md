@@ -1,15 +1,18 @@
-### SPARE-BA-Image: Brain Aging Estimation from raw MRI images
+### SPARE-BA-Image: Direct Image-to-Biomarker Brain Age scores
 
 #### Source:
 
-https://github.com/CBICA/DL-SPARE
+https://github.com/CBICA/NiChart_BAScores
+
+#### Description
+
+BAScores is an integrated NiChart package that helps users perform inference using our pre-trained image-to-biomarker models.
 
 #### Input
 
-- T1-weighted scans (Nifti)
-
+- T1-weighted scans (NIFTI files)
 
 #### Output
 
-- SPARE-BA-Image scores (csv file)
-
+- Inference results (CSV file)
+- Attention mapping results (NIFTI files)
