@@ -180,7 +180,11 @@ def pipeline_overview():
             index =  sel_index,
             key = '_sel_pipeline'
         )        
-        pname = pipelines.loc[pipelines.Name == sel_pipeline, 'Label'].values[0]
+        label_matches = pipelines.loc[pipelines.Name == sel_pipeline, 'Label'].values
+        if len(label_matches) == 0: # No selection
+            return
+        
+        pname = label_matches[0]
         st.session_state.sel_pipeline = pname
         
         #sac.divider(label='Description', align='center', color='gray')
