@@ -64,9 +64,7 @@ st.markdown(
 
 tab = sac.tabs(
     items=[
-        sac.TabsItem(label='Paths'),
         sac.TabsItem(label='Plot Colors'),
-        sac.TabsItem(label='Debug'),
         sac.TabsItem(label='Misc'),
     ],
     size='lg',
@@ -76,10 +74,6 @@ tab = sac.tabs(
 if tab == 'Plot Colors':
     with st.container(border=True):
         panel_plot_colors()
-
-elif tab == 'Debug':
-    with st.container(border=True):
-        panel_debug_options()
 
 elif tab == 'Misc':
     with st.container(border=True):
