@@ -141,7 +141,9 @@ def panel_run_pipeline():
         return
     skip_steps_when_possible = True
     skip_steps_when_possible = st.checkbox("Accelerate pipeline via caching? (Uncheck to force re-runs)", value=True)
+    alert_placeholder = st.empty()
     if st.button("Run pipeline"):
+        alert_placeholder.info(f"The pipeline {pipeline_to_run} is running. Please do not navigate away from this page.")
         with st.container():
             st.subheader("Pipeline Logs")
             with st.expander("View all pipeline logs"):
@@ -167,7 +169,7 @@ def panel_run_pipeline():
             reuse_cached_steps=skip_steps_when_possible
         )
 
-        st.success(f"Pipeline {pipeline_to_run} finished successfully.")
+        alert_placeholder.success(f"Pipeline {pipeline_to_run} finished successfully.")
 
 
 def panel_view_status():
@@ -186,7 +188,7 @@ tab = sac.tabs(
     items=[
         sac.TabsItem(label='Verify Input Data'),
         sac.TabsItem(label='Run Pipeline'),
-        sac.TabsItem(label='View Status')
+        #sac.TabsItem(label='View Status')
     ],
     size='lg',
     align='left'
