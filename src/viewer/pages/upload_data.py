@@ -48,14 +48,15 @@ def upload_data():
 def panel_delete_data():
     with st.container(border=True):
         proj_dir = st.session_state.paths['project']
-        st.button("Delete this project", help="This will permanently delete all data in this project and invalidate all associated caching.")
-        if st.confirm(f"Are you sure you want to delete the project {st.session_state.project}? This can't be undone."):
-            shutil.rmtree(st.session_state.paths['project'])
-            list_projects = utilio.get_subfolders(st.session_state.paths["out_dir"])
-            if len(list_projects) > 0:
-                sel_project = list_projects[0]
-                utilss.update_project(sel_project)
-            st.success(f"Project {st.session_state.project} was successfully deleted.")
+        if st.button("Delete this project", help="This will permanently delete all data in this project and invalidate all associated caching."):
+            st.warning("Are you sure you want to delete all data associated with this project? This cannot be undone.")
+            if st.button("Confirm deletion"):
+                shutil.rmtree(st.session_state.paths['project'])
+                list_projects = utilio.get_subfolders(st.session_state.paths["out_dir"])
+                if len(list_projects) > 0:
+                    sel_project = list_projects[0]
+                    utilss.update_project(sel_project)
+                st.success(f"Project {st.session_state.project} was successfully deleted.")
     return
 st.markdown(
     """
