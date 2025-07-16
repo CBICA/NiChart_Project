@@ -3,9 +3,8 @@ DLMUSE,dlmuse
 DLWMLS,dlwmls
 SPARE-AD,spare-ad
 SPARE-BA,spare-ba
-SPARE-BA-IMAGE,spare-ba-image
 SurrealGAN,surrealgan
-CCLNMF,cclnmf
-
+SPARE-BA-Image,spare-ba-image
+CCL-NMF,cclnmf
 
 

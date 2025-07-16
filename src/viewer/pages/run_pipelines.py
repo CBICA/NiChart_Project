@@ -102,16 +102,48 @@ def panel_run_pipeline():
     # For now, just hardcode the mapping from sel_pipeline to a pipeline in resources/pipelines.
     sel_method = st.session_state.sel_pipeline
     st.success(f'Selected pipeline: {sel_method}')
-
+    harmonize = False
+    not_harmonizable = ['cclnmf', 'dlwmls', 'spare-ba-image', 'surrealgan']
+    if sel_method not in not_harmonizable:
+        harmonize = st.checkbox("Harmonize to reference data? (Requires >= 3 scans)")
     ## TODO: Retrieve dynamically/match between front end and toolloader code
+    ## This a nice and simple placeholder for now
+    
     sel_pipeline_to_id = {
         'dlmuse': 'run_dlmuse',
+        'spare-ad': 'run_spare_ad',
+        'spare-ba': 'run_spare_ba',
+        'spare-ba-image': 'run_bascores',
+        'dlwmls': 'run_dlwmls',
+        'spare-cvm': None,
+        'surrealgan': 'run_predcrd_surrealgan',
+        'synthseg': None,
+        'cclnmf': 'run_cclnmf',
         ## Add additional lines here ({sel_pipeline value} : {name of pipeline yaml} )
     }
+    if harmonize:
+        sel_pipeline_to_id = {
+            'dlmuse': 'run_dlmuse_harmonized',
+            'dlwmls': 'run_dlwmls',
+            'spare-ad': 'run_spare_ad_harmonized',
+            'spare-ba': 'run_spare_ba_harmonized',
+            'spare-ba-image': 'run_bascores',
+            'spare-cvm': None,
+            'surrealgan': 'run_predcrd_surrealgan',
+            'synthseg': None,
+            'cclnmf': 'run_cclnmf',
+            ## Add additional lines here ({sel_pipeline value} : {name of pipeline yaml} )
+        }
 
-    pipeline_to_run = sel_pipeline_to_id[sel_method]
-
+    pipeline_to_run = sel_pipeline_to_id.get(sel_method, None)
+    if pipeline_to_run is None:
+        st.error("The currently selected pipeline doesn't have an associated tool configuration. Please submit a bug report!")
+        return
+    skip_steps_when_possible = True
+    skip_steps_when_possible = st.checkbox("Accelerate pipeline via caching? (Uncheck to force re-runs)", value=True)
+    alert_placeholder = st.empty()
     if st.button("Run pipeline"):
+        alert_placeholder.info(f"The pipeline {pipeline_to_run} is running. Please do not navigate away from this page.")
         with st.container():
             st.subheader("Pipeline Logs")
             with st.expander("View all pipeline logs"):
@@ -132,10 +164,12 @@ def panel_run_pipeline():
             global_vars={"STUDY": st.session_state.paths["project"]},
             pipeline_progress_bar=pipeline_progress_bar,
             process_progress_bar=process_progress_bar,
-            log=log
+            log=log,
+            metadata_location=os.path.join(st.session_state.paths["project"], "metadata.json"),
+            reuse_cached_steps=skip_steps_when_possible
         )
 
-        st.success(f"Pipeline {pipeline_to_run} finished successfully.")
+        alert_placeholder.success(f"Pipeline {pipeline_to_run} finished successfully.")
 
 
 def panel_view_status():
@@ -157,7 +191,7 @@ tab = sac.tabs(
     items=[
         sac.TabsItem(label='Verify Input Data'),
         sac.TabsItem(label='Run Pipeline'),
-        sac.TabsItem(label='View Status')
+        #sac.TabsItem(label='View Status')
     ],
     size='lg',
     align='left'

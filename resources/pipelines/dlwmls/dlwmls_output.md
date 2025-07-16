@@ -1,0 +1,2 @@
+- Segmentation mask (one for each scan)
+- Volume CSV (one, describing all scans)

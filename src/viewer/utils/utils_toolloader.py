@@ -4,9 +4,11 @@ import os
 import yaml
 from pathlib import Path
 import subprocess
+import shutil
 import streamlit as st
 import json
 import boto3
+from datetime import datetime
 from botocore.exceptions import ClientError
 import utils.utils_pollstatus as ps
 import time
@@ -128,14 +130,24 @@ class ToolSpec(BaseModel):
             mode = config.mode
             is_output = False
             is_ofile = False
+            is_ifile = False
             if label in self.outputs:
                 is_output = True
                 if self.outputs[label].type == 'file':
                     is_ofile = True
+            elif label in self.inputs: # necessarily this is an input
+                if self.inputs[label].type =='file':
+                    is_ifile = True
+            else:
+                print(f"Mount label {label} not found in tool spec inputs or outputs.")
+                raise ValueError(f"Mount label {label} not found in tool spec inputs or outputs.")
+        
             if is_ofile: 
                 parent_host_path = Path(host_path).parent.resolve()
                 parent_container_path = Path(config.path_in_container).parent
                 mount_args.append(f"-v {parent_host_path}:{parent_container_path}:{mode}")
+            elif is_ifile:
+                mount_args.append(f"--mount type=bind,source={host_path},target={config.path_in_container}")
             else:
                 mount_args.append(f"-v {host_path}:{config.path_in_container}:{mode}")
 
@@ -351,6 +363,7 @@ def submit_and_run_job_sync(
     execution_mode: str = "any",  # can be "cloud", "local", or "any"
     progress_bar=None,
     log=None,
+    metadata_path: Path = None,
     poll_interval: int = 15,
     do_s3_cli_transfer: bool = False # True will bypass FSX to use direct S3 file upload/download
 ) -> Dict[str, Any]:
@@ -385,6 +398,7 @@ def submit_and_run_job_sync(
 
     if progress_bar:
         progress_bar.set_description(f"Job {job_id} running...")
+    
 
     # === CLOUD MODE (AWS Batch) ===
     if mode == "cloud":
@@ -524,13 +538,138 @@ def parse_pipeline_steps(pipeline_yaml):
 
     return execution_order, step_map
 
+def load_metadata(metadata_path: Path) -> Dict:
+    if metadata_path is None:
+        return {}
+    if metadata_path.exists():
+        with open(metadata_path, 'r') as f:
+            return json.load(f)
+    else:
+        return {}
+
+def save_metadata(metadata_path: Path, metadata: Dict):
+    with open(metadata_path, 'w') as f:
+        json.dump(metadata, f, indent=2)
+
+def generate_metadata_key(tool_id: str,
+                          inputs: Dict,
+                          params: Dict):
+    def sorted_str(d: Dict) -> str:
+        return json.dumps(d, sort_keys=True)
+    return f"{tool_id}|{sorted_str(inputs)}|{sorted_str(params)}"
+
+def should_skip_step(metadata_path: Path,
+                     tool_id: str,
+                     inputs: Dict,
+                     outputs: Dict,
+                     params: Dict) -> bool:
+    metadata =  load_metadata(metadata_path)
+    key = generate_metadata_key(tool_id, inputs, params)
+    if key not in metadata:
+        return False
+    
+    record = metadata[key]
+    if record["status"] != "success":
+        return False
+    
+    finished_time = datetime.fromisoformat(record["finished_time"])
+
+    # Check mtime of all input files/dirs
+    input_mtime = 0
+    for path_str in inputs.values():
+        path = Path(path_str)
+        if path.is_file():
+            input_mtime = max(input_mtime, path.stat().st_mtime)
+        elif path.is_dir():
+            mtime = max((f.stat().st_mtime for f in path.rglob('*')), default=0)
+            input_mtime = max(input_mtime, mtime)
+
+    if finished_time.timestamp() > input_mtime:
+        # Copy outputs to new locations if output paths differ
+        for key_out, prev_output_path in record["outputs"].items():
+            new_output_path = outputs.get(key_out)
+            if new_output_path and new_output_path != prev_output_path:
+                src = Path(prev_output_path)
+                dst = Path(new_output_path)
+                if src.is_dir():
+                    shutil.copytree(src, dst, dirs_exist_ok=True)
+                else:
+                    dst.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(src, dst)
+        return True
+    return False
+
+def record_step_submission(metadata_path: Path,
+                           tool_id: str,
+                           inputs: Dict,
+                           outputs: Dict,
+                           params: Dict
+                           ):
+    metadata = load_metadata(metadata_path)
+    key = generate_metadata_key(tool_id, inputs, params)
+    metadata[key] = {
+        "tool": tool_id,
+        "inputs": inputs,
+        "params": params,
+        "outputs": outputs,
+        "submitted_time": datetime.utcnow().isoformat(),
+        "status": "pending"
+    }
+    save_metadata(metadata_path, metadata)
+
+def record_step_completion(metadata_path: Path,
+                           tool_id: str,
+                           inputs: Dict,
+                           outputs: Dict,
+                           params: Dict,
+                           status: str = "success"
+                           ):
+    metadata = load_metadata(metadata_path)
+    key = generate_metadata_key(tool_id, inputs, params)
+    
+    entry = metadata.get(key, {
+        "tool": tool_id,
+        "inputs": inputs,
+        "params": params,
+        "outputs": outputs or {},
+        "submitted_time": datetime.utcnow().isoformat()
+    })
+
+    entry["finished_time"] = datetime.utcnow().isoformat()
+    entry["status"] = status
+    if outputs:
+        entry["outputs"] = outputs
+    
+    metadata["key"] = entry
+    save_metadata(metadata_path, metadata)
+    
+
+def clear_all_metadata(metadata_path: Path):
+    if metadata_path.exists():
+        metadata_path.unlink()
+
+def clear_step_metadata(metadata_path: Path,
+                        tool_id: str,
+                        inputs: Dict,
+                        params: Dict):
+    metadata = load_metadata(metadata_path)
+    key = generate_metadata_key(tool_id, inputs, params)
+    if key in metadata:
+        del metadata[key]
+        save_metadata(metadata_path, metadata)
+
 def run_pipeline(pipeline_id: str,
                 global_vars: Dict[str, str],
                 pipeline_progress_bar=None,
                 process_progress_bar=None,
                 execution_mode='cloud',
-                log=None
+                log=None,
+                metadata_location=None,
+                reuse_cached_steps=True,
                 ):
+    if metadata_location is not None:
+        metadata_location = Path(metadata_location)
+
     # Resolve pipeline file
     pipeline_path = DEFAULT_PIPELINE_DEFINITION_PATH / f"{pipeline_id}.yaml"
     if not pipeline_path.exists():
@@ -553,6 +692,7 @@ def run_pipeline(pipeline_id: str,
             pipeline_progress_bar.update(1)
         step = step_map[sid]
         tool_id = step["tool"]
+
         log.info(f"Starting execution of pipeline step {tool_id}.")
         tool_yaml = DEFAULT_TOOL_DEFINITION_PATH / f"{tool_id}.yaml"
         tool = load_tool_spec_from_yaml(tool_yaml)
@@ -567,6 +707,33 @@ def run_pipeline(pipeline_id: str,
         if process_progress_bar:
             process_progress_bar.set_description(f"Running tool {tool_id}...")
 
+        ## Fill this in with deduplication logic
+        if metadata_location is not None:
+            # Can use metadata to deduplicate pipeline steps, check it
+            if not reuse_cached_steps:
+                clear_step_metadata(
+                    metadata_path=metadata_location,
+                    tool_id=tool_id,
+                    inputs=resolved_inputs,
+                    params=resolved_params
+                )
+            elif should_skip_step(
+                metadata_path=metadata_location,
+                tool_id=tool_id,
+                inputs=resolved_inputs,
+                params=resolved_params,
+                outputs=resolved_outputs
+            ):
+                log.info(f"[CACHE] Skipping step: {tool_id} because it was determined that a previous execution could be reused.")
+                continue # Skip to next pipeline step
+        
+        # If we reach here, the step must be executed.
+        record_step_submission(metadata_path=metadata_location,
+                           tool_id=tool_id,
+                           inputs=resolved_inputs,
+                           outputs=resolved_outputs,
+                           params=resolved_params)
+        
         result = submit_and_run_job_sync(
                     tool_name=tool_id,
                     user_params=resolved_params,
@@ -574,13 +741,26 @@ def run_pipeline(pipeline_id: str,
                     execution_mode=execution_mode,
                     progress_bar=process_progress_bar,
                     log=log,
+                    metadata_path=metadata_location
         )
 
         if result['status'] == 'success':
+            record_step_completion(metadata_path=metadata_location,
+                                   tool_id=tool_id,
+                                   inputs=resolved_inputs,
+                                   outputs=resolved_outputs,
+                                   params=resolved_params,
+                                   status="success")
             print(f"Step {sid}, {tool_id} finished succesfully.")
             log.info(f"Pipeline step {tool_id} finished successfully")
         else: # Step failed, loudly fail
-            log.error(f"Pipeline step {tool_id} failed.")
+            record_step_completion(metadata_path=metadata_location,
+                                   tool_id=tool_id,
+                                   inputs=resolved_inputs,
+                                   outputs=resolved_outputs,
+                                   params=resolved_params,
+                                   status="failure")
+            log.error(f"Pipeline step {tool_id} failed with status {result['status']}.")
             print(f"Step {sid}, {tool_id} failed with status {result["status"]}, see error log:")
             print(f"Error message: {result["error_message"]}")
             raise RuntimeError(result["error_message"])

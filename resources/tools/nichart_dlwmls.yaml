@@ -1,28 +1,28 @@
-name: nichart_dlmuse 
-description: This tool extracts DLICV intracranial volumes, DLMUSE segmentations, and ROI volume CSV files.
+name: nichart_dlwmls
+description: This tool segments white matter lesions on FLAIR MRI brain scans.
 
 dependencies: # Names of dependencies. To make another tool's output a dependency, place its name in this list
-  - t1_img
+  - fl_img
 
 inputs:
-  t1_img:
+  fl_img:
     type: directory
 
 outputs:
-  dlmuse_vol:
+  dlwmls_seg:
     type: directory
-  dlmuse_seg:
-    type: directory
+  dlwmls_vol:
+    type: file
 
 mounts:
-  t1_img:
-    path_in_container: /input/t1
+  fl_img:
+    path_in_container: /input/fl
     mode: ro
-  dlmuse_vol:
-    path_in_container: /output/dlmuse_vol
+  dlwmls_seg:
+    path_in_container: /output/DLWMLS_seg
     mode: rw
-  dlmuse_seg:
-    path_in_container: /output/dlmuse_seg
+  dlwmls_vol:
+    path_in_container: /output/DLWMLS_Volumes.csv
     mode: rw
 
 parameters:
@@ -34,6 +34,6 @@ resources: # Used to allocate jobs on the cloud. Please be diligent.
   gpus: 1
 
 container:
-  image: cbica/nichart_dlmuse:1.0.9-wrapped
-  command: -d cuda --in_dir {t1_img} --out_csvs {dlmuse_vol} --out_segs {dlmuse_seg} --cores 1
+  image: cbica/dlwmls_wrapped:0.0.1
+  command: --in_dir {fl_img} --out_seg {dlwmls_seg} --out_csv {dlwmls_vol} -device cuda
 

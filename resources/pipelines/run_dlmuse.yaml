@@ -9,6 +9,6 @@ steps:
       t1_img: ${STUDY}/t1
     outputs:
       dlmuse_seg: ${STUDY}/DLMUSE_seg
-      dlmuse_csv: ${STUDY}/DLMUSE_csv
+      dlmuse_vol: ${STUDY}/DLMUSE_vol
     
 
