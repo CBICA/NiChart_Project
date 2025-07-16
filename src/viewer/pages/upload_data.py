@@ -45,7 +45,12 @@ def upload_data():
     
 st.markdown(
     """
-    ### User Data
+    ### Manage project data
+    
+    - Create a project folder for your dataset and upload input data for processing
+    
+    - Or, switch to an existing project
+
     """
 )
 

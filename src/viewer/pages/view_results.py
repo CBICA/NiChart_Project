@@ -35,13 +35,6 @@ def select_data_files():
         in_dir = st.session_state.paths['project']
         utildv.select_files(in_dir)
 
-def panel_data_merge():
-    '''
-    Detect all csv files and merge them
-    '''
-    in_dir = st.session_state.paths['project']
-    utildv.data_merge(in_dir)
-
 def plot_vars():
     """
     Panel for viewing dlmuse results
@@ -68,7 +61,9 @@ def plot_vars():
 
 st.markdown(
     """
-    ### View Results 
+    ### Results Dashboard
+    
+    - Plot imaging variables and biomarkers derived from your dataset together with reference distributions
     """
 )
 

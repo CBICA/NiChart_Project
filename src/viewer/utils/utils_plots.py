@@ -237,8 +237,6 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
             sel_roi = st.session_state.plots.loc[st.session_state.plot_active, 'params']['yvar']
             st.session_state.sel_mrid = sel_mrid
             st.session_state.sel_roi = sel_roi
-            #st.session_state.sel_roi_img = sel_roi
-            # st.rerun()
 
         print(f'Clicked {sel_mrid}')
 

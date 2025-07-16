@@ -73,6 +73,8 @@ def panel_download():
 st.markdown(
     """
     ### Download Results 
+    
+    - Select a result folder and download
     """
 )
 

@@ -218,6 +218,9 @@ def results_overview():
 st.markdown(
     """
     ### Explore Neuroimaging Chart
+    
+    - View an overview of the reference dataset, processing pipelines and imaging variables and biomarkers derived from the reference dataset
+    
     """
 )
 

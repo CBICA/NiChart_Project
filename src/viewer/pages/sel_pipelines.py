@@ -116,6 +116,9 @@ def sel_pipeline_from_list():
 st.markdown(
     """
     ### Pipelines
+    
+    - Select a processing pipeline to apply on your data
+    
     """
 )
 

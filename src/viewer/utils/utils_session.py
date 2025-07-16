@@ -277,8 +277,6 @@ def init_dicom_vars() -> None:
         'df_dicoms': None
     }
 
-    print('AAAA')
-
 def init_plot_vars() -> None:
     '''
     Set plotting variables

@@ -7,7 +7,7 @@ dict_menu = {
     "Home": "pages/home.py",
     "Explore NiChart": "pages/explore_nichart.py",
     "Select Pipeline": "pages/sel_pipelines.py",
-    "Upload Your Data": "pages/upload_data.py",
+    "Select Project": "pages/upload_data.py",
     "Run Pipeline": "pages/run_pipelines.py",
     "View Your Brain Chart": "pages/view_results.py",
     "Download Results": "pages/download_results.py",
