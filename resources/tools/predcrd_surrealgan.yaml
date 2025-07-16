@@ -19,7 +19,7 @@ mounts:
     path_in_container: /input/demog.csv
     mode: ro
   surrealgan_csv:
-    path_in_container: /output/CCLNMF.csv
+    path_in_container: /output/SurrealGAN_RScores.csv
     mode: rw
 
 parameters:

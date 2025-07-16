@@ -1,1 +1,1 @@
-# PLACEHOLDER: FILL IN PIPELINE MARKDOWN FILES!
+- T1 scans (one or multiple, required)
