@@ -35,4 +35,4 @@ resources: # Used to allocate jobs on the cloud. Please be diligent.
 
 container:
   image: cbica/nichart_bascores:0.0.1
-  command: -i {t1_img} -o {out_attention} --csv {out_csv}
+  command: -i {t1_img} -o {out_attention} --csv {out_csv} --device cuda
