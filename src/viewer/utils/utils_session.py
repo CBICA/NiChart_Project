@@ -7,7 +7,6 @@ import time
 import yaml
 import pandas as pd
 import streamlit as st
-import utils.utils_io as utilio
 import utils.utils_rois as utilroi
 import utils.utils_processes as utilproc
 import utils.utils_cmaps as utilcmap
@@ -251,7 +250,8 @@ def init_paths():
         "out_dir": p_out,
         "project": p_prj,
         "plot_dir": p_plot,
-        "plot_data": d_plot
+        "plot_data": d_plot,
+        'target': None
     }
     
     # List of output folders
@@ -269,6 +269,16 @@ def init_paths():
     )
     st.session_state.paths["file_search_dir"] = st.session_state.paths["init"]
     ############    
+
+def init_dicom_vars() -> None:
+    '''
+    Set dicom variables
+    '''
+    st.session_state.dicoms = {
+        'list_series': None,
+        'num_dicom_scans': 0,
+        'df_dicoms': None
+    }
 
 def init_plot_vars() -> None:
     '''
@@ -289,9 +299,9 @@ def init_plot_vars() -> None:
 
     # Plot settings
     st.session_state.plot_settings = {
-        "flag_hide_settings": False,
-        "flag_hide_mri": False,
-        "flag_hide_legend": False,
+        "flag_hide_settings": 'Show',
+        "flag_hide_legend": 'Show',
+        "flag_hide_mri": 'Show',
         "trend_types": ["None", "Linear", "Smooth LOWESS Curve"],
         "centile_types": ["", "CN", "CN_Males", "CN_Females", "CN_ICV_Corrected"],
         "linfit_trace_types": [
@@ -595,6 +605,7 @@ def init_session_state() -> None:
         init_pipeline_definitions()
         init_reference_data()
         init_plot_vars()
+        init_dicom_vars()
         
         # Set flag
         st.session_state.instantiated = True

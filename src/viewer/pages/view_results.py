@@ -1,6 +1,5 @@
 import streamlit as st
 import utils.utils_pages as utilpg
-import utils.utils_io as utilio
 import utils.utils_plots as utilpl
 import utils.utils_mriview as utilmri
 import utils.utils_data_view as utildv
@@ -36,13 +35,6 @@ def select_data_files():
         in_dir = st.session_state.paths['project']
         utildv.select_files(in_dir)
 
-def panel_data_merge():
-    '''
-    Detect all csv files and merge them
-    '''
-    in_dir = st.session_state.paths['project']
-    utildv.data_merge(in_dir)
-
 def plot_vars():
     """
     Panel for viewing dlmuse results
@@ -51,34 +43,29 @@ def plot_vars():
     var_groups_data = ['demog', 'roi']
     var_groups_hue = ['cat_vars']
     pipeline = 'dlmuse'
-
-    # Set flag for hiding the settings
-    if '_flag_hide_settings' not in st.session_state:
-        st.session_state['_flag_hide_settings'] = st.session_state.plot_settings['flag_hide_settings']
-
-    def update_val():
-        st.session_state.plot_settings['flag_hide_settings'] = st.session_state['_flag_hide_settings']
+    list_vars = st.session_state.plot_data['df_data'].columns.tolist()
 
     with st.sidebar:
-        sac.divider(label='Plot Settings', align='center', color='gray')
-        st.checkbox(
-            'Hide Plot Settings',
-            key = '_flag_hide_settings',
-            on_change = update_val
-        )
+        sac.divider(label='Viewing Options', align='center', color='gray')
+    utilpl.sidebar_flag_hide_setting()
+    utilpl.sidebar_flag_hide_legend()
+    utilpl.sidebar_flag_hide_mri()
 
     utilpl.panel_set_params_plot(
         st.session_state.plot_params,
         var_groups_data,
         var_groups_hue,
-        pipeline
+        pipeline,
+        list_vars
     )
 
     utilpl.panel_show_plots()
 
 st.markdown(
     """
-    ### View Results 
+    ### Results Dashboard
+    
+    - Plot imaging variables and biomarkers derived from your dataset together with reference distributions
     """
 )
 

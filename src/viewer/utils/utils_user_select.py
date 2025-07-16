@@ -5,7 +5,6 @@ from typing import Any, Optional
 import pandas as pd
 import numpy as np
 import streamlit as st
-import utils.utils_io as utilio
 import utils.utils_session as utilses
 import utils.utils_misc as utilmisc
 import utils.utils_mriview as utilmri
@@ -21,6 +20,7 @@ def select_var_from_group(
     df_vars,
     init_group,
     init_var,
+    list_vars,
     flag_add_none = False,
     dicts_rename = None
 ):
@@ -47,21 +47,26 @@ def select_var_from_group(
         if tmp_atlas is not None:
             tmp_list = [dicts_rename[tmp_atlas][k] for k in tmp_list]
 
+        # Select vars that are included in the data
+        tmp_list = [x for x in tmp_list if x in list_vars]
+
         # Add a None item in var list
         if flag_add_none:
             tmp_list = ['None'] + tmp_list
+        
+        if len(tmp_list) > 0:
 
-        tmp_item = sac.CasItem(tmp_group, icon='app', children=tmp_list)
-        sac_items.append(tmp_item)
+            tmp_item = sac.CasItem(tmp_group, icon='app', children=tmp_list)
+            sac_items.append(tmp_item)
 
-        # Detect index of selected items
-        # !!! CasItem keeps a linear (flattened) index of nested items
-        # !!! For each group, the index is moved to:
-        #     curr_index + #items in group + 1
-        if init_group == tmp_group:
-            if init_var in tmp_list:
-                init_ind = [ind_count, ind_count + 1 + tmp_list.index(init_var)]
-        ind_count = ind_count + 1 + len(tmp_list)
+            # Detect index of selected items
+            # !!! CasItem keeps a linear (flattened) index of nested items
+            # !!! For each group, the index is moved to:
+            #     curr_index + #items in group + 1
+            if init_group == tmp_group:
+                if init_var in tmp_list:
+                    init_ind = [ind_count, ind_count + 1 + tmp_list.index(init_var)]
+            ind_count = ind_count + 1 + len(tmp_list)
 
     # Show var selector
     sel_var = sac.cascader(
@@ -75,6 +80,8 @@ def select_var_from_group(
         key=f'_sel_{label}'
     )
     #st.success(f'Selected: {sel_var}')
+    
+    print(f'aaaaaaaaaaaaaaaa {sel_var}')
 
     return sel_var
 

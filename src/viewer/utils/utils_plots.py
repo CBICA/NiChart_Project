@@ -5,7 +5,6 @@ from typing import Any, Optional
 import pandas as pd
 import numpy as np
 import streamlit as st
-import utils.utils_io as utilio
 import utils.utils_user_select as utiluser
 import utils.utils_session as utilses
 import utils.utils_misc as utilmisc
@@ -19,6 +18,63 @@ import streamlit_antd_components as sac
 
 pd.set_option('display.expand_frame_repr', False)
 pd.set_option('display.max_colwidth', None)  # or use a large number like 500
+
+def sidebar_flag_hide_setting():
+    '''
+    Set flag for hiding the settings
+    '''
+    if '_flag_hide_settings' not in st.session_state:
+        st.session_state['_flag_hide_settings'] = st.session_state.plot_settings['flag_hide_settings']
+
+    def update_val():
+        st.session_state.plot_settings['flag_hide_settings'] = st.session_state['_flag_hide_settings']
+
+    with st.sidebar:
+        st.radio(
+            'Plot Settings',
+            ['Hide', 'Show'],
+            key = '_flag_hide_settings',
+            horizontal = True,
+            on_change = update_val
+        )
+
+def sidebar_flag_hide_legend():
+    '''
+    Set flag for hiding the settings
+    '''
+    if '_flag_hide_legend' not in st.session_state:
+        st.session_state['_flag_hide_legend'] = st.session_state.plot_settings['flag_hide_legend']
+
+    def update_val():
+        st.session_state.plot_settings['flag_hide_legend'] = st.session_state['_flag_hide_legend']
+
+    with st.sidebar:
+        st.radio(
+            'Legend',
+            ['Hide', 'Show'],
+            key = '_flag_hide_legend',
+            horizontal = True,
+            on_change = update_val
+        )
+
+def sidebar_flag_hide_mri():
+    '''
+    Set flag for hiding the settings
+    '''
+    if '_flag_hide_mri' not in st.session_state:
+        st.session_state['_flag_hide_mri'] = st.session_state.plot_settings['flag_hide_mri']
+
+    def update_val():
+        st.session_state.plot_settings['flag_hide_mri'] = st.session_state['_flag_hide_mri']
+
+    with st.sidebar:
+        st.radio(
+            'MRI Viewer',
+            ['Hide', 'Show'],
+            key = '_flag_hide_mri',
+            horizontal = True,
+            on_change = update_val
+        )
 
 
 def read_data(fdata):
@@ -181,8 +237,6 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
             sel_roi = st.session_state.plots.loc[st.session_state.plot_active, 'params']['yvar']
             st.session_state.sel_mrid = sel_mrid
             st.session_state.sel_roi = sel_roi
-            #st.session_state.sel_roi_img = sel_roi
-            # st.rerun()
 
         print(f'Clicked {sel_mrid}')
 
@@ -227,9 +281,10 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
         utiltr.add_trace_centile(df_cent, plot_params, plot_settings, fig)
 
     # Add selected dot
-    sel_mrid = st.session_state.sel_mrid
-    if sel_mrid is not None:
-        utiltr.add_trace_dot(df, sel_mrid, plot_params, plot_settings, fig)
+    if df is not None:
+        sel_mrid = st.session_state.sel_mrid
+        if sel_mrid is not None:
+            utiltr.add_trace_dot(df, sel_mrid, plot_params, plot_settings, fig)
 
     st.plotly_chart(fig, key=f"bubble_chart_{plot_ind}", on_select=callback_plot_clicked)
     # st.plotly_chart(fig, key=f"bubble_chart_{plot_ind}")
@@ -278,16 +333,7 @@ def show_mri():
     if mrid is None:
         return
 
-    with st.sidebar:
-        sel_flag = sac.segmented(
-            items=['Hide', 'Show'],
-            label='MRI Viewer',
-            align='left',
-            size = 'sm'
-        )
-        st.session_state.plot_settings["flag_show_img"] = sel_flag == 'Show'
-
-    if st.session_state.plot_settings["flag_show_img"] == False:
+    if st.session_state.plot_settings["flag_hide_mri"] == 'Hide':
         return
 
     in_dir = st.session_state.paths['project']
@@ -296,71 +342,12 @@ def show_mri():
         in_dir, 't1', f'{mrid}_T1.nii.gz'
     )
     olay = os.path.join(
-        in_dir, 'dlmuse_seg', f'{mrid}_T1_DLMUSE.nii.gz'
+        in_dir, 'DLMUSE_seg', f'{mrid}_T1_DLMUSE.nii.gz'
     )
     utilmri.panel_view_seg(ulay, olay, plot_params)
 
 ###################################################################
 # User selections
-def user_select_var2(sel_var_groups, plot_params, var_type, add_none = False):
-    '''
-    User panel to select a variable 
-    Variables are grouped in categories
-    '''
-    df_groups = st.session_state.dicts['df_var_groups'].copy()
-    df_groups = df_groups[df_groups.category.isin(sel_var_groups)]
-
-    st.markdown(f'##### Variable: {var_type}')
-    cols = st.columns([1,3])
-    with cols[0]:
-        
-        list_group = df_groups.group.unique().tolist()
-        try:
-            curr_value = plot_params[f'{var_type}_group']
-            curr_index = list_group.index(curr_value)
-        except ValueError:
-            curr_index = 0
-            
-        st.selectbox(
-            "Variable Group",
-            list_group,
-            key = f'_{var_type}_group',
-            index = curr_index
-        )
-        plot_params[f'{var_type}_group'] = st.session_state[f'_{var_type}_group']
-
-    with cols[1]:
-
-        sel_group = plot_params[f'{var_type}_group']
-        if sel_group is None:
-            return
-        
-        sel_atlas = df_groups[df_groups['group'] == sel_group]['atlas'].values[0]
-        list_vars = df_groups[df_groups['group'] == sel_group]['values'].values[0]
-        
-        # Convert MUSE ROI variables from index to name
-        if sel_atlas == 'muse':
-            roi_dict = st.session_state.dicts['muse']['ind_to_name']
-            list_vars = [roi_dict[k] for k in list_vars]
-
-        if add_none:
-            list_vars = ['None'] + list_vars
-
-        try:
-            curr_value = plot_params[var_type]
-            curr_index = list_vars.index(curr_value)
-        except ValueError:
-            curr_index = 0
-            
-        st.selectbox(
-            "Variable Name",
-            list_vars,
-            key = f'_{var_type}',
-            index = curr_index
-        )
-        
-        plot_params[var_type] = st.session_state[f'_{var_type}']
-
 def user_select_var(sel_var_groups, plot_params, var_type, add_none = False):
     '''
     User panel to select a variable grouped in categories
@@ -530,12 +517,17 @@ def user_add_plots(plot_params):
             st.session_state.plots = delete_all_plots()
 
 
-def panel_set_params_plot(plot_params, var_groups_data, var_groups_hue, pipeline):
+def panel_set_params_plot(
+    plot_params, var_groups_data, var_groups_hue, pipeline, list_vars
+):
     """
     Panel to set plotting parameters
     """
-    if st.session_state.plot_settings['flag_hide_settings']:
+    if st.session_state.plot_settings['flag_hide_settings'] == 'Hide':
         return
+
+    plot_params['method'] = pipeline
+    plot_params['flag_norm_centiles'] = False    
 
     # Add tabs for parameter settings
     with st.container(border=True):
@@ -555,37 +547,40 @@ def panel_set_params_plot(plot_params, var_groups_data, var_groups_hue, pipeline
         df_vars = st.session_state.dicts['df_var_groups']
         if tab == 'Data':
             # Select x var
-            # Select x var
             sel_var = utiluser.select_var_from_group(
                 'Select x variable:',
                 df_vars[df_vars.group.isin(['demog'])],
                 plot_params['xvargroup'],
                 plot_params['xvar'],
+                list_vars,
                 flag_add_none = False,
                 dicts_rename = {
                     'muse': st.session_state.dicts['muse']['ind_to_name']
                 }
             )
-            plot_params['xvargroup'] = sel_var[0]
-            plot_params['xvar'] = sel_var[1]
+            
+            if sel_var != []:
+                plot_params['xvargroup'] = sel_var[0]
+                plot_params['xvar'] = sel_var[1]
 
-            # Select y var
             # Select y var
             sel_var = utiluser.select_var_from_group(
                 'Select y variable:',
-                df_vars[df_vars.category.isin(['roi'])],
+                df_vars[df_vars.category.isin(['demog','roi'])],
                 plot_params['yvargroup'],
                 plot_params['yvar'],
+                list_vars,
                 flag_add_none = False,
                 dicts_rename = {
                     'muse': st.session_state.dicts['muse']['ind_to_name']
                 }
             )
-            plot_params['yvargroup'] = sel_var[0]
-            plot_params['yvar'] = sel_var[1]
-            plot_params['roi_indices'] = utilmisc.get_roi_indices(
-                sel_var[1], 'muse'
-            )
+            if sel_var != []:
+                plot_params['yvargroup'] = sel_var[0]
+                plot_params['yvar'] = sel_var[1]
+                plot_params['roi_indices'] = utilmisc.get_roi_indices(
+                    sel_var[1], 'muse'
+                )
 
         elif tab == 'Groups':
             # Select h var
@@ -595,6 +590,7 @@ def panel_set_params_plot(plot_params, var_groups_data, var_groups_hue, pipeline
                 df_vars[df_vars.category.isin(['cat_vars'])],
                 plot_params['hvargroup'],
                 plot_params['hvar'],
+                list_vars,
                 flag_add_none = True,
                 dicts_rename = {
                     'muse': st.session_state.dicts['muse']['ind_to_name']
@@ -633,16 +629,18 @@ def panel_set_params_plot(plot_params, var_groups_data, var_groups_hue, pipeline
     if plot_params['trend'] == 'Smooth LOWESS Curve':
         plot_params['traces'] = plot_params['traces'] + ['lowess']
         
-    plot_params['method'] = pipeline
-    plot_params['flag_norm_centiles'] = False
-
 def panel_set_params_centile_plot(
     plot_params, var_groups_data, pipeline, flag_hide_settings = False
 ):
     """
     Panel to select centile plot args from the user
     """    
-    if st.session_state.plot_settings['flag_hide_settings']:
+    plot_params['method'] = pipeline
+    plot_params['flag_norm_centiles'] = False    
+
+    print(st.session_state.plot_settings['flag_hide_settings'])
+    
+    if st.session_state.plot_settings['flag_hide_settings'] == 'Hide':
         return
 
     # Add tabs for parameter settings
@@ -665,6 +663,7 @@ def panel_set_params_centile_plot(
                 df_vars[df_vars.group.isin(['demog'])],
                 plot_params['xvargroup'],
                 plot_params['xvar'],
+                
                 flag_add_none = False,
                 dicts_rename = {
                     'muse': st.session_state.dicts['muse']['ind_to_name']
@@ -708,8 +707,6 @@ def panel_set_params_centile_plot(
     if plot_params['centile_values'] is not None:
         plot_params['traces'] = plot_params['traces'] + plot_params['centile_values']
         
-    plot_params['method'] = pipeline
-    plot_params['flag_norm_centiles'] = False
 
 def panel_show_plots():
     '''

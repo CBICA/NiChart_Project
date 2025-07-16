@@ -181,6 +181,9 @@ def panel_view_status():
 st.markdown(
     """
     ### Run a pipeline
+    
+    - Apply the selected processing pipeline on your dataset
+    
     """
 )
 

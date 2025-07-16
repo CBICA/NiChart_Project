@@ -6,7 +6,6 @@ from typing import Any
 import streamlit as st
 import utils.utils_cloud as utilcloud
 import utils.utils_dicom as utildcm
-import utils.utils_io as utilio
 import utils.utils_menu as utilmenu
 import utils.utils_nifti as utilni
 import utils.utils_session as utilss

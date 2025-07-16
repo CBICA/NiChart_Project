@@ -1,7 +1,5 @@
 import streamlit as st
 import utils.utils_pages as utilpg
-#import utils.utils_doc as utildoc
-import utils.utils_io as utilio
 import utils.utils_session as utilses
 import utils.utils_cmaps as utilcmap
 import os
@@ -66,9 +64,7 @@ st.markdown(
 
 tab = sac.tabs(
     items=[
-        sac.TabsItem(label='Paths'),
         sac.TabsItem(label='Plot Colors'),
-        sac.TabsItem(label='Debug'),
         sac.TabsItem(label='Misc'),
     ],
     size='lg',
@@ -78,10 +74,6 @@ tab = sac.tabs(
 if tab == 'Plot Colors':
     with st.container(border=True):
         panel_plot_colors()
-
-elif tab == 'Debug':
-    with st.container(border=True):
-        panel_debug_options()
 
 elif tab == 'Misc':
     with st.container(border=True):

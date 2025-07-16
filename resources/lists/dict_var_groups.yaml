@@ -14,7 +14,7 @@ demog:
 cat_vars:
   category: cat_vars
   vtype: name
-  values: [Sex, DX]
+  values: [Sex, DX, DX_AD]
 
 SPARE:
   category: ml_biomarker
