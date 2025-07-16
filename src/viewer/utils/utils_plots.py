@@ -630,7 +630,7 @@ def panel_set_params_plot(
         plot_params['traces'] = plot_params['traces'] + ['lowess']
         
 def panel_set_params_centile_plot(
-    plot_params, var_groups_data, pipeline, flag_hide_settings = False
+    plot_params, var_groups_data, pipeline, list_vars, flag_hide_settings = False
 ):
     """
     Panel to select centile plot args from the user
@@ -663,7 +663,7 @@ def panel_set_params_centile_plot(
                 df_vars[df_vars.group.isin(['demog'])],
                 plot_params['xvargroup'],
                 plot_params['xvar'],
-                
+                list_vars,
                 flag_add_none = False,
                 dicts_rename = {
                     'muse': st.session_state.dicts['muse']['ind_to_name']
@@ -678,6 +678,7 @@ def panel_set_params_centile_plot(
                 df_vars[df_vars.category.isin(['roi'])],
                 plot_params['yvargroup'],
                 plot_params['yvar'],
+                list_vars,
                 flag_add_none = False,
                 dicts_rename = {
                     'muse': st.session_state.dicts['muse']['ind_to_name']

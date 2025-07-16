@@ -45,6 +45,16 @@ def view_dlmuse() -> None:
         # Set centile selections
         st.session_state.plot_params['centile_values'] = st.session_state.plot_settings['centile_trace_types']
 
+        df = pd.read_csv(
+                os.path.join(
+                    st.session_state.paths['resources'],
+                    'reference_data', 'centiles', 'dlmuse_centiles_CN.csv' 
+                )
+        )
+        list_vars = ['Age', 'Sex'] + df.VarName.unique().tolist()
+        print(list_vars)
+        #return
+
         with st.sidebar:
             sac.divider(label='Viewing Options', align='center', color='gray')
         utilpl.sidebar_flag_hide_setting()
@@ -53,7 +63,8 @@ def view_dlmuse() -> None:
         utilpl.panel_set_params_centile_plot(
             st.session_state.plot_params,
             var_groups_data,
-            pipeline
+            pipeline,
+            list_vars
         )
         utilpl.panel_show_centile_plots()
 
