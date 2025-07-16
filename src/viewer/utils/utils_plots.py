@@ -348,65 +348,6 @@ def show_mri():
 
 ###################################################################
 # User selections
-def user_select_var2(sel_var_groups, plot_params, var_type, add_none = False):
-    '''
-    User panel to select a variable 
-    Variables are grouped in categories
-    '''
-    df_groups = st.session_state.dicts['df_var_groups'].copy()
-    df_groups = df_groups[df_groups.category.isin(sel_var_groups)]
-
-    st.markdown(f'##### Variable: {var_type}')
-    cols = st.columns([1,3])
-    with cols[0]:
-        
-        list_group = df_groups.group.unique().tolist()
-        try:
-            curr_value = plot_params[f'{var_type}_group']
-            curr_index = list_group.index(curr_value)
-        except ValueError:
-            curr_index = 0
-            
-        st.selectbox(
-            "Variable Group",
-            list_group,
-            key = f'_{var_type}_group',
-            index = curr_index
-        )
-        plot_params[f'{var_type}_group'] = st.session_state[f'_{var_type}_group']
-
-    with cols[1]:
-
-        sel_group = plot_params[f'{var_type}_group']
-        if sel_group is None:
-            return
-        
-        sel_atlas = df_groups[df_groups['group'] == sel_group]['atlas'].values[0]
-        list_vars = df_groups[df_groups['group'] == sel_group]['values'].values[0]
-        
-        # Convert MUSE ROI variables from index to name
-        if sel_atlas == 'muse':
-            roi_dict = st.session_state.dicts['muse']['ind_to_name']
-            list_vars = [roi_dict[k] for k in list_vars]
-
-        if add_none:
-            list_vars = ['None'] + list_vars
-
-        try:
-            curr_value = plot_params[var_type]
-            curr_index = list_vars.index(curr_value)
-        except ValueError:
-            curr_index = 0
-            
-        st.selectbox(
-            "Variable Name",
-            list_vars,
-            key = f'_{var_type}',
-            index = curr_index
-        )
-        
-        plot_params[var_type] = st.session_state[f'_{var_type}']
-
 def user_select_var(sel_var_groups, plot_params, var_type, add_none = False):
     '''
     User panel to select a variable grouped in categories
@@ -576,7 +517,9 @@ def user_add_plots(plot_params):
             st.session_state.plots = delete_all_plots()
 
 
-def panel_set_params_plot(plot_params, var_groups_data, var_groups_hue, pipeline):
+def panel_set_params_plot(
+    plot_params, var_groups_data, var_groups_hue, pipeline, list_vars
+):
     """
     Panel to set plotting parameters
     """
@@ -604,37 +547,40 @@ def panel_set_params_plot(plot_params, var_groups_data, var_groups_hue, pipeline
         df_vars = st.session_state.dicts['df_var_groups']
         if tab == 'Data':
             # Select x var
-            # Select x var
             sel_var = utiluser.select_var_from_group(
                 'Select x variable:',
                 df_vars[df_vars.group.isin(['demog'])],
                 plot_params['xvargroup'],
                 plot_params['xvar'],
+                list_vars,
                 flag_add_none = False,
                 dicts_rename = {
                     'muse': st.session_state.dicts['muse']['ind_to_name']
                 }
             )
-            plot_params['xvargroup'] = sel_var[0]
-            plot_params['xvar'] = sel_var[1]
+            
+            if sel_var != []:
+                plot_params['xvargroup'] = sel_var[0]
+                plot_params['xvar'] = sel_var[1]
 
-            # Select y var
             # Select y var
             sel_var = utiluser.select_var_from_group(
                 'Select y variable:',
-                df_vars[df_vars.category.isin(['roi'])],
+                df_vars[df_vars.category.isin(['demog','roi'])],
                 plot_params['yvargroup'],
                 plot_params['yvar'],
+                list_vars,
                 flag_add_none = False,
                 dicts_rename = {
                     'muse': st.session_state.dicts['muse']['ind_to_name']
                 }
             )
-            plot_params['yvargroup'] = sel_var[0]
-            plot_params['yvar'] = sel_var[1]
-            plot_params['roi_indices'] = utilmisc.get_roi_indices(
-                sel_var[1], 'muse'
-            )
+            if sel_var != []:
+                plot_params['yvargroup'] = sel_var[0]
+                plot_params['yvar'] = sel_var[1]
+                plot_params['roi_indices'] = utilmisc.get_roi_indices(
+                    sel_var[1], 'muse'
+                )
 
         elif tab == 'Groups':
             # Select h var
@@ -644,6 +590,7 @@ def panel_set_params_plot(plot_params, var_groups_data, var_groups_hue, pipeline
                 df_vars[df_vars.category.isin(['cat_vars'])],
                 plot_params['hvargroup'],
                 plot_params['hvar'],
+                list_vars,
                 flag_add_none = True,
                 dicts_rename = {
                     'muse': st.session_state.dicts['muse']['ind_to_name']
@@ -716,6 +663,7 @@ def panel_set_params_centile_plot(
                 df_vars[df_vars.group.isin(['demog'])],
                 plot_params['xvargroup'],
                 plot_params['xvar'],
+                
                 flag_add_none = False,
                 dicts_rename = {
                     'muse': st.session_state.dicts['muse']['ind_to_name']

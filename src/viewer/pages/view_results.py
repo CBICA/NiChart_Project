@@ -43,6 +43,7 @@ def plot_vars():
     var_groups_data = ['demog', 'roi']
     var_groups_hue = ['cat_vars']
     pipeline = 'dlmuse'
+    list_vars = st.session_state.plot_data['df_data'].columns.tolist()
 
     with st.sidebar:
         sac.divider(label='Viewing Options', align='center', color='gray')
@@ -54,7 +55,8 @@ def plot_vars():
         st.session_state.plot_params,
         var_groups_data,
         var_groups_hue,
-        pipeline
+        pipeline,
+        list_vars
     )
 
     utilpl.panel_show_plots()

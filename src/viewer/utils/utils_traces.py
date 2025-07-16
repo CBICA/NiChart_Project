@@ -67,7 +67,10 @@ def add_trace_linreg(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
         hvals = df[hvar].dropna().sort_values().unique().tolist()
 
     traces = plot_params['traces']
-        
+     
+    if plot_params['xvar'] == plot_params['yvar']:
+        return fig
+     
     # Calculate fit
     dict_fit = utilstat.linreg_model(
         df, plot_params['xvar'], plot_params['yvar'], hvar
