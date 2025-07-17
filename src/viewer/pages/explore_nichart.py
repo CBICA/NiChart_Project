@@ -20,13 +20,6 @@ utilpg.config_page()
 utilpg.show_menu()
 utilpg.set_global_style()
 
-def view_synthseg() -> None:
-    """
-    Panel for viewing synthseg results
-    """    
-    # Select result type 
-    st.info('Coming soon!')
-
 def view_dlmuse() -> None:
     """
     Panel for viewing dlmuse results
@@ -37,6 +30,16 @@ def view_dlmuse() -> None:
         size='lg',
         align='left'
     )   
+
+    ## FIXME (list of rois from data file to init listbox selections)
+    df = pd.read_csv(
+            os.path.join(
+                st.session_state.paths['resources'],
+                'reference_data', 'centiles', 'dlmuse_centiles_CN.csv' 
+            )
+    )
+    list_vars = ['Age', 'Sex'] + df.VarName.unique().tolist()
+
 
     if sel_res_type == 'Regional Volumes':
         var_groups_data = ['roi']
@@ -53,7 +56,8 @@ def view_dlmuse() -> None:
         utilpl.panel_set_params_centile_plot(
             st.session_state.plot_params,
             var_groups_data,
-            pipeline
+            pipeline,
+            list_vars
         )
         utilpl.panel_show_centile_plots()
 
@@ -68,7 +72,8 @@ def view_dlmuse() -> None:
         utilmri.panel_set_params(
             st.session_state.plot_params,
             ['roi'],
-            'muse'
+            'muse',
+            list_vars
         )
 
         utilmri.panel_view_seg(

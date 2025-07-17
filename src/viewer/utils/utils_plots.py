@@ -32,7 +32,7 @@ def sidebar_flag_hide_setting():
     with st.sidebar:
         st.radio(
             'Plot Settings',
-            ['Hide', 'Show'],
+            ['Show', 'Hide'],
             key = '_flag_hide_settings',
             horizontal = True,
             on_change = update_val
@@ -51,7 +51,7 @@ def sidebar_flag_hide_legend():
     with st.sidebar:
         st.radio(
             'Legend',
-            ['Hide', 'Show'],
+            ['Show', 'Hide'],
             key = '_flag_hide_legend',
             horizontal = True,
             on_change = update_val
@@ -70,7 +70,7 @@ def sidebar_flag_hide_mri():
     with st.sidebar:
         st.radio(
             'MRI Viewer',
-            ['Hide', 'Show'],
+            ['Show', 'Hide'],
             key = '_flag_hide_mri',
             horizontal = True,
             on_change = update_val
@@ -225,15 +225,23 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
         hind = utilmisc.get_index_in_list(df.columns.tolist(), curr_params['hvar'])
         
         sel_info = st.session_state[f"bubble_chart_{plot_ind}"]
+        
+        print('-------------------------------------')
+        print(sel_info)
+        
         if len(sel_info["selection"]["points"]) > 0:
             sind = sel_info["selection"]["point_indices"][0]
             if hind is None:
                 sel_mrid = df.iloc[sind]["MRID"]
             else:
-                lgroup = sel_info["selection"]["points"][0]["legendgroup"]
-                sel_mrid = df[df[curr_params["hvar"]] == lgroup].iloc[sind][
-                    "MRID"
-                ]
+                if 'legendgroup' in sel_info["selection"]["points"][0]:
+                    lgroup = sel_info["selection"]["points"][0]["legendgroup"]
+                    sel_mrid = df[df[curr_params["hvar"]] == lgroup].iloc[sind][
+                        "MRID"
+                    ]
+                else:
+                    sel_mrid = df.iloc[sind]["MRID"]
+                    
             sel_roi = st.session_state.plots.loc[st.session_state.plot_active, 'params']['yvar']
             st.session_state.sel_mrid = sel_mrid
             st.session_state.sel_roi = sel_roi
@@ -243,6 +251,9 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
     curr_params = st.session_state.plots.loc[plot_ind, 'params']
 
     # Read centile data
+    
+    st.write()
+    
     f_cent = os.path.join(
         st.session_state.paths['centiles'],
         f'{plot_params['method']}_centiles_{plot_params['centile_type']}.csv'
@@ -630,7 +641,7 @@ def panel_set_params_plot(
         plot_params['traces'] = plot_params['traces'] + ['lowess']
         
 def panel_set_params_centile_plot(
-    plot_params, var_groups_data, pipeline, flag_hide_settings = False
+    plot_params, var_groups_data, pipeline, list_vars, flag_hide_settings = False
 ):
     """
     Panel to select centile plot args from the user
@@ -663,7 +674,7 @@ def panel_set_params_centile_plot(
                 df_vars[df_vars.group.isin(['demog'])],
                 plot_params['xvargroup'],
                 plot_params['xvar'],
-                
+                list_vars,
                 flag_add_none = False,
                 dicts_rename = {
                     'muse': st.session_state.dicts['muse']['ind_to_name']
@@ -678,6 +689,7 @@ def panel_set_params_centile_plot(
                 df_vars[df_vars.category.isin(['roi'])],
                 plot_params['yvargroup'],
                 plot_params['yvar'],
+                list_vars,
                 flag_add_none = False,
                 dicts_rename = {
                     'muse': st.session_state.dicts['muse']['ind_to_name']

@@ -284,7 +284,9 @@ def panel_select_var(sel_var_groups, plot_params, var_type, add_none = False):
 
         plot_params[var_type] = st.session_state[f'_{var_type}']
 
-def panel_set_params(plot_params, var_groups_data, atlas, flag_hide_settings = False):
+def panel_set_params(
+    plot_params, var_groups_data, atlas, list_vars, flag_hide_settings = False
+):
     """
     Panel to set mriview parameters
     """
@@ -310,6 +312,7 @@ def panel_set_params(plot_params, var_groups_data, atlas, flag_hide_settings = F
                 df_vars[df_vars.category.isin(['roi'])],
                 plot_params['yvargroup'],
                 plot_params['yvar'],
+                list_vars,
                 flag_add_none = False,
                 dicts_rename = {
                     'muse': st.session_state.dicts['muse']['ind_to_name']
