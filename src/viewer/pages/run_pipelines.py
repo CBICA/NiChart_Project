@@ -144,6 +144,12 @@ def panel_run_pipeline():
     alert_placeholder = st.empty()
     if st.button("Run pipeline"):
         alert_placeholder.info(f"The pipeline {pipeline_to_run} is running. Please do not navigate away from this page.")
+        pipeline_progress_bar = stqdm(total=2, desc="Submitting pipeline...", position=0)
+        #process_progress_bar = stqdm(total=2, desc="Waiting...", position=0)
+        process_progress_bar = None
+        process_status_box = st.status("Submitting pipeline step...")
+        #pipeline_progress_bar_slot = st.empty()
+        #process_progress_bar_slot = st.empty()
         with st.container():
             st.subheader("Pipeline Logs")
             with st.expander("View all pipeline logs"):
@@ -152,12 +158,7 @@ def panel_run_pipeline():
             with st.expander("View current step live logs"):
                 with st.container():
                     log_live_box = st.empty()
-        pipeline_progress_bar = stqdm(total=2, desc="Submitting pipeline...", position=0)
-        #process_progress_bar = stqdm(total=2, desc="Waiting...", position=0)
-        process_progress_bar = None
-        process_status_box = st.status("Submitting pipeline step...")
-        #pipeline_progress_bar_slot = st.empty()
-        #process_progress_bar_slot = st.empty()
+
 
         log = stlogbox.StreamlitJobLogger(log_committed_box, log_live_box)
 

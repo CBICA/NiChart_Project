@@ -708,6 +708,8 @@ def run_pipeline(pipeline_id: str,
         resolved_params = step.get("params", {})
        
         print(f"Submitting job: {sid} ({tool.name})")
+        if pipeline_progress_bar:
+            pipeline_progress_bar.set_description(f"Submitting pipeline step {tool_id}...")
         if process_progress_bar:
             process_progress_bar.set_description(f"Submitting pipeline step {tool_id}...")
         if process_status_box:
@@ -732,7 +734,8 @@ def run_pipeline(pipeline_id: str,
             ):
                 log.info(f"[CACHE] Skipping step: {tool_id} because it was determined that a previous execution could be reused.")
                 continue # Skip to next pipeline step
-        
+        if pipeline_progress_bar:
+            pipeline_progress_bar.set_description(f"Running {tool_id}...")
         if process_progress_bar:
             process_progress_bar.set_description(f"Running {tool_id}...")
         if process_status_box:
@@ -753,7 +756,8 @@ def run_pipeline(pipeline_id: str,
                     progress_bar=process_progress_bar,
                     status_box=process_status_box,
                     log=log,
-                    metadata_path=metadata_location
+                    metadata_path=metadata_location,
+                    do_s3_cli_transfer=True,
         )
 
         if result['status'] == 'success':
