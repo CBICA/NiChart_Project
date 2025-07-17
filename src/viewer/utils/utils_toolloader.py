@@ -413,7 +413,8 @@ def submit_and_run_job_sync(
 
                 if progress_bar:
                     progress_bar.set_description(f"Cloud job status: {status}")
-
+                if status_box:
+                    status_box.update(label=f"Cloud job: {status}", state="running")
                 if log:
                     current_logs = handle.get_logs()
                     log.update_live(current_logs)
@@ -440,7 +441,7 @@ def submit_and_run_job_sync(
             if log:
                 log.info(f"Performing post-job sync for job {job_id}.")
             if status_box:
-                status_box.update(f"Post-sync for job {job_id}...", state="running")
+                status_box.update(label=f"Post-sync for job {job_id}...", state="running")
             print("DEBUG: Syncing from S3 to mount paths via AWS CLI.")
             for mount_path in user_mounts.values():
                 #absolute_mount_path = Path(mount_path).resolve()
