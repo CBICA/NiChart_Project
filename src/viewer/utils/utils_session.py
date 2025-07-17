@@ -325,6 +325,8 @@ def init_plot_vars() -> None:
         "distplot_binnum": 100,
         "cmaps": utilcmap.cmaps_init,
         "alphas": utilcmap.alphas_init,
+        "w_centile": 6,
+        "w_fit": 6
         #"cmaps2": utilcmap.cmaps2,
         #"cmaps3": utilcmap.cmaps3,
     }

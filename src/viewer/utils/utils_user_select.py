@@ -80,8 +80,6 @@ def select_var_from_group(
         key=f'_sel_{label}'
     )
     #st.success(f'Selected: {sel_var}')
-    
-    print(f'aaaaaaaaaaaaaaaa {sel_var}')
 
     return sel_var
 
