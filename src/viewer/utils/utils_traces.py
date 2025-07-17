@@ -247,8 +247,6 @@ def add_trace_centile(df: pd.DataFrame, plot_params: dict, plot_settings: dict, 
                 )
                 fig.add_trace(ctrace)  # plot in first row
 
-    print('bbb')
-
     # Update min/max
     #fig.update_layout(xaxis_range=[xmin, xmax])
     #fig.update_layout(yaxis_range=[ymin, ymax])

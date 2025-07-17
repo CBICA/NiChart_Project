@@ -47,6 +47,9 @@ def plot_vars():
 
     with st.sidebar:
         sac.divider(label='Viewing Options', align='center', color='gray')
+        utilpl.user_add_plots(
+            st.session_state.plot_params
+        )
     utilpl.sidebar_flag_hide_setting()
     utilpl.sidebar_flag_hide_legend()
     utilpl.sidebar_flag_hide_mri()

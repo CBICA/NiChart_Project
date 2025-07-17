@@ -498,18 +498,45 @@ def user_select_plot_settings(plot_params):
         disabled=False,
     )
 
+#def user_add_plots(plot_params):
+    #'''
+    #Panel to select plot args from the user
+    #'''
+    ## flag_settings = st.sidebar.checkbox('Hide plot settings')
+
+    ##cols = st.columns([2,3,2])
+    #cols = st.columns([1,1.3,1.3])
+    #with cols[0]:
+        #if st.button('Add Plot'):
+            #st.session_state.plots = add_plot(
+                #st.session_state.plots, st.session_state.plot_params
+            #)
+
+    ## Add a single plot if there is none
+    #if st.session_state.plots.shape[0] == 0:
+        #st.session_state.plots = add_plot(
+            #st.session_state.plots, st.session_state.plot_params
+        #)
+
+    #with cols[1]:
+        #if st.button('Delete Selected'):
+            #st.session_state.plots = delete_sel_plots(
+                #st.session_state.plots
+            #)
+
+    #with cols[2]:
+        #if st.button('Delete All'):
+            #st.session_state.plots = delete_all_plots()
+
 def user_add_plots(plot_params):
     '''
     Panel to select plot args from the user
     '''
-    # flag_settings = st.sidebar.checkbox('Hide plot settings')
-
-    cols = st.columns([2,3,2])
-    with cols[0]:
-        if st.button('Add Plot'):
-            st.session_state.plots = add_plot(
-                st.session_state.plots, st.session_state.plot_params
-            )
+    sel = sac.buttons(
+        ['Add Plot', 'Delete Selected', 'Delete All'],
+        label='', align='left', size='sm', radius='lg',
+        index = None
+    )
 
     # Add a single plot if there is none
     if st.session_state.plots.shape[0] == 0:
@@ -517,15 +544,18 @@ def user_add_plots(plot_params):
             st.session_state.plots, st.session_state.plot_params
         )
 
-    with cols[1]:
-        if st.button('Delete Selected'):
-            st.session_state.plots = delete_sel_plots(
-                st.session_state.plots
-            )
+    if sel == 'Add Plot':
+        st.session_state.plots = add_plot(
+            st.session_state.plots, st.session_state.plot_params
+        )
 
-    with cols[2]:
-        if st.button('Delete All'):
-            st.session_state.plots = delete_all_plots()
+    if sel == 'Delete Selected':
+        st.session_state.plots = delete_sel_plots(
+            st.session_state.plots
+        )
+
+    if sel == 'Delete All':
+        st.session_state.plots = delete_all_plots()
 
 
 def panel_set_params_plot(
@@ -549,7 +579,7 @@ def panel_set_params_plot(
                 sac.TabsItem(label='Fit'),
                 sac.TabsItem(label='Centiles'),
                 sac.TabsItem(label='Plot Settings'),
-                sac.TabsItem(label='Add/Delete Plots')
+                #sac.TabsItem(label='Add/Delete Plots')
             ],
             size='sm',
             align='left'
@@ -619,8 +649,8 @@ def panel_set_params_plot(
         elif tab == 'Plot Settings':
             user_select_plot_settings(plot_params)
 
-        elif tab == 'Add/Delete Plots':
-            user_add_plots(plot_params)
+        #elif tab == 'Add/Delete Plots':
+            #user_add_plots(plot_params)
 
     # Set plot type
     plot_params['plot_type'] = 'scatter'
@@ -661,7 +691,7 @@ def panel_set_params_centile_plot(
                 sac.TabsItem(label='Data'),
                 sac.TabsItem(label='Centiles'),
                 sac.TabsItem(label='Plot Settings'),
-                sac.TabsItem(label='Add/Delete Plots')
+                #sac.TabsItem(label='Add/Delete Plots')
             ],
             size='sm',
             align='left'
@@ -707,8 +737,8 @@ def panel_set_params_centile_plot(
         elif tab == 'Plot Settings':
             user_select_plot_settings(plot_params)
 
-        elif tab == 'Add/Delete Plots':
-            user_add_plots(plot_params)
+        #elif tab == 'Add/Delete Plots':
+            #user_add_plots(plot_params)
 
     # Set plot type
     plot_params['plot_type'] = 'scatter'
