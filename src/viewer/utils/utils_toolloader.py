@@ -362,6 +362,7 @@ def submit_and_run_job_sync(
     id_token: str | None = None,
     execution_mode: str = "any",  # can be "cloud", "local", or "any"
     progress_bar=None,
+    status_box=None,
     log=None,
     metadata_path: Path = None,
     poll_interval: int = 15,
@@ -438,6 +439,8 @@ def submit_and_run_job_sync(
         if do_s3_cli_transfer:
             if log:
                 log.info(f"Performing post-job sync for job {job_id}.")
+            if status_box:
+                status_box.update(f"Post-sync for job {job_id}...")
             print("DEBUG: Syncing from S3 to mount paths via AWS CLI.")
             for mount_path in user_mounts.values():
                 #absolute_mount_path = Path(mount_path).resolve()
@@ -663,6 +666,7 @@ def run_pipeline(pipeline_id: str,
                 pipeline_progress_bar=None,
                 process_progress_bar=None,
                 execution_mode='cloud',
+                process_status_box=None,
                 log=None,
                 metadata_location=None,
                 reuse_cached_steps=True,
@@ -705,7 +709,9 @@ def run_pipeline(pipeline_id: str,
        
         print(f"Submitting job: {sid} ({tool.name})")
         if process_progress_bar:
-            process_progress_bar.set_description(f"Running tool {tool_id}...")
+            process_progress_bar.set_description(f"Submitting pipeline step {tool_id}...")
+        if process_status_box:
+            process_status_box.update(label=f"Submitting pipeline step: {tool_id}...")
 
         ## Fill this in with deduplication logic
         if metadata_location is not None:
@@ -727,6 +733,11 @@ def run_pipeline(pipeline_id: str,
                 log.info(f"[CACHE] Skipping step: {tool_id} because it was determined that a previous execution could be reused.")
                 continue # Skip to next pipeline step
         
+        if process_progress_bar:
+            process_progress_bar.set_description(f"Running {tool_id}...")
+        if process_status_box:
+            process_status_box.update(label=f"Running {tool_id}...")
+
         # If we reach here, the step must be executed.
         record_step_submission(metadata_path=metadata_location,
                            tool_id=tool_id,
@@ -740,6 +751,7 @@ def run_pipeline(pipeline_id: str,
                     user_mounts=resolved_total_mounts,
                     execution_mode=execution_mode,
                     progress_bar=process_progress_bar,
+                    status_box=process_status_box,
                     log=log,
                     metadata_path=metadata_location
         )
@@ -763,7 +775,15 @@ def run_pipeline(pipeline_id: str,
             log.error(f"Pipeline step {tool_id} failed with status {result['status']}.")
             print(f"Step {sid}, {tool_id} failed with status {result["status"]}, see error log:")
             print(f"Error message: {result["error_message"]}")
+            if process_progress_bar:
+                process_progress_bar.set_description(f"Running {tool_id}...")
+            if process_status_box:
+                process_status_box.update(label=f"Pipeline failed", state="error")
             raise RuntimeError(result["error_message"])
         step_outputs[sid] = resolved_outputs  # Used for future interpolation
     log.info(f"Pipeline {pipeline_id} completed successfully.")
+    if process_progress_bar:
+        process_progress_bar.set_description(f"Pipeline finished")
+    if process_status_box:
+        process_status_box.update(label=f"Pipeline finished", state="complete")
     return step_outputs

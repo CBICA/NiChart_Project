@@ -2,6 +2,7 @@ import streamlit as st
 import utils.utils_pages as utilpg
 import utils.utils_session as utilses
 import utils.utils_cmaps as utilcmap
+import utils.utils_containers as utilcontainer
 import os
 
 from utils.utils_logger import setup_logger
@@ -28,7 +29,7 @@ def panel_misc() -> None:
     Panel for setting various parameters
     """
     is_cloud_mode = st.session_state.app_type == "cloud"
-    if st.checkbox("Switch to cloud?", value=is_cloud_mode):
+    if st.checkbox("Switch to cloud? ", value=is_cloud_mode):
         st.session_state.app_type = "cloud"
     else:
         st.session_state.app_type = "desktop"
@@ -55,6 +56,9 @@ def panel_debug_options():
 def panel_plot_colors():
     utilcmap.panel_update_cmaps()
 
+def panel_container_management():
+    utilcontainer.panel_manage_containers()
+
 #st.info(
 st.markdown(
     """
@@ -66,6 +70,7 @@ tab = sac.tabs(
     items=[
         sac.TabsItem(label='Plot Colors'),
         sac.TabsItem(label='Misc'),
+        sac.TabsItem(label='Manage Containers'),
     ],
     size='lg',
     align='left'
@@ -78,6 +83,10 @@ if tab == 'Plot Colors':
 elif tab == 'Misc':
     with st.container(border=True):
         panel_misc()
+
+elif tab == 'Manage Containers':
+    with st.container(border=True):
+        panel_container_management()
 
 # Show selections
 utilses.disp_selections()

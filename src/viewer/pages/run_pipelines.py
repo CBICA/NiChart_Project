@@ -153,7 +153,9 @@ def panel_run_pipeline():
                 with st.container():
                     log_live_box = st.empty()
         pipeline_progress_bar = stqdm(total=2, desc="Submitting pipeline...", position=0)
-        process_progress_bar = stqdm(total=2, desc="Waiting...", position=0)
+        #process_progress_bar = stqdm(total=2, desc="Waiting...", position=0)
+        process_progress_bar = None
+        process_status_box = st.status("Submitting pipeline step...")
         #pipeline_progress_bar_slot = st.empty()
         #process_progress_bar_slot = st.empty()
 
@@ -164,6 +166,7 @@ def panel_run_pipeline():
             global_vars={"STUDY": st.session_state.paths["project"]},
             pipeline_progress_bar=pipeline_progress_bar,
             process_progress_bar=process_progress_bar,
+            process_status_box=process_status_box,
             log=log,
             metadata_location=os.path.join(st.session_state.paths["project"], "metadata.json"),
             reuse_cached_steps=skip_steps_when_possible
