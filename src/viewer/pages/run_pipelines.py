@@ -147,7 +147,7 @@ def panel_run_pipeline():
         pipeline_progress_bar = stqdm(total=2, desc="Submitting pipeline...", position=0)
         #process_progress_bar = stqdm(total=2, desc="Waiting...", position=0)
         process_progress_bar = None
-        process_status_box = st.status("Submitting pipeline step...")
+        process_status_box = st.status("Submitting pipeline step...", expanded=True)
         #pipeline_progress_bar_slot = st.empty()
         #process_progress_bar_slot = st.empty()
         with st.container():
