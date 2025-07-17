@@ -440,7 +440,7 @@ def submit_and_run_job_sync(
             if log:
                 log.info(f"Performing post-job sync for job {job_id}.")
             if status_box:
-                status_box.update(f"Post-sync for job {job_id}...")
+                status_box.update(f"Post-sync for job {job_id}...", state="running")
             print("DEBUG: Syncing from S3 to mount paths via AWS CLI.")
             for mount_path in user_mounts.values():
                 #absolute_mount_path = Path(mount_path).resolve()
