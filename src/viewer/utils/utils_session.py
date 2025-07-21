@@ -224,16 +224,6 @@ def init_paths():
     if not os.path.exists(p_prj):
         os.makedirs(p_prj)
 
-    p_plot = os.path.join(
-        p_prj, 'plot_data'
-    )
-    if not os.path.exists(p_plot):
-        os.makedirs(p_plot)
-
-    d_plot = os.path.join(
-        p_plot, 'plot_data.csv'
-    )
-
     st.session_state.dicts = {
         "muse_derived": os.path.join(
             p_resources, "MUSE", "list_MUSE_mapping_derived.csv"
@@ -251,17 +241,16 @@ def init_paths():
         "file_search_dir": "",
         "out_dir": p_out,
         "project": p_prj,
-        "plot_dir": p_plot,
-        "plot_data": d_plot,
         'target': None
     }
     
     # List of output folders
     st.session_state.out_dirs = [
         'participants',
-        'dicoms', 't1', 't2', 'fl', 'fmri', 'dti',
-        'dlmuse_seg', 'dlmuse_vol', 'dlwmls', 'spare',
-        'plot_data'
+        'dicoms',
+        't1', 't2', 'fl', 'fmri', 'dti',
+        'dlmuse_seg', 'dlmuse_vol',
+        'dlwmls', 'spare',
     ]
     
     ############
@@ -473,9 +462,6 @@ def update_project(sel_project) -> None:
         st.session_state.paths['out_dir'], sel_project
     )
 
-    if not os.path.exists(p_prj):
-        os.makedirs(p_prj)
-
     try:
         if not os.path.exists(p_prj):
             os.makedirs(p_prj)
@@ -485,22 +471,9 @@ def update_project(sel_project) -> None:
         st.error(f'Could not create project folder: {p_prj}')
         return
 
-    # Create plot dir
-    p_plot = os.path.join(
-        p_prj, 'plot_data'
-    )
-    if not os.path.exists(p_plot):
-        os.makedirs(p_plot)
-
-    d_plot = os.path.join(
-        p_plot, 'plot_data.csv'
-    )
-
     # Set project name
     st.session_state.project = sel_project
     st.session_state.paths['project'] = p_prj
-    st.session_state.paths['plot_dir'] = p_plot
-    st.session_state.paths['plot_data'] = d_plot
 
 # Function to parse AWS login (if available)
 def process_session_token() -> Any:

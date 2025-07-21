@@ -156,7 +156,7 @@ def select_files(in_dir):
         st.session_state.out_dirs,
         ['.csv'],
         5,
-        ['plot_data'],
+        ['data_merged'],
         True
     )
     selected = sac.tree(
@@ -201,14 +201,32 @@ def select_files(in_dir):
             primary_key = 'MRID'
             merged_df = df_all[0]
             for df in df_all[1:]:
-                merged_df = pd.merge(merged_df, df, on=primary_key, how="outer")
+                merged_df = pd.merge(
+                    merged_df,
+                    df,
+                    on=primary_key,
+                    how="outer",
+                    suffixes = ['', '_tmpduplicate']
+                )
+                sel_cols = merged_df.columns[merged_df.columns.str.contains('_tmpduplicate')==False]
+                merged_df = merged_df[sel_cols]
 
             st.success(f"✅ Merged DataFrame has {merged_df.shape[0]} rows and {merged_df.shape[1]} columns")
-            st.dataframe(merged_df.head(10))
+            st.dataframe(merged_df)
 
             # Save merged data
+            out_dir = os.path.join(
+                st.session_state.paths['project'], 'data_merged'
+            )
+            if not os.path.exists(out_dir):
+                os.makedirs(out_dir)
+
+            out_csv = os.path.join(
+                out_dir, 'data_merged.csv'
+            )
+            
             try:
-                merged_df.to_csv(st.session_state.paths['plot_data'])
+                merged_df.to_csv(out_csv)
             except:
-                st.error(f'Could not write merged data: {st.session_state.paths['plot_data']}')
+                st.error(f'Could not write merged data: {out_csv}')
 

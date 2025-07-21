@@ -1,5 +1,7 @@
-import streamlit as st
 import utils.utils_pages as utilpg
+utilpg.config_page()
+
+import streamlit as st
 import utils.utils_plots as utilpl
 import utils.utils_mriview as utilmri
 import utils.utils_data_view as utildv
@@ -15,7 +17,6 @@ logger = setup_logger()
 logger.debug('Page: View Results')
 
 # Page config should be called for each page
-utilpg.config_page()
 utilpg.show_menu()
 utilpg.set_global_style()
 
@@ -38,8 +39,14 @@ def select_data_files():
 def plot_vars():
     """
     Panel for viewing dlmuse results
-    """    
-    st.session_state.plot_data['df_data'] = utilpl.read_data(st.session_state.paths['plot_data']) 
+    """
+    csv_plot = os.path.join(
+        st.session_state.paths['project'], 'data_merged', 'data_merged.csv'
+    )
+    if os.path.exists(csv_plot):
+        st.session_state.plot_data['df_data'] = utilpl.read_data(
+            csv_plot
+        )
     var_groups_data = ['demog', 'roi']
     var_groups_hue = ['cat_vars']
     pipeline = 'dlmuse'
