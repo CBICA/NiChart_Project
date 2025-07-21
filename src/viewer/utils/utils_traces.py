@@ -214,7 +214,7 @@ def add_trace_centile(df: pd.DataFrame, plot_params: dict, plot_settings: dict, 
     w = plot_settings['w_centile']
 
     # Get centile values for the selected roi
-    df_tmp = df[df.VarName == plot_params['yvar']]
+    df_tmp = df[df.VarName == plot_params['yvar']].sort_values('Age')
 
     # Max centile value for normalization
     flag_norm = plot_params['flag_norm_centiles']
@@ -246,6 +246,7 @@ def add_trace_centile(df: pd.DataFrame, plot_params: dict, plot_settings: dict, 
                     showlegend = plot_settings['flag_hide_legend']=='Show',
                 )
                 fig.add_trace(ctrace)  # plot in first row
+
 
     # Update min/max
     #fig.update_layout(xaxis_range=[xmin, xmax])

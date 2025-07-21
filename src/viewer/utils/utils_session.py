@@ -85,6 +85,8 @@ def init_session_vars():
     # st.session_state.mode = 'release'
     st.session_state.mode = 'debug'
 
+    st.session_state.sel_add_button = None
+
     #st.session_state.project = 'nichart_project'
     st.session_state.project = 'IXI'
     
@@ -499,19 +501,6 @@ def update_project(sel_project) -> None:
     st.session_state.paths['project'] = p_prj
     st.session_state.paths['plot_dir'] = p_plot
     st.session_state.paths['plot_data'] = d_plot
-
-def config_page() -> None:
-    st.set_page_config(
-        page_title="NiChart",
-        page_icon=st.session_state.nicon,
-        layout="wide",
-        # layout="centered",
-        menu_items={
-            "Get help": "https://neuroimagingchart.com/",
-            "Report a bug": "https://github.com/CBICA/NiChart_Project/issues/new?assignees=&labels=&projects=&template=bug_report.md&title=%5BBUG%5D+",
-            "About": "https://neuroimagingchart.com/",
-        },
-    )
 
 # Function to parse AWS login (if available)
 def process_session_token() -> Any:

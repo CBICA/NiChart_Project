@@ -1,5 +1,7 @@
-import streamlit as st
 import utils.utils_pages as utilpg
+utilpg.config_page()
+
+import streamlit as st
 import utils.utils_plots as utilpl
 import utils.utils_misc as utilmisc
 import utils.utils_mriview as utilmri
@@ -16,7 +18,6 @@ logger = setup_logger()
 logger.debug('Page: Explore Nichart')
 
 # Page config should be called for each page
-utilpg.config_page()
 utilpg.show_menu()
 utilpg.set_global_style()
 
@@ -56,7 +57,7 @@ def view_dlmuse() -> None:
             
         utilpl.sidebar_flag_hide_setting()
         utilpl.sidebar_flag_hide_legend()
-        
+
         utilpl.panel_set_params_centile_plot(
             st.session_state.plot_params,
             var_groups_data,
@@ -64,6 +65,8 @@ def view_dlmuse() -> None:
             list_vars
         )
         utilpl.panel_show_centile_plots()
+
+        st.write()
 
     elif sel_res_type == 'Segmentation':
         ulay = st.session_state.ref_data["t1"]

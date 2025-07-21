@@ -13,11 +13,14 @@ import utils.utils_mriview as utilmri
 import plotly.graph_objs as go
 import plotly.figure_factory as ff
 import utils.utils_traces as utiltr
+import utils.utils_css as utilcss
 
 import streamlit_antd_components as sac
 
 pd.set_option('display.expand_frame_repr', False)
 pd.set_option('display.max_colwidth', None)  # or use a large number like 500
+
+utilcss.load_css()
 
 def sidebar_flag_hide_setting():
     '''
@@ -498,64 +501,69 @@ def user_select_plot_settings(plot_params):
         disabled=False,
     )
 
-#def user_add_plots(plot_params):
-    #'''
-    #Panel to select plot args from the user
-    #'''
-    ## flag_settings = st.sidebar.checkbox('Hide plot settings')
-
-    ##cols = st.columns([2,3,2])
-    #cols = st.columns([1,1.3,1.3])
-    #with cols[0]:
-        #if st.button('Add Plot'):
-            #st.session_state.plots = add_plot(
-                #st.session_state.plots, st.session_state.plot_params
-            #)
-
-    ## Add a single plot if there is none
-    #if st.session_state.plots.shape[0] == 0:
-        #st.session_state.plots = add_plot(
-            #st.session_state.plots, st.session_state.plot_params
-        #)
-
-    #with cols[1]:
-        #if st.button('Delete Selected'):
-            #st.session_state.plots = delete_sel_plots(
-                #st.session_state.plots
-            #)
-
-    #with cols[2]:
-        #if st.button('Delete All'):
-            #st.session_state.plots = delete_all_plots()
+# def user_add_plots2(plot_params):
+#     '''
+#     Panel to select plot args from the user
+#     '''
+#     # flag_settings = st.sidebar.checkbox('Hide plot settings')
+#
+#     #cols = st.columns([2,3,2])
+#     cols = st.columns([1,1.3,1.3])
+#     with cols[0]:
+#         if st.button('Add Plot'):
+#             st.session_state.plots = add_plot(
+#                 st.session_state.plots, st.session_state.plot_params
+#             )
+#
+#     # Add a single plot if there is none
+#     if st.session_state.plots.shape[0] == 0:
+#         st.session_state.plots = add_plot(
+#             st.session_state.plots, st.session_state.plot_params
+#         )
+#
+#     with cols[1]:
+#         if st.button('Delete Selected'):
+#             st.session_state.plots = delete_sel_plots(
+#                 st.session_state.plots
+#             )
+#
+#     with cols[2]:
+#         if st.button('Delete All'):
+#             st.session_state.plots = delete_all_plots()
+#
 
 def user_add_plots(plot_params):
     '''
     Panel to select plot args from the user
     '''
-    sel = sac.buttons(
-        ['Add Plot', 'Delete Selected', 'Delete All'],
-        label='', align='left', size='sm', radius='lg',
-        index = None
+
+    def toggle_add_plot():
+        print('toggled')
+
+        if st.session_state['_key_add_plot'] == 'Add Plot':
+            st.session_state.plots = add_plot(
+                st.session_state.plots, st.session_state.plot_params
+            )
+
+        if st.session_state['_key_add_plot'] == 'Delete Selected':
+            st.session_state.plots = delete_sel_plots(
+                st.session_state.plots
+            )
+
+        if st.session_state['_key_add_plot'] == 'Delete All':
+            st.session_state.plots = delete_all_plots()
+
+        st.session_state['_key_add_plot'] = None
+
+    options = ['Add Plot', 'Delete Selected', 'Delete All']
+    sel = st.segmented_control(
+        "Plot Control",
+        options,
+        selection_mode="single",
+        on_change = toggle_add_plot,
+        key = '_key_add_plot'
     )
 
-    # Add a single plot if there is none
-    if st.session_state.plots.shape[0] == 0:
-        st.session_state.plots = add_plot(
-            st.session_state.plots, st.session_state.plot_params
-        )
-
-    if sel == 'Add Plot':
-        st.session_state.plots = add_plot(
-            st.session_state.plots, st.session_state.plot_params
-        )
-
-    if sel == 'Delete Selected':
-        st.session_state.plots = delete_sel_plots(
-            st.session_state.plots
-        )
-
-    if sel == 'Delete All':
-        st.session_state.plots = delete_all_plots()
 
 
 def panel_set_params_plot(
@@ -679,7 +687,7 @@ def panel_set_params_centile_plot(
     plot_params['method'] = pipeline
     plot_params['flag_norm_centiles'] = False    
 
-    print(st.session_state.plot_settings['flag_hide_settings'])
+    # print(st.session_state.plot_settings['flag_hide_settings'])
     
     if st.session_state.plot_settings['flag_hide_settings'] == 'Hide':
         return
@@ -759,11 +767,11 @@ def panel_show_plots():
         if st.session_state.plots.loc[tmp_ind, 'flag_sel']:
             st.session_state.plots.at[tmp_ind, 'params'] = st.session_state.plot_params.copy()
 
-    # Add a single plot if there is none
-    if st.session_state.plots.shape[0] == 0:
-        st.session_state.plots = add_plot(
-            st.session_state.plots, st.session_state.plot_params
-        )
+    # # Add a single plot if there is none
+    # if st.session_state.plots.shape[0] == 0:
+    #     st.session_state.plots = add_plot(
+    #         st.session_state.plots, st.session_state.plot_params
+    #     )
 
     # Show plots
     show_plots(
@@ -784,11 +792,11 @@ def panel_show_centile_plots():
         if st.session_state.plots.loc[tmp_ind, 'flag_sel']:
             st.session_state.plots.at[tmp_ind, 'params'] = st.session_state.plot_params.copy()
 
-    # Add a single plot if there is none
-    if st.session_state.plots.shape[0] == 0:
-        st.session_state.plots = add_plot(
-            st.session_state.plots, st.session_state.plot_params
-        )
+    # # Add a single plot if there is none
+    # if st.session_state.plots.shape[0] == 0:
+    #     st.session_state.plots = add_plot(
+    #         st.session_state.plots, st.session_state.plot_params
+    #     )
 
     # Show plots
     show_plots(
