@@ -18,9 +18,9 @@ def file_exists(filepath: Path):
 def verify_data_dlmuse():
     flag_data = True
     t1_dir = Path(st.session_state.paths['project']) / "t1"
-    demog_file = Path(st.session_state.paths['project']) / "lists" / "demog.csv"
+    demog_file = Path(st.session_state.paths['project']) / "participants" / "participants.csv"
     if not file_exists(demog_file):
-        st.warning("Demographics file missing. Only needed for harmonized DLMUSE.")
+        st.warning("Participants file missing. Only needed for harmonized DLMUSE.")
         flag_data = False
     if not dir_has_any_files_with_suffix(t1_dir, ".nii.gz"):
         st.error("No T1 images detected. Please upload data.")
@@ -53,9 +53,9 @@ def verify_data_surrealgan():
 def verify_data_spare():
     flag_data = True
     t1_dir = Path(st.session_state.paths['project']) / "t1"
-    demog_file = Path(st.session_state.paths['project']) / "lists" / "demog.csv"
+    demog_file = Path(st.session_state.paths['project']) / "participants" / "participants.csv"
     if not file_exists(demog_file):
-        st.warning("Demographics file missing. Only needed for harmonized SPARE.")
+        st.warning("Participants file missing. Only needed for harmonized SPARE.")
         flag_data = False
     if not dir_has_any_files_with_suffix(t1_dir, ".nii.gz"):
         st.error("No T1 images detected. Please upload data.")
