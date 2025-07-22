@@ -593,10 +593,12 @@ def panel_set_params_plot(plot_params, pipeline, list_vars):
 
         df_vars = st.session_state.dicts['df_var_groups']
         if tab == 'Data':
+            
             # Select x var
             sel_var = utiluser.select_var_from_group(
                 'Select x variable:',
-                df_vars[df_vars.group.isin(['demog'])],
+                #df_vars[df_vars.group.isin(['demog'])],
+                df_vars[df_vars.group.isin(['user_data'])],
                 plot_params['xvargroup'],
                 plot_params['xvar'],
                 list_vars,
@@ -613,7 +615,7 @@ def panel_set_params_plot(plot_params, pipeline, list_vars):
             # Select y var
             sel_var = utiluser.select_var_from_group(
                 'Select y variable:',
-                df_vars[df_vars.category.isin(['demog','roi'])],
+                df_vars[df_vars.category.isin(['demog','roi', 'user'])],
                 plot_params['yvargroup'],
                 plot_params['yvar'],
                 list_vars,

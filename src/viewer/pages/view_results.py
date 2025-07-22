@@ -70,8 +70,6 @@ def plot_vars():
         st.session_state.plot_data['df_data'] = utilpl.read_data(
             csv_plot
         )
-    var_groups_data = ['demog', 'roi']
-    var_groups_hue = ['cat_vars']
     pipeline = 'dlmuse'
     list_vars = st.session_state.plot_data['df_data'].columns.tolist()
 

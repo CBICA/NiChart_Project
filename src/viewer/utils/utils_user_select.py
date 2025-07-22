@@ -33,6 +33,7 @@ def select_var_from_group(
     Variable groups are given in df_vars
     If a variable is an ROI index a dictionary for renaming should be given in dicts_rename
     '''
+        
     # Create nested var lists
     sac_items = []
     init_ind = None
