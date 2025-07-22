@@ -515,16 +515,15 @@ def load_user_csv():
             # Update variable dictionary
             df_user = pd.read_csv(out_csv)
             df_dict = st.session_state.dicts['df_var_groups']
-            df_dict.loc[len(df_dict)] = {
-                'group': 'user_data',
-                'category': 'user',
-                'vtype': 'name',
-                'atlas': None,
-                'values': df_user.columns.sort_values().tolist()
-            }
-            st.session_state.dicts['df_var_groups'] = df_dict
-
-            st.dataframe(st.session_state.dicts['df_var_groups'])
+            if 'user_data' not in df_dict.group.tolist():
+                df_dict.loc[len(df_dict)] = {
+                    'group': 'user_data',
+                    'category': 'user',
+                    'vtype': 'name',
+                    'atlas': None,
+                    'values': df_user.columns.sort_values().tolist()
+                }
+                st.session_state.dicts['df_var_groups'] = df_dict
 
     elif tab == "View":
         if not os.path.exists(out_csv):
