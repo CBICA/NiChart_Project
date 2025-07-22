@@ -764,7 +764,7 @@ def run_pipeline(pipeline_id: str,
                     status_box=process_status_box,
                     log=log,
                     metadata_path=metadata_location,
-                    do_s3_cli_transfer=True,
+                    do_s3_cli_transfer=False,
         )
 
         if result['status'] == 'success':
