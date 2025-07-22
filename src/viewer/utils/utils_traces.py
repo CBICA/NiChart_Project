@@ -164,7 +164,7 @@ def add_trace_lowess(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
             y=y_hat,
             mode="lines",
             line = line,
-            name=f"lowess_{hname}",
+            name=f"smooth_{hname}",
             #legendgroup=hname,
             showlegend = plot_settings['flag_hide_legend'] == 'Show'
         )

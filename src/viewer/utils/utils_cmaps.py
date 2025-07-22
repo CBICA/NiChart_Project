@@ -26,7 +26,7 @@ alphas_init = {
     'data': 1.0,
     'centiles': 1.0,
     'lin_fit': 1.0,
-    'conf_95%': 0.4,
+    'conf_95%': 0.1,
     'lowess': 1.0,
 }
 

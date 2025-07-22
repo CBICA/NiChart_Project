@@ -17,7 +17,7 @@ cat_vars:
   values: [Sex, DX, DX_AD]
 
 SPARE:
-  category: ml_biomarker
+  category: spare
   vtype: name
   values: [SPARE-AD, SPARE-BA]
 

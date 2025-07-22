@@ -254,14 +254,18 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
     curr_params = st.session_state.plots.loc[plot_ind, 'params']
 
     # Read centile data
-    
-    st.write()
-    
-    f_cent = os.path.join(
-        st.session_state.paths['centiles'],
-        f'{plot_params['method']}_centiles_{plot_params['centile_type']}.csv'
-    )
-    df_cent = pd.read_csv(f_cent)
+    if plot_params['centile_type'] == 'None':
+        df_cent = None
+    else:
+        try:
+            f_cent = os.path.join(
+                st.session_state.paths['centiles'],
+                f'{plot_params['method']}_centiles_{plot_params['centile_type']}.csv'
+            )
+            df_cent = pd.read_csv(f_cent)
+        except:
+            st.warning('Could not read centile data!')
+            df_cent = None
 
     # Main plot
     m = plot_settings["margin"]
@@ -283,12 +287,14 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
         utiltr.add_trace_scatter(df, plot_params, plot_settings, fig)
 
     # Add linear fit
-    if df is not None:
-        utiltr.add_trace_linreg(df, plot_params, plot_settings, fig)
+    if plot_params['trend'] == 'Linear':
+        if df is not None:
+            utiltr.add_trace_linreg(df, plot_params, plot_settings, fig)
 
     # Add non-linear fit
-    if df is not None:
-        utiltr.add_trace_lowess(df, plot_params, plot_settings, fig)
+    if plot_params['trend'] == 'Smooth LOWESS Curve':
+        if df is not None:
+            utiltr.add_trace_lowess(df, plot_params, plot_settings, fig)
 
     # Add centile trace
     if df_cent is not None:
@@ -597,8 +603,7 @@ def panel_set_params_plot(plot_params, pipeline, list_vars):
             # Select x var
             sel_var = utiluser.select_var_from_group(
                 'Select x variable:',
-                #df_vars[df_vars.group.isin(['demog'])],
-                df_vars[df_vars.group.isin(['user_data'])],
+                df_vars[df_vars.group.isin(['demog', 'user_data'])],
                 plot_params['xvargroup'],
                 plot_params['xvar'],
                 list_vars,
@@ -615,7 +620,7 @@ def panel_set_params_plot(plot_params, pipeline, list_vars):
             # Select y var
             sel_var = utiluser.select_var_from_group(
                 'Select y variable:',
-                df_vars[df_vars.category.isin(['demog','roi', 'user'])],
+                df_vars[df_vars.category.isin(['demog','roi','spare','user'])],
                 plot_params['yvargroup'],
                 plot_params['yvar'],
                 list_vars,

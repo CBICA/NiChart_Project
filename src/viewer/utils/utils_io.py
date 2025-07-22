@@ -321,6 +321,11 @@ def create_scan_csv() -> None:
     
     df = pd.concat(dfs, axis=0).sort_values(by='MRID')
     df = df.drop_duplicates().reset_index().drop('index', axis=1)
+    
+    # Add columns for batch and dx
+    df[['Batch']] = f'{st.session_state.project}_Batch1'
+    df[['IsCN']] = 1
+    
     return df
 
 ##############################################################
@@ -446,7 +451,7 @@ def load_subj_list():
     out_csv = os.path.join(out_dir, fname)
     
     if tab == 'Upload':
-        upload_single_file(out_dir, fname, 'Select demog file')
+        upload_single_file(out_dir, fname, 'Select participants file')
 
     elif tab == 'Enter Manually':
         df = create_scan_csv()
