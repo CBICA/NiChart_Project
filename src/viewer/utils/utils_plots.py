@@ -267,6 +267,12 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
             st.warning('Could not read centile data!')
             df_cent = None
 
+    # Filter data
+    if plot_params['fvar'] is not None:
+        if plot_params['fvals'] is not None:
+            df = df[df[plot_params['fvar']].isin(plot_params['fvals'])]
+
+
     # Main plot
     m = plot_settings["margin"]
     hi = plot_settings["h_init"]
@@ -637,8 +643,34 @@ def panel_set_params_plot(plot_params, pipeline, list_vars):
                 )
 
         elif tab == 'Groups':
+
+            # Select filter var
+            sel_var = utiluser.select_var_from_group(
+                'Select filter variable:',
+                df_vars[df_vars.category.isin(['cat_vars'])],
+                plot_params['fvargroup'],
+                plot_params['fvar'],
+                list_vars,
+                flag_add_none = True,
+            )
+            
+            st.write(sel_var)
+            
+            if sel_var:
+                plot_params['fvargroup'] = sel_var[0]
+                plot_params['fvar'] = sel_var[1]
+                
+                if sel_var[1] is not None:
+                    df_tmp = st.session_state.plot_data['df_data']
+                    if sel_var[1] in df_tmp:
+                        list_vals = df_tmp[sel_var[1]].dropna().unique()
+                        sel_vals = sac.checkbox(
+                            items=list_vals,
+                            label='Values', index=None, align='left'
+                        )
+                        plot_params['fvals'] = sel_vals
+
             # Select h var
-            # Select y var
             sel_var = utiluser.select_var_from_group(
                 'Select group variable:',
                 df_vars[df_vars.category.isin(['cat_vars'])],
@@ -646,12 +678,10 @@ def panel_set_params_plot(plot_params, pipeline, list_vars):
                 plot_params['hvar'],
                 list_vars,
                 flag_add_none = True,
-                dicts_rename = {
-                    'muse': st.session_state.dicts['muse']['ind_to_name']
-                }
             )
-            plot_params['hvargroup'] = sel_var[0]
-            plot_params['hvar'] = sel_var[1]
+            if sel_var:
+                plot_params['hvargroup'] = sel_var[0]
+                plot_params['hvar'] = sel_var[1]
 
         elif tab == 'Fit':
             user_select_trend(plot_params)

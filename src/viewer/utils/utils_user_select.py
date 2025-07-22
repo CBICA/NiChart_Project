@@ -22,7 +22,8 @@ def select_var_from_group(
     init_var,
     list_vars,
     flag_add_none = False,
-    dicts_rename = None
+    dicts_rename = None,
+    flag_multi = False
 ):
 
     # print(flag_add_none )
@@ -75,7 +76,7 @@ def select_var_from_group(
         label=label,
         index=init_ind,
         return_index=False,
-        multiple=False,
+        multiple=flag_multi,
         search=True,
         clear=True,
         key=f'_sel_{label}'
