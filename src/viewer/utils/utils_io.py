@@ -214,15 +214,6 @@ def upload_single_file(out_dir, out_name, label) -> None:
     '''
     Upload user file to target folder
     '''
-    if not os.path.exists(out_dir):
-        os.makedirs(out_dir)
-
-    out_file = os.path.join(out_dir, out_name)
-
-    # Set target path
-    st.session_state.paths["target"] = out_dir
-
-    # Upload data
     with st.container(border=True):
         sel_file = st.file_uploader(
             label,
@@ -231,11 +222,18 @@ def upload_single_file(out_dir, out_name, label) -> None:
         )        
         if sel_file is not None:
             try:
+                if not os.path.exists(out_dir):
+                    os.makedirs(out_dir)
+                out_file = os.path.join(out_dir, out_name)
+                
                 with open(out_file, "wb") as f:
                     f.write(sel_file.getbuffer())
                 st.success(f"File '{sel_file.name}' saved to {out_file}")
+                return True
             except:
                 st.warning(f'Could not upload file: {sel_file}')
+                return False
+        return False
 
 
 def create_img_list(dtype: str) -> None:
@@ -273,7 +271,7 @@ def create_img_list(dtype: str) -> None:
 
 def create_scan_csv() -> None:
     '''
-    Create a csv with MRID (and other demog fields if available)
+    Create a csv with MRID (and other required fields if available)
     '''
     out_dir = os.path.join(
         st.session_state.paths['project'], 'lists'
@@ -321,7 +319,13 @@ def create_scan_csv() -> None:
     if len(dfs) == 0:
         return None
     
-    df = pd.concat(dfs, axis=0).sort_values(by='MRID').drop_duplicates().reset_index().drop('index', axis=1)
+    df = pd.concat(dfs, axis=0).sort_values(by='MRID')
+    df = df.drop_duplicates().reset_index().drop('index', axis=1)
+    
+    # Add columns for batch and dx
+    df[['Batch']] = f'{st.session_state.project}_Batch1'
+    df[['IsCN']] = 1
+    
     return df
 
 ##############################################################
@@ -424,10 +428,9 @@ def load_nifti():
         if st.button("Delete"):
             remove_dir(out_dir)
     
-
-def load_csv():
+def load_subj_list():
     '''
-    Panel for uploading covariates
+    Panel for uploading subject list with variables required for processing
     '''    
     tab = sac.tabs(
         items=[
@@ -440,15 +443,15 @@ def load_csv():
         align='left'
     )
 
-    out_dir = os.path.join(st.session_state.paths['project'], 'lists')
+    out_dir = os.path.join(st.session_state.paths['project'], 'participants')
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
         
-    fname = 'demog.csv'
+    fname = 'participants.csv'
     out_csv = os.path.join(out_dir, fname)
     
     if tab == 'Upload':
-        upload_single_file(out_dir, fname, 'Select demog file')
+        upload_single_file(out_dir, fname, 'Select participants file')
 
     elif tab == 'Enter Manually':
         df = create_scan_csv()
@@ -488,6 +491,59 @@ def load_csv():
     elif tab == "Reset":
         if st.button('Delete demog file'):
             remove_dir(out_dir)
+
+
+def load_user_csv():
+    '''
+    Panel for uploading data file
+    '''    
+    tab = sac.tabs(
+        items=[
+            sac.TabsItem(label='Upload'),
+            sac.TabsItem(label='View'),
+            sac.TabsItem(label='Reset'),
+        ],
+        size='lg',
+        align='left'
+    )
+
+    out_dir = os.path.join(st.session_state.paths['project'], 'user_data')
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
+
+    fname = 'user_data.csv'
+    out_csv = os.path.join(out_dir, fname)
+            
+    if tab == 'Upload':
+        # Upload file
+        if upload_single_file(out_dir, fname, 'Select data file'):
+            # Update variable dictionary
+            df_user = pd.read_csv(out_csv)
+            df_dict = st.session_state.dicts['df_var_groups']
+            if 'user_data' not in df_dict.group.tolist():
+                df_dict.loc[len(df_dict)] = {
+                    'group': 'user_data',
+                    'category': 'user',
+                    'vtype': 'name',
+                    'atlas': None,
+                    'values': df_user.columns.sort_values().tolist()
+                }
+                st.session_state.dicts['df_var_groups'] = df_dict
+
+    elif tab == "View":
+        if not os.path.exists(out_csv):
+            st.warning('Data file not found!')
+            return
+        try:
+            df_data = pd.read_csv(out_csv)
+            st.dataframe(df_data)
+        except:
+            st.warning(f'Could not load data file: {out_csv}')
+        
+    elif tab == "Reset":
+        if st.button('Delete data file'):
+            remove_dir(out_dir)
+
 
 ##############################################################
 ## Streamlit panels for IO
@@ -571,7 +627,8 @@ def panel_load_data():
         items=[
             sac.TabsItem(label='Nifti'),
             sac.TabsItem(label='Dicom'),
-            sac.TabsItem(label='Lists')
+            sac.TabsItem(label='Subject List'),
+            sac.TabsItem(label='Additional Data')            
         ],
         size='lg',
         align='left'
@@ -602,12 +659,23 @@ def panel_load_data():
             )
             load_dicoms()
             
-    elif sel_dtype == "Lists":
+    elif sel_dtype == "Subject List":
         with st.container(border=True):
             st.markdown(
                 """
-                ***Covariate File***
-                - Upload a ***:red[csv file with covariate info]*** (Age, Sex, DX, etc.)
+                ***Subject List***
+                - List file with columns required for running pipelines
+                - Required fields: MRID, Age, Sex, Batch
                 """
             )
-            load_csv()
+            load_subj_list()
+
+    elif sel_dtype == "Additional Data":
+        with st.container(border=True):
+            st.markdown(
+                """
+                ***Additional data files***
+                - Example: Clinical data
+                """
+            )
+            load_user_csv()

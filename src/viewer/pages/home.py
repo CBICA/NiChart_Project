@@ -1,8 +1,11 @@
+import utils.utils_pages as utilpg
+# Page config should be called for each page
+utilpg.config_page()
+
 import os
 import numpy as np
 import pandas as pd
 import streamlit as st
-import utils.utils_pages as utilpg
 import utils.utils_misc as utilmisc
 import utils.utils_plots as utilpl
 import utils.utils_session as utilses
@@ -14,8 +17,6 @@ from utils.utils_logger import setup_logger
 
 import streamlit_antd_components as sac
 
-# Page config should be called for each page
-utilpg.config_page()
 utilpg.show_menu()
 utilpg.add_sidebar_options()
 utilpg.set_global_style()

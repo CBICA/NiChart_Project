@@ -8,7 +8,6 @@ import utils.utils_cloud as utilcloud
 import utils.utils_dicom as utildcm
 import utils.utils_menu as utilmenu
 import utils.utils_nifti as utilni
-import utils.utils_session as utilss
 import utils.utils_st as utilst
 from stqdm import stqdm
 import docker
@@ -17,14 +16,17 @@ import utils.utils_toolloader as tl
 import utils.utils_pollstatus as ps
 import utils.utils_displayjobs as dj
 import utils.utils_stlogbox as stlogbox
+import utils.utils_pages as utilpg
 from pathlib import Path
 import pathlib
 import time
 from streamlit_autorefresh import st_autorefresh
 
 # Page config should be called for each page
-utilss.config_page()
-
+utilpg.config_page()
+utilpg.show_menu()
+utilpg.add_sidebar_options()
+utilpg.set_global_style()
 utilmenu.menu()
 
 DISABLE_PUBLIC = True

@@ -13,11 +13,14 @@ import utils.utils_mriview as utilmri
 import plotly.graph_objs as go
 import plotly.figure_factory as ff
 import utils.utils_traces as utiltr
+import utils.utils_css as utilcss
 
 import streamlit_antd_components as sac
 
 pd.set_option('display.expand_frame_repr', False)
 pd.set_option('display.max_colwidth', None)  # or use a large number like 500
+
+utilcss.load_css()
 
 def sidebar_flag_hide_setting():
     '''
@@ -251,14 +254,18 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
     curr_params = st.session_state.plots.loc[plot_ind, 'params']
 
     # Read centile data
-    
-    st.write()
-    
-    f_cent = os.path.join(
-        st.session_state.paths['centiles'],
-        f'{plot_params['method']}_centiles_{plot_params['centile_type']}.csv'
-    )
-    df_cent = pd.read_csv(f_cent)
+    if plot_params['centile_type'] == 'None':
+        df_cent = None
+    else:
+        try:
+            f_cent = os.path.join(
+                st.session_state.paths['centiles'],
+                f'{plot_params['method']}_centiles_{plot_params['centile_type']}.csv'
+            )
+            df_cent = pd.read_csv(f_cent)
+        except:
+            st.warning('Could not read centile data!')
+            df_cent = None
 
     # Main plot
     m = plot_settings["margin"]
@@ -280,12 +287,14 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
         utiltr.add_trace_scatter(df, plot_params, plot_settings, fig)
 
     # Add linear fit
-    if df is not None:
-        utiltr.add_trace_linreg(df, plot_params, plot_settings, fig)
+    if plot_params['trend'] == 'Linear':
+        if df is not None:
+            utiltr.add_trace_linreg(df, plot_params, plot_settings, fig)
 
     # Add non-linear fit
-    if df is not None:
-        utiltr.add_trace_lowess(df, plot_params, plot_settings, fig)
+    if plot_params['trend'] == 'Smooth LOWESS Curve':
+        if df is not None:
+            utiltr.add_trace_lowess(df, plot_params, plot_settings, fig)
 
     # Add centile trace
     if df_cent is not None:
@@ -498,39 +507,72 @@ def user_select_plot_settings(plot_params):
         disabled=False,
     )
 
+# def user_add_plots2(plot_params):
+#     '''
+#     Panel to select plot args from the user
+#     '''
+#     # flag_settings = st.sidebar.checkbox('Hide plot settings')
+#
+#     #cols = st.columns([2,3,2])
+#     cols = st.columns([1,1.3,1.3])
+#     with cols[0]:
+#         if st.button('Add Plot'):
+#             st.session_state.plots = add_plot(
+#                 st.session_state.plots, st.session_state.plot_params
+#             )
+#
+#     # Add a single plot if there is none
+#     if st.session_state.plots.shape[0] == 0:
+#         st.session_state.plots = add_plot(
+#             st.session_state.plots, st.session_state.plot_params
+#         )
+#
+#     with cols[1]:
+#         if st.button('Delete Selected'):
+#             st.session_state.plots = delete_sel_plots(
+#                 st.session_state.plots
+#             )
+#
+#     with cols[2]:
+#         if st.button('Delete All'):
+#             st.session_state.plots = delete_all_plots()
+#
+
 def user_add_plots(plot_params):
     '''
     Panel to select plot args from the user
     '''
-    # flag_settings = st.sidebar.checkbox('Hide plot settings')
 
-    cols = st.columns([2,3,2])
-    with cols[0]:
-        if st.button('Add Plot'):
+    def toggle_add_plot():
+        print('toggled')
+
+        if st.session_state['_key_add_plot'] == 'Add Plot':
             st.session_state.plots = add_plot(
                 st.session_state.plots, st.session_state.plot_params
             )
 
-    # Add a single plot if there is none
-    if st.session_state.plots.shape[0] == 0:
-        st.session_state.plots = add_plot(
-            st.session_state.plots, st.session_state.plot_params
-        )
-
-    with cols[1]:
-        if st.button('Delete Selected'):
+        if st.session_state['_key_add_plot'] == 'Delete Selected':
             st.session_state.plots = delete_sel_plots(
                 st.session_state.plots
             )
 
-    with cols[2]:
-        if st.button('Delete All'):
+        if st.session_state['_key_add_plot'] == 'Delete All':
             st.session_state.plots = delete_all_plots()
 
+        st.session_state['_key_add_plot'] = None
 
-def panel_set_params_plot(
-    plot_params, var_groups_data, var_groups_hue, pipeline, list_vars
-):
+    options = ['Add Plot', 'Delete Selected', 'Delete All']
+    sel = st.segmented_control(
+        "Plot Control",
+        options,
+        selection_mode="single",
+        on_change = toggle_add_plot,
+        key = '_key_add_plot'
+    )
+
+
+
+def panel_set_params_plot(plot_params, pipeline, list_vars):
     """
     Panel to set plotting parameters
     """
@@ -549,7 +591,7 @@ def panel_set_params_plot(
                 sac.TabsItem(label='Fit'),
                 sac.TabsItem(label='Centiles'),
                 sac.TabsItem(label='Plot Settings'),
-                sac.TabsItem(label='Add/Delete Plots')
+                #sac.TabsItem(label='Add/Delete Plots')
             ],
             size='sm',
             align='left'
@@ -557,10 +599,11 @@ def panel_set_params_plot(
 
         df_vars = st.session_state.dicts['df_var_groups']
         if tab == 'Data':
+            
             # Select x var
             sel_var = utiluser.select_var_from_group(
                 'Select x variable:',
-                df_vars[df_vars.group.isin(['demog'])],
+                df_vars[df_vars.group.isin(['demog', 'user_data'])],
                 plot_params['xvargroup'],
                 plot_params['xvar'],
                 list_vars,
@@ -577,7 +620,7 @@ def panel_set_params_plot(
             # Select y var
             sel_var = utiluser.select_var_from_group(
                 'Select y variable:',
-                df_vars[df_vars.category.isin(['demog','roi'])],
+                df_vars[df_vars.category.isin(['demog','roi','spare','user'])],
                 plot_params['yvargroup'],
                 plot_params['yvar'],
                 list_vars,
@@ -619,8 +662,8 @@ def panel_set_params_plot(
         elif tab == 'Plot Settings':
             user_select_plot_settings(plot_params)
 
-        elif tab == 'Add/Delete Plots':
-            user_add_plots(plot_params)
+        #elif tab == 'Add/Delete Plots':
+            #user_add_plots(plot_params)
 
     # Set plot type
     plot_params['plot_type'] = 'scatter'
@@ -649,7 +692,7 @@ def panel_set_params_centile_plot(
     plot_params['method'] = pipeline
     plot_params['flag_norm_centiles'] = False    
 
-    print(st.session_state.plot_settings['flag_hide_settings'])
+    # print(st.session_state.plot_settings['flag_hide_settings'])
     
     if st.session_state.plot_settings['flag_hide_settings'] == 'Hide':
         return
@@ -661,7 +704,7 @@ def panel_set_params_centile_plot(
                 sac.TabsItem(label='Data'),
                 sac.TabsItem(label='Centiles'),
                 sac.TabsItem(label='Plot Settings'),
-                sac.TabsItem(label='Add/Delete Plots')
+                #sac.TabsItem(label='Add/Delete Plots')
             ],
             size='sm',
             align='left'
@@ -707,8 +750,8 @@ def panel_set_params_centile_plot(
         elif tab == 'Plot Settings':
             user_select_plot_settings(plot_params)
 
-        elif tab == 'Add/Delete Plots':
-            user_add_plots(plot_params)
+        #elif tab == 'Add/Delete Plots':
+            #user_add_plots(plot_params)
 
     # Set plot type
     plot_params['plot_type'] = 'scatter'
@@ -729,11 +772,11 @@ def panel_show_plots():
         if st.session_state.plots.loc[tmp_ind, 'flag_sel']:
             st.session_state.plots.at[tmp_ind, 'params'] = st.session_state.plot_params.copy()
 
-    # Add a single plot if there is none
-    if st.session_state.plots.shape[0] == 0:
-        st.session_state.plots = add_plot(
-            st.session_state.plots, st.session_state.plot_params
-        )
+    # # Add a single plot if there is none
+    # if st.session_state.plots.shape[0] == 0:
+    #     st.session_state.plots = add_plot(
+    #         st.session_state.plots, st.session_state.plot_params
+    #     )
 
     # Show plots
     show_plots(
@@ -754,11 +797,11 @@ def panel_show_centile_plots():
         if st.session_state.plots.loc[tmp_ind, 'flag_sel']:
             st.session_state.plots.at[tmp_ind, 'params'] = st.session_state.plot_params.copy()
 
-    # Add a single plot if there is none
-    if st.session_state.plots.shape[0] == 0:
-        st.session_state.plots = add_plot(
-            st.session_state.plots, st.session_state.plot_params
-        )
+    # # Add a single plot if there is none
+    # if st.session_state.plots.shape[0] == 0:
+    #     st.session_state.plots = add_plot(
+    #         st.session_state.plots, st.session_state.plot_params
+    #     )
 
     # Show plots
     show_plots(
