@@ -443,15 +443,21 @@ def submit_and_run_job_sync(
             if status_box:
                 status_box.update(label=f"Post-sync for job {job_id}...", state="running")
             print("DEBUG: Syncing from S3 to mount paths via AWS CLI.")
-            for mount_path in user_mounts.values():
+            for key, mount_path in user_mounts.items():
                 #absolute_mount_path = Path(mount_path).resolve()
                 print(f"DEBUG: Syncing user-mount path {mount_path}")
                 cmd = f"aws s3 sync s3://cbica-nichart-io/{mount_path} {mount_path} --exact-timestamps"
                 returncode = os.system(cmd)
-                if returncode > 0:
-                    print(f"DEBUG: Post-job sync failed!")
-                    log.error(f"Post job sync failed for job {job_id}.")
-                    raise RuntimeError(f"Cloud job {job_id} completed successfully, but post-job sync failed. Please submit an issue report.")
+                if os.WEXITSTATUS(returncode) > 0:
+                    print(f"DEBUG: Post-job sync failed, retrying appropriately for single-file.")
+                    log.error(f"Post job sync failed for job {job_id}. Possibly due to single-file, retrying with applicable command.")
+                    sf_cmd = f"aws cp s3://cbica-nichart-io/{mount_path} {mount_path}"
+                    sf_returncode = os.system(sf_cmd)
+                    if os.WEXITSTATUS(sf_returncode) > 0:
+                        log.error(f"Single-file sync also failed. Sync is uncompletable.")
+                        raise RuntimeError(f"Cloud job {job_id} completed successfully, but post-job sync (including backup single-file sync) failed with exit codes {os.WEXITSTATUS(returncode)}, {os.WEXITSTATUS(sf_returncode)}. Please submit an issue report.")
+                    else:
+                        log.info("Single-file sync succeeded, so this error can be ignored.")
             print("DEBUG: Done syncing from S3 after job completion.")  
             if log:
                 log.info(f"Done post-job sync for job {job_id}.")  
