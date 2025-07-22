@@ -212,7 +212,6 @@ def select_files(in_dir):
                 merged_df = merged_df[sel_cols]
 
             st.success(f"✅ Merged DataFrame has {merged_df.shape[0]} rows and {merged_df.shape[1]} columns")
-            st.dataframe(merged_df)
 
             # Save merged data
             out_dir = os.path.join(

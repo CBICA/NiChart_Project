@@ -214,15 +214,6 @@ def upload_single_file(out_dir, out_name, label) -> None:
     '''
     Upload user file to target folder
     '''
-    if not os.path.exists(out_dir):
-        os.makedirs(out_dir)
-
-    out_file = os.path.join(out_dir, out_name)
-
-    # Set target path
-    st.session_state.paths["target"] = out_dir
-
-    # Upload data
     with st.container(border=True):
         sel_file = st.file_uploader(
             label,
@@ -231,11 +222,18 @@ def upload_single_file(out_dir, out_name, label) -> None:
         )        
         if sel_file is not None:
             try:
+                if not os.path.exists(out_dir):
+                    os.makedirs(out_dir)
+                out_file = os.path.join(out_dir, out_name)
+                
                 with open(out_file, "wb") as f:
                     f.write(sel_file.getbuffer())
                 st.success(f"File '{sel_file.name}' saved to {out_file}")
+                return True
             except:
                 st.warning(f'Could not upload file: {sel_file}')
+                return False
+        return False
 
 
 def create_img_list(dtype: str) -> None:
@@ -490,7 +488,7 @@ def load_subj_list():
             remove_dir(out_dir)
 
 
-def load_csv():
+def load_user_csv():
     '''
     Panel for uploading data file
     '''    
@@ -512,7 +510,21 @@ def load_csv():
     out_csv = os.path.join(out_dir, fname)
             
     if tab == 'Upload':
-        upload_single_file(out_dir, fname, 'Select data file')
+        # Upload file
+        if upload_single_file(out_dir, fname, 'Select data file'):
+            # Update variable dictionary
+            df_user = pd.read_csv(out_csv)
+            df_dict = st.session_state.dicts['df_var_groups']
+            df_dict.loc[len(df_dict)] = {
+                'group': 'user_data',
+                'category': 'user',
+                'vtype': 'name',
+                'atlas': None,
+                'values': df_user.columns.sort_values().tolist()
+            }
+            st.session_state.dicts['df_var_groups'] = df_dict
+
+            st.dataframe(st.session_state.dicts['df_var_groups'])
 
     elif tab == "View":
         if not os.path.exists(out_csv):
@@ -662,4 +674,4 @@ def panel_load_data():
                 - Example: Clinical data
                 """
             )
-            load_csv()
+            load_user_csv()

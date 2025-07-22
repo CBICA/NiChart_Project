@@ -3,6 +3,7 @@ utilpg.config_page()
 
 import streamlit as st
 import utils.utils_plots as utilpl
+import utils.utils_io as utilio
 import utils.utils_mriview as utilmri
 import utils.utils_data_view as utildv
 import utils.utils_session as utilses
@@ -20,21 +21,43 @@ logger.debug('Page: View Results')
 utilpg.show_menu()
 utilpg.set_global_style()
 
-def view_project_folder():
-    """
-    Panel for viewing files in a project folder
-    """
-    with st.container(border=True):
-        in_dir = st.session_state.paths['project']
-        utildv.data_overview(in_dir)
-
 def select_data_files():
     """
     Panel for merging selected data files
-    """
-    with st.container(border=True):
-        in_dir = st.session_state.paths['project']
-        utildv.select_files(in_dir)
+    """    
+    tab = sac.tabs(
+        items=[
+            sac.TabsItem(label='Select'),
+            sac.TabsItem(label='View'),
+            sac.TabsItem(label='Reset'),
+        ],
+        size='lg',
+        align='left'
+    )
+    
+    out_dir = os.path.join(
+        st.session_state.paths['project'], 'data_merged'
+    )
+
+    if tab == 'Select':
+        with st.container(border=True):
+            in_dir = st.session_state.paths['project']
+            utildv.select_files(in_dir)
+
+    elif tab == 'View':
+        try:
+            fname = os.path.join(
+                out_dir, 'data_merged.csv'
+            )
+            df_data = pd.read_csv(fname)
+            st.dataframe(df_data)
+        except:
+            st.warning('Could not read data file!')
+        
+    elif tab == 'Reset':
+        st.info(f'Out folder name: {out_dir}')
+        if st.button("Delete"):
+            utilio.remove_dir(out_dir)
 
 def plot_vars():
     """
@@ -61,13 +84,7 @@ def plot_vars():
     utilpl.sidebar_flag_hide_legend()
     utilpl.sidebar_flag_hide_mri()
 
-    utilpl.panel_set_params_plot(
-        st.session_state.plot_params,
-        var_groups_data,
-        var_groups_hue,
-        pipeline,
-        list_vars
-    )
+    utilpl.panel_set_params_plot(st.session_state.plot_params, pipeline, list_vars)
 
     utilpl.panel_show_plots()
 
@@ -81,7 +98,6 @@ st.markdown(
 
 tab = sac.tabs(
     items=[
-        sac.TabsItem(label='View Project Folder'),
         sac.TabsItem(label='Select Data Files'),
         sac.TabsItem(label='Plot Data'),
     ],
@@ -89,11 +105,7 @@ tab = sac.tabs(
     align='left'
 )
 
-
-if tab == 'View Project Folder':
-    view_project_folder()
-
-elif tab == 'Select Data Files':
+if tab == 'Select Data Files':
     select_data_files()
 
 elif tab == 'Plot Data':

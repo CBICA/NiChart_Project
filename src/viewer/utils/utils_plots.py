@@ -566,9 +566,7 @@ def user_add_plots(plot_params):
 
 
 
-def panel_set_params_plot(
-    plot_params, var_groups_data, var_groups_hue, pipeline, list_vars
-):
+def panel_set_params_plot(plot_params, pipeline, list_vars):
     """
     Panel to set plotting parameters
     """

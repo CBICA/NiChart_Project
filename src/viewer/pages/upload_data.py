@@ -40,7 +40,7 @@ def view_project_folder():
 
 def upload_data():
     """
-    Panel for viewing files in a project folder
+    Panel for uploading project data
     """
     with st.container(border=True):    
         utilio.panel_load_data()
