@@ -14,7 +14,7 @@ mounts:
     path_in_container: /input/dlmuse_vol.csv
     mode: ro
   spare_ba_csv:
-    path_in_container: /output/SPARE_AD.csv
+    path_in_container: /output/SPARE_BA.csv
     mode: rw
 
 parameters:
