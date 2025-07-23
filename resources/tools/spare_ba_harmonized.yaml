@@ -27,5 +27,5 @@ resources: # Used to allocate jobs on the cloud. Please be diligent.
 
 container:
   image: cbica/nichart_spare_score:0.0.2
-  command: "-i {harmonized_dlmuse_vol} -t RG -m /spare_score/Models/final_models/SPARE-BA-Harmonized-new-HT-linear-BC.joblib -o {spare_ba_csv}"
+  command: "-i {harmonized_dlmuse_vol} -t RG -m /spare_score/Models/final_models/SPARE-BA-Harmonized-linear_fast-HT-BC.joblib -o {spare_ba_csv}"
 
