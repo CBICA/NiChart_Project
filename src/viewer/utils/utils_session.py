@@ -317,7 +317,9 @@ def init_plot_vars() -> None:
         "cmaps": utilcmap.cmaps_init,
         "alphas": utilcmap.alphas_init,
         "w_centile": 6,
-        "w_fit": 6
+        "w_fit": 6,
+        "min_age": 20,
+        "max_age": 100,
         #"cmaps2": utilcmap.cmaps2,
         #"cmaps3": utilcmap.cmaps3,
     }
@@ -351,7 +353,9 @@ def init_plot_vars() -> None:
         "list_roi_indices": [81, 82],
         "list_orient": ["axial", "coronal", "sagittal"],
         "is_show_overlay": True,
-        "crop_to_mask": True        
+        "crop_to_mask": True,
+        'filter_sex': ['F', 'M'],
+        'filter_age': [40, 95],
     }
 
     ###################################
