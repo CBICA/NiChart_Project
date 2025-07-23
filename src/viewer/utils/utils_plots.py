@@ -298,6 +298,11 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
             st.warning('Could not read centile data!')
             df_cent = None
 
+    # Filter centiles
+    dfcf = df_cent.copy()
+    if 'Age' in dfcf:
+        dfcf = dfcf[(dfcf.Age >= plot_params['filter_age'][0]) & (dfcf.Age <= plot_params['filter_age'][1])]
+
     # Main plot
     m = plot_settings["margin"]
     hi = plot_settings["h_init"]
@@ -328,8 +333,8 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
             utiltr.add_trace_lowess(df, plot_params, plot_settings, fig)
 
     # Add centile trace
-    if df_cent is not None:
-        utiltr.add_trace_centile(df_cent, plot_params, plot_settings, fig)
+    if dfcf is not None:
+        utiltr.add_trace_centile(dfcf, plot_params, plot_settings, fig)
 
     # Add selected dot
     if df is not None:
@@ -365,10 +370,7 @@ def show_plots(df, df_plots, plot_settings):
             dff = dff[dff.Sex.isin(sel_params['filter_sex'])]
         if 'Age' in df:
             dff = dff[(dff.Age >= sel_params['filter_age'][0]) & (dff.Age <= sel_params['filter_age'][1])]
-            
-        print(df.shape)
-        print(dff.shape)
-        
+                    
         with blocks[column_no]:
             with st.container(border=True):
                 if sel_params['plot_type'] == "dist": 
