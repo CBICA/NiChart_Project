@@ -161,10 +161,13 @@ def panel_run_pipeline():
 
 
         log = stlogbox.StreamlitJobLogger(log_committed_box, log_live_box)
-
+        execution_mode = 'local'
+        if st.session_state.has_cloud_session:
+            execution_mode = 'cloud'
         result = tl.run_pipeline(
             pipeline_id=pipeline_to_run, ##TODO EDIT THIS
             global_vars={"STUDY": st.session_state.paths["project"]},
+            execution_mode=execution_mode,
             pipeline_progress_bar=pipeline_progress_bar,
             process_progress_bar=process_progress_bar,
             process_status_box=process_status_box,
