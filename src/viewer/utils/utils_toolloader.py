@@ -362,6 +362,7 @@ def submit_and_run_job_sync(
     id_token: str | None = None,
     execution_mode: str = "any",  # can be "cloud", "local", or "any"
     progress_bar=None,
+    status_box=None,
     log=None,
     metadata_path: Path = None,
     poll_interval: int = 15,
@@ -412,7 +413,8 @@ def submit_and_run_job_sync(
 
                 if progress_bar:
                     progress_bar.set_description(f"Cloud job status: {status}")
-
+                if status_box:
+                    status_box.update(label=f"Cloud job: {status}", state="running")
                 if log:
                     current_logs = handle.get_logs()
                     log.update_live(current_logs)
@@ -438,16 +440,24 @@ def submit_and_run_job_sync(
         if do_s3_cli_transfer:
             if log:
                 log.info(f"Performing post-job sync for job {job_id}.")
+            if status_box:
+                status_box.update(label=f"Post-sync for job {job_id}...", state="running")
             print("DEBUG: Syncing from S3 to mount paths via AWS CLI.")
-            for mount_path in user_mounts.values():
+            for key, mount_path in user_mounts.items():
                 #absolute_mount_path = Path(mount_path).resolve()
                 print(f"DEBUG: Syncing user-mount path {mount_path}")
                 cmd = f"aws s3 sync s3://cbica-nichart-io/{mount_path} {mount_path} --exact-timestamps"
                 returncode = os.system(cmd)
-                if returncode > 0:
-                    print(f"DEBUG: Post-job sync failed!")
-                    log.error(f"Post job sync failed for job {job_id}.")
-                    raise RuntimeError(f"Cloud job {job_id} completed successfully, but post-job sync failed. Please submit an issue report.")
+                if os.WEXITSTATUS(returncode) > 0:
+                    print(f"DEBUG: Post-job sync failed, retrying appropriately for single-file.")
+                    log.error(f"Post job sync failed for job {job_id}. Possibly due to single-file, retrying with applicable command.")
+                    sf_cmd = f"aws s3 cp s3://cbica-nichart-io/{mount_path} {mount_path}"
+                    sf_returncode = os.system(sf_cmd)
+                    if os.WEXITSTATUS(sf_returncode) > 0:
+                        log.error(f"Single-file sync also failed. Sync is uncompletable.")
+                        raise RuntimeError(f"Cloud job {job_id} completed successfully, but post-job sync (including backup single-file sync) failed with exit codes {os.WEXITSTATUS(returncode)}, {os.WEXITSTATUS(sf_returncode)}. Please submit an issue report.")
+                    else:
+                        log.info("Single-file sync succeeded, so this error can be ignored.")
             print("DEBUG: Done syncing from S3 after job completion.")  
             if log:
                 log.info(f"Done post-job sync for job {job_id}.")  
@@ -663,6 +673,7 @@ def run_pipeline(pipeline_id: str,
                 pipeline_progress_bar=None,
                 process_progress_bar=None,
                 execution_mode='cloud',
+                process_status_box=None,
                 log=None,
                 metadata_location=None,
                 reuse_cached_steps=True,
@@ -704,8 +715,12 @@ def run_pipeline(pipeline_id: str,
         resolved_params = step.get("params", {})
        
         print(f"Submitting job: {sid} ({tool.name})")
+        if pipeline_progress_bar:
+            pipeline_progress_bar.set_description(f"Submitting pipeline step {tool_id}...")
         if process_progress_bar:
-            process_progress_bar.set_description(f"Running tool {tool_id}...")
+            process_progress_bar.set_description(f"Submitting pipeline step {tool_id}...")
+        if process_status_box:
+            process_status_box.update(label=f"Submitting pipeline step: {tool_id}...")
 
         ## Fill this in with deduplication logic
         if metadata_location is not None:
@@ -726,7 +741,13 @@ def run_pipeline(pipeline_id: str,
             ):
                 log.info(f"[CACHE] Skipping step: {tool_id} because it was determined that a previous execution could be reused.")
                 continue # Skip to next pipeline step
-        
+        if pipeline_progress_bar:
+            pipeline_progress_bar.set_description(f"Running {tool_id}...")
+        if process_progress_bar:
+            process_progress_bar.set_description(f"Running {tool_id}...")
+        if process_status_box:
+            process_status_box.update(label=f"Running {tool_id}...")
+
         # If we reach here, the step must be executed.
         record_step_submission(metadata_path=metadata_location,
                            tool_id=tool_id,
@@ -740,8 +761,10 @@ def run_pipeline(pipeline_id: str,
                     user_mounts=resolved_total_mounts,
                     execution_mode=execution_mode,
                     progress_bar=process_progress_bar,
+                    status_box=process_status_box,
                     log=log,
-                    metadata_path=metadata_location
+                    metadata_path=metadata_location,
+                    do_s3_cli_transfer=False,
         )
 
         if result['status'] == 'success':
@@ -763,7 +786,15 @@ def run_pipeline(pipeline_id: str,
             log.error(f"Pipeline step {tool_id} failed with status {result['status']}.")
             print(f"Step {sid}, {tool_id} failed with status {result["status"]}, see error log:")
             print(f"Error message: {result["error_message"]}")
+            if process_progress_bar:
+                process_progress_bar.set_description(f"Running {tool_id}...")
+            if process_status_box:
+                process_status_box.update(label=f"Pipeline failed", state="error")
             raise RuntimeError(result["error_message"])
         step_outputs[sid] = resolved_outputs  # Used for future interpolation
     log.info(f"Pipeline {pipeline_id} completed successfully.")
+    if process_progress_bar:
+        process_progress_bar.set_description(f"Pipeline finished")
+    if process_status_box:
+        process_status_box.update(label=f"Pipeline finished", state="complete")
     return step_outputs

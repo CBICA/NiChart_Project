@@ -31,6 +31,6 @@ resources: # Used to allocate jobs on the cloud. Please be diligent.
   gpus: 0
 
 container:
-  image: cbica/nichart_spare_score:0.0.1
-  command: "-i {dlmuse_vol} -demog {demog_csv} -m /spare_score/spare_scores/mdl/SPARE_AD_raw.pkl.gz -o {spare_ad_csv}"
+  image: cbica/nichart_spare_score:0.0.2
+  command: "-i {dlmuse_vol} -demog {demog_csv} -t CL -m /spare_score/Models/final_models/SPARE-AD-RAW-linear_fast-HT-CB.joblib -o {spare_ad_csv}"
 
