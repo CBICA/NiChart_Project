@@ -226,6 +226,11 @@ def select_files(in_dir):
             
             try:
                 merged_df.to_csv(out_csv)
+                
+                # Reset plot data
+                utilss.init_plot_vars()
+                
+                
             except:
                 st.error(f'Could not write merged data: {out_csv}')
 
