@@ -342,7 +342,7 @@ def panel_set_params(
                 # Crop to mask area
                 plot_params['crop_to_mask'] = st.checkbox("Crop to mask", True, disabled=False)
 
-def panel_view_seg(ulay, olay, plot_params):
+def panel_view_seg2(ulay, olay, plot_params):
     '''
     Panel to display segmented image overlaid on underlay image
     '''
@@ -355,6 +355,44 @@ def panel_view_seg(ulay, olay, plot_params):
             # Process image (and mask) to prepare final 3d matrix to display
             img, mask, img_masked = prep_image_and_olay(
                 ulay, olay, plot_params['roi_indices'], plot_params['crop_to_mask']
+            )
+            img_bounds = detect_mask_bounds(mask)
+
+            cols = st.columns(len(plot_params['list_orient']))
+            for i, tmp_orient in stqdm(
+                enumerate(plot_params['list_orient']),
+                desc="Showing images ...",
+                total=len(plot_params['list_orient'])
+            ):
+                with cols[i]:
+                    ind_view = img_views.index(tmp_orient)
+                    size_auto = True
+                    if olay is None or plot_params['is_show_overlay'] is False:
+                        show_img_slices(
+                            img, ind_view, img_bounds[ind_view, :], tmp_orient
+                        )
+                    else:
+                        show_img_slices(
+                            img_masked, ind_view, img_bounds[ind_view, :], tmp_orient
+                        )
+
+def panel_view_seg(ulay, olay, plot_params):
+    '''
+    Panel to display segmented image overlaid on underlay image
+    '''
+    sel_roi = st.session_state.sel_roi
+    roi_indices = utilmisc.get_roi_indices(sel_roi, 'muse')
+    print(roi_indices)
+    if roi_indices is None:
+        return
+
+    # Show images
+    with st.container(border=True):
+        with st.spinner("Wait for it..."):
+            # Process image (and mask) to prepare final 3d matrix to display
+            img, mask, img_masked = prep_image_and_olay(
+                #ulay, olay, plot_params['roi_indices'], plot_params['crop_to_mask']
+                ulay, olay, roi_indices, plot_params['crop_to_mask']
             )
             img_bounds = detect_mask_bounds(mask)
 

@@ -180,9 +180,6 @@ def add_trace_dot(
     if df_tmp.shape[0] == 0:
         return fig
 
-    print('aab')
-    print(plot_settings['flag_hide_legend'])
-
     trace = go.Scatter(
         x=df_tmp[plot_params['xvar']],
         y=df_tmp[plot_params['yvar']],
