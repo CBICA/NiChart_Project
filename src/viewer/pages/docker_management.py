@@ -78,8 +78,8 @@ def image_disk_usage(image):
 
 st.title("DEBUG: Try submitting a job to local Docker")
 # Button to trigger code execution
-path_to_t1 = Path(st.session_state.paths["dir_out"]) / "SampleTool" / "T1"
-path_to_outcsv = Path(st.session_state.paths["dir_out"]) / "SampleTool" / "dlmuse.csv"
+path_to_t1 = Path(st.session_state.paths["out_dir"]) / "SampleTool" / "T1"
+path_to_outcsv = Path(st.session_state.paths["out_dir"]) / "SampleTool" / "dlmuse.csv"
 # Input locations need to already exist. Output locations do not.
 path_to_t1.mkdir(parents=True, exist_ok=True)
 example_tool_name = "example_tool_template"
@@ -177,7 +177,7 @@ if st.button("Press me to try synchronous pipeline execution"):
 
     result = tl.run_pipeline(
         pipeline_id=pipeline_to_run, ##TODO EDIT THIS
-        global_vars={"STUDY": st.session_state.paths["dir_out"]},
+        global_vars={"STUDY": st.session_state.paths["out_dir"]},
         pipeline_progress_bar=pipeline_progress_bar,
         process_progress_bar=process_progress_bar,
         log=log

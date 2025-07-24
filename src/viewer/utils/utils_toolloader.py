@@ -201,7 +201,7 @@ def ensure_and_validate_mount_paths(
 
 def validate_user_request(tool_name: str, user_params: Dict, user_mounts: Dict[str, str], tool_registry_path: Union[str, Path] = DEFAULT_TOOL_DEFINITION_PATH) -> str:
     # Assumes streamlit session state is set up.
-    base_mount_dir = Path(st.session_state.paths["dir_out"]).resolve()
+    base_mount_dir = Path(st.session_state.paths["out_dir"]).resolve()
     tool_dir = Path(tool_registry_path).resolve()
     yaml_file = tool_dir / f"{tool_name}.yaml"
     if not yaml_file.exists():
