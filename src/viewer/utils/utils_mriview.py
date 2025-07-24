@@ -347,7 +347,7 @@ def panel_view_seg(ulay, olay, plot_params):
     '''
     Panel to display segmented image overlaid on underlay image
     '''
-    sel_roi = st.session_state.sel_roi
+    sel_roi = st.session_state.sel_roi   # Read sele roi
     if sel_roi is None:
         return
     
