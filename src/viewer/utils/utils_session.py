@@ -240,9 +240,17 @@ def init_paths():
         "proc_def": p_proc_def,
         "file_search_dir": "",
         "out_dir": p_out,
+        "host_out_dir": None,
         "project": p_prj,
         'target': None
     }
+
+    # Host-container dir mapping which can be useful for local nested containers
+    # Code which relies on this should always check if it is None
+    # And use local paths instead if so.
+    host_out_dir = os.getenv("NICHART_HOST_DATA_DIR", None)
+    if host_out_dir is not None:
+        st.session_state.paths['host_out_dir'] = host_out_dir
     
     # List of output folders
     st.session_state.out_dirs = [

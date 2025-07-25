@@ -38,6 +38,15 @@ def is_safe_path(base_dir: Union[str, Path], target_path: Union[str, Path]) -> b
         return True
     except ValueError:
         return False
+    
+def remap_path(path: str, remap_dict: dict) -> str:
+    for old_prefix, new_prefix in remap_dict.items():
+        if path.startswith(old_prefix):
+            # Replace prefix, preserving the rest of the path
+            suffix = path[len(old_prefix):]
+            # Avoid double slashes
+            return os.path.join(new_prefix, suffix.lstrip('/'))
+    return path  # No remap found
 
 class IOField(BaseModel):
     type: str  # "file" or "directory"
@@ -106,7 +115,7 @@ class ToolSpec(BaseModel):
             return False # Pull failed for one reason or another
         return True # Pull success
     
-    def generate_docker_command(self, param_values: Dict[str, Union[int, float, bool, str]], mount_paths: Dict[str, str]) -> str:
+    def generate_docker_command(self, param_values: Dict[str, Union[int, float, bool, str]], mount_paths: Dict[str, str], path_remapping={}) -> str:
         # This line will throw if validation fails
         param_values = self.validate_params(param_values)
 
@@ -127,6 +136,8 @@ class ToolSpec(BaseModel):
         mount_args = []
         for label, config in self.mounts.items():
             host_path = mount_paths[label]
+            if path_remapping:
+                host_path = remap_path(host_path, path_remapping)  
             mode = config.mode
             is_output = False
             is_ofile = False
@@ -199,7 +210,7 @@ def ensure_and_validate_mount_paths(
                 parent.mkdir(parents=True, exist_ok=True)
 
 
-def validate_user_request(tool_name: str, user_params: Dict, user_mounts: Dict[str, str], tool_registry_path: Union[str, Path] = DEFAULT_TOOL_DEFINITION_PATH) -> str:
+def validate_user_request(tool_name: str, user_params: Dict, user_mounts: Dict[str, str], tool_registry_path: Union[str, Path] = DEFAULT_TOOL_DEFINITION_PATH, path_remapping={}) -> str:
     # Assumes streamlit session state is set up.
     base_mount_dir = Path(st.session_state.paths["dir_out"]).resolve()
     tool_dir = Path(tool_registry_path).resolve()
@@ -215,7 +226,7 @@ def validate_user_request(tool_name: str, user_params: Dict, user_mounts: Dict[s
 
     ensure_and_validate_mount_paths(user_mounts, base_mount_dir, input_labels, output_labels)
 
-    return tool_spec.generate_docker_command(user_params, user_mounts)
+    return tool_spec.generate_docker_command(user_params, user_mounts, path_remapping)
 
 def stringify_mounts(mounts_dict: Dict[str, Union[str, Path]]) -> Dict[str, str]:
     '''Utility function that converts mount dicts of Path objects to string form. 
@@ -231,7 +242,8 @@ def submit_job(
     user_mounts: Dict[str, str],
     id_token: str | None = None,
     execution_mode: str = "any", #"cloud", "local",
-    do_s3_cli_transfer: bool = False # True will bypass FSX to use direct S3 file upload/download
+    do_s3_cli_transfer: bool = False, # True will bypass FSX to use direct S3 file upload/download
+    local_path_remapping: dict = {}, # Pass a container-host path translation as needed
 ) -> Union[str, subprocess.Popen]:
     """
     Submits a job either locally or via an AWS Lambda depending on Streamlit session state.
@@ -320,10 +332,14 @@ def submit_job(
     else:
         # === LOCAL MODE ===
         print("DEBUG: Local mode job submission.")
+        # Grab local container-host path remapping (not needed on cloud)
+        path_remapping = local_path_remapping
+        # Generate command
         docker_command = validate_user_request(
             tool_name=tool_name,
             user_params=user_params,
             user_mounts=user_mounts,
+            path_remapping=path_remapping
         )
 
         print(f"Running on local docker: {docker_command}")
@@ -366,7 +382,8 @@ def submit_and_run_job_sync(
     log=None,
     metadata_path: Path = None,
     poll_interval: int = 15,
-    do_s3_cli_transfer: bool = False # True will bypass FSX to use direct S3 file upload/download
+    do_s3_cli_transfer: bool = False, # True will bypass FSX to use direct S3 file upload/download
+    local_path_remapping: dict = {}, # Pass a container-host path remapping
 ) -> Dict[str, Any]:
     
     result = submit_job(
@@ -375,7 +392,8 @@ def submit_and_run_job_sync(
         user_mounts=user_mounts,
         id_token=id_token,
         execution_mode=execution_mode,
-        do_s3_cli_transfer=do_s3_cli_transfer
+        do_s3_cli_transfer=do_s3_cli_transfer,
+        local_path_remapping=local_path_remapping,
     )
 
     if not result["success"]:
@@ -485,11 +503,14 @@ def submit_and_run_job_sync(
                 log.update_live(current_logs)
             if progress_bar:
                 progress_bar.set_description(f"Local container job status: {status}")
-
+            if status_box:
+                status_box.update(label=f"Local container job: {status}", state="running")
             if status in ["exited", "paused", "removing", "dead"]:
                 exitcode = handle.exitcode()
                 log.commit(current_logs)
                 log.clear_live()
+                if status_box:
+                    status_box.update(label='Local container job finished', state="complete")
                 break
             time.sleep(poll_interval)
 
@@ -500,6 +521,8 @@ def submit_and_run_job_sync(
                 "job_id": job_id
             }
         else: ## Job failed, fail loudly
+            if status_box:
+                status_box.update(label='Local container job FAILED, see error below.', state='error')
             raise RuntimeError(f"Docker container job {job_id} failed with exit code {exitcode}")
             
 
@@ -677,6 +700,7 @@ def run_pipeline(pipeline_id: str,
                 log=None,
                 metadata_location=None,
                 reuse_cached_steps=True,
+                local_path_remapping={},
                 ):
     if metadata_location is not None:
         metadata_location = Path(metadata_location)
@@ -765,6 +789,7 @@ def run_pipeline(pipeline_id: str,
                     log=log,
                     metadata_path=metadata_location,
                     do_s3_cli_transfer=False,
+                    local_path_remapping=local_path_remapping,
         )
 
         if result['status'] == 'success':
