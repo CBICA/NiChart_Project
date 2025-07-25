@@ -93,6 +93,7 @@ def init_session_vars():
     st.session_state.sel_pipeline = 'dlmuse'
 
     st.session_state.sel_mrid = None
+    st.session_state.sel_roi = None
 
     st.session_state.pipeline_colors = [
         'red', 'pink', 'grape', 'violet', 'indigo', 'blue',
