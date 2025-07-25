@@ -192,7 +192,7 @@ def select_files(in_dir):
                 df.columns = df.columns.str.replace('SurrealGAN_','')
                 df.columns = df.columns.str.replace('CCL-NMF','CCLNMF_')
                 df.columns = df.columns.str.replace('SPARE_RG','SPARE_BA')
-                df.columns = df.columns.str.replace('SPARE_CL','SPARE_AD')
+                df.columns = df.columns.str.replace('SPARE_CL_decision_function','SPARE_AD')
                 df.columns = df.columns.str.replace('Prediction','DL_BrainAge')
 
             except Exception as e:

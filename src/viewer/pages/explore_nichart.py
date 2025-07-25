@@ -104,14 +104,11 @@ def view_dlwmls() -> None:
     if sel_res_type == 'Segmentation':
         ulay = st.session_state.ref_data["fl"]
         olay = st.session_state.ref_data["dlwmls"]
-        mri_params = st.session_state.mri_params
 
-        utilmri.panel_set_params(
-            mri_params, ['roi'], 'wmls'
-        )
-
+        plot_params = st.session_state.plot_params
+        
         utilmri.panel_view_seg(
-            ulay, olay, mri_params
+            ulay, olay, 
         )
 
 def view_dlmuse_biomarkers() -> None:
@@ -228,7 +225,8 @@ def results_overview():
             view_dlmuse()
 
         elif st.session_state.sel_pipeline == 'dlwmls':
-            view_dlwmls()
+            st.warning('Viewer not implemented for dlwmls')
+            #view_dlwmls()
 
 #st.info(
 st.markdown(

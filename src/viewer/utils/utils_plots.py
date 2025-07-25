@@ -792,11 +792,13 @@ def panel_set_params_centile_plot(
                     'muse': st.session_state.dicts['muse']['ind_to_name']
                 }
             )
-            plot_params['yvargroup'] = sel_var[0]
-            plot_params['yvar'] = sel_var[1]
-            plot_params['roi_indices'] = utilmisc.get_roi_indices(
-                sel_var[1], 'muse'
-            )
+                
+            if sel_var != []:                
+                plot_params['yvargroup'] = sel_var[0]
+                plot_params['yvar'] = sel_var[1]
+                plot_params['roi_indices'] = utilmisc.get_roi_indices(
+                    sel_var[1], 'muse'
+                )
 
         elif tab == 'Centiles':
             user_select_centiles(plot_params)

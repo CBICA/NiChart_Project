@@ -88,7 +88,7 @@ def init_session_vars():
     st.session_state.sel_add_button = None
 
     #st.session_state.project = 'nichart_project'
-    st.session_state.project = 'Test1'
+    st.session_state.project = 'NiChart_Demo1'
     
     st.session_state.sel_pipeline = 'dlmuse'
 
@@ -340,7 +340,7 @@ def init_plot_vars() -> None:
         "xvar": 'Age',
         "xmin": None,
         "xmax": None,
-        "yvargroup": 'MUSE_Primary',
+        "yvargroup": 'MUSE_ShortList',
         "yvar": 'GM',
         "ymin": None,
         "ymax": None,
