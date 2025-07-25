@@ -323,6 +323,7 @@ def panel_set_params(
             plot_params['roi_indices'] = utilmisc.get_roi_indices(
                 sel_var[1], 'muse'
             )
+            st.session_state['sel_roi'] = sel_var[1]
 
         elif tab == 'Plot Settings':
             col1, col2, col3 = st.columns(3)
@@ -346,7 +347,12 @@ def panel_view_seg(ulay, olay, plot_params):
     '''
     Panel to display segmented image overlaid on underlay image
     '''
-    if plot_params['roi_indices'] is None:
+    sel_roi = st.session_state.sel_roi   # Read sele roi
+    if sel_roi is None:
+        return
+    
+    roi_indices = utilmisc.get_roi_indices(sel_roi, 'muse')
+    if roi_indices is None:
         return
 
     # Show images
@@ -354,7 +360,8 @@ def panel_view_seg(ulay, olay, plot_params):
         with st.spinner("Wait for it..."):
             # Process image (and mask) to prepare final 3d matrix to display
             img, mask, img_masked = prep_image_and_olay(
-                ulay, olay, plot_params['roi_indices'], plot_params['crop_to_mask']
+                #ulay, olay, plot_params['roi_indices'], plot_params['crop_to_mask']
+                ulay, olay, roi_indices, plot_params['crop_to_mask']
             )
             img_bounds = detect_mask_bounds(mask)
 

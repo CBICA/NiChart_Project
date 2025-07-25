@@ -108,7 +108,7 @@ st.warning("The NiChart Cloud platform is currently undergoing maintenance while
 
 st.markdown(
     """
-    ### Welcome to NiChart Project!
+    ### Welcome to NiChart Project!!!
     """
     , unsafe_allow_html=True
 )

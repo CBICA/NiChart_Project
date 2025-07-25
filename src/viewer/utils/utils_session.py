@@ -93,6 +93,7 @@ def init_session_vars():
     st.session_state.sel_pipeline = 'dlmuse'
 
     st.session_state.sel_mrid = None
+    st.session_state.sel_roi = None
 
     st.session_state.pipeline_colors = [
         'red', 'pink', 'grape', 'violet', 'indigo', 'blue',
@@ -325,7 +326,9 @@ def init_plot_vars() -> None:
         "cmaps": utilcmap.cmaps_init,
         "alphas": utilcmap.alphas_init,
         "w_centile": 6,
-        "w_fit": 6
+        "w_fit": 6,
+        "min_age": 20,
+        "max_age": 100,
         #"cmaps2": utilcmap.cmaps2,
         #"cmaps3": utilcmap.cmaps3,
     }
@@ -342,8 +345,11 @@ def init_plot_vars() -> None:
         "ymin": None,
         "ymax": None,
         "hvargroup": 'cat_vars',
-        "hvar": 'Sex',
+        "hvar": None,
         "hvals": None,
+        "fvargroup": 'cat_vars',
+        "fvar": None,
+        "fvals": None,
         "corr_icv": False,
         "plot_cent_normalized": False,
         "trend": "Linear",
@@ -356,7 +362,9 @@ def init_plot_vars() -> None:
         "list_roi_indices": [81, 82],
         "list_orient": ["axial", "coronal", "sagittal"],
         "is_show_overlay": True,
-        "crop_to_mask": True        
+        "crop_to_mask": True,
+        'filter_sex': ['F', 'M'],
+        'filter_age': [40, 95],
     }
 
     ###################################

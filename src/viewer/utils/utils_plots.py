@@ -22,6 +22,37 @@ pd.set_option('display.max_colwidth', None)  # or use a large number like 500
 
 utilcss.load_css()
 
+def select_sex_var():
+    '''
+    Set sex var values
+    '''
+    sel_vals = st.pills(
+        label='Select Sex',
+        options=['F', 'M'],
+        key = '_sex_var',
+        default = st.session_state.plot_params['filter_sex'],
+        selection_mode = 'multi',
+    )
+    st.session_state.plot_params['filter_sex'] = sel_vals
+
+def select_age_range():
+    '''
+    Set age range values
+    '''
+    if '_age_range' not in st.session_state:
+        st.session_state['_age_range'] = st.session_state.plot_params['filter_age']
+
+    def update_age_range():
+        st.session_state.plot_params['filter_age'] = st.session_state['_age_range']
+
+    st.slider(
+        'Select Age Range:',
+        min_value = st.session_state.plot_settings['min_age'],
+        max_value = st.session_state.plot_settings['max_age'],
+        key = '_age_range',
+        on_change = update_age_range
+    )
+        
 def sidebar_flag_hide_setting():
     '''
     Set flag for hiding the settings
@@ -267,6 +298,11 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
             st.warning('Could not read centile data!')
             df_cent = None
 
+    # Filter centiles
+    dfcf = df_cent.copy()
+    if 'Age' in dfcf:
+        dfcf = dfcf[(dfcf.Age >= plot_params['filter_age'][0]) & (dfcf.Age <= plot_params['filter_age'][1])]
+
     # Main plot
     m = plot_settings["margin"]
     hi = plot_settings["h_init"]
@@ -297,8 +333,8 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
             utiltr.add_trace_lowess(df, plot_params, plot_settings, fig)
 
     # Add centile trace
-    if df_cent is not None:
-        utiltr.add_trace_centile(df_cent, plot_params, plot_settings, fig)
+    if dfcf is not None:
+        utiltr.add_trace_centile(dfcf, plot_params, plot_settings, fig)
 
     # Add selected dot
     if df is not None:
@@ -327,15 +363,26 @@ def show_plots(df, df_plots, plot_settings):
         if column_no == 0:
             blocks = st.columns(plots_per_row)
         sel_params = df_plots.loc[plot_ind, 'params']
+                
+        # Filter data
+        if df is None:
+            dff = None
+        else:
+            dff = df.copy()
+            if 'Sex' in df:
+                dff = dff[dff.Sex.isin(sel_params['filter_sex'])]
+            if 'Age' in df:
+                dff = dff[(dff.Age >= sel_params['filter_age'][0]) & (dff.Age <= sel_params['filter_age'][1])]
+                    
         with blocks[column_no]:
             with st.container(border=True):
                 if sel_params['plot_type'] == "dist": 
                     new_plot = display_dist_plot(
-                        df, sel_params, plot_ind, plot_settings
+                        dff, sel_params, plot_ind, plot_settings
                     )
                 elif sel_params['plot_type'] == "scatter": 
                     new_plot = display_scatter_plot(
-                        df, sel_params, plot_ind, plot_settings
+                        dff, sel_params, plot_ind, plot_settings
                     )
                 st.checkbox(
                     'Select',
@@ -587,6 +634,7 @@ def panel_set_params_plot(plot_params, pipeline, list_vars):
         tab = sac.tabs(
             items=[
                 sac.TabsItem(label='Data'),
+                sac.TabsItem(label='Filters'),
                 sac.TabsItem(label='Groups'),
                 sac.TabsItem(label='Fit'),
                 sac.TabsItem(label='Centiles'),
@@ -636,9 +684,17 @@ def panel_set_params_plot(plot_params, pipeline, list_vars):
                     sel_var[1], 'muse'
                 )
 
+        elif tab == 'Filters':
+
+            # Let user select sex var
+            select_sex_var()
+
+            # Let user pick an age range
+            select_age_range()
+
         elif tab == 'Groups':
+
             # Select h var
-            # Select y var
             sel_var = utiluser.select_var_from_group(
                 'Select group variable:',
                 df_vars[df_vars.category.isin(['cat_vars'])],
@@ -646,12 +702,10 @@ def panel_set_params_plot(plot_params, pipeline, list_vars):
                 plot_params['hvar'],
                 list_vars,
                 flag_add_none = True,
-                dicts_rename = {
-                    'muse': st.session_state.dicts['muse']['ind_to_name']
-                }
             )
-            plot_params['hvargroup'] = sel_var[0]
-            plot_params['hvar'] = sel_var[1]
+            if sel_var:
+                plot_params['hvargroup'] = sel_var[0]
+                plot_params['hvar'] = sel_var[1]
 
         elif tab == 'Fit':
             user_select_trend(plot_params)
