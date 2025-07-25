@@ -170,12 +170,12 @@ def copy_test_folders():
             os.path.join(
                 st.session_state.paths["root"],
                 "output_folder",
-                "NiChart_sMRI_Demo1",
+                "NiChart_Demo1",
             ),
             os.path.join(
                 st.session_state.paths["root"],
                 "output_folder",
-                "NiChart_sMRI_Demo2",
+                "NiChart_Demo2",
             ),
         ]
         for demo in demo_dir_paths:
