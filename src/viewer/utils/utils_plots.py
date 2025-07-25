@@ -668,7 +668,7 @@ def panel_set_params_plot(plot_params, pipeline, list_vars):
             # Select y var
             sel_var = utiluser.select_var_from_group(
                 'Select y variable:',
-                df_vars[df_vars.category.isin(['demog','roi','spare','user'])],
+                df_vars[df_vars.category.isin(['demog','roi','biomarker','user'])],
                 plot_params['yvargroup'],
                 plot_params['yvar'],
                 list_vars,

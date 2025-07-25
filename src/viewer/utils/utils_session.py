@@ -88,7 +88,7 @@ def init_session_vars():
     st.session_state.sel_add_button = None
 
     #st.session_state.project = 'nichart_project'
-    st.session_state.project = 'IXI'
+    st.session_state.project = 'Test1'
     
     st.session_state.sel_pipeline = 'dlmuse'
 

@@ -185,6 +185,15 @@ def select_files(in_dir):
         for dname in list_csv:
             try:
                 df = pd.read_csv(dname)
+                
+                ## FIXME: Custom editing in column names
+                df.columns = df.columns.str.replace('DL_MUSE_Volume_','')
+                df.columns = df.columns.str.replace('SurrealGAN_MRID','MRID')
+                df.columns = df.columns.str.replace('SurrealGAN_','')
+                df.columns = df.columns.str.replace('CCL-NMF','CCLNMF_')
+                df.columns = df.columns.str.replace('SPARE_RG','SPARE_BA')
+                df.columns = df.columns.str.replace('SPARE_CL','SPARE_AD')
+                df.columns = df.columns.str.replace('Prediction','DL_BrainAge')
 
             except Exception as e:
                 st.error(f"Failed to read {dname}: {e}")

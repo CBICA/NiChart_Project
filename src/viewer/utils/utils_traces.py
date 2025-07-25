@@ -35,6 +35,7 @@ def add_trace_scatter(df: pd.DataFrame, plot_params: dict, plot_settings: dict, 
         hvals = df[hvar].dropna().sort_values().unique().tolist()
 
     if "data" in plot_params['traces']:
+        
         for hname in hvals:
             c_ind = hvals.index(hname)  # Select index of colour for the category
             c = colors[f'd{c_ind+1}']
