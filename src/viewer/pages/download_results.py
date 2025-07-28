@@ -15,6 +15,9 @@ logger.debug('Page: Download Results')
 utilpg.config_page()
 utilpg.show_menu()
 
+if 'instantiated' not in st.session_state or not st.session_state.instantiated:
+    utilses.init_session_state()
+
 def download_folder(dtype):
     """
     Downloading files in folder
