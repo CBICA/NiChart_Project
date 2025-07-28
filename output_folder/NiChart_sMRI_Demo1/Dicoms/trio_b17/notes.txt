@@ -1,5 +1,0 @@
-This file contains sample images from a B17 Trio system. A fiducial marker is placed over the left temple.
-  gre_field_mapping_2, gre_field_mapping_3 are phase maps. These have the same spatial alignment as the subsequent T2* scan, and can be used for EPI unwarping. The TEs are 4.92 and 7.38ms
-  act_fmri_30secoff_30secon_5 : 240 T2* volumes, TR= 2.0sec. In this block design, the individual rested for 30s, then moved the right hand for 30s, repeating. This data can be analyzed with FSL using the right.txt event file. Analysis is similar to that described at http://www.cabiatl.com/CABI/resources/fsl-block-design-analysis/. For B0 unwarping, echo spacing is 0.53ms, phase encoding is A>P ('y-').
-  t1_MPRAGEcr_noGRAPPA_19 : this is a T1 scan that can be used for normalization.
-  ep2d_DTI_20_dir_AP_20, ep2d_DTI_20_dir_RL_21, ep2d_DTI_20_dir_RL_pitch_yaw_22, ep2d_DTI_20_dir_RL_cor_23: These are all 20 direction DTI images. Each has 42 files (20 directions plus B-0 map, each with 2 excitations).

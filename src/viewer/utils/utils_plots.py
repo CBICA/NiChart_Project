@@ -668,7 +668,7 @@ def panel_set_params_plot(plot_params, pipeline, list_vars):
             # Select y var
             sel_var = utiluser.select_var_from_group(
                 'Select y variable:',
-                df_vars[df_vars.category.isin(['demog','roi','spare','user'])],
+                df_vars[df_vars.category.isin(['demog','roi','biomarker','user'])],
                 plot_params['yvargroup'],
                 plot_params['yvar'],
                 list_vars,
@@ -792,11 +792,13 @@ def panel_set_params_centile_plot(
                     'muse': st.session_state.dicts['muse']['ind_to_name']
                 }
             )
-            plot_params['yvargroup'] = sel_var[0]
-            plot_params['yvar'] = sel_var[1]
-            plot_params['roi_indices'] = utilmisc.get_roi_indices(
-                sel_var[1], 'muse'
-            )
+                
+            if sel_var != []:                
+                plot_params['yvargroup'] = sel_var[0]
+                plot_params['yvar'] = sel_var[1]
+                plot_params['roi_indices'] = utilmisc.get_roi_indices(
+                    sel_var[1], 'muse'
+                )
 
         elif tab == 'Centiles':
             user_select_centiles(plot_params)
