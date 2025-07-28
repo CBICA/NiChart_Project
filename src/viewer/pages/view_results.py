@@ -21,6 +21,9 @@ logger.debug('Page: View Results')
 utilpg.show_menu()
 utilpg.set_global_style()
 
+if 'instantiated' not in st.session_state or not st.session_state.instantiated:
+    utilses.init_session_state()
+
 def select_data_files():
     """
     Panel for merging selected data files

@@ -21,6 +21,9 @@ logger.debug('Page: Explore Nichart')
 utilpg.show_menu()
 utilpg.set_global_style()
 
+if 'instantiated' not in st.session_state or not st.session_state.instantiated:
+    utilses.init_session_state()
+
 def view_dlmuse() -> None:
     """
     Panel for viewing dlmuse results

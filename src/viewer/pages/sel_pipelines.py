@@ -21,6 +21,9 @@ utilpg.config_page()
 utilpg.show_menu()
 utilpg.set_global_style()
 
+if 'instantiated' not in st.session_state or not st.session_state.instantiated:
+    utilses.init_session_state()
+
 
 def extract_sections(in_doc):
     with open(in_doc, 'r') as f:

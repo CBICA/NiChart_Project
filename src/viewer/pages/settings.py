@@ -17,6 +17,9 @@ utilpg.config_page()
 utilpg.show_menu()
 utilpg.set_global_style()
 
+if 'instantiated' not in st.session_state or not st.session_state.instantiated:
+    utilses.init_session_state()
+
 def panel_models_path():
     """
     Panel for selecting models
