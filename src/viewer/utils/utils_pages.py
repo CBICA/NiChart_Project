@@ -1,5 +1,6 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
+from PIL import Image
 
 ###################################
 # Hard-coded menu items for NiChart
@@ -62,9 +63,10 @@ def show_menu() -> None:
         st.switch_page(sel_page)
         
 def config_page() -> None:
+    nicon = Image.open("../resources/nichart1.png")
     st.set_page_config(
         page_title="NiChart",
-        page_icon=st.session_state.nicon,
+        page_icon=nicon,
         layout="wide",
         # layout="centered",
         menu_items={
