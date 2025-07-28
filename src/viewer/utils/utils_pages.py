@@ -43,7 +43,10 @@ def set_global_style():
 def show_menu() -> None:
     with st.sidebar:
         list_options = list(dict_menu.keys())
-        sel_ind = list_options.index(st.session_state.sel_menu)
+        if 'sel_menu' not in st.session_state:
+            sel_ind = 0
+        else:
+            sel_ind = list_options.index(st.session_state.sel_menu)
         sel_menu = option_menu(
             'NiChart',
             list_options,
