@@ -105,7 +105,7 @@ def panel_run_pipeline():
     harmonize = False
     not_harmonizable = ['cclnmf', 'dlwmls', 'spare-ba-image', 'surrealgan']
     if sel_method not in not_harmonizable:
-        harmonize = st.checkbox("Harmonize to reference data? (Requires >= 3 scans)")
+        harmonize = st.checkbox("Harmonize to reference data? (Requires >= 30 scans)")
     ## TODO: Retrieve dynamically/match between front end and toolloader code
     ## This a nice and simple placeholder for now
     
