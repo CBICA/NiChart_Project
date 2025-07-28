@@ -44,6 +44,7 @@ def show_menu() -> None:
     with st.sidebar:
         list_options = list(dict_menu.keys())
         if 'sel_menu' not in st.session_state:
+            st.session_state.sel_menu = list_options[0]
             sel_ind = 0
         else:
             sel_ind = list_options.index(st.session_state.sel_menu)
