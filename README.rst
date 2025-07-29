@@ -41,7 +41,7 @@ Running NiChart
 
 We provide both a locally installable **desktop application** and a **cloud-based application**. 
 
-For the desktop application please see `NiChart GitHub <https://github.com/CBICA/NiChart_Project>`_. To install, install the requirements with "pip install -e .", then "cd src/viewer" and run "streamlit run NiChartServer.py". The desktop application requires `Docker <https://docs.docker.com/get-started/get-docker/>`_ to be installed.
+For the desktop application please see `NiChart GitHub <https://github.com/CBICA/NiChart_Project>`_. To install, install the requirements with "pip install -e .", then "cd src/viewer" and run "streamlit run NiChartProject.py". The desktop application requires `Docker <https://docs.docker.com/get-started/get-docker/>`_ to be installed.
 
 `NiChart cloud application <https://neuroimagingchart.com/portal>`_, hosted via Amazon Web Services (AWS), deploys scalable infrastructure which hosts the *NiChart* tools as a standard web application accessible via the user’s web browser. 
 
