@@ -15,6 +15,7 @@ from pydicom import dcmread
 from pydicom.tag import Tag
 from stqdm import stqdm
 import utils.utils_io as utilio
+import utils.utils_cloud as utilcloud
 
 # Useful links
 # https://github.com/rordenlab/dcm2niix/blob/master/FILENAMING.md
