@@ -46,6 +46,8 @@ For the desktop application please see `NiChart GitHub <https://github.com/CBICA
 
 The cloud and desktop applications are unified at the code level through the use of the Python library `Streamlit <https://streamlit.io>`_. Consequently, the user experience is nearly identical between the cloud and desktop applications.
 
+**TO BE RELEASED AFTER AAIC 2025:** Fully docker-based install. This option will let you run NiChart in very few steps. No Python install, no virtual environments. You just need to install `Docker <https://docs.docker.com/get-started/get-docker/>` on your machine. Check back soon on this page for details or email us for more information.
+
 Quick Links
 -----------
 
