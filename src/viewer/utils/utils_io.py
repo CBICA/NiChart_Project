@@ -136,6 +136,8 @@ def copy_and_unzip_uploaded_files(in_files: list, d_out: str) -> None:
     if in_files is not None:
         for in_file in in_files:
             f_out = os.path.join(d_out, in_file.name)
+            # Handle creating nested dirs if needed
+            os.makedirs(os.path.dirname(f_out), exist_ok=True)
             if not os.path.exists(f_out):
                 with open(os.path.join(d_out, in_file.name), "wb") as f:
                     f.write(in_file.getbuffer())
