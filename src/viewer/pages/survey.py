@@ -79,11 +79,13 @@ def survey_panel():
     selected_country = st.selectbox("Select a Country", countries, key='country_select', on_change=clear(country_errbox))
     if selected_country != st.session_state.selected_country:
         st.session_state.selected_country = selected_country
-        
+
     if selected_country and selected_country != "Prefer not to answer":
         selected_country_obj = pycountry.countries.get(name=selected_country)
+        country_code = selected_country_obj.alpha_2
+        subdivisions = list(pycountry.subdivisions.get(country_code=country_code))
     
-        if selected_country_obj and hasattr(selected_country_obj, 'subdivisions'):
+        if subdivisions:
             province_errbox = st.empty()
             provinces = ['', "Prefer not to answer"] + sorted([sub.name for sub in selected_country_obj.subdivisions])
             selected_province = st.selectbox("Select a province/state", provinces, key='province_select', on_change=clear(province_errbox))
