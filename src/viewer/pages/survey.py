@@ -77,13 +77,12 @@ def survey_panel():
     if selected_country and selected_country != "Prefer not to answer":
         selected_country_obj = pycountry.countries.get(name=selected_country)
     
-    if selected_country_obj and hasattr(selected_country_obj, 'subdivisions'):
-        province_errbox = st.empty()
-        provinces = ['', "Prefer not to answer"] + sorted([sub.name for sub in selected_country_obj.subdivisions])
-        selected_province = st.selectbox("Select a province/state", provinces, on_change=clear(province_errbox))
-        
-    else:
-        selected_province = 'NO PROVINCE' # Default to no province
+        if selected_country_obj and hasattr(selected_country_obj, 'subdivisions'):
+            province_errbox = st.empty()
+            provinces = ['', "Prefer not to answer"] + sorted([sub.name for sub in selected_country_obj.subdivisions])
+            selected_province = st.selectbox("Select a province/state", provinces, on_change=clear(province_errbox))
+        else:
+            selected_province = 'NO PROVINCE' # Default to no province
 
     # Educational background info
     edu_levels = [
