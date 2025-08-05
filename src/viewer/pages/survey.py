@@ -69,18 +69,24 @@ def survey_panel():
     # Institution / Affiliation
     institution = st.text_input(label="Name of Institution", value="")
 
+    province_select = st.empty()
     # Geographic information
+    if 'selected_country' not in st.session_state:
+        st.session_state.selected_country = None
+
     countries = ['', "Prefer not to answer"] + sorted([country.name for country in pycountry.countries])
     country_errbox = st.empty()
-    selected_country = st.selectbox("Select a Country", countries, on_change=clear(country_errbox))
-    
+    selected_country = st.selectbox("Select a Country", countries, key='country_select', on_change=clear(country_errbox))
+    if selected_country != st.session_state.selected_country:
+        st.session_state.selected_country = selected_country
+        
     if selected_country and selected_country != "Prefer not to answer":
         selected_country_obj = pycountry.countries.get(name=selected_country)
     
         if selected_country_obj and hasattr(selected_country_obj, 'subdivisions'):
             province_errbox = st.empty()
             provinces = ['', "Prefer not to answer"] + sorted([sub.name for sub in selected_country_obj.subdivisions])
-            selected_province = st.selectbox("Select a province/state", provinces, on_change=clear(province_errbox))
+            selected_province = st.selectbox("Select a province/state", provinces, key='province_select', on_change=clear(province_errbox))
         else:
             selected_province = 'NO PROVINCE' # Default to no province
 
@@ -159,6 +165,7 @@ def survey_panel():
     submit = st.button("Submit Form")
     submission_msg = st.empty()
     if submit:
+        any_empty_fields = False
         if len(selected_races) == 0:
             any_empty_fields = True
             race_errbox.error("You must select at least one option for race.")
