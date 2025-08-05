@@ -10,6 +10,7 @@ import utils.utils_misc as utilmisc
 import utils.utils_plots as utilpl
 import utils.utils_session as utilses
 import utils.utils_mriview as utilmri
+import utils.utils_alerts as utils_alerts
 from streamlit_image_select import image_select
 import logging
 from stqdm import stqdm
@@ -31,7 +32,7 @@ logger.debug('Start of Home Screen!')
 def view_overview():
     with st.container(border=True):
         st.markdown(
-            f'NiChart is an {utilmisc.styled_text('open-source framework')} built specifically for deriving {utilmisc.styled_text('machine learning biomarkers')} from {utilmisc.styled_text('MRI imaging data')}', unsafe_allow_html=True
+            f'NiChart is a {utilmisc.styled_text('free, open-source framework')} built specifically for deriving {utilmisc.styled_text('machine learning biomarkers')} from {utilmisc.styled_text('MRI imaging data')}', unsafe_allow_html=True
         )
         st.image("../resources/nichart1.png", width=300)
         st.markdown(
@@ -78,6 +79,10 @@ def view_links():
             """
             , unsafe_allow_html=True
         )
+        st.markdown("And fill out our 1-minute user demographics survey to gain **permanent, free** access to NiChart Cloud!")
+        take_survey = st.button("Take Survey")
+        if take_survey:
+            st.switch_page("survey.py")
 
 def view_installation():
     with st.container(border=True):
@@ -102,9 +107,10 @@ def view_installation():
             """
             , unsafe_allow_html=True
         )
+if 'instantiated' not in st.session_state or not st.session_state.instantiated:
+    utilses.init_session_state()
 
-utilses.init_session_state()
-st.warning("The NiChart Cloud platform is currently undergoing maintenance while we deploy new infrastructure. Please be advised that service may be interrupted at any time.")
+utils_alerts.render_alert()
 
 st.markdown(
     """
