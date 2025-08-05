@@ -71,15 +71,17 @@ def survey_panel():
 
     # Geographic information
     countries = ['', "Prefer not to answer"] + sorted([country.name for country in pycountry.countries])
-    selected_country = st.selectbox("Select a Country", countries, on_change=clear(country_errbox))
     country_errbox = st.empty()
+    selected_country = st.selectbox("Select a Country", countries, on_change=clear(country_errbox))
+    
     if selected_country and selected_country != "Prefer not to answer":
         selected_country_obj = pycountry.countries.get(name=selected_country)
     
     if selected_country_obj and hasattr(selected_country_obj, 'subdivisions'):
+        province_errbox = st.empty()
         provinces = ['', "Prefer not to answer"] + sorted([sub.name for sub in selected_country_obj.subdivisions])
         selected_province = st.selectbox("Select a province/state", provinces, on_change=clear(province_errbox))
-        province_errbox = st.empty()
+        
     else:
         selected_province = 'NO PROVINCE' # Default to no province
 
@@ -98,13 +100,15 @@ def survey_panel():
         "Master's degree or equivalent", # ISCED 7
         "Doctoral degree or equivalent (e.g. PhD, JD, MD)" # ISCED 8
     ]
-    selected_edu = st.selectbox("Select the highest level of education completed", edu_levels.keys(), on_change=clear(edu_errbox))
     edu_errbox = st.empty()
+    selected_edu = st.selectbox("Select the highest level of education completed", edu_levels.keys(), on_change=clear(edu_errbox))
+    
 
     # Age info
     age_options = ['', "Under 18", "18-24", "25-34", "35-44", "45-54", "55-64", "65+", "Prefer not to answer"]
-    selected_age = st.selectbox("Select your age range", age_options, on_change=clear(age_errbox))
     age_errbox = st.empty()
+    selected_age = st.selectbox("Select your age range", age_options, on_change=clear(age_errbox))
+    
 
     # Race info
     race_options = ["Indigenous (e.g. Native American, First Nations, Aboriginal, etc.)",
@@ -116,7 +120,7 @@ def survey_panel():
                     "Other (please specify)",
                     "Prefer not to answer"
                     ]
-    
+    race_errbox = st.empty()
     selected_races = st.multiselect("Please select the racial categories you identify with:",
                                    race_options,
                                    help="You may choose more than one option unless you select 'Prefer not to answer'.",
@@ -130,12 +134,13 @@ def survey_panel():
     if "Prefer not to answer" in selected_races and len(selected_races) > 1:
         selected=["Prefer not to answer"]
     
-    race_errbox = st.empty()
+    
 
     # Ethnicity Info
     ethnicity_options = ["", "Hispanic or Latino", "Not Hispanic or Latino", "Prefer not to answer"]
-    selected_ethnicity = st.selectbox("Select the ethnic category you identify with", ethnicity_options, on_change=clear(ethnicity_errbox))
     ethnicity_errbox = st.empty()
+    selected_ethnicity = st.selectbox("Select the ethnic category you identify with", ethnicity_options, on_change=clear(ethnicity_errbox))
+    
 
     # Follow up email info
     st.markdown('''
@@ -157,22 +162,22 @@ def survey_panel():
     if submit:
         if len(selected_races) == 0:
             any_empty_fields = True
-            race_errbox.error("You must select an option.")
+            race_errbox.error("You must select at least one option for race.")
         if selected_ethnicity == '':
             any_empty_fields = True
-            ethnicity_errbox.error("You must select an option.")
+            ethnicity_errbox.error("You must select an option for ethnicity.")
         if selected_age == '':
             any_empty_fields = True
-            age_errbox.error("You must select an option.")
+            age_errbox.error("You must select an option for age.")
         if selected_edu == '':
             any_empty_fields = True
-            edu_errbox.error("You must select an option.")
+            edu_errbox.error("You must select an education level.")
         if selected_country == '':
             any_empty_fields = True
-            country_errbox.error("You must select an option.")
+            country_errbox.error("You must select a country.")
         if selected_province == '':
             any_empty_fields = True
-            province_errbox.error("You must select an option.")
+            province_errbox.error("You must select a state/province.")
         if any_empty_fields:
             submission_msg.error('You must select an option for each field. If you do not wish to answer a question, select "Prefer not to answer", or leave the text entry blank.')
             return
