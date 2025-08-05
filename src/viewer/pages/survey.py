@@ -100,7 +100,7 @@ def survey_panel():
         "Doctoral degree or equivalent (e.g. PhD, JD, MD)" # ISCED 8
     ]
     edu_errbox = st.empty()
-    selected_edu = st.selectbox("Select the highest level of education completed", edu_levels.keys(), on_change=clear(edu_errbox))
+    selected_edu = st.selectbox("Select the highest level of education completed", edu_levels, on_change=clear(edu_errbox))
     
 
     # Age info
