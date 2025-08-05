@@ -82,7 +82,7 @@ def view_links():
         st.markdown("And fill out our 1-minute user demographics survey to gain **permanent, free** access to NiChart Cloud!")
         take_survey = st.button("Take Survey")
         if take_survey:
-            st.switch_page("survey.py")
+            st.switch_page("pages/survey.py")
 
 def view_installation():
     with st.container(border=True):

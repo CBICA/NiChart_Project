@@ -32,15 +32,7 @@ def create_survey_indicator():
         pass
 
     
-if is_survey_completed():
-    st.markdown('''
-                You are accessing the page for the NiChart user demographics survey, but it appears you have already completed it.
-                If you want to make another submission, press "Take Survey". Otherwise, press "Home" to go to the home page.
-                ''')
-    take_survey_again = st.button("Take Survey")
-    go_home = st.button("Home")
-    if go_home:
-        st.switch_page("home.py")
+
 
 def clear(box):
     return lambda: box.empty()
@@ -214,5 +206,18 @@ def survey_panel():
             st.switch_page("Home")
     pass
 
-survey_panel()
+
+if is_survey_completed():
+    st.markdown('''
+                You are accessing the page for the NiChart user demographics survey, but it appears you have already completed it.
+                If you want to make another submission, press "Take Survey". Otherwise, press "Home" to go to the home page.
+                ''')
+    take_survey_again = st.button("Take Survey")
+    go_home = st.button("Home")
+    if go_home:
+        st.switch_page("pages/home.py")
+    if take_survey_again:
+        survey_panel()
+else:
+    survey_panel()
 
