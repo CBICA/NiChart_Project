@@ -12,8 +12,8 @@ import os
 
 # Page config should be called for each page
 utilpg.config_page()
-utilpg.show_menu()
-utilpg.add_sidebar_options()
+#utilpg.show_menu()
+#utilpg.add_sidebar_options()
 utilpg.set_global_style()
 
 def create_survey_indicator():
