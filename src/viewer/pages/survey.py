@@ -64,7 +64,7 @@ def survey_panel():
                 NiChart is free software and a free service supported by grants that require us to ask users for demographic and institutional information.
                 We ask for this so that we can measure the impact and spread of NiChart, determine how we can better serve the neuroimaging community, and meet grant milestones.
                 
-                You are NOT required to provide this information to use NiChart, but it would be very helpful for us. All questions are optional. To skip a question, leave it blank or select "Prefer not to answer".
+                You are NOT required to provide this information to use NiChart, but it would be very helpful for us. All questions are optional. To skip a question, leave it blank if it's a text field or select "Prefer not to answer".
                 
                 If you choose to provide this information, it will be stored by the University of Pennsylvania and accessed only for the purposes of reporting to the NIH for grant U24NS130411. All such data will be deleted upon completion of the grant period.
                 If at any time you wish to view or revoke our access to the information you have provided, please contact us at software@cbica.upenn.edu and we'll be happy to help.

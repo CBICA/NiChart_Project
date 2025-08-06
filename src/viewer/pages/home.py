@@ -11,6 +11,7 @@ import utils.utils_plots as utilpl
 import utils.utils_session as utilses
 import utils.utils_mriview as utilmri
 import utils.utils_alerts as utils_alerts
+import utils.utils_survey as utils_survey
 from streamlit_image_select import image_select
 import logging
 from stqdm import stqdm
@@ -109,6 +110,14 @@ def view_installation():
         )
 if 'instantiated' not in st.session_state or not st.session_state.instantiated:
     utilses.init_session_state()
+
+# Redirect users to survey page until it is completed or otherwise temporarily skipped
+if not utils_survey.is_survey_completed():
+    if 'skip_survey' in st.session_state:
+        if not st.session_state.skip_survey:
+            st.switch_page("pages/survey.py")
+    else:
+        st.switch_page("pages/survey.py")
 
 utils_alerts.render_alert()
 
