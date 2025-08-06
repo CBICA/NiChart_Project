@@ -35,6 +35,12 @@ def create_survey_indicator():
     with open(indicator_filepath, 'w') as f:
         pass
 
+def delete_survey_indicator():
+    user_dir = st.session_state.paths['out_dir']
+    indicator_filepath = os.path.join(user_dir, "survey.txt")
+    if os.path.exists(indicator_filepath):
+        os.remove(indicator_filepath)
+
 def clear(box):
     return lambda: box.empty()
 
@@ -245,6 +251,7 @@ if is_survey_completed():
     if go_home:
         st.switch_page("pages/home.py")
     if take_survey_again:
+        delete_survey_indicator()
         survey_panel()
 else:
     survey_panel()
