@@ -93,6 +93,7 @@ def survey_panel():
         selected_country_obj = pycountry.countries.get(name=selected_country)
         country_code = selected_country_obj.alpha_2
         subdivisions = list(pycountry.subdivisions.get(country_code=country_code))
+        subdivisions = sorted([subdivision.name for subdivision in subdivisions])
     
         if subdivisions:
             provinces = ['', "Prefer not to answer"] + subdivisions
