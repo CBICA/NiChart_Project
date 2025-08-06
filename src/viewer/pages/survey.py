@@ -16,6 +16,10 @@ utilpg.add_sidebar_options()
 utilpg.set_global_style()
 
 def is_survey_completed() -> bool:
+    # First, check for session-local skip_survey
+    if "skip_survey" in st.session_state:
+        if st.session_state.skip_survey:
+            return True
     # Look in the base output dir for the "survey submitted" file
     # (This occurs regardless of cloud or local)
     user_dir = st.session_state.paths['out_dir']
@@ -30,9 +34,6 @@ def create_survey_indicator():
     indicator_filepath = os.path.join(user_dir, "survey.txt")
     with open(indicator_filepath, 'w') as f:
         pass
-
-    
-
 
 def clear(box):
     return lambda: box.empty()
@@ -60,8 +61,15 @@ def survey_panel():
                 You are NOT required to provide this information to use NiChart, but it would be very helpful for us. All questions are optional. To skip a question, leave it blank or select "Prefer not to answer".
                 
                 If you choose to provide this information, it will be stored by the University of Pennsylvania and accessed only for the purposes of reporting to the NIH for grant U24NS130411. All such data will be deleted upon completion of the grant period.
-                If at any time you wish to revoke our access to the information you have provided, please contact us at software@cbica.upenn.edu and we'll be happy to help.
+                If at any time you wish to view or revoke our access to the information you have provided, please contact us at software@cbica.upenn.edu and we'll be happy to help.
                 ''')
+    if st.session_state.has_cloud_session:
+        st.markdown("Once you submit this form, you will be able to freely access and use the NiChart Cloud service and we won't ask you for this information again.")
+    else: # Local
+        st.markdown('''
+                    When you submit this form, your responses will be sent securely to the University of Pennsylvania via the internet. Because you are running the local version of NiChart, this is the only time NiChart will connect to the internet.
+                    To help us receive this data, please ensure you have an internet connection. If the transmission fails, you will still be able to use NiChart, but we will ask again at the beginning of your next session. Otherwise, we won't ask you again unless you run NiChart from a different location.
+                    ''')
     
     # Identification
     name = st.text_input(label="Your name", value="")
@@ -213,9 +221,15 @@ def survey_panel():
             result = submit_form(form_data)
 
             # Create indicator file to prevent another popup
-            create_survey_indicator()
             # And add an alert to make them feel good
-            utils_alerts.alert("Please accept a sincere THANK YOU from the NiChart team for filling out the user demographics survey!", type='success')
+            if result:
+                create_survey_indicator()
+                utils_alerts.alert("Please accept a sincere THANK YOU from the NiChart team for filling out the user demographics survey!", type='success')
+            else: # Disable the survey only for this session if the submission failed for whatever reason
+                utils_alerts.alert("We couldn't submit your survey data at this time. Please check your internet connection and try again later. Until then, please enjoy NiChart!", type='warning')
+                st.session_state['skip_survey'] = True
+            
+            
             st.switch_page("Home")
     pass
 
