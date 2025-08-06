@@ -116,20 +116,20 @@ def survey_panel():
     
 
     # Age info
-    age_options = ['', "Under 18", "18-24", "25-34", "35-44", "45-54", "55-64", "65+", "Prefer not to answer"]
+    age_options = ['', "Prefer not to answer", "Under 18", "18-24", "25-34", "35-44", "45-54", "55-64", "65+"]
     age_errbox = st.empty()
     selected_age = st.selectbox("Select your age range", age_options, on_change=clear(age_errbox))
     
 
     # Race info
-    race_options = ["Indigenous (e.g. Native American, First Nations, Aboriginal, etc.)",
+    race_options = ["Prefer not to answer",
+                    "Indigenous (e.g. Native American, First Nations, Aboriginal, etc.)",
                     "Asian",
                     "Black or African descent",
                     "Middle Eastern or North African"
                     "Native Hawaiian or Other Pacific Islander",
                     "White or European descent",
-                    "Other (please specify)",
-                    "Prefer not to answer"
+                    "Other (please specify)"
                     ]
     race_errbox = st.empty()
     selected_races = st.multiselect("Please select the racial categories you identify with:",
