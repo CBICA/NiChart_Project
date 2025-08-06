@@ -1,3 +1,6 @@
+import os
+import streamlit as st
+
 def is_survey_completed() -> bool:
     # First, check for session-local skip_survey
     if "skip_survey" in st.session_state:
