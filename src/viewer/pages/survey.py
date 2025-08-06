@@ -231,7 +231,7 @@ def survey_panel():
                 st.session_state['skip_survey'] = True
             
             
-            st.switch_page("Home")
+            st.switch_page("pages/home.py")
     pass
 
 
