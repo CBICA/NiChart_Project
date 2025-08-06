@@ -173,22 +173,22 @@ def survey_panel():
         any_empty_fields = False
         if len(selected_races) == 0:
             any_empty_fields = True
-            race_errbox.error("You must select at least one option for race.")
+            race_errbox.error("You must select at least one option for race (or 'prefer not to answer').")
         if selected_ethnicity == '':
             any_empty_fields = True
-            ethnicity_errbox.error("You must select an option for ethnicity.")
+            ethnicity_errbox.error("You must select an option for ethnicity (or 'prefer not to answer').")
         if selected_age == '':
             any_empty_fields = True
-            age_errbox.error("You must select an option for age.")
+            age_errbox.error("You must select an option for age (or 'prefer not to answer').")
         if selected_edu == '':
             any_empty_fields = True
-            edu_errbox.error("You must select an education level.")
+            edu_errbox.error("You must select an education level (or 'prefer not to answer').")
         if selected_country == '':
             any_empty_fields = True
-            country_errbox.error("You must select a country.")
+            country_errbox.error("You must select a country (or 'prefer not to answer').")
         if selected_province == '':
             any_empty_fields = True
-            province_errbox.error("You must select a state/province.")
+            province_errbox.error("You must select a state/province (or 'prefer not to answer').")
         if any_empty_fields:
             submission_msg.error('You must select an option for each field. If you do not wish to answer a question, select "Prefer not to answer", or leave the text entry blank.')
             return
