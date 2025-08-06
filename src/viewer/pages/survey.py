@@ -3,6 +3,7 @@
 import streamlit as st
 import utils.utils_pages as utilpg
 import utils.utils_alerts as utils_alerts
+import utils.utils_survey as utils_survey
 import pycountry
 import time
 import re
@@ -14,20 +15,6 @@ utilpg.config_page()
 utilpg.show_menu()
 utilpg.add_sidebar_options()
 utilpg.set_global_style()
-
-def is_survey_completed() -> bool:
-    # First, check for session-local skip_survey
-    if "skip_survey" in st.session_state:
-        if st.session_state.skip_survey:
-            return True
-    # Look in the base output dir for the "survey submitted" file
-    # (This occurs regardless of cloud or local)
-    user_dir = st.session_state.paths['out_dir']
-    indicator_filepath = os.path.join(user_dir, "survey.txt")
-    if os.path.exists(indicator_filepath):
-        return True # Survey has been submitted
-    else:
-        return False
 
 def create_survey_indicator():
     user_dir = st.session_state.paths['out_dir']
@@ -70,7 +57,7 @@ def survey_panel():
                 If at any time you wish to view or revoke our access to the information you have provided, please contact us at software@cbica.upenn.edu and we'll be happy to help.
                 ''')
     if st.session_state.has_cloud_session:
-        st.markdown("Once you submit this form, you will be able to freely access and use the NiChart Cloud service and we won't ask you for this information again.")
+        st.markdown("Once you submit this form, you will gain **permanent, free** access to use the NiChart Cloud service and we won't ask you for this information again.")
     else: # Local
         st.markdown('''
                     When you submit this form, your responses will be sent securely to the University of Pennsylvania via the internet. Because you are running the local version of NiChart, this is the only time NiChart will connect to the internet.
@@ -241,7 +228,7 @@ def survey_panel():
     pass
 
 
-if is_survey_completed():
+if utils_survey.is_survey_completed():
     st.markdown('''
                 You are accessing the page for the NiChart user demographics survey, but it appears you have already completed it.
                 If you want to make another submission, press "Take Survey". Otherwise, press "Home" to go to the home page.
