@@ -82,6 +82,7 @@ def survey_panel():
         st.session_state.selected_country = selected_country
 
     province_errbox = st.empty()
+    selected_province = ''
     if selected_country and selected_country != "Prefer not to answer":
         selected_country_obj = pycountry.countries.get(name=selected_country)
         country_code = selected_country_obj.alpha_2
