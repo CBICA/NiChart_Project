@@ -82,7 +82,7 @@ def survey_panel():
         st.session_state.selected_country = selected_country
 
     province_errbox = st.empty()
-    selected_province = ''
+    selected_province = 'NO PROVINCE' # Default to no province
     if selected_country and selected_country != "Prefer not to answer":
         selected_country_obj = pycountry.countries.get(name=selected_country)
         country_code = selected_country_obj.alpha_2
@@ -90,6 +90,7 @@ def survey_panel():
         subdivisions = sorted([subdivision.name for subdivision in subdivisions])
     
         if subdivisions:
+            selected_province = ''
             provinces = ['', "Prefer not to answer"] + subdivisions
             selected_province = st.selectbox("Select a province/state", provinces, key='province_select', on_change=clear(province_errbox))
         else:
