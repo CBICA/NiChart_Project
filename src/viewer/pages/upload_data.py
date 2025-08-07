@@ -52,7 +52,11 @@ def panel_delete_data():
     with st.container(border=True):
         st.success(f'Project Name: {st.session_state.project}')
         proj_dir = st.session_state.paths['project']
-        if st.button("Delete this project", help="This will permanently delete all data in this project and invalidate all associated caching."):
+        delete_proj = st.button("Delete this project", help="This will permanently delete all data in this project and invalidate all associated caching.")
+        if 'deletion_candidate' not in st.session_state:
+            st.session_state['deletion_candidate'] = ''
+        if delete_proj or st.session_state['deletion_candidate'] == st.session_state.project:
+            st.session_state['deletion_candidate'] = st.session_state.project
             st.warning("Are you sure you want to delete all data associated with this project? This cannot be undone.")
             if st.button("Confirm deletion"):
                 shutil.rmtree(st.session_state.paths['project'])
@@ -61,6 +65,7 @@ def panel_delete_data():
                 if len(list_projects) > 0:
                     sel_project = list_projects[0]
                     utilss.update_project(sel_project)
+                st.session_state['deletion_candidate'] = ''
                 
     return
 st.markdown(
