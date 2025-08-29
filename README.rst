@@ -47,7 +47,7 @@ The cloud and desktop applications are unified at the code level through the use
 
 **Desktop installation**: You have two options for installing NiChart locally as an application on your computer. Both options currently require `Docker <https://www.docker.com/get-started/>`_ to be installed, as this greatly simplifies deployment and distribution of our algorithms without requiring extensive dependency management. Follow the instructions to install Docker (or Docker Desktop, on Windows/Mac) for your platform, then restart your device before continuing. We recommend having at least 20 GB of free space on your device before installing NiChart.
 
-**Installation Option 1**: Use Docker to run NiChart itself. This avoids the need for any Python installation, but may take up a little more space on your drive. Please follow all steps carefully.
+**Installation Option 1**: Use Docker to run NiChart itself. This avoids the need for any Python installation, but may take up a little more space on your drive and requires a small amount of configuration. Please follow all steps carefully.
 
 First, if you're on Windows, open Docker Desktop. You can do this from the start/search menu or by clicking the Desktop shortcut if you selected that during installation. You should go into the settings using the gear icon on the top right, go to "General", and enable the settings "Use the WSL 2 based engine" and "Expose daemon on tcp://localhost:2375 without TLS" if they aren't already enabled (they might require you to restart). You should also see a green indicator on the bottom left which says "Engine running". If it's yellow, you need to wait for the service to start. Otherwise, you may need to troubleshoot your installation. 
 
