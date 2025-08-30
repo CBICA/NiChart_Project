@@ -86,4 +86,4 @@ Quick Links
     :target: https://x.com/NiChart_AIBIL
     :alt: Twitter
 
-© 2024 CBICA. All Rights Reserved.
+© 2025 CBICA. All Rights Reserved.
