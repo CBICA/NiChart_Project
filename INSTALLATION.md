@@ -8,11 +8,8 @@ In particular, if you don't have a GPU on your device, the cloud application is 
 
 The cloud and desktop applications are unified at the code level through the use of the Python library [Streamlit](https://streamlit.io). Consequently, the user experience is nearly identical between the cloud and desktop applications.
 
-**Desktop installation**: You have two options for installing NiChart locally as an application on your computer. Both options currently require [Docker](https://www.docker.com/get-started/) to be installed, as this greatly simplifies deployment and distribution of our algorithms without requiring extensive dependency management. Follow the instructions to install Docker (or Docker Desktop, on Windows/Mac) for your platform, then restart your device before continuing. We recommend having at least 20 GB of free space on your device before installing NiChart.
+**Desktop installation**: Installing the desktop application currently requires [Docker](https://www.docker.com/get-started/) to be installed, as this greatly simplifies deployment and distribution of our algorithms without requiring extensive dependency management. Follow the instructions to install Docker (or Docker Desktop, on Windows/Mac) for your platform, then restart your device before continuing. We recommend having at least 20 GB of free space on your device before installing NiChart.
 
-**Installation Option 1 (Docker-based installation)**: Use Docker to run NiChart itself. This avoids the need for any Python installation, but may take up a little more space on your drive and requires a small amount of configuration. Please follow all steps carefully.
-
-**Installation Option 2 (Python-based installation)**: Install Python locally and run the NiChart application. The NiChart application will attempt to communicate automatically with Docker on your machine to run the bundled algorithms.
 
 ## Windows Instructions
 
@@ -22,23 +19,13 @@ On Windows, Docker is distributed as "Docker Desktop", an application which mana
 
 ### Docker-based Installation
 
+#### Getting started
+
 First, if you're on Windows, open Docker Desktop. You can do this from the start/search menu or by clicking the Desktop shortcut if you selected that during installation. You should go into the settings using the gear icon on the top right, go to "General", and enable the settings "Use the WSL 2 based engine" and "Expose daemon on tcp://localhost:2375 without TLS" if they aren't already enabled (they might require you to restart). You should also see a green indicator on the bottom left which says "Engine running". If it's yellow, you need to wait for the service to start. Otherwise, you may need to troubleshoot your installation. 
 
-Make sure you are connected to the internet in order to download the application. Then, open a terminal.
+#### Choose a path to store results
 
-(On Windows, search "terminal", open the application that looks like a black box with a white ">_" in it. At the top of the window that appears will be a tab indicating Windows Powershell.
-Click the down arrow next to that tab to expand your terminal options, and select Ubuntu (or, if you changed the default distribution, select whichever distribution you selected while installing WSL).
-A new terminal will open in a different color and you should see something like "root@username:~#". Stay on this tab for the rest of the instructions.)
-
-Run the following command:
-
-``docker pull cbica/nichart:07032025``
-
-This pulls the NiChart application container. There are a few steps we should do first before we run it.
-
-#### Letting the container make persistent data
-
-In this installation option, NiChart runs inside a container, which is isolated from the rest of your computer to improve security. To have data persist across sessions, you need to designate a location on your computer to store this data. 
+In this installation, NiChart runs inside a container, which is isolated from the rest of your computer to improve security. To have data persist across sessions, you need to designate a location on your computer to store this data. 
 
 First, identify a path you want to use. In this demo we'll use "C:/Users/NiChart_Developer/Desktop/DEMODATA", but yours will vary as you can choose any folder you like. (On Windows, you can navigate to a folder, then click "copy path" in the file explorer to get your path.)
 
@@ -46,21 +33,30 @@ Now replace "C:/"with "/mnt/c/". You can do the same for any other drive letter,
 
 Write down this converted path as we will use it later. 
 
-#### Optional: Pre-load the tool containers
+#### Running the installer
 
-NiChart uses Docker to automatically download tools as needed. You can optionally speed up the process by downloading the tool containers ahead of time. To do so, run the following commands:
+Make sure you are connected to the internet in order to download the application. Then, open a terminal.
+
+(On Windows, search "terminal", open the application that looks like a black box with a white ">_" in it. At the top of the window that appears will be a tab indicating Windows Powershell.
+Click the down arrow next to that tab to expand your terminal options, and select Ubuntu (or, if you changed the default distribution, select whichever distribution you selected while installing WSL).
+A new terminal will open in a different color and you should see something like "root@username:~#". Stay on this tab for the rest of the instructions.)
+
+Run the following commands to download the installer and make it runnable:
 
 ```
-docker pull cbica/surrealgan_predcrd_wrapped:0.0.1
-docker pull cbica/ccl_nmf_prediction_wrapped:0.0.1
-docker pull cbica/nifti-align-to-mni:0.0.1
-docker pull cbica/nifti-binarizer:0.0.1
-docker pull cbica/combatfam_harmonize_dlmuse:0.0.1
-docker pull cbica/nichart_bascores:0.0.1
-docker pull cbica/nichart_dlmuse:1.0.9-wrapped
-docker pull dlwmls_wrapped:0.0.1
-docker pull cbica/nichart_spare_score:0.0.2
+wget https://raw.githubusercontent.com/CBICA/NiChart_Project/main/installers/install_nichart_docker_linux.sh.sh
+chmod +x install_nichart_docker_linux.sh
 ```
+
+Then run this command, **making sure to replace** /path/to/data with the data path you chose earlier:
+```
+./install_nichart_docker_linux.sh /path/to/data
+```
+
+In our example, the command becomes `./install_nichart_docker_linux.sh /mnt/c/Users/NiChart_Developer/Desktop/DEMODATA`.
+
+This command might take a while to finish.
+
 #### Running the application
 
 To run the application, run the following command. (You should replace the "/mnt/c..." path with your own data path from earlier.) 
@@ -75,26 +71,10 @@ You can click that link or copy-paste it into a browser to access the local NiCh
 
 The NiChart server will automatically stop when you close that terminal window.
 
-### Python-based Installation
-
-This installation mode requires you to [install Python 3.12](https://www.python.org/downloads/) on your device. You will also need to [install Git](https://gitforwindows.org/).
-
-We always recommend generating a separate virtual Python environment to install any software application, as it prevents misconfiguration. Some examples are given [in the Python venv docs](https://docs.python.org/3/library/venv.html), but you can also use [Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) or similar software to manage this. 
-However, creation of a virtual environment is not strictly necessary to install NiChart.
-
-First, go to the directory where you want to install NiChart and open a terminal.  Clone the NiChart_Project code repository by running ``git clone https://github.com/CBICA/NiChart_Project.git``. Then ``cd NiChart_Project``. 
-
-Now you can install the requirements with ``pip install -r requirements.txt``. This may take a few minutes to complete.
-
-#### Running the application
-
-From the project repo, ``cd src/viewer`` and ``streamlit run NiChartProject.py`` to run the application. 
-
-
 
 
 ## Linux Instructions
-Linux instructions are quite similar to the Windows instructions, except that there is no need for WSL or to use a separate mount path. All commands will need to be run from the terminal and there is no Docker Desktop configuration.
+Linux instructions are quite similar to the Windows instructions, except that there is no need for WSL and no need to convert the path specially. All commands will need to be run from the terminal and there is no Docker Desktop configuration.
 
 # Can't use Docker?
 We aim to soon provide compatibility with Singularity/Apptainer runtimes for users in computing environments where Docker is disallowed. Please check in regularly for updates.
