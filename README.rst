@@ -38,13 +38,12 @@ The development of nichart is guided by several core principles:
 Running NiChart
 ---------------
 
+
 We provide both a locally installable **desktop application** and a **cloud-based application**. 
 
-For the desktop application please see `NiChart GitHub <https://github.com/CBICA/NiChart_Project>`_.
+`NiChart cloud application <https://neuroimagingchart.com/portal>`_, hosted via Amazon Web Services (AWS), deploys scalable infrastructure which hosts the *NiChart* tools as a standard web application accessible via the user’s web browser. **No install needed**, but it requires you to upload your data to the cloud-based NiChart server for us to process it. We do not access or use your data for any other purpose than to run your requested processing and/or provide support to you, and we regularly delete user data after inactivity. However, we recognize that data privacy agreements and related concerns may nevertheless restrict use of the cloud application. If that applies to you, we suggest that you install the desktop application. We provide detailed installation instructions on the `Installation page <./INSTALLATION.md>`_. 
 
-`NiChart cloud application <https://neuroimagingchart.com/portal>`_, hosted via Amazon Web Services (AWS), deploys scalable infrastructure which hosts the *NiChart* tools as a standard web application accessible via the user’s web browser. 
-
-The cloud and desktop applications are unified at the code level through the use of the Python library `Streamlit <https://streamlit.io>`_. Consequently, the user experience is nearly identical between the cloud and desktop applications.
+**Want to switch between versions?** The cloud and desktop applications are unified at the code level through the use of the Python library `Streamlit <https://streamlit.io>`_. Consequently, the user experience is nearly identical between the cloud and desktop applications. 
 
 Quick Links
 -----------
@@ -61,4 +60,4 @@ Quick Links
     :target: https://x.com/NiChart_AIBIL
     :alt: Twitter
 
-© 2024 CBICA. All Rights Reserved.
+© 2025 CBICA. All Rights Reserved.
