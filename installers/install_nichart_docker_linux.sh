@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## This is the Linux NiChart Installation script which installs NiChart Docker containers on your computer. You need Docker installed and running for this to work.
 set -Eeuo pipefail
 
 ###############################################################################
