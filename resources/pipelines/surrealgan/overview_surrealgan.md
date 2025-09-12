@@ -1,4 +1,4 @@
-### Surreal-GAN: Brain Aging Suptypes
+### Surreal-GAN: Brain Aging Subtypes
 
 #### Source:
 

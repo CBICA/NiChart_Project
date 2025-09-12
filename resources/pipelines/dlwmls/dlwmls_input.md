@@ -1,0 +1,2 @@
+- FLAIR scan (one or multiple, required)
+- T1 scan (one or multiple, optional) [COMING SOON]

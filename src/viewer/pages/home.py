@@ -1,62 +1,72 @@
-import streamlit as st
 import utils.utils_pages as utilpg
-import utils.utils_session as utilss
-import logging
-
-from utils.utils_logger import setup_logger
-
 # Page config should be called for each page
 utilpg.config_page()
+
+import os
+import numpy as np
+import pandas as pd
+import streamlit as st
+import utils.utils_misc as utilmisc
+import utils.utils_plots as utilpl
+import utils.utils_session as utilses
+import utils.utils_mriview as utilmri
+import utils.utils_alerts as utils_alerts
+import utils.utils_survey as utils_survey
+from streamlit_image_select import image_select
+import logging
+from stqdm import stqdm
+from utils.utils_logger import setup_logger
+
+import streamlit_antd_components as sac
+
 utilpg.show_menu()
 utilpg.add_sidebar_options()
+utilpg.set_global_style()
 
 logger = setup_logger()
 
 logger.debug('Start of Home Screen!')
 
+#def styled_text(text):
+    #return f'<span style="color:darkgreen; font-weight:bold;">{text}</span>'
+
 def view_overview():
     with st.container(border=True):
         st.markdown(
-            """
-            NiChart is an **<u>open-source framework</u>** built specifically for deriving **<u>machine learning biomarkers</u>** from **<u>MRI imaging data</u>**.
-            """
-            , unsafe_allow_html=True            
+            f'NiChart is a {utilmisc.styled_text('free, open-source framework')} built specifically for deriving {utilmisc.styled_text('machine learning biomarkers')} from {utilmisc.styled_text('MRI imaging data')}', unsafe_allow_html=True
         )
         st.image("../resources/nichart1.png", width=300)
         st.markdown(
-            """
-            - NiChart platform offers tools for **<u>image processing</u>** and **<u>data analysis</u>**.
-
-            - Users can extract **<u>imaging phenotypes</u>** and **<u>machine learning (ML) indices</u>** of disease and aging.
-
-            - Pre-trained **<u>ML models </u>** allow users to quantify complex brain changes and compare results against **<u>normative and disease-specific reference ranges</u>**.
-            """
-            , unsafe_allow_html=True
+            f'- NiChart platform offers tools for {utilmisc.styled_text('image processing')} and {utilmisc.styled_text('data analysis')}', unsafe_allow_html=True
+        )
+        st.markdown(
+            f'- Users can extract {utilmisc.styled_text('imaging phenotypes')} and {utilmisc.styled_text('machine learning (ML) indices')} of disease and aging', unsafe_allow_html=True
+        )
+        st.markdown(
+            f'- Pre-trained {utilmisc.styled_text('ML models')} allow users to quantify complex brain changes and compare results against {utilmisc.styled_text('normative and disease-specific reference ranges')}', unsafe_allow_html=True
         )
 
 def view_quick_start():
     with st.container(border=True):
         st.markdown(
-            """
-            ##### Explore Brain Chart (No Data Upload Required):
+            f'###### Explore NiChart {utilmisc.styled_text('(No Data Upload Required)')}', unsafe_allow_html=True
+        )
+        st.markdown(
+            f'- Visualize distributions of imaging variables and biomarkers (pre-computed using NiChart reference data)', unsafe_allow_html=True
+        )
+
+        st.markdown(
+            '''
+            ###### Apply NiChart to Your Data
             
-            - **<u>Explore the distribution</u>** of imaging variables and machine learning–derived biomarkers **<u>from the NiChart reference dataset</u>**.
+            - Select Your Pipeline
             
-            - This module is designed for visualization only and **<u>does not require user data**</u>.
+            - Upload Your Data
             
-            - **<u>Includes:</u>** brain segmentation, region volumes, and biomarkers for aging and disease (e.g., AD, brain age).
+            - Run pipeline
             
-            ##### Analyze Your Own Data:
-
-            - **<u>Upload Your Data: </u>** Navigate to the "Data" page to upload the files you wish to analyze.
-
-            - **<u>Select Your Pipeline: </u>** Go to the "Pipelines" page and choose the analysis workflow you want to apply to your data.
-
-            - **<u>View and/or Download Your Results: </u>** Once the pipeline has finished processing, your findings will be available to view or to download.
-
-
-            """
-            , unsafe_allow_html=True
+            - View / Download Your Results
+            ''', unsafe_allow_html=True
         )
 
 def view_links():
@@ -70,6 +80,10 @@ def view_links():
             """
             , unsafe_allow_html=True
         )
+        st.markdown("And fill out our 1-minute user demographics survey to gain **permanent, free** access to NiChart Cloud!")
+        take_survey = st.button("Take Survey")
+        if take_survey:
+            st.switch_page("pages/survey.py")
 
 def view_installation():
     with st.container(border=True):
@@ -94,33 +108,57 @@ def view_installation():
             """
             , unsafe_allow_html=True
         )
-    
-# Initialize session state
-utilss.init_session_state()
-st.warning("The NiChart Cloud platform is currently undergoing maintenance while we deploy new infrastructure. Please be advised that service may be interrupted at any time.")
-st.write("# Welcome to NiChart Project!")
+if 'instantiated' not in st.session_state or not st.session_state.instantiated:
+    utilses.init_session_state()
+
+# Redirect users to survey page until it is completed or otherwise temporarily skipped
+if not utils_survey.is_survey_completed():
+    if 'skip_survey' in st.session_state:
+        if not st.session_state.skip_survey:
+            st.switch_page("pages/survey.py")
+    else:
+        st.switch_page("pages/survey.py")
+
+utils_alerts.render_alert()
 
 st.markdown(
     """
-    ### Welcome to NiChart Project!
+    ### Welcome to NiChart Project!!!
     """
     , unsafe_allow_html=True
 )
 
-tab1, tab2, tab3, tab4 = st.tabs(
-    ["Overview", "Quick Start", "Links", "Installation"]
+tab = sac.tabs(
+    items=[
+        sac.TabsItem(label='Overview'),
+        sac.TabsItem(label='Quick Start'),
+        sac.TabsItem(label='Links'),
+        sac.TabsItem(label='Installation'),
+        #sac.TabsItem(label='Test'),
+    ],
+    size='lg',
+    align='left'
 )
 
-with tab1:
+
+if tab == 'Overview':
     view_overview()
 
-with tab2:
+if tab == 'Quick Start':
     view_quick_start()
 
-with tab3:
+if tab == 'Links':
     view_links()
 
-with tab4:
+if tab == 'Installation':
     view_installation()
 
+#if tab == 'Test':
+    #view_test()
+
+# Show selections
+utilses.disp_selections()
     
+# Show session state vars
+if st.session_state.mode == 'debug':
+    utilses.disp_session_state()

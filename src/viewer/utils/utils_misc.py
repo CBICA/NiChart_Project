@@ -1,58 +1,74 @@
-from PIL import Image, ImageDraw
+import os
+from typing import Any, Optional
+import pandas as pd
+import numpy as np
+import streamlit as st
 
-def make_circle_image(input_path, output_path):
-    img = Image.open(input_path).convert("RGBA")
-    size = img.size
+###################################################################
+# Misc utils
 
-    # Create same-size mask with a white circle on black background
-    mask = Image.new('L', size, 0)
-    draw = ImageDraw.Draw(mask)
-    draw.ellipse((0, 0, size[0], size[1]), fill=255)
-
-    # Apply circular mask to image
-    img.putalpha(mask)
-
-    # Save with transparency
-    img.save(output_path, format="PNG")
-
-## Example
-#make_circle_image("square_logo.png", "circle_logo.png")
-
-def make_scaled_circle_image(input_path, output_path, scale=0.9):
-    img = Image.open(input_path).convert("RGBA")
-    w, h = img.size
-
-    # Crop to square (center crop)
-    min_dim = min(w, h)
-    left = (w - min_dim) // 2
-    top = (h - min_dim) // 2
-    right = left + min_dim
-    bottom = top + min_dim
-    img = img.crop((left, top, right, bottom))
-
-    # Resize (scale down)
-    new_size = int(min_dim * scale)
-    img_resized = img.resize((new_size, new_size), Image.LANCZOS)
-
-    # Create final square canvas
-    final_img = Image.new("RGBA", (min_dim, min_dim), (0, 0, 0, 0))
-
-    # Center resized image on canvas
-    offset = ((min_dim - new_size) // 2, (min_dim - new_size) // 2)
-    final_img.paste(img_resized, offset)
-
-    # Create circular mask
-    mask = Image.new('L', (min_dim, min_dim), 0)
-    draw = ImageDraw.Draw(mask)
-    draw.ellipse((0, 0, min_dim, min_dim), fill=255)
-
-    # Apply mask
-    final_img.putalpha(mask)
-
-    # Save result
-    final_img.save(output_path, format="PNG")
-
-## Example usage
-#make_scaled_circle_image("your_image.png", "circle_output.png", scale=0.85)
+def styled_text(text):
+    return f'<span style="color:teal; font-weight:600; background-color: #f5f5fa; padding: 4px 4px; border-radius: 3px;">{text}</span>'
 
 
+def add_items_to_list(my_list: list, items_to_add: list) -> list:
+    """Adds multiple items to a list, avoiding duplicates.
+
+    Args:
+      my_list: The list to add items to.
+      items_to_add: A list of items to add.
+
+    Returns:
+      The modified list.
+    """
+    for item in items_to_add:
+        if item not in my_list:
+            my_list.append(item)
+    return my_list
+
+def remove_items_from_list(my_list: list, items_to_remove: list) -> list:
+    """Removes multiple items from a list.
+
+    Args:
+      my_list: The list to remove items from.
+      items_to_remove: A list of items to remove.
+
+    Returns:
+      The modified list.
+    """
+    out_list = []
+    for item in my_list:
+        if item not in items_to_remove:
+            out_list.append(item)
+    return out_list
+
+def get_index_in_list(in_list: list, in_item: str) -> Optional[int]:
+    """
+    Returns the index of the item in list, or None if item not found
+    """
+    if in_item not in in_list:
+        return None
+    else:
+        return list(in_list).index(in_item)
+    
+def get_roi_indices(sel_roi, atlas):
+    '''
+    Detect indices for a selected ROI
+    '''
+    if sel_roi is None:
+        return None
+    
+    # Detect indices
+    if atlas == 'muse':
+        try:
+            df_derived = st.session_state.rois['muse']['df_derived']
+            list_roi_indices = df_derived[df_derived.Name == sel_roi].List.values[0]
+            return list_roi_indices
+        except:
+            return None
+
+    elif atlas == 'wmls':
+        list_roi_indices = [1]
+        return list_roi_indices
+
+    return None    

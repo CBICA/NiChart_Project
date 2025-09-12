@@ -1,5 +1,6 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
+from PIL import Image
 
 ###################################
 # Hard-coded menu items for NiChart
@@ -7,7 +8,7 @@ dict_menu = {
     "Home": "pages/home.py",
     "Explore NiChart": "pages/explore_nichart.py",
     "Select Pipeline": "pages/sel_pipelines.py",
-    "Upload Your Data": "pages/upload_data.py",
+    "Select Project": "pages/upload_data.py",
     "Run Pipeline": "pages/run_pipelines.py",
     "View Your Brain Chart": "pages/view_results.py",
     "Download Results": "pages/download_results.py",
@@ -17,10 +18,37 @@ dict_menu = {
 dict_workflow = {
 }
 
+def set_global_style():
+    #st.markdown("""
+        #<style>
+        #body, html, .stMarkdown, .stText, .stTextInput > label {
+            #font-size: 18px !important;
+        #}
+        #h1, h2, h3 {
+            #font-size: 28px;
+        #}
+        #</style>
+    #""", unsafe_allow_html=True)
+    st.markdown(
+        """
+        <style>
+        html, body, [class*="css"]  {
+            font-size: 20px;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
 def show_menu() -> None:
+    st.info("NiChart is supported by grants contingent on user feedback. Please take 2 minutes from your day to fill out our [current functionality feedback survey](https://forms.office.com/r/mM1kx1XsgS) and our [future directions survey](https://forms.office.com/r/acwgn2WCc4).")
     with st.sidebar:
         list_options = list(dict_menu.keys())
-        sel_ind = list_options.index(st.session_state.sel_menu)
+        if 'sel_menu' not in st.session_state:
+            st.session_state.sel_menu = list_options[0]
+            sel_ind = 0
+        else:
+            sel_ind = list_options.index(st.session_state.sel_menu)
         sel_menu = option_menu(
             'NiChart',
             list_options,
@@ -40,9 +68,10 @@ def show_menu() -> None:
         st.switch_page(sel_page)
         
 def config_page() -> None:
+    nicon = Image.open("../resources/nichart1.png")
     st.set_page_config(
         page_title="NiChart",
-        page_icon=st.session_state.nicon,
+        page_icon=nicon,
         layout="wide",
         # layout="centered",
         menu_items={

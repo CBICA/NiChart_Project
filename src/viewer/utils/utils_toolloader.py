@@ -4,9 +4,11 @@ import os
 import yaml
 from pathlib import Path
 import subprocess
+import shutil
 import streamlit as st
 import json
 import boto3
+from datetime import datetime
 from botocore.exceptions import ClientError
 import utils.utils_pollstatus as ps
 import time
@@ -36,6 +38,15 @@ def is_safe_path(base_dir: Union[str, Path], target_path: Union[str, Path]) -> b
         return True
     except ValueError:
         return False
+    
+def remap_path(path: str, remap_dict: dict) -> str:
+    for old_prefix, new_prefix in remap_dict.items():
+        if path.startswith(old_prefix):
+            # Replace prefix, preserving the rest of the path
+            suffix = path[len(old_prefix):]
+            # Avoid double slashes
+            return os.path.join(new_prefix, suffix.lstrip('/'))
+    return path  # No remap found
 
 class IOField(BaseModel):
     type: str  # "file" or "directory"
@@ -104,7 +115,7 @@ class ToolSpec(BaseModel):
             return False # Pull failed for one reason or another
         return True # Pull success
     
-    def generate_docker_command(self, param_values: Dict[str, Union[int, float, bool, str]], mount_paths: Dict[str, str]) -> str:
+    def generate_docker_command(self, param_values: Dict[str, Union[int, float, bool, str]], mount_paths: Dict[str, str], path_remapping={}) -> str:
         # This line will throw if validation fails
         param_values = self.validate_params(param_values)
 
@@ -125,17 +136,29 @@ class ToolSpec(BaseModel):
         mount_args = []
         for label, config in self.mounts.items():
             host_path = mount_paths[label]
+            if path_remapping:
+                host_path = remap_path(host_path, path_remapping)  
             mode = config.mode
             is_output = False
             is_ofile = False
+            is_ifile = False
             if label in self.outputs:
                 is_output = True
                 if self.outputs[label].type == 'file':
                     is_ofile = True
+            elif label in self.inputs: # necessarily this is an input
+                if self.inputs[label].type =='file':
+                    is_ifile = True
+            else:
+                print(f"Mount label {label} not found in tool spec inputs or outputs.")
+                raise ValueError(f"Mount label {label} not found in tool spec inputs or outputs.")
+        
             if is_ofile: 
                 parent_host_path = Path(host_path).parent.resolve()
                 parent_container_path = Path(config.path_in_container).parent
                 mount_args.append(f"-v {parent_host_path}:{parent_container_path}:{mode}")
+            elif is_ifile:
+                mount_args.append(f"--mount type=bind,source={host_path},target={config.path_in_container}")
             else:
                 mount_args.append(f"-v {host_path}:{config.path_in_container}:{mode}")
 
@@ -187,9 +210,9 @@ def ensure_and_validate_mount_paths(
                 parent.mkdir(parents=True, exist_ok=True)
 
 
-def validate_user_request(tool_name: str, user_params: Dict, user_mounts: Dict[str, str], tool_registry_path: Union[str, Path] = DEFAULT_TOOL_DEFINITION_PATH) -> str:
+def validate_user_request(tool_name: str, user_params: Dict, user_mounts: Dict[str, str], tool_registry_path: Union[str, Path] = DEFAULT_TOOL_DEFINITION_PATH, path_remapping={}) -> str:
     # Assumes streamlit session state is set up.
-    base_mount_dir = Path(st.session_state.paths["dir_out"]).resolve()
+    base_mount_dir = Path(st.session_state.paths["out_dir"]).resolve()
     tool_dir = Path(tool_registry_path).resolve()
     yaml_file = tool_dir / f"{tool_name}.yaml"
     if not yaml_file.exists():
@@ -203,7 +226,7 @@ def validate_user_request(tool_name: str, user_params: Dict, user_mounts: Dict[s
 
     ensure_and_validate_mount_paths(user_mounts, base_mount_dir, input_labels, output_labels)
 
-    return tool_spec.generate_docker_command(user_params, user_mounts)
+    return tool_spec.generate_docker_command(user_params, user_mounts, path_remapping)
 
 def stringify_mounts(mounts_dict: Dict[str, Union[str, Path]]) -> Dict[str, str]:
     '''Utility function that converts mount dicts of Path objects to string form. 
@@ -219,7 +242,8 @@ def submit_job(
     user_mounts: Dict[str, str],
     id_token: str | None = None,
     execution_mode: str = "any", #"cloud", "local",
-    do_s3_cli_transfer: bool = False # True will bypass FSX to use direct S3 file upload/download
+    do_s3_cli_transfer: bool = False, # True will bypass FSX to use direct S3 file upload/download
+    local_path_remapping: dict = {}, # Pass a container-host path translation as needed
 ) -> Union[str, subprocess.Popen]:
     """
     Submits a job either locally or via an AWS Lambda depending on Streamlit session state.
@@ -308,10 +332,14 @@ def submit_job(
     else:
         # === LOCAL MODE ===
         print("DEBUG: Local mode job submission.")
+        # Grab local container-host path remapping (not needed on cloud)
+        path_remapping = local_path_remapping
+        # Generate command
         docker_command = validate_user_request(
             tool_name=tool_name,
             user_params=user_params,
             user_mounts=user_mounts,
+            path_remapping=path_remapping
         )
 
         print(f"Running on local docker: {docker_command}")
@@ -350,9 +378,12 @@ def submit_and_run_job_sync(
     id_token: str | None = None,
     execution_mode: str = "any",  # can be "cloud", "local", or "any"
     progress_bar=None,
+    status_box=None,
     log=None,
+    metadata_path: Path = None,
     poll_interval: int = 15,
-    do_s3_cli_transfer: bool = False # True will bypass FSX to use direct S3 file upload/download
+    do_s3_cli_transfer: bool = False, # True will bypass FSX to use direct S3 file upload/download
+    local_path_remapping: dict = {}, # Pass a container-host path remapping
 ) -> Dict[str, Any]:
     
     result = submit_job(
@@ -361,7 +392,8 @@ def submit_and_run_job_sync(
         user_mounts=user_mounts,
         id_token=id_token,
         execution_mode=execution_mode,
-        do_s3_cli_transfer=do_s3_cli_transfer
+        do_s3_cli_transfer=do_s3_cli_transfer,
+        local_path_remapping=local_path_remapping,
     )
 
     if not result["success"]:
@@ -385,6 +417,7 @@ def submit_and_run_job_sync(
 
     if progress_bar:
         progress_bar.set_description(f"Job {job_id} running...")
+    
 
     # === CLOUD MODE (AWS Batch) ===
     if mode == "cloud":
@@ -398,7 +431,8 @@ def submit_and_run_job_sync(
 
                 if progress_bar:
                     progress_bar.set_description(f"Cloud job status: {status}")
-
+                if status_box:
+                    status_box.update(label=f"Cloud job: {status}", state="running")
                 if log:
                     current_logs = handle.get_logs()
                     log.update_live(current_logs)
@@ -424,16 +458,24 @@ def submit_and_run_job_sync(
         if do_s3_cli_transfer:
             if log:
                 log.info(f"Performing post-job sync for job {job_id}.")
+            if status_box:
+                status_box.update(label=f"Post-sync for job {job_id}...", state="running")
             print("DEBUG: Syncing from S3 to mount paths via AWS CLI.")
-            for mount_path in user_mounts.values():
+            for key, mount_path in user_mounts.items():
                 #absolute_mount_path = Path(mount_path).resolve()
                 print(f"DEBUG: Syncing user-mount path {mount_path}")
                 cmd = f"aws s3 sync s3://cbica-nichart-io/{mount_path} {mount_path} --exact-timestamps"
                 returncode = os.system(cmd)
-                if returncode > 0:
-                    print(f"DEBUG: Post-job sync failed!")
-                    log.error(f"Post job sync failed for job {job_id}.")
-                    raise RuntimeError(f"Cloud job {job_id} completed successfully, but post-job sync failed. Please submit an issue report.")
+                if os.WEXITSTATUS(returncode) > 0:
+                    print(f"DEBUG: Post-job sync failed, retrying appropriately for single-file.")
+                    log.error(f"Post job sync failed for job {job_id}. Possibly due to single-file, retrying with applicable command.")
+                    sf_cmd = f"aws s3 cp s3://cbica-nichart-io/{mount_path} {mount_path}"
+                    sf_returncode = os.system(sf_cmd)
+                    if os.WEXITSTATUS(sf_returncode) > 0:
+                        log.error(f"Single-file sync also failed. Sync is uncompletable.")
+                        raise RuntimeError(f"Cloud job {job_id} completed successfully, but post-job sync (including backup single-file sync) failed with exit codes {os.WEXITSTATUS(returncode)}, {os.WEXITSTATUS(sf_returncode)}. Please submit an issue report.")
+                    else:
+                        log.info("Single-file sync succeeded, so this error can be ignored.")
             print("DEBUG: Done syncing from S3 after job completion.")  
             if log:
                 log.info(f"Done post-job sync for job {job_id}.")  
@@ -461,11 +503,14 @@ def submit_and_run_job_sync(
                 log.update_live(current_logs)
             if progress_bar:
                 progress_bar.set_description(f"Local container job status: {status}")
-
+            if status_box:
+                status_box.update(label=f"Local container job: {status}", state="running")
             if status in ["exited", "paused", "removing", "dead"]:
                 exitcode = handle.exitcode()
                 log.commit(current_logs)
                 log.clear_live()
+                if status_box:
+                    status_box.update(label='Local container job finished', state="complete")
                 break
             time.sleep(poll_interval)
 
@@ -476,6 +521,8 @@ def submit_and_run_job_sync(
                 "job_id": job_id
             }
         else: ## Job failed, fail loudly
+            if status_box:
+                status_box.update(label='Local container job FAILED, see error below.', state='error')
             raise RuntimeError(f"Docker container job {job_id} failed with exit code {exitcode}")
             
 
@@ -524,13 +571,140 @@ def parse_pipeline_steps(pipeline_yaml):
 
     return execution_order, step_map
 
+def load_metadata(metadata_path: Path) -> Dict:
+    if metadata_path is None:
+        return {}
+    if metadata_path.exists():
+        with open(metadata_path, 'r') as f:
+            return json.load(f)
+    else:
+        return {}
+
+def save_metadata(metadata_path: Path, metadata: Dict):
+    with open(metadata_path, 'w') as f:
+        json.dump(metadata, f, indent=2)
+
+def generate_metadata_key(tool_id: str,
+                          inputs: Dict,
+                          params: Dict):
+    def sorted_str(d: Dict) -> str:
+        return json.dumps(d, sort_keys=True)
+    return f"{tool_id}|{sorted_str(inputs)}|{sorted_str(params)}"
+
+def should_skip_step(metadata_path: Path,
+                     tool_id: str,
+                     inputs: Dict,
+                     outputs: Dict,
+                     params: Dict) -> bool:
+    metadata =  load_metadata(metadata_path)
+    key = generate_metadata_key(tool_id, inputs, params)
+    if key not in metadata:
+        return False
+    
+    record = metadata[key]
+    if record["status"] != "success":
+        return False
+    
+    finished_time = datetime.fromisoformat(record["finished_time"])
+
+    # Check mtime of all input files/dirs
+    input_mtime = 0
+    for path_str in inputs.values():
+        path = Path(path_str)
+        if path.is_file():
+            input_mtime = max(input_mtime, path.stat().st_mtime)
+        elif path.is_dir():
+            mtime = max((f.stat().st_mtime for f in path.rglob('*')), default=0)
+            input_mtime = max(input_mtime, mtime)
+
+    if finished_time.timestamp() > input_mtime:
+        # Copy outputs to new locations if output paths differ
+        for key_out, prev_output_path in record["outputs"].items():
+            new_output_path = outputs.get(key_out)
+            if new_output_path and new_output_path != prev_output_path:
+                src = Path(prev_output_path)
+                dst = Path(new_output_path)
+                if src.is_dir():
+                    shutil.copytree(src, dst, dirs_exist_ok=True)
+                else:
+                    dst.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(src, dst)
+        return True
+    return False
+
+def record_step_submission(metadata_path: Path,
+                           tool_id: str,
+                           inputs: Dict,
+                           outputs: Dict,
+                           params: Dict
+                           ):
+    metadata = load_metadata(metadata_path)
+    key = generate_metadata_key(tool_id, inputs, params)
+    metadata[key] = {
+        "tool": tool_id,
+        "inputs": inputs,
+        "params": params,
+        "outputs": outputs,
+        "submitted_time": datetime.utcnow().isoformat(),
+        "status": "pending"
+    }
+    save_metadata(metadata_path, metadata)
+
+def record_step_completion(metadata_path: Path,
+                           tool_id: str,
+                           inputs: Dict,
+                           outputs: Dict,
+                           params: Dict,
+                           status: str = "success"
+                           ):
+    metadata = load_metadata(metadata_path)
+    key = generate_metadata_key(tool_id, inputs, params)
+    
+    entry = metadata.get(key, {
+        "tool": tool_id,
+        "inputs": inputs,
+        "params": params,
+        "outputs": outputs or {},
+        "submitted_time": datetime.utcnow().isoformat()
+    })
+
+    entry["finished_time"] = datetime.utcnow().isoformat()
+    entry["status"] = status
+    if outputs:
+        entry["outputs"] = outputs
+    
+    metadata["key"] = entry
+    save_metadata(metadata_path, metadata)
+    
+
+def clear_all_metadata(metadata_path: Path):
+    if metadata_path.exists():
+        metadata_path.unlink()
+
+def clear_step_metadata(metadata_path: Path,
+                        tool_id: str,
+                        inputs: Dict,
+                        params: Dict):
+    metadata = load_metadata(metadata_path)
+    key = generate_metadata_key(tool_id, inputs, params)
+    if key in metadata:
+        del metadata[key]
+        save_metadata(metadata_path, metadata)
+
 def run_pipeline(pipeline_id: str,
                 global_vars: Dict[str, str],
                 pipeline_progress_bar=None,
                 process_progress_bar=None,
                 execution_mode='cloud',
-                log=None
+                process_status_box=None,
+                log=None,
+                metadata_location=None,
+                reuse_cached_steps=True,
+                local_path_remapping={},
                 ):
+    if metadata_location is not None:
+        metadata_location = Path(metadata_location)
+
     # Resolve pipeline file
     pipeline_path = DEFAULT_PIPELINE_DEFINITION_PATH / f"{pipeline_id}.yaml"
     if not pipeline_path.exists():
@@ -553,6 +727,7 @@ def run_pipeline(pipeline_id: str,
             pipeline_progress_bar.update(1)
         step = step_map[sid]
         tool_id = step["tool"]
+
         log.info(f"Starting execution of pipeline step {tool_id}.")
         tool_yaml = DEFAULT_TOOL_DEFINITION_PATH / f"{tool_id}.yaml"
         tool = load_tool_spec_from_yaml(tool_yaml)
@@ -564,26 +739,87 @@ def run_pipeline(pipeline_id: str,
         resolved_params = step.get("params", {})
        
         print(f"Submitting job: {sid} ({tool.name})")
+        if pipeline_progress_bar:
+            pipeline_progress_bar.set_description(f"Submitting pipeline step {tool_id}...")
         if process_progress_bar:
-            process_progress_bar.set_description(f"Running tool {tool_id}...")
+            process_progress_bar.set_description(f"Submitting pipeline step {tool_id}...")
+        if process_status_box:
+            process_status_box.update(label=f"Submitting pipeline step: {tool_id}...")
 
+        ## Fill this in with deduplication logic
+        if metadata_location is not None:
+            # Can use metadata to deduplicate pipeline steps, check it
+            if not reuse_cached_steps:
+                clear_step_metadata(
+                    metadata_path=metadata_location,
+                    tool_id=tool_id,
+                    inputs=resolved_inputs,
+                    params=resolved_params
+                )
+            elif should_skip_step(
+                metadata_path=metadata_location,
+                tool_id=tool_id,
+                inputs=resolved_inputs,
+                params=resolved_params,
+                outputs=resolved_outputs
+            ):
+                log.info(f"[CACHE] Skipping step: {tool_id} because it was determined that a previous execution could be reused.")
+                continue # Skip to next pipeline step
+        if pipeline_progress_bar:
+            pipeline_progress_bar.set_description(f"Running {tool_id}...")
+        if process_progress_bar:
+            process_progress_bar.set_description(f"Running {tool_id}...")
+        if process_status_box:
+            process_status_box.update(label=f"Running {tool_id}...")
+
+        # If we reach here, the step must be executed.
+        record_step_submission(metadata_path=metadata_location,
+                           tool_id=tool_id,
+                           inputs=resolved_inputs,
+                           outputs=resolved_outputs,
+                           params=resolved_params)
+        
         result = submit_and_run_job_sync(
                     tool_name=tool_id,
                     user_params=resolved_params,
                     user_mounts=resolved_total_mounts,
                     execution_mode=execution_mode,
                     progress_bar=process_progress_bar,
+                    status_box=process_status_box,
                     log=log,
+                    metadata_path=metadata_location,
+                    do_s3_cli_transfer=False,
+                    local_path_remapping=local_path_remapping,
         )
 
         if result['status'] == 'success':
+            record_step_completion(metadata_path=metadata_location,
+                                   tool_id=tool_id,
+                                   inputs=resolved_inputs,
+                                   outputs=resolved_outputs,
+                                   params=resolved_params,
+                                   status="success")
             print(f"Step {sid}, {tool_id} finished succesfully.")
             log.info(f"Pipeline step {tool_id} finished successfully")
         else: # Step failed, loudly fail
-            log.error(f"Pipeline step {tool_id} failed.")
+            record_step_completion(metadata_path=metadata_location,
+                                   tool_id=tool_id,
+                                   inputs=resolved_inputs,
+                                   outputs=resolved_outputs,
+                                   params=resolved_params,
+                                   status="failure")
+            log.error(f"Pipeline step {tool_id} failed with status {result['status']}.")
             print(f"Step {sid}, {tool_id} failed with status {result["status"]}, see error log:")
             print(f"Error message: {result["error_message"]}")
+            if process_progress_bar:
+                process_progress_bar.set_description(f"Running {tool_id}...")
+            if process_status_box:
+                process_status_box.update(label=f"Pipeline failed", state="error")
             raise RuntimeError(result["error_message"])
         step_outputs[sid] = resolved_outputs  # Used for future interpolation
     log.info(f"Pipeline {pipeline_id} completed successfully.")
+    if process_progress_bar:
+        process_progress_bar.set_description(f"Pipeline finished")
+    if process_status_box:
+        process_status_box.update(label=f"Pipeline finished", state="complete")
     return step_outputs

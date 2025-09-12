@@ -6,10 +6,8 @@ from typing import Any
 import streamlit as st
 import utils.utils_cloud as utilcloud
 import utils.utils_dicom as utildcm
-import utils.utils_io as utilio
 import utils.utils_menu as utilmenu
 import utils.utils_nifti as utilni
-import utils.utils_session as utilss
 import utils.utils_st as utilst
 from stqdm import stqdm
 import docker
@@ -18,14 +16,17 @@ import utils.utils_toolloader as tl
 import utils.utils_pollstatus as ps
 import utils.utils_displayjobs as dj
 import utils.utils_stlogbox as stlogbox
+import utils.utils_pages as utilpg
 from pathlib import Path
 import pathlib
 import time
 from streamlit_autorefresh import st_autorefresh
 
 # Page config should be called for each page
-utilss.config_page()
-
+utilpg.config_page()
+utilpg.show_menu()
+utilpg.add_sidebar_options()
+utilpg.set_global_style()
 utilmenu.menu()
 
 DISABLE_PUBLIC = True
@@ -77,8 +78,8 @@ def image_disk_usage(image):
 
 st.title("DEBUG: Try submitting a job to local Docker")
 # Button to trigger code execution
-path_to_t1 = Path(st.session_state.paths["dir_out"]) / "SampleTool" / "T1"
-path_to_outcsv = Path(st.session_state.paths["dir_out"]) / "SampleTool" / "dlmuse.csv"
+path_to_t1 = Path(st.session_state.paths["out_dir"]) / "SampleTool" / "T1"
+path_to_outcsv = Path(st.session_state.paths["out_dir"]) / "SampleTool" / "dlmuse.csv"
 # Input locations need to already exist. Output locations do not.
 path_to_t1.mkdir(parents=True, exist_ok=True)
 example_tool_name = "example_tool_template"
@@ -176,7 +177,7 @@ if st.button("Press me to try synchronous pipeline execution"):
 
     result = tl.run_pipeline(
         pipeline_id=pipeline_to_run, ##TODO EDIT THIS
-        global_vars={"STUDY": st.session_state.paths["dir_out"]},
+        global_vars={"STUDY": st.session_state.paths["out_dir"]},
         pipeline_progress_bar=pipeline_progress_bar,
         process_progress_bar=process_progress_bar,
         log=log

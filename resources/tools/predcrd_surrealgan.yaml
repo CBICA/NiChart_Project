@@ -1,0 +1,35 @@
+name: predcrd_surrealgan
+description: This tool uses PredCRD to predict SurrealGAN dimensions for subjects based on DLMUSE ROIs.
+
+inputs:
+  dlmuse_vol:
+    type: file
+  demog_csv:
+    type: file
+
+outputs:
+  surrealgan_csv:
+    type: file
+
+mounts:
+  dlmuse_vol:
+    path_in_container: /input/dlmuse.csv
+    mode: ro
+  demog_csv:
+    path_in_container: /input/demog.csv
+    mode: ro
+  surrealgan_csv:
+    path_in_container: /output/SurrealGAN_RScores.csv
+    mode: rw
+
+parameters:
+  {} # Empty dictionary to signify no parameters
+
+resources: # Used to allocate jobs on the cloud. Please be diligent.
+  vcpus: 2
+  memory: 14000 # Amount must be in MiB, see https://docs.aws.amazon.com/batch/latest/APIReference/API_ResourceRequirement.html
+  gpus: 0
+
+container:
+  image: cbica/surrealgan_predcrd_wrapped:0.0.1
+  command: --roi_csv {dlmuse_vol} --demog_csv {demog_csv} --out_csv {surrealgan_csv}

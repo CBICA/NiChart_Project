@@ -1,76 +1,95 @@
-import streamlit as st
 import utils.utils_pages as utilpg
-import utils.utils_plots as utilpl
-import utils.utils_mriview as utilmri
+utilpg.config_page()
 
+import streamlit as st
+import utils.utils_plots as utilpl
+import utils.utils_misc as utilmisc
+import utils.utils_mriview as utilmri
+import utils.utils_session as utilses
 import pandas as pd
 from streamlit_image_select import image_select
-
 from stqdm import stqdm
-
 import os
-
 from utils.utils_logger import setup_logger
-logger = setup_logger()
 
-logger.debug('Start of setup!')
+import streamlit_antd_components as sac
+
+logger = setup_logger()
+logger.debug('Page: Explore Nichart')
 
 # Page config should be called for each page
-utilpg.config_page()
 utilpg.show_menu()
+utilpg.set_global_style()
 
-def view_description(method) -> None:
-    """
-    Panel for viewing method description
-    """
-    with st.container(border=True):
-        fdoc = os.path.join(
-            st.session_state.paths['resources'],
-            'pipelines',
-            method,
-            'overview_' + method + '.md'
-        )
-        with open(fdoc, 'r') as f:
-            markdown_content = f.read()
-        st.markdown(markdown_content)
-
-def view_synthseg() -> None:
-    """
-    Panel for viewing synthseg results
-    """    
-    # Select result type 
-    st.info('Coming soon!')
+if 'instantiated' not in st.session_state or not st.session_state.instantiated:
+    utilses.init_session_state()
 
 def view_dlmuse() -> None:
     """
     Panel for viewing dlmuse results
-    """    
-    # Select result type        
-    list_res_type = ['Segmentation', 'Volumes']
-    sel_res_type = st.pills(
-        'Select output type',
+    """
+    list_res_type = ['Regional Volumes', 'Segmentation']
+    sel_res_type = sac.tabs(
         list_res_type,
-        default = None,
-        selection_mode = 'single',
-        label_visibility = 'collapsed',
+        size='lg',
+        align='left'
+    )   
+
+    ## FIXME (list of rois from data file to init listbox selections)
+    df = pd.read_csv(
+            os.path.join(
+                st.session_state.paths['resources'],
+                'reference_data', 'centiles', 'dlmuse_centiles_CN.csv' 
+            )
     )
-    
-    if sel_res_type == 'Segmentation':
+    list_vars = ['Age', 'Sex'] + df.VarName.unique().tolist()
+
+
+    if sel_res_type == 'Regional Volumes':
+        var_groups_data = ['roi']
+        pipeline = 'dlmuse'
+
+        # Set centile selections
+        st.session_state.plot_params['centile_values'] = st.session_state.plot_settings['centile_trace_types']
+
+        with st.sidebar:
+            sac.divider(label='Viewing Options', align='center', color='gray')
+            utilpl.user_add_plots(
+                st.session_state.plot_params
+            )
+            
+        utilpl.sidebar_flag_hide_setting()
+        utilpl.sidebar_flag_hide_legend()
+
+        utilpl.panel_set_params_centile_plot(
+            st.session_state.plot_params,
+            var_groups_data,
+            pipeline,
+            list_vars
+        )
+        utilpl.panel_show_centile_plots()
+
+        st.write()
+
+    elif sel_res_type == 'Segmentation':
         ulay = st.session_state.ref_data["t1"]
         olay = st.session_state.ref_data["dlmuse"]        
-        utilmri.panel_view_seg(ulay, olay, 'muse')
-        
-    elif sel_res_type == 'Volumes':
-        # df = pd.read_csv(
-        #     '/home/guraylab/GitHub/gurayerus/NiChart_Project/resources/reference_data/centiles/dlmuse_centiles_CN.csv'
-        #     #'/home/gurayerus/GitHub/gurayerus/NiChart_Project/resources/reference_data/centiles/dlmuse_centiles_CN.csv'
-        # )
-        st.session_state.curr_df = None
-        utilpl.panel_view_centiles('dlmuse', 'rois')
-         
-    print(st.session_state.selections)
-    #print(st.session_state.plot_params)
-    
+
+        with st.sidebar:
+            sac.divider(label='Viewing Options', align='center', color='gray')
+        utilpl.sidebar_flag_hide_setting()
+
+        utilmri.panel_set_params(
+            st.session_state.plot_params,
+            ['roi'],
+            'muse',
+            list_vars
+        )
+
+        utilmri.panel_view_seg(
+            ulay, olay, st.session_state.plot_params
+        )
+
 def view_dlwmls() -> None:
     """
     Panel for viewing dlwmls segmentation
@@ -87,8 +106,13 @@ def view_dlwmls() -> None:
     
     if sel_res_type == 'Segmentation':
         ulay = st.session_state.ref_data["fl"]
-        olay = st.session_state.ref_data["dlwmls"]        
-        utilmri.panel_view_seg(ulay, olay, 'dlwmls')
+        olay = st.session_state.ref_data["dlwmls"]
+
+        plot_params = st.session_state.plot_params
+        
+        utilmri.panel_view_seg(
+            ulay, olay, 
+        )
 
 def view_dlmuse_biomarkers() -> None:
     """
@@ -108,59 +132,137 @@ def view_surrealgan() -> None:
     """
     st.info('Coming soon!')
 
+def show_description(pipeline) -> None:
+    """
+    Panel for viewing pipeline description
+    """
+    f_logo = os.path.join(
+        st.session_state.paths['resources'], 'pipelines', pipeline, f'logo_{pipeline}.png'
+    )
+    fdoc = os.path.join(
+        st.session_state.paths['resources'], 'pipelines', pipeline, f'overview_{pipeline}.md'
+    )
+    cols = st.columns([6, 1])
+    with cols[0]:
+        with open(fdoc, 'r') as f:
+            st.markdown(f.read())
+    with cols[1]:
+        st.image(f_logo)
+
+def data_overview():
+    '''
+    Description of NiChart data
+    '''
+    with st.container(border=True):
+        st.markdown(
+            ''' NiChart Reference Dataset is a large and diverse collection of MRI images from multiple studies. It was created as part of the ISTAGING project to develop a system for identifying imaging biomarkers of aging and neurodegenerative diseases. The dataset includes multi-modal MRI data, as well as carefully curated demographic, clinical, and cognitive variables from participants with a variety of health conditions. The reference dataset is a key component of NiChart for training machine learning models and for creating reference distributions of imaging measures and signatures, which can be used to compare NiChart values that are computed from the user data to normative or disease-related reference values.
+            '''
+        )
+        st.image(
+            os.path.join(
+                st.session_state.paths['resources'], 'images', 'nichart_data.png'
+            ),
+            width=1200
+        )
+
+def pipeline_overview():
+    '''
+    Select a pipeline and show overview
+    '''
+    with st.container(border=True):
+
+        pipelines = st.session_state.pipelines
+        sitems = []
+        colors = st.session_state.pipeline_colors
+        for i, ptmp in enumerate(pipelines.Name.tolist()):
+            sitems.append(
+                sac.ButtonsItem(
+                    label=ptmp, color = colors[i%len(colors)]
+                )
+            )
+        
+        sel_index = utilmisc.get_index_in_list(
+            pipelines.Name.tolist(), st.session_state.sel_pipeline
+        )
+        sel_pipeline = sac.buttons(
+            items=sitems,
+            size='lg',
+            radius='xl',
+            align='left',
+            index =  sel_index,
+            key = '_sel_pipeline'
+        )        
+        label_matches = pipelines.loc[pipelines.Name == sel_pipeline, 'Label'].values
+        if len(label_matches) == 0: # No selection
+            return
+        
+        pname = label_matches[0]
+        st.session_state.sel_pipeline = pname
+        
+        #sac.divider(label='Description', align='center', color='gray')
+        
+        show_description(pname)
+
+def results_overview():
+    '''
+    Select a pipeline and show overview
+    '''
+    ## Set flag for hiding the settings
+    #if '_flag_hide_settings' not in st.session_state:
+        #st.session_state['_flag_hide_settings'] = st.session_state.plot_settings['flag_hide_settings']
+
+    #def update_val():
+        #st.session_state.plot_settings['flag_hide_settings'] = st.session_state['_flag_hide_settings']
+
+    #with st.sidebar:
+        #sac.divider(label='Plot Settings', align='center', color='gray')
+        #st.checkbox(
+            #'Hide Plot Settings',
+            #key = '_flag_hide_settings',
+            #on_change = update_val
+        #)
+    
+    # Show results
+    with st.container(border=True):
+        if st.session_state.sel_pipeline == 'dlmuse':
+            view_dlmuse()
+
+        elif st.session_state.sel_pipeline == 'dlwmls':
+            st.warning('Viewer not implemented for dlwmls')
+            #view_dlwmls()
+
 #st.info(
 st.markdown(
     """
     ### Explore Neuroimaging Chart
+    
+    - View an overview of the reference dataset, processing pipelines and imaging variables and biomarkers derived from the reference dataset
+    
     """
 )
 
-tab1, tab2 = st.tabs(
-    ["Pipeline", "Output"]
+tab = sac.tabs(
+    items=[
+        sac.TabsItem(label='Data'),
+        sac.TabsItem(label='Pipelines'),
+        sac.TabsItem(label='Results Preview'),
+    ],
+    size='lg',
+    align='left'
 )
 
 # Select pipeline
-with tab1:
-    # Show a thumbnail image for each pipeline
-    pdict = dict(
-        zip(st.session_state.pipelines['Name'], st.session_state.pipelines['Label'])
-    )
-    pdir = os.path.join(st.session_state.paths['resources'], 'pipelines')
-    logo_fnames = [
-        os.path.join(pdir, pname, f'logo_{pname}.png') for pname in list(pdict.values())
-    ]
-    psel = image_select(
-        "",
-        images = logo_fnames,
-        captions=list(pdict.keys()),
-        index=0,
-        return_value="index",
-        use_container_width = False
-    )
+if tab == 'Data':
+    data_overview()
     
-    # Show description of the selected pipeline
-    if psel >= 0 :
-        view_description(list(pdict.values())[psel])
+if tab == 'Pipelines':
+    pipeline_overview()
+
+if tab == 'Results Preview':
+    results_overview()
     
-# Show output values for the selected pipeline
-with tab2:
-    if psel == 0:
-        view_dlmuse()
-
-    elif psel == 1:
-        view_dlwmls()
-        
-    elif psel == 2:
-        view_dlmuse_biomarkers()
-
-    elif psel == 3:
-        view_dlmuse_biomarkers()
-
-    elif psel == 4:
-        view_dlmuse_biomarkers()
-
-    elif psel == 5:
-        view_dlmuse_biomarkers()
-
-    elif psel == 6:
-        view_synthseg()
+# Show selections
+utilses.disp_selections()
+    
+if st.session_state.mode == 'debug':
+    utilses.disp_session_state()
