@@ -63,7 +63,7 @@ This command might take a while to finish.
 
 #### Running the application
 
-To run the application, run the following command.
+To test that NiChart is installed correctly, run the following command.
 
 ```
 ./run_nichart.sh
@@ -72,11 +72,18 @@ To run the application, run the following command.
 This will start the NiChart server on your machine which you can then access from your web browser.
 When you start the server, a few links will appear, including a localhost one: http://localhost:8501 
 
-You can click that link or copy-paste it into a browser to access the local NiChart server. 
+You can click that link or copy-paste it into a browser to access the local NiChart server. If you see the front page, congratulations! NiChart is installed.
 
 The NiChart server will automatically stop when you close that terminal window.
 
-Whenever you want to run NiChart again, open up the Ubuntu terminal as described above and run the same command. Then open your browser and go to http://localhost:8501 
+Whenever you want to run NiChart again, either:
+
+1. Open up the Ubuntu terminal as described above and run the same command. Then open your browser and go to http://localhost:8501.
+
+2. Click the desktop shortcut if you made one (see below).
+
+#### Creating a Windows desktop shortcut (Optional)
+This optional step creates a shortcut on the Windows desktop to NiChart.
 
 
 
