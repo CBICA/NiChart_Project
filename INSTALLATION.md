@@ -25,11 +25,15 @@ First, if you're on Windows, open Docker Desktop. You can do this from the start
 
 #### Choose a path to store results
 
-In this installation, NiChart runs inside a container, which is isolated from the rest of your computer to improve security. To have data persist across sessions, you need to designate a location on your computer to store this data. 
+In this installation, NiChart runs inside a container, which is isolated from the rest of your computer to improve security. To have data persist across sessions, you need to designate a location on your computer to store this data. ****
 
-First, identify a path you want to use. In this demo we'll use "C:/Users/NiChart_Developer/Desktop/DEMODATA", but yours will vary as you can choose any folder you like. (On Windows, you can navigate to a folder, then click "copy path" in the file explorer to get your path.)
+First, identify a path you want to use. In this demo we'll use "C:/Users/NiChart_Developer/Desktop/DEMODATA", but yours will vary as you can choose any folder you like. On Windows, you can navigate to a folder, then click "copy path" in the file explorer to get your path.
 
-Now replace "C:/"with "/mnt/c/". You can do the same for any other drive letter, so "D:/" becomes "/mnt/d". In our example, we end up with "/mnt/c/Users/NiChart_Developer/Desktop/DEMODATA". 
+**Please make sure that the path you use does not already contain important data**. NiChart will not try to delete existing data, but it is good practice to select a new, empty folder.
+
+Write down your path (for example, copy & paste it into Notepad).
+
+Now, in your path text, replace "C:/"with "/mnt/c/". You can do the same for any other drive letter, so "D:/" becomes "/mnt/d". In our example, we end up with "/mnt/c/Users/NiChart_Developer/Desktop/DEMODATA". 
 
 Write down this converted path as we will use it later. 
 
@@ -59,17 +63,20 @@ This command might take a while to finish.
 
 #### Running the application
 
-To run the application, run the following command. (You should replace the "/mnt/c..." path with your own data path from earlier.) 
+To run the application, run the following command.
 
 ```
-docker run -it --rm --name nichart_server -p 8501:8501 --privileged -v /usr/bin/docker:/usr/bin/docker -v /var/run/docker.sock:/var/run/docker.sock -v /mnt/c/Users/NiChart_Developer/Desktop/DEMODATA:/app/output_folder:rw cbica/nichart:07032025
+./run_nichart.sh
 ```
 
-This will start the NiChart server on your machine which you can then access from your web browser. When you start the server, a few links will appear, including a localhost one: http://localhost:8501 
+This will start the NiChart server on your machine which you can then access from your web browser.
+When you start the server, a few links will appear, including a localhost one: http://localhost:8501 
 
 You can click that link or copy-paste it into a browser to access the local NiChart server. 
 
 The NiChart server will automatically stop when you close that terminal window.
+
+Whenever you want to run NiChart again, open up the Ubuntu terminal as described above and run the same command. Then open your browser and go to http://localhost:8501 
 
 
 
