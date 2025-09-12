@@ -2,6 +2,7 @@ import subprocess
 import yaml
 from pathlib import Path
 import os
+import argparse
 
 def find_yaml_files(directory):
     return list(directory.rglob("*.yaml")) + list(directory.rglob("*.yml"))
@@ -24,7 +25,16 @@ def docker_pull_images(images):
         os.system(f'docker pull {img}')
 
 def main():
-    tool_dir = Path("/tmp/nichart_static/tools")
+    parser = argparse.ArgumentParser(description="Pull Docker images from YAML tool definitions.")
+    parser.add_argument(
+        "tool_dir",
+        nargs="?",
+        default=Path("/tmp/nichart_static/tools"),
+        help="Path to the tools directory (defaults to /tmp/nichart_static/tools)"
+    )
+    args = parser.parse_args()
+
+    tool_dir = Path(args.tool_dir)
     images = set()
 
     for yaml_file in find_yaml_files(tool_dir):
