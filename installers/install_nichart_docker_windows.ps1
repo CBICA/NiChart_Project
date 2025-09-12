@@ -124,7 +124,7 @@ switch ($LASTEXITCODE) {
 
 # Create a Windows shortcut on the Desktop that launches the WSL script
 $desktop = [Environment]::GetFolderPath('Desktop')
-$shortcutName = "MyApp (WSL - $selectedDistro).lnk"
+$shortcutName = "NiChart.lnk"
 $shortcutPath = Join-Path $desktop $shortcutName
 
 $WshShell = New-Object -ComObject WScript.Shell
@@ -144,7 +144,7 @@ $argList += @('--','/bin/bash','-lc', "'$RunScriptPath'")
 $shortcut.Arguments = ($argList -join ' ')
 $shortcut.WorkingDirectory = $desktop
 $shortcut.WindowStyle = 1
-$shortcut.Description = "Launch MyApp inside $selectedDistro"
+$shortcut.Description = "Launch NiChart inside $selectedDistro"
 $shortcut.IconLocation = "$env:SystemRoot\System32\wsl.exe,0"
 $shortcut.Save()
 
