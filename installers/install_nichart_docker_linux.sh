@@ -72,16 +72,63 @@ trap 'err "Run failed on line $LINENO while running: $BASH_COMMAND"; exit 1' ERR
 # --- Embedded by install.sh ---
 APP_IMAGE="__APP_IMAGE__"
 DATA_DIR="__DATA_DIR__"
+APP_URL_DEFAULT="http://localhost:8501/"
 
 CONTAINER_NAME="nichart_server"
 
-RUN_ARGS=(--rm -it --name "${CONTAINER_NAME}")
+RUN_ARGS=(--rm -d --name "${CONTAINER_NAME}")
 RUN_ARGS+=(--privileged -p 8501:8501 -v /usr/bin/docker:/usr/bin/docker -v /var/run/docker.sock:/var/run/docker.sock)
 RUN_ARGS+=(-v "${DATA_DIR}:/app/output_folder:rw")
 
 APP_CMD=()
+
+is_wsl() {
+  # WSL 1/2 typically expose "Microsoft" in kernel release; also /proc/version works
+  if grep -qi "microsoft" /proc/sys/kernel/osrelease 2>/dev/null; then
+    return 0
+  elif grep -qi "microsoft" /proc/version 2>/dev/null; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+open_browser() {
+  local url="$1"
+  if is_wsl; then
+    # Use Windows PowerShell to open the default browser from WSL
+    if command -v powershell.exe >/dev/null 2>&1; then
+      powershell.exe -NoProfile -Command "Start-Process \"$url\"" >/dev/null 2>&1 || warn "Failed to open browser via PowerShell."
+    else
+      warn "powershell.exe not found. Please open: $url"
+    fi
+  else
+    if command -v xdg-open >/dev/null 2>&1; then
+      xdg-open "$url" >/dev/null 2>&1 || warn "Failed to open browser via xdg-open."
+    else
+      warn "xdg-open not found. Please open: $url"
+    fi
+  fi
+}
+
 msg "Running command: docker run ${RUN_ARGS[@]} ${APP_IMAGE} ${APP_CMD[@]} $@"
-exec docker run "${RUN_ARGS[@]}" "${APP_IMAGE}" "${APP_CMD[@]}" "$@"
+# Start container
+msg "Starting container '${CONTAINER_NAME}' from image '${APP_IMAGE}'..."
+CID="$(docker run "${RUN_ARGS[@]}" "${APP_IMAGE}" "${APP_CMD[@]}" "$@" || die "docker run failed.")"
+
+# Optionally wait a short time for service to be ready (tune or remove)
+sleep 2
+
+# Try to open the browser
+msg "Opening: ${APP_URL}"
+open_browser "${APP_URL}"
+
+# Show status and friendly tips
+if [[ -n "${CID}" ]]; then
+  msg "Container ID: ${CID}"
+  msg "Use 'docker logs -f ${CONTAINER_NAME}' to tail logs."
+  msg "Use 'docker stop ${CONTAINER_NAME}' to force-stop the app."
+fi
 RUNSH
 
 # Replace placeholders
