@@ -16,6 +16,7 @@ sphinx
 pydantic
 pyyaml
 humanize
+graphviz
 
 # streamlit
 streamlit==1.40.0

@@ -12,7 +12,7 @@ APP_IMAGE="cbica/nichart:09122025"
 INSTALLER_CMD="python /app/resources/pull_containers.py /app/resources/tools/"
 
 # Docker run args (installer)
-INSTALLER_RUN_ARGS=(--privileged --user 1000 -it --rm --name nichart_installer --entrypoint=/usr/local/bin/_entrypoint.sh -v /usr/bin/docker:/usr/bin/docker -v /var/run/docker.sock:/var/run/docker.sock)
+INSTALLER_RUN_ARGS=(--privileged -it --rm --name nichart_installer --entrypoint="/usr/local/bin/_entrypoint.sh" -v /usr/bin/docker:/usr/bin/docker -v /var/run/docker.sock:/var/run/docker.sock)
 
 ###############################################################################
 
@@ -77,8 +77,8 @@ APP_URL_DEFAULT="http://localhost:8501/"
 
 CONTAINER_NAME="nichart_server"
 
-RUN_ARGS=(--rm -d --name "${CONTAINER_NAME}")
-RUN_ARGS+=(--privileged --user 1000 -p 8501:8501 -v /usr/bin/docker:/usr/bin/docker -v /var/run/docker.sock:/var/run/docker.sock)
+RUN_ARGS=(--rm -it --name "${CONTAINER_NAME}")
+RUN_ARGS+=(--privileged -p 8501:8501 -v /usr/bin/docker:/usr/bin/docker -v /var/run/docker.sock:/var/run/docker.sock)
 RUN_ARGS+=(-v "${DATA_DIR}:/app/output_folder:rw")
 
 APP_CMD=()
@@ -99,15 +99,15 @@ open_browser() {
   if is_wsl; then
     # Use Windows PowerShell to open the default browser from WSL
     if command -v powershell.exe >/dev/null 2>&1; then
-      powershell.exe -NoProfile -Command "Start-Process \"$url\"" >/dev/null 2>&1 || warn "Failed to open browser via PowerShell."
+      powershell.exe -NoProfile -Command "Start-Process \"$APP_URL_DEFAULT\"" >/dev/null 2>&1 || warn "Failed to open browser via PowerShell."
     else
       warn "powershell.exe not found. Please open: $url"
     fi
   else
     if command -v xdg-open >/dev/null 2>&1; then
-      xdg-open "$url" >/dev/null 2>&1 || warn "Failed to open browser via xdg-open."
+      xdg-open "$APP_URL_DEFAULT" >/dev/null 2>&1 || warn "Failed to open browser via xdg-open."
     else
-      warn "xdg-open not found. Please open: $url"
+      warn "xdg-open not found. Please open: $APP_URL_DEFAULT"
     fi
   fi
 }
@@ -121,8 +121,8 @@ CID="$(docker run "${RUN_ARGS[@]}" "${APP_IMAGE}" "${APP_CMD[@]}" "$@" || die "d
 sleep 2
 
 # Try to open the browser
-msg "Opening: ${APP_URL}"
-open_browser "${APP_URL}"
+msg "Opening: ${APP_URL_DEFAULT}"
+open_browser "${APP_URL_DEFAULT}"
 
 # Show status and friendly tips
 if [[ -n "${CID}" ]]; then
