@@ -60,7 +60,7 @@ To start NiChart, double-click the NiChart shortcut which the installer created 
 
 #### Updating
 
-To update NiChart, just run the installer again the same way you ran it above and the newest NiChart components will be installed. 
+To update NiChart, just download the new installer again the same way you did at first installation and run it again the same way. The newest NiChart components will be installed. 
 
 To save space, you may want to clean up your Docker images to remove older tool versions. For more information on managing Docker images, see the [Docker image docs](https://docs.docker.com/reference/cli/docker/image/).
 
