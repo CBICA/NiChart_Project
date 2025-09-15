@@ -17,8 +17,6 @@ Windows users will likely need to first [install the Windows Subsystem for Linux
 
 On Windows, Docker is distributed as "Docker Desktop", an application which manages Docker on your system. 
 
-### Docker-based Installation
-
 #### Getting started
 
 First, open Docker Desktop. You can do this from the start/search menu or by clicking the Desktop shortcut if you selected that during installation.
@@ -35,11 +33,16 @@ First, identify a path you want to use. In this demo we'll use "C:/Users/NiChart
 
 Write down your path (for example, copy & paste it into Notepad).
 
+#### Download the installer
+Make sure you are connected to the internet in order to download the application.
+
+Go to https://github.com/CBICA/NiChart_Project/blob/main/installers/install_nichart_docker_windows.ps1 and download the file (Doable with either the three dots icon on the top-right -> Download, or the separate Download button a litte below that.
+
+Open up the file explorer to find where you downloaded this file. Hold Shift and right click in that folder. You should see "Open PowerShell window here". Click that option.
+
 #### Running the installer
 
-Make sure you are connected to the internet in order to download the application. Then, open a terminal.
-
-(On Windows, search "terminal", open the application that looks like a black box with a white ">_" in it. At the top of the window that appears will be a tab indicating Windows Powershell. Stay on this tab for the rest of the instructions.)
+Make sure the PowerShell terminal from the last step is open.
 
 Then run this command, **making sure to replace** DATA_DIR with the data path you chose earlier:
 ```
