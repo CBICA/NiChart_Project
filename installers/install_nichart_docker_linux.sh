@@ -77,7 +77,7 @@ APP_URL_DEFAULT="http://localhost:8501/"
 
 CONTAINER_NAME="nichart_server"
 
-RUN_ARGS=(--rm -it --name "${CONTAINER_NAME}")
+RUN_ARGS=(--rm -d --name "${CONTAINER_NAME}")
 RUN_ARGS+=(--privileged -p 8501:8501 -v /usr/bin/docker:/usr/bin/docker -v /var/run/docker.sock:/var/run/docker.sock)
 RUN_ARGS+=(-v "${DATA_DIR}:/app/output_folder:rw")
 
