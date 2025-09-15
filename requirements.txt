@@ -17,6 +17,7 @@ pydantic
 pyyaml
 humanize
 graphviz
+dicom2nifti
 
 # streamlit
 streamlit==1.40.0
