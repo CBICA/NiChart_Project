@@ -53,7 +53,8 @@ docker pull "${APP_IMAGE}" >/dev/null || die "Failed to pull ${APP_IMAGE}"
 
 # --- Run installer container ---
 msg "Running installer container..."
-docker run "${INSTALLER_RUN_ARGS[@]}" "${APP_IMAGE}" ${INSTALLER_CMD} || die "Installer container failed."
+msg "Docker run args: ${INSTALLER_RUN_ARGS[@]} ${APP_IMAGE} ${INSTALLER_CMD}"
+docker run ${INSTALLER_RUN_ARGS[@]} ${APP_IMAGE} ${INSTALLER_CMD} || die "Installer container failed."
 
 # --- Generate run.sh ---
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
