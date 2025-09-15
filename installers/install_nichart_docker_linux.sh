@@ -112,6 +112,22 @@ open_browser() {
   fi
 }
 
+CONTAINER_NAME="nichart_server"
+
+container_running() {
+  docker ps --format '{{.Names}}' --filter "name=^/${CONTAINER_NAME}$" | grep -qx "${CONTAINER_NAME}"
+}
+
+container_exists() {
+  docker ps -a --format '{{.Names}}' --filter "name=^/${CONTAINER_NAME}$" | grep -qx "${CONTAINER_NAME}"
+}
+
+if container_running; then
+  echo "[Run] Container '${CONTAINER_NAME}' already running; opening browser."
+  open_browser
+  exit 0
+fi
+
 msg "Running command: docker run ${RUN_ARGS[@]} ${APP_IMAGE} ${APP_CMD[@]} $@"
 # Start container
 msg "Starting container '${CONTAINER_NAME}' from image '${APP_IMAGE}'..."
