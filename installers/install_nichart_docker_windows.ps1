@@ -30,23 +30,19 @@ function Assert-WSLPresent {
 }
 
 function Get-DefaultDistro {
-  # 'wsl -l -v' marks default with a '*'
   $out = & $script:wslExe -l -v 2>$null
-  if ($LASTEXITCODE -ne 0 -or -not $out) {
-    # fallback: 'wsl -l' may include '(Default)'
-    $out = & $script:wslExe -l 2>$null
-  }
-  if (-not $out) { Fail "Unable to query WSL distros. Is WSL installed and initialized?" }
+  if (-not $out) { $out = & $script:wslExe -l 2>$null }
+  if (-not $out) { Fail "Unable to query WSL distros." }
+
+  # Look for the line that starts with '* '
   foreach ($line in $out) {
-    if ($line -match '^\*?\s*([^\s].*?)(\s+\(Default\))?\s+(\d+)?' -or
-        $line -match '^\*\s+(.+)$') {
-      $name = $Matches[1]
-      if ($line -like '*Default*' -or $line -like '*`**') { return $name.Trim() }
+    if ($line -match '^\*\s+(.+?)(\s{2,}|\s+\d+|\s+\(Default\)|$)') {
+      return $Matches[1].Trim()
     }
   }
-  # If no marker found, pick the first non-header line from `wsl -l -q`
+  # Fallback: first non-empty from -q
   $q = & $script:wslExe -l -q 2>$null | Where-Object { $_ -and $_.Trim() -ne '' }
-  if (-not $q) { Fail "No WSL distributions found. Install a distro from the Store and retry." }
+  if (-not $q) { Fail "No WSL distributions found." }
   return $q[0].Trim()
 }
 
@@ -81,31 +77,36 @@ Write-Host "Windows path: $DataPath"
 Write-Host "WSL path:     $wslDataPath"
 
 # Where app/script will live inside WSL
-$AppDir         = "/home/\$USER/NiChart"
+$AppDir         = "/home/NiChart"
 $RunScriptPath  = "$AppDir/run_nichart.sh"
 $InstallLogPath = "$AppDir/install.log"
 
 # Compose the bash payload to run inside the distro
-$bashBody = @"
+$bashBody = @'
 set -euo pipefail
 
 # Example: prepare app dir and a tiny demo run script if it doesn't exist
-mkdir -p "$AppDir"
+mkdir -p "{APPDIR}"
 
 # Persist the provided data path for your app to read later
-printf '%s\n' "$wslDataPath" > "$AppDir/DATA_PATH"
+printf '%s\n' "{WPATH}" > "{APPDIR}/DATA_PATH"
 
 ### INSTALL STEPS ###
 # Get current installer from NiChart_Project and run it
-cd "$AppDir"
+cd "{APPDIR}"
 wget https://raw.githubusercontent.com/CBICA/NiChart_Project/main/installers/install_nichart_docker_linux.sh
 chmod +x install_nichart_docker_linux.sh
-./install_nichart_docker_linux.sh "$wslDataPath"
+./install_nichart_docker_linux.sh "{WPATH}"
+rm -f ./install_nichart_docker_linux.sh
 chmod +x run_nichart.sh
 ######################
 
-echo "\$(date -Is) Install completed. Data path: $wslDataPath" >> "$InstallLogPath"
-"@
+echo "$(date -Is) Install completed. Data path: {WPATH}" >> "{APPDIR}/install.log"
+'@
+
+$bashBody = $bashBody.
+  Replace('{APPDIR}', $AppDir).
+  Replace('{WPATH}',  $wslDataPath)
 
 # Invoke bash -lc "<payload>" in the chosen distro
 Write-Host "Running installer steps inside WSL..."
@@ -124,6 +125,20 @@ switch ($LASTEXITCODE) {
 
 # Create a Windows shortcut on the Desktop that launches the WSL script
 $desktop = [Environment]::GetFolderPath('Desktop')
+
+$iconUrl = "https://raw.githubusercontent.com/CBICA/NiChart_Project/refs/heads/main/resources/images/nichart1.ico"
+$iconPath = Join-Path $env:LOCALAPPDATA "NiChart/nichart.ico"
+
+
+New-Item -ItemType Directory -Path (Split-Path $iconPath) -Force | Out-Null
+
+try {
+    Invoke-WebRequest -Uri $iconUrl -OutFile $iconPath -UseBasicParsing
+} catch {
+    Write-Warning "Could not download icon from $iconUrl. Shortcut will use default WSL icon."
+    $iconPath = "$env:SystemRoot\System32\wsl.exe"  # fallback
+}
+
 $shortcutName = "NiChart.lnk"
 $shortcutPath = Join-Path $desktop $shortcutName
 
@@ -145,7 +160,7 @@ $shortcut.Arguments = ($argList -join ' ')
 $shortcut.WorkingDirectory = $desktop
 $shortcut.WindowStyle = 1
 $shortcut.Description = "Launch NiChart inside $selectedDistro"
-$shortcut.IconLocation = "$env:SystemRoot\System32\wsl.exe,0"
+$shortcut.IconLocation = "$iconPath"
 $shortcut.Save()
 
 if (-not (Test-Path $shortcutPath)) { Fail "Failed to create shortcut at $shortcutPath." }

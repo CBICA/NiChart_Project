@@ -77,7 +77,7 @@ APP_URL_DEFAULT="http://localhost:8501/"
 
 CONTAINER_NAME="nichart_server"
 
-RUN_ARGS=(--rm -it --name "${CONTAINER_NAME}")
+RUN_ARGS=(--rm -d --name "${CONTAINER_NAME}")
 RUN_ARGS+=(--privileged -p 8501:8501 -v /usr/bin/docker:/usr/bin/docker -v /var/run/docker.sock:/var/run/docker.sock)
 RUN_ARGS+=(-v "${DATA_DIR}:/app/output_folder:rw")
 
@@ -95,7 +95,6 @@ is_wsl() {
 }
 
 open_browser() {
-  local url="$1"
   if is_wsl; then
     # Use Windows PowerShell to open the default browser from WSL
     if command -v powershell.exe >/dev/null 2>&1; then
@@ -111,6 +110,22 @@ open_browser() {
     fi
   fi
 }
+
+CONTAINER_NAME="nichart_server"
+
+container_running() {
+  docker ps --format '{{.Names}}' --filter "name=^/${CONTAINER_NAME}$" | grep -qx "${CONTAINER_NAME}"
+}
+
+container_exists() {
+  docker ps -a --format '{{.Names}}' --filter "name=^/${CONTAINER_NAME}$" | grep -qx "${CONTAINER_NAME}"
+}
+
+if container_running; then
+  echo "[Run] Container '${CONTAINER_NAME}' already running; opening browser."
+  open_browser
+  exit 0
+fi
 
 msg "Running command: docker run ${RUN_ARGS[@]} ${APP_IMAGE} ${APP_CMD[@]} $@"
 # Start container

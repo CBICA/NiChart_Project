@@ -2,7 +2,7 @@
 
 We provide both a locally installable **desktop application** and a **cloud-based application**.
 
-The [NiChart cloud application](https://neuroimagingchart.com/portal), hosted via Amazon Web Services (AWS), deploys scalable infrastructure which hosts the *NiChart* tools as a standard web application accessible via the user’s web browser. **No install needed**, but it requires you to upload your data to the cloud-based NiChart server for us to process it. We do not access or use your data for any other purpose than to run your requested processing and/or provide support to you, and we regularly delete user data after inactivity. However, we recognize that data privacy agreements and related concerns may nevertheless restrict use of the cloud application. If that applies to you, we suggest that you install the desktop application. Below we provide detailed installation instructions.
+The [NiChart cloud application](https://neuroimagingchart.com/portal), hosted via Amazon Web Services (AWS), deploys scalable infrastructure which hosts the *NiChart* tools as a standard web application accessible via the user’s web browser. **No installation is needed**, but it requires you to upload your data to the cloud-based NiChart server for us to process it. We do not access or use your data for any other purpose than to run your requested processing and/or provide support to you, and we regularly delete user data after inactivity. However, we recognize that data privacy agreements and related concerns may nevertheless restrict use of the cloud application. If that applies to you, we suggest that you install the desktop application. Below we provide detailed installation instructions.
 
 In particular, if you don't have a GPU on your device, the cloud application is probably the easiest way for you to use the NiChart tools.
 
@@ -17,15 +17,17 @@ Windows users will likely need to first [install the Windows Subsystem for Linux
 
 On Windows, Docker is distributed as "Docker Desktop", an application which manages Docker on your system. 
 
-### Docker-based Installation
-
 #### Getting started
 
-First, if you're on Windows, open Docker Desktop. You can do this from the start/search menu or by clicking the Desktop shortcut if you selected that during installation. You should go into the settings using the gear icon on the top right, go to "General", and enable the settings "Use the WSL 2 based engine" and "Expose daemon on tcp://localhost:2375 without TLS" if they aren't already enabled (they might require you to restart). You should also see a green indicator on the bottom left which says "Engine running". If it's yellow, you need to wait for the service to start. Otherwise, you may need to troubleshoot your installation. 
+First, open Docker Desktop. You can do this from the start/search menu or by clicking the Desktop shortcut if you selected that during installation.
+
+You should go into the settings using the gear icon on the top right, go to "General", and enable the settings "Use the WSL 2 based engine" and "Expose daemon on tcp://localhost:2375 without TLS" if they aren't already enabled. Then go to the "Resources" tab and disable Resource Saver if it is enabled. You will probably need to restart after this to make sure all changes take effect. 
+
+When you return, you should also see a green indicator on the bottom left which says "Engine running". If it's yellow or says something else, you need to wait for the service to start. Otherwise, you may need to troubleshoot your Docker installation before continuing. 
 
 #### Choose a path to store results
 
-In this installation, NiChart runs inside a container, which is isolated from the rest of your computer to improve security. To have data persist across sessions, you need to designate a location on your computer to store this data. ****
+In this installation, NiChart runs inside a container, which is isolated from the rest of your computer to improve security. To have data persist across sessions, you need to designate a location on your computer to store this data.
 
 First, identify a path you want to use. In this demo we'll use "C:/Users/NiChart_Developer/Desktop/DEMODATA", but yours will vary as you can choose any folder you like. On Windows, you can navigate to a folder, then click "copy path" in the file explorer to get your path.
 
@@ -33,37 +35,52 @@ First, identify a path you want to use. In this demo we'll use "C:/Users/NiChart
 
 Write down your path (for example, copy & paste it into Notepad).
 
-Now, in your path text, replace "C:/"with "/mnt/c/". You can do the same for any other drive letter, so "D:/" becomes "/mnt/d". In our example, we end up with "/mnt/c/Users/NiChart_Developer/Desktop/DEMODATA". 
+#### Download the installer
+Make sure you are connected to the internet in order to download the application.
 
-Write down this converted path as we will use it later. 
+Go to https://github.com/CBICA/NiChart_Project/blob/main/installers/install_nichart_docker_windows.ps1 and download the file (Doable with either the three dots icon on the top-right -> Download, or the separate Download button a litte below that.
+
+Open up the file explorer to find where you downloaded this file. Hold Shift and right click in that folder. You should see "Open PowerShell window here". Click that option.
 
 #### Running the installer
 
-Make sure you are connected to the internet in order to download the application. Then, open a terminal.
+Make sure the PowerShell terminal from the last step is open.
 
-(On Windows, search "terminal", open the application that looks like a black box with a white ">_" in it. At the top of the window that appears will be a tab indicating Windows Powershell.
-Click the down arrow next to that tab to expand your terminal options, and select Ubuntu (or, if you changed the default distribution, select whichever distribution you selected while installing WSL).
-A new terminal will open in a different color and you should see something like "root@username:~#". Stay on this tab for the rest of the instructions.)
-
-Run the following commands to download the installer and make it runnable:
-
+Then run this command, **making sure to replace** DATA_DIR with the data path you chose earlier:
 ```
-wget https://raw.githubusercontent.com/CBICA/NiChart_Project/main/installers/install_nichart_docker_linux.sh.sh
-chmod +x install_nichart_docker_linux.sh
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\install_nichart_docker_windows.ps1 DATA_DIR --distro Ubuntu
 ```
+(Note that if you chose a different distribution for your WSL installation, you can designate that with --distro in the command above. Just replace "Ubuntu" with whatever you chose.)
 
-Then run this command, **making sure to replace** /path/to/data with the data path you chose earlier:
-```
-./install_nichart_docker_linux.sh /path/to/data
-```
-
-In our example, the command becomes `./install_nichart_docker_linux.sh /mnt/c/Users/NiChart_Developer/Desktop/DEMODATA`.
-
-This command might take a while to finish.
+This command might take a while to finish while it downloads the NiChart tools.
 
 #### Running the application
 
-To test that NiChart is installed correctly, run the following command.
+To start NiChart, double-click the NiChart shortcut which the installer created on your desktop. It should launch your browser automatically. If not, open your browser and go to http://localhost:8501 . If you see the NiChart survey, NiChart is successfully installed.
+
+#### Updating
+
+To update NiChart, just run the installer again the same way you ran it above and the newest NiChart components will be installed. 
+
+To save space, you may want to clean up your Docker images to remove older tool versions. For more information on managing Docker images, see the [Docker image docs](https://docs.docker.com/reference/cli/docker/image/).
+
+## Linux Instructions
+
+You will need to install Docker first and restart to make sure services are running properly.
+
+First identify a data path where you want to persist NiChart data. We'll call that ${DATA_DIR}.
+
+You will want to download and run the linux installer script. To do this, cd to your desired install directory and run the below. (Remember to set ${DATA_DIR} or replace it with your desired path.)
+
+```
+wget https://raw.githubusercontent.com/CBICA/NiChart_Project/main/installers/install_nichart_docker_linux.sh
+chmod +x install_nichart_docker_linux.sh
+./install_nichart_docker_linux.sh ${DATA_DIR}
+```
+
+#### Running the application
+
+Run the script run_nichart.sh that the installer created in the same directory:
 
 ```
 ./run_nichart.sh
@@ -72,23 +89,15 @@ To test that NiChart is installed correctly, run the following command.
 This will start the NiChart server on your machine which you can then access from your web browser.
 When you start the server, a few links will appear, including a localhost one: http://localhost:8501 
 
-You can click that link or copy-paste it into a browser to access the local NiChart server. If you see the front page, congratulations! NiChart is installed.
+You can click that link or copy-paste it into a browser to access the local NiChart server. If you see the survey page, congratulations! NiChart is succesfully installed.
 
-The NiChart server will automatically stop when you close that terminal window.
+To stop the NiChart server, run "docker stop nichart_server". 
 
-Whenever you want to run NiChart again, either:
+#### Updating
 
-1. Open up the Ubuntu terminal as described above and run the same command. Then open your browser and go to http://localhost:8501.
+To update NiChart, just download and re-run the latest installer.
 
-2. Click the desktop shortcut if you made one (see below).
-
-#### Creating a Windows desktop shortcut (Optional)
-This optional step creates a shortcut on the Windows desktop to NiChart.
-
-
-
-## Linux Instructions
-Linux instructions are quite similar to the Windows instructions, except that there is no need for WSL and no need to convert the path specially. All commands will need to be run from the terminal and there is no Docker Desktop configuration.
+To save space, you may want to clean up your Docker images to remove older tool versions. For more information on managing Docker images, see the [Docker image docs](https://docs.docker.com/reference/cli/docker/image/).
 
 # Can't use Docker?
-We aim to soon provide compatibility with Singularity/Apptainer runtimes for users in computing environments where Docker is disallowed. Please check in regularly for updates.
+We aim to soon provide compatibility with Singularity/Apptainer runtimes for users in computing environments where Docker is disallowed or where other related policies prevent running NiChart due to required privileges. Please check in regularly for updates.
