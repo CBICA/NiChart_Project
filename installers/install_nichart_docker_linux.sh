@@ -9,10 +9,10 @@ set -Eeuo pipefail
 APP_IMAGE="cbica/nichart:09122025"
 
 # Command inside the installer container
-INSTALLER_CMD="/app/resources/pull_containers.py /app/resources/tools/"
+INSTALLER_CMD="-c python /app/resources/pull_containers.py /app/resources/tools/"
 
 # Docker run args (installer)
-INSTALLER_RUN_ARGS=(--privileged --user 1000 -it --rm --name nichart_installer --entrypoint="python" -v /usr/bin/docker:/usr/bin/docker -v /var/run/docker.sock:/var/run/docker.sock)
+INSTALLER_RUN_ARGS=(--privileged --user 1000 -it --rm --name nichart_installer --entrypoint="bash" -v /usr/bin/docker:/usr/bin/docker -v /var/run/docker.sock:/var/run/docker.sock)
 
 ###############################################################################
 
