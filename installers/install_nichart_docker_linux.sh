@@ -95,7 +95,6 @@ is_wsl() {
 }
 
 open_browser() {
-  local url="$1"
   if is_wsl; then
     # Use Windows PowerShell to open the default browser from WSL
     if command -v powershell.exe >/dev/null 2>&1; then
