@@ -125,6 +125,20 @@ switch ($LASTEXITCODE) {
 
 # Create a Windows shortcut on the Desktop that launches the WSL script
 $desktop = [Environment]::GetFolderPath('Desktop')
+
+$iconUrl = "https://raw.githubusercontent.com/CBICA/NiChart_Project/refs/heads/main/resources/images/nichart1.ico"
+$iconPath = Join-Path $env:LOCALAPPDATA "NiChart/nichart.ico"
+
+
+New-Item -ItemType Directory -Path (Split-Path $iconPath) -Force | Out-Null
+
+try {
+    Invoke-WebRequest -Uri $iconUrl -OutFile $iconPath -UseBasicParsing
+} catch {
+    Write-Warning "Could not download icon from $iconUrl. Shortcut will use default WSL icon."
+    $iconPath = "$env:SystemRoot\System32\wsl.exe"  # fallback
+}
+
 $shortcutName = "NiChart.lnk"
 $shortcutPath = Join-Path $desktop $shortcutName
 
@@ -146,7 +160,7 @@ $shortcut.Arguments = ($argList -join ' ')
 $shortcut.WorkingDirectory = $desktop
 $shortcut.WindowStyle = 1
 $shortcut.Description = "Launch NiChart inside $selectedDistro"
-$shortcut.IconLocation = "$env:SystemRoot\System32\wsl.exe,0"
+$shortcut.IconLocation = "$iconPath"
 $shortcut.Save()
 
 if (-not (Test-Path $shortcutPath)) { Fail "Failed to create shortcut at $shortcutPath." }
