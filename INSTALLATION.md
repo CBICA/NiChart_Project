@@ -21,7 +21,9 @@ On Windows, Docker is distributed as "Docker Desktop", an application which mana
 
 First, open Docker Desktop. You can do this from the start/search menu or by clicking the Desktop shortcut if you selected that during installation.
 
-You should go into the settings using the gear icon on the top right, go to "General", and enable the settings "Use the WSL 2 based engine" and "Expose daemon on tcp://localhost:2375 without TLS" if they aren't already enabled. Then go to the "Resources" tab and disable Resource Saver if it is enabled. You should also see a green indicator on the bottom left which says "Engine running". If it's yellow or says something else, you need to wait for the service to start. Otherwise, you may need to troubleshoot your Docker installation. 
+You should go into the settings using the gear icon on the top right, go to "General", and enable the settings "Use the WSL 2 based engine" and "Expose daemon on tcp://localhost:2375 without TLS" if they aren't already enabled. Then go to the "Resources" tab and disable Resource Saver if it is enabled. You will probably need to restart after this to make sure all changes take effect. 
+
+When you return, you should also see a green indicator on the bottom left which says "Engine running". If it's yellow or says something else, you need to wait for the service to start. Otherwise, you may need to troubleshoot your Docker installation before continuing. 
 
 #### Choose a path to store results
 
