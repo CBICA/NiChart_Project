@@ -15,7 +15,7 @@ The cloud and desktop applications are unified at the code level through the use
 
 Windows users will likely need to first [install the Windows Subsystem for Linux (WSL)](https://learn.microsoft.com/en-us/windows/wsl/install). 
 
-On Windows, Docker is distributed as "Docker Desktop", an application which manages Docker on your system. 
+On Windows, [Docker](https://www.docker.com/get-started/) is distributed as "Docker Desktop", an application which manages Docker on your system. 
 
 #### Getting started
 
@@ -33,7 +33,7 @@ First, identify a path you want to use. In this demo we'll use "C:/Users/NiChart
 
 **Please make sure that the path you use does not already contain important data**. NiChart will not try to delete existing data, but it is good practice to select a new, empty folder.
 
-Write down your path (for example, copy & paste it into Notepad).
+Write down your path so you can access it later (for example, copy & paste it into Notepad).
 
 #### Download the installer
 Make sure you are connected to the internet in order to download the application.
