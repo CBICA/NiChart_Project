@@ -20,6 +20,8 @@ reference distributions for comparison to a broader population.
 .. image:: https://raw.githubusercontent.com/CBICA/NiChart_Project/refs/heads/ge-dev/resources/images/NiChart_Flowchart_v2.svg
   :alt: NiChart Flowchart
 
+This repo contains the NiChart application front-end, which ties together all individual tools in the NiChart ecosystem and provides an easy-to-use interface for processing your data.
+
 The Basics
 ----------
 
@@ -43,7 +45,7 @@ We provide both a locally installable **desktop application** and a **cloud-base
 
 The `NiChart cloud application <https://neuroimagingchart.com/portal>`_, hosted via Amazon Web Services (AWS), deploys scalable infrastructure which hosts the *NiChart* tools as a standard web application accessible via the user’s web browser. **No payment or installation is needed to use the tool**. 
 
-However, as a web application, NiChart Cloud requires you to upload your data to the private cloud-based NiChart server for us to process it. We do not access or use your data for any other purpose than to run your requested processing and/or provide support to you, and we regularly delete user data after inactivity. However, we recognize that data privacy agreements and related concerns may nevertheless restrict use of the cloud application. If that applies to you, we suggest that you install the desktop application. We provide detailed installation instructions on the `Installation page <./INSTALLATION.md>`_. 
+However, as a web application, NiChart Cloud requires you to upload your data to the private cloud-based NiChart server for us to process it. **We do not access or use your data** for any other purpose than to run your requested processing and/or provide support to you as a user, and we regularly automatically delete user data after inactivity. However, we recognize that data privacy agreements and related concerns may nevertheless restrict use of the cloud application. If that applies to you, we suggest that you install the desktop application. We provide detailed installation instructions on the `Installation page <./INSTALLATION.md>`_. 
 
 **Want to switch between versions?** The cloud and desktop applications are unified at the code level through the use of the Python library `Streamlit <https://streamlit.io>`_. Consequently, the user experience is nearly identical between the cloud and desktop applications. 
 
