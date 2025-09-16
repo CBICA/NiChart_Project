@@ -1,14 +1,14 @@
-# Installing NiChart
+# Installing NiChart Locally
 
 We provide both a locally installable **desktop application** and a **cloud-based application**.
 
-The [NiChart cloud application](https://neuroimagingchart.com/portal), hosted via Amazon Web Services (AWS), deploys scalable infrastructure which hosts the *NiChart* tools as a standard web application accessible via the user’s web browser. **No installation is needed**, but it requires you to upload your data to the cloud-based NiChart server for us to process it. We do not access or use your data for any other purpose than to run your requested processing and/or provide support to you, and we regularly delete user data after inactivity. However, we recognize that data privacy agreements and related concerns may nevertheless restrict use of the cloud application. If that applies to you, we suggest that you install the desktop application. Below we provide detailed installation instructions.
+The [NiChart cloud application](https://cloud.neuroimagingchart.com/), hosted via Amazon Web Services (AWS), deploys scalable infrastructure which hosts the *NiChart* tools as a standard web application accessible via the user’s web browser. We recommend this option first if you want to give NiChart a try, but be aware that it requires data to be transferred over the internet.
 
 In particular, if you don't have a GPU on your device, the cloud application is probably the easiest way for you to use the NiChart tools.
 
-The cloud and desktop applications are unified at the code level through the use of the Python library [Streamlit](https://streamlit.io). Consequently, the user experience is nearly identical between the cloud and desktop applications.
+NiChart Desktop is a way for you to run NiChart on your own device, avoiding complications due to data usage agreements, etc. You will still need a GPU installed on your system to run most tools.
 
-**Desktop installation**: Installing the desktop application currently requires [Docker](https://www.docker.com/get-started/) to be installed, as this greatly simplifies deployment and distribution of our algorithms without requiring extensive dependency management. Follow the instructions to install Docker (or Docker Desktop, on Windows/Mac) for your platform, then restart your device before continuing. We recommend having at least 20 GB of free space on your device before installing NiChart.
+Installing the desktop application currently requires [Docker](https://www.docker.com/get-started/) to be installed, as this greatly simplifies deployment and distribution of our algorithms without requiring extensive dependency management. Follow the instructions to install Docker (or Docker Desktop, on Windows/Mac) for your platform, then restart your device before continuing. We recommend having at least 20 GB of free space on your device before installing NiChart.
 
 
 ## Windows Instructions
