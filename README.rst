@@ -54,17 +54,17 @@ Looking for specific NiChart tools?
 
 If you're looking for the individual NiChart structural tools, please see their individual repos:
 
-[NiChart_DLMUSE](https://hub.docker.com/repository/docker/cbica/nichart_dlmuse) ([GitHub](https://github.com/CBICA/NiChart_DLMUSE)) - Fast brain segmentation via deep learning
+NiChart_DLMUSE  [`GitHub <https://github.com/CBICA/NiChart_DLMUSE>`_] [`Docker Hub <https://hub.docker.com/repository/docker/cbica/nichart_dlmuse>`_] - Fast brain segmentation via deep learning
 
-[NiChart_DLWMLS](https://hub.docker.com/repository/docker/cbica/dlwmls_wrapped) ([GitHub](https://github.com/CBICA/NiChart_DLWMLS)) - Fast white matter lesion segmentation via deep learning
+NiChart_DLWMLS [`GitHub <https://github.com/CBICA/NiChart_DLWMLS>`_] [`Docker Hub <https://hub.docker.com/repository/docker/cbica/dlwmls_wrapped>`_]  - Fast white matter lesion segmentation via deep learning
 
-[SPARE scores](https://hub.docker.com/repository/docker/cbica/nichart_spare_score) ([GitHub](https://github.com/CBICA/spare_score)) - ML-based prediction/scoring for variables of clinical interest
+SPARE scores  [`GitHub <https://github.com/CBICA/spare_score>`_] [`Docker Hub <https://hub.docker.com/repository/docker/cbica/nichart_spare_score>`_] - ML-based prediction/scoring for variables of clinical interest
 
-[CCL-NMF prediction](https://hub.docker.com/repository/docker/cbica/ccl_nmf_prediction_wrapped) ([GitHub](https://github.com/CBICA/CCL_NMF_Prediction)) - Lightweight estimation of CCL-NMF loading coefficients
+CCL-NMF prediction  [`GitHub <https://github.com/CBICA/CCL_NMF_Prediction>`_] [`Docker Hub <https://hub.docker.com/repository/docker/cbica/ccl_nmf_prediction_wrapped>`_]  - Lightweight estimation of CCL-NMF loading coefficients
 
-[ComBatFam Harmonization](https://hub.docker.com/repository/docker/cbica/combatfam_harmonize_dlmuse) ([GitHub](https://github.com/PennSIVE/ComBatFam_Pipeline)) - Dataset harmonization tools
+ComBatFam Harmonization [`GitHub <https://github.com/PennSIVE/ComBatFam_Pipeline>`_] [`Docker Hub <https://hub.docker.com/repository/docker/cbica/combatfam_harmonize_dlmuse>`_]  - Dataset harmonization tools
 
-[SurrealGAN / PredCRD](https://hub.docker.com/repository/docker/cbica/surrealgan_predcrd_wrapped) ([GitHub](https://github.com/CBICA/PredCRD)) - Predict continuous representation of disease along 5 principal dimensions
+SurrealGAN / PredCRD  [`GitHub <https://github.com/CBICA/PredCRD>`_] [`Docker Hub <https://hub.docker.com/repository/docker/cbica/surrealgan_predcrd_wrapped>`_]  - Predict continuous representation of disease along 5 principal dimensions
 
 
 Quick Links
