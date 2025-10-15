@@ -1,10 +1,10 @@
-# NiChart packages
-spare-scores
-NiChartHarmonize
-DLICV
-DLMUSE
-NiChart_DLMUSE>=1.0.9
-DLWMLS @ git+https://github.com/CBICA/DLWMLS
+# NiChart packages (not generally needed anymore thanks to Docker based deployment, but kept here for reference)
+#spare-scores
+#NiChartHarmonize
+#DLICV
+#DLMUSE
+#NiChart_DLMUSE>=1.0.9
+#DLWMLS @ git+https://github.com/CBICA/DLWMLS
 
 # general python dependencies
 torch==2.2.1
@@ -16,15 +16,20 @@ sphinx
 pydantic
 pyyaml
 humanize
+graphviz
+dicom2nifti
 
 # streamlit
-streamlit==1.39.0
+streamlit==1.40.0
 st_pages==1.0.1
 streamlit_plotly_events
 streamlit-base-extras
 streamlit-extras
 streamlit-autorefresh
 streamlit-option-menu
+streamlit-image-select
+streamlit-antd-components 
+pycountry
 chart_studio
 Jinja2
 plotly-express
