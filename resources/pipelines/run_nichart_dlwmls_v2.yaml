@@ -1,0 +1,22 @@
+pipeline_name: DLWMLS Deep Learning White Matter Lesion Segmentation
+description: |
+  White matter lesion segmentation pipeline starting from FLAIR-weighted MRI brain scans.
+
+steps:
+  - id: run_dlmuse
+    tool: nichart_dlmuse
+    inputs:
+      t1_img: ${STUDY}/t1
+    outputs:
+      dlmuse_seg: ${STUDY}/DLMUSE_seg
+      dlmuse_vol: ${STUDY}/DLMUSE_vol
+
+  - id: run_nichart_dlwmls
+    tool: nichart_dlwmls_v2 # MUST CORRESPOND EXACTLY to a tool in resources/tools dir
+    inputs:
+      t1_img: ${STUDY}/t1
+      fl_img: ${STUDY}/fl
+      dlmuse_seg: ${STUDY}/DLMUSE_seg
+
+    outputs:
+      nichart_dlwmls_out: ${STUDY}/NiChart_DLWMLS_out
