@@ -722,7 +722,7 @@ def run_pipeline(pipeline_id: str,
         pipeline_progress_bar.reset(total=total_steps)
     for sid in order:
         if process_progress_bar:
-            process_progress_bar.reset(total=4)
+            process_progress_bar.reset(total=total_steps)
         if pipeline_progress_bar:
             pipeline_progress_bar.update(1)
         step = step_map[sid]

@@ -1,0 +1,43 @@
+pipeline_name: SPARE Scores - Hypertension (Unharmonized)
+description: |
+  Pipeline which uses DLMUSE and DLWMLS to produce SPARE classification of hypertension.
+
+steps:
+  - id: run_dlmuse
+    tool: nichart_dlmuse
+    inputs:
+      t1_img: ${STUDY}/t1
+    outputs:
+      dlmuse_seg: ${STUDY}/DLMUSE_seg
+      dlmuse_vol: ${STUDY}/DLMUSE_vol
+  - id: harmonize_dlmuse
+    tool: harmonize_dlmuse
+    inputs:
+      dlmuse_vol_unharmonized: ${STUDY}/DLMUSE_vol/DLMUSE_Volumes.csv
+      covariate_csv: ${STUDY}/participants/participants.csv
+    outputs: # Harmonization wrapper expects output location as dir
+      dlmuse_vol_harmonized: ${STUDY}/DLMUSE_vol_harmonized
+  - id: run_nichart_dlwmls
+    tool: nichart_dlwmls_v2 # MUST CORRESPOND EXACTLY to a tool in resources/tools dir
+    inputs:
+      t1_img: ${STUDY}/t1
+      fl_img: ${STUDY}/fl
+      dlmuse_seg: ${STUDY}/DLMUSE_seg
+
+    outputs:
+      nichart_dlwmls_out: ${STUDY}/NiChart_DLWMLS_out
+  - id: merge_feature_csvs
+    tool: merge_feature_csvs_by_mrid
+    inputs:
+      csv_1: ${STUDY}/DLMUSE_vol_harmonized/DLMUSE_Volumes.csv
+      csv_2: ${STUDY}/NiChart_DLWMLS_out/DLWMLS_DLMUSE_Segmented_Volumes.csv
+    outputs:
+      out_csv: ${STUDY}/merged_dlwmls_dlmuse.csv
+  - id: run_spare_cvm_hypertension
+    tool: spare_cvm_hypertension_harmonized # MUST CORRESPOND EXACTLY to a tool in resources/tools dir
+    inputs:
+      merged_dlwmls_dlmuse_csv: ${STUDY}/merged_dlwmls_dlmuse.csv
+      demog_csv: ${STUDY}/participants/participants.csv
+    outputs:
+      spare_cvm_csv: ${STUDY}/SPARE_CVM_csv/SPARE_HYPERTENSION.csv
+    

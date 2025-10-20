@@ -1,0 +1,37 @@
+name: spare_cvm
+description: This tool produces SPARE-CVM scores. 
+
+inputs:
+  merged_dlwmls_dlmuse_csv:
+    type: file
+  demog_csv:
+    type: file
+
+outputs:
+  spare_cvm_csv:
+    type: file
+
+
+mounts:
+  demog_csv:
+    path_in_container: /input/demographics.csv
+    mode: ro
+  merged_dlwmls_dlmuse_csv:
+    path_in_container: /input/merged_dlwmls_dlmuse.csv
+    mode: ro
+  spare_cvm_csv:
+    path_in_container: /output/SPARE_CVM.csv
+    mode: rw
+  
+parameters:
+  {} # Empty dictionary to signify no parameters
+
+resources: # Used to allocate jobs on the cloud. Please be diligent.
+  vcpus: 2
+  memory: 8000 # Amount must be in MiB, see https://docs.aws.amazon.com/batch/latest/APIReference/API_ResourceRequirement.html
+  gpus: 0
+
+container:
+  image: cbica/nichart_spare_score:0.0.2
+  command: "-i {merged_dlwmls_dlmuse_csv} -demog {demog_csv} -t CL -m /spare_score/Models/withDLWMLS/SPARE-HYPERTENSION-RAW-linear_fast-HT-BC.joblib -o {spare_cvm_csv}"
+

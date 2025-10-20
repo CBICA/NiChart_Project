@@ -1,8 +1,13 @@
 Name,Label
 DLMUSE,dlmuse
 DLWMLS,dlwmls
+DLMUSE-DLWMLS,dlmuse-dlwmls
 SPARE-AD,spare-ad
 SPARE-BA,spare-ba
+SPARE-Smoking,spare-smoking
+SPARE-Hypertension,spare-hypertension
+SPARE-Obesity,spare-obesity
+SPARE-Diabetes,spare-diabetes
 SPARE-BA-Image,spare-ba-image
 SurrealGAN,surrealgan
 CCL-NMF,cclnmf
