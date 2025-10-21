@@ -526,16 +526,17 @@ def render(
     st.dataframe(table_rows, use_container_width=True)
 
     # Runtime choice
-    runtime = st.selectbox(
-        "Container runtime",
-        options=["docker", "apptainer", "singularity"],
-        index=["docker", "apptainer", "singularity"].index(runtime_default),
-        help="Used to preview the correct flags/env for your jobs."
-    )
+    runtime = 'docker' # Hardcoded for now
+    #runtime = st.selectbox(
+    #    "Container runtime",
+    #    options=["docker", "apptainer", "singularity"],
+    #    index=["docker", "apptainer", "singularity"].index(runtime_default),
+    #    help="Used to preview the correct flags/env for your jobs."
+    #)
 
     # Build selection options
     opts = ["auto"]
-    display = ["Auto (prefer NVIDIA, else AMD, else first)"]
+    display = ["Automatically decide"]
     for d in devices:
         val = _make_selector_value(d)
         opts.append(val)
@@ -584,30 +585,30 @@ def render(
     # Save button (explicit to avoid overwriting on every rerun)
     if st.button("Save GPU Preference"):
         save_selection(settings_path, selection_payload)
-        st.success(f"Saved to { _settings_path(settings_path) }")
+        st.success(f"Saved!")
 
     # Preview container args/env
-    extra_args, extra_env = build_container_gpu_selection(chosen, runtime=runtime)
+    #extra_args, extra_env = build_container_gpu_selection(chosen, runtime=runtime)
 
-    st.subheader("Container launch preview")
-    st.code(f"Runtime: {runtime}\nExtra args: {extra_args}\nExtra env:  {extra_env}", language="bash")
+    #st.subheader("Container launch preview")
+    #st.code(f"Runtime: {runtime}\nExtra args: {extra_args}\nExtra env:  {extra_env}", language="bash")
 
-    if runtime == "docker":
-        # Quick preview command (illustrative)
-        cmd = ["docker", "run"] + extra_args
-        for k, v in extra_env.items():
-            cmd += ["-e", f"{k}={v}"]
-        cmd += ["<image>", "python", "-c", "'print(123)'"]
-        st.caption("Example:")
-        st.code(" ".join(cmd), language="bash")
-    else:
-        # Apptainer/Singularity preview
-        env_parts = []
-        for k, v in extra_env.items():
-            env_parts += ["--env", f"{k}={v}"]
-        cmd = ["apptainer" if runtime == "apptainer" else "singularity", "exec"] + env_parts + extra_args + ["image.sif", "python", "-c", "'print(123)'"]
-        st.caption("Example:")
-        st.code(" ".join(cmd), language="bash")
+    #if runtime == "docker":
+    #    # Quick preview command (illustrative)
+    #    cmd = ["docker", "run"] + extra_args
+    #    for k, v in extra_env.items():
+    #        cmd += ["-e", f"{k}={v}"]
+    #    cmd += ["<image>", "python", "-c", "'print(123)'"]
+    #    st.caption("Example:")
+    #    st.code(" ".join(cmd), language="bash")
+    #else:
+    #    # Apptainer/Singularity preview
+    #    env_parts = []
+    #    for k, v in extra_env.items():
+    #        env_parts += ["--env", f"{k}={v}"]
+    #    cmd = ["apptainer" if runtime == "apptainer" else "singularity", "exec"] + env_parts + extra_args + ["image.sif", "python", "-c", "'print(123)'"]
+    #    st.caption("Example:")
+    #    st.code(" ".join(cmd), language="bash")
 
 
 # ---------- Convenience API for the rest of your app ----------
