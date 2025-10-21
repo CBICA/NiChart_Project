@@ -1,7 +1,3 @@
-# gpu_selector_widget.py
-# Run with: streamlit run gpu_selector_widget.py
-# Or import gpu_selector_widget.render(...) inside your app.
-
 import json
 import os
 from pathlib import Path
@@ -511,15 +507,15 @@ def render(
     table_rows = []
     for d in devices:
         table_rows.append({
-            "Label": _row_label(d),
+            #"Label": _row_label(d),
             "Vendor": d.get("vendor"),
             "Name": d.get("name"),
-            "Index": d.get("index"),
+            #"Index": d.get("index"),
             "UUID": d.get("uuid"),
-            "Bus": d.get("pci_bus_id"),
-            "Mem MB (tot)": d.get("memory_total"),
-            "Mem MB (free)": d.get("memory_free"),
-            "CC": d.get("compute_capability"),
+            #"Bus": d.get("pci_bus_id"),
+            "Mem MB (total)": d.get("memory_total"),
+            #"Mem MB (free)": d.get("memory_free"),
+            #"CC": d.get("compute_capability"),
             "Driver": d.get("driver_version"),
             "CUDA": d.get("cuda_version"),
         })
