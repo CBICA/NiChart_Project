@@ -14,6 +14,7 @@ import utils.utils_pollstatus as ps
 import time
 import re
 from collections import defaultdict, deque
+import utils_gpu as utilgpu
 
 DEFAULT_TOOL_DEFINITION_PATH = Path(__file__).parent.parent.parent.parent / "resources/tools/"
 DEFAULT_PIPELINE_DEFINITION_PATH = Path(__file__).parent.parent.parent.parent / "resources/pipelines"
@@ -122,7 +123,15 @@ class ToolSpec(BaseModel):
         # Construct any default docker args here
         global_docker_args = ['--ipc=host', '--detach']
         if self.resources.gpus != 0:
-            global_docker_args.append('--gpus all')
+            extra_args, extra_env, chosen = utilgpu.load_container_selection(st.session_state.paths['out_dir'])
+            if not chosen: # Fallback
+                global_docker_args.append('--gpus all')
+            else:
+                global_docker_args.extend(extra_args)
+                for k, v in extra_env.items():
+                    global_docker_args.append('-e')
+                    global_docker_args.append(f"{k}={v}")
+            #
 
         # Apply substitution for command template
         command_template = self.container["command"]
