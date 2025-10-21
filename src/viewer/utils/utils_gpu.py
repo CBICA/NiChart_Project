@@ -631,4 +631,4 @@ def load_container_selection(
 
 
 def panel_select_gpu():
-    render(st.session_state['out_dir'])
+    render(st.session_state.paths['out_dir'])
