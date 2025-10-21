@@ -79,6 +79,7 @@ tab = sac.tabs(
         sac.TabsItem(label='Plot Colors'),
         sac.TabsItem(label='Misc'),
         sac.TabsItem(label='Manage Containers'),
+        sac.TabsItem(label='GPU'),
     ],
     size='lg',
     align='left'
