@@ -32,6 +32,6 @@ resources: # Used to allocate jobs on the cloud. Please be diligent.
   gpus: 0
 
 container:
-  image: cbica/nichart_spare_score:0.0.2
+  image: cbica/nichart_spare_score:0.0.3
   command: "-i {merged_dlwmls_dlmuse_csv} -demog {demog_csv} -t CL -m /spare_score/Models/withDLWMLS/SPARE-DIABETES-Harmonized-linear_fast-HT-BC.joblib -o {spare_cvm_csv}"
 
