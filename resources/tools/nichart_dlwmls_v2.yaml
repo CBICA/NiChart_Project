@@ -41,5 +41,5 @@ resources: # Used to allocate jobs on the cloud. Please be diligent.
   gpus: 1
 
 container:
-  image: cbica/nichart_dlwmls:0.0.2
-  command: --fl_dir {fl_img} --t1_dir {t1_img} --dlmuse_dir {dlmuse_seg} --out_dir {nichart_dlwmls_out} --device cuda
+  image: cbica/nichart_dlwmls:0.0.3
+  command: --fl_dir {fl_img} --t1_dir {t1_img} --dlmuse_dir {dlmuse_seg} --out_dir {nichart_dlwmls_out} --device cuda --named-headers

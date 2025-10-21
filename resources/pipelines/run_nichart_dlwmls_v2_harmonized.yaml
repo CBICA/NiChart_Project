@@ -1,6 +1,6 @@
-pipeline_name: SPARE Scores - Diabetes (Unharmonized)
+pipeline_name: DLWMLS Deep Learning White Matter Lesion Segmentation
 description: |
-  Pipeline which uses DLMUSE and DLWMLS to produce SPARE classification of Diabetes.
+  White matter lesion segmentation pipeline starting from FLAIR-weighted and T1-weighted brain scans.
 
 steps:
   - id: run_dlmuse
@@ -17,6 +17,7 @@ steps:
       covariate_csv: ${STUDY}/participants/participants.csv
     outputs: # Harmonization wrapper expects output location as dir
       dlmuse_vol_harmonized: ${STUDY}/DLMUSE_vol_harmonized
+  
   - id: run_nichart_dlwmls
     tool: nichart_dlwmls_v2 # MUST CORRESPOND EXACTLY to a tool in resources/tools dir
     inputs:
@@ -26,6 +27,7 @@ steps:
 
     outputs:
       nichart_dlwmls_out: ${STUDY}/NiChart_DLWMLS_out
+
   - id: merge_feature_csvs
     tool: merge_feature_csvs_by_mrid
     inputs:
@@ -33,11 +35,3 @@ steps:
       csv_2: ${STUDY}/NiChart_DLWMLS_out/DLWMLS_DLMUSE_Segmented_Volumes.csv
     outputs:
       out_csv: ${STUDY}/merged_dlwmls_dlmuse_harmonized.csv
-  - id: run_spare_cvm_diabetes
-    tool: spare_cvm_diabetes_harmonized # MUST CORRESPOND EXACTLY to a tool in resources/tools dir
-    inputs:
-      merged_dlwmls_dlmuse_csv: ${STUDY}/merged_dlwmls_dlmuse_harmonized.csv
-      demog_csv: ${STUDY}/participants/participants.csv
-    outputs:
-      spare_cvm_csv: ${STUDY}/SPARE_CVM_csv/SPARE_DIABETES.csv
-    

@@ -20,3 +20,11 @@ steps:
 
     outputs:
       nichart_dlwmls_out: ${STUDY}/NiChart_DLWMLS_out
+
+  - id: merge_feature_csvs
+    tool: merge_feature_csvs_by_mrid
+    inputs:
+      csv_1: ${STUDY}/DLMUSE_vol/DLMUSE_Volumes.csv
+      csv_2: ${STUDY}/NiChart_DLWMLS_out/DLWMLS_DLMUSE_Segmented_Volumes.csv
+    outputs:
+      out_csv: ${STUDY}/merged_dlwmls_dlmuse.csv

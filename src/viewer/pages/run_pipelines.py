@@ -106,7 +106,7 @@ def panel_run_pipeline():
     sel_method = st.session_state.sel_pipeline
     st.success(f'Selected pipeline: {sel_method}')
     harmonize = False
-    not_harmonizable = ['cclnmf', 'dlwmls', 'spare-ba-image', 'surrealgan']
+    not_harmonizable = ['cclnmf', 'dlwmls', 'dlmuse-dlwmls', 'spare-ba-image', 'surrealgan']
     if sel_method not in not_harmonizable:
         harmonize = st.checkbox("Harmonize to reference data? (Requires >= 30 scans)")
     ## TODO: Retrieve dynamically/match between front end and toolloader code
@@ -122,6 +122,11 @@ def panel_run_pipeline():
         'surrealgan': 'run_predcrd_surrealgan',
         'synthseg': None,
         'cclnmf': 'run_cclnmf',
+        'dlmuse-dlwmls': 'run_nichart_dlwmls_v2',
+        'spare-smoking': 'run_spare_cvm_smoking',
+        'spare-hypertension': 'run_spare_cvm_hypertension',
+        'spare-obesity': 'rum_spare_cvm_obesity',
+        'spare_diabetes': 'run_spare_cvm_diabetes',
         ## Add additional lines here ({sel_pipeline value} : {name of pipeline yaml} )
     }
     if harmonize:
@@ -135,6 +140,11 @@ def panel_run_pipeline():
             'surrealgan': 'run_predcrd_surrealgan',
             'synthseg': None,
             'cclnmf': 'run_cclnmf',
+            'dlmuse-dlwmls': 'run_nichart_dlwmls_v2_harmonized',
+            'spare-smoking': 'run_spare_cvm_smoking_harmonized',
+            'spare-hypertension': 'run_spare_cvm_hypertension_harmonized',
+            'spare-obesity': 'rum_spare_cvm_obesity_harmonized',
+            'spare_diabetes': 'run_spare_cvm_diabetes_harmonized',
             ## Add additional lines here ({sel_pipeline value} : {name of pipeline yaml} )
         }
 

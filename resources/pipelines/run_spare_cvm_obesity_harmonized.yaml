@@ -32,11 +32,11 @@ steps:
       csv_1: ${STUDY}/DLMUSE_vol_harmonized/DLMUSE_Volumes.csv
       csv_2: ${STUDY}/NiChart_DLWMLS_out/DLWMLS_DLMUSE_Segmented_Volumes.csv
     outputs:
-      out_csv: ${STUDY}/merged_dlwmls_dlmuse.csv
+      out_csv: ${STUDY}/merged_dlwmls_dlmuse_harmonized.csv
   - id: run_spare_cvm_obesity
     tool: spare_cvm_obesity_harmonized # MUST CORRESPOND EXACTLY to a tool in resources/tools dir
     inputs:
-      merged_dlwmls_dlmuse_csv: ${STUDY}/merged_dlwmls_dlmuse.csv
+      merged_dlwmls_dlmuse_csv: ${STUDY}/merged_dlwmls_dlmuse_harmonized.csv
       demog_csv: ${STUDY}/participants/participants.csv
     outputs:
       spare_cvm_csv: ${STUDY}/SPARE_CVM_csv/SPARE_OBESITY.csv
