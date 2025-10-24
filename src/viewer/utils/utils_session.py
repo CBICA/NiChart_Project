@@ -85,6 +85,8 @@ def init_session_vars():
     # st.session_state.mode = 'release'
     st.session_state.mode = 'debug'
 
+    st.session_state.skip_survey = True
+
     st.session_state.sel_add_button = None
 
     #st.session_state.project = 'nichart_project'
