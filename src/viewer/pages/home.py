@@ -46,33 +46,33 @@ st.markdown(
 
 st.markdown('<p class="centered-text">Welcome to NiChart Project</p>', unsafe_allow_html=True)
 
-sel_opt = sac.segmented(
-    items=[
-        sac.SegmentedItem(label='About NiChart'),
-        sac.SegmentedItem(label='Single-Subject MRI Data'),
-        sac.SegmentedItem(label='Multi-Subject MRI Dataset'),
-        sac.SegmentedItem(label='No MRI/View Results'),
-    ], label='', align='center', size='md', radius='md', color='indigo', divider=True
-) 
+col1, col2 = st.columns([2, 1])
 
+with col1:
+    sel = sac.segmented(
+        items=[
+            sac.SegmentedItem(label='About NiChart'),
+            sac.SegmentedItem(label='Single-Subject MRI Data'),
+            sac.SegmentedItem(label='Multi-Subject MRI Dataset'),
+            sac.SegmentedItem(label='No MRI/View Results'),
+        ], label='', align='right', size='md', radius='md', color='indigo', divider=True
+    ) 
 
-sel_but = sac.buttons([
-    sac.ButtonsItem(label='Go'),
-], label='', align='center', index=None)
+with col2:
 
-if sel_but == 'Go':
+    if st.button('Go'):
 
-    print(f'Selected page {sel_opt}')
+        print(f'Selected page {sel}')
 
-    if sel_opt == 'About NiChart':
-        st.switch_page("pages/info.py")
+        if sel == 'About NiChart':
+            st.switch_page("pages/info.py")
 
-    if sel_opt == 'Single Subject MRI':
-        st.switch_page("pages/single_subject.py")
+        if sel == 'Single Subject MRI':
+            st.switch_page("pages/single_subject.py")
 
-    if sel_opt == 'Multi-Subject MRI Dataset':
-        st.switch_page("pages/multi_subject.py")
+        if sel == 'Multi-Subject MRI Dataset':
+            st.switch_page("pages/multi_subject.py")
 
-    if sel_opt == 'No MRI/View Results':
-        st.switch_page("pages/no_user_mri.py")
+        if sel == 'No MRI/View Results':
+            st.switch_page("pages/no_user_mri.py")
 
