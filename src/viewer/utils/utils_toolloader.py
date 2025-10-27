@@ -633,11 +633,14 @@ def should_skip_step(metadata_path: Path,
             if new_output_path and new_output_path != prev_output_path:
                 src = Path(prev_output_path)
                 dst = Path(new_output_path)
-                if src.is_dir():
-                    shutil.copytree(src, dst, dirs_exist_ok=True)
-                else:
-                    dst.parent.mkdir(parents=True, exist_ok=True)
-                    shutil.copy2(src, dst)
+                try:
+                    if src.is_dir():
+                        shutil.copytree(src, dst, dirs_exist_ok=True)
+                    else:
+                        dst.parent.mkdir(parents=True, exist_ok=True)
+                        shutil.copy2(src, dst)
+                except Exception as e:
+                    return False
         return True
     return False
 
