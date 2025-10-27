@@ -35,4 +35,4 @@ steps:
       csv_1: ${STUDY}/DLMUSE_vol_harmonized/DLMUSE_Volumes.csv
       csv_2: ${STUDY}/NiChart_DLWMLS_out/DLWMLS_DLMUSE_Segmented_Volumes.csv
     outputs:
-      out_csv: ${STUDY}/merged_dlwmls_dlmuse_harmonized.csv
+      out_csv: ${STUDY}/merged_dlwmls_dlmuse_harmonized/out_csv.csv
