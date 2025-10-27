@@ -8,6 +8,8 @@ SPARE-Smoking,spare-smoking
 SPARE-Hypertension,spare-hypertension
 SPARE-Obesity,spare-obesity
 SPARE-Diabetes,spare-diabetes
+SPARE-Depression,spare-depression
+SPARE-Psychosis,spare-psychosis
 SPARE-BA-Image,spare-ba-image
 SurrealGAN,surrealgan
 CCL-NMF,cclnmf
