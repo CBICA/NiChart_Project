@@ -166,6 +166,8 @@ class ToolSpec(BaseModel):
                 parent_host_path = Path(host_path).parent.resolve()
                 parent_container_path = Path(config.path_in_container).parent
                 mount_args.append(f"-v {parent_host_path}:{parent_container_path}:{mode}")
+                # Try file-specific mount trick after mounting hosts
+                mount_args.append(f"--mount type=bind,source={host_path},target={config.path_in_container}")
             elif is_ifile:
                 mount_args.append(f"--mount type=bind,source={host_path},target={config.path_in_container}")
             else:
