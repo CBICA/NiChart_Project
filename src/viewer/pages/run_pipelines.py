@@ -129,6 +129,7 @@ def panel_run_pipeline():
         'spare-diabetes': 'run_spare_cvm_diabetes',
         'spare-depression': 'run_spare_depression',
         'spare-psychosis': 'run_spare_psychosis',
+        'ravens': 'run_nichart_ravens',
         ## Add additional lines here ({sel_pipeline value} : {name of pipeline yaml} )
     }
     if harmonize:
@@ -149,6 +150,7 @@ def panel_run_pipeline():
             'spare-diabetes': 'run_spare_cvm_diabetes_harmonized',
             'spare-depression': None,
             'spare-psychosis': None,
+            'ravens': None,
             ## Add additional lines here ({sel_pipeline value} : {name of pipeline yaml} )
         }
 
