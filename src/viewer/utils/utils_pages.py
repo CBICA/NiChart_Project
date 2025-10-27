@@ -41,7 +41,6 @@ def set_global_style():
     )
 
 def show_menu() -> None:
-    st.info("NiChart is supported by grants contingent on user feedback. Please take 2 minutes from your day to fill out our [current functionality feedback survey](https://forms.office.com/r/mM1kx1XsgS) and our [future directions survey](https://forms.office.com/r/acwgn2WCc4).")
     with st.sidebar:
         list_options = list(dict_menu.keys())
         if 'sel_menu' not in st.session_state:

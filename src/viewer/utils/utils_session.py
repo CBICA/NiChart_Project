@@ -20,48 +20,50 @@ def disp_selections():
     '''
     Show user selections
     '''
-    with st.sidebar:
-        sac.divider(label='Selections', icon = 'person', align='center', color='gray')
-        if st.session_state.project is not None:
-            st.markdown(f'`Project Name: {st.session_state.project}`')
-        if st.session_state.sel_pipeline is not None:
-            st.markdown(f'`Pipeline: {st.session_state.sel_pipeline}`')
+    #with st.sidebar:
+        #sac.divider(label='Selections', icon = 'person', align='center', color='gray')
+        #if st.session_state.project is not None:
+            #st.markdown(f'`Project Name: {st.session_state.project}`')
+        #if st.session_state.sel_pipeline is not None:
+            #st.markdown(f'`Pipeline: {st.session_state.sel_pipeline}`')
+    print('FIXME: This is bypassed for now ...')
     
 def disp_session_state():
     '''
     Show session state variables
     '''
-    if '_debug_flag_show' not in st.session_state:
-        st.session_state['_debug_flag_show'] = st.session_state['debug']['flag_show']
+    #if '_debug_flag_show' not in st.session_state:
+        #st.session_state['_debug_flag_show'] = st.session_state['debug']['flag_show']
 
-    def update_val():
-        st.session_state['debug']['flag_show'] = st.session_state['_debug_flag_show']
+    #def update_val():
+        #st.session_state['debug']['flag_show'] = st.session_state['_debug_flag_show']
 
-    with st.sidebar:
-        sac.divider(label='Debug', icon = 'gear',  align='center', color='gray')
-        st.checkbox(
-            'Show Session State',
-            key = '_debug_flag_show',
-            on_change = update_val
-        )
+    #with st.sidebar:
+        #sac.divider(label='Debug', icon = 'gear',  align='center', color='gray')
+        #st.checkbox(
+            #'Show Session State',
+            #key = '_debug_flag_show',
+            #on_change = update_val
+        #)
     
-    if st.session_state['debug']['flag_show']:
-        with st.container(border=True):
-            st.markdown('##### Session State:')
-            list_items = sorted([x for x in st.session_state.keys() if not x.startswith('_')])
-            st.pills(
-                "Select Session State Variable(s) to View",
-                list_items,
-                selection_mode="multi",
-                key='_debug_sel_vars',
-                default=st.session_state['debug']['sel_vars'],
-                label_visibility="collapsed",
-            )
-            st.session_state['debug']['sel_vars'] = st.session_state['_debug_sel_vars']
+    #if st.session_state['debug']['flag_show']:
+        #with st.container(border=True):
+            #st.markdown('##### Session State:')
+            #list_items = sorted([x for x in st.session_state.keys() if not x.startswith('_')])
+            #st.pills(
+                #"Select Session State Variable(s) to View",
+                #list_items,
+                #selection_mode="multi",
+                #key='_debug_sel_vars',
+                #default=st.session_state['debug']['sel_vars'],
+                #label_visibility="collapsed",
+            #)
+            #st.session_state['debug']['sel_vars'] = st.session_state['_debug_sel_vars']
 
-            for sel_var in st.session_state['debug']['sel_vars']:
-                st.markdown('➤ ' + sel_var + ':')
-                st.write(st.session_state[sel_var])
+            #for sel_var in st.session_state['debug']['sel_vars']:
+                #st.markdown('➤ ' + sel_var + ':')
+                #st.write(st.session_state[sel_var])
+    print('FIXME: This is bypassed for now ...')
 
 def init_project_folders():
     '''

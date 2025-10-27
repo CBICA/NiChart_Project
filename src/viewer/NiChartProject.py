@@ -5,10 +5,17 @@ import streamlit as st
 import utils.utils_pages as utilpg
 import utils.utils_session as utilss
 
+from PIL import Image
+from st_pages import add_page_title, get_nav_from_toml
+
+nicon = Image.open("../resources/nichart1.png")
+
 # Init session state
 utilss.init_session_state()
 
 # utilpg.config_page()
+
+print("--- RERUN: HOME PAGE STARTING ---") 
 
 # Read user arg to select cloud / desktop
 parser = argparse.ArgumentParser(description="NiChart Application Server")
@@ -39,5 +46,24 @@ if args.cloud:
     st.session_state.app_type = "CLOUD"
     st.session_state.forced_cloud = True
 
-# Initialize session state variables
-st.switch_page("pages/home.py")
+pages = {
+    "Home": [
+        st.Page("pages/home.py", title="Home"),
+    ],
+    "Info": [
+        st.Page("pages/info.py", title="Info"),
+    ],
+    "Modes": [
+        st.Page("pages/single_subject.py", title="Single Subject"),
+        st.Page("pages/multi_subject.py", title="Multi Subject"),
+        st.Page("pages/no_user_mri.py", title="No User MRI"),
+    ],    
+    "Pipelines": [
+        st.Page("pages/sel_pipelines.py", title="Select Pipelines"),
+        st.Page("pages/run_pipelines.py", title="Run Pipelines"),
+    ],
+}
+
+pg = st.navigation(pages, position="top")
+pg.run()
+
