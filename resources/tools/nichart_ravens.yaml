@@ -23,6 +23,9 @@ mounts:
   dlmuse_seg:
     path_in_container: /input/dlmuse_seg
     mode: ro
+  demog_csv:
+    path_in_container: /input/demog.csv
+    mode: ro
   ravens_out:
     path_in_container: /output
     mode: rw
