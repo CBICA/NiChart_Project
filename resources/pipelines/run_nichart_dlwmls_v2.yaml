@@ -17,6 +17,7 @@ steps:
       t1_img: ${STUDY}/t1
       fl_img: ${STUDY}/fl
       dlmuse_seg: ${STUDY}/DLMUSE_seg
+      demog_csv: ${STUDY}/participants/participants.csv
 
     outputs:
       nichart_dlwmls_out: ${STUDY}/NiChart_DLWMLS_out
