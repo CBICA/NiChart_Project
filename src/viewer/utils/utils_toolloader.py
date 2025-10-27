@@ -14,7 +14,7 @@ import utils.utils_pollstatus as ps
 import time
 import re
 from collections import defaultdict, deque
-import utils_gpu as utilgpu
+from . import utils_gpu as utilgpu
 
 DEFAULT_TOOL_DEFINITION_PATH = Path(__file__).parent.parent.parent.parent / "resources/tools/"
 DEFAULT_PIPELINE_DEFINITION_PATH = Path(__file__).parent.parent.parent.parent / "resources/pipelines"
