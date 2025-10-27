@@ -742,7 +742,6 @@ def run_pipeline(pipeline_id: str,
         tool = load_tool_spec_from_yaml(tool_yaml)
 
         # Resolve input/output paths with variable substitution
-        step_outputs = step["outputs"]
         resolved_inputs = resolve_vars(step.get("inputs", {}), global_vars, step_outputs)
         resolved_outputs = resolve_vars(step.get("outputs", {}), global_vars, step_outputs)
         resolved_total_mounts = stringify_mounts({**resolved_inputs, **resolved_outputs})
