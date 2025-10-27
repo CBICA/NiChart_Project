@@ -1,0 +1,41 @@
+name: nichart_ravens
+description: This tool uses T1 scans and DLMUSE segmentations to produce abnormality maps via RAVENS.
+
+dependencies: # Names of dependencies. To make another tool's output a dependency, place its name in this list
+  - t1_img
+
+inputs:
+  t1_img:
+    type: directory
+  dlmuse_seg:
+    type: directory
+  demog_csv:
+    type: file
+
+outputs:
+  ravens_out:
+    type: directory
+  
+mounts:
+  t1_img:
+    path_in_container: /input/t1
+    mode: ro
+  dlmuse_seg:
+    path_in_container: /input/dlmuse_seg
+    mode: ro
+  ravens_out:
+    path_in_container: /output
+    mode: rw
+
+parameters:
+  {} # Empty dictionary to signify no parameters
+
+resources: # Used to allocate jobs on the cloud. Please be diligent.
+  vcpus: 4
+  memory: 28000 # Amount must be in MiB, see https://docs.aws.amazon.com/batch/latest/APIReference/API_ResourceRequirement.html
+  gpus: 0 
+
+container:
+  image: cbica/nichart_ravens:0.0.1
+  command: --demog-csv {demog_csv} --t1-dir {t1_img} --dlmuse-dir {dlmuse_seg} --output-dir {ravens_out} --reg-mode test --n-jobs -1
+

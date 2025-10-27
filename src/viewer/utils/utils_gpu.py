@@ -515,7 +515,7 @@ def render(
             #"Bus": d.get("pci_bus_id"),
             "Mem MB (total)": d.get("memory_total"),
             #"Mem MB (free)": d.get("memory_free"),
-            #"CC": d.get("compute_capability"),
+            "CC": d.get("compute_capability"),
             "Driver": d.get("driver_version"),
             "CUDA": d.get("cuda_version"),
         })
