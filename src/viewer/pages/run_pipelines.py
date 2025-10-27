@@ -106,8 +106,8 @@ def panel_run_pipeline():
     sel_method = st.session_state.sel_pipeline
     st.success(f'Selected pipeline: {sel_method}')
     harmonize = False
-    not_harmonizable = ['cclnmf', 'dlwmls', 'dlmuse-dlwmls', 'spare-ba-image', 'surrealgan']
-    if sel_method not in not_harmonizable:
+    harmonizable = ['spare-ad', 'spare-ba', 'dlmuse', 'dlmuse-dlwmls', 'spare-smoking', 'spare-hypertension', 'spare-obesity', 'spare-diabetes']
+    if sel_method in harmonizable:
         harmonize = st.checkbox("Harmonize to reference data? (Requires >= 30 scans)")
     ## TODO: Retrieve dynamically/match between front end and toolloader code
     ## This a nice and simple placeholder for now
@@ -125,8 +125,10 @@ def panel_run_pipeline():
         'dlmuse-dlwmls': 'run_nichart_dlwmls_v2',
         'spare-smoking': 'run_spare_cvm_smoking',
         'spare-hypertension': 'run_spare_cvm_hypertension',
-        'spare-obesity': 'rum_spare_cvm_obesity',
-        'spare_diabetes': 'run_spare_cvm_diabetes',
+        'spare-obesity': 'run_spare_cvm_obesity',
+        'spare-diabetes': 'run_spare_cvm_diabetes',
+        'spare-depression': 'run_spare_depression',
+        'spare-psychosis': 'run_spare_psychosis',
         ## Add additional lines here ({sel_pipeline value} : {name of pipeline yaml} )
     }
     if harmonize:
@@ -139,12 +141,14 @@ def panel_run_pipeline():
             'spare-cvm': None,
             'surrealgan': 'run_predcrd_surrealgan',
             'synthseg': None,
-            'cclnmf': 'run_cclnmf',
+            'cclnmf':  None,
             'dlmuse-dlwmls': 'run_nichart_dlwmls_v2_harmonized',
             'spare-smoking': 'run_spare_cvm_smoking_harmonized',
             'spare-hypertension': 'run_spare_cvm_hypertension_harmonized',
-            'spare-obesity': 'rum_spare_cvm_obesity_harmonized',
-            'spare_diabetes': 'run_spare_cvm_diabetes_harmonized',
+            'spare-obesity': 'run_spare_cvm_obesity_harmonized',
+            'spare-diabetes': 'run_spare_cvm_diabetes_harmonized',
+            'spare-depression': None,
+            'spare-psychosis': None,
             ## Add additional lines here ({sel_pipeline value} : {name of pipeline yaml} )
         }
 
