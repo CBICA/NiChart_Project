@@ -33,5 +33,5 @@ resources: # Used to allocate jobs on the cloud. Please be diligent.
 
 container:
   image: cbica/nichart_spare_score:0.0.3
-  command: "-i {merged_dlwmls_dlmuse_csv} -demog {demog_csv} -t CL -m /spare_score/Models/withDLWMLS/SPARE-HYPERTENSION-RAW-linear_fast-HT-CB.joblib -o {spare_cvm_csv}"
+  command: "-i {merged_dlwmls_dlmuse_csv} -demog {demog_csv} -t CL -m /spare_score/Models/final_models/MDD_model_new.joblib -o {spare_cvm_csv}"
 
