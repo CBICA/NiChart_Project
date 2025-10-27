@@ -1,6 +1,6 @@
-pipeline_name: SPARE Scores - Diabetes (Unharmonized)
+pipeline_name: SPARE Scores - Psychosis (Unharmonized)
 description: |
-  Pipeline which uses DLMUSE and DLWMLS to produce SPARE classification of Diabetes.
+  Pipeline which uses DLMUSE regional volumes to produce SPARE classification of Schizophrenia/Psychosis.
 
 steps:
   - id: run_dlmuse
@@ -28,11 +28,11 @@ steps:
       csv_2: ${STUDY}/NiChart_DLWMLS_out/DLWMLS_DLMUSE_Segmented_Volumes.csv
     outputs:
       out_csv: ${STUDY}/merged_dlmuse_dlwmls/csv_out.csv
-  - id: run_spare_cvm_diabetes
-    tool: spare_cvm_diabetes # MUST CORRESPOND EXACTLY to a tool in resources/tools dir
+  - id: run_spare_psychosis
+    tool: spare_psychosis # MUST CORRESPOND EXACTLY to a tool in resources/tools dir
     inputs:
       merged_dlwmls_dlmuse_csv: ${STUDY}/merged_dlmuse_dlwmls/csv_out.csv
       demog_csv: ${STUDY}/participants/participants.csv
     outputs:
-      spare_cvm_csv: ${STUDY}/SPARE_DIABETES_csv/SPARE_DIABETES.csv
+      spare_cvm_csv: ${STUDY}/SPARE_PSYCHOSIS_csv/SPARE_PSYCHOSIS.csv
     

@@ -20,7 +20,7 @@ mounts:
     path_in_container: /input/merged_dlwmls_dlmuse.csv
     mode: ro
   spare_cvm_csv:
-    path_in_container: /output/SPARE_CVM.csv
+    path_in_container: /output/SPARE_HYPERTENSION.csv
     mode: rw
   
 parameters:

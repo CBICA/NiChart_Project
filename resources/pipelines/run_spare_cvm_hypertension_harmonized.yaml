@@ -40,5 +40,5 @@ steps:
       merged_dlwmls_dlmuse_csv: ${STUDY}/merged_dlwmls_dlmuse_harmonized/out_csv.csv
       demog_csv: ${STUDY}/participants/participants.csv
     outputs:
-      spare_cvm_csv: ${STUDY}/SPARE_CVM_csv/SPARE_HYPERTENSION.csv
+      spare_cvm_csv: ${STUDY}/SPARE_HYPERTENSION_csv/SPARE_HYPERTENSION.csv
     
