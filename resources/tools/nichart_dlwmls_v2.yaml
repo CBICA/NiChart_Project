@@ -47,4 +47,4 @@ resources: # Used to allocate jobs on the cloud. Please be diligent.
 
 container:
   image: cbica/nichart_dlwmls:0.0.3
-  command: --list {demog_csv} --fl_dir {fl_img} --t1_dir {t1_img} --dlmuse_dir {dlmuse_seg} --out_dir {nichart_dlwmls_out} --device cuda --named-headers
+  command: --list {demog_csv} --fl_dir {fl_img} --t1_dir {t1_img} --dlmuse_dir {dlmuse_seg} --out_dir {nichart_dlwmls_out} --device cuda --named-headers --dlmuse_suff _T1_DLMUSE.nii.gz
