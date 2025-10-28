@@ -20,6 +20,9 @@ from utils.utils_logger import setup_logger
 
 import streamlit_antd_components as sac
 
+utilpg.config_page()
+utilpg.set_global_style()
+
 def view_overview():
     with st.container(border=True):
         st.markdown(
@@ -99,7 +102,37 @@ def view_installation():
             , unsafe_allow_html=True
         )
 
-view_quick_start()
+st.markdown(
+    """
+    ### NiChart: Neuroimaging Chart
+    """
+)
+
+
+sel = sac.tabs([
+    sac.TabsItem(label='Overview'),
+    sac.TabsItem(label='Quick Start'),
+    sac.TabsItem(label='Links'),
+    sac.TabsItem(label='Installation'),
+    sac.TabsItem(label="Start Using NiChart"),
+], align='center',  size='xl', color='grape')
+
+if sel == 'Overview':
+    view_overview()
     
+if sel == 'Quick Start':
+    view_quick_start()
+
+if sel == 'Links':
+    view_links()
+    
+if sel == 'Installation':
+    view_installation()
+
+if sel == 'Start Using NiChart':
+    st.switch_page("pages/nichart_home.py")
+    
+    
+
 
 

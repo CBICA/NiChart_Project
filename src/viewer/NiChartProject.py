@@ -13,7 +13,7 @@ nicon = Image.open("../resources/nichart1.png")
 # Init session state
 utilss.init_session_state()
 
-# utilpg.config_page()
+utilpg.config_page()
 
 print("--- RERUN: HOME PAGE STARTING ---") 
 
@@ -48,15 +48,13 @@ if args.cloud:
 
 pages = {
     "Home": [
-        st.Page("pages/home.py", title="Home"),
-    ],
-    "Info": [
-        st.Page("pages/info.py", title="Info"),
+        st.Page("pages/nichart_home.py", title="Home"),
+        st.Page("pages/nichart_info.py", title="Info"),
     ],
     "Modes": [
-        st.Page("pages/single_subject.py", title="Single Subject"),
-        st.Page("pages/multi_subject.py", title="Multi Subject"),
-        st.Page("pages/no_user_mri.py", title="No User MRI"),
+        st.Page("pages/nichart_single_subject.py", title="Single Subject"),
+        st.Page("pages/nichart_multi_subject.py", title="Multi Subject"),
+        st.Page("pages/nichart_ref_data.py", title="Reference Data"),
     ],    
     "Pipelines": [
         st.Page("pages/sel_pipelines.py", title="Select Pipelines"),
