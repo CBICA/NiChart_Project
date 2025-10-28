@@ -28,17 +28,11 @@ if 'instantiated' not in st.session_state or not st.session_state.instantiated:
 def view_overview():
     with st.container(border=True):
         st.markdown(
-            f'NiChart is a {utilmisc.styled_text('free, open-source framework')} built specifically for deriving {utilmisc.styled_text('machine learning biomarkers')} from {utilmisc.styled_text('MRI imaging data')}', unsafe_allow_html=True
-        )
-        st.image("../resources/nichart1.png", width=300)
-        st.markdown(
-            f'- NiChart platform offers tools for {utilmisc.styled_text('image processing')} and {utilmisc.styled_text('data analysis')}', unsafe_allow_html=True
-        )
-        st.markdown(
-            f'- Users can extract {utilmisc.styled_text('imaging phenotypes')} and {utilmisc.styled_text('machine learning (ML) indices')} of disease and aging', unsafe_allow_html=True
-        )
-        st.markdown(
-            f'- Pre-trained {utilmisc.styled_text('ML models')} allow users to quantify complex brain changes and compare results against {utilmisc.styled_text('normative and disease-specific reference ranges')}', unsafe_allow_html=True
+            '''
+            
+            - Welcome! This is where you can view neuroimaging chart values from the reference sample.
+            
+            '''
         )
 
 def upload_data():
@@ -53,11 +47,7 @@ def view_results():
 def download_results():
     st.info('Work in progress!')
 
-st.markdown(
-    """
-    ### NiChart Reference Distributions
-    """
-)
+st.markdown("<h5 style='text-align:center; color:#3a3a88;'>NiChart Reference Distributions\n\n</h1>", unsafe_allow_html=True)
 
 sel = sac.tabs([
     sac.TabsItem(label='Overview'),

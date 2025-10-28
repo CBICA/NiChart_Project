@@ -8,6 +8,10 @@ import utils.utils_misc as utilmisc
 import utils.utils_pages as utilpg
 import utils.utils_processes as utilprc
 import utils.utils_session as utilses
+import utils.utils_io as utilio
+import utils.utils_data_view as utildv
+from utils.utils_styles import inject_global_css 
+
 from streamlit_image_select import image_select
 import re
 from utils.utils_logger import setup_logger
@@ -16,6 +20,8 @@ import streamlit_antd_components as sac
 
 logger = setup_logger()
 logger.debug('Page: Select Pipelines')
+
+inject_global_css()
 
 # Page config should be called for each page
 utilpg.config_page()
@@ -28,21 +34,48 @@ if 'instantiated' not in st.session_state or not st.session_state.instantiated:
 def view_overview():
     with st.container(border=True):
         st.markdown(
-            f'NiChart is a {utilmisc.styled_text('free, open-source framework')} built specifically for deriving {utilmisc.styled_text('machine learning biomarkers')} from {utilmisc.styled_text('MRI imaging data')}', unsafe_allow_html=True
-        )
-        st.image("../resources/nichart1.png", width=300)
-        st.markdown(
-            f'- NiChart platform offers tools for {utilmisc.styled_text('image processing')} and {utilmisc.styled_text('data analysis')}', unsafe_allow_html=True
-        )
-        st.markdown(
-            f'- Users can extract {utilmisc.styled_text('imaging phenotypes')} and {utilmisc.styled_text('machine learning (ML) indices')} of disease and aging', unsafe_allow_html=True
-        )
-        st.markdown(
-            f'- Pre-trained {utilmisc.styled_text('ML models')} allow users to quantify complex brain changes and compare results against {utilmisc.styled_text('normative and disease-specific reference ranges')}', unsafe_allow_html=True
+            '''
+            
+            - Welcome! This is where you can upload and process a single subject's MRI scan (DICOM or NIfTI format). We'll generate their unique neuroimaging chart values.
+            
+            - Image analysis pipelines require a set of files to be used as input, like the mri scans of the subject (e.g. T1, FL) or a csv file with basic demographics (Age, Sex, etc). For specifics of required data for each pipeline you can browse each pipeline in the pipelines tab and follow instructions in data upload tab.            
+            
+            ''', unsafe_allow_html=True
         )
 
 def upload_data():
-    st.info('Work in progress!')
+
+    if st.button('Select Project'):
+        out_dir = st.session_state.paths["out_dir"]
+        sel_project = utilio.panel_select_project(out_dir, st.session_state.project)
+        st.success(f'Project Name: {st.session_state.project}')
+        
+    with st.container(border=True):    
+        utilio.panel_load_data()
+        
+     
+    if st.button('View Project'):
+        in_dir = st.session_state.paths['project']
+        utildv.data_overview(in_dir)
+
+
+    if st.button('Delete Project'):
+        with st.container(border=True):
+            st.success(f'Project Name: {st.session_state.project}')
+            proj_dir = st.session_state.paths['project']
+            if st.button("Delete this project", help="This will permanently delete all data in this project and invalidate all associated caching."):
+                st.warning("Are you sure you want to delete all data associated with this project? This cannot be undone.")
+                if st.button("Confirm deletion"):
+                    shutil.rmtree(st.session_state.paths['project'])
+                    st.success(f"Project {st.session_state.project} was successfully deleted.")
+                    list_projects = utilio.get_subfolders(st.session_state.paths["out_dir"])
+                    if len(list_projects) > 0:
+                        sel_project = list_projects[0]
+                        utilss.update_project(sel_project)
+
+    # Show selections
+    #utilses.disp_selections()
+     
 
 def select_pipeline():
     st.info('Work in progress!')
@@ -53,11 +86,7 @@ def view_results():
 def download_results():
     st.info('Work in progress!')
 
-st.markdown(
-    """
-    ### Single Subject Analysis
-    """
-)
+st.markdown("<h5 style='text-align:center; color:#3a3a88;'>Single-Subject Analysis\n\n</h1>", unsafe_allow_html=True)
 
 sel = sac.tabs([
     sac.TabsItem(label='Overview'),

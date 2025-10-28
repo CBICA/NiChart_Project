@@ -17,6 +17,7 @@ from streamlit_image_select import image_select
 import logging
 from stqdm import stqdm
 from utils.utils_logger import setup_logger
+from utils.utils_styles import inject_global_css 
 
 import streamlit_antd_components as sac
 
@@ -25,23 +26,12 @@ from utils.nav import top_nav
 
 print("--- RERUN: HOME PAGE STARTING ---") 
 
+inject_global_css()
+
 # Page config should be called for each page
 utilpg.config_page()
 utilpg.set_global_style()
 
-# Inject custom CSS once
-st.markdown(
-    """
-    <style>
-    .centered-text {
-        text-align: center;
-        font-size: 80px;
-        color: #53AB23;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
 
 #st.markdown('<h1 class="centered-text">Welcome to NiChart Project</p>', unsafe_allow_html=True)
 st.markdown("<h2 style='text-align:center; color:#5e5fad;'>Welcome to NiChart Project\n\n</h1>", unsafe_allow_html=True)

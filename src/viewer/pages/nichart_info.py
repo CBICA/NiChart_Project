@@ -41,25 +41,23 @@ def view_overview():
 
 def view_quick_start():
     with st.container(border=True):
-        st.markdown(
-            f'###### Explore NiChart {utilmisc.styled_text('(No Data Upload Required)')}', unsafe_allow_html=True
-        )
-        st.markdown(
-            f'- Visualize distributions of imaging variables and biomarkers (pre-computed using NiChart reference data)', unsafe_allow_html=True
-        )
 
         st.markdown(
             '''
-            ###### Apply NiChart to Your Data
+            You can begin using NiChart by choosing an option on the Home page and following the guided steps:
             
-            - Select Your Pipeline
+            - **Analyze Single-Subject MRI Data**:
             
-            - Upload Your Data
+            Create a neuroimaging chart for an individual subject. Process their MRI scans to compute imaging features, apply pre-trained machine learning models to derive biomarkers, and visualize results against reference population distributions.
             
-            - Run pipeline
+            - **Process Multiple-Subject Dataset**: 
             
-            - View / Download Your Results
-            ''', unsafe_allow_html=True
+            Run the NiChart processing pipeline on a group or study dataset to generate imaging biomarkers and perform large-scale or comparative analyses.
+            
+            - **Explore NiChart**:
+            
+            Browse and visualize population-level distributions of precomputed imaging features and biomarkers from the NiChart reference dataset.
+            '''
         )
 
 def view_links():
@@ -102,11 +100,7 @@ def view_installation():
             , unsafe_allow_html=True
         )
 
-st.markdown(
-    """
-    ### NiChart: Neuroimaging Chart
-    """
-)
+st.markdown("<h5 style='text-align:center; color:#3a3a88;'>NiChart: Neuroimaging Chart\n\n</h1>", unsafe_allow_html=True)
 
 
 sel = sac.tabs([
