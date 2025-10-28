@@ -78,8 +78,42 @@ def upload_data():
      
 
 def select_pipeline():
-    st.info('Work in progress!')
+    '''
+    Select a pipeline and show overview
+    '''
+    with st.container(border=True):
 
+        pipelines = st.session_state.pipelines
+        sitems = []
+        colors = st.session_state.pipeline_colors
+        for i, ptmp in enumerate(pipelines.Name.tolist()):
+            sitems.append(
+                sac.ButtonsItem(
+                    label=ptmp, color = colors[i%len(colors)]
+                )
+            )
+        
+        sel_index = utilmisc.get_index_in_list(
+            pipelines.Name.tolist(), st.session_state.sel_pipeline
+        )
+        sel_pipeline = sac.buttons(
+            items=sitems,
+            size='lg',
+            radius='xl',
+            align='left',
+            index =  sel_index,
+            key = '_sel_pipeline'
+        )        
+        label_matches = pipelines.loc[pipelines.Name == sel_pipeline, 'Label'].values
+        if len(label_matches) == 0: # No selection
+            return
+        
+        pname = label_matches[0]
+        st.session_state.sel_pipeline = pname
+        
+        #sac.divider(label='Description', align='center', color='gray')
+        
+        show_description(pname)
 def view_results():
     st.info('Work in progress!')
 
