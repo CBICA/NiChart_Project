@@ -72,7 +72,7 @@ def config_page() -> None:
         page_title="NiChart",
         page_icon=nicon,
         layout="wide",
-        # layout="centered",
+        #layout="centered",
         menu_items={
             "Get help": "https://neuroimagingchart.com/",
             "Report a bug": "https://github.com/CBICA/NiChart_Project/issues/new?assignees=&labels=&projects=&template=bug_report.md&title=%5BBUG%5D+",

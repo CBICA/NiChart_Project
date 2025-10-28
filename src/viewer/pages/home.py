@@ -35,44 +35,46 @@ st.markdown(
     <style>
     .centered-text {
         text-align: center;
-        font-size: 40px;
+        font-size: 80px;
         color: #53AB23;
-        font-weight: 500;
     }
     </style>
     """,
     unsafe_allow_html=True
 )
 
-st.markdown('<p class="centered-text">Welcome to NiChart Project</p>', unsafe_allow_html=True)
+#st.markdown('<h1 class="centered-text">Welcome to NiChart Project</p>', unsafe_allow_html=True)
+st.markdown("<h2 style='text-align:center; color:#5e5fad;'>Welcome to NiChart Project\n\n</h1>", unsafe_allow_html=True)
+st.markdown("<br>", unsafe_allow_html=True)
+st.markdown("<h5 style='text-align:center; color:#3a3a88;'>What would you like to explore today?\n\n</h1>", unsafe_allow_html=True)
 
-col1, col2 = st.columns([2, 1])
+sel = sac.chip(
+    items=[
+        sac.ChipItem(label='What is NiChart?'),
+        sac.ChipItem(label='Analyze Single Subject MRI Data'),
+        sac.ChipItem(label='Analyze a Group of Scans'),
+        sac.ChipItem(label='Explore Results Only (No MRI Needed!)'),
+    ], label='', align='center', size='lg', radius='lg', direction='vertical', color='cyan'
+) 
+flag_disabled = sel is None
 
-with col1:
-    sel = sac.segmented(
-        items=[
-            sac.SegmentedItem(label='About NiChart'),
-            sac.SegmentedItem(label='Single-Subject MRI Data'),
-            sac.SegmentedItem(label='Multi-Subject MRI Dataset'),
-            sac.SegmentedItem(label='No MRI/View Results'),
-        ], label='', align='right', size='md', radius='md', color='indigo', divider=True
-    ) 
+sel_but = sac.chip(
+    [sac.ChipItem(label='Go!', disabled=flag_disabled)],
+    label='', align='center', color='#aaeeaa'
+)
+    
+if sel_but == 'Go!':
+    print(f'Selected page {sel}')
 
-with col2:
+    if sel == 'What is NiChart?':
+        st.switch_page("pages/info.py")
 
-    if st.button('Go'):
+    if sel == 'Analyze Single Subject MRI Data':
+        st.switch_page("pages/single_subject.py")
 
-        print(f'Selected page {sel}')
+    if sel == 'Analyze a Group of Scans':
+        st.switch_page("pages/multi_subject.py")
 
-        if sel == 'About NiChart':
-            st.switch_page("pages/info.py")
-
-        if sel == 'Single Subject MRI':
-            st.switch_page("pages/single_subject.py")
-
-        if sel == 'Multi-Subject MRI Dataset':
-            st.switch_page("pages/multi_subject.py")
-
-        if sel == 'No MRI/View Results':
-            st.switch_page("pages/no_user_mri.py")
+    if sel == 'Explore Results Only (No MRI Needed!)':
+        st.switch_page("pages/no_user_mri.py")
 
