@@ -113,8 +113,26 @@ def data_overview(in_dir):
     '''
     Show files in data folder
     '''
+    dname = os.path.basename(in_dir)
+    
+    col1, col2 = st.columns([1,1])
+    
+    with col1:
+        st.markdown("##### View Project Folder:")
+
+    with col2:
+        sac.buttons(
+            [sac.ButtonsItem(label='Switch Folder')],
+            label='', align='right', color='cyan'
+        )
+
+    #colb1, colb2 = st.columns([1,8])
+    
+    
+    #with colb2:
+    st.markdown(f"##### 📂 `{dname}`")
+
     if os.path.exists(in_dir):
-        st.markdown(f"##### 📂 `{in_dir}`")
         tree_items, list_paths = build_folder_tree(in_dir, st.session_state.out_dirs)
         selected = sac.tree(
             items=tree_items,

@@ -33,12 +33,21 @@ if 'instantiated' not in st.session_state or not st.session_state.instantiated:
 
 def upload_data():
 
-    utilio.panel_load_data()
+    with st.container(border=True):
+        col1, col2, col3 = st.columns([10,1,10])
+    
+        with col1:
+            utilio.panel_load_data()
+
+        with col3:
+            in_dir = st.session_state.paths['project']
+            utildv.data_overview(in_dir)
+
         
     # Show selections
     #utilses.disp_selections()
      
-st.markdown("<h5 style='text-align:center; color:#3a3a88;'>Upload Data\n\n</h1>", unsafe_allow_html=True)
+st.markdown("<h5 style='text-align:center; color:#3a3a88;'>Data Upload\n\n</h1>", unsafe_allow_html=True)
 
 upload_data()
 
