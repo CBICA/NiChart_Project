@@ -31,29 +31,29 @@ utilpg.set_global_style()
 if 'instantiated' not in st.session_state or not st.session_state.instantiated:
     utilses.init_session_state()
 
-st.markdown("<h5 style='text-align:center; color:#3a3a88;'>Single-Subject Analysis\n\n</h1>", unsafe_allow_html=True)
-
-st.markdown(
+def view_results():
     '''
-    
-    Welcome! This is where you can calculate neuroimaging chart values from a single subject's MRI scan(s) in a few simple actions:
-    
-    - **Data:** Upload image and non-image files required for analysis
-    
-    - **Pipeline:** Select processing/analysis pipeline to run on your data
+    Select a pipeline and show overview
+    '''
+    st.info('Work in progress ...')
+     
+st.markdown("<h5 style='text-align:center; color:#3a3a88;'>View Results\n\n</h1>", unsafe_allow_html=True)
 
-    - **Results:** View/download results of the pipeline
-    
-    ''', unsafe_allow_html=True
-)
-    
+view_results()
+
 sel_but = sac.chip(
-    [sac.ChipItem(label = '', icon='arrow-right', disabled=False)],
-    label='', align='center', color='#aaeeaa', size='xl'
+    [
+        sac.ChipItem(label = '', icon='arrow-left', disabled=False),
+        sac.ChipItem(label = '', icon='house', disabled=False),
+    ],
+    label='', align='center', color='#aaeeaa', size='xl', return_index=True
 )
     
-if sel_but == '':
-    st.switch_page("pages/nichart_upload_data.py")
+if sel_but == 0:
+    st.switch_page("pages/nichart_download_results.py")
+
+if sel_but == 1:
+    st.switch_page("pages/nichart_home.py")
 
 
 # Show session state vars

@@ -51,15 +51,21 @@ pages = {
         st.Page("pages/nichart_home.py", title="Home"),
         st.Page("pages/nichart_info.py", title="Info"),
     ],
-    "Modes": [
+    "Workflows": [
         st.Page("pages/nichart_single_subject.py", title="Single Subject"),
         st.Page("pages/nichart_multi_subject.py", title="Multi Subject"),
         st.Page("pages/nichart_ref_data.py", title="Reference Data"),
     ],    
-    "Pipelines": [
-        st.Page("pages/sel_pipelines.py", title="Select Pipelines"),
-        st.Page("pages/run_pipelines.py", title="Run Pipelines"),
+    "Actions": [
+        st.Page("pages/nichart_upload_data.py", title="Data"),
+        st.Page("pages/nichart_run_pipeline.py", title="Pipelines"),
+        st.Page("pages/nichart_download_results.py", title="Download Results"),
+        st.Page("pages/nichart_view_results.py", title="View Results"),
     ],
+    #"Pipelines": [
+        #st.Page("pages/sel_pipelines.py", title="Select Pipelines"),
+        #st.Page("pages/run_pipelines.py", title="Run Pipelines"),
+    #],
 }
 
 pg = st.navigation(pages, position="top")
