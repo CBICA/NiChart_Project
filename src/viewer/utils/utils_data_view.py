@@ -124,39 +124,42 @@ def data_overview(in_dir):
     '''
     Show files in data folder
     '''
-    dname = os.path.basename(in_dir)
-    
     st.markdown("##### Project Folder:")
 
-    #sac.buttons(
-        #[sac.ButtonsItem(label='Switch Folder')],
-        #label='', align='right', color='cyan'
-    #)
-
-    st.markdown(f"##### 📂 `{dname}`")
-
-    if os.path.exists(in_dir):
-        tree_items, list_paths = build_folder_tree(in_dir, st.session_state.out_dirs)
-        selected = sac.tree(
-            items=tree_items,
-            #label='Project Folder',
-            index=None,
-            align='left', size='xl', icon='table',
-            checkbox=False,
-            #checkbox_strict = True,
-            open_all = True,
-            return_index = True
-            #height=400
-        )
+    sel_opt = st.radio(
+        label = 'Select',
+        options = ['View', 'Switch', 'Delete Files'],
+        horizontal = True,
+        label_visibility="collapsed"
+    )
     
-        #if selected:
-            #if isinstance(selected, list):
-                #selected = selected[0]
-            #fname = list_paths[selected]
-            #show_sel_item(fname)
+    if sel_opt == 'View':
 
-    else:
-        st.error(f"Folder `{in_dir}` not found.")
+        dname = os.path.basename(in_dir)
+        st.markdown(f"##### 📂 `{dname}`")
+
+        if os.path.exists(in_dir):
+            tree_items, list_paths = build_folder_tree(in_dir, st.session_state.out_dirs)
+            selected = sac.tree(
+                items=tree_items,
+                #label='Project Folder',
+                index=None,
+                align='left', size='xl', icon='table',
+                checkbox=False,
+                #checkbox_strict = True,
+                open_all = True,
+                return_index = True
+                #height=400
+            )
+        
+            #if selected:
+                #if isinstance(selected, list):
+                    #selected = selected[0]
+                #fname = list_paths[selected]
+                #show_sel_item(fname)
+
+        else:
+            st.error(f"Folder `{in_dir}` not found.")
 
 def view_subj_list(in_dir):
     fname = 'demog.csv'

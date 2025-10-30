@@ -154,14 +154,14 @@ def upload_files(out_dir, flag_single = False):
     # Set target path
     st.session_state.paths["target"] = out_dir
 
-    with st.form(key='my_form', clear_on_submit=True):
+    with st.form(key='my_form', clear_on_submit=True, border=False):
 
         sel_mod = sac.chip(
             items=[
                 sac.ChipItem(label='T1'),
                 sac.ChipItem(label='FL'),
                 sac.ChipItem(label='CSV'),
-            ], label='Data type', index=0, align='left', size='md', radius='md', multiple=False, color='cyan', 
+            ], label='', index=0, align='left', size='md', radius='md', multiple=False, color='cyan', 
             #description='Select type of your data type'
         )    
         out_path = None
@@ -173,6 +173,7 @@ def upload_files(out_dir, flag_single = False):
             key="_uploaded_input",
             accept_multiple_files=flag_single,
             help="Input files can be uploaded as a folder, multiple files, or a single zip file",
+            label_visibility="collapsed"
         )
         
         submitted = st.form_submit_button("Submit")
@@ -191,7 +192,14 @@ def upload_files(out_dir, flag_single = False):
         
         
 def panel_load_data():
+    #with st.container(border=True):
     st.markdown('##### User Input:')
+    #st.markdown(
+        #'''
+        #- Upload your input data file(s) here
+        #- MRI scan (Nifti or Dicom) or a data file (.csv)
+        #'''
+    #)
     upload_files(st.session_state.paths['project'], True)
 
 def panel_load_data_tmp():

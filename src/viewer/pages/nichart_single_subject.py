@@ -27,34 +27,36 @@ inject_global_css()
 utilpg.config_page()
 utilpg.set_global_style()
 
+# Set data type
+st.session_state.data_type = 'single_subject'
 
 if 'instantiated' not in st.session_state or not st.session_state.instantiated:
     utilses.init_session_state()
 
 st.markdown("<h5 style='text-align:center; color:#3a3a88;'>Single-Subject Analysis\n\n</h1>", unsafe_allow_html=True)
 
-st.markdown(
-    '''
-    
-    Welcome! This is where you can calculate neuroimaging chart values from a single subject's MRI scan(s) in a few simple actions:
-    
-    - **Data:** Upload image (Nifti, Dicom) and non-image (.csv) files required for analysis
-    
-    - **Pipeline:** Select processing/analysis pipeline to run on your data
+cols = st.columns([1,6,1])
+with cols[1]:
+    st.markdown(
+        '''
+        Welcome! This is where you can calculate neuroimaging chart values from a single subject's MRI scan(s) in a few simple actions:
+        
+        - **Data:** Upload image (Nifti, Dicom) and non-image (.csv) files required for analysis
+        
+        - **Pipeline:** Select processing/analysis pipeline to run on your data
 
-    - **Results:** View/download results of the pipeline
+        - **Results:** View/download results of the pipeline
+        
+        ''', unsafe_allow_html=True
+    )
     
-    ''', unsafe_allow_html=True
-)
-    
-sel_but = sac.chip(
+sel_opt = sac.chip(
     [sac.ChipItem(label = '', icon='arrow-right', disabled=False)],
     label='', align='center', color='#aaeeaa', size='xl'
 )
     
-if sel_but == '':
+if sel_opt == '':
     st.switch_page("pages/nichart_upload_data.py")
-
 
 # Show session state vars
 if st.session_state.mode == 'debug':

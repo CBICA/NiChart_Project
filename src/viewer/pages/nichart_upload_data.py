@@ -31,27 +31,79 @@ utilpg.set_global_style()
 if 'instantiated' not in st.session_state or not st.session_state.instantiated:
     utilses.init_session_state()
 
+#################################
+## Function definitions
+def help_message(data_type):
+    
+    if data_type == 'reference_data':
+        st.warning('No data upload for reference data viewer!')
+        return
+    
+    if data_type == 'multi_subject':
+        st.warning('Work in progress!')
+        return
+
+    if data_type == 'single_subject':
+        with st.popover("💡"):
+            st.write(
+                """
+                
+                **How to Use This Page**
+                
+                - **Left Panel:** Upload your data files
+                
+                  - Nifti (.nii, .nii.gz), compressed Dicom files (.zip), or data file (.csv)
+                
+                  - Dicom data will be extracted automatically to Nifti
+                  
+                
+                - **Middle Panel:** View contents of the project folder, as data is uploaded
+                
+                  - Project data is kept in a default folder (user_default)
+                  
+                  - Users can delete files inside the project folder, create a new project folder and switch to an existing folder
+                
+                - **Right Panel:** View subject list
+                
+                  - Subject list is necessary for all pipelines
+                  
+                  - It's created automatically during data upload
+                  
+                  - Users can upload their own file or edit the subject file
+
+                """
+            )
+
 def upload_data():
 
-    with st.container(border=True):
-        col1, col2, col3 = st.columns([1,1,1])
+    cols = st.columns([1,1,1])
 
-        with col1:
+    with cols[0]:
+        with st.container(border=True):
             utilio.panel_load_data()
 
-        with col2:
+    with cols[1]:
+        with st.container(border=True):
             in_dir = st.session_state.paths['project']
             utildv.data_overview(in_dir)
 
-        with col3:
+    with cols[2]:
+        with st.container(border=True):
             in_dir = st.session_state.paths['project']
             utildv.view_subj_list(in_dir)
 
         
     # Show selections
     #utilses.disp_selections()
-     
-st.markdown("<h5 style='text-align:center; color:#3a3a88;'>Data Upload\n\n</h1>", unsafe_allow_html=True)
+
+#################################
+## Main
+
+data_type = st.session_state.data_type
+
+st.markdown("<h4 style='text-align:center; color:#3a3a88;'>Data Upload\n\n</h1>", unsafe_allow_html=True)
+
+help_message(data_type)
 
 upload_data()
 

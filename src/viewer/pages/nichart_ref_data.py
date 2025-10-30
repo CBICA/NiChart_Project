@@ -23,6 +23,8 @@ logger.debug('Page: NiChart Reference Data')
 utilpg.config_page()
 utilpg.set_global_style()
 
+# Set data type
+st.session_state.data_type = 'reference_data'
 
 if 'instantiated' not in st.session_state or not st.session_state.instantiated:
     utilses.init_session_state()
