@@ -109,27 +109,30 @@ def build_folder_tree(
 
     return tree_items, list_paths
 
+
+@st.dialog("File viewer", width='medium')
+def show_sel_item(fname):
+        if fname.endswith('.csv'):
+            try:
+                df_tmp = pd.read_csv(fname)
+                st.info(f'Data file: {fname}')
+                st.dataframe(df_tmp)
+            except:
+                st.warning(f'Could not read csv file: {fname}')
+
 def data_overview(in_dir):
     '''
     Show files in data folder
     '''
     dname = os.path.basename(in_dir)
     
-    col1, col2 = st.columns([1,1])
-    
-    with col1:
-        st.markdown("##### View Project Folder:")
+    st.markdown("##### Project Folder:")
 
-    with col2:
-        sac.buttons(
-            [sac.ButtonsItem(label='Switch Folder')],
-            label='', align='right', color='cyan'
-        )
+    #sac.buttons(
+        #[sac.ButtonsItem(label='Switch Folder')],
+        #label='', align='right', color='cyan'
+    #)
 
-    #colb1, colb2 = st.columns([1,8])
-    
-    
-    #with colb2:
     st.markdown(f"##### 📂 `{dname}`")
 
     if os.path.exists(in_dir):
@@ -141,25 +144,30 @@ def data_overview(in_dir):
             align='left', size='xl', icon='table',
             checkbox=False,
             #checkbox_strict = True,
-            open_all = False,
+            open_all = True,
             return_index = True
             #height=400
         )
-        
-        if selected:
-            if isinstance(selected, list):
-                selected = selected[0]
-            fname = list_paths[selected]
-            if fname.endswith('.csv'):
-                try:
-                    df_tmp = pd.read_csv(fname)
-                    st.info(f'Data file: {fname}')
-                    st.dataframe(df_tmp)
-                except:
-                    st.warning(f'Could not read csv file: {fname}')
+    
+        #if selected:
+            #if isinstance(selected, list):
+                #selected = selected[0]
+            #fname = list_paths[selected]
+            #show_sel_item(fname)
 
     else:
         st.error(f"Folder `{in_dir}` not found.")
+
+def view_subj_list(in_dir):
+    fname = 'demog.csv'
+    fpath = os.path.join(in_dir, fname)
+
+    st.markdown("##### Subject List:")
+    
+    st.markdown(f"##### 📂 `{fname}`")
+    if os.path.exists(fpath):
+        df = pd.load_csv(fpath)
+        st.dataframe(df)
 
 def select_files(in_dir):
     '''

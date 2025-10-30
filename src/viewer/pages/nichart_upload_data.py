@@ -34,14 +34,18 @@ if 'instantiated' not in st.session_state or not st.session_state.instantiated:
 def upload_data():
 
     with st.container(border=True):
-        col1, col2, col3 = st.columns([10,1,10])
-    
+        col1, col2, col3 = st.columns([1,1,1])
+
         with col1:
             utilio.panel_load_data()
 
-        with col3:
+        with col2:
             in_dir = st.session_state.paths['project']
             utildv.data_overview(in_dir)
+
+        with col3:
+            in_dir = st.session_state.paths['project']
+            utildv.view_subj_list(in_dir)
 
         
     # Show selections

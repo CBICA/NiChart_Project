@@ -38,7 +38,7 @@ st.markdown(
     
     Welcome! This is where you can calculate neuroimaging chart values from a single subject's MRI scan(s) in a few simple actions:
     
-    - **Data:** Upload image and non-image files required for analysis
+    - **Data:** Upload image (Nifti, Dicom) and non-image (.csv) files required for analysis
     
     - **Pipeline:** Select processing/analysis pipeline to run on your data
 

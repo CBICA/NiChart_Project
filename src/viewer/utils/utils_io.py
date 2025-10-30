@@ -154,63 +154,48 @@ def upload_files(out_dir, flag_single = False):
     # Set target path
     st.session_state.paths["target"] = out_dir
 
-    #with st.container(border=True):
-        
-    with st.form(
-        key='my_form',
-        clear_on_submit=True
-    ):
-        
+    with st.form(key='my_form', clear_on_submit=True):
+
+        sel_mod = sac.chip(
+            items=[
+                sac.ChipItem(label='T1'),
+                sac.ChipItem(label='FL'),
+                sac.ChipItem(label='CSV'),
+            ], label='Data type', index=0, align='left', size='md', radius='md', multiple=False, color='cyan', 
+            #description='Select type of your data type'
+        )    
+        out_path = None
+        if sel_mod is not None:
+            out_path = os.path.join(out_dir, sel_mod.lower())
+            
         sel_files = st.file_uploader(
             "Input files or folders",
             key="_uploaded_input",
             accept_multiple_files=flag_single,
             help="Input files can be uploaded as a folder, multiple files, or a single zip file",
         )
-        if sel_files is None:
-            return False
-
-        # Every form must have a submit button.
+        
         submitted = st.form_submit_button("Submit")
         if submitted:
-            if not os.path.exists(out_dir):
-                os.makedirs(st.session_state.paths["target"])
-            copy_and_unzip_uploaded_files(
-                sel_files, st.session_state.paths["target"]
-            )
-            st.info('Uploaded')
-            print(st.session_state['_uploaded_input'])
-        
-        #if st.button('Upload'):
-            #if not os.path.exists(out_dir):
-                #os.makedirs(st.session_state.paths["target"])
-            #copy_and_unzip_uploaded_files(
-                #sel_files, st.session_state.paths["target"]
-            #)
-            #st.info('Uploaded')
-            #print(st.session_state['_uploaded_input'])
-            #del st.session_state['_uploaded_input']
-            #print('eee')
-            #print('eeefff')
-            #st.rerun()
+            if out_path is None:
+                return False
+            if len(sel_files) == 0:
+                return False
+            if not os.path.exists(out_path):
+                os.makedirs(out_path)
+            copy_and_unzip_uploaded_files(sel_files, out_path)
+            st.info('Uploaded file')
+            return True
     
     return False
         
         
-
-
 def panel_load_data():
-    '''
-    Panel for loading user data
-    '''
-    st.markdown('##### Select User Data:')
-    
-    #sel_mod = st.radio(
-        #'Input Type',
-        #['T1', 'FL', 'Demog'],
-        #index=None, horizontal=True, label_visibility='collapsed'
-    #)
+    st.markdown('##### User Input:')
+    upload_files(st.session_state.paths['project'], True)
 
+def panel_load_data_tmp():
+    st.markdown('##### User Input:')
     sel_mod = sac.chip(
         items=[
             sac.ChipItem(label='T1'),
@@ -218,7 +203,6 @@ def panel_load_data():
             sac.ChipItem(label='Demog'),
         ], label='label', index=None, align='left', size='md', radius='md', multiple=False, color='cyan'
     )    
-    
     if sel_mod is not None:
         out_dir = os.path.join(
             st.session_state.paths['project'], sel_mod.lower()
@@ -227,6 +211,3 @@ def panel_load_data():
             st.info('Hello')
             sel_mod=None
             st.rerun()
-    #load_dicoms()
-    #load_subj_list()
-    #load_user_csv()
