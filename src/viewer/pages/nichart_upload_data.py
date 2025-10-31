@@ -8,7 +8,7 @@ import utils.utils_misc as utilmisc
 import utils.utils_pages as utilpg
 import utils.utils_processes as utilprc
 import utils.utils_session as utilses
-import utils.utils_io as utilio
+import utils.utils_upload as utilup
 import utils.utils_data_view as utildv
 from utils.utils_styles import inject_global_css 
 
@@ -44,53 +44,54 @@ def help_message(data_type):
         return
 
     if data_type == 'single_subject':
-        with st.popover("💡"):
+        with st.popover("❓", width='content'):
             st.write(
                 """
-                
                 **How to Use This Page**
                 
-                - **Left Panel:** Upload your data files
+                - **Left Panel:** Upload Your Data
                 
-                  - Nifti (.nii, .nii.gz), compressed Dicom files (.zip), or data file (.csv)
-                
-                  - Dicom data will be extracted automatically to Nifti
+                  - Upload MRI scans in **NIfTI** (.nii / .nii.gz) or **DICOM** (either a folder of .dcm files or a single .zip archive).
+                  - A **subject list** will be created automatically as MRI scans are added
+                  - You may also upload non-imaging data (e.g., clinical variables) as a **CSV** containing an **MRID** column that matches the subject list.
                   
+                - **Center Panel:** Review & Edit Subject List
                 
-                - **Middle Panel:** View contents of the project folder, as data is uploaded
+                  - View subject list and associated metadata.
+                  - Edit or add details needed for downstream analysis (e.g., MRID, age, sex).
+
+                - **Right Panel:** Project Data Overview
                 
-                  - Project data is kept in a default folder (user_default)
-                  
-                  - Users can delete files inside the project folder, create a new project folder and switch to an existing folder
-                
-                - **Right Panel:** View subject list
-                
-                  - Subject list is necessary for all pipelines
-                  
-                  - It's created automatically during data upload
-                  
-                  - Users can upload their own file or edit the subject file
+                  - View all files stored in the project folder.
+                  - Delete files if needed (e.g., to restart or replace data).
+                  - Switch to a different or existing project folder.
 
                 """
             )
 
 def upload_data():
 
-    cols = st.columns([1,1,1])
+    cols = st.columns([8,1,8,1,8])
 
+    out_dir = os.path.join(
+        st.session_state.paths['out_dir'], st.session_state['project']
+    )
+    
     with cols[0]:
-        with st.container(border=True):
-            utilio.panel_load_data()
-
-    with cols[1]:
-        with st.container(border=True):
-            in_dir = st.session_state.paths['project']
-            utildv.data_overview(in_dir)
+        #with st.container(border=True):
+        utilup.panel_upload_single_subject(out_dir)
 
     with cols[2]:
-        with st.container(border=True):
-            in_dir = st.session_state.paths['project']
-            utildv.view_subj_list(in_dir)
+        #with st.container(border=True):
+        utilup.panel_edit_participants(
+            os.path.join(out_dir, 'participants'),
+            'participants.csv'
+        )
+
+    with cols[4]:
+        #with st.container(border=True):
+        in_dir = st.session_state.paths['project']
+        utilup.panel_view_folder(out_dir)
 
         
     # Show selections
@@ -101,9 +102,9 @@ def upload_data():
 
 data_type = st.session_state.data_type
 
-st.markdown("<h4 style='text-align:center; color:#3a3a88;'>Data Upload\n\n</h1>", unsafe_allow_html=True)
-
-help_message(data_type)
+with st.container(horizontal=True, horizontal_alignment="center"):
+    st.markdown("<h4 style=color:#3a3a88;'>User Data\n\n</h1>", unsafe_allow_html=True, width='content')
+    help_message(data_type)
 
 upload_data()
 
