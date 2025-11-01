@@ -48,6 +48,8 @@ sel = sac.chip(
 ) 
 flag_disabled = sel is None
 
+sac.divider(key='_p0_div1')
+
 sel_but = sac.chip(
     [sac.ChipItem(label = '', icon='arrow-right', disabled=flag_disabled)],
     label='', align='center', color='#aaeeaa', size='xl'

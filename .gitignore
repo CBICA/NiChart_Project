@@ -183,3 +183,4 @@ test/test_output
 ##*.nii.gz
 
 src/viewer/utils/tmp
+src/viewer/test

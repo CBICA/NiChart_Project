@@ -8,9 +8,9 @@ import utils.utils_misc as utilmisc
 import utils.utils_pages as utilpg
 import utils.utils_processes as utilprc
 import utils.utils_session as utilses
-import utils.utils_io as utilio
+import utils.utils_upload as utilup
 import utils.utils_data_view as utildv
-from utils.utils_styles import inject_global_css 
+from utils.utils_styles import inject_global_css
 
 from streamlit_image_select import image_select
 import re
@@ -31,10 +31,29 @@ utilpg.set_global_style()
 if 'instantiated' not in st.session_state or not st.session_state.instantiated:
     utilses.init_session_state()
 
+#################################
+## Function definitions
+def help_message(data_type):
+
+    with st.popover("❓", width='content'):
+        st.write(
+            """
+            **How to Use This Page**
+
+            - Select a pipeline
+            - Run the pipeline
+            - View progress
+            """
+        )
+
+
 def select_pipeline():
     '''
     Select a pipeline and show overview
     '''
+    st.markdown("##### Pipelines:")
+
+    sac.divider(key='_p2_div1')
 
     pipelines = st.session_state.pipelines
     sitems = []
@@ -45,7 +64,7 @@ def select_pipeline():
                 label=ptmp, color = colors[i%len(colors)]
             )
         )
-    
+
     sel_index = utilmisc.get_index_in_list(
         pipelines.Name.tolist(), st.session_state.sel_pipeline
     )
@@ -56,21 +75,39 @@ def select_pipeline():
         align='left',
         index =  sel_index,
         key = '_sel_pipeline'
-    )        
+    )
     label_matches = pipelines.loc[pipelines.Name == sel_pipeline, 'Label'].values
     if len(label_matches) == 0: # No selection
         return
-    
+
     pname = label_matches[0]
     st.session_state.sel_pipeline = pname
-    
-    #sac.divider(label='Description', align='center', color='gray')
-    
-    show_description(pname)
-     
-st.markdown("<h5 style='text-align:center; color:#3a3a88;'>Select and Run Pipeline\n\n</h1>", unsafe_allow_html=True)
 
-select_pipeline()
+    #sac.divider(label='Description', align='center', color='gray')
+
+    show_description(pname)
+
+
+def pipeline_menu():
+    cols = st.columns([10,1,10])
+    out_dir = os.path.join(
+        st.session_state.paths['out_dir'], st.session_state['project']
+    )
+
+    with cols[0]:
+        select_pipeline()
+    # with cols[2]:
+
+#################################
+## Main
+
+data_type = st.session_state.data_type
+
+with st.container(horizontal=True, horizontal_alignment="center"):
+    st.markdown("<h4 style=color:#3a3a88;'>Select and Run Pipeline\n\n</h1>", unsafe_allow_html=True, width='content')
+    help_message(data_type)
+
+pipeline_menu()
 
 sel_but = sac.chip(
     [
@@ -79,7 +116,7 @@ sel_but = sac.chip(
     ],
     label='', align='center', color='#aaeeaa', size='xl', return_index=True
 )
-    
+
 if sel_but == 0:
     st.switch_page("pages/nichart_upload_data.py")
 

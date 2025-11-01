@@ -49,6 +49,8 @@ with cols[1]:
         
         ''', unsafe_allow_html=True
     )
+
+sac.divider(key='_p0_div1')
     
 sel_opt = sac.chip(
     [sac.ChipItem(label = '', icon='arrow-right', disabled=False)],

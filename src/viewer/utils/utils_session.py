@@ -83,8 +83,8 @@ def init_session_vars():
     Set initial values for session variables
     '''
     ## Misc variables
-    # st.session_state.mode = 'release'
-    st.session_state.mode = 'debug'
+    st.session_state.mode = 'release'
+    # st.session_state.mode = 'debug'
 
     st.session_state.skip_survey = True
 

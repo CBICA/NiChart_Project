@@ -164,8 +164,9 @@ def panel_upload_single_subject(out_dir):
     '''
     Upload user data to target folder
     '''
-    st.markdown('##### File Upload:')
     sac.divider(key='_p1_div1')
+
+    st.markdown('##### Upload Files:')
 
     f_part = os.path.join(out_dir, 'participants', 'participants.csv')
         
@@ -199,8 +200,6 @@ def panel_upload_single_subject(out_dir):
     if sel_ftype == 'Multiple DICOM Files':
         flag_multi = True
         
-    sac.divider(key='_p1_div2')
-
     ###############################
     # Upload data
     with st.form(key='my_form', clear_on_submit=True, border=False):
@@ -241,8 +240,6 @@ def panel_upload_single_subject(out_dir):
                 st.error('Selected file is not a .zip file!')
                 return
 
-    sac.divider(key='_p1_div3')
-    
     ###############################
     # Create participants list
     if not os.path.exists(f_part):
@@ -257,70 +254,57 @@ def panel_upload_single_subject(out_dir):
     return False
 
 def panel_edit_participants(out_dir, fname):
-    fpath = os.path.join(out_dir, fname)
 
-    st.markdown("##### Subject List:")
-    
-    sac.divider(key='_p3_div1')
+    fpath = os.path.join(out_dir, fname)
 
     if not os.path.exists(fpath):
         return
 
-    sel_opt = sac.chip(
-        items=[
-            sac.ChipItem(label='View'),
-            sac.ChipItem(label='Edit'),
-        ],
-        label='', index=0, align='left', 
-        size='md', radius='md', multiple=False, color='cyan', 
-        description='Select an action'
-    )    
+    sac.divider(key='_p2_div1')
+    with st.container(horizontal=True, horizontal_alignment="left"):
+        st.markdown("##### Review & Edit Subject List: ", width='content')
+        st.markdown(f"##### 📃 `{fname}`", width='content')
 
-    st.markdown(f"##### 📃 `{fname}`")
-    
     df = pd.read_csv(fpath, dtype={'MRID':str, 'Age':float, 'Sex':str})
     
-    if sel_opt == 'View':
-        st.dataframe(df)
-
-    elif sel_opt == 'Edit':
-        # Define column options
-        column_config = {
-            "Age": st.column_config.NumberColumn(
-                "Age",
-                help="Select age",
-                min_value=0,
-                max_value=110,
-                step=0.1,
-                required=True
-            ),
-            "Sex": st.column_config.SelectboxColumn(
-                "Sex",
-                help="Select sex",
-                options=["M", "F", "Other"],
-                required=True
-            )
-        }
-        df_user = st.data_editor(
-            df,
-            column_config=column_config,
-            num_rows="fixed",
-            use_container_width=True
+    # Define column options
+    column_config = {
+        "Age": st.column_config.NumberColumn(
+            "Age",
+            help="Select age",
+            min_value=0,
+            max_value=110,
+            step=0.1,
+            required=True
+        ),
+        "Sex": st.column_config.SelectboxColumn(
+            "Sex",
+            help="Select sex",
+            options=["M", "F", "Other"],
+            required=True
         )
-        if st.button('Save'):
-            df_user.to_csv(fpath, index=False)
-            st.success(f'Updated demographic file: {fpath}')
-            
-            print(f'saaaaaa {df_user}')
+    }
+    df_user = st.data_editor(
+        df,
+        column_config=column_config,
+        num_rows="fixed",
+        use_container_width=True
+    )
+    if st.button('Save'):
+        df_user.to_csv(fpath, index=False)
+        st.success(f'Updated demographic file: {fpath}')
+
         
 
 def panel_view_folder(out_dir):
     '''
     Show files in data folder
     '''
-    st.markdown("##### Project Folder:")
-
-    sac.divider(key='_p2_div1')
+    dname = os.path.basename(out_dir)
+    sac.divider(key='_p2_div2')
+    with st.container(horizontal=True, horizontal_alignment="left"):
+        st.markdown("##### Review Project Folder: ", width='content')
+        st.markdown(f"##### 📃 `{dname}`", width='content')
 
     if not os.path.exists(out_dir):
         return
@@ -337,9 +321,6 @@ def panel_view_folder(out_dir):
     )    
 
     if sel_opt == 'View':
-        dname = os.path.basename(out_dir)
-        st.markdown(f"##### 📂 `{dname}`")
-
         tree_items, list_paths = utildv.build_folder_tree(out_dir, st.session_state.out_dirs)
         selected = sac.tree(
             items=tree_items,

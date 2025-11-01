@@ -19,7 +19,7 @@ from utils.utils_logger import setup_logger
 import streamlit_antd_components as sac
 
 logger = setup_logger()
-logger.debug('Page: Select Pipelines')
+logger.debug('Page: Upload Data')
 
 inject_global_css()
 
@@ -49,29 +49,29 @@ def help_message(data_type):
                 """
                 **How to Use This Page**
                 
-                - **Left Panel:** Upload Your Data
+                - **Upload Files:**
                 
                   - Upload MRI scans in **NIfTI** (.nii / .nii.gz) or **DICOM** (either a folder of .dcm files or a single .zip archive).
                   - A **subject list** will be created automatically as MRI scans are added
                   - You may also upload non-imaging data (e.g., clinical variables) as a **CSV** containing an **MRID** column that matches the subject list.
                   
-                - **Center Panel:** Review & Edit Subject List
+                - **Review & Edit Subject List:**
                 
-                  - View subject list and associated metadata.
-                  - Edit or add details needed for downstream analysis (e.g., MRID, age, sex).
+                  - View subject list; edit or add details needed for downstream analysis (e.g., MRID, age, sex).
 
-                - **Right Panel:** Project Data Overview
-                
-                  - View all files stored in the project folder.
+                - **Review Project Folder:**
+
+                  - View files stored in the project folder.
                   - Delete files if needed (e.g., to restart or replace data).
-                  - Switch to a different or existing project folder.
+                  - Switch to a new or existing project folder.
 
                 """
             )
 
 def upload_data():
 
-    cols = st.columns([8,1,8,1,8])
+    # cols = st.columns([8,1,8,1,8])
+    cols = st.columns([10,1,10])
 
     out_dir = os.path.join(
         st.session_state.paths['out_dir'], st.session_state['project']
@@ -81,16 +81,21 @@ def upload_data():
         #with st.container(border=True):
         utilup.panel_upload_single_subject(out_dir)
 
+    # with cols[2]:
+    #     #with st.container(border=True):
+    #     utilup.panel_edit_participants(
+    #         os.path.join(out_dir, 'participants'),
+    #         'participants.csv'
+    #     )
+
+    # with cols[4]:
     with cols[2]:
         #with st.container(border=True):
+        in_dir = st.session_state.paths['project']
         utilup.panel_edit_participants(
             os.path.join(out_dir, 'participants'),
             'participants.csv'
         )
-
-    with cols[4]:
-        #with st.container(border=True):
-        in_dir = st.session_state.paths['project']
         utilup.panel_view_folder(out_dir)
 
         
@@ -107,6 +112,8 @@ with st.container(horizontal=True, horizontal_alignment="center"):
     help_message(data_type)
 
 upload_data()
+
+sac.divider(key='_p0_div1')
 
 sel_but = sac.chip(
     [
