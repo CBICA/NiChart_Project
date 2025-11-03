@@ -1,6 +1,19 @@
-pipeline_name: SPARE Scores - Hypertension (Unharmonized)
+pipeline_name: SPARE Scores - Hypertension (Harmonized)
 description: |
   Pipeline which uses DLMUSE and DLWMLS to produce SPARE classification of hypertension.
+
+categories:
+  - spare
+  - inference
+  - classification
+  - harmonized
+  - hypertension
+
+requires:
+  - needs_T1
+  - needs_FLAIR
+  - needs_demographics
+  - csv_has_columns: [MRID, Age, Sex]
 
 steps:
   - id: run_dlmuse

@@ -1,18 +1,18 @@
-Name,Label
-DLMUSE,dlmuse
-DLWMLS,dlwmls
-DLMUSE-DLWMLS,dlmuse-dlwmls
-SPARE-AD,spare-ad
-SPARE-BA,spare-ba
-SPARE-Smoking,spare-smoking
-SPARE-Hypertension,spare-hypertension
-SPARE-Obesity,spare-obesity
-SPARE-Diabetes,spare-diabetes
-SPARE-Depression,spare-depression
-SPARE-Psychosis,spare-psychosis
-SPARE-BA-Image,spare-ba-image
-SurrealGAN,surrealgan
-CCL-NMF,cclnmf
-RAVENS,ravens
+Name,Label,PipelineYaml
+DLMUSE,dlmuse,run_dlmuse
+DLWMLS,dlwmls,run_dlwmls
+DLMUSE-DLWMLS,dlmuse-dlwmls,run_nichart_dlwmls_v2
+SPARE-AD,spare-ad,run_spare_ad
+SPARE-BA,spare-ba,run_spare_ba
+SPARE-Smoking,spare-smoking,run_spare_cvm_smoking
+SPARE-Hypertension,spare-hypertension,run_spare_cvm_hypertension
+SPARE-Obesity,spare-obesity,run_spare_cvm_obesity
+SPARE-Diabetes,spare-diabetes,run_spare_cvm_diabetes
+SPARE-Depression,spare-depression,run_spare_depression
+SPARE-Psychosis,spare-psychosis,run_spare_psychosis
+SPARE-BA-Image,spare-ba-image,run_bascores
+SurrealGAN,surrealgan,run_predcrd_surrealgan
+CCL-NMF,cclnmf,run_cclnmf
+RAVENS,ravens,run_nichart_ravens
 
 

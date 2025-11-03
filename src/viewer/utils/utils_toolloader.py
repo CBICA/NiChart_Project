@@ -2,6 +2,7 @@ from typing import Dict, List, Union, Optional, Any
 from pydantic import BaseModel, Field, validator
 import os
 import yaml
+import glob
 from pathlib import Path
 import subprocess
 import shutil
@@ -579,6 +580,45 @@ def parse_pipeline_steps(pipeline_yaml):
                 queue.append(neighbor)
 
     return execution_order, step_map
+
+def parse_pipeline_requirements(pipeline_id):
+    pipeline_path = DEFAULT_PIPELINE_DEFINITION_PATH / f"{pipeline_id}.yaml"
+    if not pipeline_path.exists():
+        raise FileNotFoundError(f"Pipeline definition '{pipeline_id}' not found at {pipeline_path}")
+
+    with open(pipeline_path, 'r') as f:
+        pipeline_yaml = yaml.safe_load(f)
+
+    return pipeline_yaml['requires']
+
+def parse_pipeline_categories(pipeline_id):
+    pipeline_path = DEFAULT_PIPELINE_DEFINITION_PATH / f"{pipeline_id}.yaml"
+    if not pipeline_path.exists():
+        raise FileNotFoundError(f"Pipeline definition '{pipeline_id}' not found at {pipeline_path}")
+
+    with open(pipeline_path, 'r') as f:
+        pipeline_yaml = yaml.safe_load(f)
+
+    return pipeline_yaml['categories']
+
+def get_all_pipeline_ids():
+    directory = DEFAULT_PIPELINE_DEFINITION_PATH
+    yaml_files = glob.glob(os.path.join(directory, "*.yaml"))
+    basenames = [os.path.splitext(os.path.basename(f))[0] for f in yaml_files]
+    return basenames
+
+def overall_pipeline_category_listing():
+    res_dict = {}
+    pipelines = get_all_pipeline_ids()
+    for pipeline_id in pipelines:
+        categories = parse_pipeline_categories(pipeline_id)
+        for category in categories:
+            if category in res_dict:
+                res_dict[category].append(pipeline_id)
+            else:
+                res_dict[category] = [pipeline_id]
+    return res_dict
+
 
 def load_metadata(metadata_path: Path) -> Dict:
     if metadata_path is None:

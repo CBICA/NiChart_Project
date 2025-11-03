@@ -2,6 +2,18 @@ pipeline_name: SPARE Scores - Depression (Unharmonized)
 description: |
   Pipeline which uses DLMUSE regional volumes to produce SPARE classification of MDD.
 
+categories:
+  - spare
+  - inference
+  - classification
+  - depression
+
+requires:
+  - needs_T1
+  - needs_FLAIR
+  - needs_demographics
+  - csv_has_columns: [MRID, Age, Sex]
+
 steps:
   - id: run_dlmuse
     tool: nichart_dlmuse

@@ -2,6 +2,18 @@ pipeline_name: SPARE Scores - Brain Age Estimation
 description: |
   Pipeline which uses harmonized DLMUSE to produce brain age estimation via SPARE.
 
+categories:
+  - spare
+  - inference
+  - regression
+  - harmonized
+  - brain-age
+
+requires:
+  - needs_T1
+  - needs_demographics
+  - csv_has_columns: [MRID, Age, Sex]
+
 steps:
   - id: run_nichart_dlmuse
     tool: nichart_dlmuse # MUST CORRESPOND EXACTLY to a tool in resources/tools dir
