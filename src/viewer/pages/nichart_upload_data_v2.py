@@ -71,16 +71,20 @@ def help_message(data_type):
 def upload_data():
 
     # cols = st.columns([8,1,8,1,8])
-    cols = st.columns([6,1,10,1,10])
+    cols = st.columns([10,1,10])
 
+    out_dir = os.path.join(
+        st.session_state.paths['out_dir'], st.session_state['project']
+    )
+    
     with cols[0]:
-        utilup.panel_project_folder()
+        #with st.container(border=True):
+        utilup.panel_upload_single_subject(out_dir)
 
     with cols[2]:
-        utilup.panel_upload_single_subject()
-
-    with cols[4]:
-        utilup.panel_view_files()
+        #with st.container(border=True):
+        in_dir = st.session_state.paths['project']
+        utilup.panel_view_folder(out_dir)
         
     # Show selections
     #utilses.disp_selections()
@@ -92,6 +96,7 @@ data_type = st.session_state.data_type
 
 with st.container(horizontal=True, horizontal_alignment="center"):
     st.markdown("<h4 style=color:#3a3a88;'>Upload Data\n\n</h1>", unsafe_allow_html=True, width='content')
+    help_message(data_type)
 
 upload_data()
 

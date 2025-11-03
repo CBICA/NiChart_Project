@@ -190,6 +190,7 @@ def upload_files(out_dir, flag_single = False):
     
     return False
         
+      
         
 def panel_load_data():
     #with st.container(border=True):
@@ -219,3 +220,75 @@ def panel_load_data_tmp():
             st.info('Hello')
             sel_mod=None
             st.rerun()
+
+
+def panel_select_project(out_dir, curr_project):
+    '''
+    Panel for creating/selecting a project name/folder (to keep all data for the current project)
+    '''
+    items = ['Select Existing', 'Create New']
+    if st.session_state.has_cloud_session:
+        items.append('Generate Demo Data')
+    sel_mode = sac.tabs(
+        items=items,
+        size='lg',
+        align='left'
+    )
+    
+    if sel_mode is None:
+        return None
+
+    if sel_mode == 'Generate Demo Data': 
+        st.info("You can import some demonstration data into your projects list by clicking the button below.")
+        if st.button("Generate"):
+            # Copy demo dirs to user folder (TODO: make this less hardcoded)
+            demo_dir_paths = [
+                os.path.join(
+                    st.session_state.paths["root"],
+                    "output_folder",
+                    "NiChart_sMRI_Demo1",
+                ),
+                os.path.join(
+                    st.session_state.paths["root"],
+                    "output_folder",
+                    "NiChart_sMRI_Demo2",
+                ),
+            ]
+            demo_names = []
+            for demo in demo_dir_paths:
+                demo_name = os.path.basename(demo)
+                demo_names.append(demo_name)
+                destination_path = os.path.join(
+                    st.session_state.paths["out_dir"], demo_name
+                )
+                if os.path.exists(destination_path):
+                    shutil.rmtree(destination_path)
+                shutil.copytree(demo, destination_path, dirs_exist_ok=True)
+            st.success(f"NiChart demonstration projects have been added to your projects list: {', '.join(demo_names)} ")
+            return
+      
+    if sel_mode == 'Create New':
+        sel_project = st.text_input(
+            "Task name:",
+            None,
+            placeholder="My_new_study",
+            label_visibility = 'collapsed'
+        )   
+    if sel_mode == 'Select Existing':
+        list_projects = get_subfolders(out_dir)
+        if len(list_projects) > 0:
+            sel_ind = list_projects.index(curr_project)
+            sel_project = st.selectbox(
+                "Select Existing Project",
+                options = list_projects,
+                index = sel_ind,
+                label_visibility = 'collapsed',
+            )
+    if sel_project is None:
+        return
+    
+    
+    if st.button("Select"):
+        if sel_project != curr_project:
+            utilss.update_project(sel_project)
+        return sel_project

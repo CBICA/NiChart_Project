@@ -2,6 +2,8 @@ import streamlit as st
 import utils.utils_dicoms as utildcm
 import utils.utils_session as utilss
 import utils.utils_data_view as utildv
+import utils.utils_io as utilio
+
 import os
 import pandas as pd
 import numpy as np
@@ -160,107 +162,43 @@ def copy_nifti(in_file_obj: str, d_out: str) -> None:
     #if os.path.exists(d_out):
         #unzip_files(d_out)
 
-def panel_upload_single_subject(out_dir):
+def unzip_zip_files(in_dir: str) -> None:
     '''
-    Upload user data to target folder
+    Unzips all ZIP files in the input dir and removes the original ZIP files.
     '''
-    sac.divider(key='_p1_div1')
+    if os.path.exists(in_dir):
+        for filename in os.listdir(in_dir):
+            if filename.endswith(".zip"):
+                zip_path = os.path.join(in_dir, filename)
+                with zipfile.ZipFile(zip_path, "r") as zip_ref:
+                    zip_ref.extractall(in_dir)
+                    os.remove(zip_path)
 
-    st.markdown('##### Upload:')
-
-    f_part = os.path.join(out_dir, 'participants', 'participants.csv')
-        
-    ###############################
-    # Select data/file types
-    mvals = [
-        'T1', 'FL', 'Non-Imaging'
-    ]
-    fvals = [
-        'Nifti (.nii.gz, .nii))', 'Compressed DICOM (.zip)',
-        'Multiple DICOM Files', 'Tabular (.csv)'
-    ]
-    
-    sel_mod = sac.chip(
-        mvals, label='', key='_selmod', index=0, align='left', 
-        size='md', radius='md', multiple=False, color='cyan', 
-        description='Select data type'
-    )    
-
-    sel_index = 0
-    if sel_mod == 'Non-Imaging':
-        sel_index = len(fvals)-1
-        
-    sel_ftype = sac.chip(
-        fvals, label='', key='_selftype', index=sel_index, align='left', 
-        size='md', radius='md', multiple=False, color='cyan', 
-        description='Select file format'
-    )
-    
-    flag_multi = False
-    if sel_ftype == 'Multiple DICOM Files':
-        flag_multi = True
-        
-    ###############################
-    # Upload data
-    with st.form(key='my_form', clear_on_submit=True, border=False):
-
-        out_path = os.path.join(out_dir, sel_mod.lower().replace(' ', '_'))
-            
-        sel_files = st.file_uploader(
-            "Input files or folders",
-            key="_uploaded_input",
-            accept_multiple_files=flag_multi,
-            label_visibility="collapsed"
-        )
-        
-        submitted = st.form_submit_button("Submit")
-        if not submitted:
-            return
-        
-        if not sel_files:
-            st.error('Please select files')
-            return
-        
-        if sel_ftype == 'Nifti (.nii.gz, .nii))':
-            fname = sel_files.name
-            if not fname.endswith(('.nii', '.nii.gz', '.zip')):
-                st.error('Selected file is not a Nifti image!')
-                return
-            copy_nifti(sel_files, out_path)
-
-        elif sel_ftype == 'Tabular (.csv)':
-            fname = sel_files.name
-            if not fname.endswith(('.csv')):
-                st.error('Selected file is not a .csv file!')
-                return
-            
-        elif sel_ftype == 'Compressed DICOM (.zip)':
-            fname = sel_files.name
-            if not fname.endswith(('.csv')):
-                st.error('Selected file is not a .zip file!')
-                return
-
-    ###############################
-    # Create participants list
-    if not os.path.exists(f_part):
-        if fname.endswith('.nii.gz'):
-            os.makedirs(os.path.dirname(f_part), exist_ok=True)
-            mrid = fname.replace('.nii.gz', '').replace('_T1', '')
-            df = pd.DataFrame({'MRID':[mrid], 'Age':[None], 'Sex':['']})
-            df.to_csv(f_part, index=False)
-            st.success(f'Created Participant file')
-    
-    
-    return False
+def copy_uploaded_files(in_files: list, d_out: str) -> None:
+    '''
+    Copy files to output folder and unzip zip files
+    '''
+    print("Copying uploaded files ...")
+    if in_files is not None:
+        for in_file in in_files:
+            f_out = os.path.join(d_out, in_file.name)
+            # Handle creating nested dirs if needed
+            os.makedirs(os.path.dirname(f_out), exist_ok=True)
+            if not os.path.exists(f_out):
+                with open(os.path.join(d_out, in_file.name), "wb") as f:
+                    f.write(in_file.getbuffer())
+    # Unzip zip files
+    print("Extracting zip files ...")
+    if os.path.exists(d_out):
+        unzip_zip_files(d_out)
 
 def edit_participants(out_dir, fname):
-
     fpath = os.path.join(out_dir, fname)
 
     if not os.path.exists(fpath):
         return
 
-    sac.divider(key='_p2_div1')
+    #sac.divider(key='_p2_div1')
     with st.container(horizontal=True, horizontal_alignment="left"):
         st.markdown("##### Edit Subject List: ", width='content')
         st.markdown(f"##### 📃 `{fname}`", width='content')
@@ -295,6 +233,11 @@ def edit_participants(out_dir, fname):
         st.success(f'Updated demographic file: {fpath}')
 
 
+def select_project():
+    """
+    Panel for selecting a project
+    """
+
 @st.dialog("File viewer", width='medium')
 def show_sel_item(fname):
         if fname.endswith('.csv'):
@@ -306,53 +249,163 @@ def show_sel_item(fname):
                 st.warning(f'Could not read csv file: {fname}')
 
 
-def panel_view_folder(out_dir):
+def clear_folder(folder):
+    for item in os.listdir(folder):
+        item_path = os.path.join(folder, item)
+        if os.path.isfile(item_path) or os.path.islink(item_path):
+            os.remove(item_path)
+        elif os.path.isdir(item_path):
+            shutil.rmtree(item_path)
+
+def panel_project_folder():
+    '''
+    Panel to select project folder
+    '''
+    sac.divider(key='_p1_div1')
+    
+    with st.container(horizontal=True, horizontal_alignment="left"):
+        st.markdown("##### Project Folder: ", width='content')
+        with st.popover("❓", width='content'):
+            st.write(
+                """
+                **Project Folder Help**
+                - All processing steps are performed inside a project folder.
+                - By default, NiChart will create and use a current project folder for you.
+                - You may also create a new project folder using any name you choose.
+                - If needed, you can reset the current project folder (this will remove all files inside it, but keep the folder itself), allowing you to start fresh.
+                - You may also switch to an existing project folder.
+                
+                **Note:** If you are using the cloud version, stored files will be removed periodically, so previously used project folders might not remain available.                
+                """
+            )
+            
+    placeholder = st.empty()
+    placeholder.markdown(f"##### 📁 `{st.session_state.prj_name}`", width='content')
+
+    sel_opt = st.selectbox(
+        'Select an action',
+        ['Create new project folder', 'Switch to existing project', 'Reset project folder'],
+        label_visibility='collapsed',
+        index=None
+    )
+
+    if sel_opt == 'Create new project folder':
+        sel_prj = st.text_input(
+            "Project name:",
+            None,
+            placeholder="user_new_study",
+            label_visibility = 'collapsed'
+        )
+        if st.button("Select"):
+            utilss.update_project(sel_prj)
+            placeholder.markdown(f"##### 📃 `{st.session_state.prj_name}`", width='content')
+
+    if sel_opt == 'Switch to existing project':
+        list_projects = get_subfolders(st.session_state.paths['out_dir'])
+        if len(list_projects) > 0:
+            sel_ind = list_projects.index(st.session_state.prj_name)
+            sel_prj = sac.chip(
+                list_projects,
+                label='', index=None, align='left', size='sm', radius='sm',
+                multiple=False, color='cyan', description='Projects in output folder'
+            )
+            if st.button("Select"):
+                utilss.update_project(sel_prj)
+                placeholder.markdown(f"##### 📃 `{st.session_state.prj_name}`", width='content')
+                if sel_prj is not None:
+                    utilss.update_project(sel_prj)
+                    placeholder.markdown(f"##### 📃 `{st.session_state.prj_name}`", width='content')
+    
+    if sel_opt == 'Reset project folder':
+        st.warning("⚠️Are you sure you want to delete all files in the project folder? This cannot be undone.")
+        flag_confirm = st.checkbox("I understand and want to delete all files in this folder")
+
+        with st.container(horizontal=True, horizontal_alignment="center"):
+            if st.button("Delete") and flag_confirm:
+                clear_folder(st.session_state.paths['prj_dir'])
+                st.toast(f"Files in project {st.session_state.prj_name} have been successfully deleted.")
+                utilss.update_project(st.session_state.prj_name)
+
+def panel_upload_single_subject():
+    '''
+    Upload user data to target folder
+    '''
+    sac.divider(key='_p2_div1')
+    
+    with st.container(horizontal=True, horizontal_alignment="left"):
+        st.markdown("##### Upload File(s): ", width='content')
+        with st.popover("❓", width='content'):
+            st.write(
+                """
+                **Data Upload Help**
+                  - Upload MRI scans in **NIfTI** (.nii / .nii.gz) or **DICOM** (either a folder of .dcm files or a single .zip archive).
+                  - A **subject list** will be created automatically as MRI scans are added
+                  - You may also upload non-imaging data (e.g., clinical variables) as a **CSV** containing an **MRID** column that matches the subject list.                
+                """
+            )
+            
+    #placeholder = st.empty()
+    #placeholder.markdown(f"##### 📃 `{st.session_state.prj_name}`", width='content')
+    
+    with st.form(key='my_form', clear_on_submit=True, border=False):
+
+        out_tmp = os.path.join(st.session_state.paths['prj_dir'], 'tmp_upload')
+            
+        sel_files = st.file_uploader(
+            "Input files or folders",
+            key="_uploaded_input",
+            accept_multiple_files=True,
+            label_visibility="collapsed"
+        )
+        
+        submitted = st.form_submit_button("Submit")
+        if not submitted:
+            return
+        
+        copy_uploaded_files(sel_files, out_tmp)
+        return True
+    
+    return False
+
+def panel_view_files():
     '''
     Show files in data folder
     '''
-    dname = os.path.basename(out_dir)
-    sac.divider(key='_p2_div2')
-    with st.container(horizontal=True, horizontal_alignment="left"):
-        st.markdown("##### Review Project Folder: ", width='content')
-        st.markdown(f"##### 📃 `{dname}`", width='content')
-
-    if not os.path.exists(out_dir):
-        return
-
-    sel_opt = sac.chip(
-        items=[
-            sac.ChipItem(label='View'),
-            sac.ChipItem(label='Change'),
-            sac.ChipItem(label='Reset'),
-            sac.ChipItem(label='Edit Participants'),
-
-        ],
-        label='', index=0, align='left', 
-        size='md', radius='md', multiple=False, color='cyan', 
-        description='Select an action'
-    )    
-
-    if sel_opt == 'View':
-        tree_items, list_paths = utildv.build_folder_tree(out_dir, st.session_state.out_dirs)
-        selected = sac.tree(
-            items=tree_items,
-            #label='Project Folder',
-            index=None,
-            align='left', size='xl', icon='table',
-            checkbox=False,
-            #checkbox_strict = True,
-            open_all = True,
-            return_index = True
-            #height=400
-        )
+    sac.divider(key='_p3_div1')
     
-        if selected:
-            if isinstance(selected, list):
-                selected = selected[0]
-            fname = list_paths[selected]
-            show_sel_item(fname)
+    with st.container(horizontal=True, horizontal_alignment="left"):
+        st.markdown("##### Review File(s): ", width='content')
+        with st.popover("❓", width='content'):
+            st.write(
+                """
+                **Review Files Help**
+                  - View files stored in the project folder.
+                """
+            )
+            
+    placeholder = st.empty()
+    placeholder.markdown(f"##### 📁 `{st.session_state.prj_name}`", width='content')
+    
+    tree_items, list_paths = utildv.build_folder_tree(
+        st.session_state.paths['prj_dir'], st.session_state.out_dirs
+    )
+    selected = sac.tree(
+        items=tree_items,
+        #label='Project Folder',
+        index=None,
+        align='left', size='xl', icon='table',
+        checkbox=False,
+        #checkbox_strict = True,
+        open_all = True,
+        return_index = True
+        #height=400
+    )
+    
+    if selected:
+        if isinstance(selected, list):
+            selected = selected[0]
+        fname = list_paths[selected]
+        show_sel_item(fname)
+    
 
-    if sel_opt == 'Edit Participants':
-        edit_participants(
-            os.path.join(out_dir, 'participants'), 'participants.csv'
-        )
+

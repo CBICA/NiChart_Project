@@ -22,8 +22,8 @@ def disp_selections():
     '''
     #with st.sidebar:
         #sac.divider(label='Selections', icon = 'person', align='center', color='gray')
-        #if st.session_state.project is not None:
-            #st.markdown(f'`Project Name: {st.session_state.project}`')
+        #if st.session_state.prj_name is not None:
+            #st.markdown(f'`Project Name: {st.session_state.prj_name}`')
         #if st.session_state.sel_pipeline is not None:
             #st.markdown(f'`Pipeline: {st.session_state.sel_pipeline}`')
     print('FIXME: This is bypassed for now ...')
@@ -74,7 +74,7 @@ def init_project_folders():
     dtypes = [
         "in_img", "in_img", "in_csv", "out_img", "out_csv"
     ]
-    st.session_state.project_folders = pd.DataFrame(
+    st.session_state.prj_folders = pd.DataFrame(
         {"dname": dnames, "dtype": dtypes}
     )
 
@@ -90,8 +90,8 @@ def init_session_vars():
 
     st.session_state.sel_add_button = None
 
-    #st.session_state.project = 'nichart_project'
-    st.session_state.project = 'user_default'
+    #st.session_state.prj_name = 'nichart_project'
+    st.session_state.prj_name = 'user_default'
     
     st.session_state.sel_pipeline = 'dlmuse'
 
@@ -223,7 +223,7 @@ def init_paths():
     
     # Paths specific to project
     p_prj = os.path.join(
-        p_out, st.session_state.project
+        p_out, st.session_state.prj_name
     )
     if not os.path.exists(p_prj):
         os.makedirs(p_prj)
@@ -245,7 +245,7 @@ def init_paths():
         "file_search_dir": "",
         "out_dir": p_out,
         "host_out_dir": None,
-        "project": p_prj,
+        "prj_dir": p_prj,
         'target': None
     }
 
@@ -473,7 +473,7 @@ def update_project(sel_project) -> None:
     if sel_project is None:
         return
 
-    if sel_project == st.session_state.project:
+    if sel_project == st.session_state.prj_name:
         return
 
     # Create project dir
@@ -484,15 +484,16 @@ def update_project(sel_project) -> None:
     try:
         if not os.path.exists(p_prj):
             os.makedirs(p_prj)
-            st.success(f'Created folder {p_prj}')
+            st.toast(f'Created folder {sel_project}')
             time.sleep(1)
     except:
         st.error(f'Could not create project folder: {p_prj}')
         return
 
     # Set project name
-    st.session_state.project = sel_project
-    st.session_state.paths['project'] = p_prj
+    st.session_state.prj_name = sel_project
+    st.session_state.paths['prj_dir'] = p_prj
+    st.toast(f'Updated project folder {sel_project}')
 
 # Function to parse AWS login (if available)
 def process_session_token() -> Any:
@@ -578,7 +579,7 @@ def init_session_state() -> None:
         st.session_state.paths["file_search_dir"] = st.session_state.paths["init"]
 
         # Update project variables
-        update_project(st.session_state.project)
+        update_project(st.session_state.prj_name)
 
         # Copy test data to user folder
         copy_test_folders
