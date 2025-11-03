@@ -169,28 +169,47 @@ def unzip_zip_files(in_dir: str) -> None:
     if os.path.exists(in_dir):
         for filename in os.listdir(in_dir):
             if filename.endswith(".zip"):
+                st.toast(f'Unzipping file ...')
                 zip_path = os.path.join(in_dir, filename)
                 with zipfile.ZipFile(zip_path, "r") as zip_ref:
                     zip_ref.extractall(in_dir)
                     os.remove(zip_path)
 
-def copy_uploaded_files(in_files: list, d_out: str) -> None:
+def copy_uploaded_single(in_file: str, d_out: str) -> None:
     '''
-    Copy files to output folder and unzip zip files
+    Copy file to output folder and unzip if a zip file
     '''
-    print("Copying uploaded files ...")
-    if in_files is not None:
-        for in_file in in_files:
-            f_out = os.path.join(d_out, in_file.name)
-            # Handle creating nested dirs if needed
-            os.makedirs(os.path.dirname(f_out), exist_ok=True)
-            if not os.path.exists(f_out):
-                with open(os.path.join(d_out, in_file.name), "wb") as f:
-                    f.write(in_file.getbuffer())
-    # Unzip zip files
-    print("Extracting zip files ...")
-    if os.path.exists(d_out):
+    if in_file is None:
+        return
+    
+    st.toast(f'Uploading file ...')
+
+    f_out = os.path.join(d_out, in_file.name)
+    os.makedirs(os.path.dirname(f_out), exist_ok=True)
+    if not os.path.exists(f_out):
+        with open(os.path.join(d_out, in_file.name), "wb") as f:
+            f.write(in_file.getbuffer())
+
+    # Unzip if input is a .zip file
+    if in_file.name.endswith('.zip'):
         unzip_zip_files(d_out)
+
+def copy_uploaded_multi(in_files: list, d_out: str) -> None:
+    '''
+    Copy files to output folder
+    '''
+    if len(in_files) == 0:
+        return
+    
+    st.toast(f'Uploading files ...')
+
+    for in_file in in_files:
+        f_out = os.path.join(d_out, in_file.name)
+        # Handle creating nested dirs if needed
+        os.makedirs(os.path.dirname(f_out), exist_ok=True)
+        if not os.path.exists(f_out):
+            with open(os.path.join(d_out, in_file.name), "wb") as f:
+                f.write(in_file.getbuffer())
 
 def edit_participants(out_dir, fname):
     fpath = os.path.join(out_dir, fname)
@@ -284,10 +303,13 @@ def panel_project_folder():
 
     sel_opt = st.selectbox(
         'Select an action',
-        ['Create new project folder', 'Switch to existing project', 'Reset project folder'],
+        ["I'm Good — Move On", 'Create new project folder', 'Switch to existing project', 'Reset project folder'],
         label_visibility='collapsed',
         index=None
     )
+
+    if sel_opt == "I'm Good — Move On":
+        st.success('Great! Please upload your data!')
 
     if sel_opt == 'Create new project folder':
         sel_prj = st.text_input(
@@ -326,6 +348,10 @@ def panel_project_folder():
                 st.toast(f"Files in project {st.session_state.prj_name} have been successfully deleted.")
                 utilss.update_project(st.session_state.prj_name)
 
+#def organize_data(in_dir):
+    
+    
+
 def panel_upload_single_subject():
     '''
     Upload user data to target folder
@@ -337,35 +363,59 @@ def panel_upload_single_subject():
         with st.popover("❓", width='content'):
             st.write(
                 """
-                **Data Upload Help**
-                  - Upload MRI scans in **NIfTI** (.nii / .nii.gz) or **DICOM** (either a folder of .dcm files or a single .zip archive).
-                  - A **subject list** will be created automatically as MRI scans are added
-                  - You may also upload non-imaging data (e.g., clinical variables) as a **CSV** containing an **MRID** column that matches the subject list.                
+                **Data Upload Guide**
+                - You may upload MRI scans in any of the following formats:
+                  - **NIfTI:** .nii or .nii.gz
+                  - **DICOM (compressed):** a single .zip file containing the DICOM series
+                  - **DICOM (individual files):** multiple .dcm files
+                  
+                    *(Note: uploading a folder directly is not currently supported)*
+                    
+                - If you have multiple imaging modalities (e.g., T1, FLAIR), upload them one at a time.
+                
+                - Once uploaded, NiChart will automatically:
+                  - Organize the files into the standard input structure
+                  - Create a subject list based on the uploaded MRI data
+                  
+                - You may open and edit the subject list (e.g., to add age, sex, or other metadata needed for analysis).
+                
+                - You can also upload non-imaging data (e.g., clinical or cognitive measures) as a CSV file.
+                
+                - The CSV must include an MRID column with values that match the subject IDs in the subject list, so the data can be merged correctly.
                 """
             )
             
-    #placeholder = st.empty()
-    #placeholder.markdown(f"##### 📃 `{st.session_state.prj_name}`", width='content')
+    # Upload data
+    out_tmp = os.path.join(st.session_state.paths['prj_dir'], 'tmp_upload')
     
+    sel_opt = sac.chip(
+        ['Single (.nii.gz, .nii, .zip, .csv)', 'Multiple (dicom files)'],
+        label='', index=0, align='left', size='sm', radius='sm', multiple=False, 
+        color='cyan', return_index = True
+    )
+    flag_multi=False
+    if sel_opt == 1:
+        flag_multi=True
+        
     with st.form(key='my_form', clear_on_submit=True, border=False):
-
-        out_tmp = os.path.join(st.session_state.paths['prj_dir'], 'tmp_upload')
-            
+                
         sel_files = st.file_uploader(
             "Input files or folders",
             key="_uploaded_input",
-            accept_multiple_files=True,
+            accept_multiple_files=flag_multi,
             label_visibility="collapsed"
         )
         
         submitted = st.form_submit_button("Submit")
-        if not submitted:
-            return
-        
-        copy_uploaded_files(sel_files, out_tmp)
-        return True
+        if submitted:
+            if flag_multi == False:
+                copy_uploaded_single(sel_files, out_tmp)
+            else:
+                copy_uploaded_multi(sel_files, out_tmp)
     
-    return False
+    # Organize uploaded data
+    #organize_data(out_tmp)
+    
 
 def panel_view_files():
     '''
