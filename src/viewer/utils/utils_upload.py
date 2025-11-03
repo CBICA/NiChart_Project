@@ -166,7 +166,7 @@ def panel_upload_single_subject(out_dir):
     '''
     sac.divider(key='_p1_div1')
 
-    st.markdown('##### Upload Files:')
+    st.markdown('##### Upload:')
 
     f_part = os.path.join(out_dir, 'participants', 'participants.csv')
         
@@ -253,7 +253,7 @@ def panel_upload_single_subject(out_dir):
     
     return False
 
-def panel_edit_participants(out_dir, fname):
+def edit_participants(out_dir, fname):
 
     fpath = os.path.join(out_dir, fname)
 
@@ -262,7 +262,7 @@ def panel_edit_participants(out_dir, fname):
 
     sac.divider(key='_p2_div1')
     with st.container(horizontal=True, horizontal_alignment="left"):
-        st.markdown("##### Review & Edit Subject List: ", width='content')
+        st.markdown("##### Edit Subject List: ", width='content')
         st.markdown(f"##### 📃 `{fname}`", width='content')
 
     df = pd.read_csv(fpath, dtype={'MRID':str, 'Age':float, 'Sex':str})
@@ -294,7 +294,17 @@ def panel_edit_participants(out_dir, fname):
         df_user.to_csv(fpath, index=False)
         st.success(f'Updated demographic file: {fpath}')
 
-        
+
+@st.dialog("File viewer", width='medium')
+def show_sel_item(fname):
+        if fname.endswith('.csv'):
+            try:
+                df_tmp = pd.read_csv(fname)
+                st.info(f'Data file: {fname}')
+                st.dataframe(df_tmp)
+            except:
+                st.warning(f'Could not read csv file: {fname}')
+
 
 def panel_view_folder(out_dir):
     '''
@@ -314,6 +324,8 @@ def panel_view_folder(out_dir):
             sac.ChipItem(label='View'),
             sac.ChipItem(label='Change'),
             sac.ChipItem(label='Reset'),
+            sac.ChipItem(label='Edit Participants'),
+
         ],
         label='', index=0, align='left', 
         size='md', radius='md', multiple=False, color='cyan', 
@@ -334,9 +346,13 @@ def panel_view_folder(out_dir):
             #height=400
         )
     
-        #if selected:
-            #if isinstance(selected, list):
-                #selected = selected[0]
-            #fname = list_paths[selected]
-            #show_sel_item(fname)
+        if selected:
+            if isinstance(selected, list):
+                selected = selected[0]
+            fname = list_paths[selected]
+            show_sel_item(fname)
 
+    if sel_opt == 'Edit Participants':
+        edit_participants(
+            os.path.join(out_dir, 'participants'), 'participants.csv'
+        )

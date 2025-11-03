@@ -46,46 +46,43 @@ def help_message(data_type):
             """
         )
 
+def show_description(pipeline) -> None:
+    """
+    Panel for viewing pipeline description
+    """
+    with st.container(border=True, height=300):
+        f_logo = os.path.join(
+            st.session_state.paths['resources'], 'pipelines', pipeline, f'logo_{pipeline}.png'
+        )
+        fdoc = os.path.join(
+            st.session_state.paths['resources'], 'pipelines', pipeline, f'overview_{pipeline}.md'
+        )
+        cols = st.columns([6, 1])
+        with cols[0]:
+            with open(fdoc, 'r') as f:
+                st.markdown(f.read())
+        with cols[1]:
+            st.image(f_logo)
 
 def select_pipeline():
     '''
     Select a pipeline and show overview
     '''
-    st.markdown("##### Pipelines:")
+    st.markdown("##### Select:")
 
     sac.divider(key='_p2_div1')
 
     pipelines = st.session_state.pipelines
-    sitems = []
-    colors = st.session_state.pipeline_colors
-    for i, ptmp in enumerate(pipelines.Name.tolist()):
-        sitems.append(
-            sac.ButtonsItem(
-                label=ptmp, color = colors[i%len(colors)]
-            )
-        )
+    pnames = pipelines.Name.tolist()
 
-    sel_index = utilmisc.get_index_in_list(
-        pipelines.Name.tolist(), st.session_state.sel_pipeline
+    sel_opt = sac.chip(
+        pnames,
+        label='', index=0, align='left',
+        size='md', radius='md', multiple=False, color='cyan',
+        description='Select a pipeline'
     )
-    sel_pipeline = sac.buttons(
-        items=sitems,
-        size='lg',
-        radius='xl',
-        align='left',
-        index =  sel_index,
-        key = '_sel_pipeline'
-    )
-    label_matches = pipelines.loc[pipelines.Name == sel_pipeline, 'Label'].values
-    if len(label_matches) == 0: # No selection
-        return
 
-    pname = label_matches[0]
-    st.session_state.sel_pipeline = pname
-
-    #sac.divider(label='Description', align='center', color='gray')
-
-    show_description(pname)
+    show_description(sel_opt.lower())
 
 
 def pipeline_menu():

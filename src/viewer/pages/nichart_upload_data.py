@@ -81,23 +81,10 @@ def upload_data():
         #with st.container(border=True):
         utilup.panel_upload_single_subject(out_dir)
 
-    # with cols[2]:
-    #     #with st.container(border=True):
-    #     utilup.panel_edit_participants(
-    #         os.path.join(out_dir, 'participants'),
-    #         'participants.csv'
-    #     )
-
-    # with cols[4]:
     with cols[2]:
         #with st.container(border=True):
         in_dir = st.session_state.paths['project']
-        utilup.panel_edit_participants(
-            os.path.join(out_dir, 'participants'),
-            'participants.csv'
-        )
         utilup.panel_view_folder(out_dir)
-
         
     # Show selections
     #utilses.disp_selections()
@@ -108,7 +95,7 @@ def upload_data():
 data_type = st.session_state.data_type
 
 with st.container(horizontal=True, horizontal_alignment="center"):
-    st.markdown("<h4 style=color:#3a3a88;'>User Data\n\n</h1>", unsafe_allow_html=True, width='content')
+    st.markdown("<h4 style=color:#3a3a88;'>Upload Data\n\n</h1>", unsafe_allow_html=True, width='content')
     help_message(data_type)
 
 upload_data()
