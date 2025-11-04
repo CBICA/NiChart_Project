@@ -680,6 +680,13 @@ def overall_pipeline_category_listing():
                 res_dict[category] = [pipeline_id]
     return res_dict
 
+def overall_pipeline_requirements_listing():
+    res_dict = {}
+    pipelines = get_all_pipeline_ids()
+    for pipeline_id in pipelines:
+        req_set, req_params, req_order = parse_pipeline_requirements(pipeline_id)
+        res_dict[pipeline_id] = req_set
+    return res_dict
 
 def load_metadata(metadata_path: Path) -> Dict:
     if metadata_path is None:
