@@ -899,8 +899,6 @@ def panel_guided_upload_data():
     
     if "needs_demographics" in reqs_set:
         ready = ready and (csv_report is not None) and _csv_severity(csv_report) == "green"
-    
-    st.markdown("---")
     if ready:
         st.success("All requirements satisfied. You can proceed.")
         st.button("Continue", type="primary")
