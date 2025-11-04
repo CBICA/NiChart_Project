@@ -83,31 +83,28 @@ st.markdown(
     """
     ### Manage project data
     
-    - Create a project folder for your dataset and upload input data for processing
+    - Press "Create New" to create a new project folder to contain your input and all output files
+    - Press "Select Existing" to select an existing project folder
+    - Press "Import Demo Data" (if available) to import a small sample dataset.
     """
 )
+
  ## TODO: Add import of sample dataset
-if "create_new_dataset_menu_open" not in st.session_state:
-    st.session_state.create_new_dataset_menu_open = False
-if st.button("Create New Dataset"):
-    st.session_state.create_new_dataset_menu_open = not st.session_state.create_new_dataset_menu_open
-if st.session_state.create_new_dataset_menu_open:
+left, middle, right = st.columns(3)
+
+with left:
     with st.popover(label="Create New"):
         utilio.panel_create_new()
 
-st.markdown(
-    """
-    Or switch to an existing project:
-    """
-)
-if "select_dataset_menu_open" not in st.session_state:
-    st.session_state.select_dataset_menu_open = False
-if st.button("Select Existing Dataset"):
-    st.session_state.select_dataset_menu_open = not st.session_state.select_dataset_menu_open
-if st.session_state.select_dataset_menu_open:
-    out_dir = st.session_state.paths["out_dir"]
+
+out_dir = st.session_state.paths["out_dir"]
+with middle:
     with st.popover(label="Select Existing"):
         utilio.panel_select_existing_with_preview(out_dir)
+
+with right:
+    with st.popover(label="Import Demo Data"):
+        st.info("Demo data import is not currently enabled for this pipeline.")
 
 st.markdown("### Guided Upload Process")
 utilio.panel_guided_upload_data()
