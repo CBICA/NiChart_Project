@@ -124,7 +124,7 @@ def data_overview(in_dir):
             checkbox=False,
             #checkbox_strict = True,
             open_all = False,
-            return_index = True
+            return_index = True,
             height=400
         )
         
