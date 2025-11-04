@@ -125,7 +125,7 @@ def data_overview(in_dir):
             #checkbox_strict = True,
             open_all = False,
             return_index = True
-            #height=400
+            height=400
         )
         
         if selected:
