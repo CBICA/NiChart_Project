@@ -109,6 +109,10 @@ if st.session_state.select_dataset_menu_open:
     with st.popover(label="Select Existing"):
         utilio.panel_select_existing_with_preview(out_dir)
 
+st.markdown("### Guided Upload Process")
+utilio.panel_guided_upload_data()
+
+
 st.markdown("#### Old page content")
 
 tab = sac.tabs(
