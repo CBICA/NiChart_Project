@@ -26,7 +26,7 @@ def register_csv_column(name: str):
         COLUMN_VALIDATORS[name] = fn
     return deco
 
-def issues_from_mask(df: pd.DataFrame, column: str, badmask: pd.Series, reason: str, mrid_col: str) -> List[Issue]:
+def issues_from_mask(df: pd.DataFrame, column: str, badmask: pd.Series, reason: str, mrid_col: str) -> List[CSVIssue]:
     idx = df.index[badmask.fillna(False)]
     mrids = df.loc[idx, mrid_col] if mrid_col in df.columns else [None]*len(idx)
     values = df.loc[idx, column]
@@ -79,7 +79,7 @@ def v_nonempty(df, col):
     return issues_from_mask(df, col, bad, "empty", mrid_col="MRID")
 
 @register_csv_column("MRID")
-def _validate_mrid(df: pd.DataFrame, col: str, mrid_col: str) -> List[Issue]:
+def _validate_mrid(df: pd.DataFrame, col: str, mrid_col: str) -> List[CSVIssue]:
     out = []
     out += v_nonempty(df, col)
     # duplicates
