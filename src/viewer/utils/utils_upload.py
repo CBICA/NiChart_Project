@@ -348,7 +348,8 @@ def panel_project_folder():
                 st.toast(f"Files in project {st.session_state.prj_name} have been successfully deleted.")
                 utilss.update_project(st.session_state.prj_name)
 
-#def organize_data(in_dir):
+#def organize_data():
+    
     
     
 
@@ -386,7 +387,7 @@ def panel_upload_single_subject():
             )
             
     # Upload data
-    out_tmp = os.path.join(st.session_state.paths['prj_dir'], 'tmp_upload')
+    out_tmp = os.path.join(st.session_state.paths['prj_dir'], 'user_upload')
     
     sel_opt = sac.chip(
         ['Single (.nii.gz, .nii, .zip, .csv)', 'Multiple (dicom files)'],
@@ -406,16 +407,17 @@ def panel_upload_single_subject():
             label_visibility="collapsed"
         )
         
+        flag_submit = False
         submitted = st.form_submit_button("Submit")
         if submitted:
-            if flag_multi == False:
-                copy_uploaded_single(sel_files, out_tmp)
-            else:
-                copy_uploaded_multi(sel_files, out_tmp)
-    
-    # Organize uploaded data
-    #organize_data(out_tmp)
-    
+            flag_submit = True
+        
+    if flag_submit == True:
+        if flag_multi == False:
+            copy_uploaded_single(sel_files, out_tmp)
+        else:
+            copy_uploaded_multi(sel_files, out_tmp)
+       
 
 def panel_view_files():
     '''
