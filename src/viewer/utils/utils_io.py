@@ -824,7 +824,7 @@ def panel_guided_upload_data():
 
     if "needs_demographics" in reqs_set:
         required_cols = reqs_params.get("csv_has_columns", [])
-        csv_path = os.path.join(st.session_state.paths["project"], 'participants.csv')
+        csv_path = os.path.join(st.session_state.paths["project"], 'participants' ,'participants.csv')
         csv_report = utilcsv.validate_csv(csv_path=csv_path, required_cols=required_cols, mrid_col="MRID")
         severity = _csv_severity(csv_report)
         icon = STATUS_ICON[severity]
