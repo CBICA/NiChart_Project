@@ -805,7 +805,8 @@ def classify_cardinality(req_order, counts: dict):
     return out
 
 def panel_guided_upload_data():
-    STATUS_ICON = {"green": ":material/check:", "yellow": ":material/warning:", "red": ":material/error:"}
+    # That's right, emojis in the code. >:^)
+    STATUS_ICON = {"green": "✅", "yellow": "⚠️", "red": "❌"}
     REQ_TO_HUMAN_READABLE = {
         'needs_T1': 'T1 Scans Required',
         'needs_FLAIR': 'FLAIR Scans Required',
