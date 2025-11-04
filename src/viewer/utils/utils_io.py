@@ -768,9 +768,9 @@ def compute_counts(ctx: dict = {}) -> dict:
     flair_count = get_file_count(flair_path, ['.nii', '.nii.gz'])
     csv_rows = count_csv_rows(demog_csv_path)
     res = {
-        "needs_T1": t1_count,
-        "needs_FLAIR": flair_count,
-        "needs_demographics": csv_rows,
+        "T1 Scans": t1_count,
+        "FLAIR Scans": flair_count,
+        "Demographics CSV": csv_rows,
     }
     return res
 
@@ -806,10 +806,6 @@ def classify_cardinality(req_order, counts: dict):
 
 def panel_guided_upload_data():
     STATUS_ICON = {"green": ":material/check:", "yellow": ":material/warning:", "red": ":material/error:"}
-
-    # Calculate index according to current project dirs
-
-    # Render checklist according to index
 
     pipeline = st.session_state.sel_pipeline
     pipeline_selected_explicitly = st.session_state.pipeline_selected_explicitly
@@ -874,6 +870,7 @@ def panel_guided_upload_data():
     for item in items:
         icon = STATUS_ICON[item.status]
         expanded = (item.status != "green")
+        
         label = f"{icon} {item.name} - {item.note}"
         with st.expander(label, expanded=expanded):
             if item.name == "needs_T1":
