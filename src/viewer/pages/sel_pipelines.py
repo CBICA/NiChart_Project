@@ -128,6 +128,7 @@ def sel_pipeline_from_list():
             
         if st.button('Select'):
             st.session_state.sel_pipeline = pname
+            st.session_state.pipeline_selected_explicitly = True
             st.success(f'Pipeline selected: {pname}')
 
 st.markdown(
