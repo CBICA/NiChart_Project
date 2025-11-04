@@ -600,6 +600,7 @@ def panel_select_existing_with_preview(out_dir):
     
     list_projects = get_subfolders(out_dir)
     curr_project = st.session_state.project
+    sel_project = curr_project
     with left:
         st.markdown("### Select Project")
         if len(list_projects) > 0:
@@ -612,7 +613,7 @@ def panel_select_existing_with_preview(out_dir):
             )
     with right:
         st.markdown("### Preview Project Data")
-        preview_project_folder(curr_project)
+        preview_project_folder(sel_project)
 
     if sel_project is None:
         return
