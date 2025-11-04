@@ -92,7 +92,8 @@ if "create_new_dataset_menu_open" not in st.session_state:
 if st.button("Create New Dataset"):
     st.session_state.create_new_dataset_menu_open = not st.session_state.create_new_dataset_menu_open
 if st.session_state.create_new_dataset_menu_open:
-    utilio.panel_create_new()
+    with st.popover():
+        utilio.panel_create_new()
 
 st.markdown(
     """
