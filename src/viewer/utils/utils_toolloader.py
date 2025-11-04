@@ -614,7 +614,7 @@ def parse_pipeline_categories(pipeline_id):
     with open(pipeline_path, 'r') as f:
         pipeline_yaml = yaml.safe_load(f)
 
-    return pipeline_yaml['categories']
+    return pipeline_yaml.get('categories', [])
 
 def get_all_pipeline_ids():
     directory = DEFAULT_PIPELINE_DEFINITION_PATH
