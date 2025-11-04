@@ -87,7 +87,11 @@ st.markdown(
     """
 )
  ## TODO: Add import of sample dataset
+if "create_new_dataset_menu_open" not in st.session_state:
+    st.session_state.create_new_dataset_menu_open = False
 if st.button("Create New Dataset"):
+    st.session_state.create_new_dataset_menu_open = not st.session_state.create_new_dataset_menu_open
+if st.session_state.create_new_dataset_menu_open:
     utilio.panel_create_new()
 
 st.markdown(
@@ -95,8 +99,11 @@ st.markdown(
     Or switch to an existing project:
     """
 )
-
+if "select_dataset_menu_open" not in st.session_state:
+    st.session_state.select_dataset_menu_open = False
 if st.button("Select Existing Dataset"):
+    st.session_state.select_dataset_menu_open = not st.session_state.select_dataset_menu_open
+if st.session_state.select_dataset_menu_open:
     out_dir = st.session_state.paths["out_dir"]
     utilio.panel_select_existing_with_preview(out_dir, st.session_state.project)
 
