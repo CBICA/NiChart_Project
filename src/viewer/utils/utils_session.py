@@ -10,6 +10,7 @@ import streamlit as st
 import utils.utils_rois as utilroi
 import utils.utils_processes as utilproc
 import utils.utils_cmaps as utilcmap
+import utils.utils_toolloader as utiltl
 import os
 from PIL import Image
 import streamlit_antd_components as sac
@@ -102,6 +103,7 @@ def init_session_vars():
         'red', 'pink', 'grape', 'violet', 'indigo', 'blue',
         'cyan', 'teal', 'green', 'lime', 'yellow', 'orange',
     ]
+    st.session_state.pipeline_categories = utiltl.overall_pipeline_category_listing()
 
     st.session_state.list_mods = ["T1", "T2", "FL", "DTI", "fMRI"]
     st.session_state.params = {
