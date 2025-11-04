@@ -629,20 +629,22 @@ def validate_project_name(string):
     return bool(re.fullmatch(r'[A-Za-z0-9_]+', string))
 
 def panel_create_new():
-    sel_project = st.text_input(
-            "Type a project name and hit enter:",
-            None,
-            placeholder="",
-            label_visibility = 'collapsed'
-        )
-    if sel_project is None:
-        return
-    project_name_ok = validate_project_name(sel_project)
-    if not project_name_ok:
-        st.error(f"Project names can only contain alphanumeric characters and underscores. Please revise.")
-    else:
-        utilss.update_project(sel_project)
-        st.success(f"Created project {sel_project}.")
+    with st.container(border=True):
+        st.info("Write a new project name and hit enter to save.")
+        sel_project = st.text_input(
+                "Type a project name and hit enter:",
+                None,
+                placeholder="",
+                label_visibility = 'collapsed'
+            )
+        if sel_project is None:
+            return
+        project_name_ok = validate_project_name(sel_project)
+        if not project_name_ok:
+            st.error(f"Project names can only contain alphanumeric characters and underscores. Please revise.")
+        else:
+            utilss.update_project(sel_project)
+            st.success(f"Created project {sel_project}.")
 
 def panel_select_project(out_dir, curr_project):
     '''
