@@ -112,49 +112,8 @@ def panel_run_pipeline():
     ## TODO: Retrieve dynamically/match between front end and toolloader code
     ## This a nice and simple placeholder for now
     
-    sel_pipeline_to_id = {
-        'dlmuse': 'run_dlmuse',
-        'spare-ad': 'run_spare_ad',
-        'spare-ba': 'run_spare_ba',
-        'spare-ba-image': 'run_bascores',
-        'dlwmls': 'run_dlwmls',
-        'spare-cvm': None,
-        'surrealgan': 'run_predcrd_surrealgan',
-        'synthseg': None,
-        'cclnmf': 'run_cclnmf',
-        'dlmuse-dlwmls': 'run_nichart_dlwmls_v2',
-        'spare-smoking': 'run_spare_cvm_smoking',
-        'spare-hypertension': 'run_spare_cvm_hypertension',
-        'spare-obesity': 'run_spare_cvm_obesity',
-        'spare-diabetes': 'run_spare_cvm_diabetes',
-        'spare-depression': 'run_spare_depression',
-        'spare-psychosis': 'run_spare_psychosis',
-        'ravens': 'run_nichart_ravens',
-        ## Add additional lines here ({sel_pipeline value} : {name of pipeline yaml} )
-    }
-    if harmonize:
-        sel_pipeline_to_id = {
-            'dlmuse': 'run_dlmuse_harmonized',
-            'dlwmls': 'run_dlwmls',
-            'spare-ad': 'run_spare_ad_harmonized',
-            'spare-ba': 'run_spare_ba_harmonized',
-            'spare-ba-image': 'run_bascores',
-            'spare-cvm': None,
-            'surrealgan': 'run_predcrd_surrealgan',
-            'synthseg': None,
-            'cclnmf':  None,
-            'dlmuse-dlwmls': 'run_nichart_dlwmls_v2_harmonized',
-            'spare-smoking': 'run_spare_cvm_smoking_harmonized',
-            'spare-hypertension': 'run_spare_cvm_hypertension_harmonized',
-            'spare-obesity': 'run_spare_cvm_obesity_harmonized',
-            'spare-diabetes': 'run_spare_cvm_diabetes_harmonized',
-            'spare-depression': None,
-            'spare-psychosis': None,
-            'ravens': None,
-            ## Add additional lines here ({sel_pipeline value} : {name of pipeline yaml} )
-        }
+    pipeline_to_run = tl.get_pipeline_id_by_name(sel_method, harmonized=harmonize)
 
-    pipeline_to_run = sel_pipeline_to_id.get(sel_method, None)
     if pipeline_to_run is None:
         st.error("The currently selected pipeline doesn't have an associated tool configuration. Please submit a bug report!")
         return

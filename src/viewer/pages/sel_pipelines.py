@@ -74,6 +74,18 @@ def view_doc(pipeline, dtype) -> None:
         st.code(sections[dtype])
             
 
+def pipeline_selector_categories():
+    # User selects their desired category, selection is filtered
+    pass
+
+def pipeline_selector_selectdatatypes():
+    # User selects their data types, selection is filtered (others show up as gray/disabled)
+    pass
+
+def pipeline_selector_autodatatypes():
+    # This one should auto-detect the user's available data 
+    pass
+
 def sel_pipeline_from_list():
     '''
     Select a pipeline
@@ -82,6 +94,8 @@ def sel_pipeline_from_list():
         pipelines = st.session_state.pipelines
         sitems = []
         colors = st.session_state.pipeline_colors
+        categories = st.session_state.pipeline_categories
+        reqs = st.session_state.pipeline_requirements
 
         for i, ptmp in enumerate(pipelines.Name.tolist()):
             sitems.append(

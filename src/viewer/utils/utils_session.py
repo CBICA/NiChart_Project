@@ -89,8 +89,11 @@ def init_session_vars():
 
     #st.session_state.project = 'nichart_project'
     st.session_state.project = 'NiChart_Demo1'
+    st.session_state.project = 'TemporaryDataset'
+    st.session_state.project_selected_explicitly = False
     
     st.session_state.sel_pipeline = 'dlmuse'
+    st.session_state.pipeline_selected_explicitly = False
 
     st.session_state.sel_mrid = None
     st.session_state.sel_roi = None
@@ -489,6 +492,7 @@ def update_project(sel_project) -> None:
 
     # Set project name
     st.session_state.project = sel_project
+    st.session_state.project_selected_explicitly = True
     st.session_state.paths['project'] = p_prj
 
 # Function to parse AWS login (if available)

@@ -49,15 +49,17 @@ def upload_data():
         utilio.panel_load_data()
     
 def panel_delete_data():
+    st.markdown("### Delete Specific Projects")
     with st.container(border=True):
         st.success(f'Project Name: {st.session_state.project}')
+        proj_dir = utilio.get_path_for_project(sel_project)
         proj_dir = st.session_state.paths['project']
         delete_proj = st.button("Delete this project", help="This will permanently delete all data in this project and invalidate all associated caching.")
         if 'deletion_candidate' not in st.session_state:
             st.session_state['deletion_candidate'] = ''
         if delete_proj or st.session_state['deletion_candidate'] == st.session_state.project:
             st.session_state['deletion_candidate'] = st.session_state.project
-            st.warning("Are you sure you want to delete all data associated with this project? This cannot be undone.")
+            st.warning(f"Are you sure you want to delete all data associated with project {st.session_state['deletion_candidate']}? This cannot be undone.")
             if st.button("Confirm deletion"):
                 shutil.rmtree(st.session_state.paths['project'])
                 st.success(f"Project {st.session_state.project} was successfully deleted.")
@@ -66,18 +68,39 @@ def panel_delete_data():
                     sel_project = list_projects[0]
                     utilss.update_project(sel_project)
                 st.session_state['deletion_candidate'] = ''
-                
+    st.markdown("### Delete All Projects")
+    with st.container(border=True):
+        delete_all_proj = st.button("Delete ALL projects and data")
+        if delete_all_proj:
+            st.warning("Are you sure you wish to delete all projects and data? This cannot be undone.")
+            if st.button("Confirm deletion"):
+                shutil.rmtree(st.session_state.paths['out_dir'])
+                os.makedirs(st.session_state.paths['out_dir'], exist_ok=True)
+                st.success("Deleted all user projects and data.")
     return
+
 st.markdown(
     """
     ### Manage project data
     
     - Create a project folder for your dataset and upload input data for processing
-    
-    - Or, switch to an existing project
-
     """
 )
+ ## TODO: Add import of sample dataset
+if st.button("Create New Dataset"):
+    utilio.panel_create_new()
+
+st.markdown(
+    """
+    Or switch to an existing project:
+    """
+)
+
+if st.button("Select Existing Dataset"):
+    out_dir = st.session_state.paths["out_dir"]
+    utilio.panel_select_existing_with_preview(out_dir, st.session_state.project)
+
+st.markdown("#### Old page content")
 
 tab = sac.tabs(
     items=[

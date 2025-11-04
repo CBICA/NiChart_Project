@@ -588,8 +588,23 @@ def parse_pipeline_requirements(pipeline_id):
 
     with open(pipeline_path, 'r') as f:
         pipeline_yaml = yaml.safe_load(f)
+    items = pipeline_yaml.get('requires', []) or []
+    reqs_set, req_params, req_order = set(), {}, []
 
-    return pipeline_yaml['requires']
+    for entry in items:
+        if isinstance(entry, str):
+            name, params = entry, None
+        elif isinstance(entry, dict):
+            (name, params), = entry.items()
+        else:
+            raise ValueError(f"Bad requirement entry {entry!r} when parsing pipeline requirements for {pipeline_id}.")
+        
+        reqs_set.add(name)
+        if params is not None:
+            req_params[name] = params
+        req_order.append((name, params))
+
+    return reqs_set, req_params, req_order
 
 def parse_pipeline_categories(pipeline_id):
     pipeline_path = DEFAULT_PIPELINE_DEFINITION_PATH / f"{pipeline_id}.yaml"
@@ -607,7 +622,53 @@ def get_all_pipeline_ids():
     basenames = [os.path.splitext(os.path.basename(f))[0] for f in yaml_files]
     return basenames
 
+def get_pipeline_id_by_name(sel_pipeline, harmonized=False):
+    sel_pipeline_to_id = {
+        'dlmuse': 'run_dlmuse',
+        'spare-ad': 'run_spare_ad',
+        'spare-ba': 'run_spare_ba',
+        'spare-ba-image': 'run_bascores',
+        'dlwmls': 'run_dlwmls',
+        'spare-cvm': None,
+        'surrealgan': 'run_predcrd_surrealgan',
+        'synthseg': None,
+        'cclnmf': 'run_cclnmf',
+        'dlmuse-dlwmls': 'run_nichart_dlwmls_v2',
+        'spare-smoking': 'run_spare_cvm_smoking',
+        'spare-hypertension': 'run_spare_cvm_hypertension',
+        'spare-obesity': 'run_spare_cvm_obesity',
+        'spare-diabetes': 'run_spare_cvm_diabetes',
+        'spare-depression': 'run_spare_depression',
+        'spare-psychosis': 'run_spare_psychosis',
+        'ravens': 'run_nichart_ravens',
+        ## Add additional lines here ({sel_pipeline value} : {name of pipeline yaml} )
+    }
+    if harmonized:
+        sel_pipeline_to_id = {
+            'dlmuse': 'run_dlmuse_harmonized',
+            'dlwmls': 'run_dlwmls',
+            'spare-ad': 'run_spare_ad_harmonized',
+            'spare-ba': 'run_spare_ba_harmonized',
+            'spare-ba-image': 'run_bascores',
+            'spare-cvm': None,
+            'surrealgan': 'run_predcrd_surrealgan',
+            'synthseg': None,
+            'cclnmf':  None,
+            'dlmuse-dlwmls': 'run_nichart_dlwmls_v2_harmonized',
+            'spare-smoking': 'run_spare_cvm_smoking_harmonized',
+            'spare-hypertension': 'run_spare_cvm_hypertension_harmonized',
+            'spare-obesity': 'run_spare_cvm_obesity_harmonized',
+            'spare-diabetes': 'run_spare_cvm_diabetes_harmonized',
+            'spare-depression': None,
+            'spare-psychosis': None,
+            'ravens': None,
+            ## Add additional lines here ({sel_pipeline value} : {name of pipeline yaml} )
+        }
+    return sel_pipeline_to_id[sel_pipeline]
+
 def overall_pipeline_category_listing():
+    # Returns a dictionary mapping a category to a list of associated pipelines.
+    # Useful for rendering a subset of pipelines
     res_dict = {}
     pipelines = get_all_pipeline_ids()
     for pipeline_id in pipelines:

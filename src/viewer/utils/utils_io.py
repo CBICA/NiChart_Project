@@ -1,14 +1,19 @@
 import streamlit as st
 import utils.utils_dicoms as utildcm
 import utils.utils_session as utilss
+import utils.utils_data_view as utildv
+import utils.utils_toolloader as utiltl
+import utils.utils_csvparsing as utilcsv
 import os
 import pandas as pd
 import numpy as np
 import zipfile
+import re
 import streamlit_antd_components as sac
 import shutil
 import time
 from typing import Any, BinaryIO, List, Optional
+from dataclasses import dataclass, asdict
 
 from utils.utils_logger import setup_logger
 logger = setup_logger()
@@ -550,6 +555,95 @@ def load_user_csv():
 ##############################################################
 ## Streamlit panels for IO
 
+def panel_import_demo_data():
+    st.info("You can import some demonstration data into your projects list by clicking the button below.")
+    if st.button("Import"):
+        # Copy demo dirs to user folder (TODO: make this less hardcoded)
+        demo_dir_paths = [
+            os.path.join(
+                st.session_state.paths["root"],
+                "output_folder",
+                "NiChart_sMRI_Demo1",
+            ),
+            os.path.join(
+                st.session_state.paths["root"],
+                "output_folder",
+                "NiChart_sMRI_Demo2",
+            ),
+        ]
+        demo_names = []
+        for demo in demo_dir_paths:
+            demo_name = os.path.basename(demo)
+            demo_names.append(demo_name)
+            destination_path = os.path.join(
+                st.session_state.paths["out_dir"], demo_name
+            )
+            if os.path.exists(destination_path):
+                shutil.rmtree(destination_path)
+            shutil.copytree(demo, destination_path, dirs_exist_ok=True)
+        st.success(f"NiChart demonstration projects have been added to your projects list: {', '.join(demo_names)} ")
+        return
+
+def get_path_for_project(project):
+    return os.path.join(st.session_state.paths['out_dir'], project)
+
+def preview_project_folder(project):
+    """
+    Panel for viewing files in a project folder
+    """
+    with st.container(border=True):
+        in_dir = get_path_for_project(project)
+        utildv.data_overview(in_dir)
+
+def panel_select_existing_with_preview(out_dir, curr_project):
+    left, right = st.columns([1, 2], gap='large')
+    
+    list_projects = get_subfolders(out_dir)
+    with left:
+        st.markdown("### Select Project")
+        if len(list_projects) > 0:
+            sel_ind = list_projects.index(curr_project)
+            sel_project = st.selectbox(
+                "Select Existing Project",
+                options = list_projects,
+                index = sel_ind,
+                label_visibility = 'collapsed',
+            )
+    with right:
+        st.markdown("### Preview Project Data")
+        preview_project_folder(curr_project)
+
+    if sel_project is None:
+        return
+    else:
+        utilss.update_project(sel_project)
+        st.success(f"Selected project {sel_project}")
+
+def validate_project_name(string):
+    """
+    Return True if `name` is safe for filenames/directories.
+    Allows only alphanumerics and underscores.
+    Rejects spaces, slashes, dots, colons, brackets, etc.
+    """
+    # Must contain only letters, digits, or underscores
+    return bool(re.fullmatch(r'[A-Za-z0-9_]+', string))
+
+def panel_create_new():
+    sel_project = st.text_input(
+            "Type a project name and hit enter:",
+            None,
+            placeholder="",
+            label_visibility = 'collapsed'
+        )
+    if sel_project is None:
+        return
+    project_name_ok = validate_project_name(sel_project)
+    if not project_name_ok:
+        st.error(f"Project names can only contain alphanumeric characters and underscores. Please revise.")
+    else:
+        utilss.update_project(sel_project)
+        st.success(f"Created project {sel_project}.")
+
 def panel_select_project(out_dir, curr_project):
     '''
     Panel for creating/selecting a project name/folder (to keep all data for the current project)
@@ -615,13 +709,209 @@ def panel_select_project(out_dir, curr_project):
     if sel_project is None:
         return
     
-    
     if st.button("Select"):
         if sel_project != curr_project:
             utilss.update_project(sel_project)
         return sel_project
 
-def panel_load_data():
+@dataclass
+class RequirementStatus:
+    name: str
+    status: str # 'green' | 'yellow' | 'red'
+    count: int # how many items available/satsified
+    target: int # reference count for 'green'
+    note: str = '' # short human message
+
+def _csv_severity(report) -> str:
+    if not report.file_ok or not report.columns_ok:
+        return "red"
+    return "yellow" if report.issues else "green"
+
+def _issues_dataframe(issues) -> pd.DataFrame:
+    """Makes a nice table for streamlit from List[CSVIssue]"""
+    if not issues:
+        return pd.DataFrame(columns=["mrid", "row", "column", "value", "reason"])
+    df = pd.DataFrame([asdict(i) for i in issues])
+    cols = [c for c in ["mrid", "row", "column", "value", "reason"] if c in df.columns]
+    return df[cols]
+
+
+def count_csv_rows(csv_path: str) -> int:
+    try:
+        # Load the CSV safely — low_memory=False avoids dtype guessing issues on large files
+        df = pd.read_csv(csv_path, low_memory=False)
+        # Count rows (header is automatically excluded by pandas)
+        return len(df)
+    except FileNotFoundError:
+        print(f"Error: File '{csv_path}' not found.")
+    except pd.errors.EmptyDataError:
+        print(f"Error: File '{csv_path}' is empty.")
+    except pd.errors.ParserError as e:
+        print(f"Error parsing '{csv_path}': {e}")
+    return 0
+
+def compute_counts(ctx: dict = {}) -> dict:
+    """
+    ctx can contain other contextual info, use as needed to pass things from ui
+    """
+    sel_project = st.session_state.project
+    project_path = get_path_for_project(sel_project)
+    t1_path = os.path.join(project_path, "t1")
+    flair_path = os.path.join(project_path, "fl")
+    demog_csv_path = os.path.join(project_path, "participants", "participants.csv")
+
+    t1_count = get_file_count(t1_path, ['.nii', '.nii.gz'])
+    flair_count = get_file_count(flair_path, ['.nii', '.nii.gz'])
+    csv_rows = count_csv_rows(demog_csv_path)
+    res = {
+        "needs_T1": t1_count,
+        "needs_FLAIR": flair_count,
+        "needs_demographics": csv_rows,
+    }
+    return res
+
+def classify_cardinality(req_order, counts: dict):
+    """
+    req_order: list[(name, params)]
+    counts: dict name-> int
+    Returns: list[RequirementStatus]
+    Rule:
+        target = max(counts of all present requirements among T1/FLAIR images, MRID rows)
+        red = count == 0 for a required item
+        yellow = 0 < count < target
+        green = count >= target
+    """
+    present_names = [name for (name, _) in req_order if name in counts]
+    target = max([counts[n] for n in present_names], default=0)
+    out = []
+    for (name, _) in req_order:
+        if name not in counts:
+            # Non-cardinality requirements (e.g. csv_has_columns -> treat as bool)
+            # Skip otherwise
+            continue
+        c = counts[name]
+        if c == 0:
+            status, note = "red", "missing"
+        elif c < target:
+            status, note = "yellow", f"{c}/{target} available"
+        else:
+            status, note = "green", f"{c}/{target} available"
+
+        out.append(RequirementStatus(name=name, status=status, count=c, target=target, note=note))
+    return out
+
+def panel_guided_upload_data():
+    STATUS_ICON = {"green": ":material/check:", "yellow": ":material/warning:", "red": ":material/error:"}
+
+    # Calculate index according to current project dirs
+
+    # Render checklist according to index
+
+    pipeline = st.session_state.sel_pipeline
+    pipeline_selected_explicitly = st.session_state.pipeline_selected_explicitly
+    if not pipeline_selected_explicitly:
+        st.info("No pipeline was selected, so we auto-selected DLMUSE.")
+    else:
+        st.info(f"Pipeline {pipeline} was selected, so we'll guide you through the required inputs.")
+
+    pipeline_id = utiltl.get_pipeline_id_by_name(pipeline)
+    reqs_set, reqs_params, req_order = utiltl.parse_pipeline_requirements(pipeline_id)
+
+    if "needs_demographics" in reqs_set:
+        required_cols = reqs_params.get("csv_has_columns", [])
+        csv_path = os.path.join(st.session_state.paths["project"], 'participants.csv')
+        csv_report = utilcsv.validate_csv(csv_path=csv_path, required_cols=required_cols, mrid_col="MRID")
+        severity = _csv_severity(csv_report)
+        icon = STATUS_ICON[severity]
+
+        # Build a concise label
+        if not csv_report.file_ok:
+            note = "CSV file not found."
+        elif not csv_report.columns_ok:
+            note = f"Missing columns: {', '.join(csv_report.missing_cols)}"
+        elif csv_report.issues:
+            note = f"{len(csv_report)} issue(s) detected"
+        else:
+            note = "All required columns found and passed validation; no issues"
+
+        csv_expanded = (severity != "green")
+        with st.expander(f"{icon} Demographics CSV - {note}", expanded=csv_expanded):
+            if csv_report.file_ok:
+                if csv_report.missing_cols:
+                    st.error("Missing: " + ", ".join(csv_report.missing_cols))
+                if csv_report.present_cols:
+                    st.success("Present: " + ", ".join(csv_report.present_cols))
+                if csv_report.extra_cols:
+                    st.info("Extra (not used): " + ", ".join(csv_report.extra_cols))
+                st.caption(f"Rows in CSV: {csv_report.rows}")
+
+                if csv_report.issues:
+                    st.subheader("Issues")
+                    issues_df = _issues_dataframe(csv_report.issues)
+                    group_by_col = st.selectbox(
+                        "Group issues by", ["(none)", "column", "reason"],
+                        index=1 if "column" in issues_df.columns else 0,      
+                    )
+                    if group_by_col != "(none)" and group_by_col in issues_df.columns:
+                        for key, sub in issues_df.groupby(group_by_col):
+                            st.markdown(f"**{group_by_col}: {key}** - {len(sub)} row(s)")
+                            st.dataframe(sub, use_container_width=True, height=220)
+                    else:
+                        st.dataframe(issues_df, use_container_width=True, height=320)
+                    
+                    st.info("Tip: fix the data and reupload or hit save to refresh validation")
+            else:
+                st.warning("Upload or enter a demographics CSV to validate.")
+    
+    # need to generate counts
+    counts = compute_counts()
+    items = classify_cardinality(req_order, counts)
+
+    for item in items:
+        icon = STATUS_ICON[item.status]
+        expanded = (item.status != "green")
+        label = f"{icon} {item.name} - {item.note}"
+        with st.expander(label, expanded=expanded):
+            if item.name == "needs_T1":
+                st.write("Please upload T1 images.")
+                st.write("PLACEHOLDER, WIDGET GOES HERE")
+            elif item.name == "needs_FLAIR":
+                st.write("Please upload FLAIR images.")
+                st.write("PLACEHOLDER, WIDGET GOES HERE")
+            elif item.name == "needs_demographics":
+                req_cols = reqs_params.get('csv_has_columns', [])
+                st.write("Please provide demographics CSV.", "Required columns:", ", ".join(req_cols) or "(none)")
+                st.write("PLACEHOLDER, WIDGET GOES HERE")
+            elif item.name == "csv_has_columns":
+                pass # Handled in needs_demographics case
+            else:
+                raise ValueError(f"Requirement {item.name} for pipeline {pipeline_id} has no associated rule. Please submit a bug report.")
+
+    ready = True
+    if any(s.status == "red" for s in items):
+        ready = False
+    
+    if "needs_demographics" in reqs_set:
+        ready = ready and (csv_report is not None) and _csv_severity(csv_report) == "green"
+    
+    st.markdown("---")
+    if ready:
+        st.success("All requirements satisfied. You can proceed.")
+        st.button("Continue", type="primary")
+    else:
+        st.info("Resolve the issues above to proceed.")
+    pass
+
+def panel_guided_nifti_upload():
+    pass
+
+def panel_guided_demographics_upload():
+    pass
+
+def panel_guided_upload_additionaldata():
+    pass
+
+def panel_load_data(default=None, default_nifti_type=None):
     '''
     Panel for loading user data
     '''
@@ -633,7 +923,8 @@ def panel_load_data():
             sac.TabsItem(label='Additional Data')            
         ],
         size='lg',
-        align='left'
+        align='left',
+        
     )
 
     if sel_dtype is None:
