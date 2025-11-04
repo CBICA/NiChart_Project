@@ -107,7 +107,7 @@ if st.button("Select Existing Dataset"):
 if st.session_state.select_dataset_menu_open:
     out_dir = st.session_state.paths["out_dir"]
     with st.popover(label="Select Existing"):
-        utilio.panel_select_existing_with_preview(out_dir, st.session_state.project)
+        utilio.panel_select_existing_with_preview(out_dir)
 
 st.markdown("#### Old page content")
 

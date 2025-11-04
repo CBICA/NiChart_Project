@@ -595,10 +595,11 @@ def preview_project_folder(project):
         in_dir = get_path_for_project(project)
         utildv.data_overview(in_dir)
 
-def panel_select_existing_with_preview(out_dir, curr_project):
+def panel_select_existing_with_preview(out_dir):
     left, right = st.columns([1, 2], gap='large')
     
     list_projects = get_subfolders(out_dir)
+    curr_project = st.session_state.project
     with left:
         st.markdown("### Select Project")
         if len(list_projects) > 0:
