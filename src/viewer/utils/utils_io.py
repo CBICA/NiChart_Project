@@ -243,7 +243,7 @@ def upload_single_file(out_dir, out_name, label) -> None:
         return False
 
 
-def create_img_list(dtype: str) -> None:
+def create_img_list(dtype: str, show_warning=False) -> None:
     '''
     Create a list of input images
     '''
