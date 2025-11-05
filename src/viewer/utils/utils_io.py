@@ -416,14 +416,6 @@ def load_nifti(default_modality='t1', forced_modality=None):
         upload_multiple_files(out_dir)
         
         fcount = get_file_count(out_dir, ['.nii', '.nii.gz'])
-        if fcount > 0:
-            st.success(
-                f" Detected {fcount} nifti image files", icon=":material/thumb_up:"
-            )
-        else:
-            st.info(
-                f" No nifti image files detected yet. Try uploading some!", icon=":material/thumb_down:"
-            )
             
     with right:
         # Create list of scans
@@ -432,6 +424,14 @@ def load_nifti(default_modality='t1', forced_modality=None):
 
         if st.button("Delete All Images"):
             remove_dir(out_dir)
+    if fcount > 0:
+        st.success(
+            f" Detected {fcount} nifti image files", icon=":material/thumb_up:"
+        )
+    else:
+        st.info(
+            f" No nifti image files detected yet. Try uploading some!", icon=":material/thumb_down:"
+        )
     
 def load_subj_list():
     '''
