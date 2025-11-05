@@ -804,6 +804,18 @@ def classify_cardinality(req_order, counts: dict):
         out.append(RequirementStatus(name=name, status=status, count=c, target=target, note=note))
     return out
 
+def panel_ask_harmonize():
+    sel_method = st.session_state.sel_pipeline
+    harmonizable = ['spare-ad', 'spare-ba', 'dlmuse', 'dlmuse-dlwmls', 'spare-smoking', 'spare-hypertension', 'spare-obesity', 'spare-diabetes']
+    if sel_method in harmonizable:
+        st.markdown("""
+                    Do you want to harmonize your results to the reference data?
+                    This requires at least 30 subjects and demographics (Age, Sex) data for each scan.
+                    """)
+        
+        harmonize = st.checkbox("Harmonize to reference data? (Requires >= 30 scans)")
+        st.session_state.do_harmonize = harmonize
+
 def panel_guided_upload_data():
     # That's right, emojis in the code. >:^)
     STATUS_ICON = {"green": "✅", "yellow": "⚠️", "red": "❌"}
@@ -819,7 +831,7 @@ def panel_guided_upload_data():
     else:
         st.info(f"Pipeline {pipeline} was selected, so we'll guide you through the required inputs.")
 
-    pipeline_id = utiltl.get_pipeline_id_by_name(pipeline)
+    pipeline_id = utiltl.get_pipeline_id_by_name(pipeline, harmonized=st.session_state.do_harmonize)
     reqs_set, reqs_params, req_order = utiltl.parse_pipeline_requirements(pipeline_id)
 
     # need to generate counts
