@@ -385,15 +385,6 @@ def load_nifti(default_modality='t1', forced_modality=None):
     '''
     Panel to load nifti images
     '''
-    tab = sac.tabs(
-        items=[
-            sac.TabsItem(label='Upload'),
-            sac.TabsItem(label='View'),
-            sac.TabsItem(label='Reset'),
-        ],
-        size='lg',
-        align='left'
-    )
     if forced_modality is None:
         sel_mod = sac.segmented(
             items=st.session_state.list_mods,
@@ -932,20 +923,19 @@ def panel_guided_upload_data():
     pass
 
 def panel_guided_nifti_upload(modality='t1'):
-    mode = None
     left, right = st.columns(2)
     with left:
         do_nifti = st.button("Upload NIFTI files")
         if do_nifti:
-            mode = "nifti"
+            st.session_state.nifti_dicom_upload_mode = "nifti"
     with right:
         do_dicom = st.button("Upload and Convert DICOM")
         if do_dicom:
-            mode = "dicom"
-    if mode == "nifti":
-        st.info("Drag and drop your NIFTI files to this box, or browse for them using the button. Folders, .zip archives and image files are all accepted.")
+            st.session_state.nifti_dicom_upload_mode = "dicom"
+    if st.session_state.nifti_dicom_upload_mode == "nifti":
+        st.info("Drag and drop your NIFTI files to the gray box below, or browse for them using the button. Folders, .zip archives and image files are all accepted.")
         load_nifti(default_modality=modality, forced_modality=modality)
-    elif mode == "dicom":
+    elif st.session_state.nifti_dicom_upload_mode == "dicom":
         st.info("Follow these steps to convert your DICOM files.")
         load_dicoms()
     pass
