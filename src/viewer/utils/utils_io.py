@@ -338,7 +338,7 @@ def create_scan_csv() -> None:
 ##############################################################
 ## Panels for IO
 
-def load_dicoms():
+def load_dicoms(default_modality='t1'):
     tab = sac.tabs(
         items=[
             sac.TabsItem(label='Upload'),
@@ -355,31 +355,23 @@ def load_dicoms():
         st.session_state.paths['project'], 'dicoms'
     )
     
-    if tab == "Upload":
-        if st.button("Upload"):
-            # Upload data
-            upload_multiple_files(out_dir)
+    upload_multiple_files(out_dir)
 
-        fcount = get_file_count(out_dir)
-        if fcount > 0:
-            st.success(f'Dicom data available ({fcount} files)')
+    fcount = get_file_count(out_dir)
+    if fcount > 0:
+        st.success(f'Dicom data available ({fcount} files)')
         
-    elif tab == "Detect Series":
-        utildcm.panel_detect_dicom_series(out_dir)
+    utildcm.panel_detect_dicom_series(out_dir)
         
-    elif tab == "Extract Scans":
-        utildcm.panel_extract_nifti(st.session_state.paths['project'])
+    utildcm.panel_extract_nifti(st.session_state.paths['project'])
         
-    elif tab == "View":
-        # Create list of scans
-        sel_mod='T1'
-        df = create_img_list(sel_mod.lower())
-        st.dataframe(df)
+    # Create list of scans
+    sel_mod='T1'
+    df = create_img_list(sel_mod.lower())
+    st.dataframe(df)
 
-    elif tab == "Reset":
-        st.info(f'Out folder name: {out_dir}')
-        if st.button("Delete"):
-            remove_dir(out_dir)
+    if st.button("Delete"):
+        remove_dir(out_dir)
 
 def load_nifti(default_modality='t1', forced_modality=None):
     '''
