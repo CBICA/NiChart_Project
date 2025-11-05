@@ -111,31 +111,6 @@ utilio.panel_ask_harmonize()
 utilio.panel_guided_upload_data()
 
 
-st.markdown("#### Old page content")
-
-tab = sac.tabs(
-    items=[
-        sac.TabsItem(label='Select Project Name'),
-        sac.TabsItem(label='Upload Data'),
-        sac.TabsItem(label='View Project Folder'),
-        sac.TabsItem(label='Delete Data')
-    ],
-    size='lg',
-    align='left'
-)
-
-if tab == 'Select Project Name':
-    select_project()
-
-if tab == 'Upload Data':
-    upload_data()
-
-if tab == 'View Project Folder':
-    view_project_folder()
-
-if tab == 'Delete Data':
-    panel_delete_data()
-
 # Show selections
 utilses.disp_selections()
 
