@@ -935,9 +935,9 @@ def panel_guided_upload_data():
         st.info("Resolve the issues above to proceed.")
     pass
 
-def panel_guided_nifti_upload(modality='T1'):
+def panel_guided_nifti_upload(modality='t1'):
     st.info("Drag and drop your NIFTI files to this box, or browse for them using the button.")
-    panel_load_data()
+    load_nifti(default_modality=modality, forced_modality=modality)
     pass
 
 def panel_guided_demographics_upload():
