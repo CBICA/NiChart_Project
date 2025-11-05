@@ -898,8 +898,10 @@ def panel_guided_upload_data():
                         st.dataframe(issues_df, use_container_width=True, height=320)
                     
                     st.info("Tip: fix the data and reupload or hit save to refresh validation")
+                    load_subj_list()
             else:
                 st.warning("Upload or enter a demographics CSV to validate.")
+                load_subj_list()
     
 
 
