@@ -932,8 +932,22 @@ def panel_guided_upload_data():
     pass
 
 def panel_guided_nifti_upload(modality='t1'):
-    st.info("Drag and drop your NIFTI files to this box, or browse for them using the button. Folders, .zip archives and image files are all accepted.")
-    load_nifti(default_modality=modality, forced_modality=modality)
+    mode = None
+    left, right = st.columns(2)
+    with left:
+        do_nifti = st.button("Upload NIFTI files")
+        if do_nifti:
+            mode = "nifti"
+    with right:
+        do_dicom = st.button("Upload and Convert DICOMs")
+        if do_dicom:
+            mode = "dicom"
+    if mode == "nifti":
+        st.info("Drag and drop your NIFTI files to this box, or browse for them using the button. Folders, .zip archives and image files are all accepted.")
+        load_nifti(default_modality=modality, forced_modality=modality)
+    elif mode == "dicom":
+        st.info("Follow these steps to convert your DICOM files.")
+        load_dicoms()
     pass
 
 def panel_guided_demographics_upload():
