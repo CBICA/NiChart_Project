@@ -843,6 +843,24 @@ def panel_guided_upload_data():
     count_max_value = counts[count_max_key]
     count_diffs = {key: abs(counts[key]-count_max_value) for key in counts.keys() if key != count_max_key}
 
+    for item in items:
+        icon = STATUS_ICON[item.status]
+        expanded = (item.status != "green")
+        
+        label = f"{icon} {REQ_TO_HUMAN_READABLE[item.name]} - {item.note}"
+        with st.expander(label, expanded=expanded):
+            if item.name == "needs_T1":
+                st.write("Please upload T1 images.")
+                st.write("PLACEHOLDER, WIDGET GOES HERE")
+            elif item.name == "needs_FLAIR":
+                st.write("Please upload FLAIR images.")
+                st.write("PLACEHOLDER, WIDGET GOES HERE")
+            elif item.name == "needs_demographics":
+                pass # Handled above 
+            elif item.name == "csv_has_columns":
+                pass # Handled in needs_demographics case
+            else:
+                raise ValueError(f"Requirement {item.name} for pipeline {pipeline_id} has no associated rule. Please submit a bug report.")
     if "needs_demographics" in reqs_set:
         required_cols = reqs_params.get("csv_has_columns", [])
         csv_path = os.path.join(st.session_state.paths["project"], 'participants' ,'participants.csv')
@@ -902,28 +920,6 @@ def panel_guided_upload_data():
             else:
                 st.warning("Upload or enter a demographics CSV to validate.")
                 load_subj_list()
-    
-
-
-    for item in items:
-        icon = STATUS_ICON[item.status]
-        expanded = (item.status != "green")
-        
-        label = f"{icon} {REQ_TO_HUMAN_READABLE[item.name]} - {item.note}"
-        with st.expander(label, expanded=expanded):
-            if item.name == "needs_T1":
-                st.write("Please upload T1 images.")
-                st.write("PLACEHOLDER, WIDGET GOES HERE")
-            elif item.name == "needs_FLAIR":
-                st.write("Please upload FLAIR images.")
-                st.write("PLACEHOLDER, WIDGET GOES HERE")
-            elif item.name == "needs_demographics":
-                pass # Handled above 
-            elif item.name == "csv_has_columns":
-                pass # Handled in needs_demographics case
-            else:
-                raise ValueError(f"Requirement {item.name} for pipeline {pipeline_id} has no associated rule. Please submit a bug report.")
-
     ready = True
     if any(s.status == "red" for s in items):
         ready = False
