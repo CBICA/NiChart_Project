@@ -413,9 +413,7 @@ def load_nifti(default_modality='t1', forced_modality=None):
         os.makedirs(out_dir)
     
     if tab == 'Upload':
-        if st.button("Upload"):
-            # Upload data
-            upload_multiple_files(out_dir)
+        upload_multiple_files(out_dir)
         
         fcount = get_file_count(out_dir, ['.nii', '.nii.gz'])
         if fcount > 0:
