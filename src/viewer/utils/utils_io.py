@@ -411,8 +411,8 @@ def load_nifti(default_modality='t1', forced_modality=None):
     )
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
-    
-    if tab == 'Upload':
+    left, right = st.columns([2, 1])
+    with left:
         upload_multiple_files(out_dir)
         
         fcount = get_file_count(out_dir, ['.nii', '.nii.gz'])
@@ -422,17 +422,15 @@ def load_nifti(default_modality='t1', forced_modality=None):
             )
         else:
             st.info(
-                f" No nifti image files", icon=":material/thumb_down:"
+                f" No nifti image files detected yet. Try uploading some!", icon=":material/thumb_down:"
             )
             
-    elif tab == 'View':
+    with right:
         # Create list of scans
         df = create_img_list(sel_mod.lower())
         st.dataframe(df)        
 
-    elif tab == 'Reset':
-        st.info(f'Out folder name: {out_dir}')
-        if st.button("Delete"):
+        if st.button("Delete All Images"):
             remove_dir(out_dir)
     
 def load_subj_list():
@@ -934,7 +932,7 @@ def panel_guided_upload_data():
     pass
 
 def panel_guided_nifti_upload(modality='t1'):
-    st.info("Drag and drop your NIFTI files to this box, or browse for them using the button.")
+    st.info("Drag and drop your NIFTI files to this box, or browse for them using the button. Folders, .zip archives and image files are all accepted.")
     load_nifti(default_modality=modality, forced_modality=modality)
     pass
 
