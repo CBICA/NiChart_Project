@@ -934,6 +934,8 @@ def panel_guided_upload_data():
     pass
 
 def panel_guided_nifti_upload():
+    st.info("Drag and drop your NIFTI files to this box, or browse for them using the button.")
+    panel_load_data()
     pass
 
 def panel_guided_demographics_upload():
