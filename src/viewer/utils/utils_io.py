@@ -576,6 +576,7 @@ def load_subj_list():
     
     if tab == 'Upload':
         upload_single_file(out_dir, fname_tmp, 'Select participants file')
+        
         if os.path.exists(fname_tmp):
             st.success("We received your demographics file! Converting it to our format...")
             df_user = pd.read_csv(fname_tmp)
@@ -588,12 +589,16 @@ def load_subj_list():
                             }
             nifti_parser = NiftiMRIDParser()
             heuristic_df = nifti_parser.create_master_csv(dir_dict, os.path.join(st.session_state.paths['project'], 'inferred_data_paths.csv'))
-    
+            heuristic_df = heuristic_df.drop(df.filter(regex='_path$').columns, axis=1)
             corrected_df, issues = normalize_demographics_df(df_user, heuristic_df)
             corrected_df = corrected_df.sort_values(by='MRID')
             corrected_df = corrected_df.drop_duplicates().reset_index().drop('index', axis=1)
     
             # Add columns for batch and dx
+            if 'Age' not in corrected_df.columns:
+                corrected_df[['Age']] = '?'
+            if 'Sex' not in corrected_df.columns:
+                corrected_df[['Sex']] = '?'
             if 'Batch' not in corrected_df.columns:
                 corrected_df[['Batch']] = f'{st.session_state.project}_Batch1'
             if 'IsCN' not in corrected_df.columns:
