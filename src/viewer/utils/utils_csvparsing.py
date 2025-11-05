@@ -97,6 +97,14 @@ def _validate_age(df: pd.DataFrame, col: str, mrid_col: str) -> List[CSVIssue]:
 def _validate_sex(df: pd.DataFrame, col: str, mrid_col: str) -> List[CSVIssue]:
     return v_enum(df, col, values=["M","F"])
 
+@register_csv_column("IsCN")
+def _validate_iscn(df: pd.DataFrame, col: str, mrid_col: str) -> List[CSVIssue]:
+    return v_enum(df, col, values=[0, 1])
+
+@register_csv_column("Batch")
+def _validate_batch(df: pd.DataFrame, col: str, mrid_col: str) -> List[CSVIssue]:
+    return v_nonempty(df, col)
+
 from dataclasses import asdict
 
 @dataclass
@@ -123,7 +131,7 @@ def validate_csv(csv_path: str, required_cols: list[str], mrid_col: str = "MRID"
     extra   = [c for c in cols if c not in required_cols]
 
     columns_ok = (len(missing) == 0)
-    issues: List[Issue] = []
+    issues: List[CSVIssue] = []
 
     if columns_ok:
         # Run registered validators for *present* columns we have rules for

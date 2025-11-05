@@ -808,9 +808,9 @@ def panel_guided_upload_data():
     # That's right, emojis in the code. >:^)
     STATUS_ICON = {"green": "✅", "yellow": "⚠️", "red": "❌"}
     REQ_TO_HUMAN_READABLE = {
-        'needs_T1': 'T1 Scans Required',
-        'needs_FLAIR': 'FLAIR Scans Required',
-        'needs_demographics': 'Demographic CSV Required', 
+        'needs_T1': 'T1 Scans',
+        'needs_FLAIR': 'FLAIR Scans',
+        'needs_demographics': 'Demographic CSV', 
     }
     pipeline = st.session_state.sel_pipeline
     pipeline_selected_explicitly = st.session_state.pipeline_selected_explicitly
@@ -822,13 +822,22 @@ def panel_guided_upload_data():
     pipeline_id = utiltl.get_pipeline_id_by_name(pipeline)
     reqs_set, reqs_params, req_order = utiltl.parse_pipeline_requirements(pipeline_id)
 
+    # need to generate counts
+    counts = compute_counts()
+    
+    items = classify_cardinality(req_order, counts)
+    
+    count_max_key = max(counts, key=counts.get)
+    count_max_value = counts[count_max_key]
+    count_diffs = {key: abs(counts[key]-count_max_value) for key in counts.keys() if key != count_max_key}
+
     if "needs_demographics" in reqs_set:
         required_cols = reqs_params.get("csv_has_columns", [])
         csv_path = os.path.join(st.session_state.paths["project"], 'participants' ,'participants.csv')
         csv_report = utilcsv.validate_csv(csv_path=csv_path, required_cols=required_cols, mrid_col="MRID")
         severity = _csv_severity(csv_report)
         icon = STATUS_ICON[severity]
-
+        row_note = ""
         # Build a concise label
         if not csv_report.file_ok:
             note = "CSV file not found."
@@ -838,6 +847,18 @@ def panel_guided_upload_data():
             note = f"{len(csv_report)} issue(s) detected"
         else:
             note = "All required columns found and passed validation; no issues"
+        if severity == "green":
+            if count_max_key == "needs_demographics":
+                for key, val in count_diffs:
+                    if val < count_max_value:
+                        row_note += f"{REQ_TO_HUMAN_READABLE[key]}: {val} MRIDs are in demographics CSV but not in available.\n"
+                        severity = "yellow"
+            else:
+                for key, val in count_diffs:
+                    if count_diffs["needs_demographics"] > val:
+                        row_note += f"{REQ_TO_HUMAN_READABLE[key]}: {val} CSV entries are present which have no associated scan.\n"
+                    elif count_diffs["needs_demographics"] < val:
+                        row_note += f"{REQ_TO_HUMAN_READABLE[key]}: {val} scans are present which have no demographics CSV entry.\n"
 
         csv_expanded = (severity != "green")
         with st.expander(f"{icon} Demographics CSV - {note}", expanded=csv_expanded):
@@ -868,9 +889,7 @@ def panel_guided_upload_data():
             else:
                 st.warning("Upload or enter a demographics CSV to validate.")
     
-    # need to generate counts
-    counts = compute_counts()
-    items = classify_cardinality(req_order, counts)
+
 
     for item in items:
         icon = STATUS_ICON[item.status]
@@ -885,9 +904,7 @@ def panel_guided_upload_data():
                 st.write("Please upload FLAIR images.")
                 st.write("PLACEHOLDER, WIDGET GOES HERE")
             elif item.name == "needs_demographics":
-                req_cols = reqs_params.get('csv_has_columns', [])
-                st.write("Please provide demographics CSV.", "Required columns:", ", ".join(req_cols) or "(none)")
-                st.write("PLACEHOLDER, WIDGET GOES HERE")
+                pass # Handled above 
             elif item.name == "csv_has_columns":
                 pass # Handled in needs_demographics case
             else:
