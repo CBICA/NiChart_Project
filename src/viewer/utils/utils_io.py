@@ -939,7 +939,7 @@ def panel_guided_nifti_upload(modality='t1'):
         if do_nifti:
             mode = "nifti"
     with right:
-        do_dicom = st.button("Upload and Convert DICOMs")
+        do_dicom = st.button("Upload and Convert DICOM")
         if do_dicom:
             mode = "dicom"
     if mode == "nifti":

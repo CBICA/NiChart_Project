@@ -107,6 +107,7 @@ def init_session_vars():
     st.session_state.pipeline_requirements = utiltl.overall_pipeline_requirements_listing()
     st.session_state.harmonizable_pipelines = st.session_state.pipeline_categories['harmonized']
     st.session_state.do_harmonize = False
+    st.session_state.nifti_dicom_upload_mode = None
 
     st.session_state.list_mods = ["T1", "T2", "FL", "DTI", "fMRI"]
     st.session_state.params = {
