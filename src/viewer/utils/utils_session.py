@@ -78,10 +78,21 @@ def init_project_folders():
         {"dname": dnames, "dtype": dtypes}
     )
 
+def init_participant():
+    '''
+    Set participant info
+    '''
+    st.session_state.participant = {
+        'mrid' : None, 'age' : None, 'sex' : None
+    }
+
 def init_session_vars():
     '''
     Set initial values for session variables
     '''
+    
+    init_participant()
+    
     ## Misc variables
     st.session_state.mode = 'release'
     # st.session_state.mode = 'debug'

@@ -175,57 +175,28 @@ def unzip_zip_files(in_dir: str) -> None:
                     zip_ref.extractall(in_dir)
                     os.remove(zip_path)
 
-def copy_uploaded_single(in_file: str, d_out: str) -> None:
-    '''
-    Copy file to output folder and unzip if a zip file
-    '''
-    if in_file is None:
+
+@st.dialog("Participant Information", width='medium')
+def edit_participants(in_file):
+    if not os.path.exists(in_file):
         return
     
-    st.toast(f'Uploading file ...')
-
-    f_out = os.path.join(d_out, in_file.name)
-    os.makedirs(os.path.dirname(f_out), exist_ok=True)
-    if not os.path.exists(f_out):
-        with open(os.path.join(d_out, in_file.name), "wb") as f:
-            f.write(in_file.getbuffer())
-
-    # Unzip if input is a .zip file
-    if in_file.name.endswith('.zip'):
-        unzip_zip_files(d_out)
-
-def copy_uploaded_multi(in_files: list, d_out: str) -> None:
-    '''
-    Copy files to output folder
-    '''
-    if len(in_files) == 0:
-        return
-    
-    st.toast(f'Uploading files ...')
-
-    for in_file in in_files:
-        f_out = os.path.join(d_out, in_file.name)
-        # Handle creating nested dirs if needed
-        os.makedirs(os.path.dirname(f_out), exist_ok=True)
-        if not os.path.exists(f_out):
-            with open(os.path.join(d_out, in_file.name), "wb") as f:
-                f.write(in_file.getbuffer())
-
-def edit_participants(out_dir, fname):
-    fpath = os.path.join(out_dir, fname)
-
-    if not os.path.exists(fpath):
-        return
+    fname = os.path.basename(in_file)
 
     #sac.divider(key='_p2_div1')
     with st.container(horizontal=True, horizontal_alignment="left"):
         st.markdown("##### Edit Subject List: ", width='content')
         st.markdown(f"##### 📃 `{fname}`", width='content')
 
-    df = pd.read_csv(fpath, dtype={'MRID':str, 'Age':float, 'Sex':str})
+    df = pd.read_csv(in_file, dtype={'MRID':str, 'Age':float, 'Sex':str})
     
     # Define column options
     column_config = {
+        "MRID": st.column_config.TextColumn(
+            "MRID",
+            disabled=True,
+            required=True
+        ),
         "Age": st.column_config.NumberColumn(
             "Age",
             help="Select age",
@@ -243,30 +214,22 @@ def edit_participants(out_dir, fname):
     }
     df_user = st.data_editor(
         df,
+        hide_index=True,
         column_config=column_config,
         num_rows="fixed",
         use_container_width=True
     )
     if st.button('Save'):
-        df_user.to_csv(fpath, index=False)
-        st.success(f'Updated demographic file: {fpath}')
+        df_user.to_csv(in_file, index=False)
+        st.success(f'Updated participants file: {fname}')
+        
+        st.rerun()
 
 
 def select_project():
     """
     Panel for selecting a project
     """
-
-@st.dialog("File viewer", width='medium')
-def show_sel_item(fname):
-        if fname.endswith('.csv'):
-            try:
-                df_tmp = pd.read_csv(fname)
-                st.info(f'Data file: {fname}')
-                st.dataframe(df_tmp)
-            except:
-                st.warning(f'Could not read csv file: {fname}')
-
 
 def clear_folder(folder):
     for item in os.listdir(folder):
@@ -348,10 +311,123 @@ def panel_project_folder():
                 st.toast(f"Files in project {st.session_state.prj_name} have been successfully deleted.")
                 utilss.update_project(st.session_state.prj_name)
 
-#def organize_data():
+
+        
+def update_participant_csv():
+    mrid = st.session_state.participant['mrid']
+    age = st.session_state.participant['age']
+    sex = st.session_state.participant['sex']
+    df = pd.DataFrame(
+        {'MRID':[mrid], 'Age':[age], 'Sex':[sex]}
+    )
+    odir = os.path.join(st.session_state.paths['prj_dir'], 'participants')
+    ofile = os.path.join(odir, 'participants.csv')
+    os.makedirs(odir, exist_ok=True)
+    df.to_csv(ofile, index=False)
+
+@st.dialog("Scan/Participant Info", width='medium')
+def consolidate_scan(fname):
+
+    # Detect mrid
+    mrid = st.session_state.participant['mrid']
+    if mrid is None:
+        mrid = fname
+        for suffix in ['.nii.gz', '.nii', '_T1', '_t1', '_FL', '_fl']:
+            mrid = mrid.replace(suffix, '')
+        st.session_state.participant['mrid'] = mrid
     
+    sex = st.session_state.participant['sex']
+    if sex is None:
+        ind_sex = None
+    else:
+        ind_sex = ['M', 'F', 'Other'].index(sex)
+
+    age = st.session_state.participant['age']
+
+    with st.form(key='_form_scan_info'):
+        mod = st.selectbox('Image Modality:', ['T1', 'FL'])
+        mrid = st.text_input('MRID:', value = st.session_state.participant['mrid'])
+        sex = st.selectbox('Sex (optional):', ['M', 'F', 'Other'], index=ind_sex)
+        age = st.number_input('Age (optional):', min_value=20, max_value=110, value=age)
+        submitted = st.form_submit_button("Submit")
+        flag_submit = False
+        if submitted:
+            flag_submit = True
+        
+    if flag_submit:
+        # Update participant info
+        st.session_state.participant['mrid'] = mrid
+        st.session_state.participant['age'] = age
+        st.session_state.participant['sex'] = sex
+        st.success('Updated scan and participant info!')
+        update_participant_csv()
+
+        # Move scan to consolidated folder/file
+        idir = os.path.join(st.session_state.paths['prj_dir'], 'user_upload')
+        ifile = os.path.join(idir, fname)
+        odir = os.path.join(st.session_state.paths['prj_dir'], mod)
+        ofile = os.path.join(odir, mrid + '_' + mod + '.nii.gz')
+        os.makedirs(odir, exist_ok=True)
+        if os.path.exists(ofile):
+            st.warning('Scan exists, will be updated!')
+        shutil.move(ifile, ofile)
+        shutil.rmtree(idir)
+
+        st.rerun()
+        
+        
+def upload_file(in_file):
+    '''
+    Copy file to output folder
+    '''
+    if in_file is None:
+        st.warning('Please select input file(s)')
+        return
     
+    st.toast(f'Uploading file ...')
+
+    tmp_dir = os.path.join(st.session_state.paths['prj_dir'], 'user_upload')
+    os.makedirs(tmp_dir, exist_ok=True)
+
+    fname = in_file.name
+    f_out = os.path.join(tmp_dir, fname)
+    if not os.path.exists(f_out):
+        with open(f_out, "wb") as f:
+            f.write(in_file.getbuffer())
+
+    if fname.endswith(('.nii.gz', '.nii')):
+        consolidate_scan(fname)
+
+    elif fname.endswith('.csv'):
+        consolidate_csv(fname)
+
+    elif fname.endswith('.zip'):
+        unzip_zip_files(tmp_dir)
+        st.success('Detected Zip and unzipped')
+        
+    else:
+        st.warning('Input file type mismatch: should be one of .nii.gz, .nii, .csv or .zip')
+        
+    # Remove temp folder
+    #shutil.rmtree(tmp_dir)
+
+def upload_files(in_files):
+    '''
+    Copy files to output folder
+    '''
+    if len(in_files) == 0:
+        return
     
+    st.toast(f'Uploading files ...')
+
+    tmp_dir = os.path.join(st.session_state.paths['prj_dir'], 'user_upload')
+    os.makedirs(tmp_dir, exist_ok=True)
+
+    for in_file in in_files:
+        f_out = os.path.join(tmp_dir, in_file.name)
+        if not os.path.exists(f_out):
+            with open(f_out, "wb") as f:
+                f.write(in_file.getbuffer())
 
 def panel_upload_single_subject():
     '''
@@ -387,8 +463,6 @@ def panel_upload_single_subject():
             )
             
     # Upload data
-    out_tmp = os.path.join(st.session_state.paths['prj_dir'], 'user_upload')
-    
     sel_opt = sac.chip(
         ['Single (.nii.gz, .nii, .zip, .csv)', 'Multiple (dicom files)'],
         label='', index=0, align='left', size='sm', radius='sm', multiple=False, 
@@ -414,9 +488,9 @@ def panel_upload_single_subject():
         
     if flag_submit == True:
         if flag_multi == False:
-            copy_uploaded_single(sel_files, out_tmp)
+            upload_file(sel_files)
         else:
-            copy_uploaded_multi(sel_files, out_tmp)
+            upload_files(sel_files)
        
 
 def panel_view_files():
@@ -437,7 +511,8 @@ def panel_view_files():
             
     placeholder = st.empty()
     placeholder.markdown(f"##### 📁 `{st.session_state.prj_name}`", width='content')
-    
+
+    #if st.button('View files'):
     tree_items, list_paths = utildv.build_folder_tree(
         st.session_state.paths['prj_dir'], st.session_state.out_dirs
     )
@@ -456,8 +531,20 @@ def panel_view_files():
     if selected:
         if isinstance(selected, list):
             selected = selected[0]
-        fname = list_paths[selected]
-        show_sel_item(fname)
-    
+        fpath = list_paths[selected]
+        fname = os.path.basename(fpath)
+        if fpath.endswith('.csv'):
+            try:
+                df_tmp = pd.read_csv(fpath)
+                st.info(f'Data file: {fname}')
+                st.dataframe(df_tmp)
+                
+                if st.button('Edit'):
+                    edit_participants(fpath)
+                    
+                
+            except:
+                st.warning(f'Could not read csv file: {fname}')
+        
 
 
