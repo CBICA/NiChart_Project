@@ -107,6 +107,7 @@ with right:
         st.info("Demo data import is not currently enabled for this pipeline.")
 
 st.markdown("### Guided Upload Process")
+utilio.panel_ask_harmonize()
 utilio.panel_guided_upload_data()
 
 
