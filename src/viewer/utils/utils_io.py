@@ -851,10 +851,10 @@ def panel_guided_upload_data():
         with st.expander(label, expanded=expanded):
             if item.name == "needs_T1":
                 st.write("Please upload T1 images.")
-                st.write("PLACEHOLDER, WIDGET GOES HERE")
+                panel_guided_nifti_upload(modality='T1')
             elif item.name == "needs_FLAIR":
                 st.write("Please upload FLAIR images.")
-                st.write("PLACEHOLDER, WIDGET GOES HERE")
+                panel_guided_nifti_upload(modality='FLAIR')
             elif item.name == "needs_demographics":
                 pass # Handled above 
             elif item.name == "csv_has_columns":
@@ -933,7 +933,7 @@ def panel_guided_upload_data():
         st.info("Resolve the issues above to proceed.")
     pass
 
-def panel_guided_nifti_upload():
+def panel_guided_nifti_upload(modality='T1'):
     st.info("Drag and drop your NIFTI files to this box, or browse for them using the button.")
     panel_load_data()
     pass
