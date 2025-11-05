@@ -7,13 +7,17 @@ import utils.utils_csvparsing as utilcsv
 import os
 import pandas as pd
 import numpy as np
+from NiChart_common_utils.nifti_parser import NiftiMRIDParser
 import zipfile
 import re
 import streamlit_antd_components as sac
 import shutil
 import time
-from typing import Any, BinaryIO, List, Optional
+from typing import Any, BinaryIO, List, Optional, Dict, Tuple
 from dataclasses import dataclass, asdict
+
+import difflib
+
 
 from utils.utils_logger import setup_logger
 logger = setup_logger()
@@ -283,50 +287,18 @@ def create_scan_csv() -> None:
     out_dir = os.path.join(
         st.session_state.paths['project'], 'lists'
     )
-
-    # Detect common suffix
-    def detect_common_suffix(files):
-        reversed_names = [f[::-1] for f in files]
-        common_suffix = os.path.commonprefix(reversed_names)[::-1]
-        return common_suffix
+    mod_dirs = {mod: os.path.join(st.session_state.paths['project'], mod) for mod in ['t1', 't2', 'fl', 'dti', 'fmri']}
+    dir_dict = {'T1': mod_dirs['t1'],
+                            'T2': mod_dirs['t2'],
+                            'FLAIR': mod_dirs['fl'],
+                            'DTI': mod_dirs['dti'],
+                            'FMRI': mod_dirs['fmri'],
+                            }
+    nifti_parser = NiftiMRIDParser()
+    heuristic_df = nifti_parser.create_master_csv(dir_dict, os.path.join(st.session_state.paths['project'], 'inferred_data_paths.csv'))
     
-    # Remove common suffix to get mrid
-    def remove_common_suffix(files):
-        reversed_names = [f[::-1] for f in files]
-        common_suffix = os.path.commonprefix(reversed_names)[::-1]
-        return [f[:-len(common_suffix)] if common_suffix else f for f in files]
-
-    # Get all NIfTI files
-    dfs = []
-    for mod in ['t1', 't2', 'fl', 'dti', 'fmri']:
-        img_dir = os.path.join(
-            st.session_state.paths['project'], mod
-        )
-        if os.path.exists(img_dir):
-            nifti_files = [
-                f for f in os.listdir(img_dir) if f.endswith('.nii') or f.endswith('.nii.gz')
-            ]
-            suff = detect_common_suffix(nifti_files)
-            for fname in nifti_files:
-
-
-                # Read info from csv file if exists
-                fcsv = os.path.join(
-                    img_dir, f'{fname.replace('.nii.gz','').replace('.nii','')}.csv'
-                )
-                if os.path.exists(fcsv):
-                    df = pd.read_csv(fcsv)
-
-                else:
-                    # Detect mrid from file name otherwise
-                    mrid = fname.replace(suff,'')
-                    df = pd.DataFrame({'MRID': [mrid], 'Age': [None], 'Sex': [None]})
-                
-                dfs.append(df)
-    if len(dfs) == 0:
-        return None
     
-    df = pd.concat(dfs, axis=0).sort_values(by='MRID')
+    df = heuristic_df.sort_values(by='MRID')
     df = df.drop_duplicates().reset_index().drop('index', axis=1)
     
     # Add columns for batch and dx
@@ -334,6 +306,177 @@ def create_scan_csv() -> None:
     df[['IsCN']] = 1
     
     return df
+
+
+def normalize_demographics_df(
+    df_raw: pd.DataFrame,
+    mrid_reference_df: pd.DataFrame,
+    *,
+    required_cols=("MRID", "Age", "Sex"),
+    mrid_col_in_ref="MRID",
+    age_range=(0, 120),
+    mrid_similarity_threshold=0.85
+) -> Tuple[pd.DataFrame, List[Dict[str, Any]]]:
+    """
+    Normalize a demographics DataFrame to have canonical columns (MRID, Age, Sex),
+    coerce types/values, and map MRIDs to a reference set using fuzzy matching.
+
+    Parameters
+    ----------
+    df_raw : pd.DataFrame
+        DataFrame loaded from user CSV.
+    mrid_reference_df : pd.DataFrame
+        DataFrame that contains canonical MRIDs in column `mrid_col_in_ref`.
+    required_cols : tuple
+        Canonical columns required in the output, in desired order.
+    mrid_col_in_ref : str
+        Column name in `mrid_reference_df` containing canonical MRIDs.
+    age_range : tuple
+        Acceptable (min_age, max_age) inclusive range for Age.
+    mrid_similarity_threshold : float
+        Threshold in [0,1] for fuzzy match acceptance (difflib ratio).
+
+    Returns
+    -------
+    corrected_df : pd.DataFrame
+        DataFrame with columns MRID (string), Age (Int64), Sex ('M'/'F').
+    errors : list of dict
+        Each error dict includes: {'row', 'column', 'value', 'reason'}.
+    """
+
+    errors: List[Dict[str, Any]] = []
+
+    # ---- 0) Copy and normalize column names (strip + TitleCase to match 'MRID','Age','Sex') ----
+    df = df_raw.copy()
+    normalized_cols = {c: c.strip() for c in df.columns}
+    df.rename(columns=normalized_cols, inplace=True)
+
+    def _title_no_space(name: str) -> str:
+        # Keep MRID uppercase special-case; otherwise Title Case
+        s = name.strip()
+        if s.lower().replace(" ", "") == "mrid":
+            return "MRID"
+        return s.title()
+
+    target_map = {}
+    for c in df.columns:
+        new = _title_no_space(c)
+        if new != c:
+            # avoid collisions by disambiguating
+            if new in df.columns:
+                # If collision, keep original; we'll handle via aliasing below
+                continue
+            target_map[c] = new
+    if target_map:
+        df.rename(columns=target_map, inplace=True)
+
+    # ---- 1) Try to resolve aliases if the exact required columns are missing ----
+    # Common aliases
+    aliases = {
+        "MRID": ["Subject", "SubjectID", "Subject_Id", "Id", "ID", "Mrid", "Mrn", "PatientId", "PatientID"],
+        "Age": ["Years", "AgeYears", "age", "AGE"],
+        "Sex": ["Gender", "SexAssigned", "sex", "SEX"],
+    }
+
+    for canonical in required_cols:
+        if canonical not in df.columns:
+            # find best alias present (direct or fuzzy)
+            candidates = aliases.get(canonical, [])
+            present = [c for c in df.columns if c in candidates]
+            if not present:
+                # Fuzzy on column names
+                match = difflib.get_close_matches(canonical, df.columns, n=1, cutoff=0.7)
+                if match:
+                    present = [match[0]]
+            if present:
+                df.rename(columns={present[0]: canonical}, inplace=True)
+
+    # ---- 2) Ensure required columns exist ----
+    missing = [c for c in required_cols if c not in df.columns]
+    if missing:
+        for c in missing:
+            errors.append({"row": None, "column": c, "value": None,
+                           "reason": f"Missing required column '{c}'."})
+        # Add empty columns so downstream steps still run
+        for c in missing:
+            df[c] = pd.NA
+
+    # Reorder to canonical order
+    df = df[list(required_cols) + [c for c in df.columns if c not in required_cols]]
+
+    # ---- 3) Normalize Sex to {'M','F'} ----
+    def normalize_sex(x) -> Any:
+        if pd.isna(x):
+            return pd.NA
+        s = str(x).strip().lower()
+        m_vals = {"m", "male", "man", "1", "boy"}
+        f_vals = {"f", "female", "woman", "0", "girl"}
+        if s in m_vals:
+            return "M"
+        if s in f_vals:
+            return "F"
+        return pd.NA
+
+    df["Sex"] = df["Sex"].apply(normalize_sex)
+
+    for i, v in df["Sex"].items():
+        if pd.isna(v):
+            errors.append({"row": i, "column": "Sex", "value": df_raw.iloc[i][df_raw.columns.get_loc(df.columns[df.columns.get_loc('Sex')]) if 'Sex' in df.columns else 0] if 'Sex' in df.columns else None,
+                           "reason": "Unrecognized or missing sex; expected one of M/F (accepted aliases: m/male/man/1, f/female/woman/0)."})
+
+    # ---- 4) Normalize Age to pandas nullable Int64 within range ----
+    age_min, age_max = age_range
+    age_numeric = pd.to_numeric(df["Age"], errors="coerce")
+    # Flag out-of-range or NaN
+    bad_age_mask = age_numeric.isna() | (age_numeric < age_min) | (age_numeric > age_max) | (age_numeric % 1 != 0)
+    for i, bad in bad_age_mask.items():
+        if bad:
+            errors.append({"row": i, "column": "Age", "value": df.loc[i, "Age"],
+                           "reason": f"Invalid age (must be integer in [{age_min}, {age_max}])."})
+    df["Age"] = age_numeric.round().astype("Int64")
+
+    # ---- 5) Map MRIDs to nearest in reference using fuzzy matching when no exact match ----
+    ref_mrids = mrid_reference_df[mrid_col_in_ref].astype(str).str.strip().unique().tolist()
+    ref_set = set(ref_mrids)
+
+    def best_mrid_match(mrid: str) -> Tuple[str, float]:
+        # returns (best_match, similarity) using difflib ratio
+        if not ref_mrids:
+            return mrid, 0.0
+        matches = difflib.get_close_matches(mrid, ref_mrids, n=1, cutoff=0)
+        if not matches:
+            return mrid, 0.0
+        best = matches[0]
+        sim = difflib.SequenceMatcher(None, mrid, best).ratio()
+        return best, sim
+
+    corrected_mrids = []
+    for i, raw in df["MRID"].astype(str).str.strip().items():
+        if raw in ref_set:
+            corrected_mrids.append(raw)
+            continue
+        best, sim = best_mrid_match(raw)
+        if sim >= mrid_similarity_threshold:
+            corrected_mrids.append(best)
+        else:
+            corrected_mrids.append(raw)  # leave as-is but record error
+            errors.append({"row": i, "column": "MRID", "value": raw,
+                           "reason": f"MRID not found; no close match above threshold {mrid_similarity_threshold:.2f}."})
+
+    df["MRID"] = corrected_mrids
+
+    # ---- 6) Post-check: duplicates introduced by MRID mapping ----
+    dup_mask = df["MRID"].duplicated(keep=False)
+    if dup_mask.any():
+        for i in df.index[dup_mask]:
+            errors.append({"row": i, "column": "MRID", "value": df.loc[i, "MRID"],
+                           "reason": "Duplicate MRID after mapping; manual disambiguation required."})
+
+    # Final: return only canonical cols first for convenience
+    ordered_cols = ["MRID", "Age", "Sex"] + [c for c in df.columns if c not in ("MRID", "Age", "Sex")]
+    df = df[ordered_cols]
+
+    return df, errors
 
 ##############################################################
 ## Panels for IO
@@ -427,11 +570,37 @@ def load_subj_list():
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
         
+    fname_tmp = 'participants_tmp.csv'
     fname = 'participants.csv'
     out_csv = os.path.join(out_dir, fname)
     
     if tab == 'Upload':
-        upload_single_file(out_dir, fname, 'Select participants file')
+        upload_single_file(out_dir, fname_tmp, 'Select participants file')
+        if os.path.exists(fname_tmp):
+            st.success("We received your demographics file! Converting it to our format...")
+            df_user = pd.read_csv(fname_tmp)
+            mod_dirs = {mod: os.path.join(st.session_state.paths['project'], mod) for mod in ['t1', 't2', 'fl', 'dti', 'fmri']}
+            dir_dict = {'T1': mod_dirs['t1'],
+                            'T2': mod_dirs['t2'],
+                            'FLAIR': mod_dirs['fl'],
+                            'DTI': mod_dirs['dti'],
+                            'FMRI': mod_dirs['fmri'],
+                            }
+            nifti_parser = NiftiMRIDParser()
+            heuristic_df = nifti_parser.create_master_csv(dir_dict, os.path.join(st.session_state.paths['project'], 'inferred_data_paths.csv'))
+    
+            corrected_df, issues = normalize_demographics_df(df_user, heuristic_df)
+            corrected_df = corrected_df.sort_values(by='MRID')
+            corrected_df = corrected_df.drop_duplicates().reset_index().drop('index', axis=1)
+    
+            # Add columns for batch and dx
+            if 'Batch' not in corrected_df.columns:
+                corrected_df[['Batch']] = f'{st.session_state.project}_Batch1'
+            if 'IsCN' not in corrected_df.columns:
+                corrected_df[['IsCN']] = 1
+            corrected_df.to_csv(fname, index=False)
+            st.success("Your CSV has been converted successfully.")
+        
 
     elif tab == 'Enter Manually':
         df = create_scan_csv()
@@ -889,10 +1058,10 @@ def panel_guided_upload_data():
                         st.dataframe(issues_df, use_container_width=True, height=320)
                     
                     st.info("Tip: fix the data and reupload or hit save to refresh validation")
-                    load_subj_list()
+                    panel_guided_demographics_upload()
             else:
                 st.warning("Upload or enter a demographics CSV to validate.")
-                load_subj_list()
+                panel_guided_demographics_upload()
     ready = True
     if any(s.status == "red" for s in items):
         ready = False
@@ -903,7 +1072,7 @@ def panel_guided_upload_data():
         st.success("All requirements satisfied. You can proceed.")
         st.button("Continue", type="primary")
     else:
-        st.info("Resolve the issues above to proceed.")
+        st.info("Resolve the issues above to proceed. Click to expand each requirement for more details.")
     pass
 
 def panel_guided_nifti_upload(modality='t1'):
@@ -925,7 +1094,7 @@ def panel_guided_nifti_upload(modality='t1'):
     pass
 
 def panel_guided_demographics_upload():
-    pass
+    load_subj_list()
 
 def panel_guided_upload_additionaldata():
     pass
