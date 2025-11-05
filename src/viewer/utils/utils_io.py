@@ -381,7 +381,7 @@ def load_dicoms():
         if st.button("Delete"):
             remove_dir(out_dir)
 
-def load_nifti():
+def load_nifti(default_modality='t1', forced_modality=None):
     '''
     Panel to load nifti images
     '''
@@ -394,12 +394,14 @@ def load_nifti():
         size='lg',
         align='left'
     )
-
-    sel_mod = sac.segmented(
-        items=st.session_state.list_mods,
-        size='sm',
-        align='left'
-    )
+    if forced_modality is None:
+        sel_mod = sac.segmented(
+            items=st.session_state.list_mods,
+            size='sm',
+            align='left'
+        )
+    else:
+        sel_mod = forced_modality
 
     if sel_mod is None:
         return
