@@ -76,23 +76,28 @@ def view_doc(pipeline, dtype) -> None:
 
 def pipeline_selector_categories():
     # User selects their desired category, selection is filtered
+
+    pipelines = st.session_state.pipelines
+    sitems = []
+    colors = st.session_state.pipeline_colors
+    categories = st.session_state.pipeline_categories
+    reqs = st.session_state.pipeline_requirements
+        
+    processing_pipelines = categories['feature-extraction']
+    inference_pipelines = categories['inference']
+    shortcodes = pipelines.PipelineYaml.tolist()
+    names = pipelines.Name.tolist()
+
     left, right = st.columns(2)
     with left:
         with st.container(border=True):
-            pipelines = st.session_state.pipelines
-            sitems = []
-            colors = st.session_state.pipeline_colors
-            categories = st.session_state.pipeline_categories
-            reqs = st.session_state.pipeline_requirements
-            
-            processing_pipelines = categories['feature-extraction']
-
-            for i, ptmp in enumerate(processing_pipelines):
-                sitems.append(
-                    sac.ButtonsItem(
-                        label=ptmp, color = colors[i%len(colors)]
-                    )
-                )
+            for i, ptmp in enumerate(names):
+                if shortcodes[i] in processing_pipelines:
+                    sitems.append(
+                        sac.ButtonsItem(
+                            label=ptmp, color = colors[i%len(colors)]
+                        ))
+                    
 
             sel_pipeline = sac.buttons(
                 items=sitems,
@@ -113,20 +118,14 @@ def pipeline_selector_categories():
             )
     with right:
         with st.container(border=True):
-            pipelines = st.session_state.pipelines
-            sitems = []
-            colors = st.session_state.pipeline_colors
-            categories = st.session_state.pipeline_categories
-            reqs = st.session_state.pipeline_requirements
-            
-            processing_pipelines = categories['inference']
-
-            for i, ptmp in enumerate(processing_pipelines):
-                sitems.append(
-                    sac.ButtonsItem(
-                        label=ptmp, color = colors[i%len(colors)]
+            st.markdown("## Inference Pipelines")
+            for i, ptmp in enumerate(names):
+                if shortcodes[i] in inference_pipelines:
+                    sitems.append(
+                        sac.ButtonsItem(
+                            label=ptmp, color = colors[i%len(colors)]
+                        )
                     )
-                )
 
             sel_pipeline = sac.buttons(
                 items=sitems,
@@ -145,6 +144,12 @@ def pipeline_selector_categories():
                 size='lg',
                 align='left'
             )
+    sac.divider(label='', align='center', color='gray')
+            
+    if st.button('Select'):
+        st.session_state.sel_pipeline = pname
+        st.session_state.pipeline_selected_explicitly = True
+        st.success(f'Pipeline selected: {pname}')
 
     pass
 
