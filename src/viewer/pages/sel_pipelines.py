@@ -90,6 +90,7 @@ def pipeline_selector_categories():
 
     left, right = st.columns(2)
     with left:
+        st.markdown("### Feature-Extraction Pipelines")
         with st.container(border=True):
             for i, ptmp in enumerate(names):
                 if shortcodes[i] in processing_pipelines:
@@ -107,18 +108,9 @@ def pipeline_selector_categories():
             )
             pname = pipelines.loc[pipelines.Name == sel_pipeline, 'Label'].values[0]
 
-            tab = sac.tabs(
-                items=[
-                    sac.TabsItem(label='Input'),
-                    sac.TabsItem(label='Output'),
-                    sac.TabsItem(label='Example'),
-                ],
-                size='lg',
-                align='left'
-            )
     with right:
         with st.container(border=True):
-            st.markdown("## Inference Pipelines")
+            st.markdown("### Inference Pipelines")
             for i, ptmp in enumerate(names):
                 if shortcodes[i] in inference_pipelines:
                     sitems.append(
