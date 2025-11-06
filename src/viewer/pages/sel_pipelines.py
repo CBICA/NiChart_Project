@@ -90,8 +90,9 @@ def pipeline_selector_categories():
 
     left, right = st.columns(2)
     with left:
-        st.markdown("### Feature-Extraction Pipelines")
+       
         with st.container(border=True):
+            st.markdown("### Feature-Extraction Pipelines")
             for i, ptmp in enumerate(names):
                 if shortcodes[i] in processing_pipelines:
                     sitems.append(
