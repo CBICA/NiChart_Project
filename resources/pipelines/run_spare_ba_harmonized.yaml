@@ -1,4 +1,4 @@
-pipeline_name: SPARE Scores - Brain Age Estimation
+pipeline_name: SPARE Scores - Brain Age Estimation (Harmonized)
 description: |
   Pipeline which uses harmonized DLMUSE to produce brain age estimation via SPARE.
 

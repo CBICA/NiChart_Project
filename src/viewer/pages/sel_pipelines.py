@@ -76,6 +76,76 @@ def view_doc(pipeline, dtype) -> None:
 
 def pipeline_selector_categories():
     # User selects their desired category, selection is filtered
+    left, right = st.columns(2)
+    with left:
+        with st.container(border=True):
+            pipelines = st.session_state.pipelines
+            sitems = []
+            colors = st.session_state.pipeline_colors
+            categories = st.session_state.pipeline_categories
+            reqs = st.session_state.pipeline_requirements
+            
+            processing_pipelines = categories['feature-extraction']
+
+            for i, ptmp in enumerate(processing_pipelines):
+                sitems.append(
+                    sac.ButtonsItem(
+                        label=ptmp, color = colors[i%len(colors)]
+                    )
+                )
+
+            sel_pipeline = sac.buttons(
+                items=sitems,
+                size='lg',
+                radius='xl',
+                align='left'
+            )
+            pname = pipelines.loc[pipelines.Name == sel_pipeline, 'Label'].values[0]
+
+            tab = sac.tabs(
+                items=[
+                    sac.TabsItem(label='Input'),
+                    sac.TabsItem(label='Output'),
+                    sac.TabsItem(label='Example'),
+                ],
+                size='lg',
+                align='left'
+            )
+    with right:
+        with st.container(border=True):
+            pipelines = st.session_state.pipelines
+            sitems = []
+            colors = st.session_state.pipeline_colors
+            categories = st.session_state.pipeline_categories
+            reqs = st.session_state.pipeline_requirements
+            
+            processing_pipelines = categories['inference']
+
+            for i, ptmp in enumerate(processing_pipelines):
+                sitems.append(
+                    sac.ButtonsItem(
+                        label=ptmp, color = colors[i%len(colors)]
+                    )
+                )
+
+            sel_pipeline = sac.buttons(
+                items=sitems,
+                size='lg',
+                radius='xl',
+                align='left'
+            )
+            pname = pipelines.loc[pipelines.Name == sel_pipeline, 'Label'].values[0]
+
+            tab = sac.tabs(
+                items=[
+                    sac.TabsItem(label='Input'),
+                    sac.TabsItem(label='Output'),
+                    sac.TabsItem(label='Example'),
+                ],
+                size='lg',
+                align='left'
+            )
+
     pass
 
 def pipeline_selector_selectdatatypes():
@@ -157,6 +227,15 @@ st.markdown(
 #if tab == 'Graph View':
     #st.info('Coming soon!')
 
+st.markdown("# Category View")
+pipeline_selector_categories()
+
+st.markdown("# View based on user datatype selection")
+pipeline_selector_selectdatatypes()
+
+st.markdown("# Keyword View")
+
+st.markdown("# Old Page Content")
 sel_pipeline_from_list()
 
 # Show selections
