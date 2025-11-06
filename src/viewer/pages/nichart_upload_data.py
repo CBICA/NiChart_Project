@@ -33,41 +33,6 @@ if 'instantiated' not in st.session_state or not st.session_state.instantiated:
 
 #################################
 ## Function definitions
-def help_message(data_type):
-    
-    if data_type == 'reference_data':
-        st.warning('No data upload for reference data viewer!')
-        return
-    
-    if data_type == 'multi_subject':
-        st.warning('Work in progress!')
-        return
-
-    if data_type == 'single_subject':
-        with st.popover("❓", width='content'):
-            st.write(
-                """
-                **How to Use This Page**
-                
-                - **Upload Files:**
-                
-                  - Upload MRI scans in **NIfTI** (.nii / .nii.gz) or **DICOM** (either a folder of .dcm files or a single .zip archive).
-                  - A **subject list** will be created automatically as MRI scans are added
-                  - You may also upload non-imaging data (e.g., clinical variables) as a **CSV** containing an **MRID** column that matches the subject list.
-                  
-                - **Review & Edit Subject List:**
-                
-                  - View subject list; edit or add details needed for downstream analysis (e.g., MRID, age, sex).
-
-                - **Review Project Folder:**
-
-                  - View files stored in the project folder.
-                  - Delete files if needed (e.g., to restart or replace data).
-                  - Switch to a new or existing project folder.
-
-                """
-            )
-
 def upload_data():
 
     # cols = st.columns([8,1,8,1,8])

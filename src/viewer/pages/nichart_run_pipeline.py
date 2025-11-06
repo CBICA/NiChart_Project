@@ -88,7 +88,7 @@ def select_pipeline():
 def pipeline_menu():
     cols = st.columns([10,1,10])
     out_dir = os.path.join(
-        st.session_state.paths['out_dir'], st.session_state['project']
+        st.session_state.paths['out_dir'], st.session_state['prj_name']
     )
 
     with cols[0]:

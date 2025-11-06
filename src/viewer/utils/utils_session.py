@@ -290,6 +290,7 @@ def init_dicom_vars() -> None:
     '''
     st.session_state.dicoms = {
         'list_series': None,
+        'sel_serie': None,
         'num_dicom_scans': 0,
         'df_dicoms': None
     }

@@ -3,6 +3,7 @@ import utils.utils_dicoms as utildcm
 import utils.utils_session as utilss
 import utils.utils_data_view as utildv
 import utils.utils_io as utilio
+import utils.utils_mriview as utilmri
 
 import os
 import pandas as pd
@@ -310,8 +311,6 @@ def panel_project_folder():
                 clear_folder(st.session_state.paths['prj_dir'])
                 st.toast(f"Files in project {st.session_state.prj_name} have been successfully deleted.")
                 utilss.update_project(st.session_state.prj_name)
-
-
         
 def update_participant_csv():
     mrid = st.session_state.participant['mrid']
@@ -326,8 +325,7 @@ def update_participant_csv():
     df.to_csv(ofile, index=False)
 
 @st.dialog("Scan/Participant Info", width='medium')
-def consolidate_scan(fname):
-
+def consolidate_nifti(fname):
     # Detect mrid
     mrid = st.session_state.participant['mrid']
     if mrid is None:
@@ -375,7 +373,75 @@ def consolidate_scan(fname):
 
         st.rerun()
         
+import utils.utils_dicoms as utildcm
         
+@st.dialog("Dicom extraction", width='medium')
+def extract_dicoms(in_dir):
+
+    if st.session_state.dicoms['df_dicoms'] is None:
+        df_dicoms = utildcm.detect_series(in_dir)
+        st.session_state.dicoms['df_dicoms'] = df_dicoms
+        st.session_state.dicoms['list_series'] = df_dicoms.SeriesDesc.unique()
+        st.session_state.dicoms['num_dicom_scans'] = df_dicoms[["PatientID", "StudyDate", "SeriesDesc"]].drop_duplicates().shape[0]
+
+    dicoms = st.session_state.dicoms
+    st.success(
+        f"Detected {st.session_state.dicoms['num_dicom_scans']} scans in {len(st.session_state.dicoms['list_series'])} series!",
+            icon=":material/thumb_up:"
+    )
+
+    with st.form(key='_form_dicom_convert'):    
+
+        sel_serie = st.selectbox(
+            "Select series:", dicoms['list_series'], key = "key_select_dseries", index=0
+        )
+    
+        #if st.button('Convert'):
+    
+        submitted = st.form_submit_button("Submit")
+        if submitted:
+            try:
+                utildcm.convert_serie(
+                    dicoms['df_dicoms'],
+                    sel_serie,
+                    in_dir,
+                    '.nii.gz',
+                    compression=True,
+                    reorient=True
+                )
+                
+            except Exception as e:
+                st.warning(":material/thumb_down: Nifti conversion failed!")
+                st.info(e)
+            st.rerun()
+
+    #
+
+        #num_nifti = utilio.get_file_count(in_dir, '.nii.gz')
+
+        #if num_nifti == 0:
+            #st.warning(
+                #":material/thumb_down: The extraction process did not produce any Nifti images!"
+            #)
+        ##else:
+            ##if st.session_state.has_cloud_session:
+                ##utilcloud.update_stats_db(
+                    ##st.session_state.cloud_user_id, "NIFTIfromDICOM", num_nifti
+                ##)
+
+            #df_files = utilio.get_file_names(in_dir, '.nii.gz')
+            #num_nifti = df_files.shape[0]
+
+        #submitted = st.form_submit_button("Submit")
+        #flag_submit = False
+        
+    #if submitted:
+        #flag_submit = True
+        
+    #if flag_submit:
+        #st.rerun()
+        #st.session_state.dicoms['df_dicoms'] = None
+
 def upload_file(in_file):
     '''
     Copy file to output folder
@@ -396,14 +462,15 @@ def upload_file(in_file):
             f.write(in_file.getbuffer())
 
     if fname.endswith(('.nii.gz', '.nii')):
-        consolidate_scan(fname)
+        consolidate_nifti(fname)
 
     elif fname.endswith('.csv'):
         consolidate_csv(fname)
 
     elif fname.endswith('.zip'):
         unzip_zip_files(tmp_dir)
-        st.success('Detected Zip and unzipped')
+        st.toast('Zip file is unzipped')
+        extract_dicoms(tmp_dir)
         
     else:
         st.warning('Input file type mismatch: should be one of .nii.gz, .nii, .csv or .zip')
@@ -492,6 +559,31 @@ def panel_upload_single_subject():
         else:
             upload_files(sel_files)
        
+def view_mri(fname):
+    """
+    Panel for viewing a nifti scan
+    """
+    with st.spinner("Wait for it..."):
+        try:
+            # Prepare final 3d matrix to display
+            img = utilmri.prep_image(fname)
+
+            # Detect mask bounds and center in each view
+            img_bounds = utilmri.detect_img_bounds(img)
+
+            # Show images
+            ind_view = utilmri.img_views.index('axial')
+            size_auto = True
+            utilmri.show_img_slices(
+                img,
+                ind_view,
+                img_bounds[ind_view, :],
+                'axial',
+            )
+        except:
+            st.warning(
+                ":material/thumb_down: Image parsing failed. Please confirm that the image file represents a 3D volume using an external tool."
+            )
 
 def panel_view_files():
     '''
@@ -506,19 +598,26 @@ def panel_view_files():
                 """
                 **Review Files Help**
                   - View files stored in the project folder.
+                  - Click on a file name to:
+                  
+                    - View a scan (.nii.gz, .nii)
+                    
+                    - View/edit a list (.csv)
                 """
             )
             
     placeholder = st.empty()
     placeholder.markdown(f"##### 📁 `{st.session_state.prj_name}`", width='content')
 
-    #if st.button('View files'):
     tree_items, list_paths = utildv.build_folder_tree(
-        st.session_state.paths['prj_dir'], st.session_state.out_dirs
+        st.session_state.paths['prj_dir'],
+        st.session_state.out_dirs,
+        None,
+        3,
+        ['user_upload']
     )
     selected = sac.tree(
         items=tree_items,
-        #label='Project Folder',
         index=None,
         align='left', size='xl', icon='table',
         checkbox=False,
@@ -537,14 +636,17 @@ def panel_view_files():
             try:
                 df_tmp = pd.read_csv(fpath)
                 st.info(f'Data file: {fname}')
-                st.dataframe(df_tmp)
+                st.dataframe(df_tmp, hide_index=True)
                 
                 if st.button('Edit'):
-                    edit_participants(fpath)
-                    
-                
+                    edit_participants(fpath)                
             except:
                 st.warning(f'Could not read csv file: {fname}')
+
+        if fpath.endswith(('.nii.gz','.nii')):
+            view_mri(fpath)
+            
+                              
         
 
 
