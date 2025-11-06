@@ -1,18 +1,18 @@
-Name,Label,PipelineYaml
-DLMUSE,dlmuse,run_dlmuse
-DLWMLS,dlwmls,run_dlwmls
-DLMUSE-DLWMLS,dlmuse-dlwmls,run_nichart_dlwmls_v2
-SPARE-AD,spare-ad,run_spare_ad
-SPARE-BA,spare-ba,run_spare_ba
-SPARE-Smoking,spare-smoking,run_spare_cvm_smoking
-SPARE-Hypertension,spare-hypertension,run_spare_cvm_hypertension
-SPARE-Obesity,spare-obesity,run_spare_cvm_obesity
-SPARE-Diabetes,spare-diabetes,run_spare_cvm_diabetes
-SPARE-Depression,spare-depression,run_spare_depression
-SPARE-Psychosis,spare-psychosis,run_spare_psychosis
-SPARE-BA-Image,spare-ba-image,run_bascores
-SurrealGAN,surrealgan,run_predcrd_surrealgan
-CCL-NMF,cclnmf,run_cclnmf
-RAVENS,ravens,run_nichart_ravens
+Name,Label,PipelineYaml,HarmonizedPipelineYaml
+DLMUSE,dlmuse,run_dlmuse,run_dlmuse_harmonized
+DLWMLS (Legacy),dlwmls,run_dlwmls,
+DLWMLS,dlmuse-dlwmls,run_nichart_dlwmls_v2,run_nichart_dlwmls_v2_harmonized
+SPARE-AD,spare-ad,run_spare_ad,run_spare_ad_harmonized
+SPARE-BA,spare-ba,run_spare_ba,run_spare_ba_harmonized
+SPARE-Smoking,spare-smoking,run_spare_cvm_smoking,run_spare_cvm_smoking_harmonized
+SPARE-Hypertension,spare-hypertension,run_spare_cvm_hypertension,run_spare_cvm_hypertension_harmonized
+SPARE-Obesity,spare-obesity,run_spare_cvm_obesity,run_spare_cvm_obesity_harmonized
+SPARE-Diabetes,spare-diabetes,run_spare_cvm_diabetes,run_spare_cvm_diabetes_harmonized
+SPARE-Depression,spare-depression,run_spare_depression,
+SPARE-Psychosis,spare-psychosis,run_spare_psychosis,
+SPARE-BA-Image,spare-ba-image,run_bascores,
+SurrealGAN,surrealgan,run_predcrd_surrealgan,
+CCL-NMF,cclnmf,run_cclnmf,
+RAVENS,ravens,run_nichart_ravens,
 
 

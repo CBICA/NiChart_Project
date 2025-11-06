@@ -83,23 +83,33 @@ def pipeline_selector_categories():
     categories = st.session_state.pipeline_categories
     reqs = st.session_state.pipeline_requirements
         
-    processing_pipelines = categories['feature-extraction']
+    processing_pipelines = categories['image-processing']
     inference_pipelines = categories['inference']
-    shortcodes = pipelines.PipelineYaml.tolist()
     names = pipelines.Name.tolist()
+    labels = pipelines.Label.tolist()
+    shortcodes = pipelines.PipelineYaml.tolist()
+    harmonized_shortcodes = pipelines.HarmonizedPipelineYaml.tolist()
 
     left, right = st.columns(2)
+    only_show_harmonizable = st.checkbox("Only show pipelines whose output can be harmonized to the reference data.")
     with left:
-       
         with st.container(border=True):
             st.markdown("### Feature-Extraction Pipelines")
             for i, ptmp in enumerate(names):
-                if shortcodes[i] in processing_pipelines:
-                    sitems.append(
-                        sac.ButtonsItem(
-                            label=ptmp, color = colors[i%len(colors)]
-                        ))
-                    
+                if only_show_harmonizable:
+                    if shortcodes[i] in processing_pipelines and harmonized_shortcodes[i]:
+                        sitems.append(
+                            sac.ButtonsItem(
+                                label=ptmp, color = colors[i%len(colors)]
+                            ))
+                
+                else:
+                    if shortcodes[i] in processing_pipelines:
+                        sitems.append(
+                            sac.ButtonsItem(
+                                label=ptmp, color = colors[i%len(colors)]
+                            ))
+                
 
             sel_pipeline = sac.buttons(
                 items=sitems,
@@ -113,13 +123,20 @@ def pipeline_selector_categories():
         with st.container(border=True):
             st.markdown("### Inference Pipelines")
             for i, ptmp in enumerate(names):
-                if shortcodes[i] in inference_pipelines:
-                    sitems.append(
-                        sac.ButtonsItem(
-                            label=ptmp, color = colors[i%len(colors)]
-                        )
-                    )
-
+                if only_show_harmonizable:
+                    if shortcodes[i] in inference_pipelines and harmonized_shortcodes[i]:
+                        sitems.append(
+                            sac.ButtonsItem(
+                                label=ptmp, color = colors[i%len(colors)]
+                            ))
+                
+                else:
+                    if shortcodes[i] in inference_pipelines:
+                        sitems.append(
+                            sac.ButtonsItem(
+                                label=ptmp, color = colors[i%len(colors)]
+                            ))
+                
             sel_pipeline = sac.buttons(
                 items=sitems,
                 size='lg',
@@ -128,15 +145,6 @@ def pipeline_selector_categories():
             )
             pname = pipelines.loc[pipelines.Name == sel_pipeline, 'Label'].values[0]
 
-            tab = sac.tabs(
-                items=[
-                    sac.TabsItem(label='Input'),
-                    sac.TabsItem(label='Output'),
-                    sac.TabsItem(label='Example'),
-                ],
-                size='lg',
-                align='left'
-            )
     sac.divider(label='', align='center', color='gray')
             
     if st.button('Select'):
