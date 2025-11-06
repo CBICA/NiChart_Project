@@ -89,9 +89,9 @@ def pipeline_selector_categories():
     labels = pipelines.Label.tolist()
     shortcodes = pipelines.PipelineYaml.tolist()
     harmonized_shortcodes = pipelines.HarmonizedPipelineYaml.tolist()
-
-    left, right = st.columns(2)
     only_show_harmonizable = st.checkbox("Only show pipelines whose output can be harmonized to the reference data.")
+    left, right = st.columns(2)
+    
     with left:
         with st.container(border=True):
             st.markdown("### Feature-Extraction Pipelines")
