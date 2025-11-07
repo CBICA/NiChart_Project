@@ -53,8 +53,6 @@ def upload_data():
 #################################
 ## Main
 
-data_type = st.session_state.data_type
-
 with st.container(horizontal=True, horizontal_alignment="center"):
     st.markdown("<h4 style=color:#3a3a88;'>Upload Data\n\n</h1>", unsafe_allow_html=True, width='content')
 

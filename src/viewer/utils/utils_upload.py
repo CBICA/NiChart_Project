@@ -66,6 +66,25 @@ def remove_dir(out_dir):
         st.error(f"Could not delete folder: {out_dir}")
         return False
 
+def clear_folder(folder):
+    if os.path.islink(folder):
+        st.warning("Target folder is a symlink. Cannot delete contents")
+        return        
+
+    try:
+        for item in os.listdir(folder):
+            item_path = os.path.join(folder, item)
+            if os.path.isfile(item_path) or os.path.islink(item_path):
+                os.remove(item_path)
+            elif os.path.isdir(item_path):
+                shutil.rmtree(item_path)
+        st.success(f"Removed dir: {folder}")
+        time.sleep(2)
+        return True
+    except:
+        st.error(f"Could not delete folder: {folder}")
+        return False        
+
 def browse_file(path_init: str) -> Any:
     '''
     File selector
@@ -163,19 +182,15 @@ def copy_nifti(in_file_obj: str, d_out: str) -> None:
     #if os.path.exists(d_out):
         #unzip_files(d_out)
 
-def unzip_zip_files(in_dir: str) -> None:
+def unzip_zip_file(f_in, d_out):
     '''
-    Unzips all ZIP files in the input dir and removes the original ZIP files.
+    Unzips a ZIP file to a new folder and deletes the zip file
     '''
-    if os.path.exists(in_dir):
-        for filename in os.listdir(in_dir):
-            if filename.endswith(".zip"):
-                st.toast(f'Unzipping file ...')
-                zip_path = os.path.join(in_dir, filename)
-                with zipfile.ZipFile(zip_path, "r") as zip_ref:
-                    zip_ref.extractall(in_dir)
-                    os.remove(zip_path)
-
+    os.makedirs(d_out, exist_ok=True)
+    with zipfile.ZipFile(f_in, "r") as zip_ref:
+        zip_ref.extractall(d_out)
+    os.remove(f_in)
+    st.toast(f'Unzipped zip file ...')
 
 @st.dialog("Participant Information", width='medium')
 def edit_participants(in_file):
@@ -232,13 +247,6 @@ def select_project():
     Panel for selecting a project
     """
 
-def clear_folder(folder):
-    for item in os.listdir(folder):
-        item_path = os.path.join(folder, item)
-        if os.path.isfile(item_path) or os.path.islink(item_path):
-            os.remove(item_path)
-        elif os.path.isdir(item_path):
-            shutil.rmtree(item_path)
 
 def panel_project_folder():
     '''
@@ -324,29 +332,32 @@ def update_participant_csv():
     os.makedirs(odir, exist_ok=True)
     df.to_csv(ofile, index=False)
 
-@st.dialog("Scan/Participant Info", width='medium')
-def consolidate_nifti(fname):
-    # Detect mrid
-    mrid = st.session_state.participant['mrid']
-    if mrid is None:
-        mrid = fname
-        for suffix in ['.nii.gz', '.nii', '_T1', '_t1', '_FL', '_fl']:
-            mrid = mrid.replace(suffix, '')
-        st.session_state.participant['mrid'] = mrid
+def consolidate_nifti():
     
+    # Get full name for the current file
+    # Input image file is kept in a temporary upload folder
+    in_fname = st.session_state.curr_scan
+    if in_fname is None:
+        return False
+    in_dir = os.path.join(st.session_state.paths['prj_dir'], 'user_upload')
+    in_fpath = os.path.join(in_dir, in_fname)
+
+    # Get saved scan/participant info 
+    mrid = st.session_state.participant['mrid']
     sex = st.session_state.participant['sex']
     if sex is None:
         ind_sex = None
     else:
         ind_sex = ['M', 'F', 'Other'].index(sex)
-
     age = st.session_state.participant['age']
 
+    # Update values based on user iput
     with st.form(key='_form_scan_info'):
         mod = st.selectbox('Image Modality:', ['T1', 'FL'])
-        mrid = st.text_input('MRID:', value = st.session_state.participant['mrid'])
+        mrid = st.text_input('MRID:', value = mrid)
         sex = st.selectbox('Sex (optional):', ['M', 'F', 'Other'], index=ind_sex)
-        age = st.number_input('Age (optional):', min_value=20, max_value=110, value=age)
+        age = st.number_input('Age (optional):', min_value=20.0, max_value=110.0, value=age)
+        
         submitted = st.form_submit_button("Submit")
         flag_submit = False
         if submitted:
@@ -354,29 +365,39 @@ def consolidate_nifti(fname):
         
     if flag_submit:
         # Update participant info
-        st.session_state.participant['mrid'] = mrid
-        st.session_state.participant['age'] = age
-        st.session_state.participant['sex'] = sex
-        st.success('Updated scan and participant info!')
+        st.session_state.participant = {'mrid': mrid, 'age': age, 'sex': sex}
         update_participant_csv()
+        st.success('Updated participant info!')
 
-        # Move scan to consolidated folder/file
-        idir = os.path.join(st.session_state.paths['prj_dir'], 'user_upload')
-        ifile = os.path.join(idir, fname)
-        odir = os.path.join(st.session_state.paths['prj_dir'], mod)
-        ofile = os.path.join(odir, mrid + '_' + mod + '.nii.gz')
-        os.makedirs(odir, exist_ok=True)
-        if os.path.exists(ofile):
+        # Move scan to consolidated path
+        out_dir = os.path.join(st.session_state.paths['prj_dir'], mod)
+        out_fpath = os.path.join(out_dir, mrid + '_' + mod + '.nii.gz')
+        os.makedirs(out_dir, exist_ok=True)
+        if os.path.exists(out_fpath):
             st.warning('Scan exists, will be updated!')
-        shutil.move(ifile, ofile)
-        shutil.rmtree(idir)
+        shutil.move(in_fpath, out_fpath)
+        clear_folder(in_dir)
+        return True
 
-        st.rerun()
-        
+    return False
+
+@st.dialog("Scan/Participant Info", width='medium')
+def dialog_consolidate_nifti():
+    # Detect mrid
+    mrid = st.session_state.participant['mrid']
+    if mrid is None:
+        mrid = st.session_state.curr_scan
+        for suffix in ['.nii.gz', '.nii', '_T1', '_t1', '_FL', '_fl']:
+            mrid = mrid.replace(suffix, '')
+        st.session_state.participant['mrid'] = mrid
+    
+    if consolidate_nifti():
+        st.rerun()    
+            
 import utils.utils_dicoms as utildcm
         
 @st.dialog("Dicom extraction", width='medium')
-def extract_dicoms(in_dir):
+def dialog_extract_dicoms(in_dir, out_dir):
 
     if st.session_state.dicoms['df_dicoms'] is None:
         df_dicoms = utildcm.detect_series(in_dir)
@@ -390,57 +411,23 @@ def extract_dicoms(in_dir):
             icon=":material/thumb_up:"
     )
 
-    with st.form(key='_form_dicom_convert'):    
-
-        sel_serie = st.selectbox(
-            "Select series:", dicoms['list_series'], key = "key_select_dseries", index=0
-        )
+    sel_serie = st.selectbox(
+        "Select series:", dicoms['list_series'], key = "key_select_dseries", index=0
+    )
+    if st.button("Convert to Nifti"):
+        try:
+            utildcm.convert_serie(dicoms['df_dicoms'], sel_serie, out_dir)
+            
+        except Exception as e:
+            st.warning(":material/thumb_down: Nifti conversion failed!")
+            st.warning(e)
+            time.sleep(3)
+        st.session_state.curr_scan = st.session_state.participant['mrid'] + '.nii.gz'
     
-        #if st.button('Convert'):
-    
-        submitted = st.form_submit_button("Submit")
-        if submitted:
-            try:
-                utildcm.convert_serie(
-                    dicoms['df_dicoms'],
-                    sel_serie,
-                    in_dir,
-                    '.nii.gz',
-                    compression=True,
-                    reorient=True
-                )
-                
-            except Exception as e:
-                st.warning(":material/thumb_down: Nifti conversion failed!")
-                st.info(e)
-            st.rerun()
+    st.info(f'Fname: {st.session_state.curr_scan}')
 
-    #
-
-        #num_nifti = utilio.get_file_count(in_dir, '.nii.gz')
-
-        #if num_nifti == 0:
-            #st.warning(
-                #":material/thumb_down: The extraction process did not produce any Nifti images!"
-            #)
-        ##else:
-            ##if st.session_state.has_cloud_session:
-                ##utilcloud.update_stats_db(
-                    ##st.session_state.cloud_user_id, "NIFTIfromDICOM", num_nifti
-                ##)
-
-            #df_files = utilio.get_file_names(in_dir, '.nii.gz')
-            #num_nifti = df_files.shape[0]
-
-        #submitted = st.form_submit_button("Submit")
-        #flag_submit = False
-        
-    #if submitted:
-        #flag_submit = True
-        
-    #if flag_submit:
-        #st.rerun()
-        #st.session_state.dicoms['df_dicoms'] = None
+    if consolidate_nifti():
+        st.rerun()    
 
 def upload_file(in_file):
     '''
@@ -462,15 +449,16 @@ def upload_file(in_file):
             f.write(in_file.getbuffer())
 
     if fname.endswith(('.nii.gz', '.nii')):
-        consolidate_nifti(fname)
+        st.session_state.curr_scan = fname
+        dialog_consolidate_nifti()
 
     elif fname.endswith('.csv'):
         consolidate_csv(fname)
 
     elif fname.endswith('.zip'):
-        unzip_zip_files(tmp_dir)
-        st.toast('Zip file is unzipped')
-        extract_dicoms(tmp_dir)
+        d_out = os.path.join(tmp_dir, 'unzipped')
+        unzip_zip_file(f_out, d_out)
+        dialog_extract_dicoms(d_out, tmp_dir)
         
     else:
         st.warning('Input file type mismatch: should be one of .nii.gz, .nii, .csv or .zip')

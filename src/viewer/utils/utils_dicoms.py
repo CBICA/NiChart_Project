@@ -148,15 +148,10 @@ def select_series(df_dicoms: pd.DataFrame, dict_series: pd.Series) -> Any:
     return df_sel_list, dict_out
 
 def convert_serie(
-    df_dicoms,
-    sel_serie: str,
-    out_dir: str,
-    out_suff: str,
-    compression: bool = True,
-    reorient: bool = True,
-) -> None:
+    df_dicoms, sel_serie, out_dir, out_suff = '.nii.gz', reorient=True
+):
     """
-    This function will extract dicom files given in the list to nifti
+    This function will convert a selected serie to nifti
     """
     list_files = df_dicoms[df_dicoms.SeriesDesc == sel_serie].fname.tolist()
     
@@ -186,7 +181,7 @@ def convert_serie(
         return
 
     if len(dicom_series) > 1:
-        st.warning('Detected multiple nifti scans. Extracting the first scan')
+        st.warning('Detected multiple nifti scans! We just pick one')
        
     ########################
     # Convert dicom
@@ -224,12 +219,12 @@ def convert_serie(
             print(f"Start converting {mrid}")
             nifti_file = os.path.join(out_dir, mrid + out_suff)
             convert_dicom.dicom_array_to_nifti(dicom_input, nifti_file, reorient)
-            st.info(f'Nifti image: {mrid + out_suff}')
+            st.info(f'Extracted Nifti Image: {mrid + out_suff}')
                         
             gc.collect()
         except Exception as e:
         #except:  # Explicitly capturing app exceptions here to be able to continue processing
-            print(f"Unable to convert: {base_filename}")
+            print(f"Unable to convert: {mrid + out_suff}")
             print(e)
             traceback.print_exc()
 

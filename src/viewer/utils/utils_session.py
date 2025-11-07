@@ -78,12 +78,20 @@ def init_project_folders():
         {"dname": dnames, "dtype": dtypes}
     )
 
+def init_scan():
+    '''
+    Set scan info
+    '''
+    st.session_state.curr_scan = None
+
 def init_participant():
     '''
     Set participant info
     '''
     st.session_state.participant = {
-        'mrid' : None, 'age' : None, 'sex' : None
+        'mrid' : None,
+        'age' : None,
+        'sex' : None,
     }
 
 def init_session_vars():
@@ -92,6 +100,7 @@ def init_session_vars():
     '''
     
     init_participant()
+    init_scan()
     
     ## Misc variables
     st.session_state.mode = 'release'
@@ -390,8 +399,6 @@ def init_pipeline_definitions() -> None:
     )
     st.session_state.pipelines = pd.read_csv(plist)
     
-    print(st.session_state.pipelines)
-
 def init_reference_data() -> None:
     indir = os.path.join(
         st.session_state.paths['resources'], 'reference_data', 'sample1'
