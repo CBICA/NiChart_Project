@@ -293,9 +293,9 @@ def init_paths():
     st.session_state.paths["file_search_dir"] = st.session_state.paths["init"]
     ############    
 
-def init_dicom_vars() -> None:
+def reset_dicoms() -> None:
     '''
-    Set dicom variables
+    Reset dicom variables
     '''
     st.session_state.dicoms = {
         'list_series': None,
@@ -512,6 +512,11 @@ def update_project(sel_project) -> None:
     # Set project name
     st.session_state.prj_name = sel_project
     st.session_state.paths['prj_dir'] = p_prj
+    
+    reset_dicoms()
+    init_scan()
+    init_participant()
+    
     st.toast(f'Updated project folder {sel_project}')
 
 # Function to parse AWS login (if available)
@@ -608,7 +613,7 @@ def init_session_state() -> None:
         init_pipeline_definitions()
         init_reference_data()
         init_plot_vars()
-        init_dicom_vars()
+        reset_dicoms()
         
         # Set flag
         st.session_state.instantiated = True

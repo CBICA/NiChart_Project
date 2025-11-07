@@ -236,11 +236,11 @@ def show_img_slices(img, scroll_axis, sel_axis_bounds, orientation, wimg = None)
     # Extract the slice and display it
     if wimg is None:
         if scroll_axis == 0:
-            st.image(img[slice_index, :, :], use_container_width=True)
+            st.image(img[slice_index, :, :], width='stretch')
         elif scroll_axis == 1:
-            st.image(img[:, slice_index, :], use_container_width=True)
+            st.image(img[:, slice_index, :], width='stretch')
         else:
-            st.image(img[:, :, slice_index], use_container_width=True)
+            st.image(img[:, :, slice_index], width='stretch')
     else:
         if scroll_axis == 0:
             st.image(img[slice_index, :, :], width=wimg)

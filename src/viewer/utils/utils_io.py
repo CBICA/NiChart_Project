@@ -62,6 +62,25 @@ def remove_dir(out_dir):
         st.error(f"Could not delete folder: {out_dir}")
         return False
 
+def clear_folder(folder):
+    if os.path.islink(folder):
+        st.warning("Target folder is a symlink. Cannot delete contents")
+        return        
+
+    try:
+        for item in os.listdir(folder):
+            item_path = os.path.join(folder, item)
+            if os.path.isfile(item_path) or os.path.islink(item_path):
+                os.remove(item_path)
+            elif os.path.isdir(item_path):
+                shutil.rmtree(item_path)
+        logger.debug(f"Removed dir: {folder}")
+        time.sleep(2)
+        return True
+    except:
+        st.error(f"Could not delete folder: {folder}")
+        return False        
+
 def browse_file(path_init: str) -> Any:
     '''
     File selector
@@ -114,6 +133,16 @@ def zip_folder(in_dir: str, f_out: str) -> Optional[bytes]:
             download_dir = f.read()
 
         return download_dir
+
+def unzip_zip_file(f_in, d_out):
+    '''
+    Unzips a ZIP file to a new folder and deletes the zip file
+    '''
+    os.makedirs(d_out, exist_ok=True)
+    with zipfile.ZipFile(f_in, "r") as zip_ref:
+        zip_ref.extractall(d_out)
+    os.remove(f_in)
+    st.toast(f'Unzipped zip file ...')
 
 def unzip_zip_files(in_dir: str) -> None:
     '''

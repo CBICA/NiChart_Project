@@ -80,7 +80,9 @@ def build_folder_tree(
             ext = os.path.splitext(name)[1].lower()
             tags = []
             if ext == '.csv':
-                tags.append(sac.Tag('CSV', color='red'))
+                tags.append(sac.Tag('CSV', color='purple'))
+            elif ext in ['.nii.gz', '.nii']:
+                tags.append(sac.Tag('NIfTI', color='blue'))
 
             tree_items.append(
                 sac.TreeItem(

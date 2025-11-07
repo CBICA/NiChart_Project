@@ -17,6 +17,9 @@ from stqdm import stqdm
 import utils.utils_io as utilio
 import utils.utils_cloud as utilcloud
 
+from utils.utils_logger import setup_logger
+logger = setup_logger()
+
 # Useful links
 # https://github.com/rordenlab/dcm2niix/blob/master/FILENAMING.md
 # https://stackoverflow.com/questions/71042522/conversion-not-working-properly-using-dicom2nifti
@@ -166,9 +169,9 @@ def convert_serie(
                 force=dicom2nifti.settings.pydicom_read_force,
             )
             if not _is_valid_imaging_dicom(dicom_headers):
-                print(f"Skipping: {file_path}")
+                logger.debug(f"Skipping: {file_path}")
                 continue
-            print(f"Organizing: {file_path}")
+            ##print(f"Organizing: {file_path}")
             if dicom_headers.SeriesInstanceUID not in dicom_series:
                 dicom_series[dicom_headers.SeriesInstanceUID] = []
             dicom_series[dicom_headers.SeriesInstanceUID].append(dicom_headers)
@@ -198,9 +201,9 @@ def convert_serie(
             scdate = _remove_accents("%s" % dicom_input[0].StudyDate)
 
         if ptid == '' or scdate == '':
-            mrid = _remove_accents(dicom_input[0].SeriesInstanceUID)
+            dicomid = _remove_accents(dicom_input[0].SeriesInstanceUID)
         else:
-            mrid = f'{ptid}_{scdate}'
+            dicomid = f'{ptid}_{scdate}'
             
         page = None
         if "PatientAge" in dicom_input[0]:
@@ -209,7 +212,30 @@ def convert_serie(
         psex = None
         if "PatientSex" in dicom_input[0]:
             psex = dicom_input[0].PatientSex
-            
+        
+        ###############################################
+        # Compare dicom info to existing participant info
+        mrid = st.session_state.participant['mrid']
+        if mrid is None:
+            mrid = dicomid
+        else:
+            if mrid != dicomid:
+                st.warning(f'Existing MRID ({mrid}) does not match dicom ID ({dicomid}); Existing id will be used to rename the extracted scan!')
+
+        age = st.session_state.participant['age']
+        if age is None:
+            age = page
+        else:
+            if age != page:
+                st.warning(f'Existing Age ({age}) does not match age from dicom header ({page}); Existing age will be kept!')
+
+        sex = st.session_state.participant['sex']
+        if sex is None:
+            sex = psex
+        else:
+            if sex != psex:
+                st.warning(f'Existing Sex ({sex}) does not match sex from dicom header ({psex}); Existing sex will be kept!')
+        
         st.session_state.participant = {
             'mrid' : mrid, 'age' : page, 'sex' : psex
         }

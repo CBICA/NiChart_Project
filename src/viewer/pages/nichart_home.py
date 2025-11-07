@@ -24,7 +24,10 @@ import streamlit_antd_components as sac
 import streamlit as st
 from utils.nav import top_nav
 
-print("--- RERUN: HOME PAGE STARTING ---") 
+from utils.utils_logger import setup_logger
+logger = setup_logger()
+
+logger.debug("--- STARTING: Home ---")
 
 inject_global_css()
 
@@ -56,7 +59,7 @@ sel_but = sac.chip(
 )
     
 if sel_but == '':
-    print(f'Selected page {sel}')
+    logger.debug(f'      Selected page: {sel}')
 
     if sel == 'What is NiChart?':
         st.switch_page("pages/nichart_info.py")

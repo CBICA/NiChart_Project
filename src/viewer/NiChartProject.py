@@ -15,7 +15,10 @@ utilss.init_session_state()
 
 utilpg.config_page()
 
-print("--- RERUN: HOME PAGE STARTING ---") 
+from utils.utils_logger import setup_logger
+logger = setup_logger()
+
+logger.debug("--- STARTING: Main Page ---")
 
 # Read user arg to select cloud / desktop
 parser = argparse.ArgumentParser(description="NiChart Application Server")

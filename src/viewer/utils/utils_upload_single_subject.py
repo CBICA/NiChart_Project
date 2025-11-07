@@ -18,179 +18,7 @@ from utils.utils_logger import setup_logger
 logger = setup_logger()
 
 ##############################################################
-## Generic IO functions
-def get_file_count(folder_path: str, file_suff: List[str] = []) -> int:
-    '''
-    Returns the count of files matching any of the suffixes in `file_suff`
-    within the output folder. If `file_suff` is empty, all files are counted.
-    '''
-    count = 0
-    if not os.path.exists(folder_path):
-        return 0
-
-    for root, dirs, files in os.walk(folder_path):
-        if file_suff:
-            count += sum(any(file.endswith(suffix) for suffix in file_suff) for file in files)
-        else:
-            count += len(files)
-
-    return count
-
-def get_file_names(folder_path: str, file_suff: str = "") -> pd.DataFrame:
-    f_names = []
-    if os.path.exists(folder_path):
-        if file_suff == "":
-            for root, dirs, files in os.walk(folder_path):
-                f_names.append(files)
-        else:
-            for root, dirs, files in os.walk(folder_path):
-                for file in files:
-                    if file.endswith(file_suff):
-                        f_names.append([file])
-    df_out = pd.DataFrame(columns=["FileName"], data=f_names)
-    return df_out
-
-def remove_dir(out_dir):
-    '''
-    Delete a folder
-    '''
-    try:
-        if os.path.islink(out_dir):
-            os.unlink(out_dir)
-        else:
-            shutil.rmtree(out_dir)
-        st.success(f"Removed dir: {out_dir}")
-        time.sleep(2)
-        return True
-    except:
-        st.error(f"Could not delete folder: {out_dir}")
-        return False
-
-def clear_folder(folder):
-    if os.path.islink(folder):
-        st.warning("Target folder is a symlink. Cannot delete contents")
-        return        
-
-    try:
-        for item in os.listdir(folder):
-            item_path = os.path.join(folder, item)
-            if os.path.isfile(item_path) or os.path.islink(item_path):
-                os.remove(item_path)
-            elif os.path.isdir(item_path):
-                shutil.rmtree(item_path)
-        st.success(f"Removed dir: {folder}")
-        time.sleep(2)
-        return True
-    except:
-        st.error(f"Could not delete folder: {folder}")
-        return False        
-
-def browse_file(path_init: str) -> Any:
-    '''
-    File selector
-    Returns the file name selected by the user and the parent folder
-    '''
-    root = tk.Tk()
-    root.withdraw()  # Hide the main window
-    out_file = filedialog.askopenfilename(initialdir=path_init)
-    root.destroy()
-    if len(out_file) == 0:
-        return None
-    return out_file
-
-def browse_folder(path_init: str) -> Any:
-    '''
-    Folder selector
-    Returns the folder name selected by the user
-    '''
-    root = tk.Tk()
-    root.withdraw()  # Hide the main window
-    out_path = filedialog.askdirectory(initialdir=path_init)
-    root.destroy()
-    if len(out_path) == 0:
-        return None
-    return out_path
-
-def get_subfolders(path: str) -> list:
-    '''
-    Returns a list of subfolders in input folder
-    '''
-    subdirs = []
-    for item in os.listdir(path):
-        item_path = os.path.join(path, item)
-        if os.path.isdir(item_path):
-            subdirs.append(item)
-    return sorted(subdirs)
-
-def zip_folder(out_dir: str, f_out: str) -> Optional[bytes]:
-    '''
-    Zips a folder and its contents.
-    '''
-    if not os.path.exists(out_dir):
-        return None
-    else:
-        shutil.make_archive(
-            f_out, "zip", os.path.dirname(out_dir), os.path.basename(out_dir)
-        )
-
-        with open(f"{f_out}.zip", "rb") as f:
-            download_dir = f.read()
-
-        return download_dir
-
-def unzip_files(out_dir: str) -> None:
-    '''
-    Unzips all ZIP files in the input dir and removes the original ZIP files.
-    '''
-    if os.path.exists(out_dir):
-        for filename in os.listdir(out_dir):
-            if filename.endswith(".zip"):
-                zip_path = os.path.join(out_dir, filename)
-                with zipfile.ZipFile(zip_path, "r") as zip_ref:
-                    zip_ref.extractall(out_dir)
-                    os.remove(zip_path)
-
-def copy_and_unzip_single(in_file: str, d_out: str) -> None:
-    '''
-    Copy uploaded files to the output dir and unzip zip files
-    '''
-    # Save uploaded files
-    print("Saving uploaded files")
-    fout = os.path.join(d_out, in_file.name)
-    # Handle creating nested dirs if needed
-    os.makedirs(os.path.dirname(fout), exist_ok=True)
-    if not os.path.exists(fout):
-        with open(fout, "wb") as f:
-            f.write(in_file.getbuffer())
-    ## Unzip zip files
-    #print("Extracting zip files")
-    #if os.path.exists(d_out):
-        #unzip_files(d_out)
-
-def copy_nifti(in_file_obj: str, d_out: str) -> None:
-    '''
-    Copy uploaded nifti image to the output dir
-    '''
-    fout = os.path.join(d_out, in_file_obj.name)
-    # Handle creating nested dirs if needed
-    os.makedirs(os.path.dirname(fout), exist_ok=True)
-    if not os.path.exists(fout):
-        with open(fout, "wb") as f:
-            f.write(in_file_obj.getbuffer())
-    ## Unzip zip files
-    #print("Extracting zip files")
-    #if os.path.exists(d_out):
-        #unzip_files(d_out)
-
-def unzip_zip_file(f_in, d_out):
-    '''
-    Unzips a ZIP file to a new folder and deletes the zip file
-    '''
-    os.makedirs(d_out, exist_ok=True)
-    with zipfile.ZipFile(f_in, "r") as zip_ref:
-        zip_ref.extractall(d_out)
-    os.remove(f_in)
-    st.toast(f'Unzipped zip file ...')
+## Functions to consolidate data
 
 @st.dialog("Participant Information", width='medium')
 def edit_participants(in_file):
@@ -233,7 +61,7 @@ def edit_participants(in_file):
         hide_index=True,
         column_config=column_config,
         num_rows="fixed",
-        use_container_width=True
+        width='stretch'
     )
     if st.button('Save'):
         df_user.to_csv(in_file, index=False)
@@ -241,85 +69,11 @@ def edit_participants(in_file):
         
         st.rerun()
 
-
 def select_project():
     """
     Panel for selecting a project
     """
 
-
-def panel_project_folder():
-    '''
-    Panel to select project folder
-    '''
-    sac.divider(key='_p1_div1')
-    
-    with st.container(horizontal=True, horizontal_alignment="left"):
-        st.markdown("##### Project Folder: ", width='content')
-        with st.popover("❓", width='content'):
-            st.write(
-                """
-                **Project Folder Help**
-                - All processing steps are performed inside a project folder.
-                - By default, NiChart will create and use a current project folder for you.
-                - You may also create a new project folder using any name you choose.
-                - If needed, you can reset the current project folder (this will remove all files inside it, but keep the folder itself), allowing you to start fresh.
-                - You may also switch to an existing project folder.
-                
-                **Note:** If you are using the cloud version, stored files will be removed periodically, so previously used project folders might not remain available.                
-                """
-            )
-            
-    placeholder = st.empty()
-    placeholder.markdown(f"##### 📁 `{st.session_state.prj_name}`", width='content')
-
-    sel_opt = st.selectbox(
-        'Select an action',
-        ["I'm Good — Move On", 'Create new project folder', 'Switch to existing project', 'Reset project folder'],
-        label_visibility='collapsed',
-        index=None
-    )
-
-    if sel_opt == "I'm Good — Move On":
-        st.success('Great! Please upload your data!')
-
-    if sel_opt == 'Create new project folder':
-        sel_prj = st.text_input(
-            "Project name:",
-            None,
-            placeholder="user_new_study",
-            label_visibility = 'collapsed'
-        )
-        if st.button("Select"):
-            utilss.update_project(sel_prj)
-            placeholder.markdown(f"##### 📃 `{st.session_state.prj_name}`", width='content')
-
-    if sel_opt == 'Switch to existing project':
-        list_projects = get_subfolders(st.session_state.paths['out_dir'])
-        if len(list_projects) > 0:
-            sel_ind = list_projects.index(st.session_state.prj_name)
-            sel_prj = sac.chip(
-                list_projects,
-                label='', index=None, align='left', size='sm', radius='sm',
-                multiple=False, color='cyan', description='Projects in output folder'
-            )
-            if st.button("Select"):
-                utilss.update_project(sel_prj)
-                placeholder.markdown(f"##### 📃 `{st.session_state.prj_name}`", width='content')
-                if sel_prj is not None:
-                    utilss.update_project(sel_prj)
-                    placeholder.markdown(f"##### 📃 `{st.session_state.prj_name}`", width='content')
-    
-    if sel_opt == 'Reset project folder':
-        st.warning("⚠️Are you sure you want to delete all files in the project folder? This cannot be undone.")
-        flag_confirm = st.checkbox("I understand and want to delete all files in this folder")
-
-        with st.container(horizontal=True, horizontal_alignment="center"):
-            if st.button("Delete") and flag_confirm:
-                clear_folder(st.session_state.paths['prj_dir'])
-                st.toast(f"Files in project {st.session_state.prj_name} have been successfully deleted.")
-                utilss.update_project(st.session_state.prj_name)
-        
 def update_participant_csv():
     mrid = st.session_state.participant['mrid']
     age = st.session_state.participant['age']
@@ -333,6 +87,7 @@ def update_participant_csv():
     df.to_csv(ofile, index=False)
 
 def consolidate_nifti():
+    logger.debug(f'    Function: consolidate_nifti')
     
     # Get full name for the current file
     # Input image file is kept in a temporary upload folder
@@ -341,6 +96,8 @@ def consolidate_nifti():
         return False
     in_dir = os.path.join(st.session_state.paths['prj_dir'], 'user_upload')
     in_fpath = os.path.join(in_dir, in_fname)
+
+    logger.debug(f'      Input: {in_fpath}')
 
     # Get saved scan/participant info 
     mrid = st.session_state.participant['mrid']
@@ -376,13 +133,15 @@ def consolidate_nifti():
         if os.path.exists(out_fpath):
             st.warning('Scan exists, will be updated!')
         shutil.move(in_fpath, out_fpath)
-        clear_folder(in_dir)
+        utilio.clear_folder(in_dir)
+
         return True
 
     return False
 
 @st.dialog("Scan/Participant Info", width='medium')
 def dialog_consolidate_nifti():
+    logger.debug('    Function: dialog_consolidate_nifti')
     # Detect mrid
     mrid = st.session_state.participant['mrid']
     if mrid is None:
@@ -392,13 +151,11 @@ def dialog_consolidate_nifti():
         st.session_state.participant['mrid'] = mrid
     
     if consolidate_nifti():
-        st.rerun()    
-            
-import utils.utils_dicoms as utildcm
-        
+        st.toast(f'Nifti file consolidated ...')
+        st.rerun()   
+                   
 @st.dialog("Dicom extraction", width='medium')
 def dialog_extract_dicoms(in_dir, out_dir):
-
     if st.session_state.dicoms['df_dicoms'] is None:
         df_dicoms = utildcm.detect_series(in_dir)
         st.session_state.dicoms['df_dicoms'] = df_dicoms
@@ -422,10 +179,10 @@ def dialog_extract_dicoms(in_dir, out_dir):
             st.warning(":material/thumb_down: Nifti conversion failed!")
             st.warning(e)
             time.sleep(3)
-        st.session_state.curr_scan = st.session_state.participant['mrid'] + '.nii.gz'
-    
-    st.info(f'Fname: {st.session_state.curr_scan}')
 
+        st.session_state.curr_scan = st.session_state.participant['mrid'] + '.nii.gz'
+        utilss.reset_dicoms()
+    
     if consolidate_nifti():
         st.rerun()    
 
@@ -433,12 +190,12 @@ def upload_file(in_file):
     '''
     Copy file to output folder
     '''
+    logger.debug(f'    Function: upload_file({in_file})')
     if in_file is None:
         st.warning('Please select input file(s)')
+        time.sleep(3)
         return
     
-    st.toast(f'Uploading file ...')
-
     tmp_dir = os.path.join(st.session_state.paths['prj_dir'], 'user_upload')
     os.makedirs(tmp_dir, exist_ok=True)
 
@@ -448,46 +205,158 @@ def upload_file(in_file):
         with open(f_out, "wb") as f:
             f.write(in_file.getbuffer())
 
+    st.toast(f'Uploaded file ...')
+
     if fname.endswith(('.nii.gz', '.nii')):
         st.session_state.curr_scan = fname
         dialog_consolidate_nifti()
-
+        
     elif fname.endswith('.csv'):
         consolidate_csv(fname)
 
     elif fname.endswith('.zip'):
         d_out = os.path.join(tmp_dir, 'unzipped')
-        unzip_zip_file(f_out, d_out)
+        utilio.unzip_zip_file(f_out, d_out)
         dialog_extract_dicoms(d_out, tmp_dir)
         
     else:
         st.warning('Input file type mismatch: should be one of .nii.gz, .nii, .csv or .zip')
-        
-    # Remove temp folder
-    #shutil.rmtree(tmp_dir)
 
 def upload_files(in_files):
     '''
     Copy files to output folder
     '''
+    logger.debug('    Function: Upload_files')
+
     if len(in_files) == 0:
         return
     
-    st.toast(f'Uploading files ...')
-
     tmp_dir = os.path.join(st.session_state.paths['prj_dir'], 'user_upload')
-    os.makedirs(tmp_dir, exist_ok=True)
+    d_out = os.path.join(tmp_dir, 'dicoms')
+    
+    os.makedirs(d_out, exist_ok=True)
 
     for in_file in in_files:
-        f_out = os.path.join(tmp_dir, in_file.name)
+        f_out = os.path.join(d_out, in_file.name)
         if not os.path.exists(f_out):
             with open(f_out, "wb") as f:
                 f.write(in_file.getbuffer())
 
+    st.toast(f'Uploaded files ...')
+
+    dialog_extract_dicoms(d_out, tmp_dir)
+       
+def view_mri(fname):
+    """
+    Panel for viewing a nifti scan
+    """
+    with st.spinner("Wait for it..."):
+        try:
+            # Prepare final 3d matrix to display
+            img = utilmri.prep_image(fname)
+
+            # Detect mask bounds and center in each view
+            img_bounds = utilmri.detect_img_bounds(img)
+
+            # Show images
+            ind_view = utilmri.img_views.index('axial')
+            size_auto = True
+            utilmri.show_img_slices(
+                img,
+                ind_view,
+                img_bounds[ind_view, :],
+                'axial',
+            )
+        except:
+            st.warning(
+                ":material/thumb_down: Image parsing failed. Please confirm that the image file represents a 3D volume using an external tool."
+            )
+
+##############################################################
+## Main panels
+
+def panel_project_folder():
+    '''
+    Panel to select project folder
+    '''
+    logger.debug('    Function: panel_project_folder')
+    sac.divider(key='_p1_div1')
+    
+    with st.container(horizontal=True, horizontal_alignment="left"):
+        st.markdown("##### Project Folder: ", width='content')
+        with st.popover("❓", width='content'):
+            st.write(
+                """
+                **Project Folder Help**
+                - All processing steps are performed inside a project folder.
+                - By default, NiChart will create and use a current project folder for you.
+                - You may also create a new project folder using any name you choose.
+                - If needed, you can reset the current project folder (this will remove all files inside it, but keep the folder itself), allowing you to start fresh.
+                - You may also switch to an existing project folder.
+                
+                **Note:** If you are using the cloud version, stored files will be removed periodically, so previously used project folders might not remain available.                
+                """
+            )
+    placeholder = st.empty()
+    placeholder.markdown(f"##### 📁 `{st.session_state.prj_name}`", width='content')
+
+    sel_opt = st.selectbox(
+        'Select an action',
+        ["I'm Good — Move On", 'Create new project folder', 'Switch to existing project', 'Reset project folder'],
+        label_visibility='collapsed',
+        index=None
+    )
+
+    if sel_opt == "I'm Good — Move On":
+        st.success('Great! Please upload your data!')
+
+    if sel_opt == 'Create new project folder':
+        sel_prj = st.text_input(
+            "Project name:",
+            None,
+            placeholder="user_new_study",
+            label_visibility = 'collapsed'
+        )
+
+        with st.container(horizontal=True, horizontal_alignment="center"):
+            if st.button("Select"):
+                utilss.update_project(sel_prj)
+                placeholder.markdown(f"##### 📃 `{st.session_state.prj_name}`", width='content')
+
+    if sel_opt == 'Switch to existing project':
+        list_projects = utilio.get_subfolders(st.session_state.paths['out_dir'])
+        if len(list_projects) > 0:
+            sel_ind = list_projects.index(st.session_state.prj_name)
+            sel_prj = sac.chip(
+                list_projects,
+                label='', index=None, align='left', size='sm', radius='sm',
+                multiple=False, color='cyan', description='Projects in output folder'
+            )
+            
+            with st.container(horizontal=True, horizontal_alignment="center"):
+                if st.button("Select"):
+                    utilss.update_project(sel_prj)
+                    placeholder.markdown(f"##### 📃 `{st.session_state.prj_name}`", width='content')
+                    if sel_prj is not None:
+                        utilss.update_project(sel_prj)
+                        placeholder.markdown(f"##### 📃 `{st.session_state.prj_name}`", width='content')
+    
+    if sel_opt == 'Reset project folder':
+        st.warning("⚠️Are you sure you want to delete all files in the project folder? This cannot be undone.")
+        flag_confirm = st.checkbox("I understand and want to delete all files in this folder")
+
+        with st.container(horizontal=True, horizontal_alignment="center"):
+            if st.button("Delete") and flag_confirm:
+                utilio.clear_folder(st.session_state.paths['prj_dir'])
+                st.toast(f"Files in project {st.session_state.prj_name} have been successfully deleted.")
+                utilss.update_project(st.session_state.prj_name)
+        
 def panel_upload_single_subject():
     '''
     Upload user data to target folder
     '''
+    logger.debug('    Function: panel_upload_single_subject')
+
     sac.divider(key='_p2_div1')
     
     with st.container(horizontal=True, horizontal_alignment="left"):
@@ -527,6 +396,8 @@ def panel_upload_single_subject():
     if sel_opt == 1:
         flag_multi=True
         
+    logger.debug(f'**** flag multi set to : {flag_multi}')
+        
     with st.form(key='my_form', clear_on_submit=True, border=False):
                 
         sel_files = st.file_uploader(
@@ -537,46 +408,25 @@ def panel_upload_single_subject():
         )
         
         flag_submit = False
-        submitted = st.form_submit_button("Submit")
-        if submitted:
-            flag_submit = True
+        with st.container(horizontal=True, horizontal_alignment="center"):
+            submitted = st.form_submit_button("Submit")
+            if submitted:
+                flag_submit = True
         
+    logger.debug(f'**** flag submitted set to : {flag_submit}')
+    logger.debug(f'**** sel files : {sel_files}')
     if flag_submit == True:
         if flag_multi == False:
             upload_file(sel_files)
         else:
             upload_files(sel_files)
-       
-def view_mri(fname):
-    """
-    Panel for viewing a nifti scan
-    """
-    with st.spinner("Wait for it..."):
-        try:
-            # Prepare final 3d matrix to display
-            img = utilmri.prep_image(fname)
-
-            # Detect mask bounds and center in each view
-            img_bounds = utilmri.detect_img_bounds(img)
-
-            # Show images
-            ind_view = utilmri.img_views.index('axial')
-            size_auto = True
-            utilmri.show_img_slices(
-                img,
-                ind_view,
-                img_bounds[ind_view, :],
-                'axial',
-            )
-        except:
-            st.warning(
-                ":material/thumb_down: Image parsing failed. Please confirm that the image file represents a 3D volume using an external tool."
-            )
 
 def panel_view_files():
     '''
     Show files in data folder
     '''
+    logger.debug('    Function: panel_view_files')
+    
     sac.divider(key='_p3_div1')
     
     with st.container(horizontal=True, horizontal_alignment="left"):
@@ -626,8 +476,9 @@ def panel_view_files():
                 st.info(f'Data file: {fname}')
                 st.dataframe(df_tmp, hide_index=True)
                 
-                if st.button('Edit'):
-                    edit_participants(fpath)                
+                with st.container(horizontal=True, horizontal_alignment="center"):
+                    if st.button('Edit'):
+                        edit_participants(fpath)                
             except:
                 st.warning(f'Could not read csv file: {fname}')
 

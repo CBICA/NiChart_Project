@@ -8,7 +8,6 @@ import utils.utils_misc as utilmisc
 import utils.utils_pages as utilpg
 import utils.utils_processes as utilprc
 import utils.utils_session as utilses
-import utils.utils_upload as utilup
 import utils.utils_data_view as utildv
 from utils.utils_styles import inject_global_css
 
@@ -19,7 +18,7 @@ from utils.utils_logger import setup_logger
 import streamlit_antd_components as sac
 
 logger = setup_logger()
-logger.debug('Page: Select Pipelines')
+logger.debug("--- STARTING: Run Pipelines ---")
 
 inject_global_css()
 

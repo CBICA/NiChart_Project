@@ -8,7 +8,7 @@ import utils.utils_misc as utilmisc
 import utils.utils_pages as utilpg
 import utils.utils_processes as utilprc
 import utils.utils_session as utilses
-import utils.utils_upload as utilup
+import utils.utils_upload_single_subject as utilupss
 import utils.utils_data_view as utildv
 from utils.utils_styles import inject_global_css 
 
@@ -19,7 +19,7 @@ from utils.utils_logger import setup_logger
 import streamlit_antd_components as sac
 
 logger = setup_logger()
-logger.debug('Page: Upload Data')
+logger.debug("--- STARTING: Upload Data ---")
 
 inject_global_css()
 
@@ -39,13 +39,13 @@ def upload_data():
     cols = st.columns([6,1,10,1,10])
 
     with cols[0]:
-        utilup.panel_project_folder()
+        utilupss.panel_project_folder()
 
     with cols[2]:
-        utilup.panel_upload_single_subject()
+        utilupss.panel_upload_single_subject()
 
     with cols[4]:
-        utilup.panel_view_files()
+        utilupss.panel_view_files()
         
     # Show selections
     #utilses.disp_selections()
