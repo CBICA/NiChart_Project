@@ -182,3 +182,5 @@ test/test_output
 ## make sure no data go to the repo
 ##*.nii.gz
 
+src/viewer/utils/tmp
+src/viewer/test

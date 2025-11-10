@@ -24,6 +24,30 @@ MASK_COLOR = (0, 255, 0)  # RGB format
 MASK_COLOR = np.array([0.0, 1.0, 0.0])  # RGB format
 OLAY_ALPHA = 0.2
 
+def pad_image(img: np.ndarray) -> np.ndarray:
+    """
+    Pad img to equal x,y,z
+    """
+
+    # Detect max size
+    simg = img.shape
+    mx = np.max(simg)
+
+    # Calculate padding values to make dims equal
+    pad_vals = (mx - np.array(simg)) // 2
+
+    # Create padded image
+    out_img = np.zeros([mx, mx, mx])
+
+    # Insert image inside the padded image
+    out_img[
+        pad_vals[0] : pad_vals[0] + simg[0],
+        pad_vals[1] : pad_vals[1] + simg[1],
+        pad_vals[2] : pad_vals[2] + simg[2],
+    ] = img
+
+    return out_img
+
 def reorient_nifti(nii_in: Any, ref_orient: str = "LPS") -> Any:
     """
     Initial img is reoriented to a standard orientation
@@ -212,18 +236,18 @@ def show_img_slices(img, scroll_axis, sel_axis_bounds, orientation, wimg = None)
     # Extract the slice and display it
     if wimg is None:
         if scroll_axis == 0:
-            st.image(img[slice_index, :, :], use_container_width=True)
+            st.image(img[slice_index, :, :], width='stretch')
         elif scroll_axis == 1:
-            st.image(img[:, slice_index, :], use_container_width=True)
+            st.image(img[:, slice_index, :], width='stretch')
         else:
-            st.image(img[:, :, slice_index], use_container_width=True)
+            st.image(img[:, :, slice_index], width='stretch')
     else:
         if scroll_axis == 0:
-            st.image(img[slice_index, :, :], width=w_img)
+            st.image(img[slice_index, :, :], width=wimg)
         elif scroll_axis == 1:
-            st.image(img[:, slice_index, :], width=w_img)
+            st.image(img[:, slice_index, :], width=wimg)
         else:
-            st.image(img[:, :, slice_index], width=w_img)
+            st.image(img[:, :, slice_index], width=wimg)
 
 def panel_select_var(sel_var_groups, plot_params, var_type, add_none = False):
     '''

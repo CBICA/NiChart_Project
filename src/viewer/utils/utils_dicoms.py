@@ -17,6 +17,9 @@ from stqdm import stqdm
 import utils.utils_io as utilio
 import utils.utils_cloud as utilcloud
 
+from utils.utils_logger import setup_logger
+logger = setup_logger()
+
 # Useful links
 # https://github.com/rordenlab/dcm2niix/blob/master/FILENAMING.md
 # https://stackoverflow.com/questions/71042522/conversion-not-working-properly-using-dicom2nifti
@@ -147,16 +150,14 @@ def select_series(df_dicoms: pd.DataFrame, dict_series: pd.Series) -> Any:
     # Return selected files, series descriptions, and all series in the folder
     return df_sel_list, dict_out
 
-def convert_single_series(
-    list_files: list,
-    out_dir: str,
-    out_suff: str,
-    compression: bool = True,
-    reorient: bool = True,
-) -> None:
+def convert_serie(
+    df_dicoms, sel_serie, out_dir, out_suff = '.nii.gz', reorient=True
+):
     """
-    This function will extract dicom files given in the list to nifti
+    This function will convert a selected serie to nifti
     """
+    list_files = df_dicoms[df_dicoms.SeriesDesc == sel_serie].fname.tolist()
+    
     # Sort dicom files by series uid
     dicom_series = {}  # type: ignore
     for file_path in list_files:
@@ -168,65 +169,89 @@ def convert_single_series(
                 force=dicom2nifti.settings.pydicom_read_force,
             )
             if not _is_valid_imaging_dicom(dicom_headers):
-                print(f"Skipping: {file_path}")
+                logger.debug(f"Skipping: {file_path}")
                 continue
-            print(f"Organizing: {file_path}")
+            ##print(f"Organizing: {file_path}")
             if dicom_headers.SeriesInstanceUID not in dicom_series:
                 dicom_series[dicom_headers.SeriesInstanceUID] = []
             dicom_series[dicom_headers.SeriesInstanceUID].append(dicom_headers)
         except:  # Explicitly capturing all errors here to be able to continue processing all the rest
             print("Unable to read: %s" % file_path)
 
-    # Start converting one by one
-    for series_id, dicom_input in stqdm(
-        dicom_series.items(), desc="    Converting scans...", total=len(dicom_series)
-    ):
-        base_filename = ""
+    # Check #scans
+    if len(dicom_series) == 0:
+        st.error('Could not detect nifti scan!')
+        return
+
+    if len(dicom_series) > 1:
+        st.warning('Detected multiple nifti scans! We just pick one')
+       
+    ########################
+    # Convert dicom
+    for series_id, dicom_input in dicom_series.items():
+
+        # Extract dicom info
+        ptid=""
+        if "PatientID" in dicom_input[0]:
+            ptid = _remove_accents("%s" % dicom_input[0].PatientID)
+
+        # FIXME: Check also "AcquisitionDate"
+        scdate=""
+        if "StudyDate" in dicom_input[0]:
+            scdate = _remove_accents("%s" % dicom_input[0].StudyDate)
+
+        if ptid == '' or scdate == '':
+            dicomid = _remove_accents(dicom_input[0].SeriesInstanceUID)
+        else:
+            dicomid = f'{ptid}_{scdate}'
+            
+        page = None
+        if "PatientAge" in dicom_input[0]:
+            page = dicom_input[0].PatientAge
+            page = float(page.replace('Y',''))
+        psex = None
+        if "PatientSex" in dicom_input[0]:
+            psex = dicom_input[0].PatientSex
+        
+        ###############################################
+        # Compare dicom info to existing participant info
+        mrid = st.session_state.participant['mrid']
+        if mrid is None:
+            mrid = dicomid
+        else:
+            if mrid != dicomid:
+                st.warning(f'Existing MRID ({mrid}) does not match dicom ID ({dicomid}); Existing id will be used to rename the extracted scan!')
+
+        age = st.session_state.participant['age']
+        if age is None:
+            age = page
+        else:
+            if age != page:
+                st.warning(f'Existing Age ({age}) does not match age from dicom header ({page}); Existing age will be kept!')
+
+        sex = st.session_state.participant['sex']
+        if sex is None:
+            sex = psex
+        else:
+            if sex != psex:
+                st.warning(f'Existing Sex ({sex}) does not match sex from dicom header ({psex}); Existing sex will be kept!')
+        
+        st.session_state.participant = {
+            'mrid' : mrid, 'age' : page, 'sex' : psex
+        }
+
         try:
-            # construct the filename for the nifti
-            base_filename = ""
-            if "PatientID" in dicom_input[0]:
-                base_filename = _remove_accents("%s" % dicom_input[0].PatientID)
-                print(dicom_input[0].PatientID)
-                print(base_filename)
-
-            # FIXME: Check also "AcquisitionDate"
-            if "StudyDate" in dicom_input[0]:
-                base_filename = _remove_accents(
-                    f"{base_filename}_{dicom_input[0].StudyDate}"
-                )
-
-            # if 'SeriesDescription' in dicom_input[0]:
-            # base_filename = _remove_accents(f'{base_filename}_{dicom_input[0].SeriesDescription}')
-
-            else:
-                base_filename = _remove_accents(dicom_input[0].SeriesInstanceUID)
-
             print("--------------------------------------------")
-            print(f"Start converting {base_filename}")
-            if compression:
-                nifti_file = os.path.join(out_dir, base_filename + out_suff)
-            else:
-                nifti_file = os.path.join(out_dir, base_filename + out_suff)
+            print(f"Start converting {mrid}")
+            nifti_file = os.path.join(out_dir, mrid + out_suff)
             convert_dicom.dicom_array_to_nifti(dicom_input, nifti_file, reorient)
-            
-            # Create demog info csv from dicoms
-            page = None
-            if "PatientAge" in dicom_input[0]:
-                page = dicom_input[0].PatientAge
-                page = page.replace('Y','')
-            psex = None
-            if "PatientSex" in dicom_input[0]:
-                psex = dicom_input[0].PatientSex
-            df_demog = pd.DataFrame({'MRID': [base_filename], 'Age': [page], 'Sex': [psex]})
-            csv_file = os.path.join(
-                out_dir, f'{base_filename}{out_suff.replace('.nii.gz', '').replace('.nii','')}.csv'
-            )
-            df_demog.to_csv(csv_file, index=False)
-            
+            st.info(f'Extracted Nifti Image: {mrid + out_suff}')
+                        
             gc.collect()
-        except:  # Explicitly capturing app exceptions here to be able to continue processing
-            print(f"Unable to convert: {base_filename}")
+        except Exception as e:
+        #except:  # Explicitly capturing app exceptions here to be able to continue processing
+            print(f"Unable to convert: {mrid + out_suff}")
+            print(e)
             traceback.print_exc()
 
 
@@ -314,8 +339,9 @@ def panel_extract_nifti(out_dir):
                     dout,
                     f"_{st.session_state.sel_mod}.nii.gz",
                 )
-            except:
-                st.warning(":material/thumb_down: Nifti conversion failed!")
+            except Exception as e:
+                st.warning(":material/thumb_down: Nifti ddd conversion failed!")
+                st.info(e)
 
         num_nifti = utilio.get_file_count(
             dout, ".nii.gz"
@@ -343,4 +369,54 @@ def panel_extract_nifti(out_dir):
 
         with st.expander("View NIFTI image list"):
             st.dataframe(df_files)
+
+def dicom_to_nifti_single(out_dir):
+    """
+    Extract a single scan from dicom data
+    """    
+    # Selection of dicom series
+    st.session_state.dicoms['sel_series'] = st.multiselect(
+        "Select series:",
+        st.session_state.dicoms['list_series'],
+        key = "key_multiselect_dseries",
+    )
+
+    try:
+        convert_sel_series(
+            st.session_state.dicoms['df_dicoms'],
+            st.session_state.dicoms['sel_series'],
+            dout,
+            f"_{st.session_state.sel_mod}.nii.gz",
+        )
+    except Exception as e:
+        st.warning(":material/thumb_down: Nifti ccc conversion failed!")
+        st.info(e)
+
+    num_nifti = utilio.get_file_count(
+        dout, ".nii.gz"
+    )
+    if num_nifti == 0:
+        st.warning(
+            ":material/thumb_down: The extraction process did not produce any Nifti images!"
+        )
+    else:
+        if st.session_state.has_cloud_session:
+            utilcloud.update_stats_db(
+                st.session_state.cloud_user_id, "NIFTIfromDICOM", num_nifti
+            )
+
+    df_files = utilio.get_file_names(
+        dout, ".nii.gz"
+    )
+    num_nifti = df_files.shape[0]
+
+    if num_nifti > 0:
+        st.success(
+            f"Nifti images are ready ({dout}, {num_nifti} scan(s))",
+            icon=":material/thumb_up:",
+        )
+
+        with st.expander("View NIFTI image list"):
+            st.dataframe(df_files)
+
 
