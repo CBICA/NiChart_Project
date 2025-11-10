@@ -20,7 +20,7 @@ from utils.utils_logger import setup_logger
 
 import streamlit_antd_components as sac
 
-utilpg.config_page()
+#utilpg.config_page()
 utilpg.set_global_style()
 
 def view_overview():
