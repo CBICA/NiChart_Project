@@ -299,7 +299,7 @@ def upload_files_multi_subject(in_files):
     '''
     Copy files to output folder
     '''
-    logger.debug('    Function: Upload_files')
+    logger.debug('    Function: upload_files_multi_subject')
 
     if len(in_files) == 0:
         return
@@ -318,6 +318,7 @@ def upload_files_multi_subject(in_files):
     st.toast(f'Uploaded files ...')
 
     ## FIXME [multiple nifti]
+    
        
 def view_mri(fname):
     """
