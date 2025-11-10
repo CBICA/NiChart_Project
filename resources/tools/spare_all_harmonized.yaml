@@ -1,0 +1,35 @@
+name: spare_all_harmonized
+description: This tool takes a harmonized DLMUSE CSV (and demographics information) and uses SPARE to produce all available SPARE scores.
+
+inputs:
+  dlmuse_vol:
+    type: file
+  demog_csv:
+    type: file
+
+outputs:
+  spare_all_csv:
+    type: file
+
+mounts:
+  demog_csv:
+    path_in_container: /input/demographics.csv
+    mode: ro
+  dlmuse_vol:
+    path_in_container: /input/dlmuse_vol.csv
+    mode: ro
+  spare_all_csv:
+    path_in_container: /output/SPARE_ALL.csv
+    mode: rw
+
+parameters:
+  {} # Empty dictionary to signify no parameters
+
+resources: # Used to allocate jobs on the cloud. Please be diligent.
+  vcpus: 2
+  memory: 8000 # Amount must be in MiB, see https://docs.aws.amazon.com/batch/latest/APIReference/API_ResourceRequirement.html
+  gpus: 0
+
+container:
+  image: cbica/nichart_spare_score:0.0.3
+  command: "-i {dlmuse_vol} -demog {demog_csv} -t CL -m /spare_score/Models/final_models/SPARE-AD-RAW-linear_fast-HT-CB.joblib -o {spare_ad_csv}"

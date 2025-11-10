@@ -20,7 +20,7 @@ def verify_data_dlmuse():
     t1_dir = Path(st.session_state.paths['project']) / "t1"
     demog_file = Path(st.session_state.paths['project']) / "participants" / "participants.csv"
     if not file_exists(demog_file):
-        st.warning("Participants file missing. Only needed for harmonized DLMUSE.")
+        st.warning("Participants file missing.")
         flag_data = False
     if not dir_has_any_files_with_suffix(t1_dir, ".nii.gz"):
         st.error("No T1 images detected. Please upload data.")
@@ -79,12 +79,16 @@ def verify_data(method):
         flag_data = verify_data_cclnmf()
     if method == 'surrealgan':
         flag_data = verify_data_surrealgan()
-    if method == 'spare-ba':
-        flag_data = verify_data_spare()
-    if method == 'spare-ad':
+    if method in ['spare-ba', 'spare-ad', 'spare-depression', 'spare-obesity',
+                   'spare-psychosis', 'spare-diabetes', 'spare-hypertension',
+                   'spare-smoking']:
         flag_data = verify_data_spare()
     if method == 'spare-ba-image':
         flag_data = verify_data_dlspare()
+    if method == 'dlmuse-dlwmls':
+        flag_data = verify_data_dlmuse() and verify_data_dlwmls()
+    if method == 'ravens':
+        flag_data = verify_data_dlmuse()
 
     
     return flag_data

@@ -2,6 +2,17 @@ pipeline_name: SPARE Scores - Alzheimer's Disease (Unharmonized)
 description: |
   Pipeline which uses DLMUSE and input demographics to produce Alzheimer's Disease SPARE scores.
 
+categories:
+  - spare
+  - inference
+  - classification
+  - alzheimers
+
+requires:
+  - needs_T1
+  - needs_demographics
+  - csv_has_columns: [MRID, Age, Sex]
+
 steps:
   - id: run_nichart_dlmuse
     tool: nichart_dlmuse # MUST CORRESPOND EXACTLY to a tool in resources/tools dir

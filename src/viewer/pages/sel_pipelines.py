@@ -73,6 +73,110 @@ def view_doc(pipeline, dtype) -> None:
         st.code(sections[dtype])
             
 
+def pipeline_selector_categories():
+    # User selects their desired category, selection is filtered
+
+    pipelines = st.session_state.pipelines
+    sitems = []
+    colors = st.session_state.pipeline_colors
+    categories = st.session_state.pipeline_categories
+    reqs = st.session_state.pipeline_requirements
+        
+    processing_pipelines = categories['image-processing']
+    inference_pipelines = categories['inference']
+    names = pipelines.Name.tolist()
+    labels = pipelines.Label.tolist()
+    shortcodes = pipelines.PipelineYaml.tolist()
+    harmonized_shortcodes = pipelines.HarmonizedPipelineYaml.tolist()
+    only_show_harmonizable = st.checkbox("Only show pipelines whose output can be harmonized to the reference data.")
+    left, right = st.columns(2)
+
+    with left:
+        with st.container(border=True):
+            st.markdown("### Feature-Extraction Pipelines")
+            for i, ptmp in enumerate(names):
+                if only_show_harmonizable:
+                    if shortcodes[i] in processing_pipelines and harmonized_shortcodes[i]:
+                        sitems.append(
+                            sac.ButtonsItem(
+                                label=ptmp, color = colors[i%len(colors)]
+                            ))
+                
+                else:
+                    if shortcodes[i] in processing_pipelines:
+                        sitems.append(
+                            sac.ButtonsItem(
+                                label=ptmp, color = colors[i%len(colors)]
+                            ))
+                
+
+            sel_pipeline = sac.buttons(
+                items=sitems,
+                size='lg',
+                radius='xl',
+                align='left'
+            )
+            pname = pipelines.loc[pipelines.Name == sel_pipeline, 'Label'].values[0]
+
+    with right:
+        with st.container(border=True):
+            st.markdown("### Inference Pipelines")
+            for i, ptmp in enumerate(names):
+                if only_show_harmonizable:
+                    if shortcodes[i] in inference_pipelines and harmonized_shortcodes[i]:
+                        sitems.append(
+                            sac.ButtonsItem(
+                                label=ptmp, color = colors[i%len(colors)]
+                            ))
+                
+                else:
+                    if shortcodes[i] in inference_pipelines:
+                        sitems.append(
+                            sac.ButtonsItem(
+                                label=ptmp, color = colors[i%len(colors)]
+                            ))
+                
+            sel_pipeline = sac.buttons(
+                items=sitems,
+                size='lg',
+                radius='xl',
+                align='left'
+            )
+            pname = pipelines.loc[pipelines.Name == sel_pipeline, 'Label'].values[0]
+
+    sac.divider(label='', align='center', color='gray')
+            
+    if st.button('Select'):
+        st.session_state.sel_pipeline = pname
+        st.session_state.pipeline_selected_explicitly = True
+        st.success(f'Pipeline selected: {pname}')
+
+    pass
+
+def pipeline_selector_selectdatatypes():
+    # User selects their data types, selection is filtered (others show up as gray/disabled)
+    pipelines = st.session_state.pipelines
+    sitems = []
+    colors = st.session_state.pipeline_colors
+    categories = st.session_state.pipeline_categories
+    reqs = st.session_state.pipeline_requirements
+
+    processing_pipelines = categories['image-processing']
+    inference_pipelines = categories['inference']
+    names = pipelines.Name.tolist()
+    labels = pipelines.Label.tolist()
+    shortcodes = pipelines.PipelineYaml.tolist()
+    with st.container(border=True):
+        st.write("Placeholder, need to do filtering")
+        pass
+
+
+def pipeline_selector_autodatatypes():
+    # This one should auto-detect the user's available data 
+    with st.container(border=True):
+        st.write("Placeholder, need to do filtering")
+        pass
+
 def sel_pipeline_from_list():
     '''
     Select a pipeline
@@ -81,6 +185,8 @@ def sel_pipeline_from_list():
         pipelines = st.session_state.pipelines
         sitems = []
         colors = st.session_state.pipeline_colors
+        categories = st.session_state.pipeline_categories
+        reqs = st.session_state.pipeline_requirements
 
         for i, ptmp in enumerate(pipelines.Name.tolist()):
             sitems.append(
@@ -113,6 +219,7 @@ def sel_pipeline_from_list():
             
         if st.button('Select'):
             st.session_state.sel_pipeline = pname
+            st.session_state.pipeline_selected_explicitly = True
             st.success(f'Pipeline selected: {pname}')
 
 st.markdown(
@@ -141,6 +248,15 @@ st.markdown(
 #if tab == 'Graph View':
     #st.info('Coming soon!')
 
+#st.markdown("# Category View")
+#pipeline_selector_categories()
+
+st.markdown("# View based on user datatype selection")
+pipeline_selector_selectdatatypes()
+
+st.markdown("# Keyword View")
+
+st.markdown("# Old Page Content")
 sel_pipeline_from_list()
 
 # Show selections

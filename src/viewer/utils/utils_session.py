@@ -10,6 +10,7 @@ import streamlit as st
 import utils.utils_rois as utilroi
 import utils.utils_processes as utilproc
 import utils.utils_cmaps as utilcmap
+import utils.utils_toolloader as utiltl
 import os
 from PIL import Image
 import streamlit_antd_components as sac
@@ -112,8 +113,12 @@ def init_session_vars():
 
     #st.session_state.prj_name = 'nichart_project'
     st.session_state.prj_name = 'user_default'
+    #st.session_state.project = 'nichart_project'
+    st.session_state.project = 'TemporaryDataset'
+    st.session_state.project_selected_explicitly = False
     
     st.session_state.sel_pipeline = 'dlmuse'
+    st.session_state.pipeline_selected_explicitly = False
 
     st.session_state.sel_mrid = None
     st.session_state.sel_roi = None
@@ -122,6 +127,11 @@ def init_session_vars():
         'red', 'pink', 'grape', 'violet', 'indigo', 'blue',
         'cyan', 'teal', 'green', 'lime', 'yellow', 'orange',
     ]
+    st.session_state.pipeline_categories = utiltl.overall_pipeline_category_listing()
+    st.session_state.pipeline_requirements = utiltl.overall_pipeline_requirements_listing()
+    st.session_state.harmonizable_pipelines = st.session_state.pipeline_categories['harmonized']
+    st.session_state.do_harmonize = False
+    st.session_state.nifti_dicom_upload_mode = None
 
     st.session_state.list_mods = ["T1", "T2", "FL", "DTI", "fMRI"]
     st.session_state.params = {
@@ -518,6 +528,9 @@ def update_project(sel_project) -> None:
     init_participant()
     
     st.toast(f'Updated project folder {sel_project}')
+    st.session_state.project = sel_project
+    st.session_state.project_selected_explicitly = True
+    st.session_state.paths['project'] = p_prj
 
 # Function to parse AWS login (if available)
 def process_session_token() -> Any:

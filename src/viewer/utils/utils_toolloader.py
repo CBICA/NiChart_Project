@@ -2,6 +2,7 @@ from typing import Dict, List, Union, Optional, Any
 from pydantic import BaseModel, Field, validator
 import os
 import yaml
+import glob
 from pathlib import Path
 import subprocess
 import shutil
@@ -14,6 +15,7 @@ import utils.utils_pollstatus as ps
 import time
 import re
 from collections import defaultdict, deque
+from . import utils_gpu as utilgpu
 
 DEFAULT_TOOL_DEFINITION_PATH = Path(__file__).parent.parent.parent.parent / "resources/tools/"
 DEFAULT_PIPELINE_DEFINITION_PATH = Path(__file__).parent.parent.parent.parent / "resources/pipelines"
@@ -122,7 +124,15 @@ class ToolSpec(BaseModel):
         # Construct any default docker args here
         global_docker_args = ['--ipc=host', '--detach']
         if self.resources.gpus != 0:
-            global_docker_args.append('--gpus all')
+            extra_args, extra_env, chosen = utilgpu.load_container_selection(st.session_state.paths['out_dir'])
+            if not chosen: # Fallback
+                global_docker_args.append('--gpus all')
+            else:
+                global_docker_args.extend(extra_args)
+                for k, v in extra_env.items():
+                    global_docker_args.append('-e')
+                    global_docker_args.append(f"{k}={v}")
+            #
 
         # Apply substitution for command template
         command_template = self.container["command"]
@@ -571,6 +581,113 @@ def parse_pipeline_steps(pipeline_yaml):
 
     return execution_order, step_map
 
+def parse_pipeline_requirements(pipeline_id):
+    pipeline_path = DEFAULT_PIPELINE_DEFINITION_PATH / f"{pipeline_id}.yaml"
+    if not pipeline_path.exists():
+        raise FileNotFoundError(f"Pipeline definition '{pipeline_id}' not found at {pipeline_path}")
+
+    with open(pipeline_path, 'r') as f:
+        pipeline_yaml = yaml.safe_load(f)
+    items = pipeline_yaml.get('requires', []) or []
+    reqs_set, req_params, req_order = set(), {}, []
+
+    for entry in items:
+        if isinstance(entry, str):
+            name, params = entry, None
+        elif isinstance(entry, dict):
+            (name, params), = entry.items()
+        else:
+            raise ValueError(f"Bad requirement entry {entry!r} when parsing pipeline requirements for {pipeline_id}.")
+        
+        reqs_set.add(name)
+        if params is not None:
+            req_params[name] = params
+        req_order.append((name, params))
+
+    return reqs_set, req_params, req_order
+
+def parse_pipeline_categories(pipeline_id):
+    pipeline_path = DEFAULT_PIPELINE_DEFINITION_PATH / f"{pipeline_id}.yaml"
+    if not pipeline_path.exists():
+        raise FileNotFoundError(f"Pipeline definition '{pipeline_id}' not found at {pipeline_path}")
+
+    with open(pipeline_path, 'r') as f:
+        pipeline_yaml = yaml.safe_load(f)
+
+    return pipeline_yaml.get('categories', [])
+
+def get_all_pipeline_ids():
+    directory = DEFAULT_PIPELINE_DEFINITION_PATH
+    yaml_files = glob.glob(os.path.join(directory, "*.yaml"))
+    basenames = [os.path.splitext(os.path.basename(f))[0] for f in yaml_files]
+    return basenames
+
+def get_pipeline_id_by_name(sel_pipeline, harmonized=False):
+    sel_pipeline_to_id = {
+        'dlmuse': 'run_dlmuse',
+        'spare-ad': 'run_spare_ad',
+        'spare-ba': 'run_spare_ba',
+        'spare-ba-image': 'run_bascores',
+        'dlwmls': 'run_dlwmls',
+        'spare-cvm': None,
+        'surrealgan': 'run_predcrd_surrealgan',
+        'synthseg': None,
+        'cclnmf': 'run_cclnmf',
+        'dlmuse-dlwmls': 'run_nichart_dlwmls_v2',
+        'spare-smoking': 'run_spare_cvm_smoking',
+        'spare-hypertension': 'run_spare_cvm_hypertension',
+        'spare-obesity': 'run_spare_cvm_obesity',
+        'spare-diabetes': 'run_spare_cvm_diabetes',
+        'spare-depression': 'run_spare_depression',
+        'spare-psychosis': 'run_spare_psychosis',
+        'ravens': 'run_nichart_ravens',
+        ## Add additional lines here ({sel_pipeline value} : {name of pipeline yaml} )
+    }
+    if harmonized:
+        sel_pipeline_to_id = {
+            'dlmuse': 'run_dlmuse_harmonized',
+            'dlwmls': 'run_dlwmls',
+            'spare-ad': 'run_spare_ad_harmonized',
+            'spare-ba': 'run_spare_ba_harmonized',
+            'spare-ba-image': 'run_bascores',
+            'spare-cvm': None,
+            'surrealgan': 'run_predcrd_surrealgan',
+            'synthseg': None,
+            'cclnmf':  None,
+            'dlmuse-dlwmls': 'run_nichart_dlwmls_v2_harmonized',
+            'spare-smoking': 'run_spare_cvm_smoking_harmonized',
+            'spare-hypertension': 'run_spare_cvm_hypertension_harmonized',
+            'spare-obesity': 'run_spare_cvm_obesity_harmonized',
+            'spare-diabetes': 'run_spare_cvm_diabetes_harmonized',
+            'spare-depression': None,
+            'spare-psychosis': None,
+            'ravens': None,
+            ## Add additional lines here ({sel_pipeline value} : {name of pipeline yaml} )
+        }
+    return sel_pipeline_to_id[sel_pipeline]
+
+def overall_pipeline_category_listing():
+    # Returns a dictionary mapping a category to a list of associated pipelines.
+    # Useful for rendering a subset of pipelines
+    res_dict = {}
+    pipelines = get_all_pipeline_ids()
+    for pipeline_id in pipelines:
+        categories = parse_pipeline_categories(pipeline_id)
+        for category in categories:
+            if category in res_dict:
+                res_dict[category].append(pipeline_id)
+            else:
+                res_dict[category] = [pipeline_id]
+    return res_dict
+
+def overall_pipeline_requirements_listing():
+    res_dict = {}
+    pipelines = get_all_pipeline_ids()
+    for pipeline_id in pipelines:
+        req_set, req_params, req_order = parse_pipeline_requirements(pipeline_id)
+        res_dict[pipeline_id] = req_set
+    return res_dict
+
 def load_metadata(metadata_path: Path) -> Dict:
     if metadata_path is None:
         return {}
@@ -624,11 +741,14 @@ def should_skip_step(metadata_path: Path,
             if new_output_path and new_output_path != prev_output_path:
                 src = Path(prev_output_path)
                 dst = Path(new_output_path)
-                if src.is_dir():
-                    shutil.copytree(src, dst, dirs_exist_ok=True)
-                else:
-                    dst.parent.mkdir(parents=True, exist_ok=True)
-                    shutil.copy2(src, dst)
+                try:
+                    if src.is_dir():
+                        shutil.copytree(src, dst, dirs_exist_ok=True)
+                    else:
+                        dst.parent.mkdir(parents=True, exist_ok=True)
+                        shutil.copy2(src, dst)
+                except Exception as e:
+                    return False
         return True
     return False
 
@@ -722,7 +842,7 @@ def run_pipeline(pipeline_id: str,
         pipeline_progress_bar.reset(total=total_steps)
     for sid in order:
         if process_progress_bar:
-            process_progress_bar.reset(total=4)
+            process_progress_bar.reset(total=total_steps)
         if pipeline_progress_bar:
             pipeline_progress_bar.update(1)
         step = step_map[sid]
