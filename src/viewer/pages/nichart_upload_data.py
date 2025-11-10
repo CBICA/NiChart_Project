@@ -54,7 +54,7 @@ def upload_data():
 ## Main
 
 with st.container(): # horizontal=True, horizontal_alignment='centered'
-    st.markdown("<h4 style=color:#3a3a88;'>Upload Data\n\n</h1>", unsafe_allow_html=True, width='content')
+    st.markdown("<h4 style=color:#3a3a88;'>Upload Data\n\n</h1>", unsafe_allow_html=True)
 
 upload_data()
 
