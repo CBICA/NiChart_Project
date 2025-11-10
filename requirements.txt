@@ -20,7 +20,7 @@ graphviz
 dicom2nifti
 
 # streamlit
-streamlit==1.40.0
+streamlit==1.50.0
 st_pages==1.0.1
 streamlit_plotly_events
 streamlit-base-extras
