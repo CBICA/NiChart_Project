@@ -32,7 +32,7 @@ if 'instantiated' not in st.session_state or not st.session_state.instantiated:
 
 #################################
 ## Function definitions
-def help_message(data_type):
+def help_message(workflow):
 
     with st.popover("❓", width='content'):
         st.write(
@@ -97,11 +97,11 @@ def pipeline_menu():
 #################################
 ## Main
 
-data_type = st.session_state.data_type
+workflow = st.session_state.workflow
 
 with st.container(horizontal=True, horizontal_alignment="center"):
     st.markdown("<h4 style=color:#3a3a88;'>Select and Run Pipeline\n\n</h1>", unsafe_allow_html=True, width='content')
-    help_message(data_type)
+    help_message(workflow)
 
 pipeline_menu()
 

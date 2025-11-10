@@ -28,7 +28,7 @@ utilpg.config_page()
 utilpg.set_global_style()
 
 # Set data type
-st.session_state.data_type = 'multi_subject'
+st.session_state.workflow = 'multi_subject'
 
 if 'instantiated' not in st.session_state or not st.session_state.instantiated:
     utilses.init_session_state()
@@ -40,9 +40,9 @@ with cols[1]:
 
     st.markdown(
         '''
-        Calculate neuroimaging chart values for a dataset with multiple subjects' MRI scans in a few simple actions:
+        Compute neuroimaging chart values for multi-subject MRI datasets with just a few steps:
         
-        - **Data:** Upload image (Nifti, Dicom) and non-image (.csv) files required for analysis
+        - **Data:** Upload image (NIfTI) and non-image (.csv) files required for analysis
         
         - **Pipeline:** Select processing/analysis pipeline to run on your data
 
@@ -50,6 +50,8 @@ with cols[1]:
         
         ''', unsafe_allow_html=True
     )
+
+sac.divider(key='_p0_div1')
     
 sel_opt = sac.chip(
     [sac.ChipItem(label = '', icon='arrow-right', disabled=False)],

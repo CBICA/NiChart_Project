@@ -108,6 +108,8 @@ def init_session_vars():
 
     st.session_state.skip_survey = True
 
+    st.session_state.workflow = None
+
     st.session_state.sel_add_button = None
 
     #st.session_state.prj_name = 'nichart_project'
