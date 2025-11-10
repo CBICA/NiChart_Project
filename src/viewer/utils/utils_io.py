@@ -71,6 +71,25 @@ def remove_dir(out_dir):
         st.error(f"Could not delete folder: {out_dir}")
         return False
 
+def clear_folder(folder):
+    if os.path.islink(folder):
+        st.warning("Target folder is a symlink. Cannot delete contents")
+        return        
+
+    try:
+        for item in os.listdir(folder):
+            item_path = os.path.join(folder, item)
+            if os.path.isfile(item_path) or os.path.islink(item_path):
+                os.remove(item_path)
+            elif os.path.isdir(item_path):
+                shutil.rmtree(item_path)
+        logger.debug(f"Removed dir: {folder}")
+        time.sleep(2)
+        return True
+    except:
+        st.error(f"Could not delete folder: {folder}")
+        return False        
+
 def browse_file(path_init: str) -> Any:
     '''
     File selector
@@ -124,6 +143,16 @@ def zip_folder(in_dir: str, f_out: str) -> Optional[bytes]:
 
         return download_dir
 
+def unzip_zip_file(f_in, d_out):
+    '''
+    Unzips a ZIP file to a new folder and deletes the zip file
+    '''
+    os.makedirs(d_out, exist_ok=True)
+    with zipfile.ZipFile(f_in, "r") as zip_ref:
+        zip_ref.extractall(d_out)
+    os.remove(f_in)
+    st.toast(f'Unzipped zip file ...')
+
 def unzip_zip_files(in_dir: str) -> None:
     '''
     Unzips all ZIP files in the input dir and removes the original ZIP files.
@@ -155,95 +184,75 @@ def copy_and_unzip_uploaded_files(in_files: list, d_out: str) -> None:
     if os.path.exists(d_out):
         unzip_zip_files(d_out)
 
-def callback_copy_uploaded():
-    '''
-    Copies files to local storage
-    '''
-    if len(st.session_state['_uploaded_input']) > 0:
-        copy_and_unzip_uploaded_files(
-            st.session_state['_uploaded_input'], st.session_state.paths["target"]
-        )
-
-def upload_multiple_files(out_dir):
+def upload_files(out_dir, flag_single = False):
     '''
     Upload user data to target folder
     Input data may be a folder, multiple files, or a zip file (unzip the zip file if so)
     '''
-    if not os.path.exists(out_dir):
-        os.makedirs(out_dir)
-
     # Set target path
     st.session_state.paths["target"] = out_dir
 
-    # Upload data
-    with st.container(border=True):
-        st.file_uploader(
+    with st.form(key='my_form', clear_on_submit=True, border=False):
+
+        sel_mod = sac.chip(
+            items=[
+                sac.ChipItem(label='T1'),
+                sac.ChipItem(label='FL'),
+                sac.ChipItem(label='CSV'),
+            ], label='', index=0, align='left', size='md', radius='md', multiple=False, color='cyan', 
+            #description='Select type of your data type'
+        )    
+        out_path = None
+        if sel_mod is not None:
+            out_path = os.path.join(out_dir, sel_mod.lower())
+            
+        sel_files = st.file_uploader(
             "Input files or folders",
             key="_uploaded_input",
-            accept_multiple_files=True,
-            on_change = callback_copy_uploaded,
+            accept_multiple_files=flag_single,
             help="Input files can be uploaded as a folder, multiple files, or a single zip file",
+            label_visibility="collapsed"
         )
-
-def upload_multi(out_dir):
-    """
-    Panel for uploading multiple input files or folder(s)
-    """
-    # Check if data exists
-    if st.session_state.app_type == "cloud":
-        # Upload data
-        upload_folder(
-            out_dir,
-            "Input files or folders",
-            False,
-            "Input files can be uploaded as a folder, multiple files, or a single zip file",
-        )
-
-    else:  # st.session_state.app_type == 'desktop'
-        if not os.path.exists(out_dir):
-            try:
-                os.symlink(sel_dir, out_dir)
-            except:
-                st.error(
-                    f"Could not link user input to destination folder: {out_dir}"
-                )
-
-    # Check out files
-    fcount = get_file_count(st.session_state.paths[dtype])
-    if fcount > 0:
-        st.session_state.flags[dtype] = True
-        p_dicom = st.session_state.paths[dtype]
-        st.success(
-            f" Uploaded data: ({p_dicom}, {fcount} files)",
-            icon=":material/thumb_up:",
-        )
-        time.sleep(4)
-
-        st.rerun()
-
-def upload_single_file(out_dir, out_name, label) -> None:
-    '''
-    Upload user file to target folder
-    '''
-    with st.container(border=True):
-        sel_file = st.file_uploader(
-            label,
-            key="uploaded_input_csv",
-            accept_multiple_files=False
-        )        
-        if sel_file is not None:
-            try:
-                if not os.path.exists(out_dir):
-                    os.makedirs(out_dir)
-                out_file = os.path.join(out_dir, out_name)
-                
-                with open(out_file, "wb") as f:
-                    f.write(sel_file.getbuffer())
-                st.success(f"File '{sel_file.name}' saved to {out_file}")
-                return True
-            except:
-                st.warning(f'Could not upload file: {sel_file}')
+        
+        submitted = st.form_submit_button("Submit")
+        if submitted:
+            if out_path is None:
                 return False
+            if len(sel_files) == 0:
+                return False
+            if not os.path.exists(out_path):
+                os.makedirs(out_path)
+            copy_and_unzip_uploaded_files(sel_files, out_path)
+            st.info('Uploaded file')
+            return True
+    
+    return False
+        
+      
+        
+def panel_load_data():
+    #with st.container(border=True):
+    st.markdown('##### User Input:')
+    #st.markdown(
+        #'''
+        #- Upload your input data file(s) here
+        #- MRI scan (Nifti or Dicom) or a data file (.csv)
+        #'''
+    #)
+    upload_files(st.session_state.paths['project'], True)
+
+def panel_load_data_tmp():
+    st.markdown('##### User Input:')
+    sel_mod = sac.chip(
+        items=[
+            sac.ChipItem(label='T1'),
+            sac.ChipItem(label='FL'),
+            sac.ChipItem(label='Demog'),
+        ], label='label', index=None, align='left', size='md', radius='md', multiple=False, color='cyan'
+    )    
+    if sel_mod is not None:
+        out_dir = os.path.join(
+            st.session_state.paths['project'], sel_mod.lower()
         return False
 
 
@@ -627,80 +636,11 @@ def load_subj_list():
             num_rows="dynamic",  # allows adding rows if you want
             use_container_width=True
         )
-        if st.button('Save'):
-            df_user.to_csv(out_csv, index=False)
-            st.success(f'Updated demographic file: {out_csv}')
-        
+        if upload_files(out_dir, True):
+            st.info('Hello')
+            sel_mod=None
+            st.rerun()
 
-    elif tab == "View":
-        if not os.path.exists(out_csv):
-            st.warning('Covariate file not found!')
-            return
-        try:
-            df_cov = pd.read_csv(out_csv)
-            st.dataframe(df_cov)
-        except:
-            st.warning(f'Could not load covariate file: {out_csv}')
-        
-    elif tab == "Reset":
-        if st.button('Delete demog file'):
-            remove_dir(out_dir)
-
-
-def load_user_csv():
-    '''
-    Panel for uploading data file
-    '''    
-    tab = sac.tabs(
-        items=[
-            sac.TabsItem(label='Upload'),
-            sac.TabsItem(label='View'),
-            sac.TabsItem(label='Reset'),
-        ],
-        size='lg',
-        align='left'
-    )
-
-    out_dir = os.path.join(st.session_state.paths['project'], 'user_data')
-    if not os.path.exists(out_dir):
-        os.makedirs(out_dir)
-
-    fname = 'user_data.csv'
-    out_csv = os.path.join(out_dir, fname)
-            
-    if tab == 'Upload':
-        # Upload file
-        if upload_single_file(out_dir, fname, 'Select data file'):
-            # Update variable dictionary
-            df_user = pd.read_csv(out_csv)
-            df_dict = st.session_state.dicts['df_var_groups']
-            if 'user_data' not in df_dict.group.tolist():
-                df_dict.loc[len(df_dict)] = {
-                    'group': 'user_data',
-                    'category': 'user',
-                    'vtype': 'name',
-                    'atlas': None,
-                    'values': df_user.columns.sort_values().tolist()
-                }
-                st.session_state.dicts['df_var_groups'] = df_dict
-
-    elif tab == "View":
-        if not os.path.exists(out_csv):
-            st.warning('Data file not found!')
-            return
-        try:
-            df_data = pd.read_csv(out_csv)
-            st.dataframe(df_data)
-        except:
-            st.warning(f'Could not load data file: {out_csv}')
-        
-    elif tab == "Reset":
-        if st.button('Delete data file'):
-            remove_dir(out_dir)
-
-
-##############################################################
-## Streamlit panels for IO
 
 def panel_import_demo_data():
     st.info("You can import some demonstration data into your projects list by clicking the button below.")

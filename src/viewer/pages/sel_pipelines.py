@@ -18,7 +18,6 @@ logger.debug('Page: Select Pipelines')
 
 # Page config should be called for each page
 utilpg.config_page()
-utilpg.show_menu()
 utilpg.set_global_style()
 
 if 'instantiated' not in st.session_state or not st.session_state.instantiated:
