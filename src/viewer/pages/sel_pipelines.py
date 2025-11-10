@@ -91,7 +91,7 @@ def pipeline_selector_categories():
     harmonized_shortcodes = pipelines.HarmonizedPipelineYaml.tolist()
     only_show_harmonizable = st.checkbox("Only show pipelines whose output can be harmonized to the reference data.")
     left, right = st.columns(2)
-    
+
     with left:
         with st.container(border=True):
             st.markdown("### Feature-Extraction Pipelines")
@@ -156,11 +156,27 @@ def pipeline_selector_categories():
 
 def pipeline_selector_selectdatatypes():
     # User selects their data types, selection is filtered (others show up as gray/disabled)
-    pass
+    pipelines = st.session_state.pipelines
+    sitems = []
+    colors = st.session_state.pipeline_colors
+    categories = st.session_state.pipeline_categories
+    reqs = st.session_state.pipeline_requirements
+
+    processing_pipelines = categories['image-processing']
+    inference_pipelines = categories['inference']
+    names = pipelines.Name.tolist()
+    labels = pipelines.Label.tolist()
+    shortcodes = pipelines.PipelineYaml.tolist()
+    with st.container(border=True):
+        st.write("Placeholder, need to do filtering")
+        pass
+
 
 def pipeline_selector_autodatatypes():
     # This one should auto-detect the user's available data 
-    pass
+    with st.container(border=True):
+        st.write("Placeholder, need to do filtering")
+        pass
 
 def sel_pipeline_from_list():
     '''
@@ -233,8 +249,8 @@ st.markdown(
 #if tab == 'Graph View':
     #st.info('Coming soon!')
 
-st.markdown("# Category View")
-pipeline_selector_categories()
+#st.markdown("# Category View")
+#pipeline_selector_categories()
 
 st.markdown("# View based on user datatype selection")
 pipeline_selector_selectdatatypes()
