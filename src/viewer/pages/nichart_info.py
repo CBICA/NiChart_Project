@@ -1,7 +1,7 @@
 
 import utils.utils_pages as utilpg
 # Page config should be called for each page
-utilpg.config_page()
+#utilpg.config_page()
 
 import os
 import numpy as np

@@ -20,7 +20,7 @@ logger = setup_logger()
 logger.debug('Page: NiChart Reference Data')
 
 # Page config should be called for each page
-utilpg.config_page()
+#utilpg.config_page()
 utilpg.set_global_style()
 
 # Set data type

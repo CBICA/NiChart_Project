@@ -1,7 +1,7 @@
 
 import utils.utils_pages as utilpg
 # Page config should be called for each page
-utilpg.config_page()
+# utilpg.config_page() # Apparently not. Just call it once in NiChartProject.py.
 
 import os
 import numpy as np
