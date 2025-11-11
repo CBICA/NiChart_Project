@@ -73,7 +73,11 @@ def panel_download():
      
 st.markdown("<h5 style='text-align:center; color:#3a3a88;'>Download Results\n\n</h1>", unsafe_allow_html=True)
 
+sac.divider(key='_p0_div1')
+
 panel_download()
+
+sac.divider(key='_p0_div2')
 
 sel_but = sac.chip(
     [

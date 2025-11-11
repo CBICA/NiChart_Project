@@ -63,7 +63,7 @@ if st.session_state.workflow == 'ref_data':
 else:
     upload_data()
 
-sac.divider(key='_p0_div1')
+sac.divider()
 
 sel_but = sac.chip(
     [
