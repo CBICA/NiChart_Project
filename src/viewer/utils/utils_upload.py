@@ -63,11 +63,12 @@ def edit_participants(in_file):
         num_rows="fixed",
         width='stretch'
     )
-    if st.button('Save'):
-        df_user.to_csv(in_file, index=False)
-        st.success(f'Updated participants file: {fname}')
-        
-        st.rerun()
+    
+    with st.container(horizontal=True, horizontal_alignment="center"):
+        if st.button('Save'):
+            df_user.to_csv(in_file, index=False)
+            st.success(f'Updated participants file: {fname}')
+            st.rerun()
 
 def select_project():
     """
@@ -86,6 +87,7 @@ def update_participant_csv():
     os.makedirs(odir, exist_ok=True)
     df.to_csv(ofile, index=False)
 
+@st.dialog("User csv", width='medium')
 def consolidate_user_csv(fname):
     
     if fname is None:
@@ -93,14 +95,36 @@ def consolidate_user_csv(fname):
     in_dir = os.path.join(st.session_state.paths['prj_dir'], 'user_upload')
     in_fpath = os.path.join(in_dir, fname)
 
-    # Move csv to consolidated path
-    out_dir = os.path.join(st.session_state.paths['prj_dir'], 'user_data')
-    out_fpath = os.path.join(out_dir, fname)
-    os.makedirs(out_dir, exist_ok=True)
-    if os.path.exists(out_fpath):
-        st.warning('CSV file exists, will be overwritten!')
-    shutil.move(in_fpath, out_fpath)
-    utilio.clear_folder(in_dir)
+    with st.form(key='_form_csv_info'):
+        sel_opt = st.selectbox('Use the file as participants file:', ['Yes', 'No'])
+
+        submitted = st.form_submit_button("Submit")
+        flag_submit = False
+        if submitted:
+            flag_submit = True
+        
+    if flag_submit:
+        if sel_opt == 'Yes':
+            # Move csv to consolidated path
+            out_dir = os.path.join(st.session_state.paths['prj_dir'], 'participants')
+            out_fpath = os.path.join(out_dir, 'participants.csv')
+            os.makedirs(out_dir, exist_ok=True)
+            if os.path.exists(out_fpath):
+                st.warning('CSV file exists, will be overwritten!')
+            shutil.move(in_fpath, out_fpath)        
+            
+        else:
+            # Move csv to consolidated path
+            out_dir = os.path.join(st.session_state.paths['prj_dir'], 'user_data')
+            out_fpath = os.path.join(out_dir, fname)
+            os.makedirs(out_dir, exist_ok=True)
+            if os.path.exists(out_fpath):
+                st.warning('CSV file exists, will be overwritten!')
+            shutil.move(in_fpath, out_fpath)
+        utilio.clear_folder(in_dir)
+
+        st.toast(f'CSV file consolidated ...')
+        st.rerun()   
 
 def consolidate_nifti():
     logger.debug(f'    Function: consolidate_nifti')
@@ -168,6 +192,74 @@ def dialog_consolidate_nifti():
     
     if consolidate_nifti():
         st.toast(f'Nifti file consolidated ...')
+        st.rerun()   
+
+def detect_common_suffix(files):
+    reversed_names = [f[::-1] for f in files]
+    common_suffix = os.path.commonprefix(reversed_names)[::-1]
+    return common_suffix
+
+def consolidate_nifti_multi():
+    logger.debug(f'    Function: consolidate_nifti')
+    
+    # Detect common suffix
+    in_dir = os.path.join(st.session_state.paths['prj_dir'], 'user_upload', 'nifti')
+    nifti_files = [
+        f for f in os.listdir(in_dir) if f.endswith('.nii') or f.endswith('.nii.gz')
+    ]
+    if not nifti_files:
+        st.warning("No NIfTI files found in the data folder.")
+        return False
+
+    # Remove common suffix to get mrid
+    suff = detect_common_suffix(nifti_files)
+
+    # Create the DataFrame
+    df = pd.DataFrame({'MRID': nifti_files, 'Age': None, 'Sex': None})
+
+    # Update values based on user iput
+    with st.form(key='_form_scan_info'):
+        mod = st.selectbox('Image Modality:', ['T1', 'FL'])
+        suffix = st.text_input('Image Suffix:', value = suff)
+        
+        submitted = st.form_submit_button("Submit")
+        flag_submit = False
+        if submitted:
+            flag_submit = True
+        
+    if flag_submit:
+        # Move scans to consolidated path
+        out_dir = os.path.join(st.session_state.paths['prj_dir'], mod)
+        os.makedirs(out_dir, exist_ok=True)
+        for fname in nifti_files:
+            mrid = fname.replace(suffix, '')
+            in_fpath = os.path.join(in_dir, fname)
+            out_fpath = os.path.join(out_dir, mrid + '_' + mod + '.nii.gz')
+            if os.path.exists(out_fpath):
+                st.warning('Scan exists, will be updated!')
+            shutil.move(in_fpath, out_fpath)
+        utilio.clear_folder(in_dir)
+        
+        # Create participants list
+        df['MRID'] = df.MRID.str.replace(suffix, '')
+        odir = os.path.join(st.session_state.paths['prj_dir'], 'participants')
+        ofile = os.path.join(odir, 'participants.csv')
+        os.makedirs(odir, exist_ok=True)
+        if not os.path.exists(ofile):
+            df.to_csv(ofile, index=False)
+        else:
+            st.info('Participants list already exists, will not overwrite!')
+        
+        return True
+
+    return False
+
+@st.dialog("Scan/Participant Info", width='medium')
+def dialog_consolidate_nifti_multiple():
+    logger.debug('    Function: dialog_consolidate_nifti_multiple')
+   
+    if consolidate_nifti_multi():
+        st.toast(f'Nifti files consolidated ...')
         st.rerun()   
                    
 @st.dialog("Dicom extraction", width='medium')
@@ -260,13 +352,13 @@ def upload_file_multi_subject(in_file):
     st.toast(f'Uploaded file ...')
 
     if fname.endswith('.zip'):
-        d_out = os.path.join(tmp_dir, 'unzipped')
+        d_out = os.path.join(tmp_dir, 'nifti')
         utilio.unzip_zip_file(f_out, d_out)
-        ## FIXME [zip with multiple nifti]
+        dialog_consolidate_nifti_multiple()
 
-    elif fname.endswith('.csc'):
+    elif fname.endswith('.csv'):
         st.write('Hello')
-        ## FIXME [csv]
+        consolidate_user_csv(fname)
 
     else:
         st.warning('Input file type mismatch: should be .zip or .csv')
@@ -305,7 +397,7 @@ def upload_files_multi_subject(in_files):
         return
     
     tmp_dir = os.path.join(st.session_state.paths['prj_dir'], 'user_upload')
-    d_out = os.path.join(tmp_dir, 'dicoms')
+    d_out = os.path.join(tmp_dir, 'nifti')
     
     os.makedirs(d_out, exist_ok=True)
 
@@ -317,8 +409,8 @@ def upload_files_multi_subject(in_files):
 
     st.toast(f'Uploaded files ...')
 
-    ## FIXME [multiple nifti]
-    
+    ## Multiple nifti images
+    dialog_consolidate_nifti_multiple()
        
 def view_mri(fname):
     """
