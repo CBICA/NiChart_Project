@@ -31,15 +31,49 @@ utilpg.set_global_style()
 if 'instantiated' not in st.session_state or not st.session_state.instantiated:
     utilses.init_session_state()
 
-def download_results():
+def panel_download():
     '''
-    Select a pipeline and show overview
+    Panel to download results
     '''
-    st.info('Work in progress ...')
+    prj_dir = st.session_state.paths['prj_dir']
+    list_dirs = utilio.get_subfolders(prj_dir)
+    for folder_name in ['downloads', 'user_upload']:
+        if folder_name in list_dirs:
+            list_dirs.remove(folder_name)
+    
+    if len(list_dirs) == 0:
+        return
+    
+    sel_opt = sac.checkbox(
+        list_dirs,
+        label='Select a folder:', align='center', 
+        color='#aaeeaa', size='xl',
+        check_all='Select all'
+    )
+
+    if sel_opt is None:
+        return
+
+    with st.container(horizontal=True, horizontal_alignment="center"):
+        out_dir = os.path.join(prj_dir, 'downloads')
+        os.makedirs(out_dir, exist_ok=True)
+        out_zip = os.path.join(out_dir, 'nichart_results.zip')
+
+        if st.button('Prepare Data'):
+            utilio.zip_folders(prj_dir, sel_opt, out_zip)
+            with open(out_zip, "rb") as f:
+                file_download = f.read()            
+            st.toast('Created zip file with selected folders')
+
+            flag_download = os.path.exists(out_zip)
+            st.download_button(f"Download", file_download, 'nichart_results.zip')
+            os.remove(out_zip)
+            st.toast('File downloaded')
+    
      
 st.markdown("<h5 style='text-align:center; color:#3a3a88;'>Download Results\n\n</h1>", unsafe_allow_html=True)
 
-download_results()
+panel_download()
 
 sel_but = sac.chip(
     [
