@@ -70,11 +70,6 @@ def edit_participants(in_file):
             st.success(f'Updated participants file: {fname}')
             st.rerun()
 
-def select_project():
-    """
-    Panel for selecting a project
-    """
-
 def update_participant_csv():
     mrid = st.session_state.participant['mrid']
     age = st.session_state.participant['age']

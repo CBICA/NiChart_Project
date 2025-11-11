@@ -31,57 +31,82 @@ utilpg.set_global_style()
 if 'instantiated' not in st.session_state or not st.session_state.instantiated:
     utilses.init_session_state()
 
-def select_pipeline():
+def panel_view():
+    st.info('work in prgress')
+    
+def panel_download():
     '''
-    Select a pipeline and show overview
+    Panel to download results
     '''
-    with st.container(border=True):
+    with st.container(horizontal=True, horizontal_alignment="center"):
 
-        pipelines = st.session_state.pipelines
-        sitems = []
-        colors = st.session_state.pipeline_colors
-        for i, ptmp in enumerate(pipelines.Name.tolist()):
-            sitems.append(
-                sac.ButtonsItem(
-                    label=ptmp, color = colors[i%len(colors)]
-                )
-            )
+        st.markdown(f"##### 📁 Project Folder:   `{st.session_state.prj_name}`", width='content')
+    
+        prj_dir = st.session_state.paths['prj_dir']
+        list_dirs = utilio.get_subfolders(prj_dir)
+        for folder_name in ['downloads', 'user_upload']:
+            if folder_name in list_dirs:
+                list_dirs.remove(folder_name)
         
-        sel_index = utilmisc.get_index_in_list(
-            pipelines.Name.tolist(), st.session_state.sel_pipeline
-        )
-        sel_pipeline = sac.buttons(
-            items=sitems,
-            size='lg',
-            radius='xl',
-            align='left',
-            index =  sel_index,
-            key = '_sel_pipeline'
-        )        
-        label_matches = pipelines.loc[pipelines.Name == sel_pipeline, 'Label'].values
-        if len(label_matches) == 0: # No selection
+        if len(list_dirs) == 0:
             return
         
-        pname = label_matches[0]
-        st.session_state.sel_pipeline = pname
-        
-        #sac.divider(label='Description', align='center', color='gray')
-        
-        show_description(pname)
+        sel_opt = sac.checkbox(
+            list_dirs,
+            label='Select a folder:', align='center', 
+            color='#aaeeaa', size='xl',
+            check_all='Select all'
+        )
+
+        if sel_opt is None:
+            return
+
+        with st.container(horizontal=True, horizontal_alignment="center"):
+            out_dir = os.path.join(prj_dir, 'downloads')
+            os.makedirs(out_dir, exist_ok=True)
+            out_zip = os.path.join(out_dir, 'nichart_results.zip')
+
+            if st.button('Prepare Data'):
+                utilio.zip_folders(prj_dir, sel_opt, out_zip)
+                with open(out_zip, "rb") as f:
+                    file_download = f.read()            
+                st.toast('Created zip file with selected folders')
+
+                flag_download = os.path.exists(out_zip)
+                st.download_button(f"Download", file_download, 'nichart_results.zip')
+                os.remove(out_zip)
      
 st.markdown("<h5 style='text-align:center; color:#3a3a88;'>Results\n\n</h1>", unsafe_allow_html=True)
 
-select_pipeline()
+#sac.divider(key='_p0_div1')
+
+sel = sac.tabs([
+    sac.TabsItem(label='Download'),
+    sac.TabsItem(label='View'),
+], align='center',  size='xl', color='grape')
+
+if sel == 'Download':
+    panel_download()
+    
+if sel == 'View':
+    panel_view()
+
+
+sac.divider(key='_p0_div2')
 
 sel_but = sac.chip(
     [
         sac.ChipItem(label = '', icon='arrow-left', disabled=False),
+        sac.ChipItem(label = '', icon='arrow-right', disabled=False)
     ],
     label='', align='center', color='#aaeeaa', size='xl', return_index=True
 )
     
 if sel_but == 0:
-    st.switch_page("pages/nichart_run_pipeline.py")
+    st.switch_page("pages/nichart_pipelines.py")
+
+if sel_but == 1:
+    st.switch_page("pages/nichart_home.py")
 
 # Show session state vars
 if st.session_state.mode == 'debug':

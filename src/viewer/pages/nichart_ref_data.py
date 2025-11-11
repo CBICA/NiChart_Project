@@ -28,7 +28,7 @@ utilpg.config_page()
 utilpg.set_global_style()
 
 # Set data type
-st.session_state.workflow = 'single_subject'
+st.session_state.workflow = 'ref_data'
 
 if 'instantiated' not in st.session_state or not st.session_state.instantiated:
     utilses.init_session_state()
@@ -41,9 +41,11 @@ with cols[1]:
         '''
         You can explore NiChart values computed from reference datasets here:
         
-        - **Info:** View information about reference data and processing pipelines
+        - **Data:** Info about NiChart Reference Datasets
         
-        - **Results:** View results
+        - **Pipeline:** Info about NiChart Pipelines
+
+        - **Results:** View NiChart values calculated from reference datasets
         
         ''', unsafe_allow_html=True
     )
@@ -56,7 +58,7 @@ sel_opt = sac.chip(
 )
     
 if sel_opt == '':
-    st.switch_page("pages/nichart_upload_data.py")
+    st.switch_page("pages/nichart_data.py")
 
 # Show session state vars
 if st.session_state.mode == 'debug':

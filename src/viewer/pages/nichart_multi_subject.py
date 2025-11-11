@@ -44,7 +44,7 @@ with cols[1]:
         
         - **Data:** Upload image (NIfTI) and non-image (.csv) files required for analysis
         
-        - **Pipeline:** Select processing/analysis pipeline to run on your data
+        - **Pipelines:** Select processing/analysis pipeline to run on your data
 
         - **Results:** View/download results of the pipeline
         

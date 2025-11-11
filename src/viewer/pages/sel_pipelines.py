@@ -124,23 +124,6 @@ st.markdown(
     """
 )
 
-#tab = sac.tabs(
-    #items=[
-        #sac.TabsItem(label='List View'),
-        #sac.TabsItem(label='Graph View'),
-    #],
-    #size='lg',
-    #align='left'
-#)
-
-## List view
-#if tab == 'List View':
-    #sel_pipeline_from_list()
-
-## Graph view
-#if tab == 'Graph View':
-    #st.info('Coming soon!')
-
 sel_pipeline_from_list()
 
 # Show selections

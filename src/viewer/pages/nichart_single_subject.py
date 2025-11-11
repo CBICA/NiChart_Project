@@ -43,7 +43,7 @@ with cols[1]:
         
         - **Data:** Upload image (Nifti, Dicom) and non-image (.csv) files required for analysis
         
-        - **Pipeline:** Select processing/analysis pipeline to run on your data
+        - **Pipelines:** Select processing/analysis pipeline to run on your data
 
         - **Results:** View/download results of the pipeline
         
@@ -58,7 +58,7 @@ sel_opt = sac.chip(
 )
     
 if sel_opt == '':
-    st.switch_page("pages/nichart_upload_data.py")
+    st.switch_page("pages/nichart_data.py")
 
 # Show session state vars
 if st.session_state.mode == 'debug':
