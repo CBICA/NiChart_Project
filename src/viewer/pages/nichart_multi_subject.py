@@ -59,7 +59,7 @@ sel_opt = sac.chip(
 )
     
 if sel_opt == '':
-    st.switch_page("pages/nichart_upload_data.py")
+    st.switch_page("pages/nichart_data.py")
 
 
 # Show session state vars

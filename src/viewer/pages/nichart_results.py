@@ -31,6 +31,10 @@ utilpg.set_global_style()
 if 'instantiated' not in st.session_state or not st.session_state.instantiated:
     utilses.init_session_state()
 
+def panel_view_ref():
+    st.switch_page(f'pages/explore_nichart.py')
+
+
 def panel_view():
     st.info('work in prgress')
     
@@ -40,7 +44,7 @@ def panel_download():
     '''
     with st.container(horizontal=True, horizontal_alignment="center"):
 
-        st.markdown(f"##### 📁 Project Folder:   `{st.session_state.prj_name}`", width='content')
+        st.markdown(f"###### 📁 Project Folder:   `{st.session_state.prj_name}`", width='content')
     
         prj_dir = st.session_state.paths['prj_dir']
         list_dirs = utilio.get_subfolders(prj_dir)
@@ -53,12 +57,12 @@ def panel_download():
         
         sel_opt = sac.checkbox(
             list_dirs,
-            label='Select a folder:', align='center', 
+            label='Folder(s) to download:', align='center', 
             color='#aaeeaa', size='xl',
             check_all='Select all'
         )
 
-        if sel_opt is None:
+        if sel_opt is None or len(sel_opt)==0:
             return
 
         with st.container(horizontal=True, horizontal_alignment="center"):
@@ -76,28 +80,31 @@ def panel_download():
                 st.download_button(f"Download", file_download, 'nichart_results.zip')
                 os.remove(out_zip)
      
-st.markdown("<h5 style='text-align:center; color:#3a3a88;'>Results\n\n</h1>", unsafe_allow_html=True)
+st.markdown("<h4 style='text-align:center; color:#3a3a88;'>Results\n\n</h1>", unsafe_allow_html=True)
 
 #sac.divider(key='_p0_div1')
 
-sel = sac.tabs([
-    sac.TabsItem(label='Download'),
-    sac.TabsItem(label='View'),
-], align='center',  size='xl', color='grape')
+if st.session_state.workflow == 'ref_data':
+    panel_view_ref()
 
-if sel == 'Download':
-    panel_download()
-    
-if sel == 'View':
-    panel_view()
+else:
+    sel = sac.tabs([
+        sac.TabsItem(label='Download'),
+        sac.TabsItem(label='View'),
+    ], align='center',  size='xl', color='grape')
 
+    if sel == 'Download':
+        panel_download()
+        
+    if sel == 'View':
+        panel_view()
 
 sac.divider(key='_p0_div2')
 
 sel_but = sac.chip(
     [
         sac.ChipItem(label = '', icon='arrow-left', disabled=False),
-        sac.ChipItem(label = '', icon='arrow-right', disabled=False)
+        sac.ChipItem(label = '', icon='house', disabled=False),
     ],
     label='', align='center', color='#aaeeaa', size='xl', return_index=True
 )
