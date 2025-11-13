@@ -39,14 +39,8 @@ cols = st.columns([1,6,1])
 with cols[1]:
     st.markdown(
         '''
-        You can explore NiChart values computed from reference datasets here:
-        
-        - **Data:** Info about NiChart Reference Datasets
-        
-        - **Pipeline:** Info about NiChart Pipelines
-
-        - **Results:** View NiChart values calculated from reference datasets
-        
+        You can explore NiChart values computed from reference datasets here
+                
         ''', unsafe_allow_html=True
     )
 
@@ -58,7 +52,7 @@ sel_opt = sac.chip(
 )
     
 if sel_opt == '':
-    st.switch_page("pages/nichart_data.py")
+    st.switch_page("pages/nichart_results.py")
 
 # Show session state vars
 if st.session_state.mode == 'debug':

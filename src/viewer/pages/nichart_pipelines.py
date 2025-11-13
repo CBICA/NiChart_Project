@@ -103,23 +103,42 @@ with st.container(horizontal=True, horizontal_alignment="center"):
     st.markdown("<h4 style=color:#3a3a88;'>Select and Run Pipeline\n\n</h1>", unsafe_allow_html=True, width='content')
     help_message(workflow)
 
-pipeline_menu()
+if st.session_state.workflow == 'ref_data':
+    st.info('''
+        You’ve selected the **Reference Data** workflow. This option doesn’t require pipeline selection.
+        #- If you meant to analyze your data, please go back and choose a different workflow.
+        - Otherwise, continue to the next step to explore the reference values.
+        '''
+    )
 
-sac.divider(key='_p0_div1')
+    sac.divider()
+    
+    sel_but = sac.chip(
+        [
+            sac.ChipItem(label = '', icon='arrow-right', disabled=False)
+        ],
+        label='', align='center', color='#aaeeaa', size='xl', return_index=True
+    )
+        
+    if sel_but == 0:
+        st.switch_page(f'pages/nichart_results.py')
 
-sel_but = sac.chip(
-    [
-        sac.ChipItem(label = '', icon='arrow-left', disabled=False),
-        sac.ChipItem(label = '', icon='arrow-right', disabled=False)
-    ],
-    label='', align='center', color='#aaeeaa', size='xl', return_index=True
-)
+else:
+    pipeline_menu()
+    sac.divider(key='_p0_div1')
+    sel_but = sac.chip(
+        [
+            sac.ChipItem(label = '', icon='arrow-left', disabled=False),
+            sac.ChipItem(label = '', icon='arrow-right', disabled=False)
+        ],
+        label='', align='center', color='#aaeeaa', size='xl', return_index=True
+    )
 
-if sel_but == 0:
-    st.switch_page("pages/nichart_data.py")
+    if sel_but == 0:
+        st.switch_page("pages/nichart_data.py")
 
-if sel_but == 1:
-    st.switch_page("pages/nichart_results.py")
+    if sel_but == 1:
+        st.switch_page("pages/nichart_results.py")
 
 # Show session state vars
 if st.session_state.mode == 'debug':
