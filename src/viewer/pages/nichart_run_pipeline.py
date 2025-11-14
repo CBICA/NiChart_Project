@@ -86,6 +86,8 @@ def select_pipeline():
     show_description(sel_opt.lower())
 
 def pipeline_runner_menu():
+    st.markdown("##### Run:")
+    sac.divider(key='_p2_div2')
     sel_method = st.session_state.sel_pipeline
     st.success(f'Selected pipeline: {sel_method}')
     harmonize = False
