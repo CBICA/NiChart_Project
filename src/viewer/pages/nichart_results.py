@@ -19,6 +19,7 @@ import pandas as pd
 from streamlit_image_select import image_select
 import re
 from utils.utils_logger import setup_logger
+import utils.utils_settings as utilset
 
 import streamlit_antd_components as sac
 
@@ -31,20 +32,24 @@ inject_global_css()
 utilpg.config_page()
 utilpg.set_global_style()
 
-
 if 'instantiated' not in st.session_state or not st.session_state.instantiated:
     utilses.init_session_state()
-   
      
+
+# Show setting button
+utilset.settings_button()   
+
+sac.divider(key='_p0_div1')
+
 st.markdown("<h4 style='text-align:center; color:#3a3a88;'>Results\n\n</h1>", unsafe_allow_html=True)
 
-#sac.divider(key='_p0_div1')
 
 if st.session_state.workflow == 'ref_data':
     utilres.panel_ref_data()
 
 else:
     #sel_container = st.sidebar()
+    layout = st.sidebar if st.session_state.layout == "Sidebar" else st.container(border=False)
     utilres.panel_user_data(st.session_state.layout)
 
 sac.divider(key='_p0_div2')
@@ -62,7 +67,7 @@ if sel_but == 0:
 
 if sel_but == 1:
     st.switch_page("pages/nichart_home.py")
-
+    
 # Show session state vars
 if st.session_state.mode == 'debug':
     utilses.disp_session_state()

@@ -150,9 +150,8 @@ def panel_download():
 
 def panel_user_data(layout):
 
-    container_options = st.sidebar if layout == "Sidebar" else st.container(border=False)
 
-    with container_options:
+    with layout:
         sel_tab = sac.tabs(
             items=[
                 sac.TabsItem(label='Download'),

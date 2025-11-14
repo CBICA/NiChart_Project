@@ -25,9 +25,15 @@ utilpg.set_global_style()
 
 
 with st.form('Select:'):
-    sel_layout = st.radio("Choose layout:", ["Main", "Sidebar"], horizontal=True)
+    sel_layout_label = st.radio("Choose layout:", ["Main", "Sidebar"], horizontal=True)
 
     submitted = st.form_submit_button('Submit')
-    if submitted:
-        st.success('Selected: {sel_layout}')
-        st.session_state.layout = sel_layout
+    if submitted:        
+        if sel_layout_label == "Sidebar":
+            layout = st.sidebar 
+        else:
+            layout = st.container(border=False)
+        st.session_state.sel_layout_label = sel_layout_label
+        st.session_state.layout = layout
+        st.toast('Selected Layout: {sel_layout_label}')
+        st.switch_page("pages/nichart_pipelines.py")

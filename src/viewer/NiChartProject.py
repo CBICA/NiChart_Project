@@ -53,7 +53,6 @@ pages = {
     "Home": [
         st.Page("pages/nichart_home.py", title="Home"),
         st.Page("pages/nichart_info.py", title="Info"),
-        st.Page("pages/nichart_settings.py", title="Settings"),
     ],
     "Workflows": [
         st.Page("pages/nichart_single_subject.py", title="Single Subject"),
