@@ -636,7 +636,6 @@ def get_pipeline_label_by_name(pipeline_name):
     directory = DEFAULT_PIPELINE_DEFINITION_PATH
     pipelines = pd.read_csv(os.path.join(directory, 'list_pipelines.csv'))
     row = pipelines.loc[pipelines["Name"] == pipeline_name, "Label"]
-    st.write(row)
     return row.iloc[0] if not row.empty else None      
 
 def get_pipeline_id_by_label(pipeline_label, harmonized=False):
