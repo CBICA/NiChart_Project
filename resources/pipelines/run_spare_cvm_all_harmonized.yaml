@@ -1,15 +1,18 @@
-pipeline_name: SPARE Scores - All-Inclusive (T1 only, Harmonized)
+pipeline_name: SPARE Scores - All-Inclusive (T1 + FLAIR, Harmonized)
 description: |
-  Pipeline which uses harmonized DLMUSE to produce all available harmonized SPARE scores using T1.
+  Pipeline which uses harmonized DLMUSE to produce all available harmonized SPARE scores from T1 + FLAIR data.
 
 categories:
   - spare
   - inference
   - classification
   - harmonized
+  - highlighted
+  - cvm
 
 requires:
   - needs_T1
+  - needs_FLAIR
   - needs_demographics
   - csv_has_columns: [MRID, Age, Sex]
 

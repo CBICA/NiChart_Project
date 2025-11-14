@@ -42,9 +42,9 @@ def help_message(data_type):
             """
             **How to Use This Page**
 
-            - Select a pipeline
-            - Run the pipeline
-            - View progress
+            - Use the left panel to select a pipeline and view the description. (By default, we'll only show you pipelines for which your data meets prerequisites.)
+            - Use the right panel to run the pipeline. You can select to harmonize the results to the reference data, if you have a sufficient number of data points.
+            - If you select a pipeline which requires more data, the description of the missing files or fields will appear on the right panel.
             """
         )
 

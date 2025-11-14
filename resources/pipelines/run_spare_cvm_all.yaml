@@ -1,15 +1,17 @@
-pipeline_name: SPARE Scores - All-Inclusive (T1 only)
+pipeline_name: SPARE Scores - All-Inclusive (T1 + FLAIR)
 description: |
-  Pipeline which uses DLMUSE features to produce all available SPARE scores using T1 scans.
+  Pipeline which uses DLMUSE features to produce all available SPARE scores from T1 + FLAIR data.
 
 categories:
   - spare
   - inference
   - classification
   - highlighted
+  - cvm
 
 requires:
   - needs_T1
+  - needs_FLAIR
   - needs_demographics
   - csv_has_columns: [MRID, Age, Sex]
 
