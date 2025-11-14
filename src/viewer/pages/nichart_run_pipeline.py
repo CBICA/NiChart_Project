@@ -92,7 +92,7 @@ def select_pipeline():
     
     row = pipelines.loc[pipelines["Name"] == sel_opt, "Label"]
     sel_label = row.iloc[0] if not row.empty else ''
-    show_description(sel_opt.lower())
+    show_description(sel_opt)
 
 def pipeline_runner_menu():
     st.markdown("##### Run:")
