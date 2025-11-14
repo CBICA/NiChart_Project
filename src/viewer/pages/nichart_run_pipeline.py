@@ -57,6 +57,9 @@ def show_description(pipeline) -> None:
         if pipeline == '':
             st.markdown("No description exists for this pipeline.")
             return
+        if pipeline_label is None:
+            st.markdown("Could not locate a label for this pipeline.")
+            return
         f_logo = os.path.join(
             st.session_state.paths['resources'], 'pipelines', pipeline_label, f'logo_{pipeline_label}.png'
         )
