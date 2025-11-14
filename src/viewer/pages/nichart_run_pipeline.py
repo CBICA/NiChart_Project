@@ -52,7 +52,11 @@ def show_description(pipeline) -> None:
     """
     Panel for viewing pipeline description
     """
+    
     with st.container(border=True, height=300):
+        if pipeline == '':
+            st.markdown("No description exists for this pipeline.")
+            return
         f_logo = os.path.join(
             st.session_state.paths['resources'], 'pipelines', pipeline, f'logo_{pipeline}.png'
         )
@@ -83,6 +87,8 @@ def select_pipeline():
         description='Select a pipeline'
     )
     
+    row = pipelines.loc[pipelines["Name"] == sel_opt, "Label"]
+    sel_label = row.iloc[0] if not row.empty else ''
     show_description(sel_opt.lower())
 
 def pipeline_runner_menu():
