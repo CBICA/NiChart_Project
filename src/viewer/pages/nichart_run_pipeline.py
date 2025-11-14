@@ -84,6 +84,17 @@ def select_pipeline():
 
     pipelines = st.session_state.pipelines
     pnames = pipelines.Name.tolist()
+
+    enabled_pnames = []
+    disabled_pnames = []
+    # Evaluate suitability for current data, filter accordingly
+    for pname in pnames:
+        if utiltl.check_requirements_met_by_session(pname):
+            enabled_pnames.append(pname)
+        else:
+            disabled_pnames.append(pname)
+
+
     sel_opt = sac.chip(
         pnames,
         label='', index=0, align='left',
@@ -105,6 +116,7 @@ def pipeline_runner_menu():
     if 'subject_type' not in st.session_state or st.session_state.subject_type == 'multi':
         if utiltl.pipeline_is_harmonizable(sel_method):
             harmonize = st.checkbox("Harmonize to reference data? (Requires >= 30 scans)")
+    st.session_state.do_harmonize = harmonize
     ## TODO: Retrieve dynamically/match between front end and toolloader code
     ## This a nice and simple placeholder for now
     

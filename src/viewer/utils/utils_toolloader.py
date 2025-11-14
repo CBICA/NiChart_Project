@@ -13,6 +13,8 @@ import boto3
 from datetime import datetime
 from botocore.exceptions import ClientError
 import utils.utils_pollstatus as ps
+import utils.utils_io as utilio
+import utils.utils_csvparsing as utilcsv
 import time
 import re
 from collections import defaultdict, deque
@@ -606,6 +608,112 @@ def parse_pipeline_requirements(pipeline_id):
         req_order.append((name, params))
 
     return reqs_set, req_params, req_order
+
+def check_requirements_met_by_session(pipeline_name):
+    # That's right, emojis in the code. >:^)
+    STATUS_ICON = {"green": "✅", "yellow": "⚠️", "red": "❌"}
+    REQ_TO_HUMAN_READABLE = {
+        'needs_T1': 'T1 Scans',
+        'needs_FLAIR': 'FLAIR Scans',
+        'needs_demographics': 'Demographic CSV', 
+    }
+    pipeline = st.session_state.sel_pipeline
+    pipeline_id = get_pipeline_id_by_label(pipeline, harmonized=st.session_state.do_harmonize)
+    reqs_set, reqs_params, req_order = parse_pipeline_requirements(pipeline_id)
+
+    # need to generate counts
+    counts = utilio.compute_counts()
+    
+    items = utilio.classify_cardinality(req_order, counts)
+    
+    count_max_key = max(counts, key=counts.get)
+    count_max_value = counts[count_max_key]
+    count_diffs = {key: abs(counts[key]-count_max_value) for key in counts.keys() if key != count_max_key}
+
+    for item in items:
+        icon = STATUS_ICON[item.status]
+        expanded = (item.status != "green")
+        
+        label = f"{icon} {REQ_TO_HUMAN_READABLE[item.name]} - {item.note}"
+        with st.expander(label, expanded=expanded):
+            if item.name == "needs_T1":
+                st.write("Please upload T1 images. None were detected.")
+            elif item.name == "needs_FLAIR":
+                st.write("Please upload FLAIR images. None were detected.")
+            elif item.name == "needs_demographics":
+                pass # Handled above 
+            elif item.name == "csv_has_columns":
+                pass # Handled in needs_demographics case
+            else:
+                raise ValueError(f"Requirement {item.name} for pipeline {pipeline_id} has no associated rule. Please submit a bug report.")
+    if "needs_demographics" in reqs_set:
+        required_cols = reqs_params.get("csv_has_columns", [])
+        csv_path = os.path.join(st.session_state.paths["project"], 'participants' ,'participants.csv')
+        csv_report = utilcsv.validate_csv(csv_path=csv_path, required_cols=required_cols, mrid_col="MRID")
+        severity = utilio._csv_severity(csv_report)
+        icon = STATUS_ICON[severity]
+        row_note = ""
+        # Build a concise label
+        if not csv_report.file_ok:
+            note = "CSV file not found."
+        elif not csv_report.columns_ok:
+            note = f"Missing columns: {', '.join(csv_report.missing_cols)}"
+        elif csv_report.issues:
+            note = f"{len(csv_report)} issue(s) detected"
+        else:
+            note = "All required columns found and passed validation; no issues"
+        if severity == "green":
+            if count_max_key == "needs_demographics":
+                for key, val in count_diffs:
+                    if val < count_max_value:
+                        row_note += f"{REQ_TO_HUMAN_READABLE[key]}: {val} MRIDs are in demographics CSV but not in available.\n"
+                        severity = "yellow"
+            else:
+                for key, val in count_diffs:
+                    if count_diffs["needs_demographics"] > val:
+                        row_note += f"{REQ_TO_HUMAN_READABLE[key]}: {val} CSV entries are present which have no associated scan.\n"
+                    elif count_diffs["needs_demographics"] < val:
+                        row_note += f"{REQ_TO_HUMAN_READABLE[key]}: {val} scans are present which have no demographics CSV entry.\n"
+
+        csv_expanded = (severity != "green")
+        with st.expander(f"{icon} Demographics CSV - {note}", expanded=csv_expanded):
+            if csv_report.file_ok:
+                if csv_report.missing_cols:
+                    st.error("Missing: " + ", ".join(csv_report.missing_cols))
+                if csv_report.present_cols:
+                    st.success("Present: " + ", ".join(csv_report.present_cols))
+                if csv_report.extra_cols:
+                    st.info("Extra (not used): " + ", ".join(csv_report.extra_cols))
+                st.caption(f"Rows in CSV: {csv_report.rows}")
+
+                if csv_report.issues:
+                    st.subheader("Issues")
+                    issues_df = utilio._issues_dataframe(csv_report.issues)
+                    group_by_col = st.selectbox(
+                        "Group issues by", ["(none)", "column", "reason"],
+                        index=1 if "column" in issues_df.columns else 0,      
+                    )
+                    if group_by_col != "(none)" and group_by_col in issues_df.columns:
+                        for key, sub in issues_df.groupby(group_by_col):
+                            st.markdown(f"**{group_by_col}: {key}** - {len(sub)} row(s)")
+                            st.dataframe(sub, use_container_width=True, height=220)
+                    else:
+                        st.dataframe(issues_df, use_container_width=True, height=320)
+                
+    ready = True
+    if any(s.status == "red" for s in items):
+        ready = False
+    
+    if "needs_demographics" in reqs_set:
+        ready = ready and (csv_report is not None) and utilio._csv_severity(csv_report) == "green"
+    if ready:
+        st.success("All requirements satisfied. You can proceed.")
+        st.button("Continue", type="primary")
+    else:
+        st.info("Resolve the issues above to proceed. Click to expand each requirement for more details.")
+    pass
+    
+    pass
 
 def parse_pipeline_categories(pipeline_id):
     pipeline_path = DEFAULT_PIPELINE_DEFINITION_PATH / f"{pipeline_id}.yaml"
