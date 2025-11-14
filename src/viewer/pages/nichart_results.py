@@ -12,6 +12,7 @@ import utils.utils_io as utilio
 import utils.utils_plots as utilpl
 import utils.utils_mriview as utilmri
 import utils.utils_data_view as utildv
+import gui.utils_results as utilres
 from utils.utils_styles import inject_global_css 
 import pandas as pd
 
@@ -33,158 +34,18 @@ utilpg.set_global_style()
 
 if 'instantiated' not in st.session_state or not st.session_state.instantiated:
     utilses.init_session_state()
-
-def view_dlmuse() -> None:
-    """
-    Panel for viewing dlmuse results
-    """
-    list_res_type = ['Regional Volumes', 'Segmentation']
-    sel_res_type = sac.tabs(
-        list_res_type,
-        size='lg',
-        align='left'
-    )   
-
-    ## FIXME (list of rois from data file to init listbox selections)
-    df = pd.read_csv(
-            os.path.join(
-                st.session_state.paths['resources'],
-                'reference_data', 'centiles', 'dlmuse_centiles_CN.csv' 
-            )
-    )
-    list_vars = ['Age', 'Sex'] + df.VarName.unique().tolist()
-
-
-    if sel_res_type == 'Regional Volumes':
-        var_groups_data = ['roi']
-        pipeline = 'dlmuse'
-
-        # Set centile selections
-        st.session_state.plot_params['centile_values'] = st.session_state.plot_settings['centile_trace_types']
-
-        with st.sidebar:
-            sac.divider(label='Viewing Options', align='center', color='gray')
-            utilpl.user_add_plots(
-                st.session_state.plot_params
-            )
-            
-        utilpl.sidebar_flag_hide_setting()
-        utilpl.sidebar_flag_hide_legend()
-
-        utilpl.panel_set_params_centile_plot(
-            st.session_state.plot_params,
-            var_groups_data,
-            pipeline,
-            list_vars
-        )
-        utilpl.panel_show_centile_plots()
-
-        st.write()
-
-    elif sel_res_type == 'Segmentation':
-        ulay = st.session_state.ref_data["t1"]
-        olay = st.session_state.ref_data["dlmuse"]        
-
-        with st.sidebar:
-            sac.divider(label='Viewing Options', align='center', color='gray')
-        utilpl.sidebar_flag_hide_setting()
-
-        utilmri.panel_set_params(
-            st.session_state.plot_params,
-            ['roi'],
-            'muse',
-            list_vars
-        )
-
-        utilmri.panel_view_seg(
-            ulay, olay, st.session_state.plot_params
-        )
-
-def results_overview():
-    # Show results
-    with st.container(border=True):
-        if st.session_state.sel_pipeline == 'dlmuse':
-            view_dlmuse()
-
-        elif st.session_state.sel_pipeline == 'dlwmls':
-            st.warning('Viewer not implemented for dlwmls')
-            #view_dlwmls()
-
-def panel_view_ref():
-    #st.info(
-    results_overview()
-        
-    # Show selections
-    utilses.disp_selections()
-
-def panel_view_user():
-    #st.info(
-    results_overview()
-        
-    # Show selections
-    utilses.disp_selections()
-
-    
-def panel_download():
-    '''
-    Panel to download results
-    '''
-    with st.container(horizontal=True, horizontal_alignment="center"):
-
-        st.markdown(f"###### 📁 Project Folder:   `{st.session_state.prj_name}`", width='content')
-    
-        prj_dir = st.session_state.paths['prj_dir']
-        list_dirs = utilio.get_subfolders(prj_dir)
-        for folder_name in ['downloads', 'user_upload']:
-            if folder_name in list_dirs:
-                list_dirs.remove(folder_name)
-        
-        if len(list_dirs) == 0:
-            return
-        
-        sel_opt = sac.checkbox(
-            list_dirs,
-            label='Folder(s) to download:', align='center', 
-            color='#aaeeaa', size='xl',
-            check_all='Select all'
-        )
-
-        if sel_opt is None or len(sel_opt)==0:
-            return
-
-        with st.container(horizontal=True, horizontal_alignment="center"):
-            out_dir = os.path.join(prj_dir, 'downloads')
-            os.makedirs(out_dir, exist_ok=True)
-            out_zip = os.path.join(out_dir, 'nichart_results.zip')
-
-            if st.button('Prepare Data'):
-                utilio.zip_folders(prj_dir, sel_opt, out_zip)
-                with open(out_zip, "rb") as f:
-                    file_download = f.read()            
-                st.toast('Created zip file with selected folders')
-
-                flag_download = os.path.exists(out_zip)
-                st.download_button(f"Download", file_download, 'nichart_results.zip')
-                os.remove(out_zip)
+   
      
 st.markdown("<h4 style='text-align:center; color:#3a3a88;'>Results\n\n</h1>", unsafe_allow_html=True)
 
 #sac.divider(key='_p0_div1')
 
 if st.session_state.workflow == 'ref_data':
-    panel_view_ref()
+    utilres.panel_ref_data()
 
 else:
-    sel = sac.tabs([
-        sac.TabsItem(label='Download'),
-        sac.TabsItem(label='View'),
-    ], align='center',  size='xl', color='grape')
-
-    if sel == 'Download':
-        panel_download()
-        
-    if sel == 'View':
-        panel_view_user()
+    #sel_container = st.sidebar()
+    utilres.panel_user_data(st.session_state.layout)
 
 sac.divider(key='_p0_div2')
 

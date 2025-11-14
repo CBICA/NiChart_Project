@@ -106,6 +106,8 @@ def init_session_vars():
     st.session_state.mode = 'release'
     st.session_state.mode = 'debug'
 
+    st.session_state.layout = 'Main'
+    
     st.session_state.skip_survey = True
 
     st.session_state.workflow = None
