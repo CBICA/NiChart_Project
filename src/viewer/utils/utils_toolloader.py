@@ -4,6 +4,7 @@ import os
 import yaml
 import glob
 from pathlib import Path
+import pandas as pd
 import subprocess
 import shutil
 import streamlit as st
@@ -621,6 +622,16 @@ def get_all_pipeline_ids():
     yaml_files = glob.glob(os.path.join(directory, "*.yaml"))
     basenames = [os.path.splitext(os.path.basename(f))[0] for f in yaml_files]
     return basenames
+
+def pipeline_is_harmonizable(pipeline_label):
+    directory = DEFAULT_PIPELINE_DEFINITION_PATH
+    pipelines = pd.read_csv(os.path.join(directory, 'list_pipelines.csv'))
+    row = pipelines.loc[pipelines["Label"] == pipeline_label, "HarmonizedPipelineYaml"]
+    if not row.empty:
+        return True
+    else:
+        return False
+
 
 def get_pipeline_id_by_label(sel_pipeline, harmonized=False):
     sel_pipeline_to_id = {
