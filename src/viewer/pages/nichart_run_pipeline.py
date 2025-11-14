@@ -52,16 +52,16 @@ def show_description(pipeline) -> None:
     """
     Panel for viewing pipeline description
     """
-    
+    pipeline_label = utiltl.get_pipeline_label_by_name(pipeline)
     with st.container(border=True, height=300):
         if pipeline == '':
             st.markdown("No description exists for this pipeline.")
             return
         f_logo = os.path.join(
-            st.session_state.paths['resources'], 'pipelines', pipeline, f'logo_{pipeline}.png'
+            st.session_state.paths['resources'], 'pipelines', pipeline_label, f'logo_{pipeline_label}.png'
         )
         fdoc = os.path.join(
-            st.session_state.paths['resources'], 'pipelines', pipeline, f'overview_{pipeline}.md'
+            st.session_state.paths['resources'], 'pipelines', pipeline_label, f'overview_{pipeline_label}.md'
         )
         cols = st.columns([6, 1])
         with cols[0]:
