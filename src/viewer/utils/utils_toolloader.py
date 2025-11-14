@@ -622,7 +622,7 @@ def get_all_pipeline_ids():
     basenames = [os.path.splitext(os.path.basename(f))[0] for f in yaml_files]
     return basenames
 
-def get_pipeline_id_by_name(sel_pipeline, harmonized=False):
+def get_pipeline_id_by_label(sel_pipeline, harmonized=False):
     sel_pipeline_to_id = {
         'dlmuse': 'run_dlmuse',
         'spare-ad': 'run_spare_ad',
@@ -633,6 +633,7 @@ def get_pipeline_id_by_name(sel_pipeline, harmonized=False):
         'surrealgan': 'run_predcrd_surrealgan',
         'synthseg': None,
         'cclnmf': 'run_cclnmf',
+        'dlwmls (legacy)': 'run_dlwmls',
         'dlmuse-dlwmls': 'run_nichart_dlwmls_v2',
         'spare-smoking': 'run_spare_cvm_smoking',
         'spare-hypertension': 'run_spare_cvm_hypertension',
@@ -646,7 +647,7 @@ def get_pipeline_id_by_name(sel_pipeline, harmonized=False):
     if harmonized:
         sel_pipeline_to_id = {
             'dlmuse': 'run_dlmuse_harmonized',
-            'dlwmls': 'run_dlwmls',
+            'legacy-dlwmls': 'run_dlwmls',
             'spare-ad': 'run_spare_ad_harmonized',
             'spare-ba': 'run_spare_ba_harmonized',
             'spare-ba-image': 'run_bascores',
@@ -654,7 +655,7 @@ def get_pipeline_id_by_name(sel_pipeline, harmonized=False):
             'surrealgan': 'run_predcrd_surrealgan',
             'synthseg': None,
             'cclnmf':  None,
-            'dlmuse-dlwmls': 'run_nichart_dlwmls_v2_harmonized',
+            'dlwmls': 'run_nichart_dlwmls_v2_harmonized',
             'spare-smoking': 'run_spare_cvm_smoking_harmonized',
             'spare-hypertension': 'run_spare_cvm_hypertension_harmonized',
             'spare-obesity': 'run_spare_cvm_obesity_harmonized',
@@ -687,6 +688,17 @@ def overall_pipeline_requirements_listing():
         req_set, req_params, req_order = parse_pipeline_requirements(pipeline_id)
         res_dict[pipeline_id] = req_set
     return res_dict
+
+def pipeline_to_canonical(pipeline_name):
+
+    pass
+
+def get_pipeline_doc_canonical(pipeline_canonical_id):
+    return
+
+def get_pipeline_doc(pipeline_name):
+    pipeline = pipeline_to_canonical(pipeline_name)
+    return get_pipeline_doc_canonical(pipeline)
 
 def load_metadata(metadata_path: Path) -> Dict:
     if metadata_path is None:
