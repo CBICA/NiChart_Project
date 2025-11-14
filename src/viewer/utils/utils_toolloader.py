@@ -632,56 +632,22 @@ def pipeline_is_harmonizable(pipeline_label):
     else:
         return False
 
-def get_pipeline_label_by_name(sel_pipeline):
+def get_pipeline_label_by_name(pipeline_name):
     directory = DEFAULT_PIPELINE_DEFINITION_PATH
     pipelines = pd.read_csv(os.path.join(directory, 'list_pipelines.csv'))
-    row = pipelines.loc[pipelines["Name"] == sel_pipeline, "Label"]
+    row = pipelines.loc[pipelines["Name"] == pipeline_name, "Label"]
     return row.iloc[0] if not row.empty else None      
 
-def get_pipeline_id_by_label(sel_pipeline, harmonized=False):
-    sel_pipeline_to_id = {
-        'dlmuse': 'run_dlmuse',
-        'spare-ad': 'run_spare_ad',
-        'spare-ba': 'run_spare_ba',
-        'spare-ba-image': 'run_bascores',
-        'dlwmls': 'run_dlwmls',
-        'spare-cvm': None,
-        'surrealgan': 'run_predcrd_surrealgan',
-        'synthseg': None,
-        'cclnmf': 'run_cclnmf',
-        'dlwmls (legacy)': 'run_dlwmls',
-        'dlmuse-dlwmls': 'run_nichart_dlwmls_v2',
-        'spare-smoking': 'run_spare_cvm_smoking',
-        'spare-hypertension': 'run_spare_cvm_hypertension',
-        'spare-obesity': 'run_spare_cvm_obesity',
-        'spare-diabetes': 'run_spare_cvm_diabetes',
-        'spare-depression': 'run_spare_depression',
-        'spare-psychosis': 'run_spare_psychosis',
-        'ravens': 'run_nichart_ravens',
-        ## Add additional lines here ({sel_pipeline value} : {name of pipeline yaml} )
-    }
+def get_pipeline_id_by_label(pipeline_label, harmonized=False):
     if harmonized:
-        sel_pipeline_to_id = {
-            'dlmuse': 'run_dlmuse_harmonized',
-            'legacy-dlwmls': 'run_dlwmls',
-            'spare-ad': 'run_spare_ad_harmonized',
-            'spare-ba': 'run_spare_ba_harmonized',
-            'spare-ba-image': 'run_bascores',
-            'spare-cvm': None,
-            'surrealgan': 'run_predcrd_surrealgan',
-            'synthseg': None,
-            'cclnmf':  None,
-            'dlwmls': 'run_nichart_dlwmls_v2_harmonized',
-            'spare-smoking': 'run_spare_cvm_smoking_harmonized',
-            'spare-hypertension': 'run_spare_cvm_hypertension_harmonized',
-            'spare-obesity': 'run_spare_cvm_obesity_harmonized',
-            'spare-diabetes': 'run_spare_cvm_diabetes_harmonized',
-            'spare-depression': None,
-            'spare-psychosis': None,
-            'ravens': None,
-            ## Add additional lines here ({sel_pipeline value} : {name of pipeline yaml} )
-        }
-    return sel_pipeline_to_id[sel_pipeline]
+        field_to_retrieve = "HarmonizedPipelineYaml"
+    else:
+        field_to_retrieve = "PipelineYaml"
+
+    directory = DEFAULT_PIPELINE_DEFINITION_PATH
+    pipelines = pd.read_csv(os.path.join(directory, 'list_pipelines.csv'))
+    row = pipelines.loc[pipelines["Label"] == pipeline_label, field_to_retrieve]
+    return row.iloc[0] if not row.empty else None
 
 def overall_pipeline_category_listing():
     # Returns a dictionary mapping a category to a list of associated pipelines.
