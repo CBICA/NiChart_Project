@@ -33,6 +33,7 @@ utilpg.set_global_style()
 if 'instantiated' not in st.session_state or not st.session_state.instantiated:
     utilses.init_session_state()
 
+
 #################################
 ## Function definitions
 def help_message(data_type):
@@ -100,8 +101,9 @@ def pipeline_runner_menu():
     sel_method = st.session_state.sel_pipeline
     st.success(f'Selected pipeline: {sel_method}')
     harmonize = False
-    if utiltl.pipeline_is_harmonizable(sel_method):
-        harmonize = st.checkbox("Harmonize to reference data? (Requires >= 30 scans)")
+    if 'subject_type' not in st.session_state or st.session_state.subject_type == 'multi':
+        if utiltl.pipeline_is_harmonizable(sel_method):
+            harmonize = st.checkbox("Harmonize to reference data? (Requires >= 30 scans)")
     ## TODO: Retrieve dynamically/match between front end and toolloader code
     ## This a nice and simple placeholder for now
     

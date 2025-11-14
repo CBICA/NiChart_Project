@@ -33,6 +33,8 @@ st.session_state.data_type = 'single_subject'
 if 'instantiated' not in st.session_state or not st.session_state.instantiated:
     utilses.init_session_state()
 
+st.session_state.subject_type = 'single'
+
 st.markdown("<h5 style='text-align:center; color:#3a3a88;'>Single-Subject Analysis\n\n</h1>", unsafe_allow_html=True)
 
 cols = st.columns([1,6,1])
