@@ -14,7 +14,7 @@ import utils.utils_toolloader as utiltl
 import utils.utils_stlogbox as stlogbox
 
 from streamlit_image_select import image_select
-import stqdm
+from stqdm import stqdm
 import re
 from utils.utils_logger import setup_logger
 
