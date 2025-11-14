@@ -632,6 +632,11 @@ def pipeline_is_harmonizable(pipeline_label):
     else:
         return False
 
+def get_pipeline_label_by_name(sel_pipeline):
+    directory = DEFAULT_PIPELINE_DEFINITION_PATH
+    pipelines = pd.read_csv(os.path.join(directory, 'list_pipelines.csv'))
+    row = pipelines.loc[pipelines["Name"] == sel_pipeline, "Label"]
+    return row.iloc[0] if not row.empty else None      
 
 def get_pipeline_id_by_label(sel_pipeline, harmonized=False):
     sel_pipeline_to_id = {
@@ -699,17 +704,6 @@ def overall_pipeline_requirements_listing():
         req_set, req_params, req_order = parse_pipeline_requirements(pipeline_id)
         res_dict[pipeline_id] = req_set
     return res_dict
-
-def pipeline_to_canonical(pipeline_name):
-
-    pass
-
-def get_pipeline_doc_canonical(pipeline_canonical_id):
-    return
-
-def get_pipeline_doc(pipeline_name):
-    pipeline = pipeline_to_canonical(pipeline_name)
-    return get_pipeline_doc_canonical(pipeline)
 
 def load_metadata(metadata_path: Path) -> Dict:
     if metadata_path is None:
