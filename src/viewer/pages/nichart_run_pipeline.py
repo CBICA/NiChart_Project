@@ -82,7 +82,7 @@ def select_pipeline():
         size='md', radius='md', multiple=False, color='cyan',
         description='Select a pipeline'
     )
-
+    
     show_description(sel_opt.lower())
 
 def pipeline_runner_menu():
@@ -91,13 +91,12 @@ def pipeline_runner_menu():
     sel_method = st.session_state.sel_pipeline
     st.success(f'Selected pipeline: {sel_method}')
     harmonize = False
-    harmonizable = ['spare-ad', 'spare-ba', 'dlmuse', 'dlmuse-dlwmls', 'spare-smoking', 'spare-hypertension', 'spare-obesity', 'spare-diabetes']
-    if sel_method in harmonizable:
+    if utiltl.pipeline_is_harmonizable(sel_method):
         harmonize = st.checkbox("Harmonize to reference data? (Requires >= 30 scans)")
     ## TODO: Retrieve dynamically/match between front end and toolloader code
     ## This a nice and simple placeholder for now
     
-    pipeline_to_run = utiltl.get_pipeline_id_by_name(sel_method, harmonized=harmonize)
+    pipeline_to_run = utiltl.get_pipeline_id_by_label(sel_method, harmonized=harmonize)
 
     if pipeline_to_run is None:
         st.error("The currently selected pipeline doesn't have an associated tool configuration. Please submit a bug report!")
