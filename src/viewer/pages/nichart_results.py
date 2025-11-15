@@ -36,8 +36,8 @@ if 'instantiated' not in st.session_state or not st.session_state.instantiated:
     utilses.init_session_state()
      
 
-# Show setting button
-utilset.settings_button()   
+## Show setting button
+#utilset.settings_button()
 
 sac.divider(key='_p0_div1')
 
@@ -57,17 +57,24 @@ sac.divider(key='_p0_div2')
 sel_but = sac.chip(
     [
         sac.ChipItem(label = '', icon='arrow-left', disabled=False),
+        sac.ChipItem(label = '', icon='square', disabled=False),
         sac.ChipItem(label = '', icon='house', disabled=False),
+        sac.ChipItem(label = '', icon='gear', disabled=False),
     ],
-    label='', align='center', color='#aaeeaa', size='xl', return_index=True
+    key='_chip_navig', label='', align='center', color='#aaeeaa', size='xl',
+    multiple=False,
+    return_index=True, index=1
 )
-    
 if sel_but == 0:
     st.switch_page("pages/nichart_pipelines.py")
 
-if sel_but == 1:
+if sel_but == 2:
     st.switch_page("pages/nichart_home.py")
     
+if sel_but == 3:
+#if st.button('Settings'):
+    utilset.edit_settings()
+
 # Show session state vars
 if st.session_state.mode == 'debug':
     utilses.disp_session_state()

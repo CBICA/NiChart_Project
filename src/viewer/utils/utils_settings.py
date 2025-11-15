@@ -14,23 +14,26 @@ def edit_settings():
 
         submitted = st.form_submit_button('Submit')
         
-        if submitted:        
-            if sel_layout_label == "Sidebar":
-                layout = st.sidebar 
-            else:
-                layout = st.container(border=False)
-            st.session_state.sel_layout_label = sel_layout_label
-            st.session_state.layout = layout
-            st.toast('Selected Layout: {sel_layout_label}')
-            st.rerun()
+    if submitted:
+        if sel_layout_label == "Sidebar":
+            layout = st.sidebar
+        else:
+            layout = st.container(border=False)
+        st.session_state.sel_layout_label = sel_layout_label
+        st.session_state.layout = layout
+        st.toast('Selected Layout: {sel_layout_label}')
 
-def settings_button():
-    # Top-right subtle “Settings” link
-    but_set = sac.chip(
-        [sac.ChipItem(label = 'Settings', icon='gear', disabled=False)],
-        label='', align='right', color='#aaeeaa',
-        size='sm', return_index=False,
-        index=None
-    )
-    if but_set == 'Settings':
-        edit_settings()
+        if st.session_state.get('_chip_navig'):
+            st.session_state._chip_navig = 1
+        st.rerun()
+
+#def settings_button():
+    ## Top-right subtle “Settings” link
+    #but_set = sac.chip(
+        #[sac.ChipItem(label = 'Settings', icon='gear', disabled=False)],
+        #label='', align='right', color='#aaeeaa',
+        #size='sm', return_index=False,
+        #index=None
+    #)
+    #if but_set == 'Settings':
+        #edit_settings()

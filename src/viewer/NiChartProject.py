@@ -8,12 +8,13 @@ import utils.utils_session as utilss
 from PIL import Image
 from st_pages import add_page_title, get_nav_from_toml
 
+
+utilpg.config_page()
+
 nicon = Image.open("../resources/nichart1.png")
 
 # Init session state
 utilss.init_session_state()
-
-utilpg.config_page()
 
 from utils.utils_logger import setup_logger
 logger = setup_logger()
