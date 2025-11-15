@@ -23,16 +23,10 @@ import streamlit_antd_components as sac
 import streamlit as st
 from stqdm import stqdm
 
-def view_dlmuse() -> None:
+def view_dlmuse(la) -> None:
     """
     Panel for viewing dlmuse results
     """
-    with st.sidebar:
-        sel_task = st.selectbox(
-            'Data type:',
-            ['ROI Volumes', 'Segmentation'],
-            index=0
-        )
 
     ## FIXME (list of rois from data file to init listbox selections)
     df = pd.read_csv(
@@ -89,22 +83,23 @@ def view_dlmuse() -> None:
             ulay, olay, st.session_state.plot_params
         )
 
-def panel_user_data_view():
-    # Show results
-    with st.sidebar:
+def sel_pipeline():
+    with st.session_state.layout:
         sel_pipe = st.selectbox(
             'Pipeline',
             ['dlmuse', 'dlwmls'],
             index=0
         )
-    
-    if sel_pipe == 'dlmuse':
-        view_dlmuse()
+    return sel_pipe
 
-    elif sel_pipe == 'dlwmls':
-        st.warning('Viewer not implemented for dlwmls')
-        #view_dlwmls()
-
+def sel_dtype(layout):
+    with st.session_state.layout:
+        sel_dtype = st.selectbox(
+            'Data type:',
+            ['ROI Volumes', 'Segmentation'],
+            index=0
+        )
+    return sel_dtype
 
 def panel_download():
     '''
@@ -148,10 +143,10 @@ def panel_download():
                 st.download_button(f"Download", file_download, 'nichart_results.zip')
                 os.remove(out_zip)
 
-def panel_user_data(layout):
+def panel_user_data():
 
 
-    with layout:
+    with st.session_state.layout:
         sel_tab = sac.tabs(
             items=[
                 sac.TabsItem(label='Download'),
@@ -168,7 +163,18 @@ def panel_user_data(layout):
         panel_user_data_view()
         
 def panel_ref_data():
-    #st.info(
+    layout = st.session_state.layout
+
+    sel_pipe = sel_pipeline()
+    sel_dtype = sel_dtype()
+
+    if sel_pipe == 'dlmuse':
+        view_dlmuse(dtype)
+
+    elif sel_pipe == 'dlwmls':
+        st.warning('Viewer not implemented for dlwmls')
+        #view_dlwmls()
+
     panel_user_data_view()
         
     # Show selections

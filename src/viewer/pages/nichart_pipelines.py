@@ -106,7 +106,7 @@ with st.container(horizontal=True, horizontal_alignment="center"):
 if st.session_state.workflow == 'ref_data':
     st.info('''
         You’ve selected the **Reference Data** workflow. This option doesn’t require pipeline selection.
-        #- If you meant to analyze your data, please go back and choose a different workflow.
+        - If you meant to analyze your data, please go back and choose a different workflow.
         - Otherwise, continue to the next step to explore the reference values.
         '''
     )
