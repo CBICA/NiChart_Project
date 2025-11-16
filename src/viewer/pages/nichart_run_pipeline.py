@@ -125,6 +125,7 @@ def pipeline_runner_menu(sel=False):
     sac.divider(key='_p2_div2')
     if not sel:
         st.info("Select a pipeline on the left, then look here to run it.")
+        return
     sel_method = st.session_state.sel_pipeline
     st.success(f'Selected pipeline: {sel_method}')
     harmonize = False
