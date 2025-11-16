@@ -62,8 +62,8 @@ sac.divider(key='_p0_div1')
 
 sel_but = sac.chip(
     [
-        sac.ChipItem(label = '', icon='arrow-left', disabled=False),
-        sac.ChipItem(label = '', icon='arrow-right', disabled=False)
+        sac.ChipItem(label = 'Single-Subject Intro', icon='arrow-left', disabled=False),
+        sac.ChipItem(label = 'Select and Run Pipeline', icon='arrow-right', disabled=False)
     ],
     label='', align='center', color='#aaeeaa', size='xl', return_index=True
 )

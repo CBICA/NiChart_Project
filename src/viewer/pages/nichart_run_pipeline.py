@@ -219,8 +219,8 @@ pipeline_menu()
 
 sel_but = sac.chip(
     [
-        sac.ChipItem(label = '', icon='arrow-left', disabled=False),
-        sac.ChipItem(label = '', icon='arrow-right', disabled=False)
+        sac.ChipItem(label = 'Upload Data', icon='arrow-left', disabled=False),
+        sac.ChipItem(label = 'Download Results', icon='arrow-right', disabled=False)
     ],
     label='', align='center', color='#aaeeaa', size='xl', return_index=True
 )
