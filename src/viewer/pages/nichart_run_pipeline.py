@@ -98,6 +98,7 @@ def select_pipeline():
     if show_enabled_only:
         if not enabled_pnames:
             st.error(f"It looks like your data doesn't meet the requirements for any pipelines. Please browse the pipeline listing using the checkbox above, then go back and upload some data!")
+            return
         sel_opt = sac.chip(
             enabled_pnames,
             label='', index=0, align='left',
