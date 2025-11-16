@@ -907,8 +907,8 @@ def compute_counts(ctx: dict = {}) -> dict:
     """
     sel_project = st.session_state.project
     project_path = get_path_for_project(sel_project)
-    t1_path = os.path.join(project_path, "user_uploaded_t1")
-    flair_path = os.path.join(project_path, "user_uploaded_fl")
+    t1_path = os.path.join(project_path, "t1")
+    flair_path = os.path.join(project_path, "fl")
     demog_csv_path = os.path.join(project_path, "participants", "participants.csv")
 
     t1_count = get_file_count(t1_path, ['.nii', '.nii.gz'])

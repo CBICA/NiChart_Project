@@ -128,7 +128,7 @@ def pipeline_runner_menu(enabled_pnames, sel=False):
     ## TODO: Retrieve dynamically/match between front end and toolloader code
     ## This a nice and simple placeholder for now
     if sel_name not in enabled_pnames:
-        st.info("Your data doesn't meet the requirements for this pipeline. Correct the issues marked below to enable.")
+        st.info("Your data doesn't meet the requirements for this pipeline. Correct the issues marked below to proceed.")
         utiltl.check_requirements_met_panel(sel_name)
         return
     pipeline_to_run = utiltl.get_pipeline_id_by_label(sel_method, harmonized=harmonize)
