@@ -622,6 +622,7 @@ def check_requirements_met_nopanel(pipeline_name):
     blockers = []
     for item in items:
         if item.status == 'red':
+            st.error(f"Item {item.name} error with status {item.status}")
             result = False # Not all checks met
             if item.name == "needs_T1":
                 blockers.append(f"T1 scans appear to be missing. Please check that images were uploaded.")
