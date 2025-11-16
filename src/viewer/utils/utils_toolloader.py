@@ -715,7 +715,7 @@ def check_requirements_met_panel(pipeline_name):
         elif not csv_report.columns_ok:
             note = f"Missing columns: {', '.join(csv_report.missing_cols)}"
         elif csv_report.issues:
-            note = f"{len(csv_report)} issue(s) detected"
+            note = f"{len(csv_report.issues)} issue(s) detected"
         else:
             note = "All required columns found and passed validation; no issues"
         if severity == "green":
