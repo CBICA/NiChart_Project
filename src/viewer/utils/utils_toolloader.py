@@ -584,6 +584,7 @@ def parse_pipeline_steps(pipeline_yaml):
 
     return execution_order, step_map
 
+@st.cache_data
 def parse_pipeline_requirements(pipeline_id):
     pipeline_path = DEFAULT_PIPELINE_DEFINITION_PATH / f"{pipeline_id}.yaml"
     if not pipeline_path.exists():
@@ -609,11 +610,11 @@ def parse_pipeline_requirements(pipeline_id):
 
     return reqs_set, req_params, req_order
 
-def check_requirements_met_nopanel(pipeline_name):
+def check_requirements_met_nopanel(pipeline_name, harmonized):
     label = get_pipeline_label_by_name(pipeline_name)
-    pipeline_id = get_pipeline_id_by_label(label, harmonized=st.session_state.do_harmonize)
+    pipeline_id = get_pipeline_id_by_label(label, harmonized=harmonized)
     if pd.isna(pipeline_id) or not pipeline_id:
-        pipeline_id = get_pipeline_id_by_label(label, harmonized=not st.session_state.do_harmonize)
+        pipeline_id = get_pipeline_id_by_label(label, harmonized=not harmonized)
     print(f"DEBUG: Name {pipeline_name} Label {label} Id {pipeline_id}")
     reqs_set, reqs_params, req_order = parse_pipeline_requirements(pipeline_id)
 
@@ -770,6 +771,7 @@ def check_requirements_met_panel(pipeline_name):
     else:
         st.info("Resolve the issues above to proceed. Click to expand each requirement for more details.")
 
+@st.cache_data
 def parse_pipeline_categories(pipeline_id):
     pipeline_path = DEFAULT_PIPELINE_DEFINITION_PATH / f"{pipeline_id}.yaml"
     if not pipeline_path.exists():
@@ -780,12 +782,14 @@ def parse_pipeline_categories(pipeline_id):
 
     return pipeline_yaml.get('categories', [])
 
+@st.cache_data
 def get_all_pipeline_ids():
     directory = DEFAULT_PIPELINE_DEFINITION_PATH
     yaml_files = glob.glob(os.path.join(directory, "*.yaml"))
     basenames = [os.path.splitext(os.path.basename(f))[0] for f in yaml_files]
     return basenames
 
+@st.cache_data
 def pipeline_is_harmonizable(pipeline_label):
     directory = DEFAULT_PIPELINE_DEFINITION_PATH
     pipelines = pd.read_csv(os.path.join(directory, 'list_pipelines.csv'))
@@ -795,18 +799,21 @@ def pipeline_is_harmonizable(pipeline_label):
     else:
         return False
 
+@st.cache_data
 def get_pipeline_name_by_label(pipeline_label):
     directory = DEFAULT_PIPELINE_DEFINITION_PATH
     pipelines = pd.read_csv(os.path.join(directory, 'list_pipelines.csv'))
     row = pipelines.loc[pipelines["Label"] == pipeline_label, "Name"]
     return row.iloc[0] if not row.empty else None    
 
+@st.cache_data
 def get_pipeline_label_by_name(pipeline_name):
     directory = DEFAULT_PIPELINE_DEFINITION_PATH
     pipelines = pd.read_csv(os.path.join(directory, 'list_pipelines.csv'))
     row = pipelines.loc[pipelines["Name"] == pipeline_name, "Label"]
     return row.iloc[0] if not row.empty else None      
 
+@st.cache_data
 def get_pipeline_id_by_label(pipeline_label, harmonized=False):
     if harmonized:
         field_to_retrieve = "HarmonizedPipelineYaml"
@@ -818,6 +825,7 @@ def get_pipeline_id_by_label(pipeline_label, harmonized=False):
     row = pipelines.loc[pipelines["Label"] == pipeline_label, field_to_retrieve]
     return row.iloc[0] if not row.empty else None
 
+@st.cache_data
 def overall_pipeline_category_listing():
     # Returns a dictionary mapping a category to a list of associated pipelines.
     # Useful for rendering a subset of pipelines
@@ -832,6 +840,7 @@ def overall_pipeline_category_listing():
                 res_dict[category] = [pipeline_id]
     return res_dict
 
+@st.cache_data
 def overall_pipeline_requirements_listing():
     res_dict = {}
     pipelines = get_all_pipeline_ids()

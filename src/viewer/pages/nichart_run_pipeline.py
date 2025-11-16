@@ -197,7 +197,7 @@ def pipeline_menu():
     disabled_pnames = []
     # Evaluate suitability for current data, filter accordingly
     for pname in pnames:
-        result, blockers = utiltl.check_requirements_met_nopanel(pname)
+        result, blockers = utiltl.check_requirements_met_nopanel(pname, st.session_state.do_harmonize)
         if result:
             enabled_pnames.append(pname)
         else:
