@@ -459,7 +459,7 @@ def panel_view_files():
         align='left', size='xl', icon='table',
         checkbox=False,
         #checkbox_strict = True,
-        open_all = True,
+        open_all = False,
         return_index = True
         #height=400
     )
