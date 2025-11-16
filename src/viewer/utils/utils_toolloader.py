@@ -739,7 +739,7 @@ def check_requirements_met_panel(pipeline_name):
                 if csv_report.present_cols:
                     st.success("Present: " + ", ".join(csv_report.present_cols))
                 if csv_report.extra_cols:
-                    st.info("Extra (not used): " + ", ".join(csv_report.extra_cols))
+                    st.info("Extra (not used for this pipeline): " + ", ".join(csv_report.extra_cols))
                 st.caption(f"Rows in CSV: {csv_report.rows}")
 
                 if csv_report.issues:
