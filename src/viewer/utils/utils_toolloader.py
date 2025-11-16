@@ -612,6 +612,7 @@ def parse_pipeline_requirements(pipeline_id):
 def check_requirements_met_nopanel(pipeline_name):
     label = get_pipeline_label_by_name(pipeline_name)
     pipeline_id = get_pipeline_id_by_label(label, harmonized=st.session_state.do_harmonize)
+    print(f"DEBUG: Name {pipeline_name} Label {label} Id {pipeline_id}")
     reqs_set, reqs_params, req_order = parse_pipeline_requirements(pipeline_id)
 
     counts = utilio.compute_counts()
