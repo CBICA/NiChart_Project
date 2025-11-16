@@ -613,7 +613,7 @@ def check_requirements_met_nopanel(pipeline_name):
     label = get_pipeline_label_by_name(pipeline_name)
     pipeline_id = get_pipeline_id_by_label(label, harmonized=st.session_state.do_harmonize)
     if pd.isna(pipeline_id) or not pipeline_id:
-        pipeline_id = get_pipeline_id_by_label(label, harmonize=not st.session_state.do_harmonize)
+        pipeline_id = get_pipeline_id_by_label(label, harmonized=not st.session_state.do_harmonize)
     print(f"DEBUG: Name {pipeline_name} Label {label} Id {pipeline_id}")
     reqs_set, reqs_params, req_order = parse_pipeline_requirements(pipeline_id)
 
