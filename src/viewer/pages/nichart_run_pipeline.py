@@ -74,7 +74,7 @@ def show_description(pipeline) -> None:
         with cols[1]:
             st.image(f_logo)
 
-def select_pipeline():
+def select_pipeline(enabled_pnames):
     '''
     Select a pipeline and show overview
     '''
@@ -85,15 +85,6 @@ def select_pipeline():
     pipelines = st.session_state.pipelines
     pnames = pipelines.Name.tolist()
 
-    enabled_pnames = []
-    disabled_pnames = []
-    # Evaluate suitability for current data, filter accordingly
-    for pname in pnames:
-        result, blockers = utiltl.check_requirements_met_nopanel(pname)
-        if result:
-            enabled_pnames.append(pname)
-        else:
-            disabled_pnames.append(pname)
     
     if show_enabled_only:
         if not enabled_pnames:
@@ -120,14 +111,15 @@ def select_pipeline():
     st.session_state.sel_pipeline = sel_label
     return sel_label
 
-def pipeline_runner_menu(sel=False):
+def pipeline_runner_menu(enabled_pnames, sel=False):
     st.markdown("##### Run:")
     sac.divider(key='_p2_div2')
     if not sel:
         st.info("Select a pipeline on the left, then look here to run it.")
         return
     sel_method = st.session_state.sel_pipeline
-    st.success(f'Selected pipeline: {sel_method}')
+    sel_name = utiltl.get_pipeline_name_by_label(sel_method)
+    st.success(f'Selected pipeline: {sel_name}')
     harmonize = False
     if 'subject_type' not in st.session_state or st.session_state.subject_type == 'multi':
         if utiltl.pipeline_is_harmonizable(sel_method):
@@ -135,7 +127,10 @@ def pipeline_runner_menu(sel=False):
     st.session_state.do_harmonize = harmonize
     ## TODO: Retrieve dynamically/match between front end and toolloader code
     ## This a nice and simple placeholder for now
-    
+    if sel_name not in enabled_pnames:
+        st.info("Your data doesn't meet the requirements for this pipeline. Correct the below issues to enable.")
+        utiltl.check_requirements_met_panel(sel_name)
+        return
     pipeline_to_run = utiltl.get_pipeline_id_by_label(sel_method, harmonized=harmonize)
 
     if pipeline_to_run is None:
@@ -195,10 +190,23 @@ def pipeline_menu():
         st.session_state.paths['out_dir'], st.session_state['prj_name']
     )
 
+    pipelines = st.session_state.pipelines
+    pnames = pipelines.Name.tolist()
+
+    enabled_pnames = []
+    disabled_pnames = []
+    # Evaluate suitability for current data, filter accordingly
+    for pname in pnames:
+        result, blockers = utiltl.check_requirements_met_nopanel(pname)
+        if result:
+            enabled_pnames.append(pname)
+        else:
+            disabled_pnames.append(pname)
+
     with cols[0]:
-        sel = select_pipeline()
+        sel = select_pipeline(enabled_pnames=enabled_pnames)
     with cols[1]:
-        pipeline_runner_menu(sel)
+        pipeline_runner_menu(enabled_pnames=enabled_pnames, sel=sel)
 
 #################################
 ## Main

@@ -792,6 +792,12 @@ def pipeline_is_harmonizable(pipeline_label):
     else:
         return False
 
+def get_pipeline_name_by_label(pipeline_label):
+    directory = DEFAULT_PIPELINE_DEFINITION_PATH
+    pipelines = pd.read_csv(os.path.join(directory, 'list_pipelines.csv'))
+    row = pipelines.loc[pipelines["Label"] == pipeline_label, "Name"]
+    return row.iloc[0] if not row.empty else None    
+
 def get_pipeline_label_by_name(pipeline_name):
     directory = DEFAULT_PIPELINE_DEFINITION_PATH
     pipelines = pd.read_csv(os.path.join(directory, 'list_pipelines.csv'))
