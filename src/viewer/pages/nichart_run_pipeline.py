@@ -79,7 +79,7 @@ def select_pipeline():
     Select a pipeline and show overview
     '''
     st.markdown("##### Select:")
-
+    show_enabled_only = st.checkbox("Show only pipelines which match my available data", value=True)
     sac.divider(key='_p2_div1')
 
     pipelines = st.session_state.pipelines
@@ -95,21 +95,22 @@ def select_pipeline():
         else:
             disabled_pnames.append(pname)
 
-    show_all = st.checkbox("Show all pipelines, not just ones I have the data for")
-    if show_all:
-        sel_opt = sac.chip(
-            pnames,
-            label='', index=0, align='left',
-            size='md', radius='md', multiple=False, color='cyan',
-            description='Select a pipeline'
-        )
-    else:
+    
+    if show_enabled_only:
         sel_opt = sac.chip(
             enabled_pnames,
             label='', index=0, align='left',
             size='md', radius='md', multiple=False, color='cyan',
             description='Select a pipeline'
         )
+    else:
+        sel_opt = sac.chip(
+            pnames,
+            label='', index=0, align='left',
+            size='md', radius='md', multiple=False, color='cyan',
+            description='Select a pipeline'
+        )
+        
     
     row = pipelines.loc[pipelines["Name"] == sel_opt, "Label"]
     sel_label = row.iloc[0] if not row.empty else ''
