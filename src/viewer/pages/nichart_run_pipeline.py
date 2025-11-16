@@ -118,10 +118,13 @@ def select_pipeline():
     sel_label = row.iloc[0] if not row.empty else ''
     show_description(sel_opt)
     st.session_state.sel_pipeline = sel_label
+    return sel_label
 
-def pipeline_runner_menu():
+def pipeline_runner_menu(sel=False):
     st.markdown("##### Run:")
     sac.divider(key='_p2_div2')
+    if not sel:
+        st.info("Select a pipeline on the left, then look here to run it.")
     sel_method = st.session_state.sel_pipeline
     st.success(f'Selected pipeline: {sel_method}')
     harmonize = False
@@ -192,9 +195,9 @@ def pipeline_menu():
     )
 
     with cols[0]:
-        select_pipeline()
+        sel = select_pipeline()
     with cols[1]:
-        pipeline_runner_menu()
+        pipeline_runner_menu(sel)
 
 #################################
 ## Main
