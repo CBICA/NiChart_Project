@@ -89,18 +89,27 @@ def select_pipeline():
     disabled_pnames = []
     # Evaluate suitability for current data, filter accordingly
     for pname in pnames:
-        if utiltl.check_requirements_met_by_session(pname):
+        result, blockers = utiltl.check_requirements_met_nopanel(pname)
+        if result:
             enabled_pnames.append(pname)
         else:
             disabled_pnames.append(pname)
 
-
-    sel_opt = sac.chip(
-        pnames,
-        label='', index=0, align='left',
-        size='md', radius='md', multiple=False, color='cyan',
-        description='Select a pipeline'
-    )
+    show_all = st.checkbox("Show all pipelines, not just ones I have the data for")
+    if show_all:
+        sel_opt = sac.chip(
+            pnames,
+            label='', index=0, align='left',
+            size='md', radius='md', multiple=False, color='cyan',
+            description='Select a pipeline'
+        )
+    else:
+        sel_opt = sac.chip(
+            enabled_pnames,
+            label='', index=0, align='left',
+            size='md', radius='md', multiple=False, color='cyan',
+            description='Select a pipeline'
+        )
     
     row = pipelines.loc[pipelines["Name"] == sel_opt, "Label"]
     sel_label = row.iloc[0] if not row.empty else ''

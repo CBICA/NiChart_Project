@@ -907,8 +907,8 @@ def compute_counts(ctx: dict = {}) -> dict:
     """
     sel_project = st.session_state.project
     project_path = get_path_for_project(sel_project)
-    t1_path = os.path.join(project_path, "t1")
-    flair_path = os.path.join(project_path, "fl")
+    t1_path = os.path.join(project_path, "user_uploaded_t1")
+    flair_path = os.path.join(project_path, "user_uploaded_fl")
     demog_csv_path = os.path.join(project_path, "participants", "participants.csv")
 
     t1_count = get_file_count(t1_path, ['.nii', '.nii.gz'])
@@ -978,7 +978,7 @@ def panel_guided_upload_data():
     else:
         st.info(f"Pipeline {pipeline} was selected, so we'll guide you through the required inputs.")
 
-    pipeline_id = utiltl.get_pipeline_id_by_name(pipeline, harmonized=st.session_state.do_harmonize)
+    pipeline_id = utiltl.get_pipeline_id_by_label(pipeline, harmonized=st.session_state.do_harmonize)
     reqs_set, reqs_params, req_order = utiltl.parse_pipeline_requirements(pipeline_id)
 
     # need to generate counts

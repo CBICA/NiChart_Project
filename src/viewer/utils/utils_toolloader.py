@@ -609,7 +609,44 @@ def parse_pipeline_requirements(pipeline_id):
 
     return reqs_set, req_params, req_order
 
-def check_requirements_met_by_session(pipeline_name):
+def check_requirements_met_nopanel(pipeline_name):
+    label = get_pipeline_label_by_name(pipeline_name)
+    pipeline_id = get_pipeline_id_by_label(label, harmonized=st.session_state.do_harmonize)
+    reqs_set, reqs_params, req_order = parse_pipeline_requirements(pipeline_id)
+
+    counts = utilio.compute_counts()
+    items = utilio.classify_cardinality(req_order, counts)
+    
+    # assume good unless reqs violated
+    result = True
+    blockers = []
+    for item in items:
+        if item.status == 'red':
+            result = False # Not all checks met
+            blockers.append(item)
+        if item.status == 'yellow':
+            if item.name == "needs_T1":
+                blockers.append(f"T1 scan count does not match the number of subjects available in other modalities or the participants CSV {item.note}. Please check that all images were uploaded.")
+            elif item.name == "needs_FLAIR":
+                blockers.append(f"FLAIR scan count does not match the number of subjects available in other modalities or the participants CSV {item.note}. Please check that all images were uploaded.")
+            elif item.name == "needs_demographics":
+                blockers.append(f"Participants CSV row count does not match the number of subjects available in scans {item.note}. Please check that all desired participants have CSV entries.")
+            elif item.name == "csv_has_columns":
+                required_cols = reqs_params.get("csv_has_columns", [])
+                csv_path = os.path.join(st.session_state.paths["project"], 'participants' ,'participants.csv')
+                csv_report = utilcsv.validate_csv(csv_path=csv_path, required_cols=required_cols, mrid_col="MRID")
+                severity = utilio._csv_severity(csv_report)
+                if csv_report.file_ok:
+                    if csv_report.missing_cols:
+                        blockers.append("Participants CSV missing required columns: " + ", ".join(csv_report.missing_cols))
+                else:
+                    blockers.append("Could not locate the participants CSV. Make sure it exists!")
+            else:
+                raise ValueError(f"Requirement {item.name} for pipeline {pipeline_id} has no associated rule. Please submit a bug report.")
+    return result, blockers
+
+
+def check_requirements_met_panel(pipeline_name):
     # That's right, emojis in the code. >:^)
     STATUS_ICON = {"green": "✅", "yellow": "⚠️", "red": "❌"}
     REQ_TO_HUMAN_READABLE = {
@@ -637,9 +674,9 @@ def check_requirements_met_by_session(pipeline_name):
         label = f"{icon} {REQ_TO_HUMAN_READABLE[item.name]} - {item.note}"
         with st.expander(label, expanded=expanded):
             if item.name == "needs_T1":
-                st.write("Please upload T1 images. None were detected.")
+                st.write("Please upload T1 images.")
             elif item.name == "needs_FLAIR":
-                st.write("Please upload FLAIR images. None were detected.")
+                st.write("Please upload FLAIR images.")
             elif item.name == "needs_demographics":
                 pass # Handled above 
             elif item.name == "csv_has_columns":
