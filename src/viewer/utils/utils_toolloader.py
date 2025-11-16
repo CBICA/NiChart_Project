@@ -623,6 +623,24 @@ def check_requirements_met_nopanel(pipeline_name):
     for item in items:
         if item.status == 'red':
             result = False # Not all checks met
+            if item.name == "needs_T1":
+                blockers.append(f"T1 scans appear to be missing. Please check that images were uploaded.")
+            elif item.name == "needs_FLAIR":
+                blockers.append(f"FLAIR scans appear to be missing. Please check that images were uploaded.")
+            elif item.name == "needs_demographics":
+                blockers.append(f"Participants CSV appears to be missing or malformed. Please check that this data was provided.")
+            elif item.name == "csv_has_columns":
+                required_cols = reqs_params.get("csv_has_columns", [])
+                csv_path = os.path.join(st.session_state.paths["project"], 'participants' ,'participants.csv')
+                csv_report = utilcsv.validate_csv(csv_path=csv_path, required_cols=required_cols, mrid_col="MRID")
+                severity = utilio._csv_severity(csv_report)
+                if csv_report.file_ok:
+                    if csv_report.missing_cols:
+                        blockers.append("Participants CSV missing required columns: " + ", ".join(csv_report.missing_cols))
+                else:
+                    blockers.append("Could not locate the participants CSV. Make sure it exists!")
+            else:
+                raise ValueError(f"Requirement {item.name} for pipeline {pipeline_id} has no associated rule. Please submit a bug report.")
             blockers.append(item)
         if item.status == 'yellow':
             if item.name == "needs_T1":
