@@ -720,7 +720,7 @@ def check_requirements_met_panel(pipeline_name):
             note = "All required columns found and passed validation; no issues"
         if severity == "green":
             if count_max_key == "needs_demographics":
-                for key, val in count_diffs:
+                for key, val in count_diffs.items():
                     if val < count_max_value:
                         row_note += f"{REQ_TO_HUMAN_READABLE[key]}: {val} MRIDs are in demographics CSV but not in available.\n"
                         severity = "yellow"
