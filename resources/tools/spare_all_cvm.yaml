@@ -14,8 +14,8 @@ mounts:
   demog_csv:
     path_in_container: /input/demographics.csv
     mode: ro
-  dlmuse_vol:
-    path_in_container: /input/dlmuse_vol.csv
+  merged_dlwmls_dlmuse_csv:
+    path_in_container: /input/merged_dlwmls_dlmuse.csv
     mode: ro
   spare_all_cvm_csv:
     path_in_container: /output/SPARE_CVM_ALL.csv
@@ -31,4 +31,4 @@ resources: # Used to allocate jobs on the cloud. Please be diligent.
 
 container:
   image: cbica/nichart_spare_score_runall:0.0.3
-  command: "-i {dlmuse_vol} -demog {demog_csv} --category cvm -o {spare_all_cvm_csv}"
+  command: "-i {merged_dlwmls_dlmuse_csv} -demog {demog_csv} --category cvm -o {spare_all_cvm_csv}"
