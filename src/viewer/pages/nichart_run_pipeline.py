@@ -187,8 +187,8 @@ def pipeline_runner_menu(enabled_pnames, sel=False):
             alert_placeholder.success(f"Pipeline {pipeline_to_run} finished successfully.")
         except Exception as err: 
             alert_placeholder.error(f"Pipeline {pipeline_to_run} failed with errors. Expand the log boxes for details.")
-            process_status_box.update(state="error", label="Click to view error messages.", expanded=False)
-            errbox.write(traceback.format_exc())
+            process_status_box.update(state="error", label="Pipeline run failed.", expanded=False)
+            errbox.error(traceback.format_exc())
 
 
 
