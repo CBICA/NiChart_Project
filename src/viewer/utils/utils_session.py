@@ -78,6 +78,7 @@ def init_project_folders():
     st.session_state.prj_folders = pd.DataFrame(
         {"dname": dnames, "dtype": dtypes}
     )
+    
 
 def init_scan():
     '''
@@ -115,7 +116,6 @@ def init_session_vars():
     st.session_state.prj_name = 'user_default'
     st.session_state.project = 'user_default'
     #st.session_state.project = 'nichart_project'
-    st.session_state.project = 'TemporaryDataset'
     st.session_state.project_selected_explicitly = False
     
     st.session_state.sel_pipeline = 'dlmuse'
@@ -277,6 +277,7 @@ def init_paths():
         "out_dir": p_out,
         "host_out_dir": None,
         "prj_dir": p_prj,
+        "project": p_prj,
         'target': None
     }
 
