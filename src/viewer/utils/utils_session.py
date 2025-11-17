@@ -113,6 +113,7 @@ def init_session_vars():
 
     #st.session_state.prj_name = 'nichart_project'
     st.session_state.prj_name = 'user_default'
+    st.session_state.project = 'user_default'
     #st.session_state.project = 'nichart_project'
     st.session_state.project = 'TemporaryDataset'
     st.session_state.project_selected_explicitly = False
