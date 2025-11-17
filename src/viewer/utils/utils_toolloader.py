@@ -675,7 +675,7 @@ def check_requirements_met_panel(pipeline_name):
     REQ_TO_HUMAN_READABLE = {
         'needs_T1': 'T1 Scans',
         'needs_FLAIR': 'FLAIR Scans',
-        'needs_demographics': 'Demographic CSV', 
+        'needs_demographics': 'Participants CSV', 
     }
     pipeline = st.session_state.sel_pipeline
     pipeline_id = get_pipeline_id_by_label(pipeline, harmonized=st.session_state.do_harmonize)
@@ -701,7 +701,7 @@ def check_requirements_met_panel(pipeline_name):
             elif item.name == "needs_FLAIR":
                 st.write("Please upload FLAIR images.")
             elif item.name == "needs_demographics":
-                pass # Handled above 
+                st.write("Please upload a participants CSV via the file uploader.")
             elif item.name == "csv_has_columns":
                 pass # Handled in needs_demographics case
             else:
@@ -726,17 +726,17 @@ def check_requirements_met_panel(pipeline_name):
             if count_max_key == "needs_demographics":
                 for key, val in count_diffs.items():
                     if val < count_max_value:
-                        row_note += f"{REQ_TO_HUMAN_READABLE[key]}: {val} MRIDs are in demographics CSV but not in available.\n"
+                        row_note += f"{REQ_TO_HUMAN_READABLE[key]}: {val} MRIDs are in participants CSV but not in available.\n"
                         severity = "yellow"
             else:
                 for key, val in count_diffs:
                     if count_diffs["needs_demographics"] > val:
                         row_note += f"{REQ_TO_HUMAN_READABLE[key]}: {val} CSV entries are present which have no associated scan.\n"
                     elif count_diffs["needs_demographics"] < val:
-                        row_note += f"{REQ_TO_HUMAN_READABLE[key]}: {val} scans are present which have no demographics CSV entry.\n"
+                        row_note += f"{REQ_TO_HUMAN_READABLE[key]}: {val} scans are present which have no participants CSV entry.\n"
 
         csv_expanded = (severity != "green")
-        with st.expander(f"{icon} Demographics CSV - {note}", expanded=csv_expanded):
+        with st.expander(f"{icon} Participants CSV - {note}", expanded=csv_expanded):
             if csv_report.file_ok:
                 if csv_report.missing_cols:
                     st.error("Missing: " + ", ".join(csv_report.missing_cols))

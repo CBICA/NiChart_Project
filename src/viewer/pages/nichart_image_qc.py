@@ -41,10 +41,9 @@ def help_message():
             """
             **How to Use This Page**
 
-            Here you can run quality checking on your images and detect any issues that would prevent our pipelines from executing.
+            Here you can run quality checks on your images and detect any issues that would prevent our pipelines from executing.
 
             We'll check each image in the selected project and give the associated errors below.
-
             """
         )    
 
