@@ -108,8 +108,8 @@ def init_session_vars():
 
     st.session_state.show_settings = False
 
-    st.session_state.layout_label = 'Main'
-    st.session_state.layout = st.container(border=False)
+    #st.session_state.layout_label = 'Main'
+    #st.session_state.layout = st.container(border=False)
 
     st.session_state.layout_label = 'Sidebar'
     st.session_state.layout = st.sidebar

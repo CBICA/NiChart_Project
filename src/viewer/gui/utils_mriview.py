@@ -314,59 +314,55 @@ def panel_set_params(
     """
     Panel to set mriview parameters
     """
-    if st.session_state.plot_settings['flag_hide_settings'] == 'Hide':
-        return
-
     # Add tabs for parameter settings
-    with st.sidebar:
-        with st.expander('Plot settings'):
-            tab = sac.tabs(
-                items=[
-                    sac.TabsItem(label='Data'),
-                    sac.TabsItem(label='Plot Settings')
-                ],
-                size='sm',
-                align='left'
+    with st.session_state.layout:
+        tab = sac.tabs(
+            items=[
+                sac.TabsItem(label='Data'),
+                sac.TabsItem(label='Plot Settings')
+            ],
+            size='sm',
+            align='left'
+        )
+        ## FIXME
+        df_vars = st.session_state.dicts['df_var_groups']
+        if tab == 'Data':
+            # Select roi
+            sel_var = utiluser.select_var_from_group(
+                'Select ROI variable:',
+                df_vars[df_vars.category.isin(['roi'])],
+                plot_params['yvargroup'],
+                plot_params['yvar'],
+                list_vars,
+                flag_add_none = False,
+                dicts_rename = {
+                    'muse': st.session_state.dicts['muse']['ind_to_name']
+                }
             )
-            ## FIXME
-            df_vars = st.session_state.dicts['df_var_groups']
-            if tab == 'Data':
-                # Select roi
-                sel_var = utiluser.select_var_from_group(
-                    'Select ROI variable:',
-                    df_vars[df_vars.category.isin(['roi'])],
-                    plot_params['yvargroup'],
-                    plot_params['yvar'],
-                    list_vars,
-                    flag_add_none = False,
-                    dicts_rename = {
-                        'muse': st.session_state.dicts['muse']['ind_to_name']
-                    }
-                )
-                plot_params['yvargroup'] = sel_var[0]
-                plot_params['yvar'] = sel_var[1]
-                plot_params['roi_indices'] = utilmisc.get_roi_indices(
-                    sel_var[1], 'muse'
-                )
-                st.session_state['sel_roi'] = sel_var[1]
+            plot_params['yvargroup'] = sel_var[0]
+            plot_params['yvar'] = sel_var[1]
+            plot_params['roi_indices'] = utilmisc.get_roi_indices(
+                sel_var[1], 'muse'
+            )
+            st.session_state['sel_roi'] = sel_var[1]
 
-            elif tab == 'Plot Settings':
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    # Create a list of checkbox options
-                    plot_params['list_orient'] = st.multiselect(
-                        "Select viewing planes:",
-                        img_views,
-                        img_views,
-                        label_visibility = 'collapsed'
-                    )
-                with col2:
-                    # View hide overlay
-                    plot_params['is_show_overlay'] = st.checkbox("Show overlay", True, disabled=False)
+        elif tab == 'Plot Settings':
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                # Create a list of checkbox options
+                plot_params['list_orient'] = st.multiselect(
+                    "Select viewing planes:",
+                    img_views,
+                    img_views,
+                    label_visibility = 'collapsed'
+                )
+            with col2:
+                # View hide overlay
+                plot_params['is_show_overlay'] = st.checkbox("Show overlay", True, disabled=False)
 
-                with col3:
-                    # Crop to mask area
-                    plot_params['crop_to_mask'] = st.checkbox("Crop to mask", True, disabled=False)
+            with col3:
+                # Crop to mask area
+                plot_params['crop_to_mask'] = st.checkbox("Crop to mask", True, disabled=False)
 
 def panel_view_seg(ulay, olay, plot_params):
     '''

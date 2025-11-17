@@ -50,7 +50,7 @@ if st.session_state.workflow == 'ref_data':
 else:
     #sel_container = st.sidebar()
     layout = st.sidebar if st.session_state.layout == "Sidebar" else st.container(border=False)
-    utilres.panel_user_data(st.session_state.layout)
+    utilres.panel_user_data()
 
 sac.divider(key='_p0_div2')
 
