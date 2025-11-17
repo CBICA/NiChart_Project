@@ -12,6 +12,7 @@ import utils.utils_data_view as utildv
 from utils.utils_styles import inject_global_css
 import utils.utils_toolloader as utiltl
 import utils.utils_stlogbox as stlogbox
+import traceback
 
 from streamlit_image_select import image_select
 from stqdm import stqdm
@@ -151,6 +152,7 @@ def pipeline_runner_menu(enabled_pnames, sel=False):
         #process_progress_bar_slot = st.empty()
         with st.container():
             st.subheader("Pipeline Logs")
+            errbox = st.expander("Error messages")
             with st.expander("View all pipeline logs"):
                 with st.container():
                     log_committed_box = st.empty()
@@ -184,7 +186,10 @@ def pipeline_runner_menu(enabled_pnames, sel=False):
 
             alert_placeholder.success(f"Pipeline {pipeline_to_run} finished successfully.")
         except Exception as err:
+            st.error()  
             alert_placeholder.error(f"Pipeline {pipeline_to_run} failed with errors. Expand the log boxes for details.")
+            process_status_box.update(state="error", label="Click to view error messages.", expanded=False)
+            errbox.write(traceback.format_exc(), language='text')
 
 
 
