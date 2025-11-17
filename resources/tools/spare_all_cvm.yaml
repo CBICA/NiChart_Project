@@ -1,7 +1,7 @@
 name: spare_all
 description: This tool runs all available SPARE scores in NiChart_SPARE which are available with the given features.
 inputs:
-  dlmuse_vol:
+  merged_dlwmls_dlmuse_csv:
     type: file
   demog_csv:
     type: file

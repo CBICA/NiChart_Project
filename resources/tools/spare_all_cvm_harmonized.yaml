@@ -2,7 +2,7 @@ name: spare_all_harmonized
 description: This tool takes a harmonized DLMUSE CSV (and demographics information) and uses SPARE to produce all available SPARE scores.
 
 inputs:
-  dlmuse_vol_harmonized:
+  merged_dlwmls_dlmuse_csv:
     type: file
   demog_csv:
     type: file
