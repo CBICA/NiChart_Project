@@ -49,5 +49,5 @@ steps:
       merged_dlwmls_dlmuse_csv: ${STUDY}/merged_dlmuse_dlwmls/csv_out.csv
       demog_csv: ${STUDY}/participants/participants.csv
     outputs:
-      spare_all_csv: ${STUDY}/SPARE_ALL_CVM_csv/SPARE_ALL_CVM.csv
+      spare_all_cvm_csv: ${STUDY}/SPARE_ALL_CVM_csv/SPARE_ALL_CVM.csv
     
