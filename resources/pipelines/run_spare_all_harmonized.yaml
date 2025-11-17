@@ -7,6 +7,7 @@ categories:
   - inference
   - classification
   - harmonized
+  - highlighted
 
 requires:
   - needs_T1
@@ -21,6 +22,7 @@ steps:
     outputs:
       dlmuse_seg: ${STUDY}/DLMUSE_seg
       dlmuse_vol: ${STUDY}/DLMUSE_vol
+
   - id: harmonize_dlmuse
     tool: harmonize_dlmuse
     inputs:
@@ -28,10 +30,12 @@ steps:
       covariate_csv: ${STUDY}/participants/participants.csv
     outputs: # Harmonization wrapper expects output location as dir
       dlmuse_vol_harmonized: ${STUDY}/DLMUSE_vol_harmonized
+
   - id: run_spare_all
     tool: spare_all_harmonized # MUST CORRESPOND EXACTLY to a tool in resources/tools dir
     inputs:
-      harmonized_dlmuse_vol: ${STUDY}/DLMUSE_vol_harmonized/DLMUSE_Volumes.csv
+      dlmuse_vol_harmonized: ${STUDY}/DLMUSE_vol_harmonized/DLMUSE_Volumes.csv
+      demog_csv: ${STUDY}/participants/participants.csv
     outputs:
       spare_all_csv: ${STUDY}/SPARE_ALL_csv/SPARE_ALL.csv
     

@@ -44,8 +44,10 @@ def help_message():
             **How to Use This Page**
 
             - Use the left panel to select a pipeline and view the description. (By default, we'll only show you pipelines for which your data meets prerequisites.)
-            - Use the right panel to run the pipeline. You can select to harmonize the results to the reference data, if you have a sufficient number of data points.
             - If you select a pipeline which requires more data, the description of the missing files or fields will appear on the right panel.
+            - Otherwise, use the right panel to run the pipeline. You can select to harmonize the results to the reference data, if you have a sufficient number of data points.
+            - When finished, scroll down and click the navigation arrow to download and view results, or feel free to select and run more pipelines.
+
             """
         )
 
