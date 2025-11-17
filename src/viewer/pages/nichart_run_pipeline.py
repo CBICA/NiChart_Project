@@ -166,20 +166,25 @@ def pipeline_runner_menu(enabled_pnames, sel=False):
         data_dir_on_host = st.session_state.paths["host_out_dir"]
         if data_dir_on_host is not None:
             local_path_remapping[data_dir_locally] = data_dir_on_host
-        result = utiltl.run_pipeline(
-            pipeline_id=pipeline_to_run, ##TODO EDIT THIS
-            global_vars={"STUDY": st.session_state.paths["project"]},
-            execution_mode=execution_mode,
-            pipeline_progress_bar=pipeline_progress_bar,
-            process_progress_bar=process_progress_bar,
-            process_status_box=process_status_box,
-            log=log,
-            metadata_location=os.path.join(st.session_state.paths["project"], "metadata.json"),
-            reuse_cached_steps=skip_steps_when_possible,
-            local_path_remapping=local_path_remapping
-        )
+        try:
+            result = utiltl.run_pipeline(
+                pipeline_id=pipeline_to_run, ##TODO EDIT THIS
+                global_vars={"STUDY": st.session_state.paths["project"]},
+                execution_mode=execution_mode,
+                pipeline_progress_bar=pipeline_progress_bar,
+                process_progress_bar=process_progress_bar,
+                process_status_box=process_status_box,
+                log=log,
+                metadata_location=os.path.join(st.session_state.paths["project"], "metadata.json"),
+                reuse_cached_steps=skip_steps_when_possible,
+                local_path_remapping=local_path_remapping
+            )
 
-        alert_placeholder.success(f"Pipeline {pipeline_to_run} finished successfully.")
+            alert_placeholder.success(f"Pipeline {pipeline_to_run} finished successfully.")
+        except Exception as err:
+            alert_placeholder.error(f"Pipeline {pipeline_to_run} failed with errors. Expand the log boxes for details.")
+
+
 
     pass
 
