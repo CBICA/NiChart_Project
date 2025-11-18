@@ -8,12 +8,13 @@ import utils.utils_session as utilss
 from PIL import Image
 from st_pages import add_page_title, get_nav_from_toml
 
+
+utilpg.config_page()
+
 nicon = Image.open("../resources/nichart1.png")
 
 # Init session state
 utilss.init_session_state()
-
-utilpg.config_page()
 
 from utils.utils_logger import setup_logger
 logger = setup_logger()
@@ -60,10 +61,10 @@ pages = {
         st.Page("pages/nichart_ref_data.py", title="Reference Data"),
     ],    
     "Actions": [
-        st.Page("pages/nichart_upload_data.py", title="Data"),
-        st.Page("pages/nichart_run_pipeline.py", title="Pipelines"),
-        st.Page("pages/nichart_download_results.py", title="Download Results"),
-        st.Page("pages/nichart_view_results.py", title="View Results"),
+        st.Page("pages/nichart_data.py", title="Data"),
+        st.Page("pages/nichart_pipelines.py", title="Pipelines"),
+        st.Page("pages/nichart_results.py", title="Results"),
+        st.Page("pages/explore_nichart.py", title="Explore"),
     ],
     #"Pipelines": [
         #st.Page("pages/sel_pipelines.py", title="Select Pipelines"),

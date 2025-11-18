@@ -314,11 +314,8 @@ def panel_set_params(
     """
     Panel to set mriview parameters
     """
-    if st.session_state.plot_settings['flag_hide_settings'] == 'Hide':
-        return
-
     # Add tabs for parameter settings
-    with st.expander():
+    with st.session_state.layout:
         tab = sac.tabs(
             items=[
                 sac.TabsItem(label='Data'),

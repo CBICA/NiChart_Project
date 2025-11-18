@@ -1,7 +1,7 @@
 
 import utils.utils_pages as utilpg
 # Page config should be called for each page
-# utilpg.config_page() # Apparently not. Just call it once in NiChartProject.py.
+# utilpg.config_page()
 
 import os
 import numpy as np
@@ -51,7 +51,7 @@ sel = sac.chip(
 ) 
 flag_disabled = sel is None
 
-sac.divider(key='_p0_div1')
+sac.divider()
 
 sel_but = sac.chip(
     [sac.ChipItem(label = '', icon='arrow-right', disabled=flag_disabled)],

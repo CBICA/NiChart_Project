@@ -108,6 +108,22 @@ def get_subfolders(path: str) -> list:
             subdirs.append(item)
     return sorted(subdirs)
 
+def zip_folders(in_dir, folders, output_zip):
+    """
+    Zip multiple folders into a single zip file.
+    """
+    with zipfile.ZipFile(output_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for folder in folders:
+            folder_path = os.path.join(in_dir, folder)
+            for root, _, files in os.walk(folder_path):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    # Preserve folder name structure inside the zip
+                    arcname = os.path.join(folder, os.path.relpath(file_path, folder_path))
+                    zipf.write(file_path, arcname)
+
+    print(f"Created zip: {output_zip}")
+
 def zip_folder(in_dir: str, f_out: str) -> Optional[bytes]:
     '''
     Zips a folder and its contents.

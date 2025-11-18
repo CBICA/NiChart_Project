@@ -54,34 +54,47 @@ def upload_data():
 #################################
 ## Main
 
-with st.container(horizontal=True, horizontal_alignment='center'):
+with st.container(horizontal=True, horizontal_alignment="center"):
     st.markdown("<h4 style=color:#3a3a88;'>Upload Data\n\n</h1>", unsafe_allow_html=True, width='content')
 
 if st.session_state.workflow == 'ref_data':
-    st.warning('No data upload required for reference data! Please skip to next step')
+    st.info('''
+        You’ve selected the **Reference Data** workflow. This option doesn’t require data upload.
+        - If you meant to analyze your data, please go back and choose a different workflow.
+        - Otherwise, continue to the next step to explore the reference values.
+        '''
+    )
+
+    sac.divider()
+    
+    sel_but = sac.chip(
+        [
+            sac.ChipItem(label = '', icon='arrow-right', disabled=False)
+        ],
+        label='', align='center', color='#aaeeaa', size='xl', return_index=True
+    )
+        
+    if sel_but == 0:
+        st.switch_page(f'pages/nichart_results.py')
 
 else:
     upload_data()
 
-sac.divider()
+    sac.divider()
 
-sel_but = sac.chip(
-    [
-        sac.ChipItem(label = 'Single-Subject Intro', icon='arrow-left', disabled=False),
-        sac.ChipItem(label = 'Select and Run Pipeline', icon='arrow-right', disabled=False)
-    ],
-    label='', align='center', color='#aaeeaa', size='xl', return_index=True
-)
-    
-if sel_but == 0:
-    st.switch_page(f'pages/nichart_{st.session_state.workflow}.py')
+    sel_but = sac.chip(
+        [
+            sac.ChipItem(label = '', icon='arrow-left', disabled=False),
+            sac.ChipItem(label = '', icon='arrow-right', disabled=False)
+        ],
+        label='', align='center', color='#aaeeaa', size='xl', return_index=True
+    )
+        
+    if sel_but == 0:
+        st.switch_page(f'pages/nichart_{st.session_state.workflow}.py')
 
-if sel_but == 1:
-    if st.session_state.workflow == 'ref_data':
-        st.switch_page("pages/nichart_view_results.py")
-
-    else:
-        st.switch_page("pages/nichart_run_pipeline.py")
+    if sel_but == 1:
+        st.switch_page("pages/nichart_pipelines.py")
 
 # Show session state vars
 if st.session_state.mode == 'debug':
