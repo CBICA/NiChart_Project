@@ -109,7 +109,7 @@ def view_dlmuse_segmentation():
 def select_task():
     with st.session_state.layout:
         sel_task = st.selectbox(
-            'I want to:',
+            'Select a task',
             ['Download Results', 'View Results'],
             index=0
         )
@@ -118,7 +118,7 @@ def select_task():
 def select_pipeline():
     with st.session_state.layout:
         sel_pipe = st.selectbox(
-            'Pipeline:',
+            'Select a pipeline:',
             ['dlmuse', 'dlwmls'],
             index=0
         )
@@ -127,7 +127,7 @@ def select_pipeline():
 def select_dtype():
     with st.session_state.layout:
         sel_dtype = st.selectbox(
-            'Data type:',
+            'Select result data type:',
             ['ROI Volumes', 'Segmentation'],
             index=0
         )
