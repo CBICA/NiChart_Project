@@ -20,7 +20,6 @@ logger.debug('Page: Run Pipelines')
 
 # Page config should be called for each page
 utilpg.config_page()
-utilpg.show_menu()
 utilpg.set_global_style()
 
 if 'instantiated' not in st.session_state or not st.session_state.instantiated:
@@ -106,39 +105,14 @@ def panel_run_pipeline():
     sel_method = st.session_state.sel_pipeline
     st.success(f'Selected pipeline: {sel_method}')
     harmonize = False
-    not_harmonizable = ['cclnmf', 'dlwmls', 'spare-ba-image', 'surrealgan']
-    if sel_method not in not_harmonizable:
+    harmonizable = ['spare-ad', 'spare-ba', 'dlmuse', 'dlmuse-dlwmls', 'spare-smoking', 'spare-hypertension', 'spare-obesity', 'spare-diabetes']
+    if sel_method in harmonizable:
         harmonize = st.checkbox("Harmonize to reference data? (Requires >= 30 scans)")
     ## TODO: Retrieve dynamically/match between front end and toolloader code
     ## This a nice and simple placeholder for now
     
-    sel_pipeline_to_id = {
-        'dlmuse': 'run_dlmuse',
-        'spare-ad': 'run_spare_ad',
-        'spare-ba': 'run_spare_ba',
-        'spare-ba-image': 'run_bascores',
-        'dlwmls': 'run_dlwmls',
-        'spare-cvm': None,
-        'surrealgan': 'run_predcrd_surrealgan',
-        'synthseg': None,
-        'cclnmf': 'run_cclnmf',
-        ## Add additional lines here ({sel_pipeline value} : {name of pipeline yaml} )
-    }
-    if harmonize:
-        sel_pipeline_to_id = {
-            'dlmuse': 'run_dlmuse_harmonized',
-            'dlwmls': 'run_dlwmls',
-            'spare-ad': 'run_spare_ad_harmonized',
-            'spare-ba': 'run_spare_ba_harmonized',
-            'spare-ba-image': 'run_bascores',
-            'spare-cvm': None,
-            'surrealgan': 'run_predcrd_surrealgan',
-            'synthseg': None,
-            'cclnmf': 'run_cclnmf',
-            ## Add additional lines here ({sel_pipeline value} : {name of pipeline yaml} )
-        }
+    pipeline_to_run = tl.get_pipeline_id_by_label(sel_method, harmonized=harmonize)
 
-    pipeline_to_run = sel_pipeline_to_id.get(sel_method, None)
     if pipeline_to_run is None:
         st.error("The currently selected pipeline doesn't have an associated tool configuration. Please submit a bug report!")
         return

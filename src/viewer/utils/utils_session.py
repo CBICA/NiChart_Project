@@ -10,6 +10,7 @@ import streamlit as st
 import utils.utils_rois as utilroi
 import utils.utils_processes as utilproc
 import utils.utils_cmaps as utilcmap
+import utils.utils_toolloader as utiltl
 import os
 from PIL import Image
 import streamlit_antd_components as sac
@@ -20,12 +21,13 @@ def disp_selections():
     '''
     Show user selections
     '''
-    with st.sidebar:
-        sac.divider(label='Selections', icon = 'person', align='center', color='gray')
-        if st.session_state.project is not None:
-            st.markdown(f'`Project Name: {st.session_state.project}`')
-        if st.session_state.sel_pipeline is not None:
-            st.markdown(f'`Pipeline: {st.session_state.sel_pipeline}`')
+    #with st.sidebar:
+        #sac.divider(label='Selections', icon = 'person', align='center', color='gray')
+        #if st.session_state.prj_name is not None:
+            #st.markdown(f'`Project Name: {st.session_state.prj_name}`')
+        #if st.session_state.sel_pipeline is not None:
+            #st.markdown(f'`Pipeline: {st.session_state.sel_pipeline}`')
+    print('FIXME: This is bypassed for now ...')
     
 def disp_session_state():
     '''
@@ -37,13 +39,12 @@ def disp_session_state():
     def update_val():
         st.session_state['debug']['flag_show'] = st.session_state['_debug_flag_show']
 
-    with st.sidebar:
-        sac.divider(label='Debug', icon = 'gear',  align='center', color='gray')
-        st.checkbox(
-            'Show Session State',
-            key = '_debug_flag_show',
-            on_change = update_val
-        )
+    sac.divider(label='Debug', icon = 'gear',  align='center', color='gray')
+    st.checkbox(
+        'Show Session State',
+        key = '_debug_flag_show',
+        on_change = update_val
+    )
     
     if st.session_state['debug']['flag_show']:
         with st.container(border=True):
@@ -62,6 +63,7 @@ def disp_session_state():
             for sel_var in st.session_state['debug']['sel_vars']:
                 st.markdown('➤ ' + sel_var + ':')
                 st.write(st.session_state[sel_var])
+    print('FIXME: This is bypassed for now ...')
 
 def init_project_folders():
     '''
@@ -73,24 +75,51 @@ def init_project_folders():
     dtypes = [
         "in_img", "in_img", "in_csv", "out_img", "out_csv"
     ]
-    st.session_state.project_folders = pd.DataFrame(
+    st.session_state.prj_folders = pd.DataFrame(
         {"dname": dnames, "dtype": dtypes}
     )
+    
+
+def init_scan():
+    '''
+    Set scan info
+    '''
+    st.session_state.curr_scan = None
+
+def init_participant():
+    '''
+    Set participant info
+    '''
+    st.session_state.participant = {
+        'mrid' : None,
+        'age' : None,
+        'sex' : None,
+    }
 
 def init_session_vars():
     '''
     Set initial values for session variables
     '''
+    
+    init_participant()
+    init_scan()
+    
     ## Misc variables
-    # st.session_state.mode = 'release'
-    st.session_state.mode = 'debug'
+    st.session_state.mode = 'release'
+    # st.session_state.mode = 'debug'
+
+    st.session_state.skip_survey = True
 
     st.session_state.sel_add_button = None
 
+    #st.session_state.prj_name = 'nichart_project'
+    st.session_state.prj_name = 'user_default'
+    st.session_state.project = 'user_default'
     #st.session_state.project = 'nichart_project'
-    st.session_state.project = 'NiChart_Demo1'
+    st.session_state.project_selected_explicitly = False
     
     st.session_state.sel_pipeline = 'dlmuse'
+    st.session_state.pipeline_selected_explicitly = False
 
     st.session_state.sel_mrid = None
     st.session_state.sel_roi = None
@@ -99,6 +128,11 @@ def init_session_vars():
         'red', 'pink', 'grape', 'violet', 'indigo', 'blue',
         'cyan', 'teal', 'green', 'lime', 'yellow', 'orange',
     ]
+    st.session_state.pipeline_categories = utiltl.overall_pipeline_category_listing()
+    st.session_state.pipeline_requirements = utiltl.overall_pipeline_requirements_listing()
+    st.session_state.harmonizable_pipelines = st.session_state.pipeline_categories['harmonized']
+    st.session_state.do_harmonize = False
+    st.session_state.nifti_dicom_upload_mode = None
 
     st.session_state.list_mods = ["T1", "T2", "FL", "DTI", "fMRI"]
     st.session_state.params = {
@@ -220,7 +254,7 @@ def init_paths():
     
     # Paths specific to project
     p_prj = os.path.join(
-        p_out, st.session_state.project
+        p_out, st.session_state.prj_name
     )
     if not os.path.exists(p_prj):
         os.makedirs(p_prj)
@@ -242,6 +276,7 @@ def init_paths():
         "file_search_dir": "",
         "out_dir": p_out,
         "host_out_dir": None,
+        "prj_dir": p_prj,
         "project": p_prj,
         'target': None
     }
@@ -270,12 +305,13 @@ def init_paths():
     st.session_state.paths["file_search_dir"] = st.session_state.paths["init"]
     ############    
 
-def init_dicom_vars() -> None:
+def reset_dicoms() -> None:
     '''
-    Set dicom variables
+    Reset dicom variables
     '''
     st.session_state.dicoms = {
         'list_series': None,
+        'sel_serie': None,
         'num_dicom_scans': 0,
         'df_dicoms': None
     }
@@ -375,8 +411,6 @@ def init_pipeline_definitions() -> None:
     )
     st.session_state.pipelines = pd.read_csv(plist)
     
-    print(st.session_state.pipelines)
-
 def init_reference_data() -> None:
     indir = os.path.join(
         st.session_state.paths['resources'], 'reference_data', 'sample1'
@@ -470,7 +504,7 @@ def update_project(sel_project) -> None:
     if sel_project is None:
         return
 
-    if sel_project == st.session_state.project:
+    if sel_project == st.session_state.prj_name:
         return
 
     # Create project dir
@@ -481,14 +515,23 @@ def update_project(sel_project) -> None:
     try:
         if not os.path.exists(p_prj):
             os.makedirs(p_prj)
-            st.success(f'Created folder {p_prj}')
+            st.toast(f'Created folder {sel_project}')
             time.sleep(1)
     except:
         st.error(f'Could not create project folder: {p_prj}')
         return
 
     # Set project name
+    st.session_state.prj_name = sel_project
+    st.session_state.paths['prj_dir'] = p_prj
+    
+    reset_dicoms()
+    init_scan()
+    init_participant()
+    
+    st.toast(f'Updated project folder {sel_project}')
     st.session_state.project = sel_project
+    st.session_state.project_selected_explicitly = True
     st.session_state.paths['project'] = p_prj
 
 # Function to parse AWS login (if available)
@@ -575,7 +618,7 @@ def init_session_state() -> None:
         st.session_state.paths["file_search_dir"] = st.session_state.paths["init"]
 
         # Update project variables
-        update_project(st.session_state.project)
+        update_project(st.session_state.prj_name)
 
         # Copy test data to user folder
         copy_test_folders
@@ -585,7 +628,7 @@ def init_session_state() -> None:
         init_pipeline_definitions()
         init_reference_data()
         init_plot_vars()
-        init_dicom_vars()
+        reset_dicoms()
         
         # Set flag
         st.session_state.instantiated = True

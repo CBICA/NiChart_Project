@@ -1,4 +1,4 @@
-### CCLNMF: NMF based Brain Aging Suptypes
+### CCLNMF: NMF based Brain Aging Subtypes
 
 #### Source:
 

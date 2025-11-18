@@ -1,3 +1,4 @@
+
 import utils.utils_pages as utilpg
 # Page config should be called for each page
 utilpg.config_page()
@@ -19,146 +20,61 @@ from utils.utils_logger import setup_logger
 
 import streamlit_antd_components as sac
 
-utilpg.show_menu()
-utilpg.add_sidebar_options()
+import streamlit as st
+from utils.nav import top_nav
+
+print("--- RERUN: HOME PAGE STARTING ---") 
+
+# Page config should be called for each page
+utilpg.config_page()
 utilpg.set_global_style()
 
-logger = setup_logger()
-
-logger.debug('Start of Home Screen!')
-
-#def styled_text(text):
-    #return f'<span style="color:darkgreen; font-weight:bold;">{text}</span>'
-
-def view_overview():
-    with st.container(border=True):
-        st.markdown(
-            f'NiChart is a {utilmisc.styled_text('free, open-source framework')} built specifically for deriving {utilmisc.styled_text('machine learning biomarkers')} from {utilmisc.styled_text('MRI imaging data')}', unsafe_allow_html=True
-        )
-        st.image("../resources/nichart1.png", width=300)
-        st.markdown(
-            f'- NiChart platform offers tools for {utilmisc.styled_text('image processing')} and {utilmisc.styled_text('data analysis')}', unsafe_allow_html=True
-        )
-        st.markdown(
-            f'- Users can extract {utilmisc.styled_text('imaging phenotypes')} and {utilmisc.styled_text('machine learning (ML) indices')} of disease and aging', unsafe_allow_html=True
-        )
-        st.markdown(
-            f'- Pre-trained {utilmisc.styled_text('ML models')} allow users to quantify complex brain changes and compare results against {utilmisc.styled_text('normative and disease-specific reference ranges')}', unsafe_allow_html=True
-        )
-
-def view_quick_start():
-    with st.container(border=True):
-        st.markdown(
-            f'###### Explore NiChart {utilmisc.styled_text('(No Data Upload Required)')}', unsafe_allow_html=True
-        )
-        st.markdown(
-            f'- Visualize distributions of imaging variables and biomarkers (pre-computed using NiChart reference data)', unsafe_allow_html=True
-        )
-
-        st.markdown(
-            '''
-            ###### Apply NiChart to Your Data
-            
-            - Select Your Pipeline
-            
-            - Upload Your Data
-            
-            - Run pipeline
-            
-            - View / Download Your Results
-            ''', unsafe_allow_html=True
-        )
-
-def view_links():
-    with st.container(border=True):
-        st.markdown(
-            """
-            - Check out [NiChart Web page](https://neuroimagingchart.com)
-            - Visit [NiChart GitHub](https://github.com/CBICA/NiChart_Project)
-            - Jump into [our documentation](https://cbica.github.io/NiChart_Project)
-            - Ask a question in [our community discussions](https://github.com/CBICA/NiChart_Project/discussions)
-            """
-            , unsafe_allow_html=True
-        )
-        st.markdown("And fill out our 1-minute user demographics survey to gain **permanent, free** access to NiChart Cloud!")
-        take_survey = st.button("Take Survey")
-        if take_survey:
-            st.switch_page("pages/survey.py")
-
-def view_installation():
-    with st.container(border=True):
-    #with st.expander(label='Installation'):
-        st.markdown(
-            """
-            - You can install NiChart Project desktop
-            ```
-            pip install NiChart_Project
-            ```
-
-            - Run the application
-            ```
-            cd src/viewer
-            streamlit run NiChartProject.py
-            ```
-
-            - Alternatively, the cloud app can be launched at
-            ```
-            https://cloud.neuroimagingchart.com
-            ```
-            """
-            , unsafe_allow_html=True
-        )
-if 'instantiated' not in st.session_state or not st.session_state.instantiated:
-    utilses.init_session_state()
-
-# Redirect users to survey page until it is completed or otherwise temporarily skipped
-if not utils_survey.is_survey_completed():
-    if 'skip_survey' in st.session_state:
-        if not st.session_state.skip_survey:
-            st.switch_page("pages/survey.py")
-    else:
-        st.switch_page("pages/survey.py")
-
-utils_alerts.render_alert()
-
+# Inject custom CSS once
 st.markdown(
     """
-    ### Welcome to NiChart Project!!!
-    """
-    , unsafe_allow_html=True
+    <style>
+    .centered-text {
+        text-align: center;
+        font-size: 80px;
+        color: #53AB23;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
 )
 
-tab = sac.tabs(
+#st.markdown('<h1 class="centered-text">Welcome to NiChart Project</p>', unsafe_allow_html=True)
+st.markdown("<h2 style='text-align:center; color:#5e5fad;'>Welcome to NiChart Project\n\n</h1>", unsafe_allow_html=True)
+st.markdown("<br>", unsafe_allow_html=True)
+st.markdown("<h5 style='text-align:center; color:#3a3a88;'>What would you like to explore today?\n\n</h1>", unsafe_allow_html=True)
+
+sel = sac.chip(
     items=[
-        sac.TabsItem(label='Overview'),
-        sac.TabsItem(label='Quick Start'),
-        sac.TabsItem(label='Links'),
-        sac.TabsItem(label='Installation'),
-        #sac.TabsItem(label='Test'),
-    ],
-    size='lg',
-    align='left'
+        sac.ChipItem(label='What is NiChart?'),
+        sac.ChipItem(label='Analyze Single Subject MRI Data'),
+        sac.ChipItem(label='Analyze a Group of Scans'),
+        sac.ChipItem(label='Explore Results Only (No MRI Needed!)'),
+    ], label='', align='center', size='lg', radius='lg', direction='vertical', color='cyan'
+) 
+flag_disabled = sel is None
+
+sel_but = sac.chip(
+    [sac.ChipItem(label='Go!', disabled=flag_disabled)],
+    label='', align='center', color='#aaeeaa'
 )
-
-
-if tab == 'Overview':
-    view_overview()
-
-if tab == 'Quick Start':
-    view_quick_start()
-
-if tab == 'Links':
-    view_links()
-
-if tab == 'Installation':
-    view_installation()
-
-#if tab == 'Test':
-    #view_test()
-
-# Show selections
-utilses.disp_selections()
     
-# Show session state vars
-if st.session_state.mode == 'debug':
-    utilses.disp_session_state()
+if sel_but == 'Go!':
+    print(f'Selected page {sel}')
+
+    if sel == 'What is NiChart?':
+        st.switch_page("pages/nichart_info.py")
+
+    if sel == 'Analyze Single Subject MRI Data':
+        st.switch_page("pages/nichart_single_subject.py")
+
+    if sel == 'Analyze a Group of Scans':
+        st.switch_page("pages/nichart_multi_subject.py")
+
+    if sel == 'Explore Results Only (No MRI Needed!)':
+        st.switch_page("pages/nichart_ref_data.py")
+

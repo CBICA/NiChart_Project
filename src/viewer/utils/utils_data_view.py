@@ -80,7 +80,9 @@ def build_folder_tree(
             ext = os.path.splitext(name)[1].lower()
             tags = []
             if ext == '.csv':
-                tags.append(sac.Tag('CSV', color='red'))
+                tags.append(sac.Tag('CSV', color='purple'))
+            elif ext in ['.nii.gz', '.nii']:
+                tags.append(sac.Tag('NIfTI', color='blue'))
 
             tree_items.append(
                 sac.TreeItem(
@@ -109,39 +111,68 @@ def build_folder_tree(
 
     return tree_items, list_paths
 
+
+@st.dialog("File viewer", width='medium')
+def show_sel_item(fname):
+        if fname.endswith('.csv'):
+            try:
+                df_tmp = pd.read_csv(fname)
+                st.info(f'Data file: {fname}')
+                st.dataframe(df_tmp)
+            except:
+                st.warning(f'Could not read csv file: {fname}')
+
 def data_overview(in_dir):
     '''
     Show files in data folder
     '''
-    if os.path.exists(in_dir):
-        st.markdown(f"##### 📂 `{in_dir}`")
-        tree_items, list_paths = build_folder_tree(in_dir, st.session_state.out_dirs)
-        selected = sac.tree(
-            items=tree_items,
-            #label='Project Folder',
-            index=None,
-            align='left', size='xl', icon='table',
-            checkbox=False,
-            #checkbox_strict = True,
-            open_all = False,
-            return_index = True
-            #height=400
-        )
-        
-        if selected:
-            if isinstance(selected, list):
-                selected = selected[0]
-            fname = list_paths[selected]
-            if fname.endswith('.csv'):
-                try:
-                    df_tmp = pd.read_csv(fname)
-                    st.info(f'Data file: {fname}')
-                    st.dataframe(df_tmp)
-                except:
-                    st.warning(f'Could not read csv file: {fname}')
+    st.markdown("##### Project Folder:")
 
-    else:
-        st.error(f"Folder `{in_dir}` not found.")
+    sel_opt = st.radio(
+        label = 'Select',
+        options = ['View', 'Switch', 'Delete Files'],
+        horizontal = True,
+        label_visibility="collapsed"
+    )
+    
+    if sel_opt == 'View':
+
+        dname = os.path.basename(in_dir)
+        st.markdown(f"##### 📂 `{dname}`")
+
+        if os.path.exists(in_dir):
+            tree_items, list_paths = build_folder_tree(in_dir, st.session_state.out_dirs)
+            selected = sac.tree(
+                items=tree_items,
+                #label='Project Folder',
+                index=None,
+                align='left', size='xl', icon='table',
+                checkbox=False,
+                #checkbox_strict = True,
+                open_all = True,
+                return_index = True,
+                height=200
+            )
+        
+            #if selected:
+                #if isinstance(selected, list):
+                    #selected = selected[0]
+                #fname = list_paths[selected]
+                #show_sel_item(fname)
+
+        else:
+            st.error(f"Folder `{in_dir}` not found.")
+
+def view_subj_list(in_dir):
+    fname = 'demog.csv'
+    fpath = os.path.join(in_dir, fname)
+
+    st.markdown("##### Subject List:")
+    
+    st.markdown(f"##### 📂 `{fname}`")
+    if os.path.exists(fpath):
+        df = pd.load_csv(fpath)
+        st.dataframe(df)
 
 def select_files(in_dir):
     '''

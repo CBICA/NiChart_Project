@@ -3,6 +3,7 @@ import utils.utils_pages as utilpg
 import utils.utils_session as utilses
 import utils.utils_cmaps as utilcmap
 import utils.utils_containers as utilcontainer
+import utils.utils_gpu as utilgpu
 import os
 
 from utils.utils_logger import setup_logger
@@ -62,6 +63,10 @@ def panel_plot_colors():
 def panel_container_management():
     utilcontainer.panel_manage_containers()
 
+def panel_gpu_settings():
+    utilgpu.panel_select_gpu()
+
+
 #st.info(
 st.markdown(
     """
@@ -74,6 +79,7 @@ tab = sac.tabs(
         sac.TabsItem(label='Plot Colors'),
         sac.TabsItem(label='Misc'),
         sac.TabsItem(label='Manage Containers'),
+        sac.TabsItem(label='GPU'),
     ],
     size='lg',
     align='left'
@@ -90,6 +96,10 @@ elif tab == 'Misc':
 elif tab == 'Manage Containers':
     with st.container(border=True):
         panel_container_management()
+
+elif tab == 'GPU':
+    with st.container(border=True):
+        panel_gpu_settings()
 
 # Show selections
 utilses.disp_selections()
