@@ -113,32 +113,29 @@ if st.session_state.workflow == 'ref_data':
 
     sac.divider()
     
-    sel_but = sac.chip(
-        [
-            sac.ChipItem(label = '', icon='arrow-right', disabled=False)
-        ],
-        label='', align='center', color='#aaeeaa', size='xl', return_index=True
-    )
+    with st.container(horizontal=True, horizontal_alignment="center"):
+        #b1 = st.button('', icon=':material/arrow_back:', help = 'Pipeline')
+        b2 = st.button('', icon=':material/arrow_forward:', help = 'Results')
         
-    if sel_but == 0:
-        st.switch_page(f'pages/nichart_results.py')
+    if b2:
+        st.switch_page("pages/nichart_results.py")
+        
 
 else:
     pipeline_menu()
-    sac.divider(key='_p0_div1')
-    sel_but = sac.chip(
-        [
-            sac.ChipItem(label = '', icon='arrow-left', disabled=False),
-            sac.ChipItem(label = '', icon='arrow-right', disabled=False)
-        ],
-        label='', align='center', color='#aaeeaa', size='xl', return_index=True
-    )
 
-    if sel_but == 0:
+    sac.divider(key='_p0_div1')
+
+    with st.container(horizontal=True, horizontal_alignment="center"):
+        b1 = st.button('', icon=':material/arrow_back:', help = 'Data')
+        b2 = st.button('', icon=':material/arrow_forward:', help = 'Results')
+        
+    if b1:
         st.switch_page("pages/nichart_data.py")
 
-    if sel_but == 1:
+    if b2:
         st.switch_page("pages/nichart_results.py")
+        
 
 # Show session state vars
 if st.session_state.mode == 'debug':

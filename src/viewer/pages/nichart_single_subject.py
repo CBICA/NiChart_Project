@@ -52,13 +52,22 @@ with cols[1]:
 
 sac.divider(key='_p0_div1')
     
-sel_opt = sac.chip(
-    [sac.ChipItem(label = '', icon='arrow-right', disabled=False)],
-    label='', align='center', color='#aaeeaa', size='xl'
-)
+#sel_opt = sac.chip(
+    #[sac.ChipItem(label = '', icon='arrow-right', disabled=False)],
+    #label='', align='center', color='#aaeeaa', size='xl'
+#)
     
-if sel_opt == '':
+#if sel_opt == '':
+    #st.switch_page("pages/nichart_data.py")
+
+with st.container(horizontal=True, horizontal_alignment="center"):
+    #b1 = st.button('', icon=':material/arrow_back:', help = 'Pipeline')
+    b2 = st.button('', icon=':material/arrow_forward:', help = 'Data')
+    #b3 = st.button('', icon=':material/settings:')
+    
+if b2:
     st.switch_page("pages/nichart_data.py")
+    
 
 # Show session state vars
 if st.session_state.mode == 'debug':

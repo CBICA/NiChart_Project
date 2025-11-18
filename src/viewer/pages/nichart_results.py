@@ -39,42 +39,33 @@ if 'instantiated' not in st.session_state or not st.session_state.instantiated:
 ## Show setting button
 #utilset.settings_button()
 
-sac.divider(key='_p0_div1')
+#sac.divider(key='_p0_div1')
 
-st.markdown("<h4 style='text-align:center; color:#3a3a88;'>Results\n\n</h1>", unsafe_allow_html=True)
+#st.markdown("<h4 style='text-align:center; color:#3a3a88;'>Results\n\n</h1>", unsafe_allow_html=True)
 
 
 if st.session_state.workflow == 'ref_data':
     utilres.panel_ref_data()
 
 else:
-    #sel_container = st.sidebar()
-    layout = st.sidebar if st.session_state.layout == "Sidebar" else st.container(border=False)
     utilres.panel_user_data()
 
 sac.divider(key='_p0_div2')
 
-sel_but = sac.chip(
-    [
-        sac.ChipItem(label = '', icon='arrow-left', disabled=False),
-        sac.ChipItem(label = '', icon='square', disabled=False),
-        sac.ChipItem(label = '', icon='house', disabled=False),
-        sac.ChipItem(label = '', icon='gear', disabled=False),
-    ],
-    key='_chip_navig', label='', align='center', color='#aaeeaa', size='xl',
-    multiple=False,
-    return_index=True, index=1
-)
-if sel_but == 0:
+with st.container(horizontal=True, horizontal_alignment="center"):
+    b1 = st.button('', icon=':material/arrow_back:', help = 'Pipeline')
+    b2 = st.button('', icon=':material/arrow_forward:', help = 'Home')
+    b3 = st.button('', icon=':material/settings:')
+    
+if b1:
     st.switch_page("pages/nichart_pipelines.py")
 
-if sel_but == 2:
+if b2:
     st.switch_page("pages/nichart_home.py")
     
-if sel_but == 3:
-#if st.button('Settings'):
+if b3:
     utilset.edit_settings()
-
+    
 # Show session state vars
 if st.session_state.mode == 'debug':
     utilses.disp_session_state()

@@ -67,34 +67,51 @@ if st.session_state.workflow == 'ref_data':
 
     sac.divider()
     
-    sel_but = sac.chip(
-        [
-            sac.ChipItem(label = '', icon='arrow-right', disabled=False)
-        ],
-        label='', align='center', color='#aaeeaa', size='xl', return_index=True
-    )
+    #sel_but = sac.chip(
+        #[
+            #sac.ChipItem(label = '', icon='arrow-right', disabled=False)
+        #],
+        #label='', align='center', color='#aaeeaa', size='xl', return_index=True
+    #)
         
-    if sel_but == 0:
-        st.switch_page(f'pages/nichart_results.py')
+    #if sel_but == 0:
+        #st.switch_page(f'pages/nichart_results.py')
+
+    with st.container(horizontal=True, horizontal_alignment="center"):
+        b2 = st.button('', icon=':material/arrow_forward:', help = 'Results')
+        
+    if b2:
+        st.switch_page("pages/nichart_results.py")
 
 else:
     upload_data()
 
     sac.divider()
 
-    sel_but = sac.chip(
-        [
-            sac.ChipItem(label = '', icon='arrow-left', disabled=False),
-            sac.ChipItem(label = '', icon='arrow-right', disabled=False)
-        ],
-        label='', align='center', color='#aaeeaa', size='xl', return_index=True
-    )
+    #sel_but = sac.chip(
+        #[
+            #sac.ChipItem(label = '', icon='arrow-left', disabled=False),
+            #sac.ChipItem(label = '', icon='arrow-right', disabled=False)
+        #],
+        #label='', align='center', color='#aaeeaa', size='xl', return_index=True
+    #)
         
-    if sel_but == 0:
+    #if sel_but == 0:
+        #st.switch_page(f'pages/nichart_{st.session_state.workflow}.py')
+
+    #if sel_but == 1:
+        #st.switch_page("pages/nichart_pipelines.py")
+
+    with st.container(horizontal=True, horizontal_alignment="center"):
+        b1 = st.button('', icon=':material/arrow_back:', help = 'Info')
+        b2 = st.button('', icon=':material/arrow_forward:', help = 'Pipeline')
+        
+    if b1:
         st.switch_page(f'pages/nichart_{st.session_state.workflow}.py')
 
-    if sel_but == 1:
+    if b2:
         st.switch_page("pages/nichart_pipelines.py")
+        
 
 # Show session state vars
 if st.session_state.mode == 'debug':
