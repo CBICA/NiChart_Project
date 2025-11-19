@@ -19,7 +19,7 @@ from utils.utils_logger import setup_logger
 import streamlit_antd_components as sac
 
 # Page config should be called for each page
-utilpg.config_page()
+#utilpg.config_page()
 utilpg.set_global_style()
 
 logger = setup_logger()

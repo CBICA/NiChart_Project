@@ -2,6 +2,15 @@ pipeline_name: Image-to-Biomarker Brain Aging Scores
 description: |
   Brain age regression pipeline starting from input T1 scans. Also outputs attention maps.
 
+categories:
+  - image-to-biomarker
+  - brain-age
+  - regression
+  - inference
+
+requires:
+  - needs_T1
+
 steps:
   - id: run_dlmuse
     tool: nichart_dlmuse

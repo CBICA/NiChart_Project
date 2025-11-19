@@ -1,21 +1,16 @@
-### DLWMLS: Automatic Segmentation of White Matter Lesions
+### NiChart DLWMLS: Regional + Lesion Segmentation from T1 + FLAIR Brain Scans 
+This pipeline combines DLMUSE and DLWMLS. T1 and FLAIR images are aligned and the T1 is segmented via DLMUSE. White matter lesions in FLAIR are segmented via DLWMLS. Both segmentations are used to calculate regionally localized lesion volumes.
 
 #### Source:
 
-https://github.com/CBICA/DLWMLS
-
-#### Description
-
-DLWMLS uses a trained nnUNet model to compute the segmentation of white matter lesions
+https://github.com/CBICA/NiChart_DLMUSE
+https://github.com/CBICA/NiChart_DLWMLS
 
 #### Input
 
-- FL-weighted scan (Nifti, Required)
-- T1-weighted scan (Nifti, Optional)
-
+- T1-weighted scans (Nifti)
+- FL-weighted scans (Nifti)
 
 #### Output
 
-- Segmentation labels (Nifti)
-- Lesion volumes in ROIs (csv, if T1 scan is provided)
-
+-  Regionally localized lesion volumes (CSV)

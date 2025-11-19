@@ -24,7 +24,7 @@ logger.debug("--- STARTING: Single Subject ---")
 inject_global_css()
 
 # Page config should be called for each page
-utilpg.config_page()
+#utilpg.config_page()
 utilpg.set_global_style()
 
 # Set data type
