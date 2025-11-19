@@ -24,7 +24,7 @@ logger.debug("--- STARTING: Upload Data ---")
 inject_global_css()
 
 # Page config should be called for each page
-utilpg.config_page()
+#utilpg.config_page()
 utilpg.set_global_style()
 
 if 'instantiated' not in st.session_state or not st.session_state.instantiated:
@@ -54,7 +54,7 @@ def upload_data():
 #################################
 ## Main
 
-with st.container(horizontal=True, horizontal_alignment="center"):
+with st.container(horizontal=True, horizontal_alignment='center'):
     st.markdown("<h4 style=color:#3a3a88;'>Upload Data\n\n</h1>", unsafe_allow_html=True, width='content')
 
 if st.session_state.workflow == 'ref_data':
@@ -67,8 +67,8 @@ sac.divider()
 
 sel_but = sac.chip(
     [
-        sac.ChipItem(label = '', icon='arrow-left', disabled=False),
-        sac.ChipItem(label = '', icon='arrow-right', disabled=False)
+        sac.ChipItem(label = 'Single-Subject Intro', icon='arrow-left', disabled=False),
+        sac.ChipItem(label = 'Select and Run Pipeline', icon='arrow-right', disabled=False)
     ],
     label='', align='center', color='#aaeeaa', size='xl', return_index=True
 )

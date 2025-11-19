@@ -5,6 +5,7 @@
 #DLMUSE
 #NiChart_DLMUSE>=1.0.9
 #DLWMLS @ git+https://github.com/CBICA/DLWMLS
+NiChart_common_utils
 
 # general python dependencies
 torch==2.2.1
@@ -20,7 +21,7 @@ graphviz
 dicom2nifti
 
 # streamlit
-streamlit==1.40.0
+streamlit==1.50.0
 st_pages==1.0.1
 streamlit_plotly_events
 streamlit-base-extras

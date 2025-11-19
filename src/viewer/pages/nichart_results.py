@@ -29,7 +29,7 @@ logger.debug('Page: Select Pipelines')
 inject_global_css()
 
 # Page config should be called for each page
-utilpg.config_page()
+#utilpg.config_page()
 utilpg.set_global_style()
 
 if 'instantiated' not in st.session_state or not st.session_state.instantiated:

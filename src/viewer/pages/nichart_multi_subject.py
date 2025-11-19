@@ -24,7 +24,7 @@ logger.debug('Page: Select Pipelines')
 inject_global_css()
 
 # Page config should be called for each page
-utilpg.config_page()
+#utilpg.config_page()
 utilpg.set_global_style()
 
 # Set data type
@@ -32,6 +32,8 @@ st.session_state.workflow = 'multi_subject'
 
 if 'instantiated' not in st.session_state or not st.session_state.instantiated:
     utilses.init_session_state()
+
+st.session_state.subject_type = 'multi'
 
 st.markdown("<h5 style='text-align:center; color:#3a3a88;'>Multi-Subject Dataset Analysis\n\n</h1>", unsafe_allow_html=True)
 
