@@ -93,7 +93,7 @@ def panel_view_ref():
     results_overview()
         
     # Show selections
-    utilses.disp_selections()
+    #utilses.disp_selections()
 
 def panel_view_user():
     #st.info(

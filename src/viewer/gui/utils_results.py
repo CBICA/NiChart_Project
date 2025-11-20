@@ -23,7 +23,10 @@ import streamlit_antd_components as sac
 import streamlit as st
 from stqdm import stqdm
 
-def view_dlmuse_volumes():
+from utils.utils_logger import setup_logger
+logger = setup_logger()
+
+def view_dlmuse_volumes(layout):
     """
     View dlmuse volumes
     """
@@ -40,51 +43,25 @@ def view_dlmuse_volumes():
     # Set centile selections
     st.session_state.plot_params['centile_values'] = st.session_state.plot_settings['centile_trace_types']
 
-    with st.session_state.layout:
-        sac.divider(label='Viewing Options', align='center', color='gray')
-        utilpl.user_add_plots(
-            st.session_state.plot_params
-        )
-    utilpl.panel_set_params_centile_plot(
-        st.session_state.plot_params, var_groups_data, pipeline, list_vars
-    )
-    utilpl.panel_show_centile_plots()
-
-    st.write()
-
-def view_dlmuse_centiles():
-    """
-    View dlmuse centiles
-    """
-    ## FIXME (list of rois from data file to init listbox selections)
-    fname=os.path.join(
-        st.session_state.paths['resources'], 'reference_data', 'centiles', 'dlmuse_centiles_CN.csv'
-    ) 
-    df = pd.read_csv(fname)
-    list_vars = ['Age', 'Sex'] + df.VarName.unique().tolist()
-
-    var_groups_data = ['roi']
-    pipeline = 'dlmuse'
-
-    # Set centile selections
-    st.session_state.plot_params['centile_values'] = st.session_state.plot_settings['centile_trace_types']
-
-    with st.session_state.layout:
-        sac.divider(label='Viewing Options', align='center', color='gray')
+    with layout:
+        sac.divider(label='Plot Controls', align='center', color='gray')
 
         utilpl.user_add_plots(
             st.session_state.plot_params
         )
-        #utilpl.panel_set_params_centile_plot(
-            #st.session_state.plot_params, var_groups_data, pipeline, list_vars
-        #)
 
-    utilpl.panel_show_centile_plots()
+        sac.divider(label='Plot Settings', align='center', color='gray')
+
+        utilpl.panel_set_params_centile_plot(
+            st.session_state.plot_params, var_groups_data, pipeline, list_vars
+        )
+
+    utilpl.panel_show_plots()
 
     st.write()
 
 
-def view_dlmuse_segmentation():
+def view_dlmuse_segmentation(layout):
     """
     View dlmuse segmentations
     """
@@ -97,7 +74,7 @@ def view_dlmuse_segmentation():
     ulay = st.session_state.ref_data["t1"]
     olay = st.session_state.ref_data["dlmuse"]        
 
-    with st.session_state.layout:
+    with layout:
         sac.divider(label='Viewing Options', align='center', color='gray')
         
     # Set params
@@ -106,28 +83,47 @@ def view_dlmuse_segmentation():
     # Show figures
     utilmri.panel_view_seg(ulay, olay, st.session_state.plot_params)
 
-def select_task():
-    with st.session_state.layout:
+def select_task(layout):
+    with layout:
         sel_task = st.selectbox(
-            'Select a task',
+            'Task:',
             ['Download Results', 'View Results'],
             index=0
         )
     return sel_task
 
-def select_pipeline():
-    with st.session_state.layout:
+
+def select_main_data(layout):
+    with layout:
+        sel_mdata = st.selectbox(
+            'Data:',
+            ['None', 'Current Project', 'Sample Study 1', 'Sample Study 2'],
+            index=0
+        )
+    return sel_mdata
+
+def select_ref_data(layout):
+    with layout:
+        sel_rdata = st.selectbox(
+            'Reference data:',
+            ['None', 'CN', 'CN Females', 'CN Males'],
+            index=0
+        )
+    return sel_rdata
+
+def select_pipeline(layout):
+    with layout:
         sel_pipe = st.selectbox(
-            'Select a pipeline:',
+            'Pipeline:',
             ['dlmuse', 'dlwmls'],
             index=0
         )
     return sel_pipe
 
-def select_dtype():
-    with st.session_state.layout:
+def select_dtype(layout):
+    with layout:
         sel_dtype = st.selectbox(
-            'Select result data type:',
+            'Result type:',
             ['ROI Volumes', 'Segmentation'],
             index=0
         )
@@ -175,26 +171,47 @@ def panel_download():
                 st.download_button(f"Download", file_download, 'nichart_results.zip')
                 os.remove(out_zip)
 
-def panel_user_data():
-    sel_task = select_task()
+def panel_user_data(layout):
+
+    logger.debug('    Function: panel_ref_data')
+
+    with layout:
+        sac.divider(label='Data Files', align='center', color='gray')
+
+    sel_task = select_task(layout)
     if sel_task == 'Download Results':
         panel_download()
     elif sel_task == 'View Results':
-        sel_pipe = select_pipeline()
+        sel_pipe = select_pipeline(layout)
         if sel_pipe == 'dlmuse': 
-            sel_dtype = select_dtype()
+            sel_dtype = select_dtype(layout)
             if sel_dtype == 'ROI Volumes':
-                view_dlmuse_volumes()
+                view_dlmuse_volumes(layout)
             elif sel_dtype == 'Segmentation':
-                view_dlmuse_segmentation()
+                view_dlmuse_segmentation(layout)
         
-def panel_ref_data():
-    sel_pipe = select_pipeline()
+def panel_ref_data(layout):
+
+    logger.debug('    Function: panel_ref_data')
+
+    with layout:
+        sac.divider(label='Data Files', align='center', color='gray')
+        
+    sel_mdata = select_main_data(layout)
+
+    sel_rdata = select_ref_data(layout)
+    if sel_rdata != 'None':
+        fname = os.path.join(
+            st.session_state.paths['centiles'],
+            'dlmuse_centiles_CN.csv'
+        )
+        st.session_state.plot_data['df_cent'] = utilio.read_csv(fname)
+
+    sel_pipe = select_pipeline(layout)
     if sel_pipe == 'dlmuse':
-        view_dlmuse_centiles()
+        view_dlmuse_volumes(layout)
 
     elif sel_pipe == 'dlwmls':
         st.warning('Viewer not implemented for dlwmls')
-        #view_dlwmls_centiles()
 
 

@@ -10,21 +10,21 @@ import streamlit_antd_components as sac
 @st.dialog('Settings', width='medium')
 def edit_settings():
     with st.form('Select:'):
-        sel_layout_label = st.radio("Choose layout:", ["Main", "Sidebar"], horizontal=True)
-
+        list_opts = ["Main", "Sidebar"]
+        sel_ind = list_opts.index(st.session_state.layout_plots) 
+        sel_layout = st.radio(
+            "Choose layout for plotting parameters:",
+            list_opts,
+            index = sel_ind,
+            horizontal=True
+        )
         submitted = st.form_submit_button('Submit')
         
     if submitted:
-        if sel_layout_label == "Sidebar":
-            layout = st.sidebar
-        else:
-            layout = st.container(border=False)
-        st.session_state.sel_layout_label = sel_layout_label
-        st.session_state.layout = layout
-        st.toast('Selected Layout: {sel_layout_label}')
-
-        if st.session_state.get('_chip_navig'):
-            st.session_state._chip_navig = 1
+        st.session_state.layout_plots = sel_layout
+        st.toast('Selected Layout: {sel_layout}')
+        #if st.session_state.get('_chip_navig'):
+            #st.session_state._chip_navig = 1
         st.rerun()
 
 #def settings_button():
@@ -37,3 +37,4 @@ def edit_settings():
     #)
     #if but_set == 'Settings':
         #edit_settings()
+

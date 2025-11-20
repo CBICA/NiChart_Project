@@ -63,7 +63,7 @@ def disp_session_state():
             for sel_var in st.session_state['debug']['sel_vars']:
                 st.markdown('➤ ' + sel_var + ':')
                 st.write(st.session_state[sel_var])
-    print('FIXME: This is bypassed for now ...')
+    #print('FIXME: This is bypassed for now ...')
 
 def init_project_folders():
     '''
@@ -106,15 +106,18 @@ def init_session_vars():
     
     ## Misc variables
     st.session_state.mode = 'release'
-    #st.session_state.mode = 'debug'
+    st.session_state.mode = 'debug'
 
     st.session_state.show_settings = False
 
-    #st.session_state.layout_label = 'Main'
-    #st.session_state.layout = st.container(border=False)
+    main_container = st.empty()
+    sidebar_container = st.sidebar
 
-    st.session_state.layout_label = 'Sidebar'
-    st.session_state.layout = st.sidebar
+    st.session_state.layout_plots = 'Main'
+    st.session_state.layout_plots = 'Sidebar'
+
+    #st.session_state.layout_label_plots = 'Sidebar'
+    #st.session_state.layout = st.sidebar
     
     st.session_state.skip_survey = True
 

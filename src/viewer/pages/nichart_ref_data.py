@@ -19,7 +19,7 @@ from utils.utils_logger import setup_logger
 import streamlit_antd_components as sac
 
 logger = setup_logger()
-logger.debug("--- STARTING: Single Subject ---")
+logger.debug("--- STARTING: Ref Data ---")
 
 inject_global_css()
 

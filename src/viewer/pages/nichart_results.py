@@ -24,7 +24,7 @@ import utils.utils_settings as utilset
 import streamlit_antd_components as sac
 
 logger = setup_logger()
-logger.debug('Page: Select Pipelines')
+logger.debug('Page: Results')
 
 inject_global_css()
 
@@ -43,12 +43,17 @@ if 'instantiated' not in st.session_state or not st.session_state.instantiated:
 
 #st.markdown("<h4 style='text-align:center; color:#3a3a88;'>Results\n\n</h1>", unsafe_allow_html=True)
 
+# Set plot params layout
+if st.session_state.layout_plots == 'Main':
+    layout = st.container(border=False)
+else:
+    layout = st.sidebar
 
 if st.session_state.workflow == 'ref_data':
-    utilres.panel_ref_data()
+    utilres.panel_ref_data(layout)
 
 else:
-    utilres.panel_user_data()
+    utilres.panel_user_data(layout)
 
 sac.divider(key='_p0_div2')
 
@@ -68,7 +73,8 @@ if b3:
     
 # Show session state vars
 if st.session_state.mode == 'debug':
-    utilses.disp_session_state()
+    with st.sidebar:
+        utilses.disp_session_state()
 
 
 
