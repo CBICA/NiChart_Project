@@ -52,9 +52,10 @@ def view_dlmuse_volumes(layout):
 
         sac.divider(label='Plot Settings', align='center', color='gray')
 
-        utilpl.panel_set_params_centile_plot(
-            st.session_state.plot_params, var_groups_data, pipeline, list_vars
-        )
+        #utilpl.panel_set_params_centile_plot(
+            #st.session_state.plot_params, var_groups_data, pipeline, list_vars
+        #)
+        utilpl.set_plot_params()
 
     utilpl.panel_show_plots()
 
@@ -78,56 +79,47 @@ def view_dlmuse_segmentation(layout):
         sac.divider(label='Viewing Options', align='center', color='gray')
         
     # Set params
-    utilmri.panel_set_params(st.session_state.plot_params, ['roi'], 'muse', list_vars)
+    utilmri.panel_set_params(layout, st.session_state.plot_params, ['roi'], 'muse', list_vars)
 
     # Show figures
     utilmri.panel_view_seg(ulay, olay, st.session_state.plot_params)
 
-def select_task(layout):
-    with layout:
-        sel_task = st.selectbox(
-            'Task:',
-            ['Download Results', 'View Results'],
-            index=0
-        )
-    return sel_task
+def safe_index(lst, value, default=None):
+    try:
+        return lst.index(value)
+    except ValueError:
+        return default
 
 
-def select_main_data(layout):
+def select_from_list(layout, list_opts, var_name, hdr):
+    sel_ind = safe_index(list_opts, st.session_state.get(var_name))
     with layout:
-        sel_mdata = st.selectbox(
-            'Data:',
-            ['None', 'Current Project', 'Sample Study 1', 'Sample Study 2'],
-            index=0
-        )
-    return sel_mdata
+        sel_opt = st.selectbox(hdr, list_opts, key=var_name, index=sel_ind)
+    return st.session_state[var_name]
 
 def select_ref_data(layout):
+    list_opts = ['None', 'CN', 'CN Females', 'CN Males'],
+    sel_ind = safe_index(list_opts, st.session_state.ref_type)
     with layout:
-        sel_rdata = st.selectbox(
-            'Reference data:',
-            ['None', 'CN', 'CN Females', 'CN Males'],
-            index=0
-        )
-    return sel_rdata
+        sel_opt = st.selectbox('Data:', list_opts, index=sel_ind)
+    st.session_state.ref_type = sel_opt
+    return sel_opt
 
 def select_pipeline(layout):
+    list_opts = ['dlmuse', 'dlwmls']
+    sel_ind = safe_index(list_opts, st.session_state.sel_pipeline)
     with layout:
-        sel_pipe = st.selectbox(
-            'Pipeline:',
-            ['dlmuse', 'dlwmls'],
-            index=0
-        )
-    return sel_pipe
+        sel_opt = st.selectbox('Data:', list_opts, index=sel_ind)
+    st.session_state.sel_pipeline = sel_opt
+    return sel_opt
 
-def select_dtype(layout):
+def select_res_type(layout):
+    list_opts = ['Quantitative', 'Image'],
+    sel_ind = safe_index(list_opts, st.session_state.res_type)
     with layout:
-        sel_dtype = st.selectbox(
-            'Result type:',
-            ['ROI Volumes', 'Segmentation'],
-            index=0
-        )
-    return sel_dtype
+        sel_opt = st.selectbox('Data:', list_opts, index=sel_ind)
+    st.session_state.res_type = sel_opt
+    return sel_opt
 
 def panel_download():
     '''
@@ -171,47 +163,87 @@ def panel_download():
                 st.download_button(f"Download", file_download, 'nichart_results.zip')
                 os.remove(out_zip)
 
-def panel_user_data(layout):
-
-    logger.debug('    Function: panel_ref_data')
+def panel_results(layout):
+    logger.debug('    Function: panel_results')
 
     with layout:
-        sac.divider(label='Data Files', align='center', color='gray')
+        sac.divider(label='General Options', align='center', color='gray')
 
-    sel_task = select_task(layout)
+    sel_task = select_from_list(
+        layout, ['Download Results', 'View Results'], '_res_task', 'Task:'
+    )
+
     if sel_task == 'Download Results':
         panel_download()
+        
     elif sel_task == 'View Results':
-        sel_pipe = select_pipeline(layout)
-        if sel_pipe == 'dlmuse': 
-            sel_dtype = select_dtype(layout)
-            if sel_dtype == 'ROI Volumes':
-                view_dlmuse_volumes(layout)
-            elif sel_dtype == 'Segmentation':
-                view_dlmuse_segmentation(layout)
         
-def panel_ref_data(layout):
-
-    logger.debug('    Function: panel_ref_data')
-
-    with layout:
-        sac.divider(label='Data Files', align='center', color='gray')
-        
-    sel_mdata = select_main_data(layout)
-
-    sel_rdata = select_ref_data(layout)
-    if sel_rdata != 'None':
-        fname = os.path.join(
-            st.session_state.paths['centiles'],
-            'dlmuse_centiles_CN.csv'
+        sel_pipe = select_from_list(
+            layout, ['dlmuse', 'dlwmls'], '_res_pipeline', 'Pipeline:'
         )
-        st.session_state.plot_data['df_cent'] = utilio.read_csv(fname)
 
-    sel_pipe = select_pipeline(layout)
-    if sel_pipe == 'dlmuse':
-        view_dlmuse_volumes(layout)
+        sel_mdata = select_from_list(
+            layout, ['None', 'user_output', 'Sample1'], '_res_mdata', 'Main Data:'
+        )
 
-    elif sel_pipe == 'dlwmls':
-        st.warning('Viewer not implemented for dlwmls')
+        sel_rdata = select_from_list(
+            layout, ['None', 'CN', 'CN Females'], '_res_rdata', 'Reference Data:'
+        )
+
+        if sel_pipe == 'dlmuse':
+
+            sel_rtype = select_from_list(
+                layout, ['Quantitative', 'Image'], '_res_rtype', 'Result Type:'
+            )
+            
+            if sel_rtype == 'Image':
+                view_dlmuse_segmentation(layout)
+                
+            elif sel_rtype == 'Quantitative':
+                view_dlmuse_volumes(layout)
+
+#def panel_user_data(layout):
+    #logger.debug('    Function: panel_ref_data')
+
+    #with layout:
+        #sac.divider(label='Task Options', align='center', color='gray')
+
+    #sel_task = select_task(layout)
+
+
+    #if sel_task == 'Download Results':
+        #panel_download()
+    #elif sel_task == 'View Results':
+        #sel_dtype = select_dtype(layout)
+        #if sel_dtype == 'Image':
+            #sel_pipe = select_pipeline(layout)
+            #if sel_pipe == 'dlmuse':
+                #view_dlmuse_segmentation(layout)
+        #elif sel_dtype == 'Quantitative':
+            #view_dlmuse_volumes(layout)
+            
+        
+#def panel_ref_data(layout):
+    #logger.debug('    Function: panel_ref_data')
+
+    #with layout:
+        #sac.divider(label='Data Files', align='center', color='gray')
+        
+    #sel_opt = select_main_data(layout)
+
+    #sel_rdata = select_ref_data(layout)
+    #if sel_rdata != 'None':
+        #fname = os.path.join(
+            #st.session_state.paths['centiles'],
+            #'dlmuse_centiles_CN.csv'
+        #)
+        #st.session_state.plot_data['df_cent'] = utilio.read_csv(fname)
+
+    #sel_pipe = select_pipeline(layout)
+    #if sel_pipe == 'dlmuse':
+        #view_dlmuse_volumes(layout)
+
+    #elif sel_pipe == 'dlwmls':
+        #st.warning('Viewer not implemented for dlwmls')
 
 

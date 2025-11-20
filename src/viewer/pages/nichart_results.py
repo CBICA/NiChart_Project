@@ -49,11 +49,13 @@ if st.session_state.layout_plots == 'Main':
 else:
     layout = st.sidebar
 
-if st.session_state.workflow == 'ref_data':
-    utilres.panel_ref_data(layout)
+utilres.panel_results(layout)
 
-else:
-    utilres.panel_user_data(layout)
+#if st.session_state.workflow == 'ref_data':
+    #utilres.panel_results(layout)
+
+#else:
+    #utilres.panel_results(layout)
 
 sac.divider(key='_p0_div2')
 

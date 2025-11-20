@@ -791,6 +791,24 @@ def panel_set_params_centile_plot(plot_params, var_groups_data, pipeline, list_v
         plot_params['traces'] = plot_params['traces'] + plot_params['centile_values']
         
 
+        
+def set_plot_params():
+    """
+    Show panel for selecting plotting parameters
+    """    
+    # Add tabs for parameter settings
+    tab = sac.tabs(
+        items=[
+            sac.TabsItem(label='Data'),
+            sac.TabsItem(label='Variables'),
+            sac.TabsItem(label='Traces'),
+            sac.TabsItem(label='Plot Controls'),
+            sac.TabsItem(label='Settings'),
+        ],
+        size='sm',
+        align='left'
+    )
+
 def panel_show_plots():
     '''
     Panel to show plots

@@ -110,14 +110,12 @@ def init_session_vars():
 
     st.session_state.show_settings = False
 
-    main_container = st.empty()
-    sidebar_container = st.sidebar
-
     st.session_state.layout_plots = 'Main'
     st.session_state.layout_plots = 'Sidebar'
 
-    #st.session_state.layout_label_plots = 'Sidebar'
-    #st.session_state.layout = st.sidebar
+    st.session_state.results_task = None    # Task for results: Download or View
+    st.session_state.ref_type = None    # Type of ref data: CN, CN Females, etc.
+    st.session_state.res_type = None    # Type of results: Quantitative or Image
     
     st.session_state.skip_survey = True
 
@@ -131,8 +129,8 @@ def init_session_vars():
     #st.session_state.project = 'nichart_project'
     st.session_state.project_selected_explicitly = False
     
-    st.session_state.sel_pipeline = 'dlmuse'
-    st.session_state.pipeline_selected_explicitly = False
+    st.session_state.sel_pipeline = None
+    st.session_state.pipeline_selected_explicitly = True
 
     st.session_state.sel_mrid = None
     st.session_state.sel_roi = None
@@ -342,12 +340,16 @@ def init_plot_vars() -> None:
 
     # Plot data
     st.session_state.plot_data = {
+        'csv_data': None,
+        'csv_cent': None,
         'df_data': None,
         'df_cent': None
     }
 
     # Plot settings
     st.session_state.plot_settings = {
+        "res_type": None,       # Quantitative or Image
+        "pipeline": None,
         "flag_hide_settings": 'Show',
         "flag_hide_legend": 'Show',
         "flag_hide_mri": 'Show',

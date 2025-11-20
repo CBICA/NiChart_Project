@@ -309,13 +309,13 @@ def panel_select_var(sel_var_groups, plot_params, var_type, add_none = False):
         plot_params[var_type] = st.session_state[f'_{var_type}']
 
 def panel_set_params(
-    plot_params, var_groups_data, atlas, list_vars, flag_hide_settings = False
+    layout, plot_params, var_groups_data, atlas, list_vars, flag_hide_settings = False
 ):
     """
     Panel to set mriview parameters
     """
     # Add tabs for parameter settings
-    with st.session_state.layout:
+    with layout:
         tab = sac.tabs(
             items=[
                 sac.TabsItem(label='Data'),
