@@ -40,13 +40,13 @@ The development of NiChart is guided by several core principles:
 Running NiChart
 ---------------
 
-The NiChart front-end application currently supports Windows and Linux. Windows has been tested on recent versions of Windows 10 and Windows 11. Linux has been tested on Ubuntu 24.04 but should work on other distributions.
-
 We provide both a locally installable **desktop application** and a **cloud-based application**. 
 
-The `NiChart cloud application <https://neuroimagingchart.com/portal>`_, hosted via Amazon Web Services (AWS), deploys scalable infrastructure which hosts the *NiChart* tools as a standard web application accessible via the user’s web browser. **No payment or installation is needed to use the tool**. 
+The `NiChart cloud application <https://neuroimagingchart.com/portal>`_, hosted via Amazon Web Services (AWS), deploys scalable infrastructure which hosts the *NiChart* tools as a standard web application accessible via the user’s web browser. **No payment or installation is needed to use the tool**. You don't need any special hardware to run this.
 
 However, as a web application, NiChart Cloud requires you to upload your data to the private cloud-based NiChart server for us to process it. **We do not access or use your data** for any other purpose than to run your requested processing and/or provide support to you as a user, and we regularly automatically delete user data after inactivity. However, we recognize that data privacy agreements and related concerns may nevertheless restrict use of the cloud application. If that applies to you, we suggest that you install the desktop application. We provide detailed installation instructions on the `Installation page <./INSTALLATION.md>`_. 
+
+The NiChart front-end desktop application currently supports Windows and Linux. Windows has been tested on recent versions of Windows 10 and Windows 11. Linux has been tested on Ubuntu 24.04 but should work on other distributions. An NVIDIA GPU supporting CUDA is required to run the algorithms. If you need to run the algorithms with alternative GPU hardware or on CPU, please use the standalone tools.
 
 **Want to switch between versions?** The cloud and desktop applications are unified at the code level through the use of the Python library `Streamlit <https://streamlit.io>`_. Consequently, the user experience is nearly identical between the cloud and desktop applications. 
 
