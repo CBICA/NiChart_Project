@@ -20,7 +20,7 @@ reference distributions for comparison to a broader population.
 .. image:: https://raw.githubusercontent.com/CBICA/NiChart_Project/refs/heads/ge-dev/resources/images/NiChart_Flowchart_v2.svg
   :alt: NiChart Flowchart
 
-This repo contains the NiChart application front-end, which ties together all individual tools in the NiChart ecosystem and provides an easy-to-use interface for processing your data.
+This repo contains the NiChart application front-end, which ties together all individual tools in the NiChart ecosystem and provides an easy-to-use interface for processing your data. For other tools, see the linked repositories.
 
 The Basics
 ----------
@@ -40,6 +40,7 @@ The development of NiChart is guided by several core principles:
 Running NiChart
 ---------------
 
+The NiChart front-end application currently supports Windows and Linux. Windows has been tested on recent versions of Windows 10 and Windows 11. Linux has been tested on Ubuntu 24.04 but should work on other distributions.
 
 We provide both a locally installable **desktop application** and a **cloud-based application**. 
 
