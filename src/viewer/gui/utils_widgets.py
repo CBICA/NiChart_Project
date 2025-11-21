@@ -15,6 +15,8 @@ import utils.utils_traces as utiltr
 
 import streamlit_antd_components as sac
 
+## Generic functions
+
 def safe_index(lst, value, default=None):
     try:
         return lst.index(value)
@@ -28,13 +30,15 @@ def my_selectbox(list_opts, var_name, hdr):
     This is a wrapper to resolve this issue
     '''
     sel_ind = safe_index(list_opts, st.session_state.get(var_name))
-    sel_opt = st.selectbox(hdr, list_opts, key=var_name, index=sel_ind)
+    
+    if hdr is None:
+        sel_opt = st.selectbox('', list_opts, key=var_name, index=sel_ind, label_visibility='collapsed')
+    else:
+        sel_opt = st.selectbox(hdr, list_opts, key=var_name, index=sel_ind)
+        
     return st.session_state[var_name]
 
-def selectbox_twolevel(
-    df_vars, list_vars,
-    vname1, vname2,
-    flag_add_none = False, dicts_rename = None):
+def selectbox_twolevel(df_vars, list_vars, vname1, vname2, flag_add_none = False, dicts_rename = None):
     '''
     Selectbox with two levels to select a variable grouped in categories
     Also renames variables (e.g. roi indices to names)
@@ -61,9 +65,33 @@ def selectbox_twolevel(
         roi_dict[tmp_group] = tmp_list
 
     with st.container(horizontal=True, horizontal_alignment="left"):
-        sel1 = my_selectbox(list(roi_dict), vname1, 'Group:')
+        sel1 = my_selectbox(list(roi_dict), vname1, None)
         if sel1 is None:
-            return
-        sel2 = my_selectbox(roi_dict[sel1], vname2, 'Var:')
+            sel2 = my_selectbox([], vname2, None)
+        else:
+            sel2 = my_selectbox(roi_dict[sel1], vname2, None)
 
     return sel2
+
+
+## Specific Widgets
+
+def select_muse_roi(list_vars):
+    """
+    Panel to set mriview parameters
+    """
+    df_vars = st.session_state.dicts['df_var_groups']
+    
+    # Select roi
+    st.write('ROI Name')
+    sel_var = selectbox_twolevel(
+        df_vars[df_vars.category.isin(['roi'])],
+        list_vars,
+        '_sel_roi_group',
+        '_sel_roi_name',
+        flag_add_none = False,
+        dicts_rename = {
+            'muse': st.session_state.dicts['muse']['ind_to_name']
+        }
+    )
+    st.session_state['sel_roi'] = sel_var
