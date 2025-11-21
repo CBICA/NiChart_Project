@@ -26,6 +26,23 @@ from stqdm import stqdm
 from utils.utils_logger import setup_logger
 logger = setup_logger()
 
+def safe_index(lst, value, default=None):
+    try:
+        return lst.index(value)
+    except ValueError:
+        return default
+
+def select_from_list(layout, list_opts, var_name, hdr):
+    '''
+    Generic selection box 
+    For a variable (var_name) initiated with the given list (list_opts)
+    Variable is saved in session_state (used as the key for the select box)
+    '''
+    sel_ind = safe_index(list_opts, st.session_state.get(var_name))
+    with layout:
+        sel_opt = st.selectbox(hdr, list_opts, key=var_name, index=sel_ind)
+    return st.session_state[var_name]
+
 def view_dlmuse_volumes(layout):
     """
     View dlmuse volumes
@@ -62,64 +79,74 @@ def view_dlmuse_volumes(layout):
     st.write()
 
 
-def view_dlmuse_segmentation(layout):
+def view_segmentation(layout, pipeline):
     """
-    View dlmuse segmentations
+    View segmentations
     """
-    fname=os.path.join(
-        st.session_state.paths['resources'], 'reference_data', 'centiles', 'dlmuse_centiles_CN.csv'
-    ) 
-    df = pd.read_csv(fname)
-    list_vars = ['Age', 'Sex'] + df.VarName.unique().tolist()
-    
-    ulay = st.session_state.ref_data["t1"]
-    olay = st.session_state.ref_data["dlmuse"]        
 
     with layout:
-        sac.divider(label='Viewing Options', align='center', color='gray')
+        sac.divider(label='Data', align='center', color='gray')
+
+    if pipeline == 'dlmuse':
+        fname = os.path.join(
+            st.session_state.paths['project'], 'dlmuse', 'dlmuse_vol.csv'
+        )
+        df = pd.read_csv(fname)
+
+        # Rename columns if dict for data exists
+        df = df.rename(columns = st.session_state.dicts['muse']['ind_to_name'])
+
+        list_vars = df.columns.unique().tolist()
+        list_mrids = df.MRID.sort_values().tolist()
         
-    # Set params
-    utilmri.panel_set_params(layout, st.session_state.plot_params, ['roi'], 'muse', list_vars)
+        sel_mrid = select_from_list(
+            layout, list_mrids, '_sel_mrid', 'Subject:'
+        )
+        
+        if sel_mrid is None:
+            return
+        
+        #ulay = st.session_state.ref_data["t1"]
+        #olay = st.session_state.ref_data["dlmuse"]
+        
+        ulay = os.path.join(
+            st.session_state.paths['project'], 't1', f'{sel_mrid}_T1.nii.gz'
+        )
+        olay = os.path.join(
+            st.session_state.paths['project'], 'dlmuse', f'{sel_mrid}_T1_DLMUSE.nii.gz'
+        )
+        
+        if not os.path.exists(ulay):
+            st.warning('Image not found!')
+            return
+        
+        if not os.path.exists(olay):
+            st.warning('Image not found - olay!')
+            return
 
-    # Show figures
-    utilmri.panel_view_seg(ulay, olay, st.session_state.plot_params)
+        with layout:
+            sac.divider(label='Viewing Options', align='center', color='gray')
+            
+        # Set params
+        utilmri.panel_set_params(
+            layout, st.session_state.plot_params, ['roi'], 'muse', list_vars
+        )
 
-def safe_index(lst, value, default=None):
-    try:
-        return lst.index(value)
-    except ValueError:
-        return default
+        # Show figures
+        utilmri.panel_view_seg(ulay, olay, st.session_state.plot_params)
 
+    elif pipeline == 'dlwmls':
+        st.info('Not available yet ...')
 
-def select_from_list(layout, list_opts, var_name, hdr):
-    sel_ind = safe_index(list_opts, st.session_state.get(var_name))
-    with layout:
-        sel_opt = st.selectbox(hdr, list_opts, key=var_name, index=sel_ind)
-    return st.session_state[var_name]
-
-def select_ref_data(layout):
-    list_opts = ['None', 'CN', 'CN Females', 'CN Males'],
-    sel_ind = safe_index(list_opts, st.session_state.ref_type)
-    with layout:
-        sel_opt = st.selectbox('Data:', list_opts, index=sel_ind)
-    st.session_state.ref_type = sel_opt
-    return sel_opt
-
-def select_pipeline(layout):
-    list_opts = ['dlmuse', 'dlwmls']
-    sel_ind = safe_index(list_opts, st.session_state.sel_pipeline)
-    with layout:
-        sel_opt = st.selectbox('Data:', list_opts, index=sel_ind)
-    st.session_state.sel_pipeline = sel_opt
-    return sel_opt
-
-def select_res_type(layout):
-    list_opts = ['Quantitative', 'Image'],
-    sel_ind = safe_index(list_opts, st.session_state.res_type)
-    with layout:
-        sel_opt = st.selectbox('Data:', list_opts, index=sel_ind)
-    st.session_state.res_type = sel_opt
-    return sel_opt
+def view_img_vars(layout, pipeline):
+    """
+    View image variables
+    """    
+    if pipeline == 'dlmuse':
+        view_dlmuse_volumes(layout)
+        
+    elif pipeline == 'dlwmls':
+        st.info('Not available yet ...')
 
 def panel_download():
     '''
@@ -172,78 +199,26 @@ def panel_results(layout):
     sel_task = select_from_list(
         layout, ['Download Results', 'View Results'], '_res_task', 'Task:'
     )
-
+    
     if sel_task == 'Download Results':
         panel_download()
-        
+    
     elif sel_task == 'View Results':
         
-        sel_pipe = select_from_list(
-            layout, ['dlmuse', 'dlwmls'], '_res_pipeline', 'Pipeline:'
+        sel_rtype = select_from_list(
+            layout, ['Quantitative', 'Image'], '_res_rtype', 'Result Type:'
         )
-
-        sel_mdata = select_from_list(
-            layout, ['None', 'user_output', 'Sample1'], '_res_mdata', 'Main Data:'
-        )
-
-        sel_rdata = select_from_list(
-            layout, ['None', 'CN', 'CN Females'], '_res_rdata', 'Reference Data:'
-        )
-
-        if sel_pipe == 'dlmuse':
-
-            sel_rtype = select_from_list(
-                layout, ['Quantitative', 'Image'], '_res_rtype', 'Result Type:'
+        
+        if sel_rtype == 'Image':
+            sel_pipe = select_from_list(
+                layout, ['dlmuse', 'dlwmls'], '_res_pipeline', 'Pipeline:'
             )
+            view_segmentation(layout, sel_pipe)
             
-            if sel_rtype == 'Image':
-                view_dlmuse_segmentation(layout)
-                
-            elif sel_rtype == 'Quantitative':
-                view_dlmuse_volumes(layout)
-
-#def panel_user_data(layout):
-    #logger.debug('    Function: panel_ref_data')
-
-    #with layout:
-        #sac.divider(label='Task Options', align='center', color='gray')
-
-    #sel_task = select_task(layout)
-
-
-    #if sel_task == 'Download Results':
-        #panel_download()
-    #elif sel_task == 'View Results':
-        #sel_dtype = select_dtype(layout)
-        #if sel_dtype == 'Image':
-            #sel_pipe = select_pipeline(layout)
-            #if sel_pipe == 'dlmuse':
-                #view_dlmuse_segmentation(layout)
-        #elif sel_dtype == 'Quantitative':
-            #view_dlmuse_volumes(layout)
-            
-        
-#def panel_ref_data(layout):
-    #logger.debug('    Function: panel_ref_data')
-
-    #with layout:
-        #sac.divider(label='Data Files', align='center', color='gray')
-        
-    #sel_opt = select_main_data(layout)
-
-    #sel_rdata = select_ref_data(layout)
-    #if sel_rdata != 'None':
-        #fname = os.path.join(
-            #st.session_state.paths['centiles'],
-            #'dlmuse_centiles_CN.csv'
-        #)
-        #st.session_state.plot_data['df_cent'] = utilio.read_csv(fname)
-
-    #sel_pipe = select_pipeline(layout)
-    #if sel_pipe == 'dlmuse':
-        #view_dlmuse_volumes(layout)
-
-    #elif sel_pipe == 'dlwmls':
-        #st.warning('Viewer not implemented for dlwmls')
+        elif sel_rtype == 'Quantitative':
+            sel_pipe = select_from_list(
+                layout, ['dlmuse', 'dlwmls'], '_res_pipeline', 'Pipeline:'
+            )
+            view_img_vars(layout, sel_pipe)    
 
 
