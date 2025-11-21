@@ -1,16 +1,13 @@
-### NiChart DLWMLS: Regional + Lesion Segmentation from T1 + FLAIR Brain Scans 
-This pipeline combines DLMUSE and DLWMLS. T1 and FLAIR images are aligned and the T1 is segmented via DLMUSE. White matter lesions in FLAIR are segmented via DLWMLS. Both segmentations are used to calculate regionally localized lesion volumes.
+### DLWMLS: White Matter Hyperintensity Segmentation from FLAIR scans, divided into MUSE ROI levels
 
-#### Source:
+This pipeline segments White Matter Hyperintensities (WMH) from input FLAIR scans and seperates them into MUSE ROI level in seconds by combining DL-based methods [DLWMLS](https://github.com/CBICA/DLWMLS) and [DLMUSE](https://github.com/CBICA/NiChart_DLMUSE).
 
-https://github.com/CBICA/NiChart_DLMUSE
-https://github.com/CBICA/NiChart_DLWMLS
 
 #### Input
+- FLAIR + T1w scan pairs (Nifti)
 
-- T1-weighted scans (Nifti)
-- FL-weighted scans (Nifti)
 
 #### Output
-
--  Regionally localized lesion volumes (CSV)
+- Total WMH masks
+- Regionally localized WMH masks (Nifti)
+- Regionally localized WMH volumes (CSV)

@@ -1,8 +1,7 @@
-### SPARE-AD: Alzheimers Disease Related Patterns of Brain Atrophy 
+### SPARE-AD: Spatial Pattern of Abnormalities for Recognition of Early Alzheimer’s disease
 
-#### Source:
+The SPARE-AD score quantifies how much a person's brain structure resembles the typical atrophy (shrinkage) pattern found in Alzheimer’s patients.
 
-https://github.com/CBICA/SPARE
 
 #### Input
 
@@ -12,4 +11,3 @@ https://github.com/CBICA/SPARE
 #### Output
 
 - SPARE-AD scores (csv file)
-
