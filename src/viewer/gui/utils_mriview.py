@@ -11,6 +11,7 @@ from scipy import ndimage
 import utils.utils_plots as utilpl
 import utils.utils_misc as utilmisc
 import utils.utils_user_select as utiluser
+import gui.utils_widgets as utilwd
 
 import streamlit_antd_components as sac
 
@@ -374,23 +375,17 @@ def panel_set_params(layout, plot_params, var_groups_data, atlas, list_vars):
         df_vars = st.session_state.dicts['df_var_groups']
         
         # Select roi
-        sel_var = utiluser.select_var_from_group(
-            'Select ROI variable:',
+        sel_var = utilwd.selectbox_twolevel(
             df_vars[df_vars.category.isin(['roi'])],
-            plot_params['yvargroup'],
-            plot_params['yvar'],
             list_vars,
+            '_roi_group',
+            '_roi',
             flag_add_none = False,
             dicts_rename = {
                 'muse': st.session_state.dicts['muse']['ind_to_name']
             }
         )
-        #plot_params['yvargroup'] = sel_var[0]
-        #plot_params['yvar'] = sel_var[1]
-        #plot_params['roi_indices'] = utilmisc.get_roi_indices(
-            #sel_var[1], 'muse'
-        #)
-        #st.session_state['sel_roi'] = sel_var[1]
+        st.session_state['sel_roi'] = sel_var
 
 
 def panel_view_seg(ulay, olay, plot_params):

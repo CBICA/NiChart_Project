@@ -21,19 +21,24 @@ def safe_index(lst, value, default=None):
     except ValueError:
         return default
 
-def select_from_list(list_opts, var_name, hdr):
+def my_selectbox(list_opts, var_name, hdr):
     '''
-    Generic selection box 
-    For a variable (var_name) initiated with the given list (list_opts)
-    Variable is saved in session_state (used as the key for the select box)
+    Generic selectbox
+    Standard selectbox does not initialize value to the key variable by default
+    This is a wrapper to resolve this issue
     '''
     sel_ind = safe_index(list_opts, st.session_state.get(var_name))
     sel_opt = st.selectbox(hdr, list_opts, key=var_name, index=sel_ind)
     return st.session_state[var_name]
 
-def select_var_from_group(df_vars, list_vars, flag_add_none = False, dicts_rename = None):
+def selectbox_twolevel(
+    df_vars, list_vars,
+    vname1, vname2,
+    flag_add_none = False, dicts_rename = None):
     '''
-    Panel for user to select a variable grouped in categories
+    Selectbox with two levels to select a variable grouped in categories
+    Also renames variables (e.g. roi indices to names)
+    Returns the selected variable
     '''
     roi_dict = {}
     ind_count = 0
@@ -41,10 +46,6 @@ def select_var_from_group(df_vars, list_vars, flag_add_none = False, dicts_renam
         tmp_group = row['group']
         tmp_list = row['values']
         tmp_atlas = row['atlas']
-
-        st.write(f'A1: {tmp_group}')
-        #st.write(f'A2: {tmp_list}')
-        #st.write(f'A3: {tmp_atlas}')
 
         # Convert ROI variables from index to name
         if tmp_atlas is not None:
@@ -59,12 +60,10 @@ def select_var_from_group(df_vars, list_vars, flag_add_none = False, dicts_renam
     
         roi_dict[tmp_group] = tmp_list
 
-    
-    #st.write(roi_dict.keys().tolist())
-    
     with st.container(horizontal=True, horizontal_alignment="left"):
-        sel_group = select_from_list(list(roi_dict), '_sel_group', 'Group:')
-        if sel_group is None:
+        sel1 = my_selectbox(list(roi_dict), vname1, 'Group:')
+        if sel1 is None:
             return
-        sel_var = select_from_list(roi_dict[sel_group], '_sel_var', 'Var:')
+        sel2 = my_selectbox(roi_dict[sel1], vname2, 'Var:')
 
+    return sel2
