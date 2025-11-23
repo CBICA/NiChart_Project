@@ -116,10 +116,10 @@ def view_segmentation(layout, pipeline):
                 st.session_state.paths['project'], 'dlmuse', f'{sel_mrid}_T1_DLMUSE.nii.gz'
             )
             if not os.path.exists(ulay):
-                st.warning('Image not found!')
+                st.warning(f'Underlay image not found: {ulay}')
                 return
             if not os.path.exists(olay):
-                st.warning('Image not found - olay!')
+                st.warning(f'Overlay image not found {olay}')
                 return
             #######################
 
