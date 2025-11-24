@@ -44,40 +44,99 @@ def select_from_list(layout, list_opts, var_name, hdr):
         sel_opt = st.selectbox(hdr, list_opts, key=var_name, index=sel_ind)
     return st.session_state[var_name]
 
+def set_plot_params(df):
+    """
+    Panel for selecting plotting parameters
+    """
+    list_vars = df.columns.unique().tolist()
+    
+    plot_params = st.session_state.plot_params
+    
+    sac.divider(label='Variables', align='center', color='gray')
+    
+    sel_xvar = utilwd.select_var_twolevels(
+        'Variable X', list_vars, ['demog', 'roi'],
+        'res_sel_xvar_cat', 'res_sel_xvar_name'
+    )
+    
+    sel_yvar = utilwd.select_var_twolevels(
+        'Variable Y', list_vars, ['roi'],
+        'res_sel_yvar_cat', 'res_sel_yvar_name'
+    )
+
+    sel_hvar = utilwd.select_var_twolevels(
+        'Grouping Variable', list_vars, ['demog'],
+        'res_sel_hvar_cat', 'res_sel_hvar_name'
+    )
+
+    sac.divider(label='Filters', align='center', color='gray')
+
+    # Let user select sex var
+    utilpl.select_sex_var()
+
+    # Let user pick an age range
+    utilpl.select_age_range()
+
+    sac.divider(label='Traces', align='center', color='gray')
+    utilpl.user_select_trend(plot_params)
+    
+    sac.divider(label='Plot Settings', align='center', color='gray')
+    utilpl.user_select_plot_settings(plot_params)
+    
+
+
 def view_dlmuse_volumes(layout):
     """
     View dlmuse volumes
     """
     ## FIXME (list of rois from data file to init listbox selections)
-    fname=os.path.join(
-        st.session_state.paths['resources'], 'reference_data', 'centiles', 'dlmuse_centiles_CN.csv'
-    ) 
+    #fname=os.path.join(
+        #st.session_state.paths['resources'], 'reference_data', 'centiles', 'dlmuse_centiles_CN.csv'
+    #) 
+    #df = pd.read_csv(fname)
+    #list_vars = ['Age', 'Sex'] + df.VarName.unique().tolist()
+
+    fname = os.path.join(
+        st.session_state.paths['project'], 'plots', 'data_all.csv'
+    )
     df = pd.read_csv(fname)
-    list_vars = ['Age', 'Sex'] + df.VarName.unique().tolist()
+
+    ## FIXME rename rois
+    df = df.rename(
+        columns = st.session_state.dicts['muse']['ind_to_name']
+    )
+    
+    if 'grouping_var' not in df:
+        df["grouping_var"] = "Data"
+    
+    st.session_state.plot_data['df_data'] = df.copy()
 
     var_groups_data = ['roi']
     pipeline = 'dlmuse'
 
     # Set centile selections
-    st.session_state.plot_params['centile_values'] = st.session_state.plot_settings['centile_trace_types']
+    #st.session_state.plot_params['centile_values'] = st.session_state.plot_settings['centile_trace_types']
 
-    with layout:
-        sac.divider(label='Plot Controls', align='center', color='gray')
-
-        utilpl.user_add_plots(
-            st.session_state.plot_params
-        )
-
-        sac.divider(label='Plot Settings', align='center', color='gray')
+    #with layout:
+        #sac.divider(label='Plot Controls', align='center', color='gray')
+        #utilpl.user_add_plots(st.session_state.plot_params)
 
         #utilpl.panel_set_params_centile_plot(
             #st.session_state.plot_params, var_groups_data, pipeline, list_vars
         #)
-        utilpl.set_plot_params()
+
+    # Add a single plot if there is none
+    st.session_state.plot_params['traces'] = ['data']
+    if st.session_state.plots.shape[0] == 0:
+        st.session_state.plots = utilpl.add_plot(
+            st.session_state.plots, st.session_state.plot_params
+        )
+
+
+    with layout:
+        set_plot_params(df)
 
     utilpl.panel_show_plots()
-
-    st.write()
 
 
 def view_segmentation(layout, pipeline):
@@ -100,12 +159,13 @@ def view_segmentation(layout, pipeline):
         df = df.rename(columns = st.session_state.dicts['muse']['ind_to_name'])
 
         list_vars = df.columns.unique().tolist()
+        
         list_mrids = df.MRID.sort_values().tolist()
         
         with layout:
             sel_mrid = utilwd.my_selectbox(list_mrids, 'res_sel_mrid', 'Subject')
 
-        if sel_mrid is None:
+        if sel_mrid is None or sel_mrid == 'Select an option…':
             return
 
         #######################
@@ -128,28 +188,32 @@ def view_segmentation(layout, pipeline):
 
         # Select ROI
         with layout:
-            utilwd.select_muse_roi(list_vars)
+            sel_roi = utilwd.select_muse_roi(list_vars)
+
+        if sel_roi is None or sel_roi == 'Select an option…':
+            return
 
         # Select plot parameters
         with layout:
             sac.divider(label='Plot Options', align='center', color='gray')
 
-            plot_params = st.session_state.plot_params
+            sel_orient = utilwd.my_multiselect(img_views, 'res_sel_orient', 'View Planes')
 
-            plot_params['list_orient'] = utilwd.my_multiselect(
-                img_views, '_sel_orient', 'View Planes'
-            )
-
-            if len(plot_params['list_orient']) == 0:
+            if sel_orient is None or len(sel_orient) == 0:
                 return
 
-            plot_params['is_show_overlay'] = st.checkbox("Show overlay", True, disabled=False)
+            #flag_overlay = st.checkbox("Show overlay", True, disabled=False)
+            flag_overlay = utilwd.my_checkbox('res_flag_overlay', "Show overlay")
 
-            plot_params['crop_to_mask'] = st.checkbox("Crop to mask", True, disabled=False)
-
-
+            #flag_crop = st.checkbox("Crop to mask", True, disabled=False)
+            flag_crop = utilwd.my_checkbox('res_flag_crop', "Crop to mask")
 
         # Show figures
+        plot_params = {
+            'sel_orient': sel_orient,
+            'flag_overlay': flag_overlay,
+            'flag_crop': flag_crop,
+        }
         utilmri.panel_view_seg(ulay, olay, plot_params)
 
     elif pipeline == 'dlwmls':
@@ -161,7 +225,7 @@ def view_img_vars(layout, pipeline):
     """    
     if pipeline == 'dlmuse':
         view_dlmuse_volumes(layout)
-        
+      
     elif pipeline == 'dlwmls':
         st.info('Not available yet ...')
 

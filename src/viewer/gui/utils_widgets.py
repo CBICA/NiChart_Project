@@ -15,7 +15,18 @@ import utils.utils_traces as utiltr
 
 import streamlit_antd_components as sac
 
-## Generic functions
+## Wrappers for standard widgets
+def my_checkbox(var_name, hdr):
+    '''
+    Wrapper for checkbox
+    '''
+    sel_val = st.session_state.get(var_name)
+    sel_opt = st.checkbox(
+        hdr, value=sel_val, key=f'_{var_name}'
+    )
+    st.session_state[var_name] = sel_opt
+    return sel_opt
+
 def my_multiselect(list_opts, var_name, hdr='selection box', label_visibility='visible'):
     '''
     Wrapper for multiselect
@@ -50,7 +61,6 @@ def my_selectbox(list_opts, var_name, hdr='selection box', label_visibility='vis
 def selectbox_twolevels(
     df_vars, list_vars,
     var_name1, var_name2,
-    flag_add_none = False,
     dicts_rename = None
 ):
     '''
@@ -59,7 +69,6 @@ def selectbox_twolevels(
     Returns the selected variable
     '''
     roi_dict = {}
-    ind_count = 0
     for i, row in df_vars.iterrows():
         tmp_group = row['group']
         tmp_list = row['values']
@@ -72,24 +81,24 @@ def selectbox_twolevels(
         # Select vars that are included in the data
         tmp_list = [x for x in tmp_list if x in list_vars]
 
-        # Add a None item in var list
-        if flag_add_none:
-            tmp_list = ['None'] + tmp_list
-    
         roi_dict[tmp_group] = tmp_list
+        
+    print(roi_dict)
 
     with st.container(horizontal=True, horizontal_alignment="left"):
-        sel1 = my_selectbox(list(roi_dict), var_name1, label_visibility='collapsed')
-        if sel1 is None or sel1 == 'Select an option…':
+        sel_opt1 = my_selectbox(list(roi_dict), var_name1, label_visibility='collapsed')
+        if sel_opt1 is None or sel_opt1 == 'Select an option…':
             list_opts = []
         else:
-            list_opts = roi_dict[sel1]
-        sel2 = my_selectbox(list_opts, var_name2, label_visibility='collapsed')
+            list_opts = roi_dict[sel_opt1]
+        sel_opt2 = my_selectbox(list_opts, var_name2, label_visibility='collapsed')
 
-    return sel2
+        st.session_state[var_name1] = sel_opt1
+        st.session_state[var_name2] = sel_opt2
+
+    return sel_opt2
 
 ## Specific Widgets
-
 def select_muse_roi(list_vars):
     """
     Panel to set mriview parameters
@@ -101,11 +110,35 @@ def select_muse_roi(list_vars):
     sel_var = selectbox_twolevels(
         df_vars[df_vars.category.isin(['roi'])],
         list_vars,
-        'res_sel_roi_group',
+        'res_sel_roi_cat',
         'res_sel_roi_name',
-        flag_add_none = False,
         dicts_rename = {
             'muse': st.session_state.dicts['muse']['ind_to_name']
         }
     )
     st.session_state['sel_roi'] = sel_var
+    return sel_var
+
+def select_var_twolevels(hdr, list_vars, list_cat, var_name1, var_name2):
+    """
+    Panel to select a variable using a two level selection
+    First level is the var category provided with data dict
+    """
+    df_vars = st.session_state.dicts['df_var_groups']
+    sel_cats = df_vars[df_vars.category.isin(list_cat)]
+    
+    print('aaa')
+    print(list_cat)
+    print(df_vars.category)
+    
+    # Select roi
+    st.write(hdr)
+    sel_var = selectbox_twolevels(
+        sel_cats, list_vars,
+        var_name1, var_name2,
+        dicts_rename = {
+            'muse': st.session_state.dicts['muse']['ind_to_name']
+        }
+    )
+    return sel_var
+

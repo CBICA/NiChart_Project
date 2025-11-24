@@ -21,7 +21,7 @@ def add_trace_scatter(df: pd.DataFrame, plot_params: dict, plot_settings: dict, 
         return fig
     if df.shape[0] == 0:
         return fig
-
+    
     # Set colormap
     colors = plot_settings['cmaps']['data']
     alpha = plot_settings['alphas']['data']
@@ -34,7 +34,7 @@ def add_trace_scatter(df: pd.DataFrame, plot_params: dict, plot_settings: dict, 
     if hvals is None:
         hvals = df[hvar].dropna().sort_values().unique().tolist()
 
-    if "data" in plot_params['traces']:
+    if plot_params['traces'] is not None and "data" in plot_params['traces']:
         
         for hname in hvals:
             c_ind = hvals.index(hname)  # Select index of colour for the category
@@ -68,6 +68,8 @@ def add_trace_linreg(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
         hvals = df[hvar].dropna().sort_values().unique().tolist()
 
     traces = plot_params['traces']
+    if traces is None:
+        traces = []
      
     if plot_params['xvar'] == plot_params['yvar']:
         return fig

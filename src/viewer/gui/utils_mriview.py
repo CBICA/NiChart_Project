@@ -347,21 +347,20 @@ def panel_view_seg(ulay, olay, plot_params):
         with st.spinner("Wait for it..."):
             # Process image (and mask) to prepare final 3d matrix to display
             img, mask, img_masked = prep_image_and_olay(
-                #ulay, olay, plot_params['roi_indices'], plot_params['crop_to_mask']
-                ulay, olay, roi_indices, plot_params['crop_to_mask']
+                ulay, olay, roi_indices, plot_params['flag_crop']
             )
             img_bounds = detect_mask_bounds(mask)
 
-            cols = st.columns(len(plot_params['list_orient']))
+            cols = st.columns(len(plot_params['sel_orient']))
             for i, tmp_orient in stqdm(
-                enumerate(plot_params['list_orient']),
+                enumerate(plot_params['sel_orient']),
                 desc="Showing images ...",
-                total=len(plot_params['list_orient'])
+                total=len(plot_params['sel_orient'])
             ):
                 with cols[i]:
                     ind_view = img_views.index(tmp_orient)
                     size_auto = True
-                    if olay is None or plot_params['is_show_overlay'] is False:
+                    if olay is None or plot_params['flag_overlay'] is False:
                         show_img_slices(
                             img, ind_view, img_bounds[ind_view, :], tmp_orient
                         )

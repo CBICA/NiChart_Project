@@ -14,6 +14,7 @@ import plotly.graph_objs as go
 import plotly.figure_factory as ff
 import utils.utils_traces as utiltr
 import utils.utils_css as utilcss
+import gui.utils_widgets as utilwd
 
 import streamlit_antd_components as sac
 
@@ -362,7 +363,7 @@ def show_plots(df, df_cent, df_plots, plot_settings):
                 df_filt = df_filt[df_filt.Sex.isin(sel_params['filter_sex'])]
             if 'Age' in df:
                 df_filt = df_filt[(df_filt.Age >= sel_params['filter_age'][0]) & (df_filt.Age <= sel_params['filter_age'][1])]
-                    
+                
         with blocks[column_no]:
             #with st.container(border=True):
             if sel_params['plot_type'] == "dist": 
@@ -790,24 +791,16 @@ def panel_set_params_centile_plot(plot_params, var_groups_data, pipeline, list_v
     if plot_params['centile_values'] is not None:
         plot_params['traces'] = plot_params['traces'] + plot_params['centile_values']
         
-
-        
-def set_plot_params():
+       
+def set_plot_params(df):
     """
-    Show panel for selecting plotting parameters
-    """    
-    # Add tabs for parameter settings
-    tab = sac.tabs(
-        items=[
-            sac.TabsItem(label='Data'),
-            sac.TabsItem(label='Variables'),
-            sac.TabsItem(label='Traces'),
-            sac.TabsItem(label='Plot Controls'),
-            sac.TabsItem(label='Settings'),
-        ],
-        size='sm',
-        align='left'
-    )
+    Panel for selecting plotting parameters
+    """
+    sel_xvar = 'Age'
+    
+    list_vars = df.columns.unique().tolist()
+    sel_yvar = utilwd.select_muse_roi(list_vars)
+
 
 def panel_show_plots():
     '''
@@ -834,28 +827,6 @@ def panel_show_plots():
 
     if st.session_state.sel_mrid is not None:
         show_mri()
-
-#def panel_show_centile_plots():
-    #'''
-    #Panel to show centile plots
-    #'''
-    ### Update selected plots
-    #for tmp_ind in st.session_state.plots.index.tolist():
-        #if st.session_state.plots.loc[tmp_ind, 'flag_sel']:
-            #st.session_state.plots.at[tmp_ind, 'params'] = st.session_state.plot_params.copy()
-
-    ## # Add a single plot if there is none
-    ## if st.session_state.plots.shape[0] == 0:
-    ##     st.session_state.plots = add_plot(
-    ##         st.session_state.plots, st.session_state.plot_params
-    ##     )
-
-    ## Show plots
-    #show_plots(
-        #None,
-        #st.session_state.plots,
-        #st.session_state.plot_settings
-    #)
 
 
 

@@ -121,9 +121,17 @@ def init_session_vars():
     st.session_state.res_sel_task = None
     st.session_state.res_sel_rtype = None
     st.session_state.res_sel_pipe = None
-    st.session_state.res_sel_roi_group = None
+    st.session_state.res_sel_roi_cat = None
     st.session_state.res_sel_roi_name = None
+    st.session_state.res_sel_roi_cat = None
+    st.session_state.res_sel_xvar_name = None
+    st.session_state.res_sel_xvar_cat = None
+    st.session_state.res_sel_yvar_name = None
+    st.session_state.res_sel_yvar_cat = None
     st.session_state.res_sel_mrid = None
+    st.session_state.res_sel_orient = ["axial", "coronal", "sagittal"]
+    st.session_state.res_flag_overlay = True
+    st.session_state.res_flag_crop = True
 
     st.session_state.skip_survey = True
 
