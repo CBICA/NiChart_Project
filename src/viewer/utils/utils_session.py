@@ -45,17 +45,18 @@ def disp_session_state():
         key = '_debug_flag_show',
         on_change = update_val
     )
-    
+
     if st.session_state['debug']['flag_show']:
         with st.container(border=True):
             st.markdown('##### Session State:')
-            list_items = sorted([x for x in st.session_state.keys() if not x.startswith('_')])
+            # list_items = sorted([x for x in st.session_state.keys() if not x.startswith('_')])
+            list_items = sorted([x for x in st.session_state.keys() if x.startswith('_')])
             st.pills(
                 "Select Session State Variable(s) to View",
                 list_items,
                 selection_mode="multi",
                 key='_debug_sel_vars',
-                default=st.session_state['debug']['sel_vars'],
+                # default=st.session_state['debug']['sel_vars'],
                 label_visibility="collapsed",
             )
             st.session_state['debug']['sel_vars'] = st.session_state['_debug_sel_vars']
@@ -117,6 +118,10 @@ def init_session_vars():
     st.session_state.ref_type = None    # Type of ref data: CN, CN Females, etc.
     st.session_state.res_type = None    # Type of results: Quantitative or Image
     
+    st.session_state.res_sel_task = "Select an option…"
+    st.session_state.res_sel_rtype = "Select an option…"
+    st.session_state.res_sel_pipe = "Select an option…"
+
     st.session_state.skip_survey = True
 
     st.session_state.workflow = None

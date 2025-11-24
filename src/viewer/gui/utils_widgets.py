@@ -17,26 +17,55 @@ import streamlit_antd_components as sac
 
 ## Generic functions
 
-def safe_index(lst, value, default=None):
+def my_multiselect(list_opts, var_name, hdr):
+    '''
+    Generic multiselect
+    '''
+    sel_vals = st.session_state.get(var_name)
+    if hdr is None:
+        sel_opt = st.multiselect(
+            '', list_opts, key=var_name, default=sel_vals, label_visibility='collapsed'
+        )
+    else:
+        sel_opt = st.multiselect(
+            hdr, list_opts, key=var_name, default=sel_vals
+        )
+    return st.session_state[var_name]
+
+
+def safe_index(lst, value, default=0):
     try:
         return lst.index(value)
     except ValueError:
         return default
 
-def my_selectbox(list_opts, var_name, hdr):
+def select_from_list(layout, list_opts, var_name, hdr):
     '''
-    Generic selectbox
-    Standard selectbox does not initialize value to the key variable by default
-    This is a wrapper to resolve this issue
+    Generic selection box
     '''
     sel_ind = safe_index(list_opts, st.session_state.get(var_name))
-    
-    if hdr is None:
-        sel_opt = st.selectbox('', list_opts, key=var_name, index=sel_ind, label_visibility='collapsed')
-    else:
+    with layout:
         sel_opt = st.selectbox(hdr, list_opts, key=var_name, index=sel_ind)
-        
     return st.session_state[var_name]
+
+def my_selectbox(list_opts, var_name, hdr):
+    '''
+    Wrapper for selectbox
+    '''
+    options = ["Select an option…"] + list_opts
+    sel_ind = safe_index(options, st.session_state.get(var_name))
+
+    if hdr is None:
+        sel_opt = st.selectbox(
+            'dummy label', options, key=f'_{var_name}', index=sel_ind,
+            label_visibility='collapsed', disabled=(len(list_opts) == 0)
+        )
+    else:
+        sel_opt = st.selectbox(
+            hdr, options, key=f'_{var_name}', index=sel_ind, disabled=(len(list_opts) == 0)
+        )
+    st.session_state[var_name] = sel_opt
+    return sel_opt
 
 def selectbox_twolevel(df_vars, list_vars, vname1, vname2, flag_add_none = False, dicts_rename = None):
     '''
