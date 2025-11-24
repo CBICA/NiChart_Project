@@ -15,14 +15,67 @@ import utils.utils_traces as utiltr
 
 import streamlit_antd_components as sac
 
+def select_sex_var():
+    '''
+    Set sex var values
+    '''
+    sel_vals = st.pills(
+        label='Select Sex',
+        options=['F', 'M'],
+        key = '_sex_var',
+        default = st.session_state.plot_params['filter_sex'],
+        selection_mode = 'multi',
+    )
+    st.session_state.plot_params['filter_sex'] = sel_vals
+
+    st.slider(
+        'Select Age Range:',
+        min_value = st.session_state.plot_settings['min_age'],
+        max_value = st.session_state.plot_settings['max_age'],
+        key = '_age_range',
+        on_change = update_age_range
+    )
+
 ## Wrappers for standard widgets
+def my_slider(var_name, hdr, min_val, max_val):
+    # Initialize once
+    if var_name not in st.session_state:
+        st.session_state[var_name] = min_val
+    return st.slider(
+        hdr,
+        min_value=min_val,
+        max_value=max_val,
+        key=var_name
+    )
+
 def my_checkbox(var_name, hdr):
+    # Initialize once
+    if var_name not in st.session_state:
+        st.session_state[var_name] = min_val
+    return st.slider(
+        hdr,
+        min_value=min_val,
+        max_value=max_val,
+        key=var_name
+    )
+    #'''
+    #Wrapper for checkbox
+    #'''
+    #sel_val = st.session_state.get(var_name)
+    #sel_opt = st.checkbox(
+        #hdr, value=sel_val, key=f'_{var_name}'
+    #)
+    #st.session_state[var_name] = sel_opt
+    #return sel_opt
+
+def my_multiselecttmp(list_opts, var_name, hdr='selection box', label_visibility='visible'):
     '''
-    Wrapper for checkbox
+    Wrapper for multiselect
     '''
-    sel_val = st.session_state.get(var_name)
-    sel_opt = st.checkbox(
-        hdr, value=sel_val, key=f'_{var_name}'
+    sel_vals = st.session_state.get(var_name)
+    sel_opt = st.multiselect(
+        hdr, list_opts, key=f'_{var_name}',
+        default=sel_vals, label_visibility=label_visibility
     )
     st.session_state[var_name] = sel_opt
     return sel_opt
@@ -31,10 +84,9 @@ def my_multiselect(list_opts, var_name, hdr='selection box', label_visibility='v
     '''
     Wrapper for multiselect
     '''
-    sel_vals = st.session_state.get(var_name)
     sel_opt = st.multiselect(
         hdr, list_opts, key=f'_{var_name}',
-        default=sel_vals, label_visibility=label_visibility
+        default=st.session_state.get(var_name), label_visibility=label_visibility
     )
     st.session_state[var_name] = sel_opt
     return sel_opt
@@ -83,8 +135,6 @@ def selectbox_twolevels(
 
         roi_dict[tmp_group] = tmp_list
         
-    print(roi_dict)
-
     with st.container(horizontal=True, horizontal_alignment="left"):
         sel_opt1 = my_selectbox(list(roi_dict), var_name1, label_visibility='collapsed')
         if sel_opt1 is None or sel_opt1 == 'Select an option…':

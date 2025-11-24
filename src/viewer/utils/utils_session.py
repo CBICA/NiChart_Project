@@ -49,8 +49,8 @@ def disp_session_state():
     if st.session_state['debug']['flag_show']:
         with st.container(border=True):
             st.markdown('##### Session State:')
-            # list_items = sorted([x for x in st.session_state.keys() if not x.startswith('_')])
-            list_items = sorted([x for x in st.session_state.keys() if x.startswith('_')])
+            list_items = sorted([x for x in st.session_state.keys() if not x.startswith('_')])
+            #list_items = sorted([x for x in st.session_state.keys() if x.startswith('_')])
             st.pills(
                 "Select Session State Variable(s) to View",
                 list_items,
@@ -102,6 +102,8 @@ def init_session_vars():
     Set initial values for session variables
     '''
     
+    print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+    
     init_participant()
     init_scan()
     
@@ -132,6 +134,8 @@ def init_session_vars():
     st.session_state.res_sel_orient = ["axial", "coronal", "sagittal"]
     st.session_state.res_flag_overlay = True
     st.session_state.res_flag_crop = True
+    st.session_state.res_sel_age_range = (50, 80)
+    st.session_state.res_sel_sex = ['F', 'M']
 
     st.session_state.skip_survey = True
 

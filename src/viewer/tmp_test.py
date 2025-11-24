@@ -1,24 +1,22 @@
-import argparse
-import os
-
 import streamlit as st
-import utils.utils_pages as utilpg
-import utils.utils_session as utilss
 
-main_container = st.empty()
-sidebar_container = st.sidebar
+# Initialize session state if the key doesn't exist
+if 'my_range_values' not in st.session_state:
+    st.session_state.my_range_values = (25, 75) # Default min and max values
 
-layout_choice = st.radio(
-    "Choose layout:",
-    ["Main Area", "Sidebar"],
-    key="layout_choice"
+st.title("Streamlit Range Slider with Session State")
+
+# Create the range slider, linking its value to st.session_state.my_range_values
+selected_range = st.slider(
+    "Select a range of values",
+    min_value=0,
+    max_value=100,
+    value=st.session_state.my_range_values, # Use the value from session state
+    key='my_range_values' # Link the slider to this session state key
 )
-if layout_choice == "Main Area":
-    st.session_state.layout = main_container
-else:
-    st.session_state.layout = sidebar_container
 
+st.write(f"The selected range is: {selected_range}")
+st.write(f"Values in session state: {st.session_state.my_range_values}")
 
-with st.session_state.layout:
-    st.info('Hello')
-    st.info(st.session_state)
+# You can also explicitly update session state if needed (though the key handles it for sliders)
+# st.session_state.my_range_values = selected_range    

@@ -72,10 +72,22 @@ def set_plot_params(df):
     sac.divider(label='Filters', align='center', color='gray')
 
     # Let user select sex var
-    utilpl.select_sex_var()
+    sel_sex = utilwd.my_multiselect(
+        ['F','M'], 'res_sel_sex', 
+        
+    )
 
     # Let user pick an age range
-    utilpl.select_age_range()
+    #utilpl.select_age_range()
+    #sel_age_range = utilwd.my_slider('res_sel_age_range', 'Age Range', 0, 110)
+    st.write(f'Values {st.session_state['res_sel_age_range']}')
+    sel_age_range = st.slider(
+        'Age Range', 
+        value = st.session_state.res_sel_age_range,
+        key='res_sel_age_range',
+        min_value=0, max_value=110
+    )
+    st.write(f'RRR {st.session_state['res_sel_age_range']}')
 
     sac.divider(label='Traces', align='center', color='gray')
     utilpl.user_select_trend(plot_params)
@@ -203,6 +215,7 @@ def view_segmentation(layout, pipeline):
                 return
 
             #flag_overlay = st.checkbox("Show overlay", True, disabled=False)
+            flag_overlay = utilwd.my_checkbox('res_flag_overlay', "Show overlay")
             flag_overlay = utilwd.my_checkbox('res_flag_overlay', "Show overlay")
 
             #flag_crop = st.checkbox("Crop to mask", True, disabled=False)

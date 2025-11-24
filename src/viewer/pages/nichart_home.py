@@ -51,6 +51,9 @@ sel = sac.chip(
 ) 
 flag_disabled = sel is None
 
+
+st.write(f'RRR {st.session_state['res_sel_age_range']}')
+
 sac.divider()
 
 sel_but = sac.chip(
