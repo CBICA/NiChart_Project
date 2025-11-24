@@ -118,9 +118,12 @@ def init_session_vars():
     st.session_state.ref_type = None    # Type of ref data: CN, CN Females, etc.
     st.session_state.res_type = None    # Type of results: Quantitative or Image
     
-    st.session_state.res_sel_task = "Select an option…"
-    st.session_state.res_sel_rtype = "Select an option…"
-    st.session_state.res_sel_pipe = "Select an option…"
+    st.session_state.res_sel_task = None
+    st.session_state.res_sel_rtype = None
+    st.session_state.res_sel_pipe = None
+    st.session_state.res_sel_roi_group = None
+    st.session_state.res_sel_roi_name = None
+    st.session_state.res_sel_mrid = None
 
     st.session_state.skip_survey = True
 

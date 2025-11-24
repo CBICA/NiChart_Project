@@ -16,22 +16,17 @@ import utils.utils_traces as utiltr
 import streamlit_antd_components as sac
 
 ## Generic functions
-
-def my_multiselect(list_opts, var_name, hdr):
+def my_multiselect(list_opts, var_name, hdr='selection box', label_visibility='visible'):
     '''
-    Generic multiselect
+    Wrapper for multiselect
     '''
     sel_vals = st.session_state.get(var_name)
-    if hdr is None:
-        sel_opt = st.multiselect(
-            '', list_opts, key=var_name, default=sel_vals, label_visibility='collapsed'
-        )
-    else:
-        sel_opt = st.multiselect(
-            hdr, list_opts, key=var_name, default=sel_vals
-        )
-    return st.session_state[var_name]
-
+    sel_opt = st.multiselect(
+        hdr, list_opts, key=f'_{var_name}',
+        default=sel_vals, label_visibility=label_visibility
+    )
+    st.session_state[var_name] = sel_opt
+    return sel_opt
 
 def safe_index(lst, value, default=0):
     try:
@@ -39,35 +34,25 @@ def safe_index(lst, value, default=0):
     except ValueError:
         return default
 
-def select_from_list(layout, list_opts, var_name, hdr):
-    '''
-    Generic selection box
-    '''
-    sel_ind = safe_index(list_opts, st.session_state.get(var_name))
-    with layout:
-        sel_opt = st.selectbox(hdr, list_opts, key=var_name, index=sel_ind)
-    return st.session_state[var_name]
-
-def my_selectbox(list_opts, var_name, hdr):
+def my_selectbox(list_opts, var_name, hdr='selection box', label_visibility='visible'):
     '''
     Wrapper for selectbox
     '''
     options = ["Select an option…"] + list_opts
     sel_ind = safe_index(options, st.session_state.get(var_name))
-
-    if hdr is None:
-        sel_opt = st.selectbox(
-            'dummy label', options, key=f'_{var_name}', index=sel_ind,
-            label_visibility='collapsed', disabled=(len(list_opts) == 0)
-        )
-    else:
-        sel_opt = st.selectbox(
-            hdr, options, key=f'_{var_name}', index=sel_ind, disabled=(len(list_opts) == 0)
-        )
+    sel_opt = st.selectbox(
+        hdr, options, key=f'_{var_name}', index=sel_ind,
+        label_visibility=label_visibility, disabled=(len(list_opts) == 0)
+    )
     st.session_state[var_name] = sel_opt
     return sel_opt
 
-def selectbox_twolevel(df_vars, list_vars, vname1, vname2, flag_add_none = False, dicts_rename = None):
+def selectbox_twolevels(
+    df_vars, list_vars,
+    var_name1, var_name2,
+    flag_add_none = False,
+    dicts_rename = None
+):
     '''
     Selectbox with two levels to select a variable grouped in categories
     Also renames variables (e.g. roi indices to names)
@@ -94,14 +79,14 @@ def selectbox_twolevel(df_vars, list_vars, vname1, vname2, flag_add_none = False
         roi_dict[tmp_group] = tmp_list
 
     with st.container(horizontal=True, horizontal_alignment="left"):
-        sel1 = my_selectbox(list(roi_dict), vname1, None)
-        if sel1 is None:
-            sel2 = my_selectbox([], vname2, None)
+        sel1 = my_selectbox(list(roi_dict), var_name1, label_visibility='collapsed')
+        if sel1 is None or sel1 == 'Select an option…':
+            list_opts = []
         else:
-            sel2 = my_selectbox(roi_dict[sel1], vname2, None)
+            list_opts = roi_dict[sel1]
+        sel2 = my_selectbox(list_opts, var_name2, label_visibility='collapsed')
 
     return sel2
-
 
 ## Specific Widgets
 
@@ -113,11 +98,11 @@ def select_muse_roi(list_vars):
     
     # Select roi
     st.write('ROI Name')
-    sel_var = selectbox_twolevel(
+    sel_var = selectbox_twolevels(
         df_vars[df_vars.category.isin(['roi'])],
         list_vars,
-        '_sel_roi_group',
-        '_sel_roi_name',
+        'res_sel_roi_group',
+        'res_sel_roi_name',
         flag_add_none = False,
         dicts_rename = {
             'muse': st.session_state.dicts['muse']['ind_to_name']

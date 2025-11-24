@@ -86,14 +86,10 @@ def view_segmentation(layout, pipeline):
     """
     img_views = ["axial", "coronal", "sagittal"]
 
-    print(f'CCC {'_sel_mrid' in st.session_state}')
-
     with layout:
         sac.divider(label='Data', align='center', color='gray')
 
     if pipeline == 'dlmuse':
-
-        print(f'aaa {st.session_state.get('_sel_mrid')}')
 
         fname = os.path.join(
             st.session_state.paths['project'], 'dlmuse', 'dlmuse_vol.csv'
@@ -107,52 +103,54 @@ def view_segmentation(layout, pipeline):
         list_mrids = df.MRID.sort_values().tolist()
         
         with layout:
-            sel_mrid = utilwd.my_selectbox(list_mrids, '_sel_mrid', 'Subject:')
+            sel_mrid = utilwd.my_selectbox(list_mrids, 'res_sel_mrid', 'Subject')
 
-            if sel_mrid is None:
+        if sel_mrid is None:
+            return
+
+        #######################
+        ## Set olay ulay images
+        #ulay = st.session_state.ref_data["t1"]
+        #olay = st.session_state.ref_data["dlmuse"]
+        ulay = os.path.join(
+            st.session_state.paths['project'], 't1', f'{sel_mrid}_T1.nii.gz'
+        )
+        olay = os.path.join(
+            st.session_state.paths['project'], 'dlmuse', f'{sel_mrid}_T1_DLMUSE.nii.gz'
+        )
+        if not os.path.exists(ulay):
+            st.warning(f'Underlay image not found: {ulay}')
+            return
+        if not os.path.exists(olay):
+            st.warning(f'Overlay image not found {olay}')
+            return
+        #######################
+
+        # Select ROI
+        with layout:
+            utilwd.select_muse_roi(list_vars)
+
+        # Select plot parameters
+        with layout:
+            sac.divider(label='Plot Options', align='center', color='gray')
+
+            plot_params = st.session_state.plot_params
+
+            plot_params['list_orient'] = utilwd.my_multiselect(
+                img_views, '_sel_orient', 'View Planes'
+            )
+
+            if len(plot_params['list_orient']) == 0:
                 return
 
-#             #######################
-#             ## Set olay ulay images
-#             #ulay = st.session_state.ref_data["t1"]
-#             #olay = st.session_state.ref_data["dlmuse"]
-#             ulay = os.path.join(
-#                 st.session_state.paths['project'], 't1', f'{sel_mrid}_T1.nii.gz'
-#             )
-#             olay = os.path.join(
-#                 st.session_state.paths['project'], 'dlmuse', f'{sel_mrid}_T1_DLMUSE.nii.gz'
-#             )
-#             if not os.path.exists(ulay):
-#                 st.warning(f'Underlay image not found: {ulay}')
-#                 return
-#             if not os.path.exists(olay):
-#                 st.warning(f'Overlay image not found {olay}')
-#                 return
-#             #######################
-#
-#             # Select ROI
-#             utilwd.select_muse_roi(list_vars)
-#
-#             # Select plot parameters
-#             sac.divider(label='Plot Options', align='center', color='gray')
-#
-#             plot_params = st.session_state.plot_params
-#
-#             plot_params['list_orient'] = utilwd.my_multiselect(
-#                 img_views, '_sel_orient', 'View Planes'
-#             )
-#
-#             if len(plot_params['list_orient']) == 0:
-#                 return
-#
-#             plot_params['is_show_overlay'] = st.checkbox("Show overlay", True, disabled=False)
-#
-#             plot_params['crop_to_mask'] = st.checkbox("Crop to mask", True, disabled=False)
-#
-#
-#
-#         # Show figures
-#         utilmri.panel_view_seg(ulay, olay, plot_params)
+            plot_params['is_show_overlay'] = st.checkbox("Show overlay", True, disabled=False)
+
+            plot_params['crop_to_mask'] = st.checkbox("Crop to mask", True, disabled=False)
+
+
+
+        # Show figures
+        utilmri.panel_view_seg(ulay, olay, plot_params)
 
     elif pipeline == 'dlwmls':
         st.info('Not available yet ...')
@@ -216,7 +214,7 @@ def panel_results(layout):
         sac.divider(label='General Options', align='center', color='gray')
 
     with layout:
-        sel_task = utilwd.my_selectbox(['Download', 'View'], 'res_sel_task', 'Task')
+        sel_task = utilwd.my_selectbox(['Download', 'View'], 'res_sel_task', hdr='Task')
 
     if sel_task == 'Download':
         panel_download()
@@ -229,13 +227,11 @@ def panel_results(layout):
         if sel_rtype == 'Image':
             with layout:
                 sel_pipe = utilwd.my_selectbox(['dlmuse', 'dlwmls'], 'res_sel_pipe', 'Pipeline')
-
             view_segmentation(layout, sel_pipe)
 
         elif sel_rtype == 'Quantitative':
             with layout:
                 sel_pipe = utilwd.my_selectbox(['dlmuse', 'dlwmls'], 'res_sel_pipe', 'Pipeline')
-
             view_img_vars(layout, sel_pipe)
 
 
