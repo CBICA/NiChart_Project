@@ -102,8 +102,6 @@ def init_session_vars():
     Set initial values for session variables
     '''
     
-    print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
-    
     init_participant()
     init_scan()
     
@@ -123,6 +121,13 @@ def init_session_vars():
     st.session_state.res_sel_task = None
     st.session_state.res_sel_rtype = None
     st.session_state.res_sel_pipe = None
+
+    st.session_state.general_params = {
+        'res_sel_task': None,
+        'res_sel_rtype': None,
+        'res_sel_pipe': None
+    }
+
     st.session_state.res_sel_roi_cat = None
     st.session_state.res_sel_roi_name = None
     st.session_state.res_sel_roi_cat = None
@@ -136,6 +141,10 @@ def init_session_vars():
     st.session_state.res_flag_crop = True
     st.session_state.res_sel_age_range = (50, 80)
     st.session_state.res_sel_sex = ['F', 'M']
+    st.session_state.res_sel_trends = None
+    st.session_state.res_flag_conf = False
+    st.session_state.res_lowess_s = 0.7
+
 
     st.session_state.skip_survey = True
 
@@ -377,8 +386,8 @@ def init_plot_vars() -> None:
         "flag_hide_settings": 'Show',
         "flag_hide_legend": 'Show',
         "flag_hide_mri": 'Show',
-        "trend_types": ["None", "Linear", "Smooth LOWESS Curve"],
-        "centile_types": ["", "CN", "CN_Males", "CN_Females", "CN_ICV_Corrected"],
+        "trend_types": ["Linear", "Smooth LOWESS Curve"],
+        "centile_types": ["CN", "CN_Males", "CN_Females", "CN_ICV_Corrected"],
         "linfit_trace_types": [
             "lin_fit", "conf_95%"
         ],
@@ -432,7 +441,7 @@ def init_plot_vars() -> None:
         "traces": None,
         "lowess_s": 0.7,
         "centile_type": 'CN',
-        "centile_values": ['centile_50'],
+        "centile_values": [],
         "flag_norm_centiles": False,
         "list_roi_indices": [81, 82],
         "list_orient": ["axial", "coronal", "sagittal"],

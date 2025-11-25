@@ -29,7 +29,7 @@ def add_trace_scatter(df: pd.DataFrame, plot_params: dict, plot_settings: dict, 
     # Get hue params
     hvar = plot_params['hvar']
     hvals = plot_params['hvals']    
-    if hvar is None or hvar == 'None':
+    if hvar is None or hvar == 'Select an option…':
         hvar = 'grouping_var'
     if hvals is None:
         hvals = df[hvar].dropna().sort_values().unique().tolist()
@@ -62,9 +62,9 @@ def add_trace_linreg(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
     # Get hue params
     hvar = plot_params['hvar']
     hvals = plot_params['hvals']
-    if hvar is None or hvar == 'None':
+    if hvar is None or hvar == 'Select an option…':
         hvar = 'grouping_var'
-    if hvals is None:
+    if hvals is None or hvals == []:
         hvals = df[hvar].dropna().sort_values().unique().tolist()
 
     traces = plot_params['traces']

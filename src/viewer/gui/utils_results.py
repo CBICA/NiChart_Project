@@ -53,54 +53,46 @@ def set_plot_params(df):
     
     plot_params = st.session_state.plot_params
     
+    #### Variables
     sac.divider(label='Variables', align='center', color='gray')
     
     sel_xvar = utilwd.select_var_twolevels(
+        'plot_params', 'xvargroup', 'xvar',
         'Variable X', list_vars, ['demog', 'roi'],
-        'res_sel_xvar_cat', 'res_sel_xvar_name'
     )
     
     sel_yvar = utilwd.select_var_twolevels(
+        'plot_params', 'yvargroup', 'yvar',
         'Variable Y', list_vars, ['roi'],
-        'res_sel_yvar_cat', 'res_sel_yvar_name'
     )
 
     sel_hvar = utilwd.select_var_twolevels(
+        'plot_params', 'hvargroup', 'hvar',
         'Grouping Variable', list_vars, ['demog'],
-        'res_sel_hvar_cat', 'res_sel_hvar_name'
     )
 
+    #### Filters
     sac.divider(label='Filters', align='center', color='gray')
 
     # Let user select sex var
-    sel_sex = utilwd.my_multiselect(
-        ['F','M'], 'res_sel_sex', 
-        
-    )
+    sel_sex = utilwd.my_multiselect(['F','M'], 'res_sel_sex', 'Sex')
 
     # Let user pick an age range
-    #utilpl.select_age_range()
-    #sel_age_range = utilwd.my_slider('res_sel_age_range', 'Age Range', 0, 110)
-    st.write(f'Values {st.session_state['res_sel_age_range']}')
-
-
-    print(f'RRR1 {st.session_state['res_sel_age_range']}')
-    sel_age_range = st.slider(
-        'Age Range', 
-        min_value=0, max_value=110,
-        # value = st.session_state.res_sel_age_range,
-        key = 'res_sel_age_range'
+    sel_age_range = utilwd.my_slider(
+        'plot_params', 'filter_age', 'Age Range', 0, 110
     )
 
-    print(f'RRR1 {sel_age_range}')
-    print(f'RRR2 {st.session_state['res_sel_age_range']}')
+    #### Trends
+    sac.divider(label='Trends', align='center', color='gray')
+    utilwd.select_trend()
+    
+    #### Centiles
+    sac.divider(label='Centiles', align='center', color='gray')
+    utilwd.select_centiles()
 
-    sac.divider(label='Traces', align='center', color='gray')
-    utilpl.user_select_trend(plot_params)
-    
-    sac.divider(label='Plot Settings', align='center', color='gray')
-    utilpl.user_select_plot_settings(plot_params)
-    
+    ##### Plot controls
+    #sac.divider(label='Plot Settings', align='center', color='gray')
+    #utilpl.user_select_plot_settings(plot_params)
 
 
 def view_dlmuse_volumes(layout):
@@ -134,7 +126,6 @@ def view_dlmuse_volumes(layout):
 
     # Set centile selections
     #st.session_state.plot_params['centile_values'] = st.session_state.plot_settings['centile_trace_types']
-
     #with layout:
         #sac.divider(label='Plot Controls', align='center', color='gray')
         #utilpl.user_add_plots(st.session_state.plot_params)
@@ -145,17 +136,24 @@ def view_dlmuse_volumes(layout):
 
     # Add a single plot if there is none
     st.session_state.plot_params['traces'] = ['data']
-    if st.session_state.plots.shape[0] == 0:
-        st.session_state.plots = utilpl.add_plot(
-            st.session_state.plots, st.session_state.plot_params
-        )
+    #if st.session_state.plots.shape[0] == 0:
+        #st.session_state.plots = utilpl.add_plot(
+            #st.session_state.plots, st.session_state.plot_params
+        #)
 
 
     with layout:
         set_plot_params(df)
 
+    with layout:
+        if st.button('Add Plot'):
+            st.session_state.plots = utilpl.add_plot(
+                st.session_state.plots, st.session_state.plot_params
+            )
+            st.write(st.session_state.plots)
+            st.write(st.session_state.plot_params)
+            
     utilpl.panel_show_plots()
-
 
 def view_segmentation(layout, pipeline):
     """
@@ -181,7 +179,9 @@ def view_segmentation(layout, pipeline):
         list_mrids = df.MRID.sort_values().tolist()
         
         with layout:
-            sel_mrid = utilwd.my_selectbox(list_mrids, 'res_sel_mrid', 'Subject')
+            sel_mrid = utilwd.my_selectbox(
+                'plot_params', 'res_sel_mrid', list_mrids, 'Subject'
+            )
 
         if sel_mrid is None or sel_mrid == 'Select an option…':
             return
@@ -297,7 +297,9 @@ def panel_results(layout):
         sac.divider(label='General Options', align='center', color='gray')
 
     with layout:
-        sel_task = utilwd.my_selectbox(['Download', 'View'], 'res_sel_task', hdr='Task')
+        sel_task = utilwd.my_selectbox(
+            'general_params', 'res_sel_task', ['Download', 'View'], hdr='Task'
+        )
 
     if sel_task == 'Download':
         panel_download()
@@ -305,16 +307,25 @@ def panel_results(layout):
     elif sel_task == 'View':
 
         with layout:
-            sel_rtype = utilwd.my_selectbox(['Quantitative', 'Image'], 'res_sel_rtype', 'Result Type')
+            sel_rtype = utilwd.my_selectbox(
+                'general_params', 'res_sel_rtype',
+                ['Quantitative', 'Image'], 'Result Type'
+            )
 
         if sel_rtype == 'Image':
             with layout:
-                sel_pipe = utilwd.my_selectbox(['dlmuse', 'dlwmls'], 'res_sel_pipe', 'Pipeline')
+                sel_pipe = utilwd.my_selectbox(
+                    'general_params', 'res_sel_pipe',
+                    ['dlmuse', 'dlwmls'], 'Pipeline'
+                )
             view_segmentation(layout, sel_pipe)
 
         elif sel_rtype == 'Quantitative':
             with layout:
-                sel_pipe = utilwd.my_selectbox(['dlmuse', 'dlwmls'], 'res_sel_pipe', 'Pipeline')
+                sel_pipe = utilwd.my_selectbox(
+                    'general_params', 'res_sel_pipe',
+                    ['dlmuse', 'dlwmls'], 'Pipeline'
+                )
             view_img_vars(layout, sel_pipe)
 
 

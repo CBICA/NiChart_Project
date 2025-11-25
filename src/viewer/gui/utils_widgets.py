@@ -15,58 +15,31 @@ import utils.utils_traces as utiltr
 
 import streamlit_antd_components as sac
 
-def select_sex_var():
-    '''
-    Set sex var values
-    '''
-    sel_vals = st.pills(
-        label='Select Sex',
-        options=['F', 'M'],
-        key = '_sex_var',
-        default = st.session_state.plot_params['filter_sex'],
-        selection_mode = 'multi',
-    )
-    st.session_state.plot_params['filter_sex'] = sel_vals
-
-    st.slider(
-        'Select Age Range:',
-        min_value = st.session_state.plot_settings['min_age'],
-        max_value = st.session_state.plot_settings['max_age'],
-        key = '_age_range',
-        on_change = update_age_range
-    )
-
+################################
 ## Wrappers for standard widgets
-def my_slider(var_name, hdr, min_val, max_val):
-    # Initialize once
-    if var_name not in st.session_state:
-        st.session_state[var_name] = min_val
+def my_slider(var_group, var_name, hdr, min_val=0, max_val=10, step=1):
+    def update_slider():
+        st.session_state[var_group][var_name] = st.session_state[f'_{var_name}']
+        
     return st.slider(
         hdr,
         min_value=min_val,
         max_value=max_val,
-        key=var_name
+        step=step, 
+        key=f'_{var_name}',
+        value = st.session_state[var_group][var_name],
+        on_change=update_slider        
     )
 
 def my_checkbox(var_name, hdr):
-    # Initialize once
-    if var_name not in st.session_state:
-        st.session_state[var_name] = min_val
-    return st.slider(
+    def update_checkbox():
+        st.session_state[var_name] = st.session_state[f'_{var_name}']
+    return st.checkbox(
         hdr,
-        min_value=min_val,
-        max_value=max_val,
-        key=var_name
+        key=f'_{var_name}',
+        value = st.session_state[var_name],
+        on_change=update_checkbox
     )
-    #'''
-    #Wrapper for checkbox
-    #'''
-    #sel_val = st.session_state.get(var_name)
-    #sel_opt = st.checkbox(
-        #hdr, value=sel_val, key=f'_{var_name}'
-    #)
-    #st.session_state[var_name] = sel_opt
-    #return sel_opt
 
 def my_multiselecttmp(list_opts, var_name, hdr='selection box', label_visibility='visible'):
     '''
@@ -97,22 +70,27 @@ def safe_index(lst, value, default=0):
     except ValueError:
         return default
 
-def my_selectbox(list_opts, var_name, hdr='selection box', label_visibility='visible'):
+def my_selectbox(
+    var_group, var_name, list_opts, hdr='selection box', label_visibility='visible'
+):
     '''
     Wrapper for selectbox
     '''
     options = ["Select an option…"] + list_opts
-    sel_ind = safe_index(options, st.session_state.get(var_name))
+    sel_ind = safe_index(options, st.session_state[var_group][var_name])
     sel_opt = st.selectbox(
         hdr, options, key=f'_{var_name}', index=sel_ind,
         label_visibility=label_visibility, disabled=(len(list_opts) == 0)
     )
-    st.session_state[var_name] = sel_opt
+    st.session_state[var_group][var_name] = sel_opt
     return sel_opt
 
+################################
+## Custom widgets
+
 def selectbox_twolevels(
+    var_group, var_name1, var_name2,
     df_vars, list_vars,
-    var_name1, var_name2,
     dicts_rename = None
 ):
     '''
@@ -136,19 +114,22 @@ def selectbox_twolevels(
         roi_dict[tmp_group] = tmp_list
         
     with st.container(horizontal=True, horizontal_alignment="left"):
-        sel_opt1 = my_selectbox(list(roi_dict), var_name1, label_visibility='collapsed')
+        sel_opt1 = my_selectbox(
+            var_group, var_name1, list(roi_dict), label_visibility='collapsed'
+        )
         if sel_opt1 is None or sel_opt1 == 'Select an option…':
             list_opts = []
         else:
             list_opts = roi_dict[sel_opt1]
-        sel_opt2 = my_selectbox(list_opts, var_name2, label_visibility='collapsed')
+        sel_opt2 = my_selectbox(
+            var_group, var_name2, list_opts, label_visibility='collapsed'
+        )
 
-        st.session_state[var_name1] = sel_opt1
-        st.session_state[var_name2] = sel_opt2
+        st.session_state[var_group][var_name1] = sel_opt1
+        st.session_state[var_group][var_name2] = sel_opt2
 
     return sel_opt2
 
-## Specific Widgets
 def select_muse_roi(list_vars):
     """
     Panel to set mriview parameters
@@ -169,7 +150,7 @@ def select_muse_roi(list_vars):
     st.session_state['sel_roi'] = sel_var
     return sel_var
 
-def select_var_twolevels(hdr, list_vars, list_cat, var_name1, var_name2):
+def select_var_twolevels(var_group, var_name1, var_name2, hdr, list_vars, list_cat):
     """
     Panel to select a variable using a two level selection
     First level is the var category provided with data dict
@@ -181,11 +162,57 @@ def select_var_twolevels(hdr, list_vars, list_cat, var_name1, var_name2):
     # Select roi
     st.write(hdr)
     sel_var = selectbox_twolevels(
+        var_group, var_name1, var_name2,
         sel_cats, list_vars,
-        var_name1, var_name2,
         dicts_rename = {
             'muse': st.session_state.dicts['muse']['ind_to_name']
         }
     )
     return sel_var
 
+
+################################
+## Specific selections
+
+def select_trend():
+    '''
+    Panel to select trend
+    '''
+    list_trends = st.session_state.plot_settings["trend_types"]
+    sel_trend = my_selectbox(
+        'plot_params', 'trend', list_trends, 'Trend'
+    )
+
+    if sel_trend is None:
+        return
+
+    if sel_trend == 'Select an option…':
+        return
+
+    if sel_trend == 'Linear':
+        sel_flag_conf = my_checkbox('res_flag_conf', "Add confidence interval")
+
+    elif sel_trend == 'Smooth LOWESS Curve':
+        sel_lowess_s = my_slider('plot_params', 'lowess_s', 'Smoothness', 0.4, 1.0, 0.1)
+
+def select_centiles():
+    '''
+    User panel to select centile values
+    '''
+    list_types = ['None', 'CN', 'CN-Females', 'CN-Males', 'CN-ICVNorm']
+    list_values = ['centile_5', 'centile_25', 'centile_50', 'centile_75', 'centile_95']
+
+    sel_cent_type = my_selectbox(
+        'plot_params', 'centile_type', list_types, 'Centile Type'
+    )
+    
+    if sel_cent_type is None:
+        return
+
+    if sel_cent_type == 'Select an option…':
+        return
+
+    sel_cent_vals = my_multiselect(
+        list_values, 'res_cent_values', 'Centile Values'
+    )
+    
