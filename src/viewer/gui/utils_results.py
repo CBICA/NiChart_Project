@@ -44,6 +44,7 @@ def select_from_list(layout, list_opts, var_name, hdr):
         sel_opt = st.selectbox(hdr, list_opts, key=var_name, index=sel_ind)
     return st.session_state[var_name]
 
+
 def set_plot_params(df):
     """
     Panel for selecting plotting parameters
@@ -81,13 +82,18 @@ def set_plot_params(df):
     #utilpl.select_age_range()
     #sel_age_range = utilwd.my_slider('res_sel_age_range', 'Age Range', 0, 110)
     st.write(f'Values {st.session_state['res_sel_age_range']}')
+
+
+    print(f'RRR1 {st.session_state['res_sel_age_range']}')
     sel_age_range = st.slider(
         'Age Range', 
-        value = st.session_state.res_sel_age_range,
-        key='res_sel_age_range',
-        min_value=0, max_value=110
+        min_value=0, max_value=110,
+        # value = st.session_state.res_sel_age_range,
+        key = 'res_sel_age_range'
     )
-    st.write(f'RRR {st.session_state['res_sel_age_range']}')
+
+    print(f'RRR1 {sel_age_range}')
+    print(f'RRR2 {st.session_state['res_sel_age_range']}')
 
     sac.divider(label='Traces', align='center', color='gray')
     utilpl.user_select_trend(plot_params)

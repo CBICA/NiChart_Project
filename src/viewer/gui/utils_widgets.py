@@ -177,9 +177,6 @@ def select_var_twolevels(hdr, list_vars, list_cat, var_name1, var_name2):
     df_vars = st.session_state.dicts['df_var_groups']
     sel_cats = df_vars[df_vars.category.isin(list_cat)]
     
-    print('aaa')
-    print(list_cat)
-    print(df_vars.category)
     
     # Select roi
     st.write(hdr)

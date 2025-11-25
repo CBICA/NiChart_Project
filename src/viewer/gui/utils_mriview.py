@@ -146,10 +146,6 @@ def prep_image_and_olay(f_img: np.ndarray, f_mask: Any, list_rois: list, crop_to
     Read images from files and create 3D matrices for display
     """
 
-    print(f_img)
-    print(f_mask)
-    print(list_rois)
-
     # Read nifti
     nii_img = nib.load(f_img)
     nii_mask = nib.load(f_mask)

@@ -261,8 +261,8 @@ def display_scatter_plot(df, df_cent, plot_params, plot_ind, plot_settings):
         
         sel_info = st.session_state[f"bubble_chart_{plot_ind}"]
         
-        print('-------------------------------------')
-        print(sel_info)
+        # print('-------------------------------------')
+        # print(sel_info)
         
         if len(sel_info["selection"]["points"]) > 0:
             sind = sel_info["selection"]["point_indices"][0]
@@ -281,7 +281,7 @@ def display_scatter_plot(df, df_cent, plot_params, plot_ind, plot_settings):
             st.session_state.sel_mrid = sel_mrid
             st.session_state.sel_roi = sel_roi
 
-        print(f'Clicked {sel_mrid}')
+        # print(f'Clicked {sel_mrid}')
 
     curr_params = st.session_state.plots.loc[plot_ind, 'params']
 
