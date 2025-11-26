@@ -284,7 +284,7 @@ def display_scatter_plot(df, df_cent, plot_params, plot_ind, plot_settings):
         # print(f'Clicked {sel_mrid}')
 
     curr_params = st.session_state.plots.loc[plot_ind, 'params']
-
+        
     # Filter centiles
     if df_cent is None:
         df_cent_filt = None
@@ -335,6 +335,12 @@ def display_scatter_plot(df, df_cent, plot_params, plot_ind, plot_settings):
     st.plotly_chart(fig, key=f"bubble_chart_{plot_ind}", on_select=callback_plot_clicked)
     # st.plotly_chart(fig, key=f"bubble_chart_{plot_ind}")
 
+    ## FIXME
+    with st.expander('temp debug'):
+        st.write(df)
+        st.write(df_cent)
+        st.write(curr_params)
+
     return fig
 
 def show_plots(df, df_cent, df_plots, plot_settings):
@@ -343,7 +349,18 @@ def show_plots(df, df_cent, df_plots, plot_settings):
     """
     # Read plot ids
     list_plots = df_plots.index.tolist()
-    plots_per_row = plot_settings["num_per_row"]
+    
+    # Set number of plots in each row
+    num_plot = len(list_plots)
+    
+    if plot_settings['flag_auto']:
+        st.write(num_plot)
+        st.write(plot_settings["num_per_row"])
+        plots_per_row = int(np.min([num_plot, plot_settings["num_per_row"]]))
+    else:
+        plots_per_row = plot_settings["num_per_row"]
+
+    st.write(plots_per_row)
 
     # Render plots
     #  - iterates over plots;
@@ -402,6 +419,13 @@ def show_mri():
     olay = os.path.join(
         in_dir, 'DLMUSE_seg', f'{mrid}_T1_DLMUSE.nii.gz'
     )
+    
+    if not os.path.exists(ulay):
+        return
+
+    if not os.path.exists(olay):
+        return
+    
     utilmri.panel_view_seg(ulay, olay, plot_params)
 
 ###################################################################

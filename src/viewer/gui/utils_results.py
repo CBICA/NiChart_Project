@@ -44,7 +44,6 @@ def select_from_list(layout, list_opts, var_name, hdr):
         sel_opt = st.selectbox(hdr, list_opts, key=var_name, index=sel_ind)
     return st.session_state[var_name]
 
-
 def set_plot_params(df):
     """
     Panel for selecting plotting parameters
@@ -104,14 +103,89 @@ def set_plot_params(df):
         sac.divider(label='Centiles', align='center', color='indigo', size='lg')
         utilwd.select_centiles()
 
-    ##### Plot controls
-    #sac.divider(label='Plot Settings', align='center', color='indigo', size='lg')
-    #utilpl.user_select_plot_settings(plot_params)
+    #### Plot Settings
+    if tab == 'Plot Settings':
+        utilwd.select_plot_settings()
 
-
-def view_dlmuse_volumes(layout):
+def set_centileplot_params():
     """
-    View dlmuse volumes
+    Panel for selecting centile plot parameters
+    """
+    sac.divider(label='Plotting Parameters', align='center', color='indigo', size='lg')
+    
+    tab = sac.tabs(
+        items=[
+            sac.TabsItem(label='Centiles'),
+            sac.TabsItem(label='Variables'),
+            sac.TabsItem(label='Filters'),
+            sac.TabsItem(label='Plot Settings'),
+        ],
+        size='sm',
+        align='left'
+    )
+
+    #### Centiles
+    if tab == 'Centiles':
+        utilwd.select_centiles()
+    
+    #### Variables
+    if tab == 'Variables':
+        sel_xvar = utilwd.select_var_twolevels(
+            'plot_params', 'xvargroup', 'xvar',
+            'Variable X', ['Age'], ['demog'],
+        )
+        
+        sel_yvar = utilwd.select_var_twolevels(
+            'plot_params', 'yvargroup', 'yvar',
+            'Variable Y', None, ['roi']
+        )
+    #### Filters
+    if tab == 'Filters':
+        # Let user pick an age range
+        sel_age_range = utilwd.my_slider(
+            'plot_params', 'filter_age', 'Age Range', 0, 110
+        )
+        
+    #### Plot Settings
+    if tab == 'Plot Settings':
+        utilwd.select_plot_settings()        
+
+
+def set_plot_controls():
+    sac.divider(label='Plot Controls', align='center', color='indigo', size='lg')
+    with st.container(horizontal=True, horizontal_alignment="center"):
+        if st.button('Add Plot'):
+            st.session_state.plots = utilpl.add_plot(
+                st.session_state.plots, st.session_state.plot_params
+            )
+            #st.write(st.session_state.plots)
+            #st.write(st.session_state.plot_params)
+        if st.button('Delete Selected'):
+            st.session_state.plots = utilpl.delete_sel_plots(
+                st.session_state.plots
+            )
+
+        if st.button('Delete All'):
+            st.session_state.plots = utilpl.delete_all_plots()
+
+
+def plot_centiles(layout):
+    """
+    View centile values (reference data)
+    """
+    plot_params = st.session_state.plot_params
+    
+    with layout:
+        set_centileplot_params()
+        
+    with layout:
+        set_plot_controls()
+        
+    utilpl.panel_show_plots()
+
+def plot_imgvars(layout):
+    """
+    View img variables (user data)
     """
     fname = os.path.join(
         st.session_state.paths['project'], 'plots', 'data_all.csv'
@@ -138,12 +212,7 @@ def view_dlmuse_volumes(layout):
         sac.divider(label='Plot Controls', align='center', color='indigo', size='lg')
         
     with layout:
-        if st.button('Add Plot'):
-            st.session_state.plots = utilpl.add_plot(
-                st.session_state.plots, st.session_state.plot_params
-            )
-            #st.write(st.session_state.plots)
-            #st.write(st.session_state.plot_params)
+        set_plot_controls()
             
     utilpl.panel_show_plots()
 
@@ -233,12 +302,16 @@ def view_segmentation(layout, pipeline):
     elif pipeline == 'dlwmls':
         st.info('Not available yet ...')
 
-def view_img_vars(layout, pipeline):
+def view_img_vars(layout):
     """
     View image variables
     """    
+    pipeline = st.session_state.general_params['sel_pipeline']
     if pipeline == 'dlmuse':
-        view_dlmuse_volumes(layout)
+        if st.session_state.workflow == 'ref_data':
+            plot_centiles(layout)
+        else:
+            plot_imgvar(layout)
       
     elif pipeline == 'dlwmls':
         st.info('Not available yet ...')
@@ -247,6 +320,10 @@ def panel_download():
     '''
     Panel to download results
     '''
+    if st.session_state.workflow == 'ref_data':
+        st.info('Reference data download is not available at this time.')
+        return
+    
     with st.container(horizontal=True, horizontal_alignment="center"):
 
         st.markdown(f"###### 📁 Project Folder:   `{st.session_state.prj_name}`", width='content')
@@ -287,7 +364,6 @@ def panel_download():
 
 def panel_results(layout):
     logger.debug('    Function: panel_results')
-
     with layout:
         sac.divider(label='General Options', align='center', color='indigo', size='lg')
 
@@ -300,7 +376,6 @@ def panel_results(layout):
         panel_download()
 
     elif sel_task == 'View':
-
         with layout:
             sel_rtype = utilwd.my_selectbox(
                 'general_params', 'sel_rtype',
@@ -310,7 +385,7 @@ def panel_results(layout):
         if sel_rtype == 'Image':
             with layout:
                 sel_pipe = utilwd.my_selectbox(
-                    'general_params', 'sel_pipe',
+                    'general_params', 'sel_pipeline',
                     ['dlmuse', 'dlwmls'], 'Pipeline'
                 )
             if sel_pipe is None or sel_pipe == 'Select an option...':
@@ -320,11 +395,11 @@ def panel_results(layout):
         elif sel_rtype == 'Numeric':
             with layout:
                 sel_pipe = utilwd.my_selectbox(
-                    'general_params', 'sel_pipe',
+                    'general_params', 'sel_pipeline',
                     ['dlmuse', 'dlwmls'], 'Pipeline'
                 )
             if sel_pipe is None or sel_pipe == 'Select an option...':
                 return
-            view_img_vars(layout, sel_pipe)
+            view_img_vars(layout)
 
 

@@ -351,7 +351,7 @@ def init_plot_vars() -> None:
     st.session_state.general_params = {
         'sel_task': None,
         'sel_rtype': None,
-        'sel_pipe': None
+        'sel_pipeline': None
     }
     
     ######################
@@ -401,6 +401,7 @@ def init_plot_vars() -> None:
         "distplot_trace_types": [
             "histogram", "density", "rug"
         ],
+        'flag_auto': True,
         "min_per_row": 1,
         "max_per_row": 5,
         "num_per_row": 2,
@@ -446,7 +447,7 @@ def init_plot_vars() -> None:
         "traces": ['data'],
         "lowess_s": 0.7,
         "centile_type": 'CN',
-        "centile_values": [],
+        "centile_values": ['centile_25', 'centile_50', 'centile_75'],
         "flag_norm_centiles": False,
         "list_roi_indices": [81, 82],
         "list_orient": ["axial", "coronal", "sagittal"],

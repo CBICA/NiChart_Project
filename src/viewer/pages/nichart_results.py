@@ -51,12 +51,6 @@ else:
 
 utilres.panel_results(layout)
 
-#if st.session_state.workflow == 'ref_data':
-    #utilres.panel_results(layout)
-
-#else:
-    #utilres.panel_results(layout)
-
 sac.divider(key='_p0_div2')
 
 with st.container(horizontal=True, horizontal_alignment="center"):

@@ -102,7 +102,7 @@ def my_selectbox(
 
 def selectbox_twolevels(
     var_group, var_name1, var_name2,
-    df_vars, list_vars,
+    df_vars, list_vars = None,
     dicts_rename = None
 ):
     '''
@@ -121,7 +121,8 @@ def selectbox_twolevels(
             tmp_list = [dicts_rename[tmp_atlas][k] for k in tmp_list]
 
         # Select vars that are included in the data
-        tmp_list = [x for x in tmp_list if x in list_vars]
+        if list_vars is not None:
+            tmp_list = [x for x in tmp_list if x in list_vars]
 
         roi_dict[tmp_group] = tmp_list
         
@@ -212,7 +213,9 @@ def select_centiles():
     '''
     User panel to select centile values
     '''
-    list_types = ['None', 'CN', 'CN-Females', 'CN-Males', 'CN-ICVNorm']
+    plot_params = st.session_state.plot_params
+    
+    list_types = ['CN', 'CN-Females', 'CN-Males', 'CN-ICVNorm']
     list_values = ['centile_5', 'centile_25', 'centile_50', 'centile_75', 'centile_95']
 
     sel_cent_type = my_selectbox('plot_params', 'centile_type', list_types, 'Centile Type')
@@ -223,5 +226,58 @@ def select_centiles():
     if sel_cent_type == 'Select an option…':
         return
 
+    # Read centile dataframe
+    pipeline = st.session_state.general_params['sel_pipeline']
+    csv_cent = os.path.join(
+        st.session_state.paths['centiles'],
+        f'{pipeline}_centiles_{plot_params['centile_type']}.csv'
+    )
+    if csv_cent != st.session_state.plot_data['csv_cent']:
+        try:
+            df_cent = pd.read_csv(csv_cent)
+        except:
+            st.toast('Could not read centile data!')
+            return
+
+        st.session_state.plot_data['csv_cent'] = csv_cent
+        st.session_state.plot_data['df_cent'] = df_cent
+        st.toast('Loaded centile data!')
+
     sel_cent_vals = my_multiselect('plot_params', 'centile_values', list_values, 'Centile Values')
+
+    if plot_params['centile_values'] is not None:
+        plot_params['traces'] = plot_params['traces'] + plot_params['centile_values']
     
+
+def select_plot_settings():
+    '''
+    Panel to select plot settings
+    '''
+    plot_settings = st.session_state.plot_settings
+    
+    flag_auto = my_checkbox('plot_settings', 'flag_auto', 'Auto resize')
+    
+    #st.session_state.plot_settings["num_per_row"] = st.slider(
+        #"Number of plots per row",
+        #st.session_state.plot_settings["min_per_row"],
+        #st.session_state.plot_settings["max_per_row"],
+        #st.session_state.plot_settings["num_per_row"],
+        #disabled=False,
+    #)
+
+    #plot_params["h_coeff"] = st.slider(
+        #"Plot height",
+        #min_value=st.session_state.plot_settings["h_coeff_min"],
+        #max_value=st.session_state.plot_settings["h_coeff_max"],
+        #value=st.session_state.plot_settings["h_coeff"],
+        #step=st.session_state.plot_settings["h_coeff_step"],
+        #disabled=False,
+    #)
+
+    ## Checkbox to show/hide plot legend
+    #plot_params['flag_hide_legend'] = st.checkbox(
+        #"Hide legend",
+        #value=st.session_state.plot_settings['flag_hide_legend'],
+        #disabled=False,
+    #)
+
