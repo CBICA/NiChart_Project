@@ -420,6 +420,80 @@ def panel_upload_single_subject():
         else:
             upload_files(sel_files)
 
+def panel_upload_multi_subject():
+    '''
+    Upload user data to target folder
+    '''
+    logger.debug('    Function: panel_upload_multi_subject')
+
+    sac.divider(key='_p2_div1')
+    
+    with st.container(horizontal=True, horizontal_alignment="left"):
+        st.markdown("##### Upload File(s): ", width='content')
+        with st.popover("❓", width='content'):
+            st.write(
+                """
+                **Data Upload Guide**
+                - You may upload MRI scans in any of the following formats:
+                  - **NIfTI:** one or multiple .nii or .nii.gz files 
+                  - **DICOM (compressed):** a single .zip file containing the DICOM series
+                  - **DICOM (individual files):** multiple .dcm files
+                  
+                    *(Note: uploading a folder directly is not currently supported)*
+                    
+                - If you have multiple imaging modalities (e.g., T1, FLAIR), upload only one modality batch at a time.
+                
+                - Once uploaded, NiChart will automatically:
+                  - Organize the files into the standard input structure
+                  - Create a subject list based on the uploaded MRI data
+                  
+                - You may open and edit the subject list (e.g., to add age, sex, or other metadata needed for analysis).
+                
+                - You can also upload non-imaging data (e.g., clinical or cognitive measures) as a CSV file (required for harmonization and many analytical pipelines).
+                
+                - The CSV must include an MRID column with values that match the subject IDs in the subject list, so the data can be merged correctly.
+
+                - When you go to select a pipeline in the next step, if you select a pipeline which needs more fields, we'll tell you.
+                """
+            )
+            
+    # Upload data
+    #sel_opt = sac.chip(
+    #    ['Single (.nii.gz, .nii, .zip, .csv)', 'Multiple (dicom files)'],
+    #    label='', index=0, align='left', size='sm', radius='sm', multiple=False, 
+    #    color='cyan', return_index = True
+    #)
+    sel_opt = sac.chip(
+        ['T1 scans (.nii.gz, .nii, .zip)', 'FLAIR scans (.nii.gz, .nii, .zip)',
+         'DICOM images (.dcm, .zip)', 'Participants CSV (.csv)'],
+         label='', index=0, align='left', size='sm', radius='sm', multiple=False,
+         color='cyan', return_index = True
+    )
+
+    flag_multi=True
+        
+    logger.debug(f'**** flag multi set to : {flag_multi}')
+        
+    with st.form(key='my_form', clear_on_submit=True, border=False):
+                
+        sel_files = st.file_uploader(
+            "Input files or folders",
+            key="_uploaded_input",
+            accept_multiple_files=flag_multi,
+            label_visibility="collapsed"
+        )
+        
+        flag_submit = False
+        with st.container(horizontal=True, horizontal_alignment="center"):
+            submitted = st.form_submit_button("Submit")
+            if submitted:
+                flag_submit = True
+        
+    logger.debug(f'**** flag submitted set to : {flag_submit}')
+    logger.debug(f'**** sel files : {sel_files}')
+    if flag_submit == True:
+        upload_files(sel_files)
+
 def panel_view_files():
     '''
     Show files in data folder
