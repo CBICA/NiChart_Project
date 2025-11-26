@@ -82,9 +82,7 @@ def safe_index(lst, value, default=0):
     except ValueError:
         return default
 
-def my_selectbox(
-    var_group, var_name, list_opts, hdr='selection box', label_visibility='visible'
-):
+def my_selectbox(var_group, var_name, list_opts, hdr='selection box', label_visibility='visible'):
     '''
     Wrapper for selectbox
     '''
@@ -100,11 +98,7 @@ def my_selectbox(
 ################################
 ## Custom widgets
 
-def selectbox_twolevels(
-    var_group, var_name1, var_name2,
-    df_vars, list_vars = None,
-    dicts_rename = None
-):
+def selectbox_twolevels(var_group, var_name1, var_name2, df_vars, list_vars = None, dicts_rename = None):
     '''
     Selectbox with two levels to select a variable grouped in categories
     Also renames variables (e.g. roi indices to names)
@@ -187,7 +181,6 @@ def select_var_twolevels(var_group, var_name1, var_name2, hdr, list_vars, list_c
 
 ################################
 ## Specific selections
-
 def select_trend():
     '''
     Panel to select trend
@@ -247,8 +240,7 @@ def select_centiles():
 
     if plot_params['centile_values'] is not None:
         plot_params['traces'] = plot_params['traces'] + plot_params['centile_values']
-    
-
+        
 def select_plot_settings():
     '''
     Panel to select plot settings
@@ -278,5 +270,24 @@ def select_plot_settings():
 
     # Checkbox to show/hide plot legend
     sel_f = my_checkbox('plot_settings', 'flag_hide_legend', "Hide legend")
+
+def select_mriplot_settings():
+    '''
+    Panel to select mriplot settings
+    '''
+    img_views = ["axial", "coronal", "sagittal"]
+
+    sac.divider(label='Plot Options', align='center', color='indigo', size='lg')
+
+    sel_orient = my_multiselect(
+        'mriplot_params', 'sel_orient', img_views, 'View Planes'
+    )
+
+    if sel_orient is None or len(sel_orient) == 0:
+        return
+
+    flag_overlay = my_checkbox('mriplot_params', 'flag_overlay', "Show overlay")
+
+    flag_crop = my_checkbox('mriplot_params', 'flag_crop', "Crop to mask")
 
 

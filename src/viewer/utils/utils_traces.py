@@ -48,7 +48,7 @@ def add_trace_scatter(df: pd.DataFrame, plot_params: dict, plot_settings: dict, 
                 marker={"color": c_txt},
                 name=hname,
                 legendgroup=hname,
-                showlegend = plot_settings['flag_hide_legend'] == 'Show',
+                showlegend = not plot_settings['flag_hide_legend'],
             )
             fig.add_trace(trace)
 
@@ -98,7 +98,7 @@ def add_trace_linreg(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
                 line=line,
                 name=f"lin_{hname}",
                 #legendgroup=hname,
-                showlegend = plot_settings['flag_hide_legend'] == 'Show',
+                showlegend = not plot_settings['flag_hide_legend'],
             )
             fig.add_trace(trace)
 
@@ -120,7 +120,8 @@ def add_trace_linreg(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
                 hoverinfo="skip",
                 name=f"lin_conf95_{hname}",
                 #legendgroup=hname,
-                showlegend = plot_settings['flag_hide_legend'] == 'Show',
+                showlegend = not plot_settings['flag_hide_legend'],
+                
             )
             fig.add_trace(trace)
 
@@ -169,7 +170,8 @@ def add_trace_lowess(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
             line = line,
             name=f"smooth_{hname}",
             #legendgroup=hname,
-            showlegend = plot_settings['flag_hide_legend'] == 'Show'
+            showlegend = not plot_settings['flag_hide_legend'],
+            
         )
         fig.add_trace(trace)
 
@@ -191,7 +193,8 @@ def add_trace_dot(
         marker=dict(
             color="rgba(250, 50, 50, 0.5)", size=12, line=dict(color="Red", width=3)
         ),
-        showlegend = plot_settings['flag_hide_legend'] == 'Show'
+        showlegend = not plot_settings['flag_hide_legend'],
+        
     )
     fig.add_trace(trace)
 
@@ -243,7 +246,8 @@ def add_trace_centile(df: pd.DataFrame, plot_params: dict, plot_settings: dict, 
                     name=cvar,
                     #legendgroup="centiles",
                     line=dict(color=c_txt, width = w),
-                    showlegend = plot_settings['flag_hide_legend']=='Show',
+                    showlegend = not plot_settings['flag_hide_legend'],
+                    
                 )
                 fig.add_trace(ctrace)  # plot in first row
 

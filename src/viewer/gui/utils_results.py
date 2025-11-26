@@ -216,11 +216,11 @@ def plot_imgvars(layout):
             
     utilpl.panel_show_plots()
 
-def view_segmentation(layout, pipeline):
+def view_segmentation(layout):
     """
     View segmentations
     """
-    img_views = ["axial", "coronal", "sagittal"]
+    pipeline = st.session_state.general_params['sel_pipeline']
 
     with layout:
         sac.divider(label='Data', align='center', color='grape', size = 'xl')
@@ -248,6 +248,7 @@ def view_segmentation(layout, pipeline):
             return
 
         #######################
+        ## FIXME
         ## Set olay ulay images
         #ulay = st.session_state.ref_data["t1"]
         #olay = st.session_state.ref_data["dlmuse"]
@@ -266,37 +267,17 @@ def view_segmentation(layout, pipeline):
         #######################
 
         # Select ROI
+        ## FIXME
         with layout:
             sel_roi = utilwd.select_muse_roi(list_vars)
-
         if sel_roi is None or sel_roi == 'Select an option…':
             return
-        
-        ## FIXME
         st.session_state.mriplot_params['sel_roi'] = sel_roi
 
         # Select plot parameters
         with layout:
-            sac.divider(label='Plot Options', align='center', color='indigo', size='lg')
-
-            sel_orient = utilwd.my_multiselect(
-                'mriplot_params', 'sel_orient', img_views, 'View Planes'
-            )
-
-            if sel_orient is None or len(sel_orient) == 0:
-                return
-
-            #flag_overlay = st.checkbox("Show overlay", True, disabled=False)
-            flag_overlay = utilwd.my_checkbox('mriplot_params', 'flag_overlay', "Show overlay")
-
-            #flag_crop = st.checkbox("Crop to mask", True, disabled=False)
-            flag_crop = utilwd.my_checkbox('mriplot_params', 'flag_crop', "Crop to mask")
-
-        ## FIXME
-        st.session_state.mriplot_params['sel_orient'] = sel_orient
-        st.session_state.mriplot_params['flag_overlay'] = flag_overlay
-        st.session_state.mriplot_params['flag_crop'] = flag_crop
-
+            utilwd.select_mriplot_settings()
+            
         utilmri.panel_view_seg(ulay, olay, st.session_state.mriplot_params)
 
     elif pipeline == 'dlwmls':
@@ -390,7 +371,7 @@ def panel_results(layout):
                 )
             if sel_pipe is None or sel_pipe == 'Select an option...':
                 return
-            view_segmentation(layout, sel_pipe)
+            view_segmentation(layout)
 
         elif sel_rtype == 'Numeric':
             with layout:

@@ -387,9 +387,8 @@ def init_plot_vars() -> None:
     st.session_state.plot_settings = {
         "res_type": None,       # Quantitative or Image
         "pipeline": None,
-        "flag_hide_settings": 'Show',
-        "flag_hide_legend": 'Show',
-        "flag_hide_mri": 'Show',
+        "flag_hide_legend": False,
+        "flag_hide_mri": True,
         "trend_types": ["Linear", "Smooth LOWESS Curve"],
         "centile_types": ["CN", "CN_Males", "CN_Females", "CN_ICV_Corrected"],
         "linfit_trace_types": [

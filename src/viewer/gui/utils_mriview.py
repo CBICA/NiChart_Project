@@ -347,7 +347,7 @@ def panel_view_seg(ulay, olay, plot_params):
             )
             img_bounds = detect_mask_bounds(mask)
 
-            cols = st.columns(len(plot_params['sel_orient']))
+            cols = st.columns(3)
             for i, tmp_orient in stqdm(
                 enumerate(plot_params['sel_orient']),
                 desc="Showing images ...",
