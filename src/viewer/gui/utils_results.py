@@ -50,48 +50,62 @@ def set_plot_params(df):
     Panel for selecting plotting parameters
     """
     list_vars = df.columns.unique().tolist()
+
+    sac.divider(label='Plotting Parameters', align='center', color='indigo', size='lg')
     
-    plot_params = st.session_state.plot_params
+    tab = sac.tabs(
+        items=[
+            sac.TabsItem(label='Variables'),
+            sac.TabsItem(label='Filters'),
+            sac.TabsItem(label='Trends'),
+            sac.TabsItem(label='Centiles'),
+            sac.TabsItem(label='Plot Settings'),
+        ],
+        size='sm',
+        align='left'
+    )
+    
     
     #### Variables
-    sac.divider(label='Variables', align='center', color='gray')
-    
-    sel_xvar = utilwd.select_var_twolevels(
-        'plot_params', 'xvargroup', 'xvar',
-        'Variable X', list_vars, ['demog', 'roi'],
-    )
-    
-    sel_yvar = utilwd.select_var_twolevels(
-        'plot_params', 'yvargroup', 'yvar',
-        'Variable Y', list_vars, ['roi'],
-    )
+    if tab == 'Variables':
+        sel_xvar = utilwd.select_var_twolevels(
+            'plot_params', 'xvargroup', 'xvar',
+            'Variable X', list_vars, ['demog', 'roi'],
+        )
+        
+        sel_yvar = utilwd.select_var_twolevels(
+            'plot_params', 'yvargroup', 'yvar',
+            'Variable Y', list_vars, ['roi'],
+        )
 
-    sel_hvar = utilwd.select_var_twolevels(
-        'plot_params', 'hvargroup', 'hvar',
-        'Grouping Variable', list_vars, ['demog'],
-    )
+        sel_hvar = utilwd.select_var_twolevels(
+            'plot_params', 'hvargroup', 'hvar',
+            'Grouping Variable', list_vars, ['demog'],
+        )
 
     #### Filters
-    sac.divider(label='Filters', align='center', color='gray')
+    if tab == 'Filters':
 
-    # Let user select sex var
-    sel_sex = utilwd.my_multiselect(['F','M'], 'res_sel_sex', 'Sex')
+        # Let user select sex var
+        sel_sex = utilwd.my_multiselect('plot_params', 'filter_sex', ['F','M'], 'Sex')
 
-    # Let user pick an age range
-    sel_age_range = utilwd.my_slider(
-        'plot_params', 'filter_age', 'Age Range', 0, 110
-    )
+        # Let user pick an age range
+        sel_age_range = utilwd.my_slider(
+            'plot_params', 'filter_age', 'Age Range', 0, 110
+        )
 
     #### Trends
-    sac.divider(label='Trends', align='center', color='gray')
-    utilwd.select_trend()
+    if tab == 'Trends':
+        sac.divider(label='Trends', align='center', color='indigo', size='lg')
+        utilwd.select_trend()
     
     #### Centiles
-    sac.divider(label='Centiles', align='center', color='gray')
-    utilwd.select_centiles()
+    if tab == 'Centiles':
+        sac.divider(label='Centiles', align='center', color='indigo', size='lg')
+        utilwd.select_centiles()
 
     ##### Plot controls
-    #sac.divider(label='Plot Settings', align='center', color='gray')
+    #sac.divider(label='Plot Settings', align='center', color='indigo', size='lg')
     #utilpl.user_select_plot_settings(plot_params)
 
 
@@ -99,13 +113,6 @@ def view_dlmuse_volumes(layout):
     """
     View dlmuse volumes
     """
-    ## FIXME (list of rois from data file to init listbox selections)
-    #fname=os.path.join(
-        #st.session_state.paths['resources'], 'reference_data', 'centiles', 'dlmuse_centiles_CN.csv'
-    #) 
-    #df = pd.read_csv(fname)
-    #list_vars = ['Age', 'Sex'] + df.VarName.unique().tolist()
-
     fname = os.path.join(
         st.session_state.paths['project'], 'plots', 'data_all.csv'
     )
@@ -124,34 +131,19 @@ def view_dlmuse_volumes(layout):
     var_groups_data = ['roi']
     pipeline = 'dlmuse'
 
-    # Set centile selections
-    #st.session_state.plot_params['centile_values'] = st.session_state.plot_settings['centile_trace_types']
-    #with layout:
-        #sac.divider(label='Plot Controls', align='center', color='gray')
-        #utilpl.user_add_plots(st.session_state.plot_params)
-
-        #utilpl.panel_set_params_centile_plot(
-            #st.session_state.plot_params, var_groups_data, pipeline, list_vars
-        #)
-
-    # Add a single plot if there is none
-    st.session_state.plot_params['traces'] = ['data']
-    #if st.session_state.plots.shape[0] == 0:
-        #st.session_state.plots = utilpl.add_plot(
-            #st.session_state.plots, st.session_state.plot_params
-        #)
-
-
     with layout:
         set_plot_params(df)
 
+    with layout:
+        sac.divider(label='Plot Controls', align='center', color='indigo', size='lg')
+        
     with layout:
         if st.button('Add Plot'):
             st.session_state.plots = utilpl.add_plot(
                 st.session_state.plots, st.session_state.plot_params
             )
-            st.write(st.session_state.plots)
-            st.write(st.session_state.plot_params)
+            #st.write(st.session_state.plots)
+            #st.write(st.session_state.plot_params)
             
     utilpl.panel_show_plots()
 
@@ -162,7 +154,7 @@ def view_segmentation(layout, pipeline):
     img_views = ["axial", "coronal", "sagittal"]
 
     with layout:
-        sac.divider(label='Data', align='center', color='gray')
+        sac.divider(label='Data', align='center', color='grape', size = 'xl')
 
     if pipeline == 'dlmuse':
 
@@ -180,7 +172,7 @@ def view_segmentation(layout, pipeline):
         
         with layout:
             sel_mrid = utilwd.my_selectbox(
-                'plot_params', 'res_sel_mrid', list_mrids, 'Subject'
+                'mriplot_params', 'sel_mrid', list_mrids, 'Subject'
             )
 
         if sel_mrid is None or sel_mrid == 'Select an option…':
@@ -210,30 +202,33 @@ def view_segmentation(layout, pipeline):
 
         if sel_roi is None or sel_roi == 'Select an option…':
             return
+        
+        ## FIXME
+        st.session_state.mriplot_params['sel_roi'] = sel_roi
 
         # Select plot parameters
         with layout:
-            sac.divider(label='Plot Options', align='center', color='gray')
+            sac.divider(label='Plot Options', align='center', color='indigo', size='lg')
 
-            sel_orient = utilwd.my_multiselect(img_views, 'res_sel_orient', 'View Planes')
+            sel_orient = utilwd.my_multiselect(
+                'mriplot_params', 'sel_orient', img_views, 'View Planes'
+            )
 
             if sel_orient is None or len(sel_orient) == 0:
                 return
 
             #flag_overlay = st.checkbox("Show overlay", True, disabled=False)
-            flag_overlay = utilwd.my_checkbox('res_flag_overlay', "Show overlay")
-            flag_overlay = utilwd.my_checkbox('res_flag_overlay', "Show overlay")
+            flag_overlay = utilwd.my_checkbox('mriplot_params', 'flag_overlay', "Show overlay")
 
             #flag_crop = st.checkbox("Crop to mask", True, disabled=False)
-            flag_crop = utilwd.my_checkbox('res_flag_crop', "Crop to mask")
+            flag_crop = utilwd.my_checkbox('mriplot_params', 'flag_crop', "Crop to mask")
 
-        # Show figures
-        plot_params = {
-            'sel_orient': sel_orient,
-            'flag_overlay': flag_overlay,
-            'flag_crop': flag_crop,
-        }
-        utilmri.panel_view_seg(ulay, olay, plot_params)
+        ## FIXME
+        st.session_state.mriplot_params['sel_orient'] = sel_orient
+        st.session_state.mriplot_params['flag_overlay'] = flag_overlay
+        st.session_state.mriplot_params['flag_crop'] = flag_crop
+
+        utilmri.panel_view_seg(ulay, olay, st.session_state.mriplot_params)
 
     elif pipeline == 'dlwmls':
         st.info('Not available yet ...')
@@ -294,11 +289,11 @@ def panel_results(layout):
     logger.debug('    Function: panel_results')
 
     with layout:
-        sac.divider(label='General Options', align='center', color='gray')
+        sac.divider(label='General Options', align='center', color='indigo', size='lg')
 
     with layout:
         sel_task = utilwd.my_selectbox(
-            'general_params', 'res_sel_task', ['Download', 'View'], hdr='Task'
+            'general_params', 'sel_task', ['Download', 'View'], hdr='Task'
         )
 
     if sel_task == 'Download':
@@ -308,24 +303,28 @@ def panel_results(layout):
 
         with layout:
             sel_rtype = utilwd.my_selectbox(
-                'general_params', 'res_sel_rtype',
-                ['Quantitative', 'Image'], 'Result Type'
+                'general_params', 'sel_rtype',
+                ['Numeric', 'Image'], 'Data Type'
             )
 
         if sel_rtype == 'Image':
             with layout:
                 sel_pipe = utilwd.my_selectbox(
-                    'general_params', 'res_sel_pipe',
+                    'general_params', 'sel_pipe',
                     ['dlmuse', 'dlwmls'], 'Pipeline'
                 )
+            if sel_pipe is None or sel_pipe == 'Select an option...':
+                return
             view_segmentation(layout, sel_pipe)
 
-        elif sel_rtype == 'Quantitative':
+        elif sel_rtype == 'Numeric':
             with layout:
                 sel_pipe = utilwd.my_selectbox(
-                    'general_params', 'res_sel_pipe',
+                    'general_params', 'sel_pipe',
                     ['dlmuse', 'dlwmls'], 'Pipeline'
                 )
+            if sel_pipe is None or sel_pipe == 'Select an option...':
+                return
             view_img_vars(layout, sel_pipe)
 
 

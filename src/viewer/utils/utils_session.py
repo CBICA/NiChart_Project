@@ -114,36 +114,18 @@ def init_session_vars():
     st.session_state.layout_plots = 'Main'
     st.session_state.layout_plots = 'Sidebar'
 
-    st.session_state.results_task = None    # Task for results: Download or View
-    st.session_state.ref_type = None    # Type of ref data: CN, CN Females, etc.
-    st.session_state.res_type = None    # Type of results: Quantitative or Image
-    
-    st.session_state.res_sel_task = None
-    st.session_state.res_sel_rtype = None
-    st.session_state.res_sel_pipe = None
-
-    st.session_state.general_params = {
-        'res_sel_task': None,
-        'res_sel_rtype': None,
-        'res_sel_pipe': None
-    }
-
-    st.session_state.res_sel_roi_cat = None
-    st.session_state.res_sel_roi_name = None
-    st.session_state.res_sel_roi_cat = None
-    st.session_state.res_sel_xvar_name = None
-    st.session_state.res_sel_xvar_cat = None
-    st.session_state.res_sel_yvar_name = None
-    st.session_state.res_sel_yvar_cat = None
-    st.session_state.res_sel_mrid = None
-    st.session_state.res_sel_orient = ["axial", "coronal", "sagittal"]
-    st.session_state.res_flag_overlay = True
-    st.session_state.res_flag_crop = True
-    st.session_state.res_sel_age_range = (50, 80)
-    st.session_state.res_sel_sex = ['F', 'M']
-    st.session_state.res_sel_trends = None
-    st.session_state.res_flag_conf = False
-    st.session_state.res_lowess_s = 0.7
+    #st.session_state.res_sel_roi_cat = None
+    #st.session_state.res_sel_roi_name = None
+    #st.session_state.res_sel_roi_cat = None
+    #st.session_state.res_sel_xvar_name = None
+    #st.session_state.res_sel_xvar_cat = None
+    #st.session_state.res_sel_yvar_name = None
+    #st.session_state.res_sel_yvar_cat = None
+    #st.session_state.res_sel_age_range = (50, 80)
+    #st.session_state.res_sel_sex = ['F', 'M']
+    #st.session_state.res_sel_trends = None
+    #st.session_state.res_flag_conf = False
+    #st.session_state.res_lowess_s = 0.7
 
 
     st.session_state.skip_survey = True
@@ -364,12 +346,34 @@ def init_plot_vars() -> None:
     '''
     Set plotting variables
     '''
+    ######################
+    # General params
+    st.session_state.general_params = {
+        'sel_task': None,
+        'sel_rtype': None,
+        'sel_pipe': None
+    }
+    
+    ######################
+    # General params
+    img_views = ["axial", "coronal", "sagittal"]
+    st.session_state.mriplot_params = {
+        'sel_mrid': None,
+        'sel_roi': None,
+        'sel_orient': img_views,
+        'flag_overlay': True,
+        'flag_crop': True
+    }
+    
+
+    ######################
+    # Params for data plots
+    
     # Dataframe that keeps parameters for all plots
     st.session_state.plots = pd.DataFrame(columns=['flag_sel', 'params'])
     st.session_state.plot_curr = -1
 
     st.session_state.plot_active = None
-
 
     # Plot data
     st.session_state.plot_data = {
@@ -419,6 +423,7 @@ def init_plot_vars() -> None:
 
     # Plot parameters specific to each plot
     st.session_state.plot_params = {
+        'sel_mrid': None,
         "plot_type": "scatter",
         "xvargroup": 'demog',
         "xvar": 'Age',
@@ -438,7 +443,7 @@ def init_plot_vars() -> None:
         "plot_cent_normalized": False,
         "trend": "Linear",
         "show_conf": True,
-        "traces": None,
+        "traces": ['data'],
         "lowess_s": 0.7,
         "centile_type": 'CN',
         "centile_values": [],

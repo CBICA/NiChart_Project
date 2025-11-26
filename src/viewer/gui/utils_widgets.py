@@ -31,13 +31,13 @@ def my_slider(var_group, var_name, hdr, min_val=0, max_val=10, step=1):
         on_change=update_slider        
     )
 
-def my_checkbox(var_name, hdr):
+def my_checkbox(var_group, var_name, hdr):
     def update_checkbox():
-        st.session_state[var_name] = st.session_state[f'_{var_name}']
+        st.session_state[var_group][var_name] = st.session_state[f'_{var_name}']
     return st.checkbox(
         hdr,
         key=f'_{var_name}',
-        value = st.session_state[var_name],
+        value = st.session_state[var_group][var_name],
         on_change=update_checkbox
     )
 
@@ -53,7 +53,7 @@ def my_multiselecttmp(list_opts, var_name, hdr='selection box', label_visibility
     st.session_state[var_name] = sel_opt
     return sel_opt
 
-def my_multiselect(list_opts, var_name, hdr='selection box', label_visibility='visible'):
+def my_multiselecttmp2(list_opts, var_name, hdr='selection box', label_visibility='visible'):
     '''
     Wrapper for multiselect
     '''
@@ -62,6 +62,18 @@ def my_multiselect(list_opts, var_name, hdr='selection box', label_visibility='v
         default=st.session_state.get(var_name), label_visibility=label_visibility
     )
     st.session_state[var_name] = sel_opt
+    return sel_opt
+
+def my_multiselect(var_group, var_name, list_opts, hdr='selection box', label_visibility='visible'):
+    '''
+    Wrapper for multiselect
+    '''
+    sel_opt = st.multiselect(
+        hdr, list_opts, key=f'_{var_name}',
+        default=st.session_state[var_group][var_name],
+        label_visibility=label_visibility
+    )
+    st.session_state[var_group][var_name] = sel_opt
     return sel_opt
 
 def safe_index(lst, value, default=0):
@@ -139,10 +151,11 @@ def select_muse_roi(list_vars):
     # Select roi
     st.write('ROI Name')
     sel_var = selectbox_twolevels(
+        'plot_params',
+        'xvargroup',
+        'xvar',
         df_vars[df_vars.category.isin(['roi'])],
         list_vars,
-        'res_sel_roi_cat',
-        'res_sel_roi_name',
         dicts_rename = {
             'muse': st.session_state.dicts['muse']['ind_to_name']
         }
@@ -190,7 +203,7 @@ def select_trend():
         return
 
     if sel_trend == 'Linear':
-        sel_flag_conf = my_checkbox('res_flag_conf', "Add confidence interval")
+        show_conf = my_checkbox('plot_params', 'show_conf', "Add confidence interval")
 
     elif sel_trend == 'Smooth LOWESS Curve':
         sel_lowess_s = my_slider('plot_params', 'lowess_s', 'Smoothness', 0.4, 1.0, 0.1)
@@ -202,9 +215,7 @@ def select_centiles():
     list_types = ['None', 'CN', 'CN-Females', 'CN-Males', 'CN-ICVNorm']
     list_values = ['centile_5', 'centile_25', 'centile_50', 'centile_75', 'centile_95']
 
-    sel_cent_type = my_selectbox(
-        'plot_params', 'centile_type', list_types, 'Centile Type'
-    )
+    sel_cent_type = my_selectbox('plot_params', 'centile_type', list_types, 'Centile Type')
     
     if sel_cent_type is None:
         return
@@ -212,7 +223,5 @@ def select_centiles():
     if sel_cent_type == 'Select an option…':
         return
 
-    sel_cent_vals = my_multiselect(
-        list_values, 'res_cent_values', 'Centile Values'
-    )
+    sel_cent_vals = my_multiselect('plot_params', 'centile_values', list_values, 'Centile Values')
     
