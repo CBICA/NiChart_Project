@@ -257,27 +257,26 @@ def select_plot_settings():
     
     flag_auto = my_checkbox('plot_settings', 'flag_auto', 'Auto resize')
     
-    #st.session_state.plot_settings["num_per_row"] = st.slider(
-        #"Number of plots per row",
-        #st.session_state.plot_settings["min_per_row"],
-        #st.session_state.plot_settings["max_per_row"],
-        #st.session_state.plot_settings["num_per_row"],
-        #disabled=False,
-    #)
+    if flag_auto:
+        hdr='Max. number of plots per row'
+    else:
+        hdr='Number of plots per row'
+    
+    sel_num = my_slider( 
+        'plot_settings', 'num_per_row', hdr,
+        st.session_state.plot_settings["min_per_row"],
+        st.session_state.plot_settings["max_per_row"],
+        1
+    )
 
-    #plot_params["h_coeff"] = st.slider(
-        #"Plot height",
-        #min_value=st.session_state.plot_settings["h_coeff_min"],
-        #max_value=st.session_state.plot_settings["h_coeff_max"],
-        #value=st.session_state.plot_settings["h_coeff"],
-        #step=st.session_state.plot_settings["h_coeff_step"],
-        #disabled=False,
-    #)
+    sel_h = my_slider( 
+        'plot_settings', 'h_coeff', "Plot Height",
+        st.session_state.plot_settings["h_coeff_min"],
+        st.session_state.plot_settings["h_coeff_max"],
+        st.session_state.plot_settings["h_coeff_step"]
+    )
 
-    ## Checkbox to show/hide plot legend
-    #plot_params['flag_hide_legend'] = st.checkbox(
-        #"Hide legend",
-        #value=st.session_state.plot_settings['flag_hide_legend'],
-        #disabled=False,
-    #)
+    # Checkbox to show/hide plot legend
+    sel_f = my_checkbox('plot_settings', 'flag_hide_legend', "Hide legend")
+
 
