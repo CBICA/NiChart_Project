@@ -209,9 +209,6 @@ def plot_imgvars(layout):
         set_plot_params(df)
 
     with layout:
-        sac.divider(label='Plot Controls', align='center', color='indigo', size='lg')
-        
-    with layout:
         set_plot_controls()
             
     utilpl.panel_show_plots()
@@ -292,10 +289,18 @@ def view_img_vars(layout):
         if st.session_state.workflow == 'ref_data':
             plot_centiles(layout)
         else:
-            plot_imgvar(layout)
+            plot_imgvars(layout)
       
     elif pipeline == 'dlwmls':
         st.info('Not available yet ...')
+
+def prepare_data_for_download(prj_dir, sel_opt, out_zip):
+    utilio.zip_folders(prj_dir, sel_opt, out_zip)
+    with open(out_zip, "rb") as f:
+        file_download = f.read()
+    st.toast('Created zip file with selected folders')
+    os.remove(out_zip)
+    return file_download
 
 def panel_download():
     '''
@@ -333,18 +338,22 @@ def panel_download():
             os.makedirs(out_dir, exist_ok=True)
             out_zip = os.path.join(out_dir, 'nichart_results.zip')
 
-            if st.button('Prepare Data'):
-                utilio.zip_folders(prj_dir, sel_opt, out_zip)
-                with open(out_zip, "rb") as f:
-                    file_download = f.read()            
-                st.toast('Created zip file with selected folders')
+            st.download_button(
+                label = f"Download",
+                data = prepare_data_for_download(prj_dir, sel_opt, out_zip),
+                file_name = 'nichart_results.zip',
+                on_click = 'ignore'
+            )
 
-                flag_download = os.path.exists(out_zip)
-                st.download_button(f"Download", file_download, 'nichart_results.zip')
-                os.remove(out_zip)
 
 def panel_results(layout):
     logger.debug('    Function: panel_results')
+
+    if st.session_state.workflow is None:
+        st.info('Please select a Workflow!')
+        return
+
+
     with layout:
         sac.divider(label='General Options', align='center', color='indigo', size='lg')
 

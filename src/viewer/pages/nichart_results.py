@@ -34,14 +34,6 @@ utilpg.set_global_style()
 
 if 'instantiated' not in st.session_state or not st.session_state.instantiated:
     utilses.init_session_state()
-     
-
-## Show setting button
-#utilset.settings_button()
-
-#sac.divider(key='_p0_div1')
-
-#st.markdown("<h4 style='text-align:center; color:#3a3a88;'>Results\n\n</h1>", unsafe_allow_html=True)
 
 # Set plot params layout
 if st.session_state.layout_plots == 'Main':
@@ -50,6 +42,12 @@ else:
     layout = st.sidebar
 
 utilres.panel_results(layout)
+
+#if st.session_state.workflow == 'ref_data':
+    #utilres.panel_results(layout)
+
+#else:
+    #utilres.panel_results(layout)
 
 sac.divider(key='_p0_div2')
 
