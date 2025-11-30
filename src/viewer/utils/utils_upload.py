@@ -672,59 +672,48 @@ def panel_view_files():
     
     with st.container(horizontal=True, horizontal_alignment="left"):
         st.markdown("##### Review File(s): ", width='content')
-#         with st.popover("❓", width='content'):
-#             st.write(
-#                 """
-#                 **Review Files Help**
-#                   - View files stored in the project folder.
-#                   - Click on a file name to:
-#
-#                     - View a scan (.nii.gz, .nii)
-#
-#                     - View/edit a list (.csv)
-#                 """
-#             )
             
     placeholder = st.empty()
     placeholder.markdown(f"##### 📁 `{st.session_state.prj_name}`", width='content')
 
-    tree_items, list_paths = utildv.build_folder_tree(
-        st.session_state.paths['prj_dir'],
-        st.session_state.out_dirs,
-        None,
-        3,
-        ['user_upload']
-    )
-    selected = sac.tree(
-        items=tree_items,
-        index=None,
-        align='left', size='xl', icon='table',
-        checkbox=False,
-        #checkbox_strict = True,
-        open_all = True,
-        return_index = True
-        #height=400
-    )
-    
-    if selected:
-        if isinstance(selected, list):
-            selected = selected[0]
-        fpath = list_paths[selected]
-        fname = os.path.basename(fpath)
-        if fpath.endswith('.csv'):
-            try:
-                df_tmp = pd.read_csv(fpath)
-                st.info(f'Data file: {fname}')
-                st.dataframe(df_tmp, hide_index=True)
-                
-                with st.container(horizontal=True, horizontal_alignment="center"):
-                    if st.button('Edit'):
-                        edit_participants(fpath)                
-            except:
-                st.warning(f'Could not read csv file: {fname}')
+    with st.container(border = None, height = 400):
+        tree_items, list_paths = utildv.build_folder_tree(
+            st.session_state.paths['prj_dir'],
+            st.session_state.out_dirs,
+            None,
+            3,
+            ['user_upload']
+        )
+        selected = sac.tree(
+            items=tree_items,
+            index=None,
+            align='left', size='xl', icon='table',
+            checkbox=False,
+            #checkbox_strict = True,
+            open_all = True,
+            return_index = True
+            #height=400
+        )
 
-        if fpath.endswith(('.nii.gz','.nii')):
-            view_mri(fpath)
+        if selected:
+            if isinstance(selected, list):
+                selected = selected[0]
+            fpath = list_paths[selected]
+            fname = os.path.basename(fpath)
+            if fpath.endswith('.csv'):
+                try:
+                    df_tmp = pd.read_csv(fpath)
+                    st.info(f'Data file: {fname}')
+                    st.dataframe(df_tmp, hide_index=True)
+
+                    with st.container(horizontal=True, horizontal_alignment="center"):
+                        if st.button('Edit'):
+                            edit_participants(fpath)
+                except:
+                    st.warning(f'Could not read csv file: {fname}')
+
+            if fpath.endswith(('.nii.gz','.nii')):
+                view_mri(fpath)
             
                               
         

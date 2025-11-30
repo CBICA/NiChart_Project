@@ -11,6 +11,7 @@ import utils.utils_session as utilses
 import utils.utils_io as utilio
 import utils.utils_data_view as utildv
 from utils.utils_styles import inject_global_css 
+import gui.utils_navig as utilnav
 
 from streamlit_image_select import image_select
 import re
@@ -52,24 +53,7 @@ with cols[1]:
         ''', unsafe_allow_html=True
     )
 
-sac.divider(key='_p0_div1')
-    
-#sel_opt = sac.chip(
-    #[sac.ChipItem(label = '', icon='arrow-right', disabled=False)],
-    #label='', align='center', color='#aaeeaa', size='xl'
-#)
-    
-#if sel_opt == '':
-    #st.switch_page("pages/nichart_data.py")
-
-with st.container(horizontal=True, horizontal_alignment="center"):
-    #b1 = st.button('', icon=':material/arrow_back:', help = 'Pipeline')
-    b2 = st.button('', icon=':material/arrow_forward:', help = 'Data')
-    #b3 = st.button('', icon=':material/settings:')
-    
-if b2:
-    st.switch_page("pages/nichart_data.py")
-    
+utilnav.main_navig(None, None, 'Data', 'pages/nichart_data.py')
 
 # Show session state vars
 if st.session_state.mode == 'debug':

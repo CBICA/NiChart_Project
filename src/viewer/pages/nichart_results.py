@@ -15,6 +15,8 @@ import utils.utils_data_view as utildv
 import gui.utils_results as utilres
 from utils.utils_styles import inject_global_css 
 import pandas as pd
+import gui.utils_navig as utilnav
+import utils.utils_settings as utilset
 
 from streamlit_image_select import image_select
 import re
@@ -32,26 +34,48 @@ inject_global_css()
 #utilpg.config_page()
 utilpg.set_global_style()
 
+@st.dialog("Help Information", width="medium")
+def my_help():
+    st.write(
+        """
+        **How to Use This Page**
+
+        - See results
+        """
+    )
+
 if 'instantiated' not in st.session_state or not st.session_state.instantiated:
     utilses.init_session_state()
 
 utilres.panel_results()
 
-sac.divider(key='_p0_div2')
+if st.session_state.workflow == 'Reference Data':
+    utilnav.main_navig(
+        'Info', 'pages/nichart_ref_data.py',
+        'Home', 'pages/nichart_home.py',
+        utilset.edit_settings, my_help
+    )
 
-with st.container(horizontal=True, horizontal_alignment="center"):
-    b1 = st.button('', icon=':material/arrow_back:', help = 'Pipeline')
-    b2 = st.button('', icon=':material/arrow_forward:', help = 'Home')
-    b3 = st.button('', icon=':material/settings:')
-    
-if b1:
-    st.switch_page("pages/nichart_pipelines.py")
+else:
+    utilnav.main_navig(
+        'Pipelines', 'pages/nichart_pipelines.py',
+        'Home', 'pages/nichart_home.py',
+        utilset.edit_settings, my_help
+    )
 
-if b2:
-    st.switch_page("pages/nichart_home.py")
-    
-if b3:
-    utilset.edit_settings()
+# with st.container(horizontal=True, horizontal_alignment="center"):
+#     b1 = st.button('', icon=':material/arrow_back:', help = 'Pipeline')
+#     b2 = st.button('', icon=':material/arrow_forward:', help = 'Home')
+#     b3 = st.button('', icon=':material/settings:')
+#
+# if b1:
+#     st.switch_page("pages/nichart_pipelines.py")
+#
+# if b2:
+#     st.switch_page("pages/nichart_home.py")
+#
+# if b3:
+#     utilset.edit_settings()
     
 # # Show session state vars
 # if st.session_state.mode == 'debug':

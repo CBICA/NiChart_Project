@@ -359,19 +359,6 @@ def panel_results():
     else:
         layout = st.sidebar
 
-
-    with layout:
-        with st.container(horizontal=True, horizontal_alignment="left"):
-            st.markdown("##### Settings ", width='content')
-            with st.popover("❓", width='content'):
-                st.write(
-                    """
-                    **Data Viewer Settings Help**
-                    - Select options to view results from a specific pipeline
-                    """
-                )
-
-
     with layout:
         sac.divider(label='General Options', align='center', color='indigo', size='lg')
 

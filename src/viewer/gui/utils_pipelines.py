@@ -29,19 +29,6 @@ logger = setup_logger()
 
 #################################
 ## Function definitions
-def help_message(workflow):
-
-    with st.popover("❓", width='content'):
-        st.write(
-            """
-            **How to Use This Page**
-
-            - Select a pipeline
-            - Run the pipeline
-            - View progress
-            """
-        )
-
 def show_description(pipeline) -> None:
     """
     Panel for viewing pipeline description
@@ -101,7 +88,6 @@ def panel_pipelines():
 
     with st.container(horizontal=True, horizontal_alignment="center"):
         st.markdown("<h4 style=color:#3a3a88;'>Select and Run Pipeline\n\n</h1>", unsafe_allow_html=True, width='content')
-        help_message(workflow)
 
     if st.session_state.workflow == 'ref_data':
         st.info('''

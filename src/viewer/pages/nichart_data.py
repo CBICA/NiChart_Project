@@ -35,26 +35,6 @@ if 'instantiated' not in st.session_state or not st.session_state.instantiated:
 
 #################################
 ## Function definitions
-def upload_data():
-
-    cols = st.columns([6,1,10,1,10])
-
-    with cols[0]:
-        utilup.panel_project_folder()
-
-    with cols[2]:
-        if st.session_state.workflow == 'single_subject':
-            utilup.panel_upload_single_subject()
-        if st.session_state.workflow == 'multi_subject':
-            utilup.panel_upload_multi_subject()
-
-    with cols[4]:
-        utilup.panel_view_files()
-        
-    # Show selections
-    #utilses.disp_selections()
-
-
 @st.dialog("Help Information", width="medium")
 def my_help():
     tab1, tab2, tab3 = st.tabs(["Project Folder", "Upload Files", "Review Files"])
@@ -72,77 +52,93 @@ def my_help():
             """
         )
 
-    with tab2:
-        st.write(
-            """
-            - You may upload MRI scans in any of the following formats:
-                - **NIfTI:** .nii or .nii.gz
-                - **DICOM (compressed):** a single .zip file containing the DICOM series
-                - **DICOM (individual files):** multiple .dcm files
+    if st.session_state.workflow == 'single_subject':
+        with tab2:
+            st.write(
+                """
+                - You may upload MRI scans in any of the following formats:
+                    - **NIfTI:** .nii or .nii.gz
+                    - **DICOM (compressed):** a single .zip file containing the DICOM series
+                    - **DICOM (individual files):** multiple .dcm files
 
-                *(Note: uploading a folder directly is not currently supported)*
+                    *(Note: uploading a folder directly is not currently supported)*
 
-            - If you have multiple imaging modalities (e.g., T1, FLAIR), upload them one at a time.
+                - If you have multiple imaging modalities (e.g., T1, FLAIR), upload them one at a time.
 
-            - Once uploaded, NiChart will automatically:
-                - Organize the files into the standard input structure
-                - Create a subject list based on the uploaded MRI data
+                - Once uploaded, NiChart will automatically:
+                    - Organize the files into the standard input structure
+                    - Create a subject list based on the uploaded MRI data
 
-            - You may open and edit the subject list (e.g., to add age, sex, or other metadata needed for analysis).
+                - You may open and edit the subject list (e.g., to add age, sex, or other metadata needed for analysis).
 
-            - You can also upload non-imaging data (e.g., clinical or cognitive measures) as a CSV file.
+                - You can also upload non-imaging data (e.g., clinical or cognitive measures) as a CSV file.
 
-            - The CSV must include an MRID column with values that match the subject IDs in the subject list, so the data can be merged correctly.
-            """
-        )
+                - The CSV must include an MRID column with values that match the subject IDs in the subject list, so the data can be merged correctly.
+                """
+            )
 
-    # with tab3:
-    #     st.write(
-    #         """
-    #         **Data Upload Help**
-    #
-    #         - MRI Scans (NIfTI format):
-    #             - Upload one or more .nii / .nii.gz files or
-    #             - Upload a .zip file containing multiple NIfTI files
-    #
-    #             *(Note: uploading a folder directly is not currently supported)*
-    #
-    #         - If your dataset includes multiple imaging modalities (e.g., T1, FLAIR), upload each modality separately.
-    #
-    #         - A participant CSV is required, containing at least one column:
-    #
-    #             **MRID** → subject ID that matches the scan filenames
-    #
-    #         - Filename Format Requirement:
-    #
-    #             {MRID}_common_suffix.nii.gz
-    #
-    #             Example: SUB001_T1.nii.gz
-    #
-    #         - After upload, NiChart will automatically:
-    #
-    #             - Organize scans into the standard input directory structure
-    #
-    #             - Check consistency between the participants CSV and the uploaded scans
-    #
-    #         - You may view and edit participants CSV after upload.
-    #
-    #         - Optional: Upload non-imaging data (e.g., clinical or cognitive variables) as an additional CSV (should include the MRID column).
-    #         """
-    #     )
+    if st.session_state.workflow == 'multi_subject':
+        with tab2:
+            st.write(
+                """
+                - MRI Scans (NIfTI format):
+                    - Upload one or more .nii / .nii.gz files or
+                    - Upload a .zip file containing multiple NIfTI files
+
+                    *(Note: uploading a folder directly is not currently supported)*
+
+                - If your dataset includes multiple imaging modalities (e.g., T1, FLAIR), upload each modality separately.
+
+                - A participant CSV is required, containing at least one column:
+
+                    **MRID** → subject ID that matches the scan filenames
+
+                - Filename Format Requirement:
+
+                    {MRID}_common_suffix.nii.gz
+
+                    Example: SUB001_T1.nii.gz
+
+                - After upload, NiChart will automatically:
+
+                    - Organize scans into the standard input directory structure
+
+                    - Check consistency between the participants CSV and the uploaded scans
+
+                - You may view and edit participants CSV after upload.
+
+                - Optional: Upload non-imaging data (e.g., clinical or cognitive variables) as an additional CSV (should include the MRID column).
+                """
+            )
 
     with tab3:
         st.write(
             """
-            **Review Files Help**
-                - View files stored in the project folder.
-                - Click on a file name to:
+            - View files stored in the project folder.
+
+            - Click on a file name to:
 
                 - View a scan (.nii.gz, .nii)
 
                 - View/edit a list (.csv)
             """
         )
+
+def upload_data():
+
+    cols = st.columns([6,1,10,1,10])
+
+    with cols[0]:
+        utilup.panel_project_folder()
+
+    with cols[2]:
+        if st.session_state.workflow == 'single_subject':
+            utilup.panel_upload_single_subject()
+        if st.session_state.workflow == 'multi_subject':
+            utilup.panel_upload_multi_subject()
+
+    with cols[4]:
+        utilup.panel_view_files()
 
 
 #################################
@@ -159,7 +155,10 @@ if st.session_state.workflow == 'ref_data':
         '''
     )
 
-    # utilnav.main_navig()
+    utilnav.main_navig(
+        'Home', 'pages/nichart_home.py',
+        'Results', 'pages/nichart_results.py',
+    )
 
 else:
     upload_data()
@@ -167,22 +166,8 @@ else:
     utilnav.main_navig(
         'Info', f'pages/nichart_{st.session_state.workflow}.py',
         'Pipelines', 'pages/nichart_pipelines.py',
-        utilset.edit_settings,
-        my_help
+        utilset.edit_settings, my_help
     )
-
-#     sac.divider()
-#
-#     with st.container(horizontal=True, horizontal_alignment="center"):
-#         b1 = st.button('', icon=':material/arrow_back:', help = 'Info')
-#         b2 = st.button('', icon=':material/arrow_forward:', help = 'Pipeline')
-#
-#     if b1:
-#         st.switch_page(f'pages/nichart_{st.session_state.workflow}.py')
-#
-#     if b2:
-#         st.switch_page("pages/nichart_pipelines.py")
-        
 
 # Show session state vars
 if st.session_state.mode == 'debug':
