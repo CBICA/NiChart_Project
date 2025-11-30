@@ -10,7 +10,10 @@ import utils.utils_processes as utilprc
 import utils.utils_session as utilses
 import utils.utils_upload as utilup
 import utils.utils_data_view as utildv
-from utils.utils_styles import inject_global_css 
+import utils.utils_settings as utilset
+
+import gui.utils_navig as utilnav
+from utils.utils_styles import inject_global_css
 
 from streamlit_image_select import image_select
 import re
@@ -51,6 +54,23 @@ def upload_data():
     # Show selections
     #utilses.disp_selections()
 
+
+@st.dialog("Help Information", width="medium")
+def my_help():
+    st.write(
+        """
+        **Project Folder Help**
+        - All processing steps are performed inside a project folder.
+        - By default, NiChart will create and use a current project folder for you.
+        - You may also create a new project folder using any name you choose.
+        - If needed, you can reset the current project folder (this will remove all files inside it, but keep the folder itself), allowing you to start fresh.
+        - You may also switch to an existing project folder.
+
+        **Note:** If you are using the cloud version, stored files will be removed periodically, so previously used project folders might not remain available.
+        """
+    )
+
+
 #################################
 ## Main
 
@@ -65,52 +85,29 @@ if st.session_state.workflow == 'ref_data':
         '''
     )
 
-    sac.divider()
-    
-    #sel_but = sac.chip(
-        #[
-            #sac.ChipItem(label = '', icon='arrow-right', disabled=False)
-        #],
-        #label='', align='center', color='#aaeeaa', size='xl', return_index=True
-    #)
-        
-    #if sel_but == 0:
-        #st.switch_page(f'pages/nichart_results.py')
-
-    with st.container(horizontal=True, horizontal_alignment="center"):
-        b2 = st.button('', icon=':material/arrow_forward:', help = 'Results')
-        
-    if b2:
-        st.switch_page("pages/nichart_results.py")
+    # utilnav.main_navig()
 
 else:
     upload_data()
 
-    sac.divider()
+    utilnav.main_navig(
+        'Info', f'pages/nichart_{st.session_state.workflow}.py',
+        'Pipelines', 'pages/nichart_pipelines.py',
+        utilset.edit_settings,
+        my_help
+    )
 
-    #sel_but = sac.chip(
-        #[
-            #sac.ChipItem(label = '', icon='arrow-left', disabled=False),
-            #sac.ChipItem(label = '', icon='arrow-right', disabled=False)
-        #],
-        #label='', align='center', color='#aaeeaa', size='xl', return_index=True
-    #)
-        
-    #if sel_but == 0:
-        #st.switch_page(f'pages/nichart_{st.session_state.workflow}.py')
-
-    #if sel_but == 1:
-        #st.switch_page("pages/nichart_pipelines.py")
-
-    with st.container(horizontal=True, horizontal_alignment="center"):
-        b1 = st.button('', icon=':material/arrow_back:', help = 'Info')
-        b2 = st.button('', icon=':material/arrow_forward:', help = 'Pipeline')
-        
-    if b1:
-        st.switch_page(f'pages/nichart_{st.session_state.workflow}.py')
-
-    if b2:
-        st.switch_page("pages/nichart_pipelines.py")
+#     sac.divider()
+#
+#     with st.container(horizontal=True, horizontal_alignment="center"):
+#         b1 = st.button('', icon=':material/arrow_back:', help = 'Info')
+#         b2 = st.button('', icon=':material/arrow_forward:', help = 'Pipeline')
+#
+#     if b1:
+#         st.switch_page(f'pages/nichart_{st.session_state.workflow}.py')
+#
+#     if b2:
+#         st.switch_page("pages/nichart_pipelines.py")
         
 
 # Show session state vars

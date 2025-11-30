@@ -346,12 +346,30 @@ def panel_download():
             )
 
 
-def panel_results(layout):
+def panel_results():
     logger.debug('    Function: panel_results')
 
     if st.session_state.workflow is None:
         st.info('Please select a Workflow!')
         return
+
+    # Set plotting parameters layout
+    if st.session_state.layout_plots == 'Main':
+        layout = st.container(border=False)
+    else:
+        layout = st.sidebar
+
+
+    with layout:
+        with st.container(horizontal=True, horizontal_alignment="left"):
+            st.markdown("##### Settings ", width='content')
+            with st.popover("❓", width='content'):
+                st.write(
+                    """
+                    **Data Viewer Settings Help**
+                    - Select options to view results from a specific pipeline
+                    """
+                )
 
 
     with layout:

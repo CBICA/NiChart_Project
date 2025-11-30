@@ -445,19 +445,19 @@ def panel_project_folder():
     
     with st.container(horizontal=True, horizontal_alignment="left"):
         st.markdown("##### Project Folder: ", width='content')
-        with st.popover("❓", width='content'):
-            st.write(
-                """
-                **Project Folder Help**
-                - All processing steps are performed inside a project folder.
-                - By default, NiChart will create and use a current project folder for you.
-                - You may also create a new project folder using any name you choose.
-                - If needed, you can reset the current project folder (this will remove all files inside it, but keep the folder itself), allowing you to start fresh.
-                - You may also switch to an existing project folder.
-                
-                **Note:** If you are using the cloud version, stored files will be removed periodically, so previously used project folders might not remain available.                
-                """
-            )
+#         with st.popover("❓", width='content'):
+#             st.write(
+#                 """
+#                 **Project Folder Help**
+#                 - All processing steps are performed inside a project folder.
+#                 - By default, NiChart will create and use a current project folder for you.
+#                 - You may also create a new project folder using any name you choose.
+#                 - If needed, you can reset the current project folder (this will remove all files inside it, but keep the folder itself), allowing you to start fresh.
+#                 - You may also switch to an existing project folder.
+#
+#                 **Note:** If you are using the cloud version, stored files will be removed periodically, so previously used project folders might not remain available.
+#                 """
+#             )
     placeholder = st.empty()
     placeholder.markdown(f"##### 📁 `{st.session_state.prj_name}`", width='content')
 
