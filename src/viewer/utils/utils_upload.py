@@ -522,30 +522,30 @@ def panel_upload_single_subject():
     
     with st.container(horizontal=True, horizontal_alignment="left"):
         st.markdown("##### Upload File(s): ", width='content')
-        with st.popover("❓", width='content'):
-            st.write(
-                """
-                **Data Upload Guide**
-                - You may upload MRI scans in any of the following formats:
-                  - **NIfTI:** .nii or .nii.gz
-                  - **DICOM (compressed):** a single .zip file containing the DICOM series
-                  - **DICOM (individual files):** multiple .dcm files
-                  
-                    *(Note: uploading a folder directly is not currently supported)*
-                    
-                - If you have multiple imaging modalities (e.g., T1, FLAIR), upload them one at a time.
-                
-                - Once uploaded, NiChart will automatically:
-                  - Organize the files into the standard input structure
-                  - Create a subject list based on the uploaded MRI data
-                  
-                - You may open and edit the subject list (e.g., to add age, sex, or other metadata needed for analysis).
-                
-                - You can also upload non-imaging data (e.g., clinical or cognitive measures) as a CSV file.
-                
-                - The CSV must include an MRID column with values that match the subject IDs in the subject list, so the data can be merged correctly.
-                """
-            )
+#         with st.popover("❓", width='content'):
+#             st.write(
+#                 """
+#                 **Data Upload Guide**
+#                 - You may upload MRI scans in any of the following formats:
+#                   - **NIfTI:** .nii or .nii.gz
+#                   - **DICOM (compressed):** a single .zip file containing the DICOM series
+#                   - **DICOM (individual files):** multiple .dcm files
+#
+#                     *(Note: uploading a folder directly is not currently supported)*
+#
+#                 - If you have multiple imaging modalities (e.g., T1, FLAIR), upload them one at a time.
+#
+#                 - Once uploaded, NiChart will automatically:
+#                   - Organize the files into the standard input structure
+#                   - Create a subject list based on the uploaded MRI data
+#
+#                 - You may open and edit the subject list (e.g., to add age, sex, or other metadata needed for analysis).
+#
+#                 - You can also upload non-imaging data (e.g., clinical or cognitive measures) as a CSV file.
+#
+#                 - The CSV must include an MRID column with values that match the subject IDs in the subject list, so the data can be merged correctly.
+#                 """
+#             )
             
     # Upload data
     sel_opt = sac.chip(
@@ -592,40 +592,40 @@ def panel_upload_multi_subject():
     
     with st.container(horizontal=True, horizontal_alignment="left"):
         st.markdown("##### Upload File(s): ", width='content')
-        with st.popover("❓", width='content'):
-            st.write(
-                """
-                **Data Upload Help**
-                
-                - MRI Scans (NIfTI format):
-                  - Upload one or more .nii / .nii.gz files or
-                  - Upload a .zip file containing multiple NIfTI files
-                  
-                  *(Note: uploading a folder directly is not currently supported)*
-                    
-                - If your dataset includes multiple imaging modalities (e.g., T1, FLAIR), upload each modality separately.
-                
-                - A participant CSV is required, containing at least one column:
-                    
-                    **MRID** → subject ID that matches the scan filenames
-                
-                - Filename Format Requirement:
-                    
-                    {MRID}_common_suffix.nii.gz
-                    
-                    Example: SUB001_T1.nii.gz
-                    
-                - After upload, NiChart will automatically:
-                
-                  - Organize scans into the standard input directory structure
-                  
-                  - Check consistency between the participants CSV and the uploaded scans
-                  
-                - You may view and edit participants CSV after upload.
-                
-                - Optional: Upload non-imaging data (e.g., clinical or cognitive variables) as an additional CSV (should include the MRID column).
-                """
-            )
+#         with st.popover("❓", width='content'):
+#             st.write(
+#                 """
+#                 **Data Upload Help**
+#
+#                 - MRI Scans (NIfTI format):
+#                   - Upload one or more .nii / .nii.gz files or
+#                   - Upload a .zip file containing multiple NIfTI files
+#
+#                   *(Note: uploading a folder directly is not currently supported)*
+#
+#                 - If your dataset includes multiple imaging modalities (e.g., T1, FLAIR), upload each modality separately.
+#
+#                 - A participant CSV is required, containing at least one column:
+#
+#                     **MRID** → subject ID that matches the scan filenames
+#
+#                 - Filename Format Requirement:
+#
+#                     {MRID}_common_suffix.nii.gz
+#
+#                     Example: SUB001_T1.nii.gz
+#
+#                 - After upload, NiChart will automatically:
+#
+#                   - Organize scans into the standard input directory structure
+#
+#                   - Check consistency between the participants CSV and the uploaded scans
+#
+#                 - You may view and edit participants CSV after upload.
+#
+#                 - Optional: Upload non-imaging data (e.g., clinical or cognitive variables) as an additional CSV (should include the MRID column).
+#                 """
+#             )
             
     # Upload data
     sel_opt = sac.chip(
@@ -672,18 +672,18 @@ def panel_view_files():
     
     with st.container(horizontal=True, horizontal_alignment="left"):
         st.markdown("##### Review File(s): ", width='content')
-        with st.popover("❓", width='content'):
-            st.write(
-                """
-                **Review Files Help**
-                  - View files stored in the project folder.
-                  - Click on a file name to:
-                  
-                    - View a scan (.nii.gz, .nii)
-                    
-                    - View/edit a list (.csv)
-                """
-            )
+#         with st.popover("❓", width='content'):
+#             st.write(
+#                 """
+#                 **Review Files Help**
+#                   - View files stored in the project folder.
+#                   - Click on a file name to:
+#
+#                     - View a scan (.nii.gz, .nii)
+#
+#                     - View/edit a list (.csv)
+#                 """
+#             )
             
     placeholder = st.empty()
     placeholder.markdown(f"##### 📁 `{st.session_state.prj_name}`", width='content')
