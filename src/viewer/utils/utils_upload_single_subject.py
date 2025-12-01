@@ -506,7 +506,7 @@ def panel_upload_multi_subject():
         t1_out_dir = os.path.join(st.session_state.paths['prj_dir'], 't1')
         utilio.upload_multiple_files(out_dir=t1_out_dir)
     with st.popover("FLAIR Scans"):
-        fl_out_dir = os.path.join(st.session_state.paths['prj_dir'], 'flair')
+        fl_out_dir = os.path.join(st.session_state.paths['prj_dir'], 'fl')
         utilio.upload_multiple_files(out_dir=fl_out_dir)
     #with st.popover("DICOM images"):
     #    pass
