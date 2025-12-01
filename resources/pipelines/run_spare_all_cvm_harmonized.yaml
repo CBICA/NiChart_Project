@@ -22,13 +22,13 @@ steps:
     inputs:
       t1_img: ${STUDY}/t1
     outputs:
-      dlmuse_seg: ${STUDY}/DLMUSE_seg
-      dlmuse_vol: ${STUDY}/DLMUSE_vol
+      dlmuse_seg: ${STUDY}/dlmuse_seg
+      dlmuse_vol: ${STUDY}/dlmuse_vol
 
   - id: harmonize_dlmuse
     tool: harmonize_dlmuse
     inputs:
-      dlmuse_vol_unharmonized: ${STUDY}/DLMUSE_vol/DLMUSE_Volumes.csv
+      dlmuse_vol_unharmonized: ${STUDY}/dlmuse_vol/DLMUSE_Volumes.csv
       covariate_csv: ${STUDY}/participants/participants.csv
     outputs: # Harmonization wrapper expects output location as dir
       dlmuse_vol_harmonized: ${STUDY}/DLMUSE_vol_harmonized
@@ -38,17 +38,17 @@ steps:
     inputs:
       t1_img: ${STUDY}/t1
       fl_img: ${STUDY}/fl
-      dlmuse_seg: ${STUDY}/DLMUSE_seg
+      dlmuse_seg: ${STUDY}/dlmuse_seg
       demog_csv: ${STUDY}/participants/participants.csv
 
     outputs:
-      nichart_dlwmls_out: ${STUDY}/NiChart_DLWMLS_out
+      nichart_dlwmls_out: ${STUDY}/nichart_dlwmls_out
 
   - id: merge_feature_csvs
     tool: merge_feature_csvs_by_mrid
     inputs:
-      csv_1: ${STUDY}/DLMUSE_vol_harmonized/DLMUSE_Volumes.csv
-      csv_2: ${STUDY}/NiChart_DLWMLS_out/DLWMLS_DLMUSE_Segmented_Volumes.csv
+      csv_1: ${STUDY}/dlmuse_vol_harmonized/DLMUSE_Volumes.csv
+      csv_2: ${STUDY}/nichart_dlwmls_out/DLWMLS_DLMUSE_Segmented_Volumes.csv
     outputs:
       out_csv: ${STUDY}/merged_dlmuse_dlwmls/csv_out.csv
 
@@ -58,5 +58,5 @@ steps:
       merged_dlwmls_dlmuse_csv: ${STUDY}/merged_dlmuse_dlwmls/csv_out.csv
       demog_csv: ${STUDY}/participants/participants.csv
     outputs:
-      spare_all_cvm_csv: ${STUDY}/SPARE_ALL_CVM_csv/SPARE_ALL_CVM.csv
+      spare_all_cvm_csv: ${STUDY}/ml_biomarkers/SPARE_ALL_CVM.csv
     
