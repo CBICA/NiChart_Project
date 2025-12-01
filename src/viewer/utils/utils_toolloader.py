@@ -793,10 +793,14 @@ def pipeline_is_harmonizable(pipeline_label):
     directory = DEFAULT_PIPELINE_DEFINITION_PATH
     pipelines = pd.read_csv(os.path.join(directory, 'list_pipelines.csv'))
     row = pipelines.loc[pipelines["Label"] == pipeline_label, "HarmonizedPipelineYaml"]
-    if not row.empty:
-        return True
-    else:
+    if row.empty:
         return False
+    value = row.iloc[0]
+
+    if pd.isna(value) or str(value).strip() == "":
+        return False
+    
+    return True
 
 @st.cache_data
 def get_pipeline_name_by_label(pipeline_label):
