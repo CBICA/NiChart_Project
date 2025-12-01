@@ -16,7 +16,7 @@ cat_vars:
   vtype: name
   values: [Sex, DX, DX_AD]
 
-Supervised_Biomarkers:
+SPARE_Scores:
   category: biomarker 
   vtype: name
   values: [SPARE_AD, SPARE_BA, DL_BrainAge]

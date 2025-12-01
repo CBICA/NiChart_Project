@@ -325,46 +325,6 @@ def panel_set_params(plot_params, var_groups_data, atlas, list_vars):
     )
     st.session_state['sel_roi'] = sel_var
 
-def panel_view_seg_tmp(ulay, olay, plot_params):
-    '''
-    Panel to display segmented image overlaid on underlay image
-    '''
-    sel_roi = st.session_state.sel_roi   # Read sel roi
-    if sel_roi is None:
-        return
-    
-    roi_indices = utilmisc.get_roi_indices(sel_roi, 'muse')
-    if roi_indices is None:
-        return
-
-    # Show images
-    with st.container(border=True):
-        with st.spinner("Wait for it..."):
-            # Process image (and mask) to prepare final 3d matrix to display
-            img, mask, img_masked = prep_image_and_olay(
-                ulay, olay, roi_indices, plot_params['flag_crop']
-            )
-            img_bounds = detect_mask_bounds(mask)
-
-            cols = st.columns(3)
-            for i, tmp_orient in stqdm(
-                enumerate(plot_params['sel_orient']),
-                desc="Showing images ...",
-                total=len(plot_params['sel_orient'])
-            ):
-                with cols[i]:
-                    ind_view = img_views.index(tmp_orient)
-                    size_auto = True
-                    if olay is None or plot_params['flag_overlay'] is False:
-                        show_img_slices(
-                            img, ind_view, img_bounds[ind_view, :], tmp_orient
-                        )
-                    else:
-                        show_img_slices(
-                            img_masked, ind_view, img_bounds[ind_view, :], tmp_orient
-                        )
-
-
 def panel_view_seg():
     '''
     Panel to display segmented image overlaid on underlay image
@@ -372,11 +332,9 @@ def panel_view_seg():
     params = st.session_state.mriplot_params
     
     if params['ulay'] is None:
-        st.error('Could not find underlay image!')
         return
 
     if params['olay'] is None:
-        st.error('Could not find overlay image!')
         return
 
     if params['sel_roi'] is None:

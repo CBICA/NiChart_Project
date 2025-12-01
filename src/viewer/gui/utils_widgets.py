@@ -214,13 +214,13 @@ def select_centiles():
     pipeline = st.session_state.general_params['sel_pipeline']
     csv_cent = os.path.join(
         st.session_state.paths['centiles'],
-        f'{pipeline}_centiles_{plot_params['centile_type']}.csv'
+        f'centiles_{plot_params['centile_type']}.csv'
     )
     if csv_cent != st.session_state.plot_data['csv_cent']:
         try:
             df_cent = pd.read_csv(csv_cent)
         except:
-            st.toast('Could not read centile data!')
+            st.toast(f'Could not read centile data: {csv_cent}')
             return
 
         st.session_state.plot_data['csv_cent'] = csv_cent

@@ -300,33 +300,33 @@ def show_plots(df, df_cent, df_plots, plot_settings):
             )
             df_plots.loc[plot_ind, 'flag_sel'] = st.session_state[f'_flag_sel_{plot_ind}']
 
-def show_mriplot():
-    '''
-    Display mri plot
-    '''
-    mrid = st.session_state.sel_mrid
-    if mrid is None:
-        return
+#def show_mriplot():
+    #'''
+    #Display mri plot
+    #'''
+    #mrid = st.session_state.sel_mrid
+    #if mrid is None:
+        #return
 
-    if st.session_state.plot_settings["flag_hide_mri"] == 'Hide':
-        return
+    #if st.session_state.plot_settings["flag_hide_mri"] == 'Hide':
+        #return
 
-    in_dir = st.session_state.paths['project']
-    plot_params = st.session_state.plot_params
-    ulay = os.path.join(
-        in_dir, 't1', f'{mrid}_T1.nii.gz'
-    )
-    olay = os.path.join(
-        in_dir, 'DLMUSE_seg', f'{mrid}_T1_DLMUSE.nii.gz'
-    )
+    #in_dir = st.session_state.paths['project']
+    #plot_params = st.session_state.plot_params
+    #ulay = os.path.join(
+        #in_dir, 't1', f'{mrid}_T1.nii.gz'
+    #)
+    #olay = os.path.join(
+        #in_dir, 'DLMUSE_seg', f'{mrid}_T1_DLMUSE.nii.gz'
+    #)
     
-    if not os.path.exists(ulay):
-        return
+    #if not os.path.exists(ulay):
+        #return
 
-    if not os.path.exists(olay):
-        return
+    #if not os.path.exists(olay):
+        #return
     
-    utilmri.panel_view_seg(ulay, olay, plot_params)
+    #utilmri.panel_view_seg(ulay, olay, plot_params)
 
 def add_new_plot(plot_params):
     '''
@@ -354,6 +354,8 @@ def panel_show_plots():
     '''
     Panel to show plots
     '''
+    pipeline = st.session_state.general_params['sel_pipeline']
+    
     ## Update selected plots
     for tmp_ind in st.session_state.plots.index.tolist():
         if st.session_state.plots.loc[tmp_ind, 'flag_sel']:
@@ -366,34 +368,38 @@ def panel_show_plots():
         st.session_state.plots,
         st.session_state.plot_settings
     )
+    
+    if pipeline == 'dlmuse':
 
-    if st.session_state.sel_mrid is not None:
-        sac.divider(label='Image Viewer', align='center', color='grape', size = 'lg')
+        if st.session_state.sel_mrid is not None:
+            sac.divider(label='Image Viewer', align='center', color='grape', size = 'lg')
 
-        if st.checkbox('Show MRI?'):
-            sel_mrid = st.session_state.sel_mrid
-            #######################
-            ## Set olay ulay images
-            fname = os.path.join(
-                st.session_state.paths['curr_data'], 't1', f'{sel_mrid}_T1.nii.gz'
-            )
-            if not os.path.exists(fname):
-                st.session_state.mriplot_params['ulay'] = None
-            else:
-                st.session_state.mriplot_params['ulay'] = fname
+            if st.checkbox('Show MRI?'):
+                sel_mrid = st.session_state.sel_mrid
+                #######################
+                ## Set olay ulay images
+                fname = os.path.join(
+                    st.session_state.paths['curr_data'], 't1', f'{sel_mrid}_T1.nii.gz'
+                )
+                if not os.path.exists(fname):
+                    st.session_state.mriplot_params['ulay'] = None
+                    st.warning(f'Could not find underlay image: {fname}')
+                else:
+                    st.session_state.mriplot_params['ulay'] = fname
 
-            fname = os.path.join(
-                st.session_state.paths['curr_data'], 'dlmuse', f'{sel_mrid}_T1_DLMUSE.nii.gz'
-            )
-            if not os.path.exists(fname):
-                st.session_state.mriplot_params['olay'] = None
-            else:
-                st.session_state.mriplot_params['olay'] = fname
-            st.session_state.mriplot_params['sel_mrid'] = sel_mrid
+                fname = os.path.join(
+                    st.session_state.paths['curr_data'], 'DLMUSE_seg', f'{sel_mrid}_T1_DLMUSE.nii.gz'
+                )
+                if not os.path.exists(fname):
+                    st.session_state.mriplot_params['olay'] = None
+                    st.warning(f'Could not find overlay image: {fname}')
+                else:
+                    st.session_state.mriplot_params['olay'] = fname
+                st.session_state.mriplot_params['sel_mrid'] = sel_mrid
 
-            st.session_state.mriplot_params['sel_roi'] = st.session_state.plot_params['yvar']
-            
-            utilmri.panel_view_seg()
+                st.session_state.mriplot_params['sel_roi'] = st.session_state.plot_params['yvar']
+                
+                utilmri.panel_view_seg()
 
 
 

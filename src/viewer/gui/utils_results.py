@@ -38,10 +38,16 @@ def set_plot_params():
 
     st.session_state.plot_params['xvargroup'] = 'age'
     st.session_state.plot_params['xvar'] = 'Age'
+
     if pipeline == 'dlmuse':
         yvarlist = ['roi']
         st.session_state.plot_params['yvargroup'] = 'MUSE_ShortList'
         st.session_state.plot_params['yvar'] = 'GM'
+
+    elif pipeline == 'spare':
+        yvarlist = ['biomarker']
+        st.session_state.plot_params['yvargroup'] = 'SPARE_Scores'
+        st.session_state.plot_params['yvar'] = 'SPARE_BA'
 
 
     sac.divider(label='Plotting Parameters', align='center', color='indigo', size='lg')
@@ -147,6 +153,9 @@ def plot_data(layout):
     #st.write(st.session_state.plot_params)
     #st.write(st.session_state.plot_data)
 
+    #st.write(st.session_state.plot_data)
+    #st.write(plot_params)
+
     utilpl.panel_show_plots()
 
 def view_segmentation(layout):
@@ -160,12 +169,18 @@ def view_segmentation(layout):
 
     if pipeline == 'dlmuse':
 
+        #fname = os.path.join(
+            #st.session_state.paths['curr_data'], 'dlmuse', 'dlmuse_vol.csv'
+        #)
         fname = os.path.join(
-            st.session_state.paths['curr_data'], 'dlmuse', 'dlmuse_vol.csv'
+            st.session_state.paths['curr_data'], 'DLMUSE_vol', 'DLMUSE_Volumes.csv'
         )
         df = pd.read_csv(fname)
+        
+        #st.write(st.session_state.paths)
 
-        # Rename columns if dict for data exists
+        # Rename DLMUSE columns
+        df.columns = df.columns.str.replace('DL_MUSE_Volume_','')
         df = df.rename(columns = st.session_state.dicts['muse']['ind_to_name'])
 
         list_vars = df.columns.unique().tolist()
@@ -192,7 +207,7 @@ def view_segmentation(layout):
             st.session_state.mriplot_params['ulay'] = fname
 
         fname = os.path.join(
-            st.session_state.paths['curr_data'], 'dlmuse', f'{sel_mrid}_T1_DLMUSE.nii.gz'
+            st.session_state.paths['curr_data'], 'DLMUSE_seg', f'{sel_mrid}_T1_DLMUSE.nii.gz'
         )
         if not os.path.exists(fname):
             st.session_state.mriplot_params['olay'] = None
@@ -229,7 +244,7 @@ def view_img_vars(layout):
     # Set reference centile data
     fname = os.path.join(
         st.session_state.paths['centiles'],
-        'dlmuse_centiles_' + st.session_state.plot_params['centile_type'] + '.csv'
+        'centiles_' + st.session_state.plot_params['centile_type'] + '.csv'
     )
     if fname != st.session_state.plot_data['csv_cent']:
         st.session_state.plot_data['csv_cent'] = fname
@@ -242,6 +257,11 @@ def view_img_vars(layout):
             st.session_state.paths['curr_data'], 'plots', 'data_all.csv'
         )
 
+    elif pipeline == 'spare':
+        fname = os.path.join(
+            st.session_state.paths['curr_data'], 'plots', 'data_all.csv'
+        )
+
     else:
     #elif pipeline == 'dlwmls':
         st.info('Not available yet ...')
@@ -250,6 +270,7 @@ def view_img_vars(layout):
     if fname != st.session_state.plot_data['csv_data']:
         st.session_state.plot_data['csv_data'] = fname
         df = utilio.read_csv(fname)
+        df.columns = df.columns.str.replace('DL_MUSE_Volume_','')
         df = df.rename(columns = st.session_state.dicts['muse']['ind_to_name'])
         df["grouping_var"] = "Data"
         st.session_state.plot_data['df_data'] = df
@@ -381,7 +402,7 @@ def panel_results():
             with layout:
                 sel_pipe = utilwd.my_selectbox(
                     'general_params', 'sel_pipeline',
-                    ['dlmuse', 'dlwmls'], 'Pipeline'
+                    ['dlmuse', 'dlwmls', 'spare'], 'Pipeline'
                 )
             if sel_pipe is None or sel_pipe == 'Select an option...':
                 return

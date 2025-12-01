@@ -125,9 +125,6 @@ def init_session_vars():
     st.session_state.project = 'user_default'
     #st.session_state.project = 'nichart_project'
 
-    st.session_state.prj_name = 'test1'
-    st.session_state.project = 'test1'
-
     st.session_state.project_selected_explicitly = False
     
     st.session_state.sel_pipeline = None
@@ -579,6 +576,8 @@ def update_project(sel_project) -> None:
     st.session_state.project = sel_project
     st.session_state.project_selected_explicitly = True
     st.session_state.paths['project'] = p_prj
+
+    st.session_state.paths['curr_data'] = st.session_state.paths['prj_dir']
 
 # Function to parse AWS login (if available)
 def process_session_token() -> Any:
