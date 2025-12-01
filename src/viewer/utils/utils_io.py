@@ -171,7 +171,7 @@ def upload_multiple_files(out_dir):
     '''
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
-
+    keymod = os.path.basename(out_dir)
     # Set target path
     st.session_state.paths["target"] = out_dir
 
@@ -179,7 +179,7 @@ def upload_multiple_files(out_dir):
     with st.container(border=True):
         st.file_uploader(
             "Input files or folders",
-            key="_uploaded_input",
+            key="_uploaded_input_" + keymod,
             accept_multiple_files=True,
             on_change = callback_copy_uploaded,
             help="Input files can be uploaded as a folder, multiple files, or a single zip file",
