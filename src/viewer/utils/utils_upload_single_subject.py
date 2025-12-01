@@ -545,7 +545,12 @@ def panel_upload_multi_subject():
         logger.debug(f'**** flag csv submitted set to : {flag_csv_submit}')
         logger.debug(f'**** sel csv file : {csv_file}')
         if flag_csv_submit == True:
-            upload_file(csv_file)
+            dest_path = os.path.join(st.session_state.paths['prj_dir'], 'participants', 'participants.csv')
+            os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+            with open(dest_path, 'wb') as f:
+                f.write(csv_file.getbuffer())
+            st.success("Uploaded your CSV file successfully!")
+            #upload_file(csv_file)
 
     #flag_multi=True
     #    
