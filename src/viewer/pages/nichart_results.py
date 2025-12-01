@@ -47,6 +47,10 @@ def my_help():
 if 'instantiated' not in st.session_state or not st.session_state.instantiated:
     utilses.init_session_state()
 
+with st.container(horizontal=True, horizontal_alignment="center"):
+    st.markdown("<h4 style=color:#3a3a88;'>View Results\n\n</h1>", unsafe_allow_html=True, width='content')
+
+
 utilres.panel_results()
 
 if st.session_state.workflow == 'Reference Data':

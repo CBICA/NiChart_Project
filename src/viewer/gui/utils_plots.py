@@ -259,7 +259,7 @@ def show_plots(df, df_cent, df_plots, plot_settings):
     """
     # Read plot ids
     list_plots = df_plots.index.tolist()
-    
+        
     # Set number of plots in each row
     num_plot = len(list_plots)
     if plot_settings['flag_auto']:

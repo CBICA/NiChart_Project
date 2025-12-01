@@ -75,6 +75,11 @@ def set_plot_params():
             'plot_params', 'hvargroup', 'hvar',
             'Grouping Variable', ['demog']
         )
+        
+    #### Centiles
+    if tab == 'Centiles':
+        sac.divider(label='Centiles', align='center', color='indigo', size='lg')
+        utilwd.select_centiles()        
 
     #### Filters
     if tab == 'Filters':
@@ -124,6 +129,23 @@ def plot_data(layout):
 
     with layout:
         set_plot_controls()
+
+    # Update traces
+    plot_params = st.session_state.plot_params
+    if plot_params['centile_values'] is not None:
+        plot_params['traces'] = plot_params['traces'] + plot_params['centile_values']
+
+    if plot_params['trend'] == 'Linear':
+        plot_params['traces'] = plot_params['traces'] + ['lin_fit']
+
+    if plot_params['show_conf']:
+        plot_params['traces'] = plot_params['traces'] + ['conf_95%']
+
+    if plot_params['trend'] == 'Smooth LOWESS Curve':
+        plot_params['traces'] = plot_params['traces'] + ['lowess']
+
+    #st.write(st.session_state.plot_params)
+    #st.write(st.session_state.plot_data)
 
     utilpl.panel_show_plots()
 
@@ -197,13 +219,40 @@ def view_segmentation(layout):
 def view_img_vars(layout):
     """
     View image variables
-    """    
+    """
     pipeline = st.session_state.general_params['sel_pipeline']
+
+    # Set reference centile data
+    fname = os.path.join(
+        st.session_state.paths['centiles'],
+        'dlmuse_centiles_' + st.session_state.plot_params['centile_type'] + '.csv'
+    )
+    if fname != st.session_state.plot_data['csv_cent']:
+        st.session_state.plot_data['csv_cent'] = fname
+        df = utilio.read_csv(fname)
+        st.session_state.plot_data['df_cent'] = df
+
+    # Set pipeline specific parameters    
     if pipeline == 'dlmuse':
-        plot_data(layout)
-      
-    elif pipeline == 'dlwmls':
+        fname = os.path.join(
+            st.session_state.paths['curr_data'], 'plots', 'data_all.csv'
+        )
+
+    else:
+    #elif pipeline == 'dlwmls':
         st.info('Not available yet ...')
+        return
+    
+    if fname != st.session_state.plot_data['csv_data']:
+        st.session_state.plot_data['csv_data'] = fname
+        df = utilio.read_csv(fname)
+        df = df.rename(columns = st.session_state.dicts['muse']['ind_to_name'])
+        df["grouping_var"] = "Data"
+        st.session_state.plot_data['df_data'] = df
+
+    # Plot data
+    plot_data(layout)
+      
 
 def prepare_data_for_download(prj_dir, sel_opt, out_zip):
     utilio.zip_folders(prj_dir, sel_opt, out_zip)

@@ -260,6 +260,9 @@ def init_paths():
     p_centiles = os.path.join(
         p_resources, "reference_data", "centiles"
     )
+    p_sample = os.path.join(
+        p_root, "sample_datasets", "demo_dataset_IXI"
+    )    
     p_proc_def = os.path.join(
         p_resources, "process_definitions"
     )
@@ -297,6 +300,7 @@ def init_paths():
         "root": p_root,
         "init": p_init,
         "resources": p_resources,
+        "sample_data": p_sample,
         "centiles" : p_centiles,
         "proc_def": p_proc_def,
         "file_search_dir": "",
@@ -304,7 +308,8 @@ def init_paths():
         "host_out_dir": None,
         "prj_dir": p_prj,
         "project": p_prj,
-        'target': None
+        'target': None,
+        "curr_data": None
     }
 
     # Host-container dir mapping which can be useful for local nested containers

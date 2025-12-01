@@ -203,7 +203,7 @@ def add_trace_centile(df: pd.DataFrame, plot_params: dict, plot_settings: dict, 
     Add trace for centile curves
     '''
     cvals = st.session_state.plot_settings['centile_trace_types']
-
+    
     # Check centile traces
     if plot_params['traces'] is None:
         return fig

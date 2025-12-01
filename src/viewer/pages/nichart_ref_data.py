@@ -27,8 +27,14 @@ inject_global_css()
 #utilpg.config_page()
 utilpg.set_global_style()
 
-# Set data type
+###############################
+# Set session state variables for the reference data workflow
 st.session_state.workflow = 'ref_data'
+
+st.session_state.paths['curr_data'] = st.session_state.paths['sample_data'] 
+
+###############################
+
 
 if 'instantiated' not in st.session_state or not st.session_state.instantiated:
     utilses.init_session_state()

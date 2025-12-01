@@ -28,10 +28,10 @@ logger = setup_logger()
 def read_csv(fname):
     try:
         df = pd.read_csv(fname)
-        st.toast(f'Loaded reference data file: {os.path.basename(fname)}')
+        st.toast(f'Loaded data file: {os.path.basename(fname)}')
         return df
     except SystemExit as e:
-        st.warning(f'Could not load reference data csv: {os.path.basename(fname)}')
+        st.warning(f'Could not load data file: {os.path.basename(fname)}')
         return None
 
 def get_file_count(folder_path: str, file_suff: List[str] = []) -> int:
