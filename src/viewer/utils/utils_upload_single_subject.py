@@ -439,7 +439,7 @@ def generate_template_csv():
     
     df = heuristic_df.sort_values(by='MRID')
     df = df.drop_duplicates().reset_index().drop('index', axis=1)
-    #df = df.drop(columns=['T1_path', 'FLAIR_path', 'DTI_path', 'FMRI_path'], errors='ignore')
+    df = df.drop(columns=['T1_path', 'FLAIR_path', 'DTI_path', 'FMRI_path'], errors='ignore')
     
     # Add columns for batch and dx
     df[['Age']] = ''
