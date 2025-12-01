@@ -228,6 +228,8 @@ with st.container(horizontal=True, horizontal_alignment="center"):
 
 pipeline_menu()
 
+sac.divider(key='_p0_div1')
+
 sel_but = sac.chip(
     [
         sac.ChipItem(label = 'Upload Data', icon='arrow-left', disabled=False),

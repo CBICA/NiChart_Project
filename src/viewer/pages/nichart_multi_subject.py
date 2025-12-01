@@ -11,6 +11,7 @@ import utils.utils_session as utilses
 import utils.utils_io as utilio
 import utils.utils_data_view as utildv
 from utils.utils_styles import inject_global_css 
+import gui.utils_navig as utilnav
 
 from streamlit_image_select import image_select
 import re
@@ -27,13 +28,18 @@ inject_global_css()
 #utilpg.config_page()
 utilpg.set_global_style()
 
-# Set data type
-st.session_state.data_type = 'multi_subject'
+###############################
+# Set session state variables for the reference data workflow
+st.session_state.workflow = 'multi_subject'
+st.session_state.subject_type = 'multi'
+
+st.session_state.paths['curr_data'] = st.session_state.paths['prj_dir'] 
+
+###############################
 
 if 'instantiated' not in st.session_state or not st.session_state.instantiated:
     utilses.init_session_state()
 
-st.session_state.subject_type = 'multi'
 
 st.markdown("<h5 style='text-align:center; color:#3a3a88;'>Multi-Subject Dataset Analysis\n\n</h1>", unsafe_allow_html=True)
 
@@ -42,25 +48,18 @@ with cols[1]:
 
     st.markdown(
         '''
-        Calculate neuroimaging chart values for a dataset with multiple subjects' MRI scans in a few simple actions:
+        Compute neuroimaging chart values for multi-subject MRI datasets with just a few steps:
         
-        - **Data:** Upload image (Nifti, Dicom) and non-image (.csv) files required for analysis
+        - **Data:** Upload image (NIfTI) and non-image (.csv) files required for analysis
         
-        - **Pipeline:** Select processing/analysis pipeline to run on your data
+        - **Pipelines:** Select processing/analysis pipeline to run on your data
 
         - **Results:** View/download results of the pipeline
         
         ''', unsafe_allow_html=True
     )
-    
-sel_opt = sac.chip(
-    [sac.ChipItem(label = '', icon='arrow-right', disabled=False)],
-    label='', align='center', color='#aaeeaa', size='xl'
-)
-    
-if sel_opt == '':
-    st.switch_page("pages/nichart_upload_data.py")
 
+utilnav.main_navig(None, None, 'Data', 'pages/nichart_data.py')
 
 # Show session state vars
 if st.session_state.mode == 'debug':
