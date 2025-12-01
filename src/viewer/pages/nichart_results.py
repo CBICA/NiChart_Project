@@ -63,24 +63,4 @@ else:
         utilset.edit_settings, my_help
     )
 
-# with st.container(horizontal=True, horizontal_alignment="center"):
-#     b1 = st.button('', icon=':material/arrow_back:', help = 'Pipeline')
-#     b2 = st.button('', icon=':material/arrow_forward:', help = 'Home')
-#     b3 = st.button('', icon=':material/settings:')
-#
-# if b1:
-#     st.switch_page("pages/nichart_pipelines.py")
-#
-# if b2:
-#     st.switch_page("pages/nichart_home.py")
-#
-# if b3:
-#     utilset.edit_settings()
-    
-# # Show session state vars
-# if st.session_state.mode == 'debug':
-#     with st.sidebar:
-#         utilses.disp_session_state()
-
-
 

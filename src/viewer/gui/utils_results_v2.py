@@ -27,6 +27,23 @@ from stqdm import stqdm
 from utils.utils_logger import setup_logger
 logger = setup_logger()
 
+def safe_index(lst, value, default=None):
+    try:
+        return lst.index(value)
+    except ValueError:
+        return default
+
+def select_from_list(layout, list_opts, var_name, hdr):
+    '''
+    Generic selection box
+    For a variable (var_name) initiated with the given list (list_opts)
+    Variable is saved in session_state (used as the key for the select box)
+    '''
+    sel_ind = safe_index(list_opts, st.session_state.get(var_name))
+    with layout:
+        sel_opt = st.selectbox(hdr, list_opts, key=var_name, index=sel_ind)
+    return st.session_state[var_name]
+
 def set_plot_params(df):
     """
     Panel for selecting plotting parameters
@@ -86,6 +103,50 @@ def set_plot_params(df):
     if tab == 'Plot Settings':
         utilwd.select_plot_settings()
 
+def set_centileplot_params():
+    """
+    Panel for selecting centile plot parameters
+    """
+    sac.divider(label='Plotting Parameters', align='center', color='indigo', size='lg')
+
+    tab = sac.tabs(
+        items=[
+            sac.TabsItem(label='Centiles'),
+            sac.TabsItem(label='Variables'),
+            sac.TabsItem(label='Filters'),
+            sac.TabsItem(label='Plot Settings'),
+        ],
+        size='sm',
+        align='left'
+    )
+
+    #### Centiles
+    if tab == 'Centiles':
+        utilwd.select_centiles()
+
+    #### Variables
+    if tab == 'Variables':
+        sel_xvar = utilwd.select_var_twolevels(
+            'plot_params', 'xvargroup', 'xvar',
+            'Variable X', ['Age'], ['demog'],
+        )
+
+        sel_yvar = utilwd.select_var_twolevels(
+            'plot_params', 'yvargroup', 'yvar',
+            'Variable Y', None, ['roi']
+        )
+    #### Filters
+    if tab == 'Filters':
+        # Let user pick an age range
+        sel_age_range = utilwd.my_slider(
+            'plot_params', 'filter_age', 'Age Range', 0, 110
+        )
+
+    #### Plot Settings
+    if tab == 'Plot Settings':
+        utilwd.select_plot_settings()
+
+
 def set_plot_controls():
     sac.divider(label='Plot Controls', align='center', color='indigo', size='lg')
     with st.container(horizontal=True, horizontal_alignment="center"):
@@ -104,10 +165,42 @@ def set_plot_controls():
             st.session_state.plots = utilpl.delete_all_plots()
 
 
-def plot_data(layout):
+def plot_centiles(layout):
     """
-    View img variables
+    View centile values (reference data)
     """
+    plot_params = st.session_state.plot_params
+    
+    with layout:
+        set_centileplot_params()
+        
+    with layout:
+        set_plot_controls()
+        
+    utilpl.panel_show_plots()
+
+def plot_imgvars(layout):
+    """
+    View img variables (user data)
+    """
+    fname = os.path.join(
+        st.session_state.paths['project'], 'plots', 'data_all.csv'
+    )
+    df = pd.read_csv(fname)
+
+    ## FIXME rename rois
+    df = df.rename(
+        columns = st.session_state.dicts['muse']['ind_to_name']
+    )
+    
+    if 'grouping_var' not in df:
+        df["grouping_var"] = "Data"
+    
+    st.session_state.plot_data['df_data'] = df.copy()
+
+    var_groups_data = ['roi']
+    pipeline = 'dlmuse'
+
     with layout:
         set_plot_params(df)
 
