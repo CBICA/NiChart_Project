@@ -512,7 +512,7 @@ def panel_upload_multi_subject():
     #    pass
     with st.popover("Participants CSV"):
         st.markdown("## Participants CSV Upload")
-        st.info("Most pipelines require some clinical or demographic information about participants. Below you can download a template CSV file to fill in. If you don't have information for a certain column, feel free to delete it. When ready, upload it with the file uploader.")
+        st.info("Most pipelines require some clinical or demographic information about participants. Below you can download a template CSV file to fill in. If you don't have information for a certain column, feel free to delete it. When ready, upload it with the file uploader and hit 'Submit'.")
         ## TODO: explain all columns here (expandable)
         with st.expander(label="Explanation of columns", expanded=False):
             st.write("Age must be in years. Sex must be M or F.")
