@@ -10,6 +10,7 @@ import pandas as pd
 import numpy as np
 import zipfile
 import streamlit_antd_components as sac
+from NiChart_common_utils.nifti_parser import NiftiMRIDParser
 import shutil
 import time
 from typing import Any, BinaryIO, List, Optional
@@ -185,6 +186,10 @@ def dialog_extract_dicoms(in_dir, out_dir):
     
     if consolidate_nifti():
         st.rerun()    
+
+def consolidate_csv(fname):
+    out_file = os.path.join(st.session_state.paths['prj_dir'], 'participants', 'participants.csv')
+    shutil.copyfile(fname, out_file)
 
 def upload_file(in_file):
     '''
@@ -419,6 +424,140 @@ def panel_upload_single_subject():
             upload_file(sel_files)
         else:
             upload_files(sel_files)
+
+def generate_template_csv():
+    mod_dirs = {mod: os.path.join(st.session_state.paths['project'], mod) for mod in ['t1', 't2', 'fl', 'dti', 'fmri']}
+    dir_dict = {'T1': mod_dirs['t1'],
+                            'T2': mod_dirs['t2'],
+                            'FLAIR': mod_dirs['fl'],
+                            'DTI': mod_dirs['dti'],
+                            'FMRI': mod_dirs['fmri'],
+                            }
+    nifti_parser = NiftiMRIDParser()
+    heuristic_df = nifti_parser.create_master_csv(dir_dict, os.path.join(st.session_state.paths['project'], 'inferred_data_paths.csv'))
+    
+    
+    df = heuristic_df.sort_values(by='MRID')
+    df = df.drop_duplicates().reset_index().drop('index', axis=1)
+    df = df.drop(columns=['T1_path', 'FLAIR_path', 'DTI_path', 'FMRI_path'], errors='ignore')
+    
+    # Add columns for batch and dx
+    df[['Age']] = ''
+    df[['Sex']] = ''
+    df[['Batch']] = f'{st.session_state.project}_Batch1'
+    df[['IsCN']] = 1
+    
+    
+    return df
+
+def panel_upload_multi_subject():
+    '''
+    Upload user data to target folder
+    '''
+    logger.debug('    Function: panel_upload_multi_subject')
+
+    sac.divider(key='_p2_div1')
+    
+    with st.container(horizontal=True, horizontal_alignment="left"):
+        st.markdown("##### Upload File(s): ", width='content')
+        with st.popover("❓", width='content'):
+            st.write(
+                """
+                **Data Upload Guide**
+                - Here, upload the data you have available. (In the next step we'll automatically determine which pipelines you can run based on this.)
+
+                - You may upload MRI scans in any of the following formats:
+                  - **NIfTI:** one or multiple .nii or .nii.gz files 
+                  - **DICOM (compressed):** a single .zip file containing the DICOM series
+                  - **DICOM (individual files):** multiple .dcm files
+                  
+                    *(Note: uploading a folder directly is not currently supported)*
+                    
+                - If you have multiple imaging modalities (e.g., T1, FLAIR), upload only one modality batch at a time. First click the modality on the list, then drag-and-drop your images onto the box.
+                
+                - Once uploaded, NiChart will automatically:
+                  - Organize the files into the standard input structure
+                  - Create a subject list based on the uploaded MRI data
+                  
+                - You may open and edit the subject list (e.g., to add age, sex, or other metadata needed for analysis).
+                
+                - You can also upload non-imaging data (e.g., clinical or cognitive measures) as a CSV file (required for harmonization and many analytical pipelines).
+                
+                - The CSV must include an MRID column with values that match the subject IDs in the subject list, so the data can be merged correctly.
+
+                - When you go to select a pipeline in the next step, if you select a pipeline which needs more fields, we'll tell you.
+                """
+            )
+            
+    # Upload data
+    #sel_opt = sac.chip(
+    #    ['Single (.nii.gz, .nii, .zip, .csv)', 'Multiple (dicom files)'],
+    #    label='', index=0, align='left', size='sm', radius='sm', multiple=False, 
+    #    color='cyan', return_index = True
+    #)
+    #sel_opt = sac.chip(
+    #    ['T1 scans (.nii.gz, .nii, .zip)', 'FLAIR scans (.nii.gz, .nii, .zip)',
+    #     'DICOM images (.dcm, .zip)', 'Participants CSV (.csv)'],
+    #     label='', index=0, align='left', size='sm', radius='sm', multiple=False,
+    #     color='cyan', return_index = True
+    #)
+
+    with st.popover("T1 Scans"):
+        t1_out_dir = os.path.join(st.session_state.paths['prj_dir'], 't1')
+        utilio.upload_multiple_files(out_dir=t1_out_dir)
+    with st.popover("FLAIR Scans"):
+        fl_out_dir = os.path.join(st.session_state.paths['prj_dir'], 'fl')
+        utilio.upload_multiple_files(out_dir=fl_out_dir)
+    #with st.popover("DICOM images"):
+    #    pass
+    with st.popover("Participants CSV"):
+        st.markdown("## Participants CSV Upload")
+        st.info("Most pipelines require some clinical or demographic information about participants. Below you can download a template CSV file to fill in. If you don't have information for a certain column, feel free to delete it. When ready, upload it with the file uploader and hit 'Submit'.")
+        ## TODO: explain all columns here (expandable)
+        with st.expander(label="Explanation of columns", expanded=False):
+            st.write("Age must be in years. Sex must be M or F.")
+            st.write("Batch is just used to identify particpants from a related source and is used for harmonization (not needed otherwise). We auto-generate a batch name assuming all scans are from a single population.")
+            st.write("IsCN is used to denote cognitively normal patients (1 for CN, 0 otherwise). This is used for filtering during harmonization and not needed otherwise.")
+        try:
+            autogenerated_csv = generate_template_csv()
+            autogenerated_csv_data = autogenerated_csv.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="Download template CSV",
+                data=autogenerated_csv_data,
+                file_name='participants.csv',
+                mime="text/csv"
+            )
+        except Exception as e:
+            st.warning("We couldn't seem to generate your template CSV. Please go back and ensure you uploaded scans first.")
+        
+        csv_file = st.file_uploader(
+            "Input participants CSV",
+            key="_uploaded_csv_input",
+            accept_multiple_files=False,
+            label_visibility="collapsed"
+        )
+        flag_csv_submit = False
+        with st.container(horizontal=True, horizontal_alignment="center"):
+            csv_submitted = st.button("Submit")
+            if csv_submitted:
+                flag_csv_submit = True
+    
+        logger.debug(f'**** flag csv submitted set to : {flag_csv_submit}')
+        logger.debug(f'**** sel csv file : {csv_file}')
+        if flag_csv_submit == True:
+            try:
+                dest_path = os.path.join(st.session_state.paths['prj_dir'], 'participants', 'participants.csv')
+                os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+                with open(dest_path, 'wb') as f:
+                    f.write(csv_file.getbuffer())
+                st.toast("Uploaded your CSV file successfully!")
+            except:
+                st.toast("Failed to upload CSV file.")
+            #upload_file(csv_file)
+
+    #flag_multi=True
+    #    
+    #logger.debug(f'**** flag multi set to : {flag_multi}')
 
 def panel_view_files():
     '''

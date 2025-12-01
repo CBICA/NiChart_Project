@@ -17,5 +17,5 @@ steps:
     inputs:
       fl_img: ${STUDY}/fl
     outputs:
-      dlwmls_seg: ${STUDY}/DLWMLS_seg
-      dlwmls_vol: ${STUDY}/DLWMLS_vol/DLWMLS_Volumes.csv
+      dlwmls_seg: ${STUDY}/dlwmls_seg
+      dlwmls_vol: ${STUDY}/dlwmls_vol/DLWMLS_Volumes.csv
