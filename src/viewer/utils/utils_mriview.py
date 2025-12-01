@@ -318,7 +318,7 @@ def panel_set_params(
         return
 
     # Add tabs for parameter settings
-    with st.container(border=True):
+    with st.expander():
         tab = sac.tabs(
             items=[
                 sac.TabsItem(label='Data'),

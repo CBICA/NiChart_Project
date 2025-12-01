@@ -1,7 +1,9 @@
 Name,Label,PipelineYaml,HarmonizedPipelineYaml
+SPARE-ALL,spare-all,run_spare_all,run_spare_all_harmonized
+SPARE-CVM Scores,spare-all-cvm,run_spare_all_cvm,run_spare_all_cvm_harmonized
 DLMUSE,dlmuse,run_dlmuse,run_dlmuse_harmonized
-DLWMLS (Legacy),dlwmls,run_dlwmls,
-DLWMLS,dlmuse-dlwmls,run_nichart_dlwmls_v2,run_nichart_dlwmls_v2_harmonized
+DLWMLS (Legacy),legacy-dlwmls,run_dlwmls,
+DLWMLS,dlwmls,run_nichart_dlwmls_v2,run_nichart_dlwmls_v2_harmonized
 SPARE-AD,spare-ad,run_spare_ad,run_spare_ad_harmonized
 SPARE-BA,spare-ba,run_spare_ba,run_spare_ba_harmonized
 SPARE-Smoking,spare-smoking,run_spare_cvm_smoking,run_spare_cvm_smoking_harmonized
@@ -14,5 +16,3 @@ SPARE-BA-Image,spare-ba-image,run_bascores,
 SurrealGAN,surrealgan,run_predcrd_surrealgan,
 CCL-NMF,cclnmf,run_cclnmf,
 RAVENS,ravens,run_nichart_ravens,
-
-

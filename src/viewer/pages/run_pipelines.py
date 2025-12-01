@@ -111,7 +111,7 @@ def panel_run_pipeline():
     ## TODO: Retrieve dynamically/match between front end and toolloader code
     ## This a nice and simple placeholder for now
     
-    pipeline_to_run = tl.get_pipeline_id_by_name(sel_method, harmonized=harmonize)
+    pipeline_to_run = tl.get_pipeline_id_by_label(sel_method, harmonized=harmonize)
 
     if pipeline_to_run is None:
         st.error("The currently selected pipeline doesn't have an associated tool configuration. Please submit a bug report!")

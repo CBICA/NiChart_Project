@@ -4,6 +4,7 @@ import os
 import yaml
 import glob
 from pathlib import Path
+import pandas as pd
 import subprocess
 import shutil
 import streamlit as st
@@ -12,6 +13,8 @@ import boto3
 from datetime import datetime
 from botocore.exceptions import ClientError
 import utils.utils_pollstatus as ps
+import utils.utils_io as utilio
+import utils.utils_csvparsing as utilcsv
 import time
 import re
 from collections import defaultdict, deque
@@ -581,6 +584,7 @@ def parse_pipeline_steps(pipeline_yaml):
 
     return execution_order, step_map
 
+@st.cache_data
 def parse_pipeline_requirements(pipeline_id):
     pipeline_path = DEFAULT_PIPELINE_DEFINITION_PATH / f"{pipeline_id}.yaml"
     if not pipeline_path.exists():
@@ -606,6 +610,168 @@ def parse_pipeline_requirements(pipeline_id):
 
     return reqs_set, req_params, req_order
 
+def check_requirements_met_nopanel(pipeline_name, harmonized):
+    label = get_pipeline_label_by_name(pipeline_name)
+    pipeline_id = get_pipeline_id_by_label(label, harmonized=harmonized)
+    if pd.isna(pipeline_id) or not pipeline_id:
+        pipeline_id = get_pipeline_id_by_label(label, harmonized=not harmonized)
+    print(f"DEBUG: Name {pipeline_name} Label {label} Id {pipeline_id}")
+    reqs_set, reqs_params, req_order = parse_pipeline_requirements(pipeline_id)
+
+    counts = utilio.compute_counts()
+    items = utilio.classify_cardinality(req_order, counts)
+    
+    # assume good unless reqs violated
+    result = True
+    blockers = []
+    for item in items:
+        if item.status == 'red':
+            #st.error(f"Item {item.name} error with status {item.status}") # Debug 
+            result = False # Not all checks met
+            if item.name == "needs_T1":
+                blockers.append(f"T1 scans appear to be missing. Please check that images were uploaded.")
+            elif item.name == "needs_FLAIR":
+                blockers.append(f"FLAIR scans appear to be missing. Please check that images were uploaded.")
+            elif item.name == "needs_demographics":
+                blockers.append(f"Participants CSV appears to be missing or malformed. Please check that this data was provided.")
+            elif item.name == "csv_has_columns":
+                required_cols = reqs_params.get("csv_has_columns", [])
+                csv_path = os.path.join(st.session_state.paths["project"], 'participants' ,'participants.csv')
+                csv_report = utilcsv.validate_csv(csv_path=csv_path, required_cols=required_cols, mrid_col="MRID")
+                severity = utilio._csv_severity(csv_report)
+                if csv_report.file_ok:
+                    if csv_report.missing_cols:
+                        blockers.append("Participants CSV missing required columns: " + ", ".join(csv_report.missing_cols))
+                else:
+                    blockers.append("Could not locate the participants CSV. Make sure it exists!")
+            else:
+                raise ValueError(f"Requirement {item.name} for pipeline {pipeline_id} has no associated rule. Please submit a bug report.")
+            blockers.append(item)
+        if item.status == 'yellow':
+            if item.name == "needs_T1":
+                blockers.append(f"T1 scan count does not match the number of subjects available in other modalities or the participants CSV {item.note}. Please check that all images were uploaded.")
+            elif item.name == "needs_FLAIR":
+                blockers.append(f"FLAIR scan count does not match the number of subjects available in other modalities or the participants CSV {item.note}. Please check that all images were uploaded.")
+            elif item.name == "needs_demographics":
+                blockers.append(f"Participants CSV row count does not match the number of subjects available in scans {item.note}. Please check that all desired participants have CSV entries.")
+            elif item.name == "csv_has_columns":
+                required_cols = reqs_params.get("csv_has_columns", [])
+                csv_path = os.path.join(st.session_state.paths["project"], 'participants' ,'participants.csv')
+                csv_report = utilcsv.validate_csv(csv_path=csv_path, required_cols=required_cols, mrid_col="MRID")
+                severity = utilio._csv_severity(csv_report)
+                if csv_report.file_ok:
+                    if csv_report.missing_cols:
+                        blockers.append("Participants CSV missing required columns: " + ", ".join(csv_report.missing_cols))
+                else:
+                    blockers.append("Could not locate the participants CSV. Make sure it exists!")
+            else:
+                raise ValueError(f"Requirement {item.name} for pipeline {pipeline_id} has no associated rule. Please submit a bug report.")
+    return result, blockers
+
+
+def check_requirements_met_panel(pipeline_name):
+    # That's right, emojis in the code. >:^)
+    STATUS_ICON = {"green": "✅", "yellow": "⚠️", "red": "❌"}
+    REQ_TO_HUMAN_READABLE = {
+        'needs_T1': 'T1 Scans',
+        'needs_FLAIR': 'FLAIR Scans',
+        'needs_demographics': 'Participants CSV', 
+    }
+    pipeline = st.session_state.sel_pipeline
+    pipeline_id = get_pipeline_id_by_label(pipeline, harmonized=st.session_state.do_harmonize)
+    reqs_set, reqs_params, req_order = parse_pipeline_requirements(pipeline_id)
+
+    # need to generate counts
+    counts = utilio.compute_counts()
+    
+    items = utilio.classify_cardinality(req_order, counts)
+    
+    count_max_key = max(counts, key=counts.get)
+    count_max_value = counts[count_max_key]
+    count_diffs = {key: abs(counts[key]-count_max_value) for key in counts.keys() if key != count_max_key}
+
+    for item in items:
+        icon = STATUS_ICON[item.status]
+        expanded = (item.status != "green")
+        
+        label = f"{icon} {REQ_TO_HUMAN_READABLE[item.name]} - {item.note}"
+        with st.expander(label, expanded=expanded):
+            if item.name == "needs_T1":
+                st.write("Please upload T1 images.")
+            elif item.name == "needs_FLAIR":
+                st.write("Please upload FLAIR images.")
+            elif item.name == "needs_demographics":
+                st.write("Please upload a participants CSV via the file uploader.")
+            elif item.name == "csv_has_columns":
+                pass # Handled in needs_demographics case
+            else:
+                raise ValueError(f"Requirement {item.name} for pipeline {pipeline_id} has no associated rule. Please submit a bug report.")
+    if "needs_demographics" in reqs_set:
+        required_cols = reqs_params.get("csv_has_columns", [])
+        csv_path = os.path.join(st.session_state.paths["project"], 'participants' ,'participants.csv')
+        csv_report = utilcsv.validate_csv(csv_path=csv_path, required_cols=required_cols, mrid_col="MRID")
+        severity = utilio._csv_severity(csv_report)
+        icon = STATUS_ICON[severity]
+        row_note = ""
+        # Build a concise label
+        if not csv_report.file_ok:
+            note = "CSV file not found."
+        elif not csv_report.columns_ok:
+            note = f"Missing columns: {', '.join(csv_report.missing_cols)}"
+        elif csv_report.issues:
+            note = f"{len(csv_report.issues)} issue(s) detected"
+        else:
+            note = "All required columns found and passed validation; no issues"
+        if severity == "green":
+            if count_max_key == "needs_demographics":
+                for key, val in count_diffs.items():
+                    if val < count_max_value:
+                        row_note += f"{REQ_TO_HUMAN_READABLE[key]}: {val} MRIDs are in participants CSV but not in available.\n"
+                        severity = "yellow"
+            else:
+                for key, val in count_diffs:
+                    if count_diffs["needs_demographics"] > val:
+                        row_note += f"{REQ_TO_HUMAN_READABLE[key]}: {val} CSV entries are present which have no associated scan.\n"
+                    elif count_diffs["needs_demographics"] < val:
+                        row_note += f"{REQ_TO_HUMAN_READABLE[key]}: {val} scans are present which have no participants CSV entry.\n"
+
+        csv_expanded = (severity != "green")
+        with st.expander(f"{icon} Participants CSV - {note}", expanded=csv_expanded):
+            if csv_report.file_ok:
+                if csv_report.missing_cols:
+                    st.error("Missing: " + ", ".join(csv_report.missing_cols))
+                if csv_report.present_cols:
+                    st.success("Present: " + ", ".join(csv_report.present_cols))
+                if csv_report.extra_cols:
+                    st.info("Extra (not used for this pipeline): " + ", ".join(csv_report.extra_cols))
+                st.caption(f"Rows in CSV: {csv_report.rows}")
+
+                if csv_report.issues:
+                    st.subheader("Issues")
+                    issues_df = utilio._issues_dataframe(csv_report.issues)
+                    group_by_col = st.selectbox(
+                        "Group issues by", ["(none)", "column", "reason"],
+                        index=1 if "column" in issues_df.columns else 0,      
+                    )
+                    if group_by_col != "(none)" and group_by_col in issues_df.columns:
+                        for key, sub in issues_df.groupby(group_by_col):
+                            st.markdown(f"**{group_by_col}: {key}** - {len(sub)} row(s)")
+                            st.dataframe(sub, use_container_width=True, height=220)
+                    else:
+                        st.dataframe(issues_df, use_container_width=True, height=320)
+                
+    ready = True
+    if any(s.status == "red" for s in items):
+        ready = False
+    
+    if "needs_demographics" in reqs_set:
+        ready = ready and (csv_report is not None) and utilio._csv_severity(csv_report) == "green"
+    if ready:
+        st.success("All requirements satisfied. You can proceed.")
+    else:
+        st.info("Resolve the issues above to proceed. Click to expand each requirement for more details.")
+
+@st.cache_data
 def parse_pipeline_categories(pipeline_id):
     pipeline_path = DEFAULT_PIPELINE_DEFINITION_PATH / f"{pipeline_id}.yaml"
     if not pipeline_path.exists():
@@ -616,56 +782,50 @@ def parse_pipeline_categories(pipeline_id):
 
     return pipeline_yaml.get('categories', [])
 
+@st.cache_data
 def get_all_pipeline_ids():
     directory = DEFAULT_PIPELINE_DEFINITION_PATH
     yaml_files = glob.glob(os.path.join(directory, "*.yaml"))
     basenames = [os.path.splitext(os.path.basename(f))[0] for f in yaml_files]
     return basenames
 
-def get_pipeline_id_by_name(sel_pipeline, harmonized=False):
-    sel_pipeline_to_id = {
-        'dlmuse': 'run_dlmuse',
-        'spare-ad': 'run_spare_ad',
-        'spare-ba': 'run_spare_ba',
-        'spare-ba-image': 'run_bascores',
-        'dlwmls': 'run_dlwmls',
-        'spare-cvm': None,
-        'surrealgan': 'run_predcrd_surrealgan',
-        'synthseg': None,
-        'cclnmf': 'run_cclnmf',
-        'dlmuse-dlwmls': 'run_nichart_dlwmls_v2',
-        'spare-smoking': 'run_spare_cvm_smoking',
-        'spare-hypertension': 'run_spare_cvm_hypertension',
-        'spare-obesity': 'run_spare_cvm_obesity',
-        'spare-diabetes': 'run_spare_cvm_diabetes',
-        'spare-depression': 'run_spare_depression',
-        'spare-psychosis': 'run_spare_psychosis',
-        'ravens': 'run_nichart_ravens',
-        ## Add additional lines here ({sel_pipeline value} : {name of pipeline yaml} )
-    }
-    if harmonized:
-        sel_pipeline_to_id = {
-            'dlmuse': 'run_dlmuse_harmonized',
-            'dlwmls': 'run_dlwmls',
-            'spare-ad': 'run_spare_ad_harmonized',
-            'spare-ba': 'run_spare_ba_harmonized',
-            'spare-ba-image': 'run_bascores',
-            'spare-cvm': None,
-            'surrealgan': 'run_predcrd_surrealgan',
-            'synthseg': None,
-            'cclnmf':  None,
-            'dlmuse-dlwmls': 'run_nichart_dlwmls_v2_harmonized',
-            'spare-smoking': 'run_spare_cvm_smoking_harmonized',
-            'spare-hypertension': 'run_spare_cvm_hypertension_harmonized',
-            'spare-obesity': 'run_spare_cvm_obesity_harmonized',
-            'spare-diabetes': 'run_spare_cvm_diabetes_harmonized',
-            'spare-depression': None,
-            'spare-psychosis': None,
-            'ravens': None,
-            ## Add additional lines here ({sel_pipeline value} : {name of pipeline yaml} )
-        }
-    return sel_pipeline_to_id[sel_pipeline]
+@st.cache_data
+def pipeline_is_harmonizable(pipeline_label):
+    directory = DEFAULT_PIPELINE_DEFINITION_PATH
+    pipelines = pd.read_csv(os.path.join(directory, 'list_pipelines.csv'))
+    row = pipelines.loc[pipelines["Label"] == pipeline_label, "HarmonizedPipelineYaml"]
+    if not row.empty:
+        return True
+    else:
+        return False
 
+@st.cache_data
+def get_pipeline_name_by_label(pipeline_label):
+    directory = DEFAULT_PIPELINE_DEFINITION_PATH
+    pipelines = pd.read_csv(os.path.join(directory, 'list_pipelines.csv'))
+    row = pipelines.loc[pipelines["Label"] == pipeline_label, "Name"]
+    return row.iloc[0] if not row.empty else None    
+
+@st.cache_data
+def get_pipeline_label_by_name(pipeline_name):
+    directory = DEFAULT_PIPELINE_DEFINITION_PATH
+    pipelines = pd.read_csv(os.path.join(directory, 'list_pipelines.csv'))
+    row = pipelines.loc[pipelines["Name"] == pipeline_name, "Label"]
+    return row.iloc[0] if not row.empty else None      
+
+@st.cache_data
+def get_pipeline_id_by_label(pipeline_label, harmonized=False):
+    if harmonized:
+        field_to_retrieve = "HarmonizedPipelineYaml"
+    else:
+        field_to_retrieve = "PipelineYaml"
+
+    directory = DEFAULT_PIPELINE_DEFINITION_PATH
+    pipelines = pd.read_csv(os.path.join(directory, 'list_pipelines.csv'))
+    row = pipelines.loc[pipelines["Label"] == pipeline_label, field_to_retrieve]
+    return row.iloc[0] if not row.empty else None
+
+@st.cache_data
 def overall_pipeline_category_listing():
     # Returns a dictionary mapping a category to a list of associated pipelines.
     # Useful for rendering a subset of pipelines
@@ -680,6 +840,7 @@ def overall_pipeline_category_listing():
                 res_dict[category] = [pipeline_id]
     return res_dict
 
+@st.cache_data
 def overall_pipeline_requirements_listing():
     res_dict = {}
     pipelines = get_all_pipeline_ids()

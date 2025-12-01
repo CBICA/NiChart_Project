@@ -1,12 +1,12 @@
-pipeline_name: SPARE Scores - All-Inclusive
+pipeline_name: SPARE Scores - All-Inclusive (T1 only)
 description: |
-  Pipeline which uses DLMUSE features to produce all available SPARE scores.
+  Pipeline which uses DLMUSE features to produce all available SPARE scores using T1 scans.
 
 categories:
   - spare
   - inference
   - classification
-
+  - highlighted
 
 requires:
   - needs_T1

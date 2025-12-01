@@ -64,7 +64,8 @@ def v_float(df, col, *, ge=None, le=None):
 
 def v_enum(df, col, *, values: list[str]):
     s = df[col].astype(str)
-    bad = ~s.isin(values)
+    values_as_strs = [str(val) for val in values]
+    bad = ~s.isin(values_as_strs)
     return issues_from_mask(df, col, bad, f"not in {values}", mrid_col="MRID")
 
 def v_regex(df, col, *, pattern: str):

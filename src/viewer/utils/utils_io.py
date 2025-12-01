@@ -7,7 +7,7 @@ import utils.utils_csvparsing as utilcsv
 import os
 import pandas as pd
 import numpy as np
-from NiChart_common_utils.nifti_parser import NiftiMRIDParser
+#from NiChart_common_utils.nifti_parser import NiftiMRIDParser
 import zipfile
 import re
 import streamlit_antd_components as sac
@@ -24,6 +24,16 @@ logger = setup_logger()
 
 ##############################################################
 ## Generic IO functions
+##@st.cache_data  # type:ignore
+def read_csv(fname):
+    try:
+        df = pd.read_csv(fname)
+        st.toast(f'Loaded data file: {os.path.basename(fname)}')
+        return df
+    except SystemExit as e:
+        st.warning(f'Could not load data file: {os.path.basename(fname)}')
+        return None
+
 def get_file_count(folder_path: str, file_suff: List[str] = []) -> int:
     '''
     Returns the count of files matching any of the suffixes in `file_suff`
@@ -71,25 +81,6 @@ def remove_dir(out_dir):
         st.error(f"Could not delete folder: {out_dir}")
         return False
 
-def clear_folder(folder):
-    if os.path.islink(folder):
-        st.warning("Target folder is a symlink. Cannot delete contents")
-        return        
-
-    try:
-        for item in os.listdir(folder):
-            item_path = os.path.join(folder, item)
-            if os.path.isfile(item_path) or os.path.islink(item_path):
-                os.remove(item_path)
-            elif os.path.isdir(item_path):
-                shutil.rmtree(item_path)
-        logger.debug(f"Removed dir: {folder}")
-        time.sleep(2)
-        return True
-    except:
-        st.error(f"Could not delete folder: {folder}")
-        return False        
-
 def browse_file(path_init: str) -> Any:
     '''
     File selector
@@ -127,6 +118,22 @@ def get_subfolders(path: str) -> list:
             subdirs.append(item)
     return sorted(subdirs)
 
+def zip_folders(in_dir, folders, output_zip):
+    """
+    Zip multiple folders into a single zip file.
+    """
+    with zipfile.ZipFile(output_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for folder in folders:
+            folder_path = os.path.join(in_dir, folder)
+            for root, _, files in os.walk(folder_path):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    # Preserve folder name structure inside the zip
+                    arcname = os.path.join(folder, os.path.relpath(file_path, folder_path))
+                    zipf.write(file_path, arcname)
+
+    print(f"Created zip: {output_zip}")
+
 def zip_folder(in_dir: str, f_out: str) -> Optional[bytes]:
     '''
     Zips a folder and its contents.
@@ -142,16 +149,6 @@ def zip_folder(in_dir: str, f_out: str) -> Optional[bytes]:
             download_dir = f.read()
 
         return download_dir
-
-def unzip_zip_file(f_in, d_out):
-    '''
-    Unzips a ZIP file to a new folder and deletes the zip file
-    '''
-    os.makedirs(d_out, exist_ok=True)
-    with zipfile.ZipFile(f_in, "r") as zip_ref:
-        zip_ref.extractall(d_out)
-    os.remove(f_in)
-    st.toast(f'Unzipped zip file ...')
 
 def unzip_zip_files(in_dir: str) -> None:
     '''
@@ -184,75 +181,95 @@ def copy_and_unzip_uploaded_files(in_files: list, d_out: str) -> None:
     if os.path.exists(d_out):
         unzip_zip_files(d_out)
 
-def upload_files(out_dir, flag_single = False):
+def callback_copy_uploaded():
+    '''
+    Copies files to local storage
+    '''
+    if len(st.session_state['_uploaded_input']) > 0:
+        copy_and_unzip_uploaded_files(
+            st.session_state['_uploaded_input'], st.session_state.paths["target"]
+        )
+
+def upload_multiple_files(out_dir):
     '''
     Upload user data to target folder
     Input data may be a folder, multiple files, or a zip file (unzip the zip file if so)
     '''
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
+
     # Set target path
     st.session_state.paths["target"] = out_dir
 
-    with st.form(key='my_form', clear_on_submit=True, border=False):
-
-        sel_mod = sac.chip(
-            items=[
-                sac.ChipItem(label='T1'),
-                sac.ChipItem(label='FL'),
-                sac.ChipItem(label='CSV'),
-            ], label='', index=0, align='left', size='md', radius='md', multiple=False, color='cyan', 
-            #description='Select type of your data type'
-        )    
-        out_path = None
-        if sel_mod is not None:
-            out_path = os.path.join(out_dir, sel_mod.lower())
-            
-        sel_files = st.file_uploader(
+    # Upload data
+    with st.container(border=True):
+        st.file_uploader(
             "Input files or folders",
             key="_uploaded_input",
-            accept_multiple_files=flag_single,
+            accept_multiple_files=True,
+            on_change = callback_copy_uploaded,
             help="Input files can be uploaded as a folder, multiple files, or a single zip file",
-            label_visibility="collapsed"
         )
-        
-        submitted = st.form_submit_button("Submit")
-        if submitted:
-            if out_path is None:
-                return False
-            if len(sel_files) == 0:
-                return False
-            if not os.path.exists(out_path):
-                os.makedirs(out_path)
-            copy_and_unzip_uploaded_files(sel_files, out_path)
-            st.info('Uploaded file')
-            return True
-    
-    return False
-        
-      
-        
-def panel_load_data():
-    #with st.container(border=True):
-    st.markdown('##### User Input:')
-    #st.markdown(
-        #'''
-        #- Upload your input data file(s) here
-        #- MRI scan (Nifti or Dicom) or a data file (.csv)
-        #'''
-    #)
-    upload_files(st.session_state.paths['project'], True)
 
-def panel_load_data_tmp():
-    st.markdown('##### User Input:')
-    sel_mod = sac.chip(
-        items=[
-            sac.ChipItem(label='T1'),
-            sac.ChipItem(label='FL'),
-            sac.ChipItem(label='Demog'),
-        ], label='label', index=None, align='left', size='md', radius='md', multiple=False, color='cyan'
-    )    
-    if sel_mod is not None:
-        out_dir = os.path.join(
-            st.session_state.paths['project'], sel_mod.lower()
+def upload_multi(out_dir):
+    """
+    Panel for uploading multiple input files or folder(s)
+    """
+    # Check if data exists
+    if st.session_state.app_type == "cloud":
+        # Upload data
+        upload_folder(
+            out_dir,
+            "Input files or folders",
+            False,
+            "Input files can be uploaded as a folder, multiple files, or a single zip file",
+        )
+
+    else:  # st.session_state.app_type == 'desktop'
+        if not os.path.exists(out_dir):
+            try:
+                os.symlink(sel_dir, out_dir)
+            except:
+                st.error(
+                    f"Could not link user input to destination folder: {out_dir}"
+                )
+
+    # Check out files
+    fcount = get_file_count(st.session_state.paths[dtype])
+    if fcount > 0:
+        st.session_state.flags[dtype] = True
+        p_dicom = st.session_state.paths[dtype]
+        st.success(
+            f" Uploaded data: ({p_dicom}, {fcount} files)",
+            icon=":material/thumb_up:",
+        )
+        time.sleep(4)
+
+        st.rerun()
+
+def upload_single_file(out_dir, out_name, label) -> None:
+    '''
+    Upload user file to target folder
+    '''
+    with st.container(border=True):
+        sel_file = st.file_uploader(
+            label,
+            key="uploaded_input_csv",
+            accept_multiple_files=False
+        )        
+        if sel_file is not None:
+            try:
+                if not os.path.exists(out_dir):
+                    os.makedirs(out_dir)
+                out_file = os.path.join(out_dir, out_name)
+                
+                with open(out_file, "wb") as f:
+                    f.write(sel_file.getbuffer())
+                st.success(f"File '{sel_file.name}' saved to {out_file}")
+                return True
+            except:
+                st.warning(f'Could not upload file: {sel_file}')
+                return False
         return False
 
 
@@ -296,25 +313,25 @@ def create_scan_csv() -> None:
     out_dir = os.path.join(
         st.session_state.paths['project'], 'lists'
     )
-    mod_dirs = {mod: os.path.join(st.session_state.paths['project'], mod) for mod in ['t1', 't2', 'fl', 'dti', 'fmri']}
-    dir_dict = {'T1': mod_dirs['t1'],
-                            'T2': mod_dirs['t2'],
-                            'FLAIR': mod_dirs['fl'],
-                            'DTI': mod_dirs['dti'],
-                            'FMRI': mod_dirs['fmri'],
-                            }
-    nifti_parser = NiftiMRIDParser()
-    heuristic_df = nifti_parser.create_master_csv(dir_dict, os.path.join(st.session_state.paths['project'], 'inferred_data_paths.csv'))
+    #mod_dirs = {mod: os.path.join(st.session_state.paths['project'], mod) for mod in ['t1', 't2', 'fl', 'dti', 'fmri']}
+    #dir_dict = {'T1': mod_dirs['t1'],
+                            #'T2': mod_dirs['t2'],
+                            #'FLAIR': mod_dirs['fl'],
+                            #'DTI': mod_dirs['dti'],
+                            #'FMRI': mod_dirs['fmri'],
+                            #}
+    #nifti_parser = NiftiMRIDParser()
+    #heuristic_df = nifti_parser.create_master_csv(dir_dict, os.path.join(st.session_state.paths['project'], 'inferred_data_paths.csv'))
     
     
-    df = heuristic_df.sort_values(by='MRID')
-    df = df.drop_duplicates().reset_index().drop('index', axis=1)
+    #df = heuristic_df.sort_values(by='MRID')
+    #df = df.drop_duplicates().reset_index().drop('index', axis=1)
     
-    # Add columns for batch and dx
-    df[['Batch']] = f'{st.session_state.project}_Batch1'
-    df[['IsCN']] = 1
+    ## Add columns for batch and dx
+    #df[['Batch']] = f'{st.session_state.project}_Batch1'
+    #df[['IsCN']] = 1
     
-    return df
+    #return df
 
 
 def normalize_demographics_df(
@@ -575,72 +592,141 @@ def load_subj_list():
         align='left'
     )
 
-    out_dir = os.path.join(st.session_state.paths['project'], 'participants')
+    #out_dir = os.path.join(st.session_state.paths['project'], 'participants')
+    #if not os.path.exists(out_dir):
+        #os.makedirs(out_dir)
+        
+    #fname_tmp = 'participants_tmp.csv'
+    #fname = 'participants.csv'
+    #out_csv = os.path.join(out_dir, fname)
+    
+    #if tab == 'Upload':
+        #upload_single_file(out_dir, fname_tmp, 'Select participants file')
+        
+        #if os.path.exists(fname_tmp):
+            #st.success("We received your demographics file! Converting it to our format...")
+            #df_user = pd.read_csv(fname_tmp)
+            #mod_dirs = {mod: os.path.join(st.session_state.paths['project'], mod) for mod in ['t1', 't2', 'fl', 'dti', 'fmri']}
+            #dir_dict = {'T1': mod_dirs['t1'],
+                            #'T2': mod_dirs['t2'],
+                            #'FLAIR': mod_dirs['fl'],
+                            #'DTI': mod_dirs['dti'],
+                            #'FMRI': mod_dirs['fmri'],
+                            #}
+            #nifti_parser = NiftiMRIDParser()
+            #heuristic_df = nifti_parser.create_master_csv(dir_dict, os.path.join(st.session_state.paths['project'], 'inferred_data_paths.csv'))
+            #heuristic_df = heuristic_df.drop(df.filter(regex='_path$').columns, axis=1)
+            #corrected_df, issues = normalize_demographics_df(df_user, heuristic_df)
+            #corrected_df = corrected_df.sort_values(by='MRID')
+            #corrected_df = corrected_df.drop_duplicates().reset_index().drop('index', axis=1)
+    
+            ## Add columns for batch and dx
+            #if 'Age' not in corrected_df.columns:
+                #corrected_df[['Age']] = '?'
+            #if 'Sex' not in corrected_df.columns:
+                #corrected_df[['Sex']] = '?'
+            #if 'Batch' not in corrected_df.columns:
+                #corrected_df[['Batch']] = f'{st.session_state.project}_Batch1'
+            #if 'IsCN' not in corrected_df.columns:
+                #corrected_df[['IsCN']] = 1
+            #corrected_df.to_csv(fname, index=False)
+            #st.success("Your CSV has been converted successfully.")
+        
+
+    #elif tab == 'Enter Manually':
+        #df = create_scan_csv()
+            
+        #st.info("Please enter values for your sample")
+        
+        ## Define column options
+        #column_config = {
+            #"Sex": st.column_config.SelectboxColumn(
+                #"Sex",
+                #help="Select sex",
+                #options=["M", "F", "Other"],
+                #required=True
+            #)
+        #}
+        #df_user = st.data_editor(
+            #df,
+            #column_config=column_config,
+            #num_rows="dynamic",  # allows adding rows if you want
+            #use_container_width=True
+        #)
+        #if st.button('Save'):
+            #df_user.to_csv(out_csv, index=False)
+            #st.success(f'Updated demographic file: {out_csv}')
+        
+
+    #elif tab == "View":
+        #if not os.path.exists(out_csv):
+            #st.warning('Covariate file not found!')
+            #return
+        #try:
+            #df_cov = pd.read_csv(out_csv)
+            #st.dataframe(df_cov)
+        #except:
+            #st.warning(f'Could not load covariate file: {out_csv}')
+        
+    #elif tab == "Reset":
+        #if st.button('Delete demog file'):
+            #remove_dir(out_dir)
+
+
+def load_user_csv():
+    '''
+    Panel for uploading data file
+    '''    
+    tab = sac.tabs(
+        items=[
+            sac.TabsItem(label='Upload'),
+            sac.TabsItem(label='View'),
+            sac.TabsItem(label='Reset'),
+        ],
+        size='lg',
+        align='left'
+    )
+
+    out_dir = os.path.join(st.session_state.paths['project'], 'user_data')
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
-        
-    fname_tmp = 'participants_tmp.csv'
-    fname = 'participants.csv'
+
+    fname = 'user_data.csv'
     out_csv = os.path.join(out_dir, fname)
-    
-    if tab == 'Upload':
-        upload_single_file(out_dir, fname_tmp, 'Select participants file')
-        
-        if os.path.exists(fname_tmp):
-            st.success("We received your demographics file! Converting it to our format...")
-            df_user = pd.read_csv(fname_tmp)
-            mod_dirs = {mod: os.path.join(st.session_state.paths['project'], mod) for mod in ['t1', 't2', 'fl', 'dti', 'fmri']}
-            dir_dict = {'T1': mod_dirs['t1'],
-                            'T2': mod_dirs['t2'],
-                            'FLAIR': mod_dirs['fl'],
-                            'DTI': mod_dirs['dti'],
-                            'FMRI': mod_dirs['fmri'],
-                            }
-            nifti_parser = NiftiMRIDParser()
-            heuristic_df = nifti_parser.create_master_csv(dir_dict, os.path.join(st.session_state.paths['project'], 'inferred_data_paths.csv'))
-            heuristic_df = heuristic_df.drop(df.filter(regex='_path$').columns, axis=1)
-            corrected_df, issues = normalize_demographics_df(df_user, heuristic_df)
-            corrected_df = corrected_df.sort_values(by='MRID')
-            corrected_df = corrected_df.drop_duplicates().reset_index().drop('index', axis=1)
-    
-            # Add columns for batch and dx
-            if 'Age' not in corrected_df.columns:
-                corrected_df[['Age']] = '?'
-            if 'Sex' not in corrected_df.columns:
-                corrected_df[['Sex']] = '?'
-            if 'Batch' not in corrected_df.columns:
-                corrected_df[['Batch']] = f'{st.session_state.project}_Batch1'
-            if 'IsCN' not in corrected_df.columns:
-                corrected_df[['IsCN']] = 1
-            corrected_df.to_csv(fname, index=False)
-            st.success("Your CSV has been converted successfully.")
-        
-
-    elif tab == 'Enter Manually':
-        df = create_scan_csv()
             
-        st.info("Please enter values for your sample")
-        
-        # Define column options
-        column_config = {
-            "Sex": st.column_config.SelectboxColumn(
-                "Sex",
-                help="Select sex",
-                options=["M", "F", "Other"],
-                required=True
-            )
-        }
-        df_user = st.data_editor(
-            df,
-            column_config=column_config,
-            num_rows="dynamic",  # allows adding rows if you want
-            use_container_width=True
-        )
-        if upload_files(out_dir, True):
-            st.info('Hello')
-            sel_mod=None
-            st.rerun()
+    if tab == 'Upload':
+        # Upload file
+        if upload_single_file(out_dir, fname, 'Select data file'):
+            # Update variable dictionary
+            df_user = pd.read_csv(out_csv)
+            df_dict = st.session_state.dicts['df_var_groups']
+            if 'user_data' not in df_dict.group.tolist():
+                df_dict.loc[len(df_dict)] = {
+                    'group': 'user_data',
+                    'category': 'user',
+                    'vtype': 'name',
+                    'atlas': None,
+                    'values': df_user.columns.sort_values().tolist()
+                }
+                st.session_state.dicts['df_var_groups'] = df_dict
 
+    elif tab == "View":
+        if not os.path.exists(out_csv):
+            st.warning('Data file not found!')
+            return
+        try:
+            df_data = pd.read_csv(out_csv)
+            st.dataframe(df_data)
+        except:
+            st.warning(f'Could not load data file: {out_csv}')
+        
+    elif tab == "Reset":
+        if st.button('Delete data file'):
+            remove_dir(out_dir)
+
+
+##############################################################
+## Streamlit panels for IO
 
 def panel_import_demo_data():
     st.info("You can import some demonstration data into your projects list by clicking the button below.")
@@ -918,7 +1004,7 @@ def panel_guided_upload_data():
     else:
         st.info(f"Pipeline {pipeline} was selected, so we'll guide you through the required inputs.")
 
-    pipeline_id = utiltl.get_pipeline_id_by_name(pipeline, harmonized=st.session_state.do_harmonize)
+    pipeline_id = utiltl.get_pipeline_id_by_label(pipeline, harmonized=st.session_state.do_harmonize)
     reqs_set, reqs_params, req_order = utiltl.parse_pipeline_requirements(pipeline_id)
 
     # need to generate counts
