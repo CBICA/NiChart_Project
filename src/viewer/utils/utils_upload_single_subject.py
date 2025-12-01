@@ -547,29 +547,9 @@ def panel_upload_multi_subject():
         if flag_csv_submit == True:
             upload_file(csv_file)
 
-    flag_multi=True
-        
-    logger.debug(f'**** flag multi set to : {flag_multi}')
-        
-    with st.form(key='my_form', clear_on_submit=True, border=False):
-                
-        sel_files = st.file_uploader(
-            "Input files or folders",
-            key="_uploaded_input_b",
-            accept_multiple_files=flag_multi,
-            label_visibility="collapsed"
-        )
-        
-        flag_submit = False
-        with st.container(horizontal=True, horizontal_alignment="center"):
-            submitted = st.form_submit_button("Submit")
-            if submitted:
-                flag_submit = True
-        
-    logger.debug(f'**** flag submitted set to : {flag_submit}')
-    logger.debug(f'**** sel files : {sel_files}')
-    if flag_submit == True:
-        upload_files(sel_files)
+    #flag_multi=True
+    #    
+    #logger.debug(f'**** flag multi set to : {flag_multi}')
 
 def panel_view_files():
     '''
