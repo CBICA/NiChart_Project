@@ -8,7 +8,7 @@ import streamlit as st
 import utils.utils_user_select as utiluser
 import utils.utils_session as utilses
 import utils.utils_misc as utilmisc
-import utils.utils_mriview as utilmri
+import gui.utils_mriview as utilmri
 
 import plotly.graph_objs as go
 import plotly.figure_factory as ff
@@ -246,10 +246,10 @@ def display_scatter_plot(df, df_cent, plot_params, plot_ind, plot_settings):
     # st.plotly_chart(fig, key=f"bubble_chart_{plot_ind}")
 
     ## FIXME
-    with st.expander('temp debug'):
-        st.write(df)
-        st.write(df_cent)
-        st.write(curr_params)
+    #with st.expander('temp debug'):
+        #st.write(df)
+        #st.write(df_cent)
+        #st.write(curr_params)
 
     return fig
 
@@ -368,7 +368,32 @@ def panel_show_plots():
     )
 
     if st.session_state.sel_mrid is not None:
-        show_mri()
+        sac.divider(label='Image Viewer', align='center', color='grape', size = 'lg')
+
+        if st.checkbox('Show MRI?'):
+            sel_mrid = st.session_state.sel_mrid
+            #######################
+            ## Set olay ulay images
+            fname = os.path.join(
+                st.session_state.paths['curr_data'], 't1', f'{sel_mrid}_T1.nii.gz'
+            )
+            if not os.path.exists(fname):
+                st.session_state.mriplot_params['ulay'] = None
+            else:
+                st.session_state.mriplot_params['ulay'] = fname
+
+            fname = os.path.join(
+                st.session_state.paths['curr_data'], 'dlmuse', f'{sel_mrid}_T1_DLMUSE.nii.gz'
+            )
+            if not os.path.exists(fname):
+                st.session_state.mriplot_params['olay'] = None
+            else:
+                st.session_state.mriplot_params['olay'] = fname
+            st.session_state.mriplot_params['sel_mrid'] = sel_mrid
+
+            st.session_state.mriplot_params['sel_roi'] = st.session_state.plot_params['yvar']
+            
+            utilmri.panel_view_seg()
 
 
 
