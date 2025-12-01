@@ -551,7 +551,7 @@ def panel_upload_multi_subject():
                 
         sel_files = st.file_uploader(
             "Input files or folders",
-            key="_uploaded_input",
+            key="_uploaded_input_b",
             accept_multiple_files=flag_multi,
             label_visibility="collapsed"
         )
