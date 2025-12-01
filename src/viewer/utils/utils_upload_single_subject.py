@@ -187,6 +187,10 @@ def dialog_extract_dicoms(in_dir, out_dir):
     if consolidate_nifti():
         st.rerun()    
 
+def consolidate_csv(fname):
+    out_file = os.path.join(st.session_state.paths['prj_dir'], 'participants', 'participants.csv')
+    shutil.copyfile(fname, out_file)
+
 def upload_file(in_file):
     '''
     Copy file to output folder
