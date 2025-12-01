@@ -1003,10 +1003,10 @@ def run_pipeline(pipeline_id: str,
     total_steps = len(order)
     current_step = 0
     if pipeline_progress_bar:
-        pipeline_progress_bar.reset(total=total_steps)
+        pipeline_progress_bar.reset(total=total_steps+1)
     for sid in order:
         if process_progress_bar:
-            process_progress_bar.reset(total=total_steps)
+            process_progress_bar.reset(total=total_steps+1)
         if pipeline_progress_bar:
             pipeline_progress_bar.update(1)
         step = step_map[sid]
