@@ -198,7 +198,8 @@ def select_centiles():
     '''
     plot_params = st.session_state.plot_params
     
-    list_types = ['CN', 'CN-Females', 'CN-Males', 'CN-ICVNorm']
+    #list_types = ['CN', 'CN-Females', 'CN-Males', 'CN-ICVNorm']
+    list_types = ['CN', 'CN-Females', 'CN-Males']
     list_values = ['centile_5', 'centile_25', 'centile_50', 'centile_75', 'centile_95']
 
     sel_cent_type = my_selectbox('plot_params', 'centile_type', list_types, 'Centile Type')

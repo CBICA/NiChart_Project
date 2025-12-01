@@ -144,7 +144,7 @@ def add_trace_lowess(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
     # Get hue params
     hvar = plot_params['hvar']
     hvals = plot_params['hvals']
-    if hvar is None or hvar == 'None':
+    if hvar is None or hvar == 'Select an option…':
         hvar = 'grouping_var'
     if hvals is None:
         hvals = df[hvar].dropna().sort_values().unique().tolist()

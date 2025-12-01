@@ -395,7 +395,8 @@ def init_plot_vars() -> None:
         "flag_hide_legend": False,
         "flag_hide_mri": True,
         "trend_types": ["Linear", "Smooth LOWESS Curve"],
-        "centile_types": ["CN", "CN_Males", "CN_Females", "CN_ICV_Corrected"],
+        #"centile_types": ["CN", "CN_Males", "CN_Females", "CN_ICV_Corrected"],
+        "centile_types": ["CN", "CN_Males", "CN_Females"],
         "linfit_trace_types": [
             "lin_fit", "conf_95%"
         ],
@@ -446,8 +447,8 @@ def init_plot_vars() -> None:
         "fvals": None,
         "corr_icv": False,
         "plot_cent_normalized": False,
-        "trend": "Linear",
-        "show_conf": True,
+        "trend": None,
+        "show_conf": False,
         "traces": ['data'],
         "lowess_s": 0.7,
         "centile_type": 'CN',
