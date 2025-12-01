@@ -164,16 +164,18 @@ def callback_copy_uploaded():
             st.session_state['_uploaded_input'], st.session_state.paths["target"]
         )
 
-def wrap_callback_copy_uploaded(keymod=''):
-
+def wrap_callback_copy_uploaded(keymod='', out_dir=None):
+    
     def callback_copy_uploaded():
         '''
         Copies files to local storage
         '''
+        if out_dir is None:
+            out_dir = st.session_state.paths['target']
         key = '_uploaded_input_' + keymod
         if len(st.session_state[key]) > 0:
             copy_and_unzip_uploaded_files(
-                st.session_state[key], st.session_state.paths["target"]
+                st.session_state[key], out_dir
             )
     
     return callback_copy_uploaded
@@ -187,7 +189,7 @@ def upload_multiple_files(out_dir):
         os.makedirs(out_dir)
     keymod = os.path.basename(out_dir)
     # Set target path
-    st.session_state.paths["target"] = out_dir
+    #st.session_state.paths["target"] = out_dir
 
     # Upload data
     with st.container(border=True):
@@ -195,7 +197,7 @@ def upload_multiple_files(out_dir):
             "Input files or folders",
             key="_uploaded_input_" + keymod,
             accept_multiple_files=True,
-            on_change = wrap_callback_copy_uploaded(keymod),
+            on_change = wrap_callback_copy_uploaded(keymod=keymod, out_dir=out_dir),
             help="Input files can be uploaded as a folder, multiple files, or a single zip file",
         )
 
