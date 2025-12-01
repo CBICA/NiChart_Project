@@ -528,7 +528,7 @@ def panel_upload_multi_subject():
         )
         flag_csv_submit = False
         with st.container(horizontal=True, horizontal_alignment="center"):
-            csv_submitted = st.form_submit_button("Submit")
+            csv_submitted = st.button("Submit")
             if csv_submitted:
                 flag_csv_submit = True
     
