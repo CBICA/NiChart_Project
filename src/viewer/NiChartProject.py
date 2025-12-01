@@ -64,12 +64,7 @@ pages = {
         st.Page("pages/nichart_data.py", title="Data"),
         st.Page("pages/nichart_pipelines.py", title="Pipelines"),
         st.Page("pages/nichart_results.py", title="Results"),
-        st.Page("pages/explore_nichart.py", title="Explore"),
     ],
-    #"Pipelines": [
-        #st.Page("pages/sel_pipelines.py", title="Select Pipelines"),
-        #st.Page("pages/run_pipelines.py", title="Run Pipelines"),
-    #],
 }
 
 pg = st.navigation(pages, position="top")

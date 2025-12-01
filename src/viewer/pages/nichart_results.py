@@ -53,7 +53,7 @@ with st.container(horizontal=True, horizontal_alignment="center"):
 
 utilres.panel_results()
 
-if st.session_state.workflow == 'Reference Data':
+if st.session_state.workflow == 'ref_data':
     utilnav.main_navig(
         'Info', 'pages/nichart_ref_data.py',
         'Home', 'pages/nichart_home.py',
