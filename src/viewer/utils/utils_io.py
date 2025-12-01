@@ -165,17 +165,18 @@ def callback_copy_uploaded():
         )
 
 def wrap_callback_copy_uploaded(keymod='', out_dir=None):
-    
+    if out_dir is None:
+        out_dir = st.session_state.paths['target']
+    out_d = out_dir
     def callback_copy_uploaded():
         '''
         Copies files to local storage
         '''
-        if out_dir is None:
-            out_dir = st.session_state.paths['target']
+        
         key = '_uploaded_input_' + keymod
         if len(st.session_state[key]) > 0:
             copy_and_unzip_uploaded_files(
-                st.session_state[key], out_dir
+                st.session_state[key], out_d
             )
     
     return callback_copy_uploaded
