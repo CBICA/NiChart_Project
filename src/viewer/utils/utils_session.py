@@ -114,20 +114,6 @@ def init_session_vars():
     st.session_state.layout_plots = 'Main'
     st.session_state.layout_plots = 'Sidebar'
 
-    #st.session_state.res_sel_roi_cat = None
-    #st.session_state.res_sel_roi_name = None
-    #st.session_state.res_sel_roi_cat = None
-    #st.session_state.res_sel_xvar_name = None
-    #st.session_state.res_sel_xvar_cat = None
-    #st.session_state.res_sel_yvar_name = None
-    #st.session_state.res_sel_yvar_cat = None
-    #st.session_state.res_sel_age_range = (50, 80)
-    #st.session_state.res_sel_sex = ['F', 'M']
-    #st.session_state.res_sel_trends = None
-    #st.session_state.res_flag_conf = False
-    #st.session_state.res_lowess_s = 0.7
-
-
     st.session_state.skip_survey = True
 
     st.session_state.workflow = None
@@ -363,13 +349,14 @@ def init_plot_vars() -> None:
     # General params
     img_views = ["axial", "coronal", "sagittal"]
     st.session_state.mriplot_params = {
+        'ulay': None,
+        'olay': None,
         'sel_mrid': None,
         'sel_roi': None,
         'sel_orient': img_views,
         'flag_overlay': True,
-        'flag_crop': True
+        'flag_crop': True,
     }
-    
 
     ######################
     # Params for data plots

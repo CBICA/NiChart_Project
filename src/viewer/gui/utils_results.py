@@ -161,7 +161,7 @@ def view_segmentation(layout):
     if pipeline == 'dlmuse':
 
         fname = os.path.join(
-            st.session_state.paths['project'], 'dlmuse', 'dlmuse_vol.csv'
+            st.session_state.paths['curr_data'], 'dlmuse', 'dlmuse_vol.csv'
         )
         df = pd.read_csv(fname)
 
@@ -181,24 +181,23 @@ def view_segmentation(layout):
             return
 
         #######################
-        ## FIXME
         ## Set olay ulay images
-        #ulay = st.session_state.ref_data["t1"]
-        #olay = st.session_state.ref_data["dlmuse"]
-        ulay = os.path.join(
-            st.session_state.paths['project'], 't1', f'{sel_mrid}_T1.nii.gz'
+        fname = os.path.join(
+            st.session_state.paths['curr_data'], 't1', f'{sel_mrid}_T1.nii.gz'
         )
-        olay = os.path.join(
-            st.session_state.paths['project'], 'dlmuse', f'{sel_mrid}_T1_DLMUSE.nii.gz'
-        )
-        if not os.path.exists(ulay):
-            st.warning(f'Underlay image not found: {ulay}')
-            return
-        if not os.path.exists(olay):
-            st.warning(f'Overlay image not found {olay}')
-            return
-        #######################
+        if not os.path.exists(fname):
+            st.session_state.mriplot_params['ulay'] = None
+        else:
+            st.session_state.mriplot_params['ulay'] = fname
 
+        fname = os.path.join(
+            st.session_state.paths['curr_data'], 'dlmuse', f'{sel_mrid}_T1_DLMUSE.nii.gz'
+        )
+        if not os.path.exists(fname):
+            st.session_state.mriplot_params['olay'] = None
+        else:
+            st.session_state.mriplot_params['olay'] = fname
+            
         # Select ROI
         ## FIXME
         with layout:
@@ -211,7 +210,9 @@ def view_segmentation(layout):
         with layout:
             utilwd.select_mriplot_settings()
             
-        utilmri.panel_view_seg(ulay, olay, st.session_state.mriplot_params)
+        st.warning('**Note:** This is a low-resolution (2 mm) sample dataset provided for illustration only.')
+        
+        utilmri.panel_view_seg()
 
     elif pipeline == 'dlwmls':
         st.info('Not available yet ...')

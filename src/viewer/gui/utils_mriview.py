@@ -325,8 +325,7 @@ def panel_set_params(plot_params, var_groups_data, atlas, list_vars):
     )
     st.session_state['sel_roi'] = sel_var
 
-
-def panel_view_seg(ulay, olay, plot_params):
+def panel_view_seg_tmp(ulay, olay, plot_params):
     '''
     Panel to display segmented image overlaid on underlay image
     '''
@@ -357,6 +356,54 @@ def panel_view_seg(ulay, olay, plot_params):
                     ind_view = img_views.index(tmp_orient)
                     size_auto = True
                     if olay is None or plot_params['flag_overlay'] is False:
+                        show_img_slices(
+                            img, ind_view, img_bounds[ind_view, :], tmp_orient
+                        )
+                    else:
+                        show_img_slices(
+                            img_masked, ind_view, img_bounds[ind_view, :], tmp_orient
+                        )
+
+
+def panel_view_seg():
+    '''
+    Panel to display segmented image overlaid on underlay image
+    '''
+    params = st.session_state.mriplot_params
+    
+    
+    if params['ulay'] is None:
+        return
+
+    if params['olay'] is None:
+        return
+
+    if params['sel_roi'] is None:
+        return
+    
+    roi_indices = utilmisc.get_roi_indices(params['sel_roi'], 'muse')
+    if roi_indices is None:
+        return
+
+    # Show images
+    with st.container(border=True):
+        with st.spinner("Wait for it..."):
+            # Process image (and mask) to prepare final 3d matrix to display
+            img, mask, img_masked = prep_image_and_olay(
+                params['ulay'], params['olay'], roi_indices, params['flag_crop']
+            )
+            img_bounds = detect_mask_bounds(mask)
+
+            cols = st.columns(3)
+            for i, tmp_orient in stqdm(
+                enumerate(params['sel_orient']),
+                desc="Showing images ...",
+                total=len(params['sel_orient'])
+            ):
+                with cols[i]:
+                    ind_view = img_views.index(tmp_orient)
+                    size_auto = True
+                    if params['olay'] is None or params['flag_overlay'] is False:
                         show_img_slices(
                             img, ind_view, img_bounds[ind_view, :], tmp_orient
                         )
