@@ -27,11 +27,22 @@ from stqdm import stqdm
 from utils.utils_logger import setup_logger
 logger = setup_logger()
 
-def set_plot_params(df):
+def set_plot_params():
     """
     Panel for selecting plotting parameters
     """
-    list_vars = df.columns.unique().tolist()
+
+    ###################################################
+    ### Set specific selections for different pipelines
+    pipeline = st.session_state.general_params['sel_pipeline']
+
+    st.session_state.plot_params['xvargroup'] = 'age'
+    st.session_state.plot_params['xvar'] = 'Age'
+    if pipeline == 'dlmuse':
+        yvarlist = ['roi']
+        st.session_state.plot_params['yvargroup'] = 'MUSE_ShortList'
+        st.session_state.plot_params['yvar'] = 'GM'
+
 
     sac.divider(label='Plotting Parameters', align='center', color='indigo', size='lg')
     
@@ -52,17 +63,17 @@ def set_plot_params(df):
     if tab == 'Variables':
         sel_xvar = utilwd.select_var_twolevels(
             'plot_params', 'xvargroup', 'xvar',
-            'Variable X', list_vars, ['demog', 'roi'],
+            'Variable X', ['age'],
         )
         
         sel_yvar = utilwd.select_var_twolevels(
             'plot_params', 'yvargroup', 'yvar',
-            'Variable Y', list_vars, ['roi'],
+            'Variable Y', yvarlist
         )
 
         sel_hvar = utilwd.select_var_twolevels(
             'plot_params', 'hvargroup', 'hvar',
-            'Grouping Variable', list_vars, ['demog'],
+            'Grouping Variable', ['demog']
         )
 
     #### Filters
@@ -109,11 +120,11 @@ def plot_data(layout):
     View img variables
     """
     with layout:
-        set_plot_params(df)
+        set_plot_params()
 
     with layout:
         set_plot_controls()
-            
+
     utilpl.panel_show_plots()
 
 def view_segmentation(layout):
@@ -189,10 +200,7 @@ def view_img_vars(layout):
     """    
     pipeline = st.session_state.general_params['sel_pipeline']
     if pipeline == 'dlmuse':
-        if st.session_state.workflow == 'ref_data':
-            plot_centiles(layout)
-        else:
-            plot_imgvars(layout)
+        plot_data(layout)
       
     elif pipeline == 'dlwmls':
         st.info('Not available yet ...')
@@ -266,7 +274,6 @@ def panel_download():
                 file_name = 'nichart_results.zip',
                 on_click = 'ignore'
             )
-
 
 def panel_results():
     logger.debug('    Function: panel_results')

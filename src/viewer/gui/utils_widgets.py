@@ -53,17 +53,6 @@ def my_multiselecttmp(list_opts, var_name, hdr='selection box', label_visibility
     st.session_state[var_name] = sel_opt
     return sel_opt
 
-def my_multiselecttmp2(list_opts, var_name, hdr='selection box', label_visibility='visible'):
-    '''
-    Wrapper for multiselect
-    '''
-    sel_opt = st.multiselect(
-        hdr, list_opts, key=f'_{var_name}',
-        default=st.session_state.get(var_name), label_visibility=label_visibility
-    )
-    st.session_state[var_name] = sel_opt
-    return sel_opt
-
 def my_multiselect(var_group, var_name, list_opts, hdr='selection box', label_visibility='visible'):
     '''
     Wrapper for multiselect
@@ -88,6 +77,7 @@ def my_selectbox(var_group, var_name, list_opts, hdr='selection box', label_visi
     '''
     options = ["Select an option…"] + list_opts
     sel_ind = safe_index(options, st.session_state[var_group][var_name])
+
     sel_opt = st.selectbox(
         hdr, options, key=f'_{var_name}', index=sel_ind,
         label_visibility=label_visibility, disabled=(len(list_opts) == 0)
@@ -119,7 +109,7 @@ def selectbox_twolevels(var_group, var_name1, var_name2, df_vars, list_vars = No
             tmp_list = [x for x in tmp_list if x in list_vars]
 
         roi_dict[tmp_group] = tmp_list
-        
+
     with st.container(horizontal=True, horizontal_alignment="left"):
         sel_opt1 = my_selectbox(
             var_group, var_name1, list(roi_dict), label_visibility='collapsed'
@@ -158,14 +148,14 @@ def select_muse_roi(list_vars):
     st.session_state['sel_roi'] = sel_var
     return sel_var
 
-def select_var_twolevels(var_group, var_name1, var_name2, hdr, list_vars, list_cat):
+def select_var_twolevels(var_group, var_name1, var_name2, hdr, list_cat, list_vars = None):
     """
     Panel to select a variable using a two level selection
     First level is the var category provided with data dict
     """
     df_vars = st.session_state.dicts['df_var_groups']
     sel_cats = df_vars[df_vars.category.isin(list_cat)]
-    
+
     
     # Select roi
     st.write(hdr)
