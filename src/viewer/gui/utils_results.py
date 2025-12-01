@@ -187,6 +187,7 @@ def view_segmentation(layout):
         )
         if not os.path.exists(fname):
             st.session_state.mriplot_params['ulay'] = None
+            st.write(fname)
         else:
             st.session_state.mriplot_params['ulay'] = fname
 
@@ -195,6 +196,7 @@ def view_segmentation(layout):
         )
         if not os.path.exists(fname):
             st.session_state.mriplot_params['olay'] = None
+            st.write(fname)
         else:
             st.session_state.mriplot_params['olay'] = fname
             
@@ -210,7 +212,8 @@ def view_segmentation(layout):
         with layout:
             utilwd.select_mriplot_settings()
             
-        st.warning('**Note:** This is a low-resolution (2 mm) sample dataset provided for illustration only.')
+        if st.session_state.workflow == 'ref_data':
+            st.warning('**Note:** This is a low-resolution (2 mm) sample dataset provided for illustration only.')
         
         utilmri.panel_view_seg()
 

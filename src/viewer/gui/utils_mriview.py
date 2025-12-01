@@ -371,14 +371,16 @@ def panel_view_seg():
     '''
     params = st.session_state.mriplot_params
     
-    
     if params['ulay'] is None:
+        st.error('Could not find underlay image!')
         return
 
     if params['olay'] is None:
+        st.error('Could not find overlay image!')
         return
 
     if params['sel_roi'] is None:
+        st.error('Please select the ROI!')
         return
     
     roi_indices = utilmisc.get_roi_indices(params['sel_roi'], 'muse')
