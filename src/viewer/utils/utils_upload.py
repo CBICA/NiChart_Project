@@ -625,25 +625,25 @@ def panel_view_files():
             #height=400
         )
 
-        if selected:
-            if isinstance(selected, list):
-                selected = selected[0]
-            fpath = list_paths[selected]
-            fname = os.path.basename(fpath)
-            if fpath.endswith('.csv'):
-                try:
-                    df_tmp = pd.read_csv(fpath)
-                    st.info(f'Data file: {fname}')
-                    st.dataframe(df_tmp, hide_index=True)
+    if selected:
+        if isinstance(selected, list):
+            selected = selected[0]
+        fpath = list_paths[selected]
+        fname = os.path.basename(fpath)
+        if fpath.endswith('.csv'):
+            try:
+                df_tmp = pd.read_csv(fpath)
+                st.info(f'Data file: {fname}')
+                st.dataframe(df_tmp, hide_index=True)
 
-                    with st.container(horizontal=True, horizontal_alignment="center"):
-                        if st.button('Edit'):
-                            edit_participants(fpath)
-                except:
-                    st.warning(f'Could not read csv file: {fname}')
+                with st.container(horizontal=True, horizontal_alignment="center"):
+                    if st.button('Edit'):
+                        edit_participants(fpath)
+            except:
+                st.warning(f'Could not read csv file: {fname}')
 
-            if fpath.endswith(('.nii.gz','.nii')):
-                view_mri(fpath)
+        if fpath.endswith(('.nii.gz','.nii')):
+            view_mri(fpath)
             
                               
         
