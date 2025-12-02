@@ -69,6 +69,8 @@ def select_pipeline():
         description='Select a pipeline'
     )
 
+    st.session_state.sel_pipeline = sel_opt
+
     show_description(sel_opt.lower())
 
 def show_description(pipeline) -> None:
@@ -131,6 +133,7 @@ def select_pipeline(enabled_pnames):
     sel_label = row.iloc[0] if not row.empty else ''
     show_description(sel_opt)
     st.session_state.sel_pipeline = sel_label
+    st.info(f"DEBUG: sel_pipeline {sel_label}")
     return sel_label
 
 def pipeline_runner_menu(enabled_pnames, sel=False):
