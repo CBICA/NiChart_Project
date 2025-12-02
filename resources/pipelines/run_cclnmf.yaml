@@ -17,12 +17,12 @@ steps:
     inputs:
       t1_img: ${STUDY}/t1
     outputs:
-      dlmuse_seg: ${STUDY}/DLMUSE_seg
-      dlmuse_vol: ${STUDY}/DLMUSE_vol
+      dlmuse_seg: ${STUDY}/dlmuse_seg
+      dlmuse_vol: ${STUDY}/dlmuse_vol
   - id: run_cclnmf
     tool: cclnmf_prediction # MUST CORRESPOND EXACTLY to a tool in resources/tools dir
     inputs:
       demog_csv: ${STUDY}/participants/participants.csv
-      dlmuse_vol: ${STUDY}/DLMUSE_vol/DLMUSE_Volumes.csv
+      dlmuse_vol: ${STUDY}/dlmuse_vol/DLMUSE_Volumes.csv
     outputs:
-      cclnmf_csv: ${STUDY}/CCLNMF_csv/CCLNMF_prediction_loadings.csv
+      cclnmf_csv: ${STUDY}/ml_biomarkers/CCLNMF_prediction_loadings.csv

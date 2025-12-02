@@ -67,14 +67,19 @@ sac.divider()
 
 sel_but = sac.chip(
     [
-        sac.ChipItem(label = 'Single-Subject Intro', icon='arrow-left', disabled=False),
+        sac.ChipItem(label = 'Back to Intro', icon='arrow-left', disabled=False),
         sac.ChipItem(label = 'Select and Run Pipeline', icon='arrow-right', disabled=False)
     ],
     label='', align='center', color='#aaeeaa', size='xl', return_index=True
 )
     
 if sel_but == 0:
-    st.switch_page(f'pages/nichart_{st.session_state.workflow}.py')
+    if st.session_state.subject_type == 'single':
+        st.switch_page("pages/nichart_single_subject.py")
+    if st.session_state.subject_type == 'multi':
+        st.switch_page("pages/nichart_multi_subject.py")
+    else: # Fallback
+        st.switch_page(f'pages/nichart_{st.session_state.workflow}.py')
 
 if sel_but == 1:
     if st.session_state.workflow == 'ref_data':

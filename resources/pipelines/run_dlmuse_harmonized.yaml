@@ -19,12 +19,12 @@ steps:
     inputs:
       t1_img: ${STUDY}/t1
     outputs:
-      dlmuse_seg: ${STUDY}/DLMUSE_seg
-      dlmuse_vol: ${STUDY}/DLMUSE_vol
+      dlmuse_seg: ${STUDY}/dlmuse_seg
+      dlmuse_vol: ${STUDY}/dlmuse_vol
   - id: harmonize_dlmuse
     tool: harmonize_dlmuse
     inputs:
-      dlmuse_vol_unharmonized: ${STUDY}/DLMUSE_vol/DLMUSE_Volumes.csv
+      dlmuse_vol_unharmonized: ${STUDY}/dlmuse_vol/DLMUSE_Volumes.csv
       covariate_csv: ${STUDY}/participants/participants.csv
     outputs: # Harmonization wrapper expects output location as dir
-      dlmuse_vol_harmonized: ${STUDY}/DLMUSE_vol_harmonized
+      dlmuse_vol_harmonized: ${STUDY}/dlmuse_vol_harmonized
