@@ -132,8 +132,9 @@ def select_pipeline(enabled_pnames):
     row = pipelines.loc[pipelines["Name"] == sel_opt, "Label"]
     sel_label = row.iloc[0] if not row.empty else ''
     show_description(sel_opt)
-    st.session_state.sel_pipeline = sel_label
-    st.info(f"DEBUG: sel_pipeline {sel_label}")
+    st.session_state.sel_pipeline = sel_opt
+    st.info(f"DEBUG: sel_opt {sel_opt}")
+
     return sel_label
 
 def pipeline_runner_menu(enabled_pnames, sel=False):
