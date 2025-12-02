@@ -1,7 +1,7 @@
 
 import utils.utils_pages as utilpg
 # Page config should be called for each page
-# utilpg.config_page() # Apparently not. Just call it once in NiChartProject.py.
+# utilpg.config_page()
 
 import os
 import numpy as np
@@ -13,6 +13,8 @@ import utils.utils_session as utilses
 import utils.utils_mriview as utilmri
 import utils.utils_alerts as utils_alerts
 import utils.utils_survey as utils_survey
+import gui.utils_navig as utilnav
+
 from streamlit_image_select import image_select
 import logging
 from stqdm import stqdm
@@ -49,27 +51,20 @@ sel = sac.chip(
         sac.ChipItem(label='Explore Results Only (No MRI Needed!)'),
     ], label='', align='center', size='lg', radius='lg', direction='vertical', color='cyan'
 ) 
-flag_disabled = sel is None
-
-sac.divider(key='_p0_div1')
-
-sel_but = sac.chip(
-    [sac.ChipItem(label = '', icon='arrow-right', disabled=flag_disabled)],
-    label='', align='center', color='#aaeeaa', size='xl'
-)
     
-if sel_but == '':
-    logger.debug(f'      Selected page: {sel}')
+if sel == 'What is NiChart?':
+    sel_page = "pages/nichart_info.py"
 
-    if sel == 'What is NiChart?':
-        st.switch_page("pages/nichart_info.py")
+if sel == 'Analyze Single Subject MRI Data':
+    sel_page = "pages/nichart_single_subject.py"
 
-    if sel == 'Analyze Single Subject MRI Data':
-        st.switch_page("pages/nichart_single_subject.py")
+if sel == 'Analyze a Group of Scans':
+    sel_page = "pages/nichart_multi_subject.py"
 
-    if sel == 'Analyze a Group of Scans':
-        st.switch_page("pages/nichart_multi_subject.py")
+if sel == 'Explore Results Only (No MRI Needed!)':
+    sel_page = "pages/nichart_ref_data.py"
 
-    if sel == 'Explore Results Only (No MRI Needed!)':
-        st.switch_page("pages/nichart_ref_data.py")
+if sel is not None:
+    utilnav.main_navig(None, None, 'Go!', sel_page)
+
 

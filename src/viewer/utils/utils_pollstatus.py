@@ -1,6 +1,6 @@
 import streamlit as st
 import boto3
-import docker
+# import docker
 import random
 import json
 from time import sleep
@@ -40,7 +40,7 @@ class TaskHandle(ABC):
         """Returns the available logs for the task."""
         pass
 
-import docker
+# import docker
 import boto3
 import botocore
 class DummyHandle(TaskHandle):

@@ -102,7 +102,7 @@ elif tab == 'GPU':
         panel_gpu_settings()
 
 # Show selections
-utilses.disp_selections()
+#utilses.disp_selections()
 
 # Show session state vars
 if st.session_state.mode == 'debug':
