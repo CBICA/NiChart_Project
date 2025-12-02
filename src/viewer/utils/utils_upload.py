@@ -10,6 +10,7 @@ import pandas as pd
 import numpy as np
 import zipfile
 import streamlit_antd_components as sac
+from NiChart_common_utils.nifti_parser import NiftiMRIDParser
 import shutil
 import time
 from typing import Any, BinaryIO, List, Optional
@@ -572,11 +573,11 @@ def panel_upload_single_subject():
 
 def generate_template_csv():
     mod_dirs = {mod: os.path.join(st.session_state.paths['project'], mod) for mod in ['T1', 'T2', 'FL', 'DTI', 'FMRI']}
-    dir_dict = {'T1': mod_dirs['t1'],
-                            'T2': mod_dirs['t2'],
-                            'FLAIR': mod_dirs['fl'],
-                            'DTI': mod_dirs['dti'],
-                            'FMRI': mod_dirs['fmri'],
+    dir_dict = {'T1': mod_dirs['T1'],
+                            'T2': mod_dirs['T2'],
+                            'FLAIR': mod_dirs['FL'],
+                            'DTI': mod_dirs['DTI'],
+                            'FMRI': mod_dirs['FMRI'],
                             }
     nifti_parser = NiftiMRIDParser()
     heuristic_df = nifti_parser.create_master_csv(dir_dict, os.path.join(st.session_state.paths['project'], 'inferred_data_paths.csv'))
@@ -648,10 +649,10 @@ def panel_upload_multi_subject():
     #)
 
     with st.popover("T1 Scans"):
-        t1_out_dir = os.path.join(st.session_state.paths['prj_dir'], 't1')
+        t1_out_dir = os.path.join(st.session_state.paths['prj_dir'], 'T1')
         utilio.upload_multiple_files(out_dir=t1_out_dir)
     with st.popover("FLAIR Scans"):
-        fl_out_dir = os.path.join(st.session_state.paths['prj_dir'], 'fl')
+        fl_out_dir = os.path.join(st.session_state.paths['prj_dir'], 'FL')
         utilio.upload_multiple_files(out_dir=fl_out_dir)
     #with st.popover("DICOM images"):
     #    pass
