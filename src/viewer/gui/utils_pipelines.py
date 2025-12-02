@@ -134,8 +134,8 @@ def select_pipeline(enabled_pnames):
     show_description(sel_opt)
     st.session_state.sel_pipeline_name = sel_opt
     st.session_state.sel_pipeline_label = sel_label
-    st.info(f"DEBUG: sel_opt {sel_opt}")
-    st.info(f"DEBUG: sel_label {sel_label}")
+    #st.info(f"DEBUG: sel_opt {sel_opt}")
+    #st.info(f"DEBUG: sel_label {sel_label}")
 
     return sel_label
 
@@ -156,9 +156,9 @@ def pipeline_runner_menu(enabled_pnames, sel=False):
     ## TODO: Retrieve dynamically/match between front end and toolloader code
     ## This a nice and simple placeholder for now
     if sel_name not in enabled_pnames:
-        st.info(f"DEBUG: Enabled pnames: {enabled_pnames}")
-        st.info(f"DEBUG: sel_name: {sel_name}")
-        st.info(f"DEBUG: sel_pipeline: {sel_method}")
+        #st.info(f"DEBUG: Enabled pnames: {enabled_pnames}")
+        #st.info(f"DEBUG: sel_name: {sel_name}")
+        #st.info(f"DEBUG: sel_pipeline: {sel_method}")
         st.info("Your data doesn't meet the requirements for this pipeline. Correct the issues marked below to proceed.")
         utiltl.check_requirements_met_panel(sel_name)
         return
