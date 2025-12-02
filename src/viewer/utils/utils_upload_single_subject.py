@@ -111,7 +111,7 @@ def consolidate_nifti():
 
     # Update values based on user iput
     with st.form(key='_form_scan_info'):
-        mod = st.selectbox('Image Modality:', ['T1', 'FL'])
+        mod = st.selectbox('Image Modality:', ['t1', 'fl'])
         mrid = st.text_input('MRID:', value = mrid)
         sex = st.selectbox('Sex (optional):', ['M', 'F', 'Other'], index=ind_sex)
         age = st.number_input('Age (optional):', min_value=20.0, max_value=110.0, value=age)
@@ -426,7 +426,7 @@ def panel_upload_single_subject():
             upload_files(sel_files)
 
 def generate_template_csv():
-    mod_dirs = {mod: os.path.join(st.session_state.paths['project'], mod) for mod in ['T1', 'T2', 'FL', 'DTI', 'FMRI']}
+    mod_dirs = {mod: os.path.join(st.session_state.paths['project'], mod) for mod in ['t1', 't2', 'fl', 'dti', 'fmri']}
     dir_dict = {'T1': mod_dirs['t1'],
                             'T2': mod_dirs['t2'],
                             'FLAIR': mod_dirs['fl'],
