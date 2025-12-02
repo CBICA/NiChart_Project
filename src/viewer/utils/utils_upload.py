@@ -606,34 +606,34 @@ def panel_upload_multi_subject():
     
     with st.container(horizontal=True, horizontal_alignment="left"):
         st.markdown("##### Upload File(s): ", width='content')
-        with st.popover("❓", width='content'):
-            st.write(
-                """
-                **Data Upload Guide**
-                - Here, upload the data you have available. (In the next step we'll automatically determine which pipelines you can run based on this.)
-
-                - You may upload MRI scans in any of the following formats:
-                  - **NIfTI:** one or multiple .nii or .nii.gz files 
-                  - **DICOM (compressed):** a single .zip file containing the DICOM series
-                  - **DICOM (individual files):** multiple .dcm files
-                  
-                    *(Note: uploading a folder directly is not currently supported)*
-                    
-                - If you have multiple imaging modalities (e.g., T1, FLAIR), upload only one modality batch at a time. First click the modality on the list, then drag-and-drop your images onto the box.
-                
-                - Once uploaded, NiChart will automatically:
-                  - Organize the files into the standard input structure
-                  - Create a subject list based on the uploaded MRI data
-                  
-                - You may open and edit the subject list (e.g., to add age, sex, or other metadata needed for analysis).
-                
-                - You can also upload non-imaging data (e.g., clinical or cognitive measures) as a CSV file (required for harmonization and many analytical pipelines).
-                
-                - The CSV must include an MRID column with values that match the subject IDs in the subject list, so the data can be merged correctly.
-
-                - When you go to select a pipeline in the next step, if you select a pipeline which needs more fields, we'll tell you.
-                """
-            )
+        #with st.popover("❓", width='content'):
+        #    st.write(
+        #        """
+        #        **Data Upload Guide**
+        #        - Here, upload the data you have available. (In the next step we'll automatically determine which pipelines you can run based on this.)
+        #
+        #        - You may upload MRI scans in any of the following formats:
+        #          - **NIfTI:** one or multiple .nii or .nii.gz files 
+        #          - **DICOM (compressed):** a single .zip file containing the DICOM series
+        #          - **DICOM (individual files):** multiple .dcm files
+        #          
+        #            *(Note: uploading a folder directly is not currently supported)*
+        #            
+        #        - If you have multiple imaging modalities (e.g., T1, FLAIR), upload only one modality batch at a time. First click the modality on the list, then drag-and-drop your images onto the box.
+        #        
+        #        - Once uploaded, NiChart will automatically:
+        #          - Organize the files into the standard input structure
+        #          - Create a subject list based on the uploaded MRI data
+        #          
+        #        - You may open and edit the subject list (e.g., to add age, sex, or other metadata needed for analysis).
+        #        
+        #        - You can also upload non-imaging data (e.g., clinical or cognitive measures) as a CSV file (required for harmonization and many analytical pipelines).
+        #        
+        #        - The CSV must include an MRID column with values that match the subject IDs in the subject list, so the data can be merged correctly.
+        #
+        #        - When you go to select a pipeline in the next step, if you select a pipeline which needs more fields, we'll tell you.
+        #        """
+        #    )
             
     # Upload data
     #sel_opt = sac.chip(
