@@ -173,7 +173,7 @@ def view_segmentation(layout):
             #st.session_state.paths['curr_data'], 'dlmuse', 'dlmuse_vol.csv'
         #)
         fname = os.path.join(
-            st.session_state.paths['curr_data'], 'DLMUSE_vol', 'DLMUSE_Volumes.csv'
+            st.session_state.paths['curr_data'], 'dlmuse_vol', 'dlmuse_vol.csv'
         )
         df = pd.read_csv(fname)
         
@@ -207,7 +207,7 @@ def view_segmentation(layout):
             st.session_state.mriplot_params['ulay'] = fname
 
         fname = os.path.join(
-            st.session_state.paths['curr_data'], 'DLMUSE_seg', f'{sel_mrid}_T1_DLMUSE.nii.gz'
+            st.session_state.paths['curr_data'], 'dlmuse_seg', f'{sel_mrid}_T1_DLMUSE.nii.gz'
         )
         if not os.path.exists(fname):
             st.session_state.mriplot_params['olay'] = None

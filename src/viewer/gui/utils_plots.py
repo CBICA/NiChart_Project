@@ -388,7 +388,7 @@ def panel_show_plots():
                     st.session_state.mriplot_params['ulay'] = fname
 
                 fname = os.path.join(
-                    st.session_state.paths['curr_data'], 'DLMUSE_seg', f'{sel_mrid}_T1_DLMUSE.nii.gz'
+                    st.session_state.paths['curr_data'], 'dlmuse_seg', f'{sel_mrid}_T1_DLMUSE.nii.gz'
                 )
                 if not os.path.exists(fname):
                     st.session_state.mriplot_params['olay'] = None
@@ -399,6 +399,9 @@ def panel_show_plots():
 
                 st.session_state.mriplot_params['sel_roi'] = st.session_state.plot_params['yvar']
                 
+                st.session_state.mriplot_params['flag_overlay'] = True
+                st.session_state.mriplot_params['flag_crop'] = True
+
                 utilmri.panel_view_seg()
 
 
