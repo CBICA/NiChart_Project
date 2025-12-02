@@ -426,7 +426,7 @@ def panel_upload_single_subject():
             upload_files(sel_files)
 
 def generate_template_csv():
-    mod_dirs = {mod: os.path.join(st.session_state.paths['project'], mod) for mod in ['t1', 't2', 'fl', 'dti', 'fmri']}
+    mod_dirs = {mod: os.path.join(st.session_state.paths['project'], mod) for mod in ['T1', 'T2', 'FL', 'DTI', 'FMRI']}
     dir_dict = {'T1': mod_dirs['t1'],
                             'T2': mod_dirs['t2'],
                             'FLAIR': mod_dirs['fl'],
