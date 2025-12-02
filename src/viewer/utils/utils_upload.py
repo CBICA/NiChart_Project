@@ -573,11 +573,11 @@ def panel_upload_single_subject():
 
 def generate_template_csv():
     mod_dirs = {mod: os.path.join(st.session_state.paths['project'], mod) for mod in ['t1', 't2', 'fl', 'dti', 'fmri']}
-    dir_dict = {'T1': mod_dirs['T1'],
-                            'T2': mod_dirs['T2'],
-                            'FLAIR': mod_dirs['FL'],
-                            'DTI': mod_dirs['DTI'],
-                            'FMRI': mod_dirs['FMRI'],
+    dir_dict = {'T1': mod_dirs['t1'],
+                            'T2': mod_dirs['t2'],
+                            'FLAIR': mod_dirs['fl'],
+                            'DTI': mod_dirs['dti'],
+                            'FMRI': mod_dirs['fmri'],
                             }
     nifti_parser = NiftiMRIDParser()
     heuristic_df = nifti_parser.create_master_csv(dir_dict, os.path.join(st.session_state.paths['project'], 'inferred_data_paths.csv'))
