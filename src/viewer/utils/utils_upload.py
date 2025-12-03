@@ -601,7 +601,7 @@ def panel_upload_multi_subject():
     '''
     logger.debug('    Function: panel_upload_multi_subject')
 
-    sac.divider(key='_p2_div1')
+    sac.divider(key='_p2_div4')
     
     with st.container(horizontal=True, horizontal_alignment="left"):
         st.markdown("##### Upload File(s): ", width='content')
