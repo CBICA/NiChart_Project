@@ -484,12 +484,11 @@ def panel_project_folder():
             )
             
             with st.container(horizontal=True, horizontal_alignment="center"):
-                if st.button("Select"):
+                utilss.update_project(sel_prj)
+                placeholder.markdown(f"##### 📃 `{st.session_state.prj_name}`", width='content')
+                if sel_prj is not None:
                     utilss.update_project(sel_prj)
                     placeholder.markdown(f"##### 📃 `{st.session_state.prj_name}`", width='content')
-                    if sel_prj is not None:
-                        utilss.update_project(sel_prj)
-                        placeholder.markdown(f"##### 📃 `{st.session_state.prj_name}`", width='content')
     
     if sel_opt == 'Reset project folder':
         st.warning("⚠️Are you sure you want to delete all files in the project folder? This cannot be undone.")
