@@ -320,7 +320,7 @@ def panel_download():
     
         prj_dir = st.session_state.paths['prj_dir']
         list_dirs = utilio.get_subfolders(prj_dir)
-        for folder_name in ['downloads', 'user_upload']:
+        for folder_name in ['download', 'downloads', 'user_upload']:
             if folder_name in list_dirs:
                 list_dirs.remove(folder_name)
         
@@ -334,19 +334,32 @@ def panel_download():
             check_all='Select all'
         )
 
-        if sel_opt is None or len(sel_opt)==0:
-            return
-
         with st.container(horizontal=True, horizontal_alignment="center"):
-            out_dir = os.path.join(prj_dir, 'downloads')
-            os.makedirs(out_dir, exist_ok=True)
-            out_zip = os.path.join(out_dir, 'nichart_results.zip')
+            flag_disabled1 = True
+            flag_disabled2 = True
+            data_zip = ''
+            if sel_opt is not None and len(sel_opt)>0:
+                flag_disabled1 = False
+            
+            if st.button('Prepare Data', disabled = flag_disabled1):
+                out_dir = os.path.join(prj_dir, 'downloads')
+                os.makedirs(out_dir, exist_ok=True)
+                out_zip = os.path.join(out_dir, 'nichart_results.zip')
+                data_zip = prepare_data_for_download(prj_dir, sel_opt, out_zip)
+                flag_disabled2 = False
+
+            #st.download_button(
+                #label = f"Download",
+                #data = prepare_data_for_download(prj_dir, sel_opt, out_zip),
+                #file_name = 'nichart_results.zip',
+                #on_click = 'ignore'
+            #)
 
             st.download_button(
                 label = f"Download",
-                data = prepare_data_for_download(prj_dir, sel_opt, out_zip),
+                data = data_zip,
                 file_name = 'nichart_results.zip',
-                on_click = 'ignore'
+                disabled = flag_disabled2
             )
 
 def panel_results():
