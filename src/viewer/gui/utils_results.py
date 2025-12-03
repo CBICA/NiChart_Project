@@ -38,11 +38,36 @@ def set_plot_params():
 
     st.session_state.plot_params['xvargroup'] = 'age'
     st.session_state.plot_params['xvar'] = 'Age'
+
     if pipeline == 'dlmuse':
         yvarlist = ['roi']
         st.session_state.plot_params['yvargroup'] = 'MUSE_ShortList'
         st.session_state.plot_params['yvar'] = 'GM'
 
+    elif pipeline == 'dlwmls':
+        yvarlist = ['wmroi']
+        st.session_state.plot_params['yvargroup'] = 'MUSE_WM'
+        st.session_state.plot_params['yvar'] = 'Frontal_WM_R'
+
+    elif pipeline == 'spare':
+        yvarlist = ['biomarker']
+        st.session_state.plot_params['yvargroup'] = 'SPARE_Scores'
+        st.session_state.plot_params['yvar'] = 'SPARE_BA'
+
+    elif pipeline == 'spare_cvm':
+        yvarlist = ['biomarker']
+        st.session_state.plot_params['yvargroup'] = 'SPARE_CVM_Scores'
+        st.session_state.plot_params['yvar'] = 'SPARE_HYPERTENSION'
+
+    elif pipeline == 'cclnmf':
+        yvarlist = ['biomarker']
+        st.session_state.plot_params['yvargroup'] = 'CCLNMF_Aging_Dimensions'
+        st.session_state.plot_params['yvar'] = 'CCLNMF_1'
+
+    elif pipeline == 'surreal_gan':
+        yvarlist = ['biomarker']
+        st.session_state.plot_params['yvargroup'] = 'SurrealGAN_Aging_Dimensions'
+        st.session_state.plot_params['yvar'] = 'R1'
 
     sac.divider(label='Plotting Parameters', align='center', color='indigo', size='lg')
     
@@ -132,8 +157,13 @@ def plot_data(layout):
 
     # Update traces
     plot_params = st.session_state.plot_params
+    
+    plot_params['traces'] = ['data']
     if plot_params['centile_values'] is not None:
-        plot_params['traces'] = plot_params['traces'] + plot_params['centile_values']
+        if st.session_state.plot_data['df_cent'] is None:
+            st.warning('Note: Reference centile data is not available!')
+        else:
+            plot_params['traces'] = plot_params['traces'] + plot_params['centile_values']
 
     if plot_params['trend'] == 'Linear':
         plot_params['traces'] = plot_params['traces'] + ['lin_fit']
@@ -144,11 +174,10 @@ def plot_data(layout):
     if plot_params['trend'] == 'Smooth LOWESS Curve':
         plot_params['traces'] = plot_params['traces'] + ['lowess']
 
-    #st.write(st.session_state.plot_params)
     #st.write(st.session_state.plot_data)
 
     utilpl.panel_show_plots()
-
+    
 def view_segmentation(layout):
     """
     View segmentations
@@ -159,25 +188,20 @@ def view_segmentation(layout):
         sac.divider(label='Data', align='center', color='grape', size = 'xl')
 
     if pipeline == 'dlmuse':
-
         fname = os.path.join(
-            st.session_state.paths['curr_data'], 'dlmuse', 'dlmuse_vol.csv'
+            st.session_state.paths['curr_data'], 'dlmuse_vol', 'DLMUSE_Volumes.csv'
         )
         df = pd.read_csv(fname)
-
-        # Rename columns if dict for data exists
+        df.columns = df.columns.str.replace('DL_MUSE_Volume_','')
         df = df.rename(columns = st.session_state.dicts['muse']['ind_to_name'])
-
         list_vars = df.columns.unique().tolist()
-        
         list_mrids = df.MRID.sort_values().tolist()
         
         with layout:
             sel_mrid = utilwd.my_selectbox(
                 'mriplot_params', 'sel_mrid', list_mrids, 'Subject'
             )
-
-        if sel_mrid is None or sel_mrid == 'Select an option…':
+        if sel_mrid is None or str(sel_mrid) == 'Select an option...':
             return
 
         #######################
@@ -192,7 +216,7 @@ def view_segmentation(layout):
             st.session_state.mriplot_params['ulay'] = fname
 
         fname = os.path.join(
-            st.session_state.paths['curr_data'], 'dlmuse', f'{sel_mrid}_T1_DLMUSE.nii.gz'
+            st.session_state.paths['curr_data'], 'dlmuse_seg', f'{sel_mrid}_T1_DLMUSE.nii.gz'
         )
         if not os.path.exists(fname):
             st.session_state.mriplot_params['olay'] = None
@@ -201,10 +225,9 @@ def view_segmentation(layout):
             st.session_state.mriplot_params['olay'] = fname
             
         # Select ROI
-        ## FIXME
         with layout:
             sel_roi = utilwd.select_muse_roi(list_vars)
-        if sel_roi is None or sel_roi == 'Select an option…':
+        if sel_roi is None or str(sel_roi) == 'Select an option...':
             return
         st.session_state.mriplot_params['sel_roi'] = sel_roi
 
@@ -218,45 +241,245 @@ def view_segmentation(layout):
         utilmri.panel_view_seg()
 
     elif pipeline == 'dlwmls':
-        st.info('Not available yet ...')
+        fname = os.path.join(
+            st.session_state.paths['curr_data'], 'participants', 'participants.csv'
+        )
+        try: 
+            df = pd.read_csv(fname)
+            list_mrids = df.MRID.sort_values().tolist()
+        except:
+            st.warning('Could not detect result files for this pipeline!')
+            return
+        
+        with layout:
+            sel_mrid = utilwd.my_selectbox(
+                'mriplot_params', 'sel_mrid', list_mrids, 'Subject'
+            )
+        if sel_mrid is None or str(sel_mrid) == 'Select an option...':
+            return
+
+        #######################
+        ## Set olay ulay images
+        fname = os.path.join(
+            st.session_state.paths['curr_data'], 'fl', f'{sel_mrid}_FL.nii.gz'
+        )
+        # FIXME
+        fname = os.path.join(
+            st.session_state.paths['curr_data'], 't1', f'{sel_mrid}_T1.nii.gz'
+        )
+        if not os.path.exists(fname):
+            st.session_state.mriplot_params['ulay'] = None
+            st.write(fname)
+        else:
+            st.session_state.mriplot_params['ulay'] = fname
+
+        fname = os.path.join(
+            st.session_state.paths['curr_data'], 'nichart_dlwmls_out', 
+            'DLWMLS_DLMUSE_Segmented',
+            f'{sel_mrid}_DLWMLS_DLMUSE_Segmented.nii.gz'
+        )
+        if not os.path.exists(fname):
+            st.session_state.mriplot_params['olay'] = None
+            st.write(fname)
+        else:
+            st.session_state.mriplot_params['olay'] = fname
+            
+        st.session_state.mriplot_params['sel_roi'] = None
+
+        # Select plot parameters
+        with layout:
+            utilwd.select_mriplot_settings()
+            
+        if st.session_state.workflow == 'ref_data':
+            st.warning('**Note:** This is a low-resolution (2 mm) sample dataset provided for illustration only.')
+        
+        utilmri.panel_view_seg()
+
+    elif pipeline == 'csf_ravens':
+        fname = os.path.join(
+            st.session_state.paths['curr_data'], 'participants', 'participants.csv'
+        )
+        try: 
+            df = pd.read_csv(fname)
+            list_mrids = df.MRID.sort_values().tolist()
+        except:
+            st.warning('Could not detect result files for this pipeline!')
+            return
+        
+        with layout:
+            sel_mrid = utilwd.my_selectbox(
+                'mriplot_params', 'sel_mrid', list_mrids, 'Subject'
+            )
+        if sel_mrid is None or str(sel_mrid) == 'Select an option...':
+            return
+
+        #######################
+        ## Set olay ulay images
+        fname = os.path.join(
+            st.session_state.paths['curr_data'], 't1', f'{sel_mrid}_T1.nii.gz'
+        )
+        if not os.path.exists(fname):
+            st.session_state.mriplot_params['ulay'] = None
+            st.write(fname)
+        else:
+            st.session_state.mriplot_params['ulay'] = fname
+
+        fname = os.path.join(
+            st.session_state.paths['curr_data'], 'nichart_ravens_out', 
+            f'{sel_mrid}_Label_CSF_RAVENS_ICVNorm_zScored_inSubj.nii.gz'
+        )
+        if not os.path.exists(fname):
+            st.session_state.mriplot_params['olay'] = None
+            st.write(fname)
+        else:
+            st.session_state.mriplot_params['olay'] = fname
+            
+        st.session_state.mriplot_params['sel_roi'] = None
+
+        # Select plot parameters
+        with layout:
+            utilwd.select_ravensplot_settings()
+            
+        if st.session_state.workflow == 'ref_data':
+            st.warning('**Note:** This is a low-resolution (2 mm) sample dataset provided for illustration only.')
+        
+        utilmri.panel_view_map()
+
+
+def prep_csv():
+    """
+    Merge result files to view
+    """
+    pipeline = st.session_state.general_params['sel_pipeline']
+
+    out_dir = os.path.join(
+        st.session_state.paths['curr_data'], 'plots'
+    )
+    fout = os.path.join(
+        out_dir, f'data_{pipeline}.csv'
+    )
+    os.makedirs(out_dir, exist_ok=True)
+
+    f_p = os.path.join(
+        st.session_state.paths['curr_data'], 'participants', 'participants.csv'
+    )
+
+    # Set pipeline specific parameters    
+    if pipeline == 'dlmuse':
+        f_d = os.path.join(
+            st.session_state.paths['curr_data'], 'dlmuse_vol', 'DLMUSE_Volumes.csv'
+        )
+
+    elif pipeline == 'dlwmls':
+        f_d = os.path.join(
+            st.session_state.paths['curr_data'], 'nichart_dlwmls_out', 'DLWMLS_DLMUSE_Segmented_Volumes.csv'
+        )
+
+    elif pipeline == 'spare':
+        f_d = os.path.join(
+            st.session_state.paths['curr_data'], 'ml_biomarkers', 'SPARE_ALL.csv'
+        )
+
+    elif pipeline == 'spare_cvm':
+        f_d = os.path.join(
+            st.session_state.paths['curr_data'], 'ml_biomarkers', 'SPARE_CVM_ALL.csv'
+        )
+
+    elif pipeline == 'cclnmf':
+        f_d = os.path.join(
+            st.session_state.paths['curr_data'], 'ml_biomarkers', 'CCLNMF.csv'
+        )
+
+    elif pipeline == 'surreal_gan':
+        f_d = os.path.join(
+            st.session_state.paths['curr_data'], 'ml_biomarkers', 'SurrealGAN_RScores.csv'
+        )
+    
+    try:
+        df_p = pd.read_csv(f_p)
+        df_d = pd.read_csv(f_d)
+        df = df_p.merge(df_d, on='MRID')
+        df.to_csv(fout, index=False)
+        st.toast('Data file merged to participant info!')
+
+    except:
+        st.warning('Could not read result files!')
+        return False
+
+    return True
+    
 
 def view_img_vars(layout):
     """
     View image variables
     """
     pipeline = st.session_state.general_params['sel_pipeline']
-
+    if str(pipeline) == 'Select an option...':
+        return
+    
     # Set reference centile data
     fname = os.path.join(
         st.session_state.paths['centiles'],
-        'dlmuse_centiles_' + st.session_state.plot_params['centile_type'] + '.csv'
+        pipeline + '_centiles_' + st.session_state.plot_params['centile_type'] + '.csv'
     )
     if fname != st.session_state.plot_data['csv_cent']:
         st.session_state.plot_data['csv_cent'] = fname
-        df = utilio.read_csv(fname)
-        st.session_state.plot_data['df_cent'] = df
+        try:
+            df = utilio.read_csv(fname)
+            st.session_state.plot_data['df_cent'] = df
+        except:
+            st.session_state.plot_data['df_cent'] = None
 
-    # Set pipeline specific parameters    
-    if pipeline == 'dlmuse':
-        fname = os.path.join(
-            st.session_state.paths['curr_data'], 'plots', 'data_all.csv'
-        )
 
-    else:
-    #elif pipeline == 'dlwmls':
-        st.info('Not available yet ...')
-        return
+    # Set data file
+    fname = os.path.join(st.session_state.paths['curr_data'], 'plots', f'data_{pipeline}.csv')
     
     if fname != st.session_state.plot_data['csv_data']:
+        
+        if not prep_csv():
+            return
+
         st.session_state.plot_data['csv_data'] = fname
         df = utilio.read_csv(fname)
-        df = df.rename(columns = st.session_state.dicts['muse']['ind_to_name'])
+        
+        # Pipeline specific steps
+        if pipeline == 'dlmuse':            
+            df.columns = df.columns.str.replace('DL_MUSE_Volume_','')
+            df = df.rename(columns = st.session_state.dicts['muse']['ind_to_name'])
+
+        elif pipeline == 'dlwmls':            
+            df.columns = df.columns.str.replace('DL_WMLS_Volume_','')
+            df = df.rename(columns = st.session_state.dicts['muse']['ind_to_name'])
+            #st.write(df)
+            
+        elif pipeline == 'spare':            
+            df = df.drop('SPARE_AD', axis=1)
+            df.columns = df.columns.str.replace('SPARE_AD_decision_function','SPARE_AD')
+            #st.write(df)
+            
+        elif pipeline == 'spare_cvm':            
+            df = df.drop(['SPARE_SMOKING','SPARE_HYPERTENSION','SPARE_OBESITY', 'SPARE_DIABETES'], axis=1)
+            df.columns = df.columns.str.replace('_decision_function','')
+
+        elif pipeline == 'surreal_gan':         
+            df.columns = df.columns.str.replace('SurrealGAN_','')
+            st.write(df)
+
         df["grouping_var"] = "Data"
         st.session_state.plot_data['df_data'] = df
 
+    ## Pipeline specific steps
+    #if pipeline == 'dlmuse':
+
+    ##elif pipeline == 'spare':
+
+    ##else:
+    ###elif pipeline == 'dlwmls':
+        ##st.info('Not available yet ...')
+        ##return
+
     # Plot data
     plot_data(layout)
-      
 
 def prepare_data_for_download(prj_dir, sel_opt, out_zip):
     utilio.zip_folders(prj_dir, sel_opt, out_zip)
@@ -299,7 +522,7 @@ def panel_download():
     
         prj_dir = st.session_state.paths['prj_dir']
         list_dirs = utilio.get_subfolders(prj_dir)
-        for folder_name in ['downloads', 'user_upload']:
+        for folder_name in ['download', 'downloads', 'user_upload']:
             if folder_name in list_dirs:
                 list_dirs.remove(folder_name)
         
@@ -313,19 +536,32 @@ def panel_download():
             check_all='Select all'
         )
 
-        if sel_opt is None or len(sel_opt)==0:
-            return
-
         with st.container(horizontal=True, horizontal_alignment="center"):
-            out_dir = os.path.join(prj_dir, 'downloads')
-            os.makedirs(out_dir, exist_ok=True)
-            out_zip = os.path.join(out_dir, 'nichart_results.zip')
+            flag_disabled1 = True
+            flag_disabled2 = True
+            data_zip = ''
+            if sel_opt is not None and len(sel_opt)>0:
+                flag_disabled1 = False
+            
+            if st.button('Prepare Data', disabled = flag_disabled1):
+                out_dir = os.path.join(prj_dir, 'downloads')
+                os.makedirs(out_dir, exist_ok=True)
+                out_zip = os.path.join(out_dir, 'nichart_results.zip')
+                data_zip = prepare_data_for_download(prj_dir, sel_opt, out_zip)
+                flag_disabled2 = False
+
+            #st.download_button(
+                #label = f"Download",
+                #data = prepare_data_for_download(prj_dir, sel_opt, out_zip),
+                #file_name = 'nichart_results.zip',
+                #on_click = 'ignore'
+            #)
 
             st.download_button(
                 label = f"Download",
-                data = prepare_data_for_download(prj_dir, sel_opt, out_zip),
+                data = data_zip,
                 file_name = 'nichart_results.zip',
-                on_click = 'ignore'
+                disabled = flag_disabled2
             )
 
 def panel_results():
@@ -354,6 +590,10 @@ def panel_results():
                 'general_params', 'sel_task', ['Download', 'View'], hdr='Task'
             )
 
+    if sel_task is None or str(sel_task) == 'Select an option...':
+        with st.container(horizontal=False, horizontal_alignment="center"):
+            st.markdown('Please select a viewing option from the sidebar!', width="content")
+
     if sel_task == 'Info':
         panel_info()
 
@@ -364,27 +604,37 @@ def panel_results():
         with layout:
             sel_rtype = utilwd.my_selectbox(
                 'general_params', 'sel_rtype',
-                ['Numeric', 'Image'], 'Data Type'
+                ['Image', 'Numeric'], 'Data Type'
             )
 
         if sel_rtype == 'Image':
             with layout:
                 sel_pipe = utilwd.my_selectbox(
                     'general_params', 'sel_pipeline',
-                    ['dlmuse', 'dlwmls'], 'Pipeline'
+                    ['dlmuse', 'dlwmls', 'csf_ravens'], 'Pipeline'
                 )
-            if sel_pipe is None or sel_pipe == 'Select an option...':
+            if sel_pipe is None or str(sel_pipe) == 'Select an option...':
                 return
             view_segmentation(layout)
 
         elif sel_rtype == 'Numeric':
             with layout:
+                old_pipe = st.session_state.general_params['sel_pipeline']
                 sel_pipe = utilwd.my_selectbox(
                     'general_params', 'sel_pipeline',
-                    ['dlmuse', 'dlwmls'], 'Pipeline'
+                    ['dlmuse', 'dlwmls', 'spare', 'spare_cvm', 'cclnmf', 'surreal_gan'],
+                    'Pipeline'
                 )
-            if sel_pipe is None or sel_pipe == 'Select an option...':
+
+            if sel_pipe is None or str(sel_pipe) == 'Select an option...':
                 return
+            
+            # Reset plots if pipeline changed
+            if old_pipe != sel_pipe:
+                st.session_state.plots = pd.DataFrame(columns=['flag_sel', 'params'])
+                st.session_state.plot_curr = -1
+                st.session_state.plot_active = None
+                
             view_img_vars(layout)
 
 

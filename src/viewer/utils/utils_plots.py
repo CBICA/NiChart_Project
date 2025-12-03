@@ -295,7 +295,7 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
             )
             df_cent = pd.read_csv(f_cent)
         except:
-            st.warning('Could not read centile data!')
+            st.warning(f'Could not read centile data: {f_cent}')
             df_cent = None
 
     # Filter centiles

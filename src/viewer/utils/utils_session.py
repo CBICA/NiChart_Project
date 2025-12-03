@@ -125,9 +125,6 @@ def init_session_vars():
     st.session_state.project = 'user_default'
     #st.session_state.project = 'nichart_project'
 
-    st.session_state.prj_name = 'test1'
-    st.session_state.project = 'test1'
-
     st.session_state.project_selected_explicitly = False
     
     st.session_state.sel_pipeline = None
@@ -355,7 +352,8 @@ def init_plot_vars() -> None:
         'sel_roi': None,
         'sel_orient': img_views,
         'flag_overlay': True,
-        'flag_crop': True,
+        'flag_crop': False,
+        'map_minmax': [2.0, 5.0]
     }
 
     ######################
@@ -444,7 +442,7 @@ def init_plot_vars() -> None:
         "list_roi_indices": [81, 82],
         "list_orient": ["axial", "coronal", "sagittal"],
         "is_show_overlay": True,
-        "crop_to_mask": True,
+        "crop_to_mask": False,
         'filter_sex': ['F', 'M'],
         'filter_age': [40, 95],
     }
@@ -579,6 +577,8 @@ def update_project(sel_project) -> None:
     st.session_state.project = sel_project
     st.session_state.project_selected_explicitly = True
     st.session_state.paths['project'] = p_prj
+
+    st.session_state.paths['curr_data'] = st.session_state.paths['prj_dir']
 
 # Function to parse AWS login (if available)
 def process_session_token() -> Any:

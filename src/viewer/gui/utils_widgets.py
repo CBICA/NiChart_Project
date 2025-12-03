@@ -75,7 +75,7 @@ def my_selectbox(var_group, var_name, list_opts, hdr='selection box', label_visi
     '''
     Wrapper for selectbox
     '''
-    options = ["Select an option…"] + list_opts
+    options = ["Select an option..."] + list_opts
     sel_ind = safe_index(options, st.session_state[var_group][var_name])
 
     sel_opt = st.selectbox(
@@ -100,6 +100,10 @@ def selectbox_twolevels(var_group, var_name1, var_name2, df_vars, list_vars = No
         tmp_list = row['values']
         tmp_atlas = row['atlas']
 
+        #with st.container(border=True):
+            #st.write(tmp_group)
+            #st.write(tmp_list)
+
         # Convert ROI variables from index to name
         if tmp_atlas is not None:
             tmp_list = [dicts_rename[tmp_atlas][k] for k in tmp_list]
@@ -114,7 +118,7 @@ def selectbox_twolevels(var_group, var_name1, var_name2, df_vars, list_vars = No
         sel_opt1 = my_selectbox(
             var_group, var_name1, list(roi_dict), label_visibility='collapsed'
         )
-        if sel_opt1 is None or sel_opt1 == 'Select an option…':
+        if sel_opt1 is None or str(sel_opt1) == 'Select an option...':
             list_opts = []
         else:
             list_opts = roi_dict[sel_opt1]
@@ -155,7 +159,6 @@ def select_var_twolevels(var_group, var_name1, var_name2, hdr, list_cat, list_va
     """
     df_vars = st.session_state.dicts['df_var_groups']
     sel_cats = df_vars[df_vars.category.isin(list_cat)]
-
     
     # Select roi
     st.write(hdr)
@@ -183,7 +186,7 @@ def select_trend():
     if sel_trend is None:
         return
 
-    if sel_trend == 'Select an option…':
+    if str(sel_trend) == 'Select an option...':
         return
 
     if sel_trend == 'Linear':
@@ -207,25 +210,24 @@ def select_centiles():
     if sel_cent_type is None:
         return
 
-    if sel_cent_type == 'Select an option…':
+    if str(sel_cent_type) == 'Select an option...':
         return
 
     # Read centile dataframe
     pipeline = st.session_state.general_params['sel_pipeline']
     csv_cent = os.path.join(
         st.session_state.paths['centiles'],
-        f'{pipeline}_centiles_{plot_params['centile_type']}.csv'
+        pipeline + '_centiles_' + plot_params['centile_type'] + '.csv'
     )
     if csv_cent != st.session_state.plot_data['csv_cent']:
+        st.session_state.plot_data['csv_cent'] = csv_cent        
         try:
-            df_cent = pd.read_csv(csv_cent)
+            df = utilio.read_csv(csv_cent)
+            st.session_state.plot_data['df_cent'] = df
+            st.toast('Loaded centile data!')
         except:
+            st.session_state.plot_data['df_cent'] = None
             st.toast('Could not read centile data!')
-            return
-
-        st.session_state.plot_data['csv_cent'] = csv_cent
-        st.session_state.plot_data['df_cent'] = df_cent
-        st.toast('Loaded centile data!')
 
     sel_cent_vals = my_multiselect('plot_params', 'centile_values', list_values, 'Centile Values')
 
@@ -281,4 +283,25 @@ def select_mriplot_settings():
 
     flag_crop = my_checkbox('mriplot_params', 'flag_crop', "Crop to mask")
 
+def select_ravensplot_settings():
+    '''
+    Panel to select mriplot settings
+    '''
+    img_views = ["axial", "coronal", "sagittal"]
 
+    sac.divider(label='Plot Options', align='center', color='indigo', size='lg')
+
+    sel_orient = my_multiselect(
+        'mriplot_params', 'sel_orient', img_views, 'View Planes'
+    )
+
+    if sel_orient is None or len(sel_orient) == 0:
+        return
+
+    flag_overlay = my_checkbox('mriplot_params', 'flag_overlay', "Show overlay")
+
+    flag_crop = my_checkbox('mriplot_params', 'flag_crop', "Crop to mask")
+
+    map_minmax = my_slider(
+        'mriplot_params', 'map_minmax', 'Z-score min/max values', min_val=-10.0, max_val=10.0, step=0.2
+    )

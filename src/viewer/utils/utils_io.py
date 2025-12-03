@@ -150,6 +150,9 @@ def zip_folder(in_dir: str, f_out: str) -> Optional[bytes]:
 
         return download_dir
 
+def clear_folder(in_dir):
+    shutil.rmtree(in_dir)
+
 def unzip_zip_files(in_dir: str) -> None:
     '''
     Unzips all ZIP files in the input dir and removes the original ZIP files.

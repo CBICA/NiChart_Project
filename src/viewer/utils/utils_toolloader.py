@@ -729,7 +729,7 @@ def check_requirements_met_panel(pipeline_name):
                         row_note += f"{REQ_TO_HUMAN_READABLE[key]}: {val} MRIDs are in participants CSV but not in available.\n"
                         severity = "yellow"
             else:
-                for key, val in count_diffs:
+                for key, val in count_diffs.items():
                     if count_diffs["needs_demographics"] > val:
                         row_note += f"{REQ_TO_HUMAN_READABLE[key]}: {val} CSV entries are present which have no associated scan.\n"
                     elif count_diffs["needs_demographics"] < val:
