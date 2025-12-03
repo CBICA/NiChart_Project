@@ -352,7 +352,7 @@ def init_plot_vars() -> None:
         'sel_roi': None,
         'sel_orient': img_views,
         'flag_overlay': True,
-        'flag_crop': True,
+        'flag_crop': False,
     }
 
     ######################
@@ -441,7 +441,7 @@ def init_plot_vars() -> None:
         "list_roi_indices": [81, 82],
         "list_orient": ["axial", "coronal", "sagittal"],
         "is_show_overlay": True,
-        "crop_to_mask": True,
+        "crop_to_mask": False,
         'filter_sex': ['F', 'M'],
         'filter_age': [40, 95],
     }

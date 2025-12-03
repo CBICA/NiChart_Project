@@ -39,16 +39,9 @@ st.session_state.paths['curr_data'] = st.session_state.paths['sample_data']
 if 'instantiated' not in st.session_state or not st.session_state.instantiated:
     utilses.init_session_state()
 
-st.markdown("<h5 style='text-align:center; color:#3a3a88;'>View NiChart Values\n\n</h1>", unsafe_allow_html=True)
-
-cols = st.columns([1,6,1])
-with cols[1]:
-    st.markdown(
-        '''
-        You can explore NiChart values computed from reference datasets here
-                
-        ''', unsafe_allow_html=True
-    )
+with st.container(horizontal=False, horizontal_alignment="center"):
+    st.markdown("<h5 style='color:#3a3a88;'>View NiChart Values\n\n</h1>", unsafe_allow_html=True, width='content')
+    st.markdown('You can explore NiChart values computed from reference datasets here', unsafe_allow_html=True, width='content')
 
 sac.divider(key='_p0_div1')
     

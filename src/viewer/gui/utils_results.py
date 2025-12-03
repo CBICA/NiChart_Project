@@ -147,7 +147,7 @@ def plot_data(layout):
     plot_params['traces'] = ['data']
     if plot_params['centile_values'] is not None:
         if st.session_state.plot_data['df_cent'] is None:
-            st.warning('Reference centile data is not available!')
+            st.warning('Note: Reference centile data is not available!')
         else:
             plot_params['traces'] = plot_params['traces'] + plot_params['centile_values']
 
@@ -175,25 +175,18 @@ def view_segmentation(layout):
 
     if pipeline == 'dlmuse':
         fname = os.path.join(
-            st.session_state.paths['curr_data'], 'dlmuse_vol', 'dlmuse_vol.csv'
+            st.session_state.paths['curr_data'], 'dlmuse_vol', 'DLMUSE_Volumes.csv'
         )
         df = pd.read_csv(fname)
-        
-        #st.write(st.session_state.paths)
-
-        # Rename DLMUSE columns
         df.columns = df.columns.str.replace('DL_MUSE_Volume_','')
         df = df.rename(columns = st.session_state.dicts['muse']['ind_to_name'])
-
         list_vars = df.columns.unique().tolist()
-        
         list_mrids = df.MRID.sort_values().tolist()
         
         with layout:
             sel_mrid = utilwd.my_selectbox(
                 'mriplot_params', 'sel_mrid', list_mrids, 'Subject'
             )
-
         if sel_mrid is None or sel_mrid == 'Select an option…':
             return
 
@@ -218,7 +211,6 @@ def view_segmentation(layout):
             st.session_state.mriplot_params['olay'] = fname
             
         # Select ROI
-        ## FIXME
         with layout:
             sel_roi = utilwd.select_muse_roi(list_vars)
         if sel_roi is None or sel_roi == 'Select an option…':
@@ -235,7 +227,56 @@ def view_segmentation(layout):
         utilmri.panel_view_seg()
 
     elif pipeline == 'dlwmls':
-        st.info('Not available yet ...')
+        fname = os.path.join(
+            st.session_state.paths['curr_data'], 'nichart_dlwmls_out', 'DLWMLS_DLMUSE_Segmented_Volumes.csv'
+        )
+        df = pd.read_csv(fname)
+        df.columns = df.columns.str.replace('DL_WMLS_Volume_','')
+        list_mrids = df.MRID.sort_values().tolist()
+        
+        with layout:
+            sel_mrid = utilwd.my_selectbox(
+                'mriplot_params', 'sel_mrid', list_mrids, 'Subject'
+            )
+        if sel_mrid is None or sel_mrid == 'Select an option…':
+            return
+
+        #######################
+        ## Set olay ulay images
+        fname = os.path.join(
+            st.session_state.paths['curr_data'], 'fl', f'{sel_mrid}_FL.nii.gz'
+        )
+        # FIXME
+        fname = os.path.join(
+            st.session_state.paths['curr_data'], 't1', f'{sel_mrid}_T1.nii.gz'
+        )
+        if not os.path.exists(fname):
+            st.session_state.mriplot_params['ulay'] = None
+            st.write(fname)
+        else:
+            st.session_state.mriplot_params['ulay'] = fname
+
+        fname = os.path.join(
+            st.session_state.paths['curr_data'], 'nichart_dlwmls_out', 
+            'DLWMLS_DLMUSE_Segmented',
+            f'{sel_mrid}_DLWMLS_DLMUSE_Segmented.nii.gz'
+        )
+        if not os.path.exists(fname):
+            st.session_state.mriplot_params['olay'] = None
+            st.write(fname)
+        else:
+            st.session_state.mriplot_params['olay'] = fname
+            
+        st.session_state.mriplot_params['sel_roi'] = None
+
+        # Select plot parameters
+        with layout:
+            utilwd.select_mriplot_settings()
+            
+        if st.session_state.workflow == 'ref_data':
+            st.warning('**Note:** This is a low-resolution (2 mm) sample dataset provided for illustration only.')
+        
+        utilmri.panel_view_seg()
 
 
 def prep_csv():
@@ -286,6 +327,8 @@ def view_img_vars(layout):
     View image variables
     """
     pipeline = st.session_state.general_params['sel_pipeline']
+    if str(pipeline) == 'Select an option...':
+        return
     
     # Set reference centile data
     fname = os.path.join(
@@ -318,6 +361,11 @@ def view_img_vars(layout):
         if pipeline == 'dlwmls':            
             df.columns = df.columns.str.replace('DL_WMLS_Volume_','')
             df = df.rename(columns = st.session_state.dicts['muse']['ind_to_name'])
+            #st.write(df)
+            
+        if pipeline == 'spare':            
+            df = df.drop('SPARE_AD', axis=1)
+            df.columns = df.columns.str.replace('SPARE_AD_decision_function','SPARE_AD')
             #st.write(df)
             
         df["grouping_var"] = "Data"
@@ -475,8 +523,18 @@ def panel_results():
                     'general_params', 'sel_pipeline',
                     ['dlmuse', 'dlwmls', 'spare', 'cclnmf', 's-gan'], 'Pipeline'
                 )
-            if sel_pipe is None or sel_pipe == 'Select an option...':
+                
+            #st.write(sel_pipe)
+            print(sel_pipe)
+            
+            if sel_pipe is None or str(sel_pipe) == 'Select an option...':
                 return
+            #else:
+                #st.write(sel_pipe)
+                #print(f'aaaaa {sel_pipe} Select an option...')
+                #st.write(str(sel_pipe) == 'Select an option...')
+                
+            #return
             
             # Reset plots if pipeline changed
             if old_pipe != sel_pipe:

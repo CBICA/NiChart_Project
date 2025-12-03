@@ -338,17 +338,19 @@ def panel_view_seg():
         return
 
     if params['sel_roi'] is None:
-        st.error('Please select the ROI!')
-        return
-    
-    roi_indices = utilmisc.get_roi_indices(params['sel_roi'], 'muse')
-    if roi_indices is None:
-        return
+        #st.error('Please select the ROI!')
+        #return
+        roi_indices = [1]
+    else:
+        roi_indices = utilmisc.get_roi_indices(params['sel_roi'], 'muse')
+        if roi_indices is None:
+            return
 
     # Show images
     with st.container(border=True):
         with st.spinner("Wait for it..."):
             # Process image (and mask) to prepare final 3d matrix to display
+                        
             img, mask, img_masked = prep_image_and_olay(
                 params['ulay'], params['olay'], roi_indices, params['flag_crop']
             )
