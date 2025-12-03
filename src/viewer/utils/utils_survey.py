@@ -11,6 +11,7 @@ def is_survey_completed() -> bool:
     user_dir = st.session_state.paths['out_dir']
     indicator_filepath = os.path.join(user_dir, "survey.txt")
     if os.path.exists(indicator_filepath):
+        print(f"Survey file exists: {indicator_filepath}")
         return True # Survey has been submitted
     else:
         return False
