@@ -32,4 +32,4 @@ resources: # Used to allocate jobs on the cloud. Please be diligent.
 
 container:
   image: cbica/nifti-align-to-mni:0.0.1
-  command: --img_dir {img_dir} --mask_dir {mask_dir} --output_dir {mni_dir} --transform affine --mask_suffix _DLMUSE --template_mask /MNI_template_DLICV.nii.gz
+  command: --img_dir {img_dir} --mask_dir {mask_dir} --output_dir {mni_dir} --transform affine --mask_suffix _DLMUSE --template_mask mni_icbm152_t1_tal_nlin_sym_09a_LPS_DLICV.nii.gz
