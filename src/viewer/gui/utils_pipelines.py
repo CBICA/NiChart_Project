@@ -236,6 +236,8 @@ def pipeline_menu():
     disabled_pnames = []
     # Evaluate suitability for current data, filter accordingly
     for pname in pnames:
+        if not utiltl.pipeline_is_enabled_by_name(pname):
+            continue # Skip pipelines which are not enabled in frontend ("True") (list_pipelines.csv)
         result, blockers = utiltl.check_requirements_met_nopanel(pname, st.session_state.do_harmonize)
         if result:
             enabled_pnames.append(pname)

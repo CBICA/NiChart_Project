@@ -803,6 +803,16 @@ def pipeline_is_harmonizable(pipeline_label):
     return True
 
 @st.cache_data
+def pipeline_is_enabled_by_name(pipeline_name):
+    directory = DEFAULT_PIPELINE_DEFINITION_PATH
+    pipelines = pd.read_csv(os.path.join(directory, 'list_pipelines.csv'))
+    row = pipelines.loc[pipelines["Name"] == pipeline_name, "EnabledInFrontEnd"]
+    val = row.iloc[0] if not row.empty else None
+    if str(val) == "True":
+        return True
+    return False
+
+@st.cache_data
 def get_pipeline_name_by_label(pipeline_label):
     directory = DEFAULT_PIPELINE_DEFINITION_PATH
     pipelines = pd.read_csv(os.path.join(directory, 'list_pipelines.csv'))
