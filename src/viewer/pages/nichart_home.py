@@ -44,9 +44,10 @@ if not utils_survey.is_survey_completed():
             print("Activating survey page.")
             st.switch_page("pages/survey.py")
     else:
-        print("Skipping survey, it's already completed.")
+        print("Skipping survey due to session state.")
         st.switch_page("pages/survey.py")
-
+else:
+    print("Skipping survey, it's already completed.")
 utils_alerts.render_alert()
 
 #st.markdown('<h1 class="centered-text">Welcome to NiChart Project</p>', unsafe_allow_html=True)
