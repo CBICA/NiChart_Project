@@ -16,10 +16,15 @@ cat_vars:
   vtype: name
   values: [Sex, DX, DX_AD]
 
-Supervised_Biomarkers:
+SPARE_Scores:
   category: biomarker 
   vtype: name
   values: [SPARE_AD, SPARE_BA, DL_BrainAge]
+
+SPARE_CVM_Scores:
+  category: biomarker 
+  vtype: name
+  values: [SPARE_SMOKING, SPARE_HYPERTENSION, SPARE_OBESITY, SPARE_DIABETES]
 
 SurrealGAN_Aging_Dimensions:
   category: biomarker 
@@ -29,7 +34,7 @@ SurrealGAN_Aging_Dimensions:
 CCLNMF_Aging_Dimensions:
   category: biomarker 
   vtype: name
-  values: [CCLNMF_1, CCLNMF_2, CCLNMF_3, CCLNMF_4, CCLNMF_5, CCLNMF_6, CCLNMF_7]
+  values: [CCL-NMF1, CCL-NMF2, CCL-NMF3, CCL-NMF4, CCL-NMF5, CCL-NMF6, CCL-NMF7]
 
 #MUSE_Short:
   #category: roi
@@ -61,5 +66,16 @@ MUSE_ShortList:
   atlas: muse
   values: [702, 701, 601, 604, 509, 501, 502, 503, 504, 505, 506, 507, 508, 404, 411, 31, 32, 36, 37, 47, 48, 57, 58, 59, 60]
 
+#MUSE_WM:
+  #category: wmroi
+  #vtype: index
+  #atlas: muse
+  #values: [701, 604, 607, 614, 403, 405, 408, 410, 412, 415, 427, 40, 41, 81, 82, 83, 84, 85, 86, 87, 88]
+
+MUSE_WM:
+  category: wmroi
+  vtype: index
+  atlas: muse
+  values: [702,81, 82, 83, 84, 85, 86, 87, 88]
 
 

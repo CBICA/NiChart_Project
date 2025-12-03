@@ -21,6 +21,9 @@ def add_trace_scatter(df: pd.DataFrame, plot_params: dict, plot_settings: dict, 
         return fig
     if df.shape[0] == 0:
         return fig
+
+    if plot_params['xvar'] not in df or plot_params['yvar'] not in df:
+        return fig
     
     # Set colormap
     colors = plot_settings['cmaps']['data']
@@ -29,7 +32,7 @@ def add_trace_scatter(df: pd.DataFrame, plot_params: dict, plot_settings: dict, 
     # Get hue params
     hvar = plot_params['hvar']
     hvals = plot_params['hvals']    
-    if hvar is None or hvar == 'Select an option…':
+    if hvar not in df:
         hvar = 'grouping_var'
     if hvals is None:
         hvals = df[hvar].dropna().sort_values().unique().tolist()
@@ -56,13 +59,20 @@ def add_trace_linreg(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
     '''
     Add trace for linear fit and confidence interval
     '''
+    # Check data
+    if plot_params['xvar'] == plot_params['yvar']:
+        return fig
+
+    if plot_params['xvar'] not in df or plot_params['yvar'] not in df:
+        return fig
+    
     # Set colormap
     colors = plot_settings['cmaps']['data']
 
     # Get hue params
     hvar = plot_params['hvar']
     hvals = plot_params['hvals']
-    if hvar is None or hvar == 'Select an option…':
+    if hvar not in df:
         hvar = 'grouping_var'
     if hvals is None or hvals == []:
         hvals = df[hvar].dropna().sort_values().unique().tolist()
@@ -70,10 +80,7 @@ def add_trace_linreg(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
     traces = plot_params['traces']
     if traces is None:
         traces = []
-     
-    if plot_params['xvar'] == plot_params['yvar']:
-        return fig
-     
+          
     # Calculate fit
     dict_fit = utilstat.linreg_model(
         df, plot_params['xvar'], plot_params['yvar'], hvar
@@ -131,6 +138,10 @@ def add_trace_lowess(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
     '''
     Add trace for non-linear fit
     '''
+    # Check data
+    if plot_params['xvar'] not in df or plot_params['yvar'] not in df:
+        return fig
+
     # Check trace
     traces = plot_params['traces']
     if 'lowess' not in traces:
@@ -144,13 +155,13 @@ def add_trace_lowess(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
     # Get hue params
     hvar = plot_params['hvar']
     hvals = plot_params['hvals']
-    if hvar is None or hvar == 'Select an option…':
+    if hvar not in df:
         hvar = 'grouping_var'
     if hvals is None:
         hvals = df[hvar].dropna().sort_values().unique().tolist()
 
     lowess_s = plot_params['lowess_s']
-        
+
     dict_fit = utilstat.lowess_model(
         df, plot_params['xvar'], plot_params['yvar'], hvar, lowess_s
     )
@@ -181,6 +192,10 @@ def add_trace_dot(
     '''
     Add trace for a single dot
     '''
+    # Check data
+    if plot_params['xvar'] not in df or plot_params['yvar'] not in df:
+        return fig
+    
     df_tmp = df[df.MRID == sel_mrid]
     if df_tmp.shape[0] == 0:
         return fig
@@ -202,6 +217,13 @@ def add_trace_centile(df: pd.DataFrame, plot_params: dict, plot_settings: dict, 
     '''
     Add trace for centile curves
     '''
+
+    
+    # Check data
+    if plot_params['xvar'] not in df or plot_params['yvar'] not in df.VarName.unique():
+        st.warning('Variable not found in centile data!')
+        return fig
+        
     cvals = st.session_state.plot_settings['centile_trace_types']
     
     # Check centile traces
@@ -262,6 +284,10 @@ def add_trace_dots(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
     '''
     Add trace for multiple dots
     '''
+    # Check data
+    if plot_params['xvar'] not in df or plot_params['yvar'] not in df:
+        return fig
+    
     trace = go.Scatter(
         x=df[plot_params['xvar']],
         y=df[plot_params['yvar']],
