@@ -50,22 +50,22 @@ def set_plot_params():
         st.session_state.plot_params['yvar'] = 'Frontal_WM_R'
 
     elif pipeline == 'spare':
-        yvarlist = ['biomarker']
+        yvarlist = ['SPARE_Scores']
         st.session_state.plot_params['yvargroup'] = 'SPARE_Scores'
         st.session_state.plot_params['yvar'] = 'SPARE_BA'
 
     elif pipeline == 'spare_cvm':
-        yvarlist = ['biomarker']
+        yvarlist = ['SPARE_CVM_Scores']
         st.session_state.plot_params['yvargroup'] = 'SPARE_CVM_Scores'
         st.session_state.plot_params['yvar'] = 'SPARE_HYPERTENSION'
 
     elif pipeline == 'cclnmf':
-        yvarlist = ['biomarker']
+        yvarlist = ['CCLNMF_Aging_Dimensions']
         st.session_state.plot_params['yvargroup'] = 'CCLNMF_Aging_Dimensions'
-        st.session_state.plot_params['yvar'] = 'CCLNMF_1'
+        st.session_state.plot_params['yvar'] = 'CCL-NMF1'
 
     elif pipeline == 'surreal_gan':
-        yvarlist = ['biomarker']
+        yvarlist = ['SurrealGAN_Aging_Dimensions']
         st.session_state.plot_params['yvargroup'] = 'SurrealGAN_Aging_Dimensions'
         st.session_state.plot_params['yvar'] = 'R1'
 
@@ -263,10 +263,6 @@ def view_segmentation(layout):
         fname = os.path.join(
             st.session_state.paths['curr_data'], 'fl', f'{sel_mrid}_FL.nii.gz'
         )
-        # FIXME
-        fname = os.path.join(
-            st.session_state.paths['curr_data'], 't1', f'{sel_mrid}_T1.nii.gz'
-        )
         if not os.path.exists(fname):
             st.session_state.mriplot_params['ulay'] = None
             st.write(fname)
@@ -275,8 +271,8 @@ def view_segmentation(layout):
 
         fname = os.path.join(
             st.session_state.paths['curr_data'], 'nichart_dlwmls_out', 
-            'DLWMLS_DLMUSE_Segmented',
-            f'{sel_mrid}_DLWMLS_DLMUSE_Segmented.nii.gz'
+            'DLWMLS_FLAIR',
+            f'{sel_mrid}_FL_LPS_DLWMLS.nii.gz'
         )
         if not os.path.exists(fname):
             st.session_state.mriplot_params['olay'] = None
