@@ -6,7 +6,7 @@ set -Eeuo pipefail
 # Config
 ###############################################################################
 # Hardcoded image for both installer and runtime
-APP_IMAGE="cbica/nichart:09122025"
+APP_IMAGE="cbica/nichart:12032025"
 
 # Command inside the installer container
 INSTALLER_CMD="python /app/resources/pull_containers.py /app/resources/tools/"
