@@ -54,6 +54,20 @@ def set_plot_params():
         st.session_state.plot_params['yvargroup'] = 'SPARE_Scores'
         st.session_state.plot_params['yvar'] = 'SPARE_BA'
 
+    elif pipeline == 'spare_cvm':
+        yvarlist = ['biomarker']
+        st.session_state.plot_params['yvargroup'] = 'SPARE_CVM_Scores'
+        st.session_state.plot_params['yvar'] = 'SPARE_HYPERTENSION'
+
+    elif pipeline == 'cclnmf':
+        yvarlist = ['biomarker']
+        st.session_state.plot_params['yvargroup'] = 'CCLNMF_Aging_Dimensions'
+        st.session_state.plot_params['yvar'] = 'CCLNMF_1'
+
+    elif pipeline == 'surreal_gan':
+        yvarlist = ['biomarker']
+        st.session_state.plot_params['yvargroup'] = 'SurrealGAN_Aging_Dimensions'
+        st.session_state.plot_params['yvar'] = 'R1'
 
     sac.divider(label='Plotting Parameters', align='center', color='indigo', size='lg')
     
@@ -365,6 +379,21 @@ def prep_csv():
         f_d = os.path.join(
             st.session_state.paths['curr_data'], 'ml_biomarkers', 'SPARE_ALL.csv'
         )
+
+    elif pipeline == 'spare_cvm':
+        f_d = os.path.join(
+            st.session_state.paths['curr_data'], 'ml_biomarkers', 'SPARE_CVM_ALL.csv'
+        )
+
+    elif pipeline == 'cclnmf':
+        f_d = os.path.join(
+            st.session_state.paths['curr_data'], 'ml_biomarkers', 'CCLNMF.csv'
+        )
+
+    elif pipeline == 'surreal_gan':
+        f_d = os.path.join(
+            st.session_state.paths['curr_data'], 'ml_biomarkers', 'SurrealGAN_RScores.csv'
+        )
     
     try:
         df_p = pd.read_csv(f_p)
@@ -418,16 +447,24 @@ def view_img_vars(layout):
             df.columns = df.columns.str.replace('DL_MUSE_Volume_','')
             df = df.rename(columns = st.session_state.dicts['muse']['ind_to_name'])
 
-        if pipeline == 'dlwmls':            
+        elif pipeline == 'dlwmls':            
             df.columns = df.columns.str.replace('DL_WMLS_Volume_','')
             df = df.rename(columns = st.session_state.dicts['muse']['ind_to_name'])
             #st.write(df)
             
-        if pipeline == 'spare':            
+        elif pipeline == 'spare':            
             df = df.drop('SPARE_AD', axis=1)
             df.columns = df.columns.str.replace('SPARE_AD_decision_function','SPARE_AD')
             #st.write(df)
             
+        elif pipeline == 'spare_cvm':            
+            df = df.drop(['SPARE_SMOKING','SPARE_HYPERTENSION','SPARE_OBESITY', 'SPARE_DIABETES'], axis=1)
+            df.columns = df.columns.str.replace('_decision_function','')
+
+        elif pipeline == 'surreal_gan':         
+            df.columns = df.columns.str.replace('SurrealGAN_','')
+            st.write(df)
+
         df["grouping_var"] = "Data"
         st.session_state.plot_data['df_data'] = df
 
@@ -585,7 +622,8 @@ def panel_results():
                 old_pipe = st.session_state.general_params['sel_pipeline']
                 sel_pipe = utilwd.my_selectbox(
                     'general_params', 'sel_pipeline',
-                    ['dlmuse', 'dlwmls', 'spare', 'cclnmf', 's-gan'], 'Pipeline'
+                    ['dlmuse', 'dlwmls', 'spare', 'spare_cvm', 'cclnmf', 'surreal_gan'],
+                    'Pipeline'
                 )
 
             if sel_pipe is None or str(sel_pipe) == 'Select an option...':
