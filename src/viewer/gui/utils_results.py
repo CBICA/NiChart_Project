@@ -228,11 +228,10 @@ def view_segmentation(layout):
 
     elif pipeline == 'dlwmls':
         fname = os.path.join(
-            st.session_state.paths['curr_data'], 'nichart_dlwmls_out', 'DLWMLS_DLMUSE_Segmented_Volumes.csv'
+            st.session_state.paths['curr_data'], 'participants', 'participants.csv'
         )
         try: 
             df = pd.read_csv(fname)
-            df.columns = df.columns.str.replace('DL_WMLS_Volume_','')
             list_mrids = df.MRID.sort_values().tolist()
         except:
             st.warning('Could not detect result files for this pipeline!')
@@ -281,6 +280,56 @@ def view_segmentation(layout):
             st.warning('**Note:** This is a low-resolution (2 mm) sample dataset provided for illustration only.')
         
         utilmri.panel_view_seg()
+
+    elif pipeline == 'csf_ravens':
+        fname = os.path.join(
+            st.session_state.paths['curr_data'], 'participants', 'participants.csv'
+        )
+        try: 
+            df = pd.read_csv(fname)
+            list_mrids = df.MRID.sort_values().tolist()
+        except:
+            st.warning('Could not detect result files for this pipeline!')
+            return
+        
+        with layout:
+            sel_mrid = utilwd.my_selectbox(
+                'mriplot_params', 'sel_mrid', list_mrids, 'Subject'
+            )
+        if sel_mrid is None or str(sel_mrid) == 'Select an option...':
+            return
+
+        #######################
+        ## Set olay ulay images
+        fname = os.path.join(
+            st.session_state.paths['curr_data'], 't1', f'{sel_mrid}_T1.nii.gz'
+        )
+        if not os.path.exists(fname):
+            st.session_state.mriplot_params['ulay'] = None
+            st.write(fname)
+        else:
+            st.session_state.mriplot_params['ulay'] = fname
+
+        fname = os.path.join(
+            st.session_state.paths['curr_data'], 'nichart_ravens_out', 
+            f'{sel_mrid}_Label_CSF_RAVENS_ICVNorm_zScored_inSubj.nii.gz'
+        )
+        if not os.path.exists(fname):
+            st.session_state.mriplot_params['olay'] = None
+            st.write(fname)
+        else:
+            st.session_state.mriplot_params['olay'] = fname
+            
+        st.session_state.mriplot_params['sel_roi'] = None
+
+        # Select plot parameters
+        with layout:
+            utilwd.select_ravensplot_settings()
+            
+        if st.session_state.workflow == 'ref_data':
+            st.warning('**Note:** This is a low-resolution (2 mm) sample dataset provided for illustration only.')
+        
+        utilmri.panel_view_map()
 
 
 def prep_csv():
@@ -525,7 +574,7 @@ def panel_results():
             with layout:
                 sel_pipe = utilwd.my_selectbox(
                     'general_params', 'sel_pipeline',
-                    ['dlmuse', 'dlwmls'], 'Pipeline'
+                    ['dlmuse', 'dlwmls', 'csf_ravens'], 'Pipeline'
                 )
             if sel_pipe is None or str(sel_pipe) == 'Select an option...':
                 return

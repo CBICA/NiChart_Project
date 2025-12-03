@@ -353,6 +353,7 @@ def init_plot_vars() -> None:
         'sel_orient': img_views,
         'flag_overlay': True,
         'flag_crop': False,
+        'map_minmax': [2.0, 5.0]
     }
 
     ######################

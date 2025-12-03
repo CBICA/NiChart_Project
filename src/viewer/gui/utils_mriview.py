@@ -25,6 +25,11 @@ MASK_COLOR = (0, 255, 0)  # RGB format
 MASK_COLOR = np.array([0.0, 1.0, 0.0])  # RGB format
 OLAY_ALPHA = 0.2
 
+MAP_COLOR = (255, 0, 0)  # RGB format
+MAP_COLOR = np.array([1.0, 0.0, 0.0])  # RGB format
+MAP_ALPHA = 0.7
+
+
 def pad_image(img: np.ndarray) -> np.ndarray:
     """
     Pad img to equal x,y,z
@@ -358,6 +363,112 @@ def panel_view_seg():
             except:
                 st.warning('Could not read image files!')
                 return
+            
+            img_bounds = detect_mask_bounds(mask)
+
+            cols = st.columns(3)
+            for i, tmp_orient in stqdm(
+                enumerate(params['sel_orient']),
+                desc="Showing images ...",
+                total=len(params['sel_orient'])
+            ):
+                with cols[i]:
+                    ind_view = img_views.index(tmp_orient)
+                    size_auto = True
+                    if params['olay'] is None or params['flag_overlay'] is False:
+                        show_img_slices(
+                            img, ind_view, img_bounds[ind_view, :], tmp_orient
+                        )
+                    else:
+                        show_img_slices(
+                            img_masked, ind_view, img_bounds[ind_view, :], tmp_orient
+                        )
+
+def prep_image_and_olaymap(
+    f_img, f_map, minmax = [0,1], crop_to_mask = False
+):
+    """
+    Read ulay image and olay map from files and create 3D matrices for display
+    """
+
+    # Read nifti
+    nii_img = nib.load(f_img)
+    nii_map = nib.load(f_map)
+
+    # Reorient nifti
+    nii_img = reorient_nifti(nii_img, ref_orient="IPL")
+    nii_map = reorient_nifti(nii_map, ref_orient="IPL")
+
+    # Extract image to matrix
+    out_img = nii_img.get_fdata()
+    out_map = nii_map.get_fdata()
+
+    # Rescale image and out_mask to equal voxel size in all 3 dimensions
+    out_img = ndimage.zoom(out_img, nii_img.header.get_zooms(), order=0, mode="nearest")
+    out_map = ndimage.zoom(
+        out_map, nii_map.header.get_zooms(), order=0, mode="nearest"
+    )
+
+    # Shift values in out_img to remove negative values
+    out_img = out_img - np.min([0, out_img.min()])
+
+    # Convert image to uint
+    out_img = out_img.astype(float) / out_img.max()
+
+    out_map = np.asarray(out_map, dtype=float)
+    out_map = np.nan_to_num(out_map, nan=-9999)
+    min_val = float(minmax[0])
+    max_val = float(minmax[1])
+
+    #out_map = (out_map >= min_val & out_map <= max_val).astype(int)
+    out_map = ((out_map >= min_val) & (out_map <= max_val)).astype(int)
+    st.write(f'Masked voxels: {(out_map>0).sum()}')
+
+    # Crop image to ROIs and reshape
+    out_img, out_map = crop_image(out_img, out_map, crop_to_mask)
+    
+
+    # Merge image and out_mask
+    out_img = np.stack((out_img,) * 3, axis=-1)
+
+    out_img_out_masked = out_img.copy()
+    out_img_out_masked[out_map == 1] = (
+        # WARNING & FIXME:
+        # @spirosmaggioros: I don't think this should be like this, something is wrong here with MASK_COLOR * OLAY_ALPHA
+        out_img_out_masked[out_map == 1] * (1 - MAP_ALPHA)
+        + MAP_COLOR * MAP_ALPHA  # type:ignore
+    )
+
+    return out_img, out_map, out_img_out_masked
+
+
+
+def panel_view_map():
+    '''
+    Panel to display a map with float values overlaid on underlay image
+    '''
+    params = st.session_state.mriplot_params
+    
+    if params['ulay'] is None:
+        return
+
+    if params['olay'] is None:
+        return
+
+    # Show images
+    with st.container(border=True):
+        with st.spinner("Wait for it..."):
+            # Process image (and mask) to prepare final 3d matrix to display
+            
+            #try:
+            img, mask, img_masked = prep_image_and_olaymap(
+                params['ulay'], params['olay'], params['map_minmax'] 
+            )
+            #except Exception as e:
+                #st.warning(f'Could not read image files!')
+                #st.write(params['ulay'])
+                #st.write(params['olay'])
+                #return
             
             img_bounds = detect_mask_bounds(mask)
 

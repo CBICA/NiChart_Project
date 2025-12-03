@@ -283,4 +283,25 @@ def select_mriplot_settings():
 
     flag_crop = my_checkbox('mriplot_params', 'flag_crop', "Crop to mask")
 
+def select_ravensplot_settings():
+    '''
+    Panel to select mriplot settings
+    '''
+    img_views = ["axial", "coronal", "sagittal"]
 
+    sac.divider(label='Plot Options', align='center', color='indigo', size='lg')
+
+    sel_orient = my_multiselect(
+        'mriplot_params', 'sel_orient', img_views, 'View Planes'
+    )
+
+    if sel_orient is None or len(sel_orient) == 0:
+        return
+
+    flag_overlay = my_checkbox('mriplot_params', 'flag_overlay', "Show overlay")
+
+    flag_crop = my_checkbox('mriplot_params', 'flag_crop', "Crop to mask")
+
+    map_minmax = my_slider(
+        'mriplot_params', 'map_minmax', 'Z-score min/max values', min_val=-10.0, max_val=10.0, step=0.2
+    )
