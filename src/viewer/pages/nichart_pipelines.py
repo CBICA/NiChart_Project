@@ -55,7 +55,7 @@ if st.session_state.workflow == 'Reference Data':
 
 else:
     utilnav.main_navig(
-        'Data', 'pages/nichart_upload_data.py',
+        'Data', 'pages/nichart_data.py',
         'Results', 'pages/nichart_results.py',
         utilset.edit_settings, my_help
     )

@@ -58,7 +58,7 @@ with cols[1]:
         ''', unsafe_allow_html=True
     )
 
-utilnav.main_navig(None, None, 'Data', 'pages/nichart_upload_data.py')
+utilnav.main_navig(None, None, 'Data', 'pages/nichart_data.py')
 
 # Show session state vars
 if st.session_state.mode == 'debug':

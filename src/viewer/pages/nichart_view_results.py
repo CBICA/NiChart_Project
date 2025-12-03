@@ -49,7 +49,7 @@ sel_but = sac.chip(
 )
     
 if sel_but == 0:
-    st.switch_page("pages/nichart_download_results.py")
+    st.switch_page("pages/nichart_results.py")
 
 if sel_but == 1:
     st.switch_page("pages/nichart_home.py")
