@@ -187,7 +187,7 @@ def view_segmentation(layout):
             sel_mrid = utilwd.my_selectbox(
                 'mriplot_params', 'sel_mrid', list_mrids, 'Subject'
             )
-        if sel_mrid is None or sel_mrid == 'Select an option…':
+        if sel_mrid is None or str(sel_mrid) == 'Select an option...':
             return
 
         #######################
@@ -213,7 +213,7 @@ def view_segmentation(layout):
         # Select ROI
         with layout:
             sel_roi = utilwd.select_muse_roi(list_vars)
-        if sel_roi is None or sel_roi == 'Select an option…':
+        if sel_roi is None or str(sel_roi) == 'Select an option...':
             return
         st.session_state.mriplot_params['sel_roi'] = sel_roi
 
@@ -230,15 +230,19 @@ def view_segmentation(layout):
         fname = os.path.join(
             st.session_state.paths['curr_data'], 'nichart_dlwmls_out', 'DLWMLS_DLMUSE_Segmented_Volumes.csv'
         )
-        df = pd.read_csv(fname)
-        df.columns = df.columns.str.replace('DL_WMLS_Volume_','')
-        list_mrids = df.MRID.sort_values().tolist()
+        try: 
+            df = pd.read_csv(fname)
+            df.columns = df.columns.str.replace('DL_WMLS_Volume_','')
+            list_mrids = df.MRID.sort_values().tolist()
+        except:
+            st.warning('Could not detect result files for this pipeline!')
+            return
         
         with layout:
             sel_mrid = utilwd.my_selectbox(
                 'mriplot_params', 'sel_mrid', list_mrids, 'Subject'
             )
-        if sel_mrid is None or sel_mrid == 'Select an option…':
+        if sel_mrid is None or str(sel_mrid) == 'Select an option...':
             return
 
         #######################
@@ -319,8 +323,13 @@ def prep_csv():
         df = df_p.merge(df_d, on='MRID')
         df.to_csv(fout, index=False)
         st.toast('Data file merged to participant info!')
+
     except:
         st.warning('Could not read result files!')
+        return False
+
+    return True
+    
 
 def view_img_vars(layout):
     """
@@ -348,7 +357,9 @@ def view_img_vars(layout):
     fname = os.path.join(st.session_state.paths['curr_data'], 'plots', f'data_{pipeline}.csv')
     
     if fname != st.session_state.plot_data['csv_data']:
-        prep_csv()
+        
+        if not prep_csv():
+            return
 
         st.session_state.plot_data['csv_data'] = fname
         df = utilio.read_csv(fname)
@@ -493,6 +504,10 @@ def panel_results():
                 'general_params', 'sel_task', ['Download', 'View'], hdr='Task'
             )
 
+    if sel_task is None or str(sel_task) == 'Select an option...':
+        with st.container(horizontal=False, horizontal_alignment="center"):
+            st.markdown('Please select a viewing option from the sidebar!', width="content")
+
     if sel_task == 'Info':
         panel_info()
 
@@ -503,7 +518,7 @@ def panel_results():
         with layout:
             sel_rtype = utilwd.my_selectbox(
                 'general_params', 'sel_rtype',
-                ['Numeric', 'Image'], 'Data Type'
+                ['Image', 'Numeric'], 'Data Type'
             )
 
         if sel_rtype == 'Image':
@@ -512,7 +527,7 @@ def panel_results():
                     'general_params', 'sel_pipeline',
                     ['dlmuse', 'dlwmls'], 'Pipeline'
                 )
-            if sel_pipe is None or sel_pipe == 'Select an option...':
+            if sel_pipe is None or str(sel_pipe) == 'Select an option...':
                 return
             view_segmentation(layout)
 
@@ -529,12 +544,6 @@ def panel_results():
             
             if sel_pipe is None or str(sel_pipe) == 'Select an option...':
                 return
-            #else:
-                #st.write(sel_pipe)
-                #print(f'aaaaa {sel_pipe} Select an option...')
-                #st.write(str(sel_pipe) == 'Select an option...')
-                
-            #return
             
             # Reset plots if pipeline changed
             if old_pipe != sel_pipe:

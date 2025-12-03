@@ -75,7 +75,7 @@ def my_selectbox(var_group, var_name, list_opts, hdr='selection box', label_visi
     '''
     Wrapper for selectbox
     '''
-    options = ["Select an option…"] + list_opts
+    options = ["Select an option..."] + list_opts
     sel_ind = safe_index(options, st.session_state[var_group][var_name])
 
     sel_opt = st.selectbox(
@@ -118,7 +118,7 @@ def selectbox_twolevels(var_group, var_name1, var_name2, df_vars, list_vars = No
         sel_opt1 = my_selectbox(
             var_group, var_name1, list(roi_dict), label_visibility='collapsed'
         )
-        if sel_opt1 is None or sel_opt1 == 'Select an option…':
+        if sel_opt1 is None or str(sel_opt1) == 'Select an option...':
             list_opts = []
         else:
             list_opts = roi_dict[sel_opt1]
@@ -186,7 +186,7 @@ def select_trend():
     if sel_trend is None:
         return
 
-    if sel_trend == 'Select an option…':
+    if str(sel_trend) == 'Select an option...':
         return
 
     if sel_trend == 'Linear':
@@ -210,7 +210,7 @@ def select_centiles():
     if sel_cent_type is None:
         return
 
-    if sel_cent_type == 'Select an option…':
+    if str(sel_cent_type) == 'Select an option...':
         return
 
     # Read centile dataframe

@@ -350,10 +350,15 @@ def panel_view_seg():
     with st.container(border=True):
         with st.spinner("Wait for it..."):
             # Process image (and mask) to prepare final 3d matrix to display
-                        
-            img, mask, img_masked = prep_image_and_olay(
-                params['ulay'], params['olay'], roi_indices, params['flag_crop']
-            )
+            
+            try:
+                img, mask, img_masked = prep_image_and_olay(
+                    params['ulay'], params['olay'], roi_indices, params['flag_crop']
+                )
+            except:
+                st.warning('Could not read image files!')
+                return
+            
             img_bounds = detect_mask_bounds(mask)
 
             cols = st.columns(3)
