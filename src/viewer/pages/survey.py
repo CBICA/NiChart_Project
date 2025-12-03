@@ -238,7 +238,7 @@ if utils_survey.is_survey_completed():
     take_survey_again = st.button("Take Survey")
     go_home = st.button("Home")
     if go_home:
-        st.switch_page("pages/home.py")
+        st.switch_page("pages/nichart_home.py")
     if take_survey_again:
         delete_survey_indicator()
         survey_panel()

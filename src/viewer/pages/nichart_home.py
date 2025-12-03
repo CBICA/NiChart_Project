@@ -37,6 +37,15 @@ inject_global_css()
 #utilpg.config_page() # Done earlier above
 utilpg.set_global_style()
 
+# Redirect users to survey page until it is completed or otherwise temporarily skipped
+if not utils_survey.is_survey_completed():
+    if 'skip_survey' in st.session_state:
+        if not st.session_state.skip_survey:
+            st.switch_page("pages/survey.py")
+    else:
+        st.switch_page("pages/survey.py")
+
+utils_alerts.render_alert()
 
 #st.markdown('<h1 class="centered-text">Welcome to NiChart Project</p>', unsafe_allow_html=True)
 st.markdown("<h2 style='text-align:center; color:#5e5fad;'>Welcome to NiChart Project\n\n</h1>", unsafe_allow_html=True)
