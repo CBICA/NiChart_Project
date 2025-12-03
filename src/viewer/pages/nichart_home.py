@@ -41,8 +41,10 @@ utilpg.set_global_style()
 if not utils_survey.is_survey_completed():
     if 'skip_survey' in st.session_state:
         if not st.session_state.skip_survey:
+            print("Activating survey page.")
             st.switch_page("pages/survey.py")
     else:
+        print("Skipping survey, it's already completed.")
         st.switch_page("pages/survey.py")
 
 utils_alerts.render_alert()
