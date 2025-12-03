@@ -114,7 +114,8 @@ def init_session_vars():
     st.session_state.layout_plots = 'Main'
     st.session_state.layout_plots = 'Sidebar'
 
-    st.session_state.skip_survey = True
+    # Survey-checking code has fallbacks, don't set it.
+    #st.session_state.skip_survey = True
 
     st.session_state.workflow = None
 
