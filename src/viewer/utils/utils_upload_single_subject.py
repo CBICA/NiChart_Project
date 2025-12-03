@@ -111,7 +111,7 @@ def consolidate_nifti():
 
     # Update values based on user iput
     with st.form(key='_form_scan_info'):
-        mod = st.selectbox('Image Modality:', ['T1', 'FL'])
+        mod = st.selectbox('Image Modality:', ['t1', 'fl'])
         mrid = st.text_input('MRID:', value = mrid)
         sex = st.selectbox('Sex (optional):', ['M', 'F', 'Other'], index=ind_sex)
         age = st.number_input('Age (optional):', min_value=20.0, max_value=110.0, value=age)
