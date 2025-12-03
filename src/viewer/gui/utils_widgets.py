@@ -217,18 +217,17 @@ def select_centiles():
     pipeline = st.session_state.general_params['sel_pipeline']
     csv_cent = os.path.join(
         st.session_state.paths['centiles'],
-        f'centiles_{plot_params['centile_type']}.csv'
+        pipeline + '_centiles_' + plot_params['centile_type'] + '.csv'
     )
     if csv_cent != st.session_state.plot_data['csv_cent']:
+        st.session_state.plot_data['csv_cent'] = csv_cent        
         try:
-            df_cent = pd.read_csv(csv_cent)
+            df = utilio.read_csv(csv_cent)
+            st.session_state.plot_data['df_cent'] = df
+            st.toast('Loaded centile data!')
         except:
-            st.toast(f'Could not read centile data: {csv_cent}')
-            return
-
-        st.session_state.plot_data['csv_cent'] = csv_cent
-        st.session_state.plot_data['df_cent'] = df_cent
-        st.toast('Loaded centile data!')
+            st.session_state.plot_data['df_cent'] = None
+            st.toast('Could not read centile data!')
 
     sel_cent_vals = my_multiselect('plot_params', 'centile_values', list_values, 'Centile Values')
 

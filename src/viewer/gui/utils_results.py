@@ -146,7 +146,10 @@ def plot_data(layout):
     
     plot_params['traces'] = ['data']
     if plot_params['centile_values'] is not None:
-        plot_params['traces'] = plot_params['traces'] + plot_params['centile_values']
+        if st.session_state.plot_data['df_cent'] is None:
+            st.warning('Reference centile data is not available!')
+        else:
+            plot_params['traces'] = plot_params['traces'] + plot_params['centile_values']
 
     if plot_params['trend'] == 'Linear':
         plot_params['traces'] = plot_params['traces'] + ['lin_fit']
@@ -287,12 +290,16 @@ def view_img_vars(layout):
     # Set reference centile data
     fname = os.path.join(
         st.session_state.paths['centiles'],
-        'centiles_' + st.session_state.plot_params['centile_type'] + '.csv'
+        pipeline + '_centiles_' + st.session_state.plot_params['centile_type'] + '.csv'
     )
     if fname != st.session_state.plot_data['csv_cent']:
         st.session_state.plot_data['csv_cent'] = fname
-        df = utilio.read_csv(fname)
-        st.session_state.plot_data['df_cent'] = df
+        try:
+            df = utilio.read_csv(fname)
+            st.session_state.plot_data['df_cent'] = df
+        except:
+            st.session_state.plot_data['df_cent'] = None
+
 
     # Set data file
     fname = os.path.join(st.session_state.paths['curr_data'], 'plots', f'data_{pipeline}.csv')
