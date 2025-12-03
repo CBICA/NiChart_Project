@@ -360,6 +360,7 @@ def panel_show_plots():
     for tmp_ind in st.session_state.plots.index.tolist():
         if st.session_state.plots.loc[tmp_ind, 'flag_sel']:
             st.session_state.plots.at[tmp_ind, 'params'] = st.session_state.plot_params.copy()
+    
 
     # Show plots
     show_plots(

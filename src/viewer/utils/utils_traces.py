@@ -217,10 +217,13 @@ def add_trace_centile(df: pd.DataFrame, plot_params: dict, plot_settings: dict, 
     '''
     Add trace for centile curves
     '''
-    # Check data
-    if plot_params['xvar'] not in df or plot_params['yvar'] not in df:
-        return fig
+
     
+    # Check data
+    if plot_params['xvar'] not in df or plot_params['yvar'] not in df.VarName.unique():
+        st.warning('Variable not found in centile data!')
+        return fig
+        
     cvals = st.session_state.plot_settings['centile_trace_types']
     
     # Check centile traces

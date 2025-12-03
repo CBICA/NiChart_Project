@@ -44,6 +44,11 @@ def set_plot_params():
         st.session_state.plot_params['yvargroup'] = 'MUSE_ShortList'
         st.session_state.plot_params['yvar'] = 'GM'
 
+    elif pipeline == 'dlwmls':
+        yvarlist = ['wmroi']
+        st.session_state.plot_params['yvargroup'] = 'MUSE_WM'
+        st.session_state.plot_params['yvar'] = 'Frontal_WM_R'
+
     elif pipeline == 'spare':
         yvarlist = ['biomarker']
         st.session_state.plot_params['yvargroup'] = 'SPARE_Scores'
@@ -138,6 +143,8 @@ def plot_data(layout):
 
     # Update traces
     plot_params = st.session_state.plot_params
+    
+    plot_params['traces'] = ['data']
     if plot_params['centile_values'] is not None:
         plot_params['traces'] = plot_params['traces'] + plot_params['centile_values']
 
@@ -150,14 +157,10 @@ def plot_data(layout):
     if plot_params['trend'] == 'Smooth LOWESS Curve':
         plot_params['traces'] = plot_params['traces'] + ['lowess']
 
-    #st.write(st.session_state.plot_params)
     #st.write(st.session_state.plot_data)
-
-    #st.write(st.session_state.plot_data)
-    #st.write(plot_params)
 
     utilpl.panel_show_plots()
-
+    
 def view_segmentation(layout):
     """
     View segmentations
@@ -168,10 +171,6 @@ def view_segmentation(layout):
         sac.divider(label='Data', align='center', color='grape', size = 'xl')
 
     if pipeline == 'dlmuse':
-
-        #fname = os.path.join(
-            #st.session_state.paths['curr_data'], 'dlmuse', 'dlmuse_vol.csv'
-        #)
         fname = os.path.join(
             st.session_state.paths['curr_data'], 'dlmuse_vol', 'dlmuse_vol.csv'
         )
@@ -235,12 +234,56 @@ def view_segmentation(layout):
     elif pipeline == 'dlwmls':
         st.info('Not available yet ...')
 
+
+def prep_csv():
+    """
+    Merge result files to view
+    """
+    pipeline = st.session_state.general_params['sel_pipeline']
+
+    out_dir = os.path.join(
+        st.session_state.paths['curr_data'], 'plots'
+    )
+    fout = os.path.join(
+        out_dir, f'data_{pipeline}.csv'
+    )
+    os.makedirs(out_dir, exist_ok=True)
+
+    f_p = os.path.join(
+        st.session_state.paths['curr_data'], 'participants', 'participants.csv'
+    )
+
+    # Set pipeline specific parameters    
+    if pipeline == 'dlmuse':
+        f_d = os.path.join(
+            st.session_state.paths['curr_data'], 'dlmuse_vol', 'DLMUSE_Volumes.csv'
+        )
+
+    elif pipeline == 'dlwmls':
+        f_d = os.path.join(
+            st.session_state.paths['curr_data'], 'nichart_dlwmls_out', 'DLWMLS_DLMUSE_Segmented_Volumes.csv'
+        )
+
+    elif pipeline == 'spare':
+        f_d = os.path.join(
+            st.session_state.paths['curr_data'], 'ml_biomarkers', 'SPARE_ALL.csv'
+        )
+    
+    try:
+        df_p = pd.read_csv(f_p)
+        df_d = pd.read_csv(f_d)
+        df = df_p.merge(df_d, on='MRID')
+        df.to_csv(fout, index=False)
+        st.toast('Data file merged to participant info!')
+    except:
+        st.warning('Could not read result files!')
+
 def view_img_vars(layout):
     """
     View image variables
     """
     pipeline = st.session_state.general_params['sel_pipeline']
-
+    
     # Set reference centile data
     fname = os.path.join(
         st.session_state.paths['centiles'],
@@ -251,33 +294,40 @@ def view_img_vars(layout):
         df = utilio.read_csv(fname)
         st.session_state.plot_data['df_cent'] = df
 
-    # Set pipeline specific parameters    
-    if pipeline == 'dlmuse':
-        fname = os.path.join(
-            st.session_state.paths['curr_data'], 'plots', 'data_all.csv'
-        )
-
-    elif pipeline == 'spare':
-        fname = os.path.join(
-            st.session_state.paths['curr_data'], 'plots', 'data_all.csv'
-        )
-
-    else:
-    #elif pipeline == 'dlwmls':
-        st.info('Not available yet ...')
-        return
+    # Set data file
+    fname = os.path.join(st.session_state.paths['curr_data'], 'plots', f'data_{pipeline}.csv')
     
     if fname != st.session_state.plot_data['csv_data']:
+        prep_csv()
+
         st.session_state.plot_data['csv_data'] = fname
         df = utilio.read_csv(fname)
-        df.columns = df.columns.str.replace('DL_MUSE_Volume_','')
-        df = df.rename(columns = st.session_state.dicts['muse']['ind_to_name'])
+        
+        # Pipeline specific steps
+        if pipeline == 'dlmuse':            
+            df.columns = df.columns.str.replace('DL_MUSE_Volume_','')
+            df = df.rename(columns = st.session_state.dicts['muse']['ind_to_name'])
+
+        if pipeline == 'dlwmls':            
+            df.columns = df.columns.str.replace('DL_WMLS_Volume_','')
+            df = df.rename(columns = st.session_state.dicts['muse']['ind_to_name'])
+            #st.write(df)
+            
         df["grouping_var"] = "Data"
         st.session_state.plot_data['df_data'] = df
 
+    ## Pipeline specific steps
+    #if pipeline == 'dlmuse':
+
+    ##elif pipeline == 'spare':
+
+    ##else:
+    ###elif pipeline == 'dlwmls':
+        ##st.info('Not available yet ...')
+        ##return
+
     # Plot data
     plot_data(layout)
-      
 
 def prepare_data_for_download(prj_dir, sel_opt, out_zip):
     utilio.zip_folders(prj_dir, sel_opt, out_zip)
@@ -413,12 +463,20 @@ def panel_results():
 
         elif sel_rtype == 'Numeric':
             with layout:
+                old_pipe = st.session_state.general_params['sel_pipeline']
                 sel_pipe = utilwd.my_selectbox(
                     'general_params', 'sel_pipeline',
-                    ['dlmuse', 'dlwmls', 'spare'], 'Pipeline'
+                    ['dlmuse', 'dlwmls', 'spare', 'cclnmf', 's-gan'], 'Pipeline'
                 )
             if sel_pipe is None or sel_pipe == 'Select an option...':
                 return
+            
+            # Reset plots if pipeline changed
+            if old_pipe != sel_pipe:
+                st.session_state.plots = pd.DataFrame(columns=['flag_sel', 'params'])
+                st.session_state.plot_curr = -1
+                st.session_state.plot_active = None
+                
             view_img_vars(layout)
 
 

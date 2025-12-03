@@ -100,6 +100,10 @@ def selectbox_twolevels(var_group, var_name1, var_name2, df_vars, list_vars = No
         tmp_list = row['values']
         tmp_atlas = row['atlas']
 
+        #with st.container(border=True):
+            #st.write(tmp_group)
+            #st.write(tmp_list)
+
         # Convert ROI variables from index to name
         if tmp_atlas is not None:
             tmp_list = [dicts_rename[tmp_atlas][k] for k in tmp_list]
@@ -155,7 +159,6 @@ def select_var_twolevels(var_group, var_name1, var_name2, hdr, list_cat, list_va
     """
     df_vars = st.session_state.dicts['df_var_groups']
     sel_cats = df_vars[df_vars.category.isin(list_cat)]
-
     
     # Select roi
     st.write(hdr)
