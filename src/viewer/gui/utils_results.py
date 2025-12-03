@@ -538,10 +538,7 @@ def panel_results():
                     'general_params', 'sel_pipeline',
                     ['dlmuse', 'dlwmls', 'spare', 'cclnmf', 's-gan'], 'Pipeline'
                 )
-                
-            #st.write(sel_pipe)
-            print(sel_pipe)
-            
+
             if sel_pipe is None or str(sel_pipe) == 'Select an option...':
                 return
             
