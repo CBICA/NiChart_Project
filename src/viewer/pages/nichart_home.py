@@ -37,6 +37,8 @@ inject_global_css()
 #utilpg.config_page() # Done earlier above
 utilpg.set_global_style()
 
+def redirect_
+
 html_style = '''
     <style>
     div:has( >.element-container div.floating) {
@@ -68,10 +70,10 @@ if st.session_state.has_cloud_session:
         with col2:
             do_logout = st.button("Logout", type='primary')
             if do_logout:
-                st.markdown(f"""
+                st.html(f"""
                     <script>
                     window.location.href = "{logout_url}";
-                    </script>""", unsafe_allow_html=True
+                    </script>""", unsafe_allow_javascript=True
                 )
 
 # Redirect users to survey page until it is completed or otherwise temporarily skipped
