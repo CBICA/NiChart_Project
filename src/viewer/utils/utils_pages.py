@@ -52,8 +52,8 @@ def set_global_style():
                     f""" Logged in as: {user_email}""",
                     unsafe_allow_html=True
                 )
-                do_logout = st.button("Logout", type='primary')
             with col2:
+                do_logout = st.button("Logout", type='primary')
                 if do_logout:
                     st.markdown(f"""
                         <script>
