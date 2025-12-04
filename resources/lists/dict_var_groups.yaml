@@ -19,7 +19,7 @@ cat_vars:
 SPARE_Scores:
   category: biomarker 
   vtype: name
-  values: [SPARE_AD, SPARE_BA, DL_BrainAge]
+  values: [SPARE_AD, SPARE_BA, SPARE_MDD, SPARE_SCZ]
 
 SPARE_CVM_Scores:
   category: biomarker 

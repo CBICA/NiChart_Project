@@ -272,7 +272,7 @@ def view_segmentation(layout):
         fname = os.path.join(
             st.session_state.paths['curr_data'], 'nichart_dlwmls_out', 
             'DLWMLS_FLAIR',
-            f'{sel_mrid}_FL_LPS_DLWMLS.nii.gz'
+            f'{sel_mrid}_FL_DLWMLS.nii.gz'
         )
         if not os.path.exists(fname):
             st.session_state.mriplot_params['olay'] = None
@@ -449,8 +449,8 @@ def view_img_vars(layout):
             #st.write(df)
             
         elif pipeline == 'spare':            
-            df = df.drop('SPARE_AD', axis=1)
-            df.columns = df.columns.str.replace('SPARE_AD_decision_function','SPARE_AD')
+            df = df.drop(['SPARE_AD', 'SPARE_MDD', 'SPARE_SCZ'], axis=1)
+            df.columns = df.columns.str.replace('_decision_function','')
             #st.write(df)
             
         elif pipeline == 'spare_cvm':            
@@ -459,7 +459,6 @@ def view_img_vars(layout):
 
         elif pipeline == 'surreal_gan':         
             df.columns = df.columns.str.replace('SurrealGAN_','')
-            st.write(df)
 
         df["grouping_var"] = "Data"
         st.session_state.plot_data['df_data'] = df
