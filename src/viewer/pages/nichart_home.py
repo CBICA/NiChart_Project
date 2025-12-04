@@ -37,8 +37,6 @@ inject_global_css()
 #utilpg.config_page() # Done earlier above
 utilpg.set_global_style()
 
-def redirect_
-
 html_style = '''
     <style>
     div:has( >.element-container div.floating) {
