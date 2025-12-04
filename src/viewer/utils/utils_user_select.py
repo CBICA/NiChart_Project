@@ -15,35 +15,44 @@ import utils.utils_traces as utiltr
 
 import streamlit_antd_components as sac
 
+def safe_index(lst, value, default=None):
+    try:
+        return lst.index(value)
+    except ValueError:
+        return default
+
+def select_from_list(list_opts, var_name, hdr):
+    '''
+    Generic selection box 
+    For a variable (var_name) initiated with the given list (list_opts)
+    Variable is saved in session_state (used as the key for the select box)
+    '''
+    sel_ind = safe_index(list_opts, st.session_state.get(var_name))
+    sel_opt = st.selectbox(hdr, list_opts, key=var_name, index=sel_ind)
+    return st.session_state[var_name]
+
 def select_var_from_group(
-    label,
     df_vars,
-    init_group,
-    init_var,
     list_vars,
     flag_add_none = False,
     dicts_rename = None,
-    flag_multi = False
 ):
-
-    # print(flag_add_none )
-    # return [init_group, init_var]
-
     '''
     Panel for user to select a variable grouped in categories
     Variable groups are given in df_vars
     If a variable is an ROI index a dictionary for renaming should be given in dicts_rename
     '''
-        
-    # Create nested var lists
-    sac_items = []
-    init_ind = None
-
+    
+    roi_dict = {}
     ind_count = 0
     for i, row in df_vars.iterrows():
         tmp_group = row['group']
         tmp_list = row['values']
         tmp_atlas = row['atlas']
+
+        st.write(f'A1: {tmp_group}')
+        #st.write(f'A2: {tmp_list}')
+        #st.write(f'A3: {tmp_atlas}')
 
         # Convert ROI variables from index to name
         if tmp_atlas is not None:
@@ -55,43 +64,17 @@ def select_var_from_group(
         # Add a None item in var list
         if flag_add_none:
             tmp_list = ['None'] + tmp_list
-        
-        if len(tmp_list) > 0:
+    
+        roi_dict[tmp_group] = tmp_list
 
-            tmp_item = sac.CasItem(tmp_group, icon='app', children=tmp_list)
-            sac_items.append(tmp_item)
-
-            # Detect index of selected items
-            # !!! CasItem keeps a linear (flattened) index of nested items
-            # !!! For each group, the index is moved to:
-            #     curr_index + #items in group + 1
-            if init_group == tmp_group:
-                if init_var in tmp_list:
-                    init_ind = [ind_count, ind_count + 1 + tmp_list.index(init_var)]
-            ind_count = ind_count + 1 + len(tmp_list)
-
-
-    # Show var selector
-    sel_var = sac.cascader(
-        items = sac_items,
-        label=label,
-        index=init_ind,
-        return_index=False,
-        multiple=flag_multi,
-        search=True,
-        clear=True,
-        key=f'_sel_{label}'
-    )
-    #st.success(f'Selected: {sel_var}')
-
-    if len(sel_var) == 0:
-        return sel_var
-
-    if sel_var[1] in list_vars:
-        return sel_var
-    ## FIXME : hack to skip bug in returned tuple in sac.cascader
-    else:
-        return [init_group, init_var]
+    
+    #st.write(roi_dict.keys().tolist())
+    
+    with st.container(horizontal=True, horizontal_alignment="left"):
+        sel_group = select_from_list(list(roi_dict), '_sel_group', 'Group:')
+        if sel_group is None:
+            return
+        sel_var = select_from_list(roi_dict[sel_group], '_sel_var', 'Var:')
 
 
 #def select_var_from_group2(
@@ -150,3 +133,139 @@ def select_var_from_group(
     #)
     ##st.success(f'Selected: {sel_var}')
     #return sel_var
+
+
+
+#def select_var_from_group_tmp1(
+    #label,
+    #df_vars,
+    #init_group,
+    #init_var,
+    #list_vars,
+    #flag_add_none = False,
+    #dicts_rename = None,
+    #flag_multi = False
+#):
+    ## print(flag_add_none )
+    ## return [init_group, init_var]
+    #'''
+    #Panel for user to select a variable grouped in categories
+    #Variable groups are given in df_vars
+    #If a variable is an ROI index a dictionary for renaming should be given in dicts_rename
+    #'''
+        
+    ## Create nested var lists
+    #sac_items = []
+    #init_ind = None
+
+    #ind_count = 0
+    #for i, row in df_vars.iterrows():
+        #tmp_group = row['group']
+        #tmp_list = row['values']
+        #tmp_atlas = row['atlas']
+
+        ## Convert ROI variables from index to name
+        #if tmp_atlas is not None:
+            #tmp_list = [dicts_rename[tmp_atlas][k] for k in tmp_list]
+
+        ## Select vars that are included in the data
+        #tmp_list = [x for x in tmp_list if x in list_vars]
+
+        ## Add a None item in var list
+        #if flag_add_none:
+            #tmp_list = ['None'] + tmp_list
+        
+        #if len(tmp_list) > 0:
+
+            #tmp_item = sac.CasItem(tmp_group, icon='app', children=tmp_list)
+            #sac_items.append(tmp_item)
+
+            ## Detect index of selected items
+            ## !!! CasItem keeps a linear (flattened) index of nested items
+            ## !!! For each group, the index is moved to:
+            ##     curr_index + #items in group + 1
+            #if init_group == tmp_group:
+                #if init_var in tmp_list:
+                    #init_ind = [ind_count, ind_count + 1 + tmp_list.index(init_var)]
+            #ind_count = ind_count + 1 + len(tmp_list)
+
+
+    ## Show var selector
+    #sel_var = sac.cascader(
+        #items = sac_items,
+        #label=label,
+        #index=init_ind,
+        #return_index=False,
+        #multiple=flag_multi,
+        #search=True,
+        #clear=True,
+        #key=f'_sel_{label}'
+    #)
+    ##st.success(f'Selected: {sel_var}')
+
+    #if len(sel_var) == 0:
+        #return sel_var
+
+    #if sel_var[1] in list_vars:
+        #return sel_var
+    ### FIXME : hack to skip bug in returned tuple in sac.cascader
+    #else:
+        #return [init_group, init_var]
+
+
+##def select_var_from_group2(
+    ##df_groups,
+    ##sel_groups,
+    ##var_type,
+    ##init_sel,
+    ##add_none = False,
+    ##dict_muse = None
+##):
+    ##'''
+    ##Select a variable grouped in categories
+    ##'''
+    ### Select groups
+    ##df_sel = df_groups[df_groups.category.isin(sel_groups)].reset_index()
+
+    ### Create nested var lists
+    ##sac_items = []
+    ##init_ind = None
+
+    ##ind_count = 0
+    ##for i, row in df_sel.iterrows():
+        ##tmp_group = row['group']
+        ##tmp_list = row['values']       
+        ##tmp_atlas = row['atlas']
+        
+        ### Convert MUSE ROI variables from index to name
+        ##if tmp_atlas == 'muse':
+            ##tmp_list = [dict_muse[k] for k in tmp_list]
+
+        ##if add_none:
+            ##tmp_list = ['None'] + tmp_list
+        
+        ##tmp_item = sac.CasItem(tmp_group, icon='app', children=tmp_list)
+        ##sac_items.append(tmp_item)
+
+        ### Detect index of selected items
+        ### !!! CasItem keeps a linear (flattened) index of nested items
+        ### !!! For each group, the index is moved to:
+        ###     curr_index + #items in group + 1
+        ##if init_sel[0] == tmp_group:
+            ##if init_sel[1] in tmp_list:
+                ##init_ind = [ind_count, ind_count + 1 + tmp_list.index(init_sel[1])]
+        ##ind_count = ind_count + 1 + len(tmp_list)
+
+    ### Show var selector
+    ##sel_var = sac.cascader(
+        ##items = sac_items,
+        ##label=f'Variable: {var_type}',
+        ##index=init_ind,
+        ##return_index = False,
+        ##multiple=False,
+        ##search=True,
+        ##clear=True,
+        ##key=f'_sel_{var_type}'
+    ##)
+    ###st.success(f'Selected: {sel_var}')
+    ##return sel_var

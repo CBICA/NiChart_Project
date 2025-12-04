@@ -1,5 +1,7 @@
 ### CCLNMF: NMF based Brain Aging Subtypes
 
+![SVG Image](./description_ccl_nmf_prediction.svg)
+
 #### Source:
 
 https://github.com/CBICA/CCLNMF

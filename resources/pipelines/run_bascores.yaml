@@ -17,19 +17,19 @@ steps:
     inputs:
       t1_img: ${STUDY}/t1
     outputs:
-      dlmuse_vol: ${STUDY}/DLMUSE_vol
-      dlmuse_seg: ${STUDY}/DLMUSE_seg
+      dlmuse_vol: ${STUDY}/dlmuse_vol
+      dlmuse_seg: ${STUDY}/dlmuse_seg
   - id: binarize_DLMUSE_to_DLICV
     tool: binarize_seg_to_mask
     inputs:
-      seg_dir: ${STUDY}/DLMUSE_seg
+      seg_dir: ${STUDY}/dlmuse_seg
     outputs:
-      mask_dir: ${STUDY}/DLICV_mask
+      mask_dir: ${STUDY}/dlicv_mask
   - id: align_dlicv_to_MNI
     tool: dlicv_to_mni
     inputs:
       img_dir: ${STUDY}/t1 # Dir of NIFTI scans
-      mask_dir: ${STUDY}/DLICV_mask # Dir of masks associated with img_dir's images
+      mask_dir: ${STUDY}/dlicv_mask # Dir of masks associated with img_dir's images
     outputs:
       mni_dir: ${STUDY}/t1_mni # Dir of MNI-aligned NIFTI scans
   - id: run_nichart_bascores
@@ -37,5 +37,5 @@ steps:
     inputs:
       t1_img: ${STUDY}/t1_mni
     outputs:
-      out_csv: ${STUDY}/SPARE_BA_Image_csv/SPARE_BA_Image.csv
+      out_csv: ${STUDY}/ml_biomarkers/SPARE_BA_Image.csv
       out_attention: ${STUDY}/SPARE_BA_Image_attention

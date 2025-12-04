@@ -729,7 +729,7 @@ def check_requirements_met_panel(pipeline_name):
                         row_note += f"{REQ_TO_HUMAN_READABLE[key]}: {val} MRIDs are in participants CSV but not in available.\n"
                         severity = "yellow"
             else:
-                for key, val in count_diffs:
+                for key, val in count_diffs.items():
                     if count_diffs["needs_demographics"] > val:
                         row_note += f"{REQ_TO_HUMAN_READABLE[key]}: {val} CSV entries are present which have no associated scan.\n"
                     elif count_diffs["needs_demographics"] < val:
@@ -789,15 +789,28 @@ def get_all_pipeline_ids():
     basenames = [os.path.splitext(os.path.basename(f))[0] for f in yaml_files]
     return basenames
 
-@st.cache_data
 def pipeline_is_harmonizable(pipeline_label):
     directory = DEFAULT_PIPELINE_DEFINITION_PATH
     pipelines = pd.read_csv(os.path.join(directory, 'list_pipelines.csv'))
     row = pipelines.loc[pipelines["Label"] == pipeline_label, "HarmonizedPipelineYaml"]
-    if not row.empty:
-        return True
-    else:
+    if row.empty:
         return False
+    value = row.iloc[0]
+
+    if pd.isna(value) or str(value).strip() == "":
+        return False
+    
+    return True
+
+@st.cache_data
+def pipeline_is_enabled_by_name(pipeline_name):
+    directory = DEFAULT_PIPELINE_DEFINITION_PATH
+    pipelines = pd.read_csv(os.path.join(directory, 'list_pipelines.csv'))
+    row = pipelines.loc[pipelines["Name"] == pipeline_name, "EnabledInFrontEnd"]
+    val = row.iloc[0] if not row.empty else None
+    if str(val) == "True":
+        return True
+    return False
 
 @st.cache_data
 def get_pipeline_name_by_label(pipeline_label):
@@ -1000,10 +1013,10 @@ def run_pipeline(pipeline_id: str,
     total_steps = len(order)
     current_step = 0
     if pipeline_progress_bar:
-        pipeline_progress_bar.reset(total=total_steps)
+        pipeline_progress_bar.reset(total=total_steps+1)
     for sid in order:
         if process_progress_bar:
-            process_progress_bar.reset(total=total_steps)
+            process_progress_bar.reset(total=total_steps+1)
         if pipeline_progress_bar:
             pipeline_progress_bar.update(1)
         step = step_map[sid]

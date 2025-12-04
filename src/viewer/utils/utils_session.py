@@ -45,17 +45,18 @@ def disp_session_state():
         key = '_debug_flag_show',
         on_change = update_val
     )
-    
+
     if st.session_state['debug']['flag_show']:
         with st.container(border=True):
             st.markdown('##### Session State:')
             list_items = sorted([x for x in st.session_state.keys() if not x.startswith('_')])
+            #list_items = sorted([x for x in st.session_state.keys() if x.startswith('_')])
             st.pills(
                 "Select Session State Variable(s) to View",
                 list_items,
                 selection_mode="multi",
                 key='_debug_sel_vars',
-                default=st.session_state['debug']['sel_vars'],
+                # default=st.session_state['debug']['sel_vars'],
                 label_visibility="collapsed",
             )
             st.session_state['debug']['sel_vars'] = st.session_state['_debug_sel_vars']
@@ -63,7 +64,7 @@ def disp_session_state():
             for sel_var in st.session_state['debug']['sel_vars']:
                 st.markdown('➤ ' + sel_var + ':')
                 st.write(st.session_state[sel_var])
-    print('FIXME: This is bypassed for now ...')
+    #print('FIXME: This is bypassed for now ...')
 
 def init_project_folders():
     '''
@@ -106,9 +107,17 @@ def init_session_vars():
     
     ## Misc variables
     st.session_state.mode = 'release'
-    # st.session_state.mode = 'debug'
+    st.session_state.mode = 'debug'
 
-    st.session_state.skip_survey = True
+    st.session_state.show_settings = False
+
+    st.session_state.layout_plots = 'Main'
+    st.session_state.layout_plots = 'Sidebar'
+
+    # Survey-checking code has fallbacks, don't set it.
+    #st.session_state.skip_survey = True
+
+    st.session_state.workflow = None
 
     st.session_state.sel_add_button = None
 
@@ -116,10 +125,11 @@ def init_session_vars():
     st.session_state.prj_name = 'user_default'
     st.session_state.project = 'user_default'
     #st.session_state.project = 'nichart_project'
+
     st.session_state.project_selected_explicitly = False
     
-    st.session_state.sel_pipeline = 'dlmuse'
-    st.session_state.pipeline_selected_explicitly = False
+    st.session_state.sel_pipeline = None
+    st.session_state.pipeline_selected_explicitly = True
 
     st.session_state.sel_mrid = None
     st.session_state.sel_roi = None
@@ -234,6 +244,12 @@ def init_paths():
     p_centiles = os.path.join(
         p_resources, "reference_data", "centiles"
     )
+    #p_sample = os.path.join(
+        #p_root, "sample_datasets", "demo_dataset_IXI"
+    #)    
+    p_sample = os.path.join(
+        p_root, "sample_datasets", "demo_dataset"
+    )    
     p_proc_def = os.path.join(
         p_resources, "process_definitions"
     )
@@ -271,6 +287,7 @@ def init_paths():
         "root": p_root,
         "init": p_init,
         "resources": p_resources,
+        "sample_data": p_sample,
         "centiles" : p_centiles,
         "proc_def": p_proc_def,
         "file_search_dir": "",
@@ -278,7 +295,8 @@ def init_paths():
         "host_out_dir": None,
         "prj_dir": p_prj,
         "project": p_prj,
-        'target': None
+        'target': None,
+        "curr_data": None
     }
 
     # Host-container dir mapping which can be useful for local nested containers
@@ -320,26 +338,54 @@ def init_plot_vars() -> None:
     '''
     Set plotting variables
     '''
+    ######################
+    # General params
+    st.session_state.general_params = {
+        'sel_task': None,
+        'sel_rtype': None,
+        'sel_pipeline': None
+    }
+    
+    ######################
+    # General params
+    img_views = ["axial", "coronal", "sagittal"]
+    st.session_state.mriplot_params = {
+        'ulay': None,
+        'olay': None,
+        'sel_mrid': None,
+        'sel_roi': None,
+        'sel_orient': img_views,
+        'flag_overlay': True,
+        'flag_crop': False,
+        'map_minmax': [2.0, 5.0]
+    }
+
+    ######################
+    # Params for data plots
+    
     # Dataframe that keeps parameters for all plots
     st.session_state.plots = pd.DataFrame(columns=['flag_sel', 'params'])
     st.session_state.plot_curr = -1
 
     st.session_state.plot_active = None
 
-
     # Plot data
     st.session_state.plot_data = {
+        'csv_data': None,
+        'csv_cent': None,
         'df_data': None,
         'df_cent': None
     }
 
     # Plot settings
     st.session_state.plot_settings = {
-        "flag_hide_settings": 'Show',
-        "flag_hide_legend": 'Show',
-        "flag_hide_mri": 'Show',
-        "trend_types": ["None", "Linear", "Smooth LOWESS Curve"],
-        "centile_types": ["", "CN", "CN_Males", "CN_Females", "CN_ICV_Corrected"],
+        "res_type": None,       # Quantitative or Image
+        "pipeline": None,
+        "flag_hide_legend": False,
+        "flag_hide_mri": True,
+        "trend_types": ["Linear", "Smooth LOWESS Curve"],
+        #"centile_types": ["CN", "CN_Males", "CN_Females", "CN_ICV_Corrected"],
+        "centile_types": ["CN", "CN_Males", "CN_Females"],
         "linfit_trace_types": [
             "lin_fit", "conf_95%"
         ],
@@ -349,6 +395,7 @@ def init_plot_vars() -> None:
         "distplot_trace_types": [
             "histogram", "density", "rug"
         ],
+        'flag_auto': True,
         "min_per_row": 1,
         "max_per_row": 5,
         "num_per_row": 2,
@@ -371,6 +418,7 @@ def init_plot_vars() -> None:
 
     # Plot parameters specific to each plot
     st.session_state.plot_params = {
+        'sel_mrid': None,
         "plot_type": "scatter",
         "xvargroup": 'demog',
         "xvar": 'Age',
@@ -388,17 +436,17 @@ def init_plot_vars() -> None:
         "fvals": None,
         "corr_icv": False,
         "plot_cent_normalized": False,
-        "trend": "Linear",
-        "show_conf": True,
-        "traces": None,
+        "trend": None,
+        "show_conf": False,
+        "traces": ['data'],
         "lowess_s": 0.7,
         "centile_type": 'CN',
-        "centile_values": ['centile_50'],
+        "centile_values": ['centile_25', 'centile_50', 'centile_75'],
         "flag_norm_centiles": False,
         "list_roi_indices": [81, 82],
         "list_orient": ["axial", "coronal", "sagittal"],
         "is_show_overlay": True,
-        "crop_to_mask": True,
+        "crop_to_mask": False,
         'filter_sex': ['F', 'M'],
         'filter_age': [40, 95],
     }
@@ -533,6 +581,8 @@ def update_project(sel_project) -> None:
     st.session_state.project = sel_project
     st.session_state.project_selected_explicitly = True
     st.session_state.paths['project'] = p_prj
+
+    st.session_state.paths['curr_data'] = st.session_state.paths['prj_dir']
 
 # Function to parse AWS login (if available)
 def process_session_token() -> Any:

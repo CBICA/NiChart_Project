@@ -11,6 +11,7 @@ import utils.utils_session as utilses
 import utils.utils_io as utilio
 import utils.utils_data_view as utildv
 from utils.utils_styles import inject_global_css 
+import gui.utils_navig as utilnav
 
 from streamlit_image_select import image_select
 import re
@@ -27,13 +28,18 @@ inject_global_css()
 #utilpg.config_page()
 utilpg.set_global_style()
 
-# Set data type
-st.session_state.data_type = 'single_subject'
+###############################
+# Set session state variables for the reference data workflow
+st.session_state.workflow = 'single_subject'
+st.session_state.subject_type = 'single'
+
+st.session_state.paths['curr_data'] = st.session_state.paths['prj_dir'] 
+
+###############################
 
 if 'instantiated' not in st.session_state or not st.session_state.instantiated:
     utilses.init_session_state()
 
-st.session_state.subject_type = 'single'
 
 st.markdown("<h5 style='text-align:center; color:#3a3a88;'>Single-Subject Analysis\n\n</h1>", unsafe_allow_html=True)
 
@@ -45,22 +51,14 @@ with cols[1]:
         
         - **Data:** Upload image (Nifti, Dicom) and non-image (.csv) files required for analysis
         
-        - **Pipeline:** Select processing/analysis pipeline to run on your data
+        - **Pipelines:** Select processing/analysis pipeline to run on your data
 
         - **Results:** View/download results of the pipeline
         
         ''', unsafe_allow_html=True
     )
 
-sac.divider(key='_p0_div1')
-    
-sel_opt = sac.chip(
-    [sac.ChipItem(label = '', icon='arrow-right', disabled=False)],
-    label='', align='center', color='#aaeeaa', size='xl'
-)
-    
-if sel_opt == '':
-    st.switch_page("pages/nichart_upload_data.py")
+utilnav.main_navig(None, None, 'Data', 'pages/nichart_data.py')
 
 # Show session state vars
 if st.session_state.mode == 'debug':
