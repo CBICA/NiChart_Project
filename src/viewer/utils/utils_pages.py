@@ -40,46 +40,6 @@ def set_global_style():
         unsafe_allow_html=True
     )
 
-    html_style = '''
-        <style>
-        div:has( >.element-container div.floating) {
-            display: flex;
-            flex-direction: column;
-            position: fixed;
-            top: 4rem;        /* distance from the top */
-            left: 0.75rem;
-            z-index: 9999;    /* keep it above content */
-        }
-
-        div.floating {
-            height:0%;
-        }
-        </style>
-        '''
-    st.markdown(html_style, unsafe_allow_html=True)
-    if st.session_state.has_cloud_session:
-        user_email = st.session_state.cloud_user_email
-    else: 
-        user_email = "place@holder.com"
-    if True:
-        with st.container():
-            st.markdown('<div class="floating"></div>', unsafe_allow_html=True)
-            col1, col2 = st.columns([6, 1])
-            with col1: 
-                logout_url = 'https://cbica-nichart.auth.us-east-1.amazoncognito.com/logout?client_id=4shr6mm2h0p0i4o9uleqpu33fj&logout_uri=https://neuroimagingchart.com'
-                st.markdown(
-                    f""" Logged in as: {user_email}""",
-                    unsafe_allow_html=True
-                )
-            with col2:
-                do_logout = st.button("Logout", type='primary')
-                if do_logout:
-                    st.markdown(f"""
-                        <script>
-                        window.location.href = "{logout_url}";
-                        </script>""", unsafe_allow_html=True
-                    )
-
 def show_menu() -> None:
     with st.sidebar:
         list_options = list(dict_menu.keys())
