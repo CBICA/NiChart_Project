@@ -138,6 +138,8 @@ def upload_data():
             utilup.panel_upload_single_subject()
         if st.session_state.workflow == 'multi_subject':
             utilup.panel_upload_multi_subject()
+        else: # default to multi
+            utilup.panel_upload_multi_subject()
 
     with cols[4]:
         utilup.panel_view_files()
