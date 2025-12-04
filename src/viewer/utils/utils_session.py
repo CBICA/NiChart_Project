@@ -244,8 +244,11 @@ def init_paths():
     p_centiles = os.path.join(
         p_resources, "reference_data", "centiles"
     )
+    #p_sample = os.path.join(
+        #p_root, "sample_datasets", "demo_dataset_IXI"
+    #)    
     p_sample = os.path.join(
-        p_root, "sample_datasets", "demo_dataset_IXI"
+        p_root, "sample_datasets", "demo_dataset"
     )    
     p_proc_def = os.path.join(
         p_resources, "process_definitions"

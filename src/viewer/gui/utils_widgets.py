@@ -158,7 +158,10 @@ def select_var_twolevels(var_group, var_name1, var_name2, hdr, list_cat, list_va
     First level is the var category provided with data dict
     """
     df_vars = st.session_state.dicts['df_var_groups']
-    sel_cats = df_vars[df_vars.category.isin(list_cat)]
+    
+    sel_cats = df_vars[df_vars.group.isin(list_cat)]
+    if sel_cats.shape[0] == 0:
+        sel_cats = df_vars[df_vars.category.isin(list_cat)]
     
     # Select roi
     st.write(hdr)
