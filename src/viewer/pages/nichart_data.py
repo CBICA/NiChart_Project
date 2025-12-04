@@ -89,7 +89,9 @@ def my_help():
 
                 - If your dataset includes multiple imaging modalities (e.g., T1, FLAIR), upload each modality separately.
 
-                - A participant CSV is required, containing at least one column:
+                - Wait for the whole batch to upload before proceeding. (You'll see a few upload bars -- use the arrows to scroll through the batch.)
+
+                - For many pipelines, a participant CSV is required, containing at least one column:
 
                     **MRID** → subject ID that matches the scan filenames
 
