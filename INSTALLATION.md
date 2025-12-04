@@ -42,11 +42,11 @@ Make sure you are connected to the internet in order to download the application
 
 Go to https://github.com/CBICA/NiChart_Project/blob/main/installers/install_nichart_docker_windows.ps1 and download the file (Doable with either the three dots icon on the top-right -> Download, or the separate Download button a litte below that.
 
-Open up the file explorer to find where you downloaded this file. Hold Shift and right click in that folder. You should see "Open PowerShell window here". Click that option.
+Open up the file explorer to find where you downloaded this file. Hold Shift and right click in that folder. You should see "Open PowerShell window here" or "Open Terminal here". Click one of those options.
 
 #### Running the installer
 
-Make sure the PowerShell terminal from the last step is open.
+Make sure the terminal from the last step is open.
 
 Then run this command, **making sure to replace** DATA_DIR with the data path you chose earlier:
 ```
