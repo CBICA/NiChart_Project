@@ -56,9 +56,6 @@ html_style = '''
 st.markdown(html_style, unsafe_allow_html=True)
 if st.session_state.has_cloud_session:
     user_email = st.session_state.cloud_user_email
-else: 
-    user_email = "place@holder.com"
-if True:
     with st.container():
         st.markdown('<div class="floating"></div>', unsafe_allow_html=True)
         col1, col2 = st.columns([6, 1])
