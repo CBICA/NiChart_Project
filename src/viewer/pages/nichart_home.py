@@ -22,6 +22,7 @@ from utils.utils_logger import setup_logger
 from utils.utils_styles import inject_global_css 
 
 import streamlit_antd_components as sac
+import streamlit.components.v1 as components
 
 import streamlit as st
 from utils.nav import top_nav
@@ -68,10 +69,10 @@ if st.session_state.has_cloud_session:
         with col2:
             do_logout = st.button("Logout", type='primary')
             if do_logout:
-                st.html(f"""
+                components.html(f"""
                     <script>
                     window.location.href = "{logout_url}";
-                    </script>""", unsafe_allow_javascript=True
+                    </script>"""
                 )
 
 # Redirect users to survey page until it is completed or otherwise temporarily skipped
