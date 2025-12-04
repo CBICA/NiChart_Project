@@ -46,6 +46,9 @@ def set_global_style():
             display: flex;
             flex-direction: column;
             position: fixed;
+            top: 4rem;        /* distance from the top */
+            right: 1.5rem;    /* distance from the right side */
+            z-index: 9999;    /* keep it above content */
         }
 
         div.floating {
