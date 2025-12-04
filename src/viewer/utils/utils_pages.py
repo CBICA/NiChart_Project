@@ -47,6 +47,7 @@ def set_global_style():
             flex-direction: column;
             position: fixed;
             top: 4rem;        /* distance from the top */
+            left: 0.75rem;
             z-index: 9999;    /* keep it above content */
         }
 
