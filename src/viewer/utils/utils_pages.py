@@ -44,12 +44,22 @@ def set_global_style():
     else: 
         user_email = "place@holder.com"
     if True:
-        logout_url = 'https://cbica-nichart.auth.us-east-1.amazoncognito.com/logout?client_id=4shr6mm2h0p0i4o9uleqpu33fj&logout_uri=https://neuroimagingchart.com'
-        st.markdown(
-            f""" Logged in as: {user_email} <a href="{logout_url}" style="text-decoration:none;">Logout</a>
-            """,
-            unsafe_allow_html=True
-        )
+        with st.container():
+            col1, col2 = st.columns([6, 1])
+            with col1: 
+                logout_url = 'https://cbica-nichart.auth.us-east-1.amazoncognito.com/logout?client_id=4shr6mm2h0p0i4o9uleqpu33fj&logout_uri=https://neuroimagingchart.com'
+                st.markdown(
+                    f""" Logged in as: {user_email}""",
+                    unsafe_allow_html=True
+                )
+                do_logout = st.button("Logout", type='primary')
+            with col2:
+                if do_logout:
+                    st.markdown(f"""
+                        <script>
+                        window.location.href = "{logout_url}";
+                        </script>""", unsafe_allow_html=True
+                    )
 
 def show_menu() -> None:
     with st.sidebar:
