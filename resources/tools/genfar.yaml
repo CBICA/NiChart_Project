@@ -27,4 +27,4 @@ resources: # Used to allocate jobs on the cloud. Please be diligent.
 
 container:
   image: cbica/genfar:0.0.1
-  command: --data-dir {t1_dir} --output_dir {output_dir}
+  command: --data-dir {t1_dir} --output-dir {output_dir}
