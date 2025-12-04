@@ -22,6 +22,7 @@ import pandas as pd
 import gui.utils_widgets as utilwd
 
 import traceback
+import requests
 
 import streamlit_antd_components as sac
 
@@ -199,6 +200,29 @@ def pipeline_runner_menu(enabled_pnames, sel=False):
         if data_dir_on_host is not None:
             local_path_remapping[data_dir_locally] = data_dir_on_host
         try:
+            try:
+                jobstats_lambda_url = "https://gpzw2o0kxd.execute-api.us-east-1.amazonaws.com/default/cbica-nichart-updatestats"
+                if st.session_state.has_cloud_session:
+                    user_id = st.session_state.cloud_user_id
+                else:
+                    user_id = 'LOCALUSER'
+
+                payload = {
+                    "user_id": user_id,
+                    "job_type": pipeline_to_run,
+                    "count": 1
+                }
+                response = requests.post(
+                    jobstats_lambda_url,
+                    json=payload,
+                    timeout=5
+                )
+                print("Update job stats status:", response.status_code)
+                print("Update job stats response body:", response.text)
+            except Exception as e:
+                # If this fails for any reason (no internet etc) just continue.
+                pass
+
             result = utiltl.run_pipeline(
                 pipeline_id=pipeline_to_run, ##TODO EDIT THIS
                 global_vars={"STUDY": st.session_state.paths["project"]},

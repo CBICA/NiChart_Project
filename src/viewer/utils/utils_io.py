@@ -7,7 +7,7 @@ import utils.utils_csvparsing as utilcsv
 import os
 import pandas as pd
 import numpy as np
-#from NiChart_common_utils.nifti_parser import NiftiMRIDParser
+from NiChart_common_utils.nifti_parser import NiftiMRIDParser
 import zipfile
 import re
 import streamlit_antd_components as sac
