@@ -46,8 +46,7 @@ def set_global_style():
     if True:
         logout_url = 'https://cbica-nichart.auth.us-east-1.amazoncognito.com/logout?client_id=4shr6mm2h0p0i4o9uleqpu33fj&logout_uri=https://neuroimagingchart.com'
         st.markdown(
-            f"""
-            <a href="{logout_url}" style="text-decoration:none;">Logout</a>
+            f""" Logged in as: {user_email} <a href="{logout_url}" style="text-decoration:none;">Logout</a>
             """,
             unsafe_allow_html=True
         )
