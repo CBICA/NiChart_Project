@@ -39,12 +39,28 @@ def set_global_style():
         """,
         unsafe_allow_html=True
     )
+
+    html_style = '''
+        <style>
+        div:has( >.element-container div.floating) {
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+        }
+
+        div.floating {
+            height:0%;
+        }
+        </style>
+        '''
+    st.markdown(html_style, unsafe_allow_html=True)
     if st.session_state.has_cloud_session:
         user_email = st.session_state.cloud_user_email
     else: 
         user_email = "place@holder.com"
     if True:
         with st.container():
+            st.markdown('<div class="floating"></div>', unsafe_allow_html=True)
             col1, col2 = st.columns([6, 1])
             with col1: 
                 logout_url = 'https://cbica-nichart.auth.us-east-1.amazoncognito.com/logout?client_id=4shr6mm2h0p0i4o9uleqpu33fj&logout_uri=https://neuroimagingchart.com'
