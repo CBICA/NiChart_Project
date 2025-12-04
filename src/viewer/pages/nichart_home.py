@@ -71,7 +71,7 @@ if st.session_state.has_cloud_session:
             if do_logout:
                 components.html(f"""
                     <script>
-                    window.location.href = "{logout_url}";
+                    window.top.location.href = "{logout_url}";
                     </script>"""
                 )
 
