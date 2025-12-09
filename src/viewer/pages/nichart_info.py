@@ -34,13 +34,13 @@ def click_callback(dialog_tile):
         st.rerun()
     return callback
 
-@st.dialog("Details", on_dismiss=click_callback(None))
-def info_dialog(dialog_tile):
+@st.dialog("Details")
+def info_dialog():
     
-    if dialog_tile == 'NiChart':
+    if st.session_state.dialog_tile == 'NiChart':
         st.markdown('Hello NiChart')
     
-    elif dialog_tile == 'AI Biomarkers':
+    elif st.session_statedialog_tile == 'AI Biomarkers':
         st.markdown('Predictive scores for quantification of brain aging or neurodegeneration from MRI images')
 
 # State
