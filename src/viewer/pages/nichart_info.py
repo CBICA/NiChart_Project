@@ -56,8 +56,8 @@ def imgfile_to_data(filepath):
 imgdir =  os.path.join(st.session_state.paths['resources'], 'images', 'nichart_logo')
 
 my_card = {
-    "width": "300px",
-    "height": "300px",
+    "width": "100%",
+    #"height": "100%",
     "margin": "5px",
     "border-radius": "4vmin",
     "box-shadow": "0 0 10px rgba(0,0,0,0.3)",
@@ -81,8 +81,8 @@ with st.container(horizontal=True, horizontal_alignment="center"):
     data = imgfile_to_data(os.path.join(imgdir, 'nichart_logo_v2_img1_v2.png'))
     with cols[0]:
         clicked0 = card(
-            title="",
-            text="",
+            title="sample_title",
+            text="sample_text",
             image = data,
             styles={
                 "card": my_card,
