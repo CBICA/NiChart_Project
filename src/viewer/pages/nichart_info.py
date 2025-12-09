@@ -138,7 +138,6 @@ with st.container(horizontal=True, horizontal_alignment="center"):
                 "title": my_text,
             },
             key = 'card0',
-            on_click=click_callback("NiChart")
         )
 
     data = imgfile_to_data(os.path.join(imgdir, 'nichart_logo_v2_img3_v2.png'))
