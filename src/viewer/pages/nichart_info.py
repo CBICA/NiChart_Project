@@ -31,7 +31,6 @@ st.set_page_config(page_title="NiChart", layout="wide")
 def click_callback(dialog_tile):
     def callback():
         st.session_state.dialog_tile = dialog_tile
-        st.rerun()
     return callback
 
 @st.dialog("Details")
@@ -44,7 +43,7 @@ def info_dialog():
         st.markdown('Predictive scores for quantification of brain aging or neurodegeneration from MRI images')
 
     st.session_state.dialog_tile = None
-    
+
 # State
 if "dialog_tile" not in st.session_state:
     st.session_state.dialog_tile = None
