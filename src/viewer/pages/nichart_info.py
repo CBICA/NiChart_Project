@@ -210,13 +210,15 @@ with st.container(horizontal=True, horizontal_alignment="center"):
             on_click=click_callback("Voxelwise Abnormality Maps")
         )
 
-#if clicked0:
-#    st.session_state.dialog_tile = 'NiChart'
-#    clicked0 = False
+if clicked0:
+    st.session_state.dialog_tile = 'NiChart'
+    clicked0 = False
+    st.write(f'Clicked 0 {clicked0}')
 
-#if clicked1:
-#    st.session_state.dialog_tile = 'AI Biomarkers'
-#    clicked1 = False
+if clicked1:
+    st.session_state.dialog_tile = 'AI Biomarkers'
+    clicked1 = False
+    st.write(f'Clicked 1 {clicked1}')
 
 # ---- Open dialog if set ----
 #if st.session_state.dialog_tile is not None:
