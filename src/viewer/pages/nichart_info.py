@@ -31,6 +31,7 @@ st.set_page_config(page_title="NiChart", layout="wide")
 def click_callback(dialog_tile):
     def callback():
         st.session_state.dialog_tile = dialog_tile
+        st.rerun()
     return callback
 
 def dismiss_callback():
