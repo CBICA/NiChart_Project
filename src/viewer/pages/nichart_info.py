@@ -81,6 +81,7 @@ my_text = {
 with st.container(horizontal=True, horizontal_alignment="center"):
     cols = [i for i in range(5)]
     cols[0:2] = st.columns(3)
+    st.divider()
     cols[3:] = st.columns(2)
 
     data = imgfile_to_data(os.path.join(imgdir, 'nichart_logo_v2_img1_v2.png'))
