@@ -79,7 +79,8 @@ my_text = {
 }
 
 
-
+with st.container(horizontal_alignment="center"):
+    st.markdown("## What can I do with NiChart?")
 with st.container(horizontal=True, horizontal_alignment="center"):
     cols = st.columns(5)
 
