@@ -34,7 +34,11 @@ def click_callback(dialog_tile):
         st.rerun()
     return callback
 
-@st.dialog("Details", on_dismiss='ignore')
+def dismiss_callback():
+    st.session_state.dialog_tile = None
+    return
+
+@st.dialog("Details", on_dismiss=dismiss_callback)
 def info_dialog(dialog_tile):
     
     if dialog_tile == 'NiChart':
