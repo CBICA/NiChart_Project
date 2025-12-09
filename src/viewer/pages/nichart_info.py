@@ -79,13 +79,6 @@ def info_dialog(dialog_tile):
 
     st.session_state.dialog_tile = None
 
-# State
-if "dialog_tile" not in st.session_state:
-    st.session_state.dialog_tile = None
-else:
-    info_dialog(st.session_state.dialog_tile)
-
-
 def imgfile_to_data(filepath):
     import base64
 
