@@ -89,6 +89,7 @@ with st.container(horizontal=True, horizontal_alignment="center"):
                 "card": my_card,
                 "text": my_text,
                 "filter": my_filter,
+                "title": my_text,
             },
             key = 'card0'
         )
