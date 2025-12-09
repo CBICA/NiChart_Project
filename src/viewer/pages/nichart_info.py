@@ -28,12 +28,6 @@ utilpg.set_global_style()
 
 st.set_page_config(page_title="NiChart", layout="wide")
 
-def click_callback(dialog_tile):
-    def callback():
-        pass
-        st.session_state.dialog_tile = dialog_tile
-    return callback
-
 def dismiss_callback():
     st.session_state.dialog_tile = None
     return
@@ -160,7 +154,6 @@ with st.container(horizontal=True, horizontal_alignment="center"):
                 "title": my_text,
             },
             key = 'card1',
-            on_click=click_callback("AI Biomarkers")
         )
 
     data = imgfile_to_data(os.path.join(imgdir, 'nichart_logo_v2_img4_v2.png'))
@@ -176,7 +169,6 @@ with st.container(horizontal=True, horizontal_alignment="center"):
                 "title": my_text,
             },
             key = 'card2',
-            on_click=click_callback("DL Segmentation")
         )
 
     data = imgfile_to_data(os.path.join(imgdir, 'nichart_logo_v2_img5_v2.png'))
@@ -192,7 +184,6 @@ with st.container(horizontal=True, horizontal_alignment="center"):
                 "title": my_text,
             },
             key = 'card3',
-            on_click=click_callback("Brain Aging Subtypes")
         )
 
     data = imgfile_to_data(os.path.join(imgdir, 'nichart_logo_v2_img6_v2.png'))
@@ -208,7 +199,6 @@ with st.container(horizontal=True, horizontal_alignment="center"):
                 "title": my_text,
             },
             key = 'card4',
-            on_click=click_callback("Voxelwise Abnormality Maps")
         )
 
 st.write(f'Clicked 0 {clicked0}')
