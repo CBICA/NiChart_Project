@@ -37,7 +37,7 @@ def dismiss_callback():
     st.session_state.dialog_tile = None
     return
 
-@st.dialog("Details", on_dismiss=dismiss_callback)
+@st.dialog("Details", on_dismiss='ignore')
 def info_dialog(dialog_tile):
     st.write(st.session_state.dialog_tile)
     
