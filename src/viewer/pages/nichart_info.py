@@ -28,14 +28,10 @@ utilpg.set_global_style()
 
 st.set_page_config(page_title="NiChart", layout="wide")
 
-# State
-if "dialog_tile" not in st.session_state:
-    st.session_state.dialog_tile = None
-
-
 def click_callback(dialog_tile):
     def callback():
         st.session_state.dialog_tile = dialog_tile
+        st.rerun()
     return callback
 
 @st.dialog("Details", on_dismiss=click_callback(None))
@@ -46,6 +42,13 @@ def info_dialog(dialog_tile):
     
     elif dialog_tile == 'AI Biomarkers':
         st.markdown('Predictive scores for quantification of brain aging or neurodegeneration from MRI images')
+
+# State
+if "dialog_tile" not in st.session_state:
+    st.session_state.dialog_tile = None
+else:
+    info_dialog(st.session_state.dialog_tile)
+
 
 def imgfile_to_data(filepath):
     import base64
