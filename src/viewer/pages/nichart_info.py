@@ -38,14 +38,43 @@ def dismiss_callback():
     return
 
 @st.dialog("Details", on_dismiss='ignore')
+def nichart_dialog():
+    st.markdown('Hello NiChart')
+
+@st.dialog("Details", on_dismiss='ignore')
+def biomarker_dialog():
+    st.markdown('Predictive scores for quantification of brain aging or neurodegeneration from MRI images')
+
+@st.dialog("Details", on_dismiss='ignore')
+def segmentation_dialog():
+    st.markdown('Predictive scores for quantification of brain aging or neurodegeneration from MRI images')
+
+@st.dialog("Details", on_dismiss='ignore')
+def brainagingsubtypes_dialog():
+    st.markdown('Brain aging subtypes')
+
+@st.dialog("Details", on_dismiss='ignore')
+def abnormalitymaps_dialog():
+    st.markdown('Voxelwise abnormality maps')
+
+
 def info_dialog(dialog_tile):
     st.write(st.session_state.dialog_tile)
     
     if dialog_tile == 'NiChart':
-        st.markdown('Hello NiChart')
+        nichart_dialog()
     
     elif dialog_tile == 'AI Biomarkers':
-        st.markdown('Predictive scores for quantification of brain aging or neurodegeneration from MRI images')
+        biomarker_dialog()
+
+    elif dialog_tile == 'DL Segmentation':
+        segmentation_dialog()
+    
+    elif dialog_tile == 'Brain Aging Subtypes':
+        brainagingsubtypes_dialog()
+    
+    elif dialog_tile == 'Voxelwise Abnormality Maps':
+        abnormalitymaps_dialog()
 
     st.session_state.dialog_tile = None
 
