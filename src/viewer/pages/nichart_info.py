@@ -40,14 +40,14 @@ def info_dialog():
     if st.session_state.dialog_tile == 'NiChart':
         st.markdown('Hello NiChart')
     
-    elif st.session_statedialog_tile == 'AI Biomarkers':
+    elif st.session_state.dialog_tile == 'AI Biomarkers':
         st.markdown('Predictive scores for quantification of brain aging or neurodegeneration from MRI images')
 
 # State
 if "dialog_tile" not in st.session_state:
     st.session_state.dialog_tile = None
 else:
-    info_dialog(st.session_state.dialog_tile)
+    info_dialog()
 
 
 def imgfile_to_data(filepath):
