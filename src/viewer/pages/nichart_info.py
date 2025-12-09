@@ -58,8 +58,10 @@ def abnormalitymaps_dialog():
     st.session_state.dialog_tile = None
 
 def info_dialog(dialog_tile):
+    pass
+
     st.write(st.session_state.dialog_tile)
-    
+   
     if dialog_tile == 'NiChart':
         nichart_dialog()
     
