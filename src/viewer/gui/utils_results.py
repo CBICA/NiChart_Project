@@ -98,7 +98,7 @@ def set_plot_params():
 
         sel_hvar = utilwd.select_var_twolevels(
             'plot_params', 'hvargroup', 'hvar',
-            'Grouping Variable', ['demog']
+            'Grouping Variable', ['cat_vars']
         )
         
     #### Centiles
@@ -265,7 +265,8 @@ def view_segmentation(layout):
         )
         if not os.path.exists(fname):
             st.session_state.mriplot_params['ulay'] = None
-            st.write(fname)
+            st.warning('Could not detect underlay image!')
+            return
         else:
             st.session_state.mriplot_params['ulay'] = fname
 
@@ -276,7 +277,8 @@ def view_segmentation(layout):
         )
         if not os.path.exists(fname):
             st.session_state.mriplot_params['olay'] = None
-            st.write(fname)
+            st.warning('Could not detect overlay image!')
+            return
         else:
             st.session_state.mriplot_params['olay'] = fname
             
@@ -316,7 +318,8 @@ def view_segmentation(layout):
         )
         if not os.path.exists(fname):
             st.session_state.mriplot_params['ulay'] = None
-            st.write(fname)
+            st.warning('Could not detect underlay image!')
+            return
         else:
             st.session_state.mriplot_params['ulay'] = fname
 
@@ -326,7 +329,8 @@ def view_segmentation(layout):
         )
         if not os.path.exists(fname):
             st.session_state.mriplot_params['olay'] = None
-            st.write(fname)
+            st.warning('Could not detect overlay image!')
+            return
         else:
             st.session_state.mriplot_params['olay'] = fname
             
@@ -403,7 +407,16 @@ def prep_csv():
         return False
 
     return True
+
+def rename_columns(df, suffix):
+    tmp_cols = [c for c in df.columns if c.endswith(suffix)]
     
+    for c in tmp_cols:
+        base = c.replace(suffix, "")
+        df[base] = df[c]
+
+    df = df.drop(columns=tmp_cols)
+    return df
 
 def view_img_vars(layout):
     """
@@ -449,13 +462,11 @@ def view_img_vars(layout):
             #st.write(df)
             
         elif pipeline == 'spare':            
-            df = df.drop(['SPARE_AD', 'SPARE_MDD', 'SPARE_SCZ'], axis=1)
-            df.columns = df.columns.str.replace('_decision_function','')
+            df = rename_columns(df, '_decision_function')
             #st.write(df)
             
         elif pipeline == 'spare_cvm':            
-            df = df.drop(['SPARE_SMOKING','SPARE_HYPERTENSION','SPARE_OBESITY', 'SPARE_DIABETES'], axis=1)
-            df.columns = df.columns.str.replace('_decision_function','')
+            df = rename_columns(df, '_decision_function')
 
         elif pipeline == 'surreal_gan':         
             df.columns = df.columns.str.replace('SurrealGAN_','')
