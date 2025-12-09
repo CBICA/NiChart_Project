@@ -167,7 +167,7 @@ if clicked1:
     clicked1 = False
 
 # ---- Open dialog if set ----
-if st.session_state.dialog_tile:
+if st.session_state.dialog_tile is not None:
     info_dialog()
     
 st.write(clicked0)
