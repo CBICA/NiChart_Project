@@ -165,20 +165,20 @@ with st.container(horizontal=True, horizontal_alignment="center"):
             on_click=info_dialog_wrapper("Voxelwise Abnormality Maps")
         )
 
-if clicked0:
-    st.session_state.dialog_tile = 'NiChart'
-    clicked0 = False
+#if clicked0:
+#    st.session_state.dialog_tile = 'NiChart'
+#    clicked0 = False
 
-if clicked1:
-    st.session_state.dialog_tile = 'AI Biomarkers'
-    clicked1 = False
+#if clicked1:
+#    st.session_state.dialog_tile = 'AI Biomarkers'
+#    clicked1 = False
 
 # ---- Open dialog if set ----
-if st.session_state.dialog_tile is not None:
-    info_dialog()
+#if st.session_state.dialog_tile is not None:
+#    info_dialog()
     
-st.write(clicked0)
-st.write(clicked1)
+#st.write(clicked0)
+#st.write(clicked1)
 utilnav.main_navig(
     None, None,
     'Home', 'pages/nichart_home.py',
