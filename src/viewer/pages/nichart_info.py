@@ -28,6 +28,18 @@ utilpg.set_global_style()
 
 st.set_page_config(page_title="NiChart", layout="wide")
 
+# State
+if 'clicked_cards' not in st.session_state:
+    st.session_state.clicked_cards = [False for i in range(5)]
+
+def click_callback(integer):
+    def callback():
+        new_range = [False for i in range(5)]
+        new_range[integer] = True
+        st.session_state.clicked_cards = new_range
+        st.write(f"Callback from card {integer}. Contents: {new_range}")
+    return callback
+
 def dismiss_callback():
     st.session_state.dialog_tile = None
     return
@@ -133,6 +145,7 @@ with st.container(horizontal=True, horizontal_alignment="center"):
                 "title": my_text,
             },
             key = 'card0',
+            on_click=click_callback(0),
         )
 
     data = imgfile_to_data(os.path.join(imgdir, 'nichart_logo_v2_img3_v2.png'))
@@ -148,6 +161,7 @@ with st.container(horizontal=True, horizontal_alignment="center"):
                 "title": my_text,
             },
             key = 'card1',
+            on_click=click_callback(1),
         )
 
     data = imgfile_to_data(os.path.join(imgdir, 'nichart_logo_v2_img4_v2.png'))
@@ -163,6 +177,7 @@ with st.container(horizontal=True, horizontal_alignment="center"):
                 "title": my_text,
             },
             key = 'card2',
+            on_click=click_callback(2),
         )
 
     data = imgfile_to_data(os.path.join(imgdir, 'nichart_logo_v2_img5_v2.png'))
@@ -178,6 +193,7 @@ with st.container(horizontal=True, horizontal_alignment="center"):
                 "title": my_text,
             },
             key = 'card3',
+            on_click=click_callback(3),
         )
 
     data = imgfile_to_data(os.path.join(imgdir, 'nichart_logo_v2_img6_v2.png'))
@@ -193,6 +209,7 @@ with st.container(horizontal=True, horizontal_alignment="center"):
                 "title": my_text,
             },
             key = 'card4',
+            on_click=click_callback(4),
         )
 
 st.write(f'Clicked 0 {clicked0}')
