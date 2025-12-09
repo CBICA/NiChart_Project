@@ -56,7 +56,7 @@ def imgfile_to_data(filepath):
 imgdir =  os.path.join(st.session_state.paths['resources'], 'images', 'nichart_logo')
 
 my_card = {
-    "width": "120%",
+    "width": "95%",
     #"height": "100%",
     "margin": "2px",
     "border-radius": "1vmin",
