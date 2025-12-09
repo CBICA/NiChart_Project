@@ -28,16 +28,13 @@ utilpg.set_global_style()
 
 st.set_page_config(page_title="NiChart", layout="wide")
 
-def on_dismiss():
-    st.rerun(scope='fragment')
-
 def click_callback(dialog_tile):
     def callback():
         st.session_state.dialog_tile = dialog_tile
         st.rerun()
     return callback
 
-@st.dialog("Details", on_dismiss='rerun')
+@st.dialog("Details", on_dismiss='ignore')
 def info_dialog(dialog_tile):
     
     if dialog_tile == 'NiChart':
