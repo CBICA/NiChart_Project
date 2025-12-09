@@ -39,6 +39,7 @@ def dismiss_callback():
 
 @st.dialog("Details", on_dismiss=dismiss_callback)
 def info_dialog(dialog_tile):
+    st.write(st.session_state.dialog_tile)
     
     if dialog_tile == 'NiChart':
         st.markdown('Hello NiChart')
