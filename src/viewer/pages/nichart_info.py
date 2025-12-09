@@ -70,7 +70,7 @@ my_filter = {
 
 my_text = {
     "font-family": "'Source Sans', sans-serif;",
-    "font-size": 32,
+    "font-size": '1.5rem',
     "font-weight": "bold",
     "color": 'white',
     "background-color": "black",
