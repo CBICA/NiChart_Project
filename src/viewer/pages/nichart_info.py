@@ -105,7 +105,8 @@ with st.container(horizontal=True, horizontal_alignment="center"):
             styles={
                 "card": my_card,
                 "filter": my_filter,
-                "text": my_text
+                "text": my_text,
+                "title": my_text,
             },
             key = 'card1'
         )
@@ -119,7 +120,8 @@ with st.container(horizontal=True, horizontal_alignment="center"):
             styles={
                 "card": my_card,
                 "filter": my_filter,
-                "text": my_text
+                "text": my_text,
+                "title": my_text,
             },
             key = 'card2'
         )
@@ -133,7 +135,8 @@ with st.container(horizontal=True, horizontal_alignment="center"):
             styles={
                 "card": my_card,
                 "filter": my_filter,
-                "text": my_text
+                "text": my_text,
+                "title": my_text,
             },
             key = 'card3'
         )
@@ -147,7 +150,8 @@ with st.container(horizontal=True, horizontal_alignment="center"):
             styles={
                 "card": my_card,
                 "filter": my_filter,
-                "text": my_text
+                "text": my_text,
+                "title": my_text,
             },
             key = 'card4'
         )
