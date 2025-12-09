@@ -43,6 +43,8 @@ def info_dialog():
     elif st.session_state.dialog_tile == 'AI Biomarkers':
         st.markdown('Predictive scores for quantification of brain aging or neurodegeneration from MRI images')
 
+    st.session_state.dialog_tile = None
+    
 # State
 if "dialog_tile" not in st.session_state:
     st.session_state.dialog_tile = None
