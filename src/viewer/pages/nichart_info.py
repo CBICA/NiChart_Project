@@ -38,7 +38,7 @@ def info_dialog():
     if st.session_state.dialog_tile == 'NiChart':
         st.markdown('Hello NiChart')
     
-    if st.session_state.dialog_tile == 'AI Biomarkers':
+    elif st.session_state.dialog_tile == 'AI Biomarkers':
         st.markdown('Predictive scores for quantification of brain aging or neurodegeneration from MRI images')
 
     st.session_state.dialog_tile = None
@@ -81,7 +81,7 @@ with st.container(horizontal=True, horizontal_alignment="center"):
     data = imgfile_to_data(os.path.join(imgdir, 'nichart_logo_v2_img1_v2.png'))
     with cols[0]:
         clicked0 = card(
-            title="NeuroImaging Chart",
+            title="",
             text="",
             image = data,
             styles={
@@ -108,7 +108,7 @@ with st.container(horizontal=True, horizontal_alignment="center"):
 
     data = imgfile_to_data(os.path.join(imgdir, 'nichart_logo_v2_img4_v2.png'))
     with cols[2]:
-        clicked1 = card(
+        clicked2 = card(
             title="DL Segmentation",
             text="",
             image = data,
@@ -122,7 +122,7 @@ with st.container(horizontal=True, horizontal_alignment="center"):
 
     data = imgfile_to_data(os.path.join(imgdir, 'nichart_logo_v2_img5_v2.png'))
     with cols[3]:
-        clicked1 = card(
+        clicked3 = card(
             title="Brain Aging Subtypes",
             text="",
             image = data,
@@ -136,7 +136,7 @@ with st.container(horizontal=True, horizontal_alignment="center"):
 
     data = imgfile_to_data(os.path.join(imgdir, 'nichart_logo_v2_img6_v2.png'))
     with cols[4]:
-        clicked1 = card(
+        clicked4 = card(
             title="Voxelwise Abnormality Maps",
             text="",
             image = data,
@@ -150,14 +150,18 @@ with st.container(horizontal=True, horizontal_alignment="center"):
 
 if clicked0:
     st.session_state.dialog_tile = 'NiChart'
+    clicked0 = False
 
 if clicked1:
     st.session_state.dialog_tile = 'AI Biomarkers'
+    clicked1 = False
 
 # ---- Open dialog if set ----
 if st.session_state.dialog_tile:
     info_dialog()
     
+st.write(clicked0)
+st.write(clicked1)
 utilnav.main_navig(
     None, None,
     'Home', 'pages/nichart_home.py',
