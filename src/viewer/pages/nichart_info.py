@@ -37,23 +37,23 @@ def dismiss_callback():
     st.session_state.dialog_tile = None
     return
 
-@st.dialog("Details", on_dismiss='ignore')
+@st.dialog("Details", on_dismiss='rerun')
 def nichart_dialog():
     st.markdown('Hello NiChart')
 
-@st.dialog("Details", on_dismiss='ignore')
+@st.dialog("Details", on_dismiss='rerun')
 def biomarker_dialog():
     st.markdown('Predictive scores for quantification of brain aging or neurodegeneration from MRI images')
 
-@st.dialog("Details", on_dismiss='ignore')
+@st.dialog("Details", on_dismiss='rerun')
 def segmentation_dialog():
     st.markdown('Predictive scores for quantification of brain aging or neurodegeneration from MRI images')
 
-@st.dialog("Details", on_dismiss='ignore')
+@st.dialog("Details", on_dismiss='rerun')
 def brainagingsubtypes_dialog():
     st.markdown('Brain aging subtypes')
 
-@st.dialog("Details", on_dismiss='ignore')
+@st.dialog("Details", on_dismiss='rerun')
 def abnormalitymaps_dialog():
     st.markdown('Voxelwise abnormality maps')
 
