@@ -34,12 +34,12 @@ def click_callback(dialog_tile):
     return callback
 
 @st.dialog("Details")
-def info_dialog():
+def info_dialog(dialog_tile):
     
-    if st.session_state.dialog_tile == 'NiChart':
+    if dialog_tile == 'NiChart':
         st.markdown('Hello NiChart')
     
-    elif st.session_state.dialog_tile == 'AI Biomarkers':
+    elif dialog_tile == 'AI Biomarkers':
         st.markdown('Predictive scores for quantification of brain aging or neurodegeneration from MRI images')
 
     st.session_state.dialog_tile = None
@@ -48,7 +48,7 @@ def info_dialog():
 if "dialog_tile" not in st.session_state:
     st.session_state.dialog_tile = None
 else:
-    info_dialog()
+    info_dialog(st.session_state.dialog_tile)
 
 
 def imgfile_to_data(filepath):
