@@ -33,15 +33,16 @@ if "dialog_tile" not in st.session_state:
     st.session_state.dialog_tile = None
 
 @st.dialog("Info")
-def info_dialog():
+def info_dialog(dialog_tile):
     
-    if st.session_state.dialog_tile == 'NiChart':
+    if dialog_tile == 'NiChart':
         st.markdown('Hello NiChart')
     
-    elif st.session_state.dialog_tile == 'AI Biomarkers':
+    elif dialog_tile == 'AI Biomarkers':
         st.markdown('Predictive scores for quantification of brain aging or neurodegeneration from MRI images')
 
-    st.session_state.dialog_tile = None
+def info_dialog_wrapper(dialog_tile):
+    return lambda: info_dialog(dialog_tile)
 
 def imgfile_to_data(filepath):
     import base64
@@ -96,7 +97,8 @@ with st.container(horizontal=True, horizontal_alignment="center"):
                 "filter": my_filter,
                 "title": my_text,
             },
-            key = 'card0'
+            key = 'card0',
+            on_click=info_dialog_wrapper("NiChart")
         )
 
     data = imgfile_to_data(os.path.join(imgdir, 'nichart_logo_v2_img3_v2.png'))
@@ -111,7 +113,8 @@ with st.container(horizontal=True, horizontal_alignment="center"):
                 "text": my_text,
                 "title": my_text,
             },
-            key = 'card1'
+            key = 'card1',
+            on_click=info_dialog_wrapper("AI Biomarkers")
         )
 
     data = imgfile_to_data(os.path.join(imgdir, 'nichart_logo_v2_img4_v2.png'))
@@ -126,7 +129,8 @@ with st.container(horizontal=True, horizontal_alignment="center"):
                 "text": my_text,
                 "title": my_text,
             },
-            key = 'card2'
+            key = 'card2',
+            on_click=info_dialog_wrapper("DL Segmentation")
         )
 
     data = imgfile_to_data(os.path.join(imgdir, 'nichart_logo_v2_img5_v2.png'))
@@ -141,7 +145,8 @@ with st.container(horizontal=True, horizontal_alignment="center"):
                 "text": my_text,
                 "title": my_text,
             },
-            key = 'card3'
+            key = 'card3',
+            on_click=info_dialog_wrapper("Brain Aging Subtypes")
         )
 
     data = imgfile_to_data(os.path.join(imgdir, 'nichart_logo_v2_img6_v2.png'))
@@ -156,7 +161,8 @@ with st.container(horizontal=True, horizontal_alignment="center"):
                 "text": my_text,
                 "title": my_text,
             },
-            key = 'card4'
+            key = 'card4',
+            on_click=info_dialog_wrapper("Voxelwise Abnormality Maps")
         )
 
 if clicked0:
