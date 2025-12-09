@@ -69,8 +69,8 @@ my_filter = {
 }
 
 my_text = {
-    "font-family": "serif",
-    "font-size": 40,
+    "font-family": "'Source Sans', sans-serif;",
+    "font-size": 32,
     "font-weight": "bold",
     "color": 'white',
     "background-color": "black",
