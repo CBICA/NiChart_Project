@@ -74,6 +74,8 @@ my_text = {
     "font-weight": "bold",
     "color": 'white',
     "background-color": "black",
+    "padding": "2px 4px",  # optional: makes it look like real highlighting
+    "border-radius": "3px",  # optional: rounds the highlight edges 
 }
 
 with st.container(horizontal=True, horizontal_alignment="center"):
