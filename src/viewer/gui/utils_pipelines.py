@@ -38,7 +38,7 @@ def show_description(pipeline) -> None:
     """
     Panel for viewing pipeline description
     """
-    with st.container(border=True, height=300):
+    with st.container(border=True):
         f_logo = os.path.join(
             st.session_state.paths['resources'], 'pipelines', pipeline, f'logo_{pipeline}.png'
         )
