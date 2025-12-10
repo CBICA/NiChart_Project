@@ -170,10 +170,15 @@ def show_full_desc(title):
     Surreal-GAN R-indices: The R-index reflects the severity of individualized brain changes along multiple dimensions, potentially reflecting the stage of a mixture of underlying neuropathological and biological processes that induce deviations from the distribution of a reference brain structure.
 
 The Surreal-GAN dimensions of aging were obtained using a knowledge distillation method to train a tabular transformer with four encoder layers to predict the original dimensions of aging from the full Surreal-GAN architecture40
+    
     R1: subcortical atrophy, mainly concentrated in the caudate and putamen
+    
     R2: focal medial temporal lobe (MTL) atrophy
+    
     R3: parieto-temporal atrophy, including that in middle temporal gyrus, angular gyrus and middle occipital gyrus
+    
     R4: diffuse cortical atrophy in medial and lateral frontal regions, as well as superior parietal and occipital regions
+    
     R5: perisylvian atrophy centered around the insular cortex
 
 
