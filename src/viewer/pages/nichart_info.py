@@ -146,15 +146,49 @@ def show_short_desc(title):
 def show_full_desc(title):
     st.markdown(f"{title} Full Description")
     if title == "NiChart":
-        st.markdown("")
+        st.markdown('''NeuroImaging Chart of AI-based Imaging Biomarkers. A framework to process MRI images, harmonize to reference data, apply and contribute machine learning models, and derive individualized neuroimaging biomarkers.''')
     if title == "AI Biomarkers":
-        st.markdown("")
+        st.markdown('''
+    NiChart leverages T1 images to compute several machine learning imaging predictions in the form of SPARE scores.
+
+
+    SPARE - Spatial Patterns of Abnormalities reflect structural variability in the brain associated with a given task. These models use the DLMUSE ROIs, age (not used in SPARE-BA), sex, and DLICV as predictors and SVM classifiers.
+
+    SPARE-AD: An individualized index reflecting the presence and severity of Alzheimer’s disease (AD)-like patterns of atrophy in the brain (https://pubmed.ncbi.nlm.nih.gov/19416949/)
+
+    All other SPARE disease models reflect the specific conditions for depression (SPARE-Depression), psychosis (SPARE-Psychosis), hypertension (SPARE-Hypertension), diabetes (SPARE-Diabetes), obesity (SPARE-Obesity), and smoking status (SPARE-Smoking).
+
+    The cardiometabolic risk models (smoking, obesity, hypertension, and diabetes) are a reflection of the previously published SPARE-CVMs (https://www.nature.com/articles/s41467-025-57867-7).
+
+    DeepSPARE-BA - Reflects structural changes using the minimally processed T1 image directly.''')
     if title == "DL Segmentation":
-        st.markdown("")
+        st.markdown('''NiChart performs three aspects of processing, deep learning-based ICV estimation (DLICV), segmentation into MUSE (https://pubmed.ncbi.nlm.nih.gov/26679328/) ROIs using a deep learning method (https://pubmed.ncbi.nlm.nih.gov/40960397/). Additionally, if FLAIR is available DLWMLS, a deep learning white matter lesion segmentation method, computes white matter hyperintensity presence within the DLMUSE ROIs.''')
     if title == "Brain Aging Subtypes":
-        st.markdown("")
+        st.markdown('''
+    Brain aging dimensions reflect continuous latent representations of structural patterns associated with aging. 
+
+
+    Surreal-GAN R-indices: The R-index reflects the severity of individualized brain changes along multiple dimensions, potentially reflecting the stage of a mixture of underlying neuropathological and biological processes that induce deviations from the distribution of a reference brain structure.
+
+    The Surreal-GAN dimensions of aging were obtained using a knowledge distillation method to train a tabular transformer with four encoder layers to predict the original dimensions of aging from the full Surreal-GAN architecture40
+    R1: subcortical atrophy, mainly concentrated in the caudate and putamen
+    R2: focal medial temporal lobe (MTL) atrophy
+    R3: parieto-temporal atrophy, including that in middle temporal gyrus, angular gyrus and middle occipital gyrus
+    R4: diffuse cortical atrophy in medial and lateral frontal regions, as well as superior parietal and occipital regions
+    R5: perisylvian atrophy centered around the insular cortex
+
+
+    Coupled Cross-Sectional and Longitudinal Non-Negative Matrix Factorization (CCL-NMF) identifies dominant patterns of brain aging by jointly modeling baseline (cross-sectional) and follow-up (longitudinal) MRI data. Cross-sectional maps capture cumulative aging differences across individuals, while longitudinal maps quantify subject-specific change rates. These maps are jointly decomposed via NMF into shared spatial components and individual loadings, providing continuous measures of distinct aging patterns.
+
+''')
     if title == "Voxelwise Abnormality Maps":
-        st.markdown("")
+        st.markdown('''
+    Voxelwise abnormality maps quantify how much each brain region deviates from a normative aging model, highlighting localized tissue loss or expansion
+
+RAVENS maps provide mass-preserving tissue density measures, enabling precise regional comparisons of gray matter, white matter, and CSF volumes.
+Combining RAVENS with CSF-based abnormality maps yields a spatial fingerprint of structural vulnerability, showing where tissue density differs from healthy controls at the voxel level.
+These maps allow detection of subtle, early, and spatially specific changes tied to cardiometabolic risks, disease progression, or aging.
+The approach supports subject-level interpretation, enabling visualization of individual neuroanatomical abnormalities, not just group averages.''')
     
     pass
 
