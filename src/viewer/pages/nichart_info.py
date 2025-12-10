@@ -169,7 +169,7 @@ def show_full_desc(title):
 
     Surreal-GAN R-indices: The R-index reflects the severity of individualized brain changes along multiple dimensions, potentially reflecting the stage of a mixture of underlying neuropathological and biological processes that induce deviations from the distribution of a reference brain structure.
 
-The Surreal-GAN dimensions of aging were obtained using a knowledge distillation method to train a tabular transformer with four encoder layers to predict the original dimensions of aging from the full Surreal-GAN architecture40
+The Surreal-GAN dimensions of aging were obtained using a knowledge distillation method to train a tabular transformer with four encoder layers to predict the original dimensions of aging from the full Surreal-GAN architecture:
     
     R1: subcortical atrophy, mainly concentrated in the caudate and putamen
     
