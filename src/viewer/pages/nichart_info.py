@@ -148,7 +148,7 @@ def show_full_desc(title):
 def card(title, image_path):
     with st.container(border=True):
         st.image(imgfile_to_data(image_path))
-        st.markdown(f"### {title}")
+        st.markdown(f"#### {title}")
         show_short_desc(title)
         with st.popover("See More"):
             show_full_desc(title)
