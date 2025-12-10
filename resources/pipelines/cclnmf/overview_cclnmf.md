@@ -1,7 +1,7 @@
 ## CCL-NMF_Prediction: Estimation of Crosssectional loadings of NMF based Brain Aging Subtypes
 
 
-<p>This pipeline provides a lightweight knowledge distillation solution for estimating Coupled Cross-sectional and Longitudinal Non-negative Matrix Factorization (CCL-NMF)'s crosssectional loadings (7) from T1 MRI images.</p>
+This pipeline provides a lightweight knowledge distillation solution for estimating Coupled Cross-sectional and Longitudinal Non-negative Matrix Factorization (CCL-NMF)'s crosssectional loadings (7) from T1 MRI images.
 
 
 #### Input:

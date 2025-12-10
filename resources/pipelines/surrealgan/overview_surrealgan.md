@@ -1,6 +1,6 @@
 ### Surreal-GAN Prediction: Estimation of Semi-Supervised Representation Learning via GAN for uncovering heterogeneous disease-related imaging patterns
 
-<p>A lightweight knowledge distillation method for estimating SurrealGAN R-indices, low dimensional representations of disease-related heterogeneity, where each dimension indicates the severity of one relatively homogeneous imaging patterns.</p>
+A lightweight knowledge distillation method for estimating SurrealGAN R-indices, low dimensional representations of disease-related heterogeneity, where each dimension indicates the severity of one relatively homogeneous imaging patterns.
 
 
 #### Input
