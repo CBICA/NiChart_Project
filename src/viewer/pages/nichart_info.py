@@ -144,7 +144,6 @@ def show_short_desc(title):
         pass
 
 def show_full_desc(title):
-    st.markdown(f"{title} Full Description")
     if title == "NiChart":
         st.markdown('''NeuroImaging Chart of AI-based Imaging Biomarkers. A framework to process MRI images, harmonize to reference data, apply and contribute machine learning models, and derive individualized neuroimaging biomarkers.''')
     if title == "AI Biomarkers":
