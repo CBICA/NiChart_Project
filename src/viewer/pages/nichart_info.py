@@ -131,7 +131,7 @@ def show_short_desc(title):
         st.markdown("NiChart analyzes neuroimaging data like never before.")
         pass
     if title == "AI Biomarkers":
-        st.markdown("Extract AI biomarkers from your imaging data.")
+        st.markdown("Extract AI-derived biomarkers from your imaging data.")
         pass
     if title == "DL Segmentation":
         st.markdown("Segment brain scans in seconds.")
