@@ -127,21 +127,34 @@ my_text = {
 }
 
 def show_short_desc(title):
-    st.markdown(f"{title} Short Description")
-    pass
+    if title == "NiChart":
+        st.markdown("NiChart analyzes neuroimaging data like never before.")
+        pass
+    if title == "AI Biomarkers":
+        st.markdown("Extract AI biomarkers from your imaging data.")
+        pass
+    if title == "DL Segmentation":
+        st.markdown("Segment brain scans in seconds.")
+        pass
+    if title == "Brain Aging Subtypes":
+        st.markdown("Calculate trajectory along subtypes of brain aging.")
+        pass
+    if title == "Voxelwise Abnormality Maps":
+        st.markdown("View abnormalities in anatomical space.")
+        pass
 
 def show_full_desc(title):
     st.markdown(f"{title} Full Description")
     if title == "NiChart":
-        pass
+        st.markdown("")
     if title == "AI Biomarkers":
-        pass
+        st.markdown("")
     if title == "DL Segmentation":
-        pass
+        st.markdown("")
     if title == "Brain Aging Subtypes":
-        pass
+        st.markdown("")
     if title == "Voxelwise Abnormality Maps":
-        pass
+        st.markdown("")
     
     pass
 
