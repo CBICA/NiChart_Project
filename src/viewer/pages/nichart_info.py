@@ -178,7 +178,6 @@ with st.container(horizontal=True, horizontal_alignment="center"):
              image_path=os.path.join(imgdir, 'nichart_logo_v2_img5_v2.png')
              )
 
-    data = imgfile_to_data()
     with cols[4]: # Voxelwise Abnormality Maps
         card(title="Voxelwise Abnormality Maps",
              image_path=os.path.join(imgdir, 'nichart_logo_v2_img6_v2.png')
