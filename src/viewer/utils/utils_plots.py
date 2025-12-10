@@ -295,7 +295,7 @@ def display_scatter_plot(df, plot_params, plot_ind, plot_settings):
             )
             df_cent = pd.read_csv(f_cent)
         except:
-            st.warning('Could not read centile data!')
+            st.warning(f'Could not read centile data: {f_cent}')
             df_cent = None
 
     # Filter centiles
@@ -630,7 +630,7 @@ def panel_set_params_plot(plot_params, pipeline, list_vars):
     plot_params['flag_norm_centiles'] = False    
 
     # Add tabs for parameter settings
-    with st.container(border=True):
+    with st.expander('Plot Settings'):
         tab = sac.tabs(
             items=[
                 sac.TabsItem(label='Data'),
@@ -752,7 +752,8 @@ def panel_set_params_centile_plot(
         return
 
     # Add tabs for parameter settings
-    with st.container(border=True):
+    with st.expander('Plot Settings'):
+    #with st.container(border=True):
         tab = sac.tabs(
             items=[
                 sac.TabsItem(label='Data'),
@@ -828,11 +829,11 @@ def panel_show_plots():
         if st.session_state.plots.loc[tmp_ind, 'flag_sel']:
             st.session_state.plots.at[tmp_ind, 'params'] = st.session_state.plot_params.copy()
 
-    # # Add a single plot if there is none
-    # if st.session_state.plots.shape[0] == 0:
-    #     st.session_state.plots = add_plot(
-    #         st.session_state.plots, st.session_state.plot_params
-    #     )
+    # Add a single plot if there is none
+    if st.session_state.plots.shape[0] == 0:
+        st.session_state.plots = add_plot(
+            st.session_state.plots, st.session_state.plot_params
+        )
 
     # Show plots
     show_plots(

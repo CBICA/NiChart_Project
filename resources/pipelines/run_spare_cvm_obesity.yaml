@@ -20,24 +20,24 @@ steps:
     inputs:
       t1_img: ${STUDY}/t1
     outputs:
-      dlmuse_seg: ${STUDY}/DLMUSE_seg
-      dlmuse_vol: ${STUDY}/DLMUSE_vol
+      dlmuse_seg: ${STUDY}/dlmuse_seg
+      dlmuse_vol: ${STUDY}/dlmuse_vol
 
   - id: run_nichart_dlwmls
     tool: nichart_dlwmls_v2 # MUST CORRESPOND EXACTLY to a tool in resources/tools dir
     inputs:
       t1_img: ${STUDY}/t1
       fl_img: ${STUDY}/fl
-      dlmuse_seg: ${STUDY}/DLMUSE_seg
+      dlmuse_seg: ${STUDY}/dlmuse_seg
       demog_csv: ${STUDY}/participants/participants.csv
 
     outputs:
-      nichart_dlwmls_out: ${STUDY}/NiChart_DLWMLS_out
+      nichart_dlwmls_out: ${STUDY}/nichart_dlwmls_out
   - id: merge_feature_csvs
     tool: merge_feature_csvs_by_mrid
     inputs:
-      csv_1: ${STUDY}/DLMUSE_vol/DLMUSE_Volumes.csv
-      csv_2: ${STUDY}/NiChart_DLWMLS_out/DLWMLS_DLMUSE_Segmented_Volumes.csv
+      csv_1: ${STUDY}/dlmuse_vol/DLMUSE_Volumes.csv
+      csv_2: ${STUDY}/nichart_dlwmls_out/DLWMLS_DLMUSE_Segmented_Volumes.csv
     outputs:
       out_csv: ${STUDY}/merged_dlmuse_dlwmls/csv_out.csv
   - id: run_spare_cvm_obesity
@@ -46,5 +46,5 @@ steps:
       merged_dlwmls_dlmuse_csv: ${STUDY}/merged_dlmuse_dlwmls/csv_out.csv
       demog_csv: ${STUDY}/participants/participants.csv
     outputs:
-      spare_cvm_csv: ${STUDY}/SPARE_OBESITY_csv/SPARE_OBESITY.csv
+      spare_cvm_csv: ${STUDY}/ml_biomarkers/SPARE_OBESITY.csv
     

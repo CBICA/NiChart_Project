@@ -18,15 +18,14 @@ from utils.utils_logger import setup_logger
 
 import streamlit_antd_components as sac
 
-logger = setup_logger()
-logger.debug('Page: Select Pipelines')
-
-inject_global_css()
-
 # Page config should be called for each page
 #utilpg.config_page()
 utilpg.set_global_style()
 
+logger = setup_logger()
+logger.debug('Page: Select Pipelines')
+
+inject_global_css()
 
 if 'instantiated' not in st.session_state or not st.session_state.instantiated:
     utilses.init_session_state()
@@ -50,7 +49,7 @@ sel_but = sac.chip(
 )
     
 if sel_but == 0:
-    st.switch_page("pages/nichart_download_results.py")
+    st.switch_page("pages/nichart_results.py")
 
 if sel_but == 1:
     st.switch_page("pages/nichart_home.py")

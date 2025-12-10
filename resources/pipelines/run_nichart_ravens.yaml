@@ -18,15 +18,15 @@ steps:
     inputs:
       t1_img: ${STUDY}/t1
     outputs:
-      dlmuse_seg: ${STUDY}/DLMUSE_seg
-      dlmuse_vol: ${STUDY}/DLMUSE_vol
+      dlmuse_seg: ${STUDY}/dlmuse_seg
+      dlmuse_vol: ${STUDY}/dlmuse_vol
 
   - id: run_nichart_ravens
     tool: nichart_ravens # MUST CORRESPOND EXACTLY to a tool in resources/tools dir
     inputs:
       t1_img: ${STUDY}/t1
-      dlmuse_seg: ${STUDY}/DLMUSE_seg
+      dlmuse_seg: ${STUDY}/dlmuse_seg
       demog_csv: ${STUDY}/participants/participants.csv
 
     outputs:
-      ravens_out: ${STUDY}/NiChart_RAVENS_out
+      ravens_out: ${STUDY}/nichart_ravens_out

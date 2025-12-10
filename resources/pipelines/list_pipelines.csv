@@ -1,20 +1,19 @@
-Name,Label,PipelineYaml,HarmonizedPipelineYaml
-All SPARE Scores,spare-all,run_spare_all,run_spare_all_harmonized
-All SPARE-CVM Scores,spare-all-cvm,run_spare_all_cvm,run_spare_all_cvm_harmonized
-DLMUSE,dlmuse,run_dlmuse,run_dlmuse_harmonized
-DLWMLS (Legacy),legacy-dlwmls,run_dlwmls,
-DLWMLS,dlwmls,run_nichart_dlwmls_v2,run_nichart_dlwmls_v2_harmonized
-SPARE-AD,spare-ad,run_spare_ad,run_spare_ad_harmonized
-SPARE-BA,spare-ba,run_spare_ba,run_spare_ba_harmonized
-SPARE-Smoking,spare-smoking,run_spare_cvm_smoking,run_spare_cvm_smoking_harmonized
-SPARE-Hypertension,spare-hypertension,run_spare_cvm_hypertension,run_spare_cvm_hypertension_harmonized
-SPARE-Obesity,spare-obesity,run_spare_cvm_obesity,run_spare_cvm_obesity_harmonized
-SPARE-Diabetes,spare-diabetes,run_spare_cvm_diabetes,run_spare_cvm_diabetes_harmonized
-SPARE-Depression,spare-depression,run_spare_depression,
-SPARE-Psychosis,spare-psychosis,run_spare_psychosis,
-SPARE-BA-Image,spare-ba-image,run_bascores,
-SurrealGAN,surrealgan,run_predcrd_surrealgan,
-CCL-NMF,cclnmf,run_cclnmf,
-RAVENS,ravens,run_nichart_ravens,
-
-
+Name,EnabledInFrontEnd,Label,PipelineYaml,HarmonizedPipelineYaml
+SPARE-ALL,True,spare-all,run_spare_all,run_spare_all_harmonized
+SPARE-CVM Scores,True,spare-all-cvm,run_spare_all_cvm,run_spare_all_cvm_harmonized
+DLMUSE,True,dlmuse,run_dlmuse,run_dlmuse_harmonized
+DLWMLS (Legacy),True,legacy-dlwmls,run_dlwmls,
+DLWMLS,True,dlwmls,run_nichart_dlwmls_v2,run_nichart_dlwmls_v2_harmonized
+SPARE-AD,False,spare-ad,run_spare_ad,run_spare_ad_harmonized
+SPARE-BA,False,spare-ba,run_spare_ba,run_spare_ba_harmonized
+SPARE-Smoking,False,spare-smoking,run_spare_cvm_smoking,run_spare_cvm_smoking_harmonized
+SPARE-Hypertension,False,spare-hypertension,run_spare_cvm_hypertension,run_spare_cvm_hypertension_harmonized
+SPARE-Obesity,False,spare-obesity,run_spare_cvm_obesity,run_spare_cvm_obesity_harmonized
+SPARE-Diabetes,False,spare-diabetes,run_spare_cvm_diabetes,run_spare_cvm_diabetes_harmonized
+SPARE-Depression,False,spare-depression,run_spare_depression,
+SPARE-Psychosis,False,spare-psychosis,run_spare_psychosis,
+SPARE-BA-Image,False,spare-ba-image,run_bascores,
+SurrealGAN,True,surrealgan,run_predcrd_surrealgan,
+CCL-NMF,True,cclnmf,run_cclnmf,
+RAVENS,True,ravens,run_nichart_ravens,
+GenFAR,True,genfar,run_genfar,

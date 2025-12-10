@@ -1,0 +1,39 @@
+pipeline_name: GenFAR
+description: |
+  GenFAR models from T1 scans.
+
+categories:
+  - image-to-biomarker
+  - regression
+  - inference
+
+requires:
+  - needs_T1
+
+steps:
+  - id: run_dlmuse
+    tool: nichart_dlmuse
+    inputs:
+      t1_img: ${STUDY}/t1
+    outputs:
+      dlmuse_vol: ${STUDY}/dlmuse_vol
+      dlmuse_seg: ${STUDY}/dlmuse_seg
+  - id: binarize_DLMUSE_to_DLICV
+    tool: binarize_seg_to_mask
+    inputs:
+      seg_dir: ${STUDY}/dlmuse_seg
+    outputs:
+      mask_dir: ${STUDY}/dlicv_mask
+  - id: align_dlicv_to_MNI_ICBM152
+    tool: dlicv_to_mni_icbm152
+    inputs:
+      img_dir: ${STUDY}/t1 # Dir of NIFTI scans
+      mask_dir: ${STUDY}/dlicv_mask # Dir of masks associated with img_dir's images
+    outputs:
+      mni_dir: ${STUDY}/t1_mni_icbm152 # Dir of MNI-aligned NIFTI scans
+  - id: run_genfar
+    tool: genfar # MUST CORRESPOND EXACTLY to a tool in resources/tools dir
+    inputs:
+      t1_dir: ${STUDY}/t1_mni_icbm152
+    outputs:
+      output_dir: ${STUDY}/ml_biomarkers
