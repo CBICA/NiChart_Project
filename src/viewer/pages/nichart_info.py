@@ -126,113 +126,66 @@ my_text = {
     "border-radius": "3px",  # optional: rounds the highlight edges 
 }
 
+def show_short_desc(title):
+    st.markdown(f"##{title} Short Description")
+    pass
+
+def show_full_desc(title):
+    st.markdown(f"##{title} Full Description")
+    if title == "NiChart":
+        pass
+    if title == "AI Biomarkers":
+        pass
+    if title == "DL Segmentation":
+        pass
+    if title == "Brain Aging Subtypes":
+        pass
+    if title == "Voxelwise Abnormality Maps":
+        pass
+    
+    pass
+
+def card(title, image_path):
+    with st.container(border=True):
+        st.image(imgfile_to_data(image_path))
+        st.markdown(f"## {title}")
+        show_short_desc(title)
+        with st.popover("See More"):
+            show_full_desc(title)
 
 with st.container(horizontal_alignment="center"):
     st.markdown("## What can I do with NiChart?")
 with st.container(horizontal=True, horizontal_alignment="center"):
     cols = st.columns(5)
 
-    data = imgfile_to_data(os.path.join(imgdir, 'nichart_logo_v2_img1_v2.png'))
-    with cols[0]:
-        clicked0 = card(
-            title="NiChart",
-            text="",
-            image = data,
-            styles={
-                "card": my_card,
-                "text": my_text,
-                "filter": my_filter,
-                "title": my_text,
-            },
-            key = 'card0',
-            on_click=click_callback(0),
-        )
+    with cols[0]: # NiChart
+        card(title="NiChart",
+             image_path=os.path.join(imgdir, 'nichart_logo_v2_img1_v2.png')
+            )
 
-    data = imgfile_to_data(os.path.join(imgdir, 'nichart_logo_v2_img3_v2.png'))
-    with cols[1]:
-        clicked1 = card(
-            title="AI Biomarkers",
-            text="",
-            image = data,
-            styles={
-                "card": my_card,
-                "filter": my_filter,
-                "text": my_text,
-                "title": my_text,
-            },
-            key = 'card1',
-            on_click=click_callback(1),
-        )
+    with cols[1]: # AI Biomarkers
+        card(title="AI Biomarkers",
+             image_path=os.path.join(imgdir, 'nichart_logo_v2_img3_v2.png')
+             )
 
-    data = imgfile_to_data(os.path.join(imgdir, 'nichart_logo_v2_img4_v2.png'))
-    with cols[2]:
-        clicked2 = card(
-            title="DL Segmentation",
-            text="",
-            image = data,
-            styles={
-                "card": my_card,
-                "filter": my_filter,
-                "text": my_text,
-                "title": my_text,
-            },
-            key = 'card2',
-            on_click=click_callback(2),
-        )
+    with cols[2]: # DL Segmentation
+        card(title="DL Segmentation",
+             image_path=os.path.join(imgdir, 'nichart_logo_v2_img4_v2.png')
+             )
 
-    data = imgfile_to_data(os.path.join(imgdir, 'nichart_logo_v2_img5_v2.png'))
-    with cols[3]:
-        clicked3 = card(
-            title="Brain Aging Subtypes",
-            text="",
-            image = data,
-            styles={
-                "card": my_card,
-                "filter": my_filter,
-                "text": my_text,
-                "title": my_text,
-            },
-            key = 'card3',
-            on_click=click_callback(3),
-        )
+    with cols[3]: # Brain Aging Subtypes
+        card(title="Brain Aging Subtypes",
+             image_path=os.path.join(imgdir, 'nichart_logo_v2_img5_v2.png')
+             )
 
-    data = imgfile_to_data(os.path.join(imgdir, 'nichart_logo_v2_img6_v2.png'))
-    with cols[4]:
-        clicked4 = card(
-            title="Voxelwise Abnormality Maps",
-            text="",
-            image = data,
-            styles={
-                "card": my_card,
-                "filter": my_filter,
-                "text": my_text,
-                "title": my_text,
-            },
-            key = 'card4',
-            on_click=click_callback(4),
-        )
+    data = imgfile_to_data()
+    with cols[4]: # Voxelwise Abnormality Maps
+        card(title="Voxelwise Abnormality Maps",
+             image_path=os.path.join(imgdir, 'nichart_logo_v2_img6_v2.png')
+             )
 
-st.write(f'Clicked 0 {clicked0}')
-st.write(f'Clicked 1 {clicked1}')
-
-if clicked0:
-    st.session_state.dialog_tile = 'NiChart'
-    clicked0 = False
-    st.write("Clicked0")
     
 
-if clicked1:
-    st.session_state.dialog_tile = 'AI Biomarkers'
-    st.write("Clicked1")
-    clicked1 = False
-    
-
-# ---- Open dialog if set ----
-#if st.session_state.dialog_tile is not None:
-#    info_dialog()
-    
-#st.write(clicked0)
-#st.write(clicked1)
 utilnav.main_navig(
     None, None,
     'Home', 'pages/nichart_home.py',
