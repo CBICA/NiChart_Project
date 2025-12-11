@@ -239,10 +239,10 @@ sel_but = sac.chip(
 )
 
 if sel_but == 0:
-    st.switch_page("pages/nichart_upload_data.py")
+    st.switch_page("pages/nichart_data.py")
 
 if sel_but == 1:
-    st.switch_page("pages/nichart_download_results.py")
+    st.switch_page("pages/nichart_results.py")
 
 # Show session state vars
 if st.session_state.mode == 'debug':

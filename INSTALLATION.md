@@ -1,5 +1,7 @@
 # Installing NiChart Locally
 
+**Typical Install Time**: 10 minutes. 30 minutes to download all containerized tools.
+
 We provide both a locally installable **desktop application** and a **cloud-based application**.
 
 The [NiChart cloud application](https://cloud.neuroimagingchart.com/), hosted via Amazon Web Services (AWS), deploys scalable infrastructure which hosts the *NiChart* tools as a standard web application accessible via the user’s web browser. We recommend this option first if you want to give NiChart a try, but be aware that it requires data to be transferred over the internet.

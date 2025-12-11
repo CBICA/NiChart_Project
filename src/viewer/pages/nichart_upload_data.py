@@ -42,7 +42,7 @@ def upload_data():
     with cols[2]:
         if st.session_state.workflow == 'single_subject':
             utilup.panel_upload_single_subject()
-        if st.session_state.workflow == 'multi_subject':
+        elif st.session_state.workflow == 'multi_subject':
             utilup.panel_upload_multi_subject()
         else:
             utilup.panel_upload_multi_subject()
@@ -85,10 +85,10 @@ if sel_but == 0:
 
 if sel_but == 1:
     if st.session_state.workflow == 'ref_data':
-        st.switch_page("pages/nichart_view_results.py")
+        st.switch_page("pages/nichart_results.py")
 
     else:
-        st.switch_page("pages/nichart_run_pipeline.py")
+        st.switch_page("pages/nichart_pipelines.py")
 
 # Show session state vars
 if st.session_state.mode == 'debug':

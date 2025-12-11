@@ -6,15 +6,14 @@ import utils.utils_pages as utilpg
 import utils.utils_session as utilss
 
 from PIL import Image
-from st_pages import add_page_title, get_nav_from_toml
-
-
-utilpg.config_page()
+#from st_pages import add_page_title, get_nav_from_toml
 
 nicon = Image.open("../resources/nichart1.png")
 
 # Init session state
 utilss.init_session_state()
+
+utilpg.config_page()
 
 from utils.utils_logger import setup_logger
 logger = setup_logger()
@@ -54,6 +53,7 @@ pages = {
     "Home": [
         st.Page("pages/nichart_home.py", title="Home"),
         st.Page("pages/nichart_info.py", title="Info"),
+        st.Page("pages/survey.py", title="Take Survey"),
     ],
     "Workflows": [
         st.Page("pages/nichart_single_subject.py", title="Single Subject"),
@@ -65,6 +65,10 @@ pages = {
         st.Page("pages/nichart_pipelines.py", title="Pipelines"),
         st.Page("pages/nichart_results.py", title="Results"),
     ],
+    #"Pipelines": [
+        #st.Page("pages/sel_pipelines.py", title="Select Pipelines"),
+        #st.Page("pages/run_pipelines.py", title="Run Pipelines"),
+    #],
 }
 
 pg = st.navigation(pages, position="top")

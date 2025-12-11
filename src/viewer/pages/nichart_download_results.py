@@ -90,10 +90,10 @@ sel_but = sac.chip(
 )
     
 if sel_but == 0:
-    st.switch_page("pages/nichart_run_pipeline.py")
+    st.switch_page("pages/nichart_pipelines.py")
 
 if sel_but == 1:
-    st.switch_page("pages/nichart_view_results.py")
+    st.switch_page("pages/nichart_results.py")
 
 # Show session state vars
 if st.session_state.mode == 'debug':
