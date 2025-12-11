@@ -19,6 +19,8 @@ import gui.utils_view as utilview
 import pandas as pd
 import gui.utils_widgets as utilwd
 
+from NiChart_common_utils.nifti_parser import NiftiMRIDParser
+
 import streamlit_antd_components as sac
 
 import streamlit as st
@@ -206,15 +208,33 @@ def view_segmentation(layout):
 
         #######################
         ## Set olay ulay images
-        fname = os.path.join(
-            st.session_state.paths['curr_data'], 't1', f'{sel_mrid}_T1.nii.gz'
-        )
+
+        # Use heuristic parser
+        mod_dirs = {mod: os.path.join(st.session_state.paths['project'], mod) for mod in ['t1', 't2', 'fl', 'dti', 'fmri']}
+        dir_dict = {'T1': mod_dirs['t1'],
+                                'T2': mod_dirs['t2'],
+                                'FLAIR': mod_dirs['fl'],
+                                'DTI': mod_dirs['dti'],
+                                'FMRI': mod_dirs['fmri'],
+                                'DLMUSE': os.path.join(st.session_state.paths['project'], 'dlmuse_seg')
+                                }
+        
+        nifti_parser = NiftiMRIDParser()
+        heuristic_df = nifti_parser.create_master_csv(dir_dict, os.path.join(st.session_state.paths['project'], 'inferred_data_paths.csv'))
+        
+        heuristic_df = heuristic_df.sort_values(by='MRID')
+        fname = nifti_parser.get_path(sel_mrid, modality='t1')
+
+        #fname = os.path.join(
+        #    st.session_state.paths['curr_data'], 't1', f'{sel_mrid}_T1.nii.gz'
+        #)
         if not os.path.exists(fname):
             st.session_state.mriplot_params['ulay'] = None
             st.write(fname)
         else:
             st.session_state.mriplot_params['ulay'] = fname
 
+        fname = nifti_parser.get_path(sel_mrid, modality='DLMUSE')
         fname = os.path.join(
             st.session_state.paths['curr_data'], 'dlmuse_seg', f'{sel_mrid}_T1_DLMUSE.nii.gz'
         )
