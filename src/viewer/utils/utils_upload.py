@@ -4,6 +4,7 @@ import utils.utils_session as utilss
 import utils.utils_data_view as utildv
 import utils.utils_io as utilio
 import utils.utils_mriview as utilmri
+from utils.utils_upload_single_subject import upload_file
 
 import os
 import pandas as pd
