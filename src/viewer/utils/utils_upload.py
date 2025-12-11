@@ -567,9 +567,9 @@ def panel_upload_single_subject():
     logger.debug(f'**** sel files : {sel_files}')
     if flag_submit == True:
         if flag_multi == False:
-            upload_file(sel_files)
+            upload_file_single_subject(sel_files)
         else:
-            upload_files(sel_files)
+            upload_files_single_subject(sel_files)
 
 def generate_template_csv():
     mod_dirs = {mod: os.path.join(st.session_state.paths['project'], mod) for mod in ['t1', 't2', 'fl', 'dti', 'fmri']}
