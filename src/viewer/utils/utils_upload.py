@@ -164,7 +164,7 @@ def consolidate_nifti():
         st.success('Updated participant info!')
 
         # Move scan to consolidated path
-        out_dir = os.path.join(st.session_state.paths['prj_dir'], mod)
+        out_dir = os.path.join(st.session_state.paths['prj_dir'], mod.lower())
         out_fpath = os.path.join(out_dir, mrid + '_' + mod + '.nii.gz')
         os.makedirs(out_dir, exist_ok=True)
         if os.path.exists(out_fpath):
