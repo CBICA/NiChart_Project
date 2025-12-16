@@ -5,7 +5,6 @@ from typing import Any, Optional
 import pandas as pd
 import numpy as np
 import streamlit as st
-import utils.utils_io as utilio
 import utils.utils_stats as utilstat
 
 import plotly.graph_objs as go
@@ -23,6 +22,9 @@ def add_trace_scatter(df: pd.DataFrame, plot_params: dict, plot_settings: dict, 
     if df.shape[0] == 0:
         return fig
 
+    if plot_params['xvar'] not in df or plot_params['yvar'] not in df:
+        return fig
+    
     # Set colormap
     colors = plot_settings['cmaps']['data']
     alpha = plot_settings['alphas']['data']
@@ -30,12 +32,13 @@ def add_trace_scatter(df: pd.DataFrame, plot_params: dict, plot_settings: dict, 
     # Get hue params
     hvar = plot_params['hvar']
     hvals = plot_params['hvals']    
-    if hvar is None or hvar == 'None':
+    if hvar not in df:
         hvar = 'grouping_var'
     if hvals is None:
         hvals = df[hvar].dropna().sort_values().unique().tolist()
 
-    if "data" in plot_params['traces']:
+    if plot_params['traces'] is not None and "data" in plot_params['traces']:
+        
         for hname in hvals:
             c_ind = hvals.index(hname)  # Select index of colour for the category
             c = colors[f'd{c_ind+1}']
@@ -48,7 +51,7 @@ def add_trace_scatter(df: pd.DataFrame, plot_params: dict, plot_settings: dict, 
                 marker={"color": c_txt},
                 name=hname,
                 legendgroup=hname,
-                showlegend=not plot_settings['flag_hide_legend'],
+                showlegend = not plot_settings['flag_hide_legend'],
             )
             fig.add_trace(trace)
 
@@ -56,19 +59,28 @@ def add_trace_linreg(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
     '''
     Add trace for linear fit and confidence interval
     '''
+    # Check data
+    if plot_params['xvar'] == plot_params['yvar']:
+        return fig
+
+    if plot_params['xvar'] not in df or plot_params['yvar'] not in df:
+        return fig
+    
     # Set colormap
     colors = plot_settings['cmaps']['data']
 
     # Get hue params
     hvar = plot_params['hvar']
     hvals = plot_params['hvals']
-    if hvar is None or hvar == 'None':
+    if hvar not in df:
         hvar = 'grouping_var'
-    if hvals is None:
+    if hvals is None or hvals == []:
         hvals = df[hvar].dropna().sort_values().unique().tolist()
 
     traces = plot_params['traces']
-        
+    if traces is None:
+        traces = []
+          
     # Calculate fit
     dict_fit = utilstat.linreg_model(
         df, plot_params['xvar'], plot_params['yvar'], hvar
@@ -77,6 +89,7 @@ def add_trace_linreg(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
     # Add traces for the fit and confidence intervals
     if "lin_fit" in traces:
         alpha = plot_settings['alphas']['lin_fit']
+        w = plot_settings['w_fit']
 
         for i, hname in enumerate(hvals):
             c_ind = hvals.index(hname)  # Select index of colour for the category
@@ -84,15 +97,15 @@ def add_trace_linreg(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
             c_txt = f'rgba({c[0]},{c[1]},{c[2]},{alpha})'
             x_hat = dict_fit[hname]["x_hat"]
             y_hat = dict_fit[hname]["y_hat"]
-            line = {"color": c_txt}
+            line = {"color": c_txt, 'width': w}
             trace = go.Scatter(
                 x=x_hat,
                 y=y_hat,
                 mode="lines",
                 line=line,
                 name=f"lin_{hname}",
-                legendgroup=hname,
-                showlegend=not plot_settings['flag_hide_legend'],
+                #legendgroup=hname,
+                showlegend = not plot_settings['flag_hide_legend'],
             )
             fig.add_trace(trace)
 
@@ -113,8 +126,9 @@ def add_trace_linreg(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
                 line=dict(color = c_txt),
                 hoverinfo="skip",
                 name=f"lin_conf95_{hname}",
-                legendgroup=hname,
-                showlegend=not plot_settings['flag_hide_legend'],
+                #legendgroup=hname,
+                showlegend = not plot_settings['flag_hide_legend'],
+                
             )
             fig.add_trace(trace)
 
@@ -124,6 +138,10 @@ def add_trace_lowess(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
     '''
     Add trace for non-linear fit
     '''
+    # Check data
+    if plot_params['xvar'] not in df or plot_params['yvar'] not in df:
+        return fig
+
     # Check trace
     traces = plot_params['traces']
     if 'lowess' not in traces:
@@ -132,17 +150,18 @@ def add_trace_lowess(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
     # Set colormap
     colors = plot_settings['cmaps']['data']
     alpha = plot_settings['alphas']['lowess']
+    w = plot_settings['w_fit']
 
     # Get hue params
     hvar = plot_params['hvar']
     hvals = plot_params['hvals']
-    if hvar is None or hvar == 'None':
+    if hvar not in df:
         hvar = 'grouping_var'
     if hvals is None:
         hvals = df[hvar].dropna().sort_values().unique().tolist()
 
     lowess_s = plot_params['lowess_s']
-        
+
     dict_fit = utilstat.lowess_model(
         df, plot_params['xvar'], plot_params['yvar'], hvar, lowess_s
     )
@@ -154,16 +173,16 @@ def add_trace_lowess(df: pd.DataFrame, plot_params: dict, plot_settings: dict, f
         c_txt = f'rgba({c[0]},{c[1]},{c[2]},{alpha})'
         x_hat = dict_fit[hname]["x_hat"]
         y_hat = dict_fit[hname]["y_hat"]
-        line = {"color": c_txt}
+        line = {"color": c_txt, 'width': w}
         trace = go.Scatter(
             x=x_hat,
             y=y_hat,
-            # showlegend=False,
             mode="lines",
             line = line,
-            name=f"lowess_{hname}",
-            legendgroup=hname,
-            showlegend=not plot_params['flag_hide_legend'],
+            name=f"smooth_{hname}",
+            #legendgroup=hname,
+            showlegend = not plot_settings['flag_hide_legend'],
+            
         )
         fig.add_trace(trace)
 
@@ -173,12 +192,13 @@ def add_trace_dot(
     '''
     Add trace for a single dot
     '''
+    # Check data
+    if plot_params['xvar'] not in df or plot_params['yvar'] not in df:
+        return fig
+    
     df_tmp = df[df.MRID == sel_mrid]
     if df_tmp.shape[0] == 0:
         return fig
-
-    print('aab')
-    print(plot_settings['flag_hide_legend'])
 
     trace = go.Scatter(
         x=df_tmp[plot_params['xvar']],
@@ -188,7 +208,8 @@ def add_trace_dot(
         marker=dict(
             color="rgba(250, 50, 50, 0.5)", size=12, line=dict(color="Red", width=3)
         ),
-        showlegend=not plot_settings['flag_hide_legend']
+        showlegend = not plot_settings['flag_hide_legend'],
+        
     )
     fig.add_trace(trace)
 
@@ -196,8 +217,15 @@ def add_trace_centile(df: pd.DataFrame, plot_params: dict, plot_settings: dict, 
     '''
     Add trace for centile curves
     '''
-    cvals = st.session_state.plot_settings['centile_trace_types']
 
+    
+    # Check data
+    if plot_params['xvar'] not in df or plot_params['yvar'] not in df.VarName.unique():
+        st.warning('Variable not found in centile data!')
+        return fig
+        
+    cvals = st.session_state.plot_settings['centile_trace_types']
+    
     # Check centile traces
     if plot_params['traces'] is None:
         return fig
@@ -208,14 +236,10 @@ def add_trace_centile(df: pd.DataFrame, plot_params: dict, plot_settings: dict, 
     # Set colormap
     colors = plot_settings['cmaps']['centiles']
     alpha = plot_settings['alphas']['centiles']
-
-    # Set colormap
-    # c_ind = hvals.index(hname)  # Select index of colour for the category
-    # c = colors[f'd{c_ind+1}']
-    # c_txt = f'rgba({c[0]},{c[1]},{c[2]},{c[3]})'
+    w = plot_settings['w_centile']
 
     # Get centile values for the selected roi
-    df_tmp = df[df.VarName == plot_params['yvar']]
+    df_tmp = df[df.VarName == plot_params['yvar']].sort_values('Age')
 
     # Max centile value for normalization
     flag_norm = plot_params['flag_norm_centiles']
@@ -242,9 +266,10 @@ def add_trace_centile(df: pd.DataFrame, plot_params: dict, plot_settings: dict, 
                     y=yvals,
                     mode="lines",
                     name=cvar,
-                    legendgroup="centiles",
-                    line=dict(color=c_txt),
-                    showlegend=not plot_settings['flag_hide_legend'],
+                    #legendgroup="centiles",
+                    line=dict(color=c_txt, width = w),
+                    showlegend = not plot_settings['flag_hide_legend'],
+                    
                 )
                 fig.add_trace(ctrace)  # plot in first row
 
@@ -259,6 +284,10 @@ def add_trace_dots(df: pd.DataFrame, plot_params: dict, fig: Any) -> None:
     '''
     Add trace for multiple dots
     '''
+    # Check data
+    if plot_params['xvar'] not in df or plot_params['yvar'] not in df:
+        return fig
+    
     trace = go.Scatter(
         x=df[plot_params['xvar']],
         y=df[plot_params['yvar']],

@@ -20,10 +20,12 @@ reference distributions for comparison to a broader population.
 .. image:: https://raw.githubusercontent.com/CBICA/NiChart_Project/refs/heads/ge-dev/resources/images/NiChart_Flowchart_v2.svg
   :alt: NiChart Flowchart
 
+This repo contains the NiChart application front-end, which ties together all individual tools in the NiChart ecosystem and provides an easy-to-use interface for processing your data. For other tools, see the linked repositories.
+
 The Basics
 ----------
 
-The development of nichart is guided by several core principles:
+The development of NiChart is guided by several core principles:
 
  1. Enabling **near real-time image processing and analysis** through advanced methods.
 
@@ -40,11 +42,31 @@ Running NiChart
 
 We provide both a locally installable **desktop application** and a **cloud-based application**. 
 
-For the desktop application please see `NiChart GitHub <https://github.com/CBICA/NiChart_Project>`_.
+The `NiChart cloud application <https://neuroimagingchart.com/portal>`_, hosted via Amazon Web Services (AWS), deploys scalable infrastructure which hosts the *NiChart* tools as a standard web application accessible via the user’s web browser. **No payment or installation is needed to use the tool**. You don't need any special hardware to run this.
 
-`NiChart cloud application <https://neuroimagingchart.com/portal>`_, hosted via Amazon Web Services (AWS), deploys scalable infrastructure which hosts the *NiChart* tools as a standard web application accessible via the user’s web browser. 
+However, as a web application, NiChart Cloud requires you to upload your data to the private cloud-based NiChart server for us to process it. **We do not access or use your data** for any other purpose than to run your requested processing and/or provide support to you as a user, and we regularly automatically delete user data after inactivity. However, we recognize that data privacy agreements and related concerns may nevertheless restrict use of the cloud application. If that applies to you, we suggest that you install the desktop application. We provide detailed installation instructions on the `Installation page <./INSTALLATION.md>`_. 
 
-The cloud and desktop applications are unified at the code level through the use of the Python library `Streamlit <https://streamlit.io>`_. Consequently, the user experience is nearly identical between the cloud and desktop applications.
+The NiChart front-end desktop application currently supports Windows and Linux. Windows has been tested on recent versions of Windows 10 (update 22H2) and is continually tested on the latest release of Windows 11. Linux has been tested on Ubuntu 24.04 but should work with relatively little trouble on other distributions. An NVIDIA GPU supporting CUDA is required to run the algorithms. If you need to run the algorithms with alternative GPU hardware or on CPU, please use the standalone tools.
+
+**Want to switch between versions?** The cloud and desktop applications are unified at the code level through the use of the Python library `Streamlit <https://streamlit.io>`_. Consequently, the user experience is nearly identical between the cloud and desktop applications. 
+
+Looking for specific NiChart tools?
+-------------------
+
+If you're looking for the individual NiChart structural tools, please see their individual repos:
+
+NiChart_DLMUSE  [`GitHub <https://github.com/CBICA/NiChart_DLMUSE>`_] [`Docker Hub <https://hub.docker.com/repository/docker/cbica/nichart_dlmuse>`_] - Fast brain segmentation via deep learning
+
+NiChart_DLWMLS [`GitHub <https://github.com/CBICA/NiChart_DLWMLS>`_] [`Docker Hub <https://hub.docker.com/repository/docker/cbica/dlwmls_wrapped>`_]  - Fast white matter lesion segmentation via deep learning
+
+SPARE scores  [`GitHub <https://github.com/CBICA/spare_score>`_] [`Docker Hub <https://hub.docker.com/repository/docker/cbica/nichart_spare_score>`_] - ML-based prediction/scoring for variables of clinical interest
+
+CCL-NMF prediction  [`GitHub <https://github.com/CBICA/CCL_NMF_Prediction>`_] [`Docker Hub <https://hub.docker.com/repository/docker/cbica/ccl_nmf_prediction_wrapped>`_]  - Lightweight estimation of CCL-NMF loading coefficients
+
+ComBatFam Harmonization [`GitHub <https://github.com/PennSIVE/ComBatFam_Pipeline>`_] [`Docker Hub <https://hub.docker.com/repository/docker/cbica/combatfam_harmonize_dlmuse>`_]  - Dataset harmonization tools
+
+SurrealGAN / PredCRD  [`GitHub <https://github.com/CBICA/PredCRD>`_] [`Docker Hub <https://hub.docker.com/repository/docker/cbica/surrealgan_predcrd_wrapped>`_]  - Predict continuous representation of disease along 5 principal dimensions
+
 
 Quick Links
 -----------
@@ -61,4 +83,4 @@ Quick Links
     :target: https://x.com/NiChart_AIBIL
     :alt: Twitter
 
-© 2024 CBICA. All Rights Reserved.
+© 2025 CBICA. All Rights Reserved.

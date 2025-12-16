@@ -60,9 +60,12 @@ def get_roi_indices(sel_roi, atlas):
     
     # Detect indices
     if atlas == 'muse':
-        df_derived = st.session_state.rois['muse']['df_derived']
-        list_roi_indices = df_derived[df_derived.Name == sel_roi].List.values[0]
-        return list_roi_indices
+        try:
+            df_derived = st.session_state.rois['muse']['df_derived']
+            list_roi_indices = df_derived[df_derived.Name == sel_roi].List.values[0]
+            return list_roi_indices
+        except:
+            return None
 
     elif atlas == 'wmls':
         list_roi_indices = [1]

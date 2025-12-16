@@ -1,5 +1,7 @@
-import streamlit as st
 import utils.utils_pages as utilpg
+utilpg.config_page()
+
+import streamlit as st
 import utils.utils_plots as utilpl
 import utils.utils_misc as utilmisc
 import utils.utils_mriview as utilmri
@@ -16,16 +18,11 @@ logger = setup_logger()
 logger.debug('Page: Explore Nichart')
 
 # Page config should be called for each page
-utilpg.config_page()
 utilpg.show_menu()
 utilpg.set_global_style()
 
-def view_synthseg() -> None:
-    """
-    Panel for viewing synthseg results
-    """    
-    # Select result type 
-    st.info('Coming soon!')
+if 'instantiated' not in st.session_state or not st.session_state.instantiated:
+    utilses.init_session_state()
 
 def view_dlmuse() -> None:
     """
@@ -38,6 +35,16 @@ def view_dlmuse() -> None:
         align='left'
     )   
 
+    ## FIXME (list of rois from data file to init listbox selections)
+    df = pd.read_csv(
+            os.path.join(
+                st.session_state.paths['resources'],
+                'reference_data', 'centiles', 'dlmuse_centiles_CN.csv' 
+            )
+    )
+    list_vars = ['Age', 'Sex'] + df.VarName.unique().tolist()
+
+
     if sel_res_type == 'Regional Volumes':
         var_groups_data = ['roi']
         pipeline = 'dlmuse'
@@ -45,20 +52,38 @@ def view_dlmuse() -> None:
         # Set centile selections
         st.session_state.plot_params['centile_values'] = st.session_state.plot_settings['centile_trace_types']
 
+        with st.sidebar:
+            sac.divider(label='Viewing Options', align='center', color='gray')
+            utilpl.user_add_plots(
+                st.session_state.plot_params
+            )
+            
+        utilpl.sidebar_flag_hide_setting()
+        utilpl.sidebar_flag_hide_legend()
+
         utilpl.panel_set_params_centile_plot(
             st.session_state.plot_params,
             var_groups_data,
-            pipeline
+            pipeline,
+            list_vars
         )
         utilpl.panel_show_centile_plots()
+
+        st.write()
 
     elif sel_res_type == 'Segmentation':
         ulay = st.session_state.ref_data["t1"]
         olay = st.session_state.ref_data["dlmuse"]        
+
+        with st.sidebar:
+            sac.divider(label='Viewing Options', align='center', color='gray')
+        utilpl.sidebar_flag_hide_setting()
+
         utilmri.panel_set_params(
             st.session_state.plot_params,
             ['roi'],
-            'muse'
+            'muse',
+            list_vars
         )
 
         utilmri.panel_view_seg(
@@ -82,14 +107,11 @@ def view_dlwmls() -> None:
     if sel_res_type == 'Segmentation':
         ulay = st.session_state.ref_data["fl"]
         olay = st.session_state.ref_data["dlwmls"]
-        mri_params = st.session_state.mri_params
 
-        utilmri.panel_set_params(
-            mri_params, ['roi'], 'wmls'
-        )
-
+        plot_params = st.session_state.plot_params
+        
         utilmri.panel_view_seg(
-            ulay, olay, mri_params
+            ulay, olay, 
         )
 
 def view_dlmuse_biomarkers() -> None:
@@ -133,7 +155,14 @@ def data_overview():
     '''
     with st.container(border=True):
         st.markdown(
-            ''' NiChart Reference Dataset is a large and diverse collection of MRI images from multiple studies. It was created as part of the ISTAGING project to develop a system for identifying imaging biomarkers of aging and neurodegenerative diseases. The dataset includes multi-modal MRI data, as well as carefully curated demographic, clinical, and cognitive variables from participants with a variety of health conditions. The reference dataset is a key component of NiChart for training machine learning models and for creating reference distributions of imaging measures and signatures, which can be used to compare NiChart values that are computed from the user data to normative or disease-related reference values.
+            '''
+            - NiChart Reference Dataset is a large and diverse collection of MRI images from multiple studies, created as part of the ISTAGING project to develop a system for identifying imaging biomarkers of aging and neurodegenerative diseases.
+
+            - The dataset includes multi-modal MRI data, as well as carefully curated demographic, clinical, and cognitive variables from participants with a variety of health conditions.
+
+            - The reference dataset is used for training machine learning models and for creating reference distributions of imaging measures and signatures
+
+            - Users can compare their data to normative or disease-related NiChart reference values.
             '''
         )
         st.image(
@@ -170,8 +199,12 @@ def pipeline_overview():
             index =  sel_index,
             key = '_sel_pipeline'
         )        
-        pname = pipelines.loc[pipelines.Name == sel_pipeline, 'Label'].values[0]
-        st.session_state.sel_pipeline = sel_pipeline
+        label_matches = pipelines.loc[pipelines.Name == sel_pipeline, 'Label'].values
+        if len(label_matches) == 0: # No selection
+            return
+        
+        pname = label_matches[0]
+        st.session_state.sel_pipeline = pname
         
         #sac.divider(label='Description', align='center', color='gray')
         
@@ -181,33 +214,37 @@ def results_overview():
     '''
     Select a pipeline and show overview
     '''
-    # Set flag for hiding the settings
-    if '_flag_hide_settings' not in st.session_state:
-        st.session_state['_flag_hide_settings'] = st.session_state.plot_settings['flag_hide_settings']
+    ## Set flag for hiding the settings
+    #if '_flag_hide_settings' not in st.session_state:
+        #st.session_state['_flag_hide_settings'] = st.session_state.plot_settings['flag_hide_settings']
 
-    def update_val():
-        st.session_state.plot_settings['flag_hide_settings'] = st.session_state['_flag_hide_settings']
+    #def update_val():
+        #st.session_state.plot_settings['flag_hide_settings'] = st.session_state['_flag_hide_settings']
 
-    with st.sidebar:
-        sac.divider(label='Plot Settings', align='center', color='gray')
-        st.checkbox(
-            'Hide Plot Settings',
-            key = '_flag_hide_settings',
-            on_change = update_val
-        )
+    #with st.sidebar:
+        #sac.divider(label='Plot Settings', align='center', color='gray')
+        #st.checkbox(
+            #'Hide Plot Settings',
+            #key = '_flag_hide_settings',
+            #on_change = update_val
+        #)
     
     # Show results
     with st.container(border=True):
-        if st.session_state.sel_pipeline == 'DLMUSE':
+        if st.session_state.sel_pipeline == 'dlmuse':
             view_dlmuse()
 
-        elif st.session_state.sel_pipeline == 'DLWMLS':
-            view_dlwmls()
+        elif st.session_state.sel_pipeline == 'dlwmls':
+            st.warning('Viewer not implemented for dlwmls')
+            #view_dlwmls()
 
 #st.info(
 st.markdown(
     """
     ### Explore Neuroimaging Chart
+    
+    - View an overview of the reference dataset, processing pipelines and imaging variables and biomarkers derived from the reference dataset
+    
     """
 )
 

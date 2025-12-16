@@ -10,10 +10,12 @@ except ImportError:
     boto3_available = False
 
 import utils.utils_menu as utilmenu
-import utils.utils_session as utilss
+import utils.utils_pages as utilpg
 
-utilss.config_page()
-utilmenu.menu()
+utilpg.config_page()
+utilpg.show_menu()
+utilpg.add_sidebar_options()
+utilpg.set_global_style()
 
 if boto3_available:
     try:

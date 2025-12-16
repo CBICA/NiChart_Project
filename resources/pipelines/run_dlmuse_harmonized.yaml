@@ -1,0 +1,30 @@
+pipeline_name: DLMUSE Brain Segmentation (Harmonized)
+description: |
+  Segmentation pipeline starting from T1-weighted MRI brain scans (harmonized to reference data).
+
+categories:
+  - image-processing
+  - segmentation
+  - feature-extraction
+  - harmonized
+
+requires:
+  - needs_T1
+  - needs_demographics
+  - csv_has_columns: [MRID, Age, Sex]
+
+steps:
+  - id: run_nichart_dlmuse
+    tool: nichart_dlmuse # MUST CORRESPOND EXACTLY to a tool in resources/tools dir
+    inputs:
+      t1_img: ${STUDY}/t1
+    outputs:
+      dlmuse_seg: ${STUDY}/dlmuse_seg
+      dlmuse_vol: ${STUDY}/dlmuse_vol
+  - id: harmonize_dlmuse
+    tool: harmonize_dlmuse
+    inputs:
+      dlmuse_vol_unharmonized: ${STUDY}/dlmuse_vol/DLMUSE_Volumes.csv
+      covariate_csv: ${STUDY}/participants/participants.csv
+    outputs: # Harmonization wrapper expects output location as dir
+      dlmuse_vol_harmonized: ${STUDY}/dlmuse_vol_harmonized

@@ -3,6 +3,12 @@ description: |
   Segmentation pipeline processing both T1 and FL images through
   DLMUSE and DLWMLS tools, followed by a shared reorientation step.
 
+categories:
+  []
+
+requires:
+  - needs_T1
+
 steps:
   - id: run_nichart_dlmuse
     tool: nichart_dlmuse # MUST CORRESPOND EXACTLY to a tool in resources/tools dir

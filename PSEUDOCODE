@@ -1,0 +1,42 @@
+Pseudocode description of NiChart_Project:
+
+INPUT: User data files, pipeline selection
+OUTPUT: Processed results and downloadable outputs
+
+1. INITIALIZE application (desktop or cloud mode)
+
+2. DATA UPLOAD phase:
+   - Accept user data files
+   - Validate file formats and integrity
+   - Store data in working directory
+
+3. PIPELINE SELECTION phase:
+   - Display available pipelines
+   - Filter pipelines compatible with uploaded data format
+   - User selects pipeline P from compatible set
+
+4. COMPATIBILITY CHECK phase:
+   - Analyze requirements of pipeline P
+   - Check uploaded data against requirements
+   - IF data incomplete or incompatible THEN:
+       - Prompt user for additional/corrected data
+       - GOTO step 2
+   - ENDIF
+
+5. PIPELINE EXECUTION phase:
+   - Load pipeline P configuration
+   - FOR each stage S in pipeline P DO:
+       - Execute computational stage S on data
+       - Validate intermediate outputs
+       - IF stage fails THEN report error and halt
+   - ENDFOR
+
+6. RESULTS PRESENTATION phase:
+   - Generate visualizations and summaries
+   - Display results in application interface
+   - Provide download options for:
+       - Raw output files
+       - Processed data
+       - Analysis reports
+
+7. TERMINATE or return to step 2 for new analysis

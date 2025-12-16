@@ -2,16 +2,23 @@ from typing import Dict, List, Union, Optional, Any
 from pydantic import BaseModel, Field, validator
 import os
 import yaml
+import glob
 from pathlib import Path
+import pandas as pd
 import subprocess
+import shutil
 import streamlit as st
 import json
 import boto3
+from datetime import datetime
 from botocore.exceptions import ClientError
 import utils.utils_pollstatus as ps
+import utils.utils_io as utilio
+import utils.utils_csvparsing as utilcsv
 import time
 import re
 from collections import defaultdict, deque
+from . import utils_gpu as utilgpu
 
 DEFAULT_TOOL_DEFINITION_PATH = Path(__file__).parent.parent.parent.parent / "resources/tools/"
 DEFAULT_PIPELINE_DEFINITION_PATH = Path(__file__).parent.parent.parent.parent / "resources/pipelines"
@@ -36,6 +43,15 @@ def is_safe_path(base_dir: Union[str, Path], target_path: Union[str, Path]) -> b
         return True
     except ValueError:
         return False
+    
+def remap_path(path: str, remap_dict: dict) -> str:
+    for old_prefix, new_prefix in remap_dict.items():
+        if path.startswith(old_prefix):
+            # Replace prefix, preserving the rest of the path
+            suffix = path[len(old_prefix):]
+            # Avoid double slashes
+            return os.path.join(new_prefix, suffix.lstrip('/'))
+    return path  # No remap found
 
 class IOField(BaseModel):
     type: str  # "file" or "directory"
@@ -104,14 +120,22 @@ class ToolSpec(BaseModel):
             return False # Pull failed for one reason or another
         return True # Pull success
     
-    def generate_docker_command(self, param_values: Dict[str, Union[int, float, bool, str]], mount_paths: Dict[str, str]) -> str:
+    def generate_docker_command(self, param_values: Dict[str, Union[int, float, bool, str]], mount_paths: Dict[str, str], path_remapping={}) -> str:
         # This line will throw if validation fails
         param_values = self.validate_params(param_values)
 
         # Construct any default docker args here
         global_docker_args = ['--ipc=host', '--detach']
         if self.resources.gpus != 0:
-            global_docker_args.append('--gpus all')
+            extra_args, extra_env, chosen = utilgpu.load_container_selection(st.session_state.paths['out_dir'])
+            if not chosen: # Fallback
+                global_docker_args.append('--gpus all')
+            else:
+                global_docker_args.extend(extra_args)
+                for k, v in extra_env.items():
+                    global_docker_args.append('-e')
+                    global_docker_args.append(f"{k}={v}")
+            #
 
         # Apply substitution for command template
         command_template = self.container["command"]
@@ -125,17 +149,29 @@ class ToolSpec(BaseModel):
         mount_args = []
         for label, config in self.mounts.items():
             host_path = mount_paths[label]
+            if path_remapping:
+                host_path = remap_path(host_path, path_remapping)  
             mode = config.mode
             is_output = False
             is_ofile = False
+            is_ifile = False
             if label in self.outputs:
                 is_output = True
                 if self.outputs[label].type == 'file':
                     is_ofile = True
+            elif label in self.inputs: # necessarily this is an input
+                if self.inputs[label].type =='file':
+                    is_ifile = True
+            else:
+                print(f"Mount label {label} not found in tool spec inputs or outputs.")
+                raise ValueError(f"Mount label {label} not found in tool spec inputs or outputs.")
+        
             if is_ofile: 
                 parent_host_path = Path(host_path).parent.resolve()
                 parent_container_path = Path(config.path_in_container).parent
                 mount_args.append(f"-v {parent_host_path}:{parent_container_path}:{mode}")
+            elif is_ifile:
+                mount_args.append(f"--mount type=bind,source={host_path},target={config.path_in_container}")
             else:
                 mount_args.append(f"-v {host_path}:{config.path_in_container}:{mode}")
 
@@ -187,9 +223,9 @@ def ensure_and_validate_mount_paths(
                 parent.mkdir(parents=True, exist_ok=True)
 
 
-def validate_user_request(tool_name: str, user_params: Dict, user_mounts: Dict[str, str], tool_registry_path: Union[str, Path] = DEFAULT_TOOL_DEFINITION_PATH) -> str:
+def validate_user_request(tool_name: str, user_params: Dict, user_mounts: Dict[str, str], tool_registry_path: Union[str, Path] = DEFAULT_TOOL_DEFINITION_PATH, path_remapping={}) -> str:
     # Assumes streamlit session state is set up.
-    base_mount_dir = Path(st.session_state.paths["dir_out"]).resolve()
+    base_mount_dir = Path(st.session_state.paths["out_dir"]).resolve()
     tool_dir = Path(tool_registry_path).resolve()
     yaml_file = tool_dir / f"{tool_name}.yaml"
     if not yaml_file.exists():
@@ -203,7 +239,7 @@ def validate_user_request(tool_name: str, user_params: Dict, user_mounts: Dict[s
 
     ensure_and_validate_mount_paths(user_mounts, base_mount_dir, input_labels, output_labels)
 
-    return tool_spec.generate_docker_command(user_params, user_mounts)
+    return tool_spec.generate_docker_command(user_params, user_mounts, path_remapping)
 
 def stringify_mounts(mounts_dict: Dict[str, Union[str, Path]]) -> Dict[str, str]:
     '''Utility function that converts mount dicts of Path objects to string form. 
@@ -219,7 +255,8 @@ def submit_job(
     user_mounts: Dict[str, str],
     id_token: str | None = None,
     execution_mode: str = "any", #"cloud", "local",
-    do_s3_cli_transfer: bool = False # True will bypass FSX to use direct S3 file upload/download
+    do_s3_cli_transfer: bool = False, # True will bypass FSX to use direct S3 file upload/download
+    local_path_remapping: dict = {}, # Pass a container-host path translation as needed
 ) -> Union[str, subprocess.Popen]:
     """
     Submits a job either locally or via an AWS Lambda depending on Streamlit session state.
@@ -308,10 +345,14 @@ def submit_job(
     else:
         # === LOCAL MODE ===
         print("DEBUG: Local mode job submission.")
+        # Grab local container-host path remapping (not needed on cloud)
+        path_remapping = local_path_remapping
+        # Generate command
         docker_command = validate_user_request(
             tool_name=tool_name,
             user_params=user_params,
             user_mounts=user_mounts,
+            path_remapping=path_remapping
         )
 
         print(f"Running on local docker: {docker_command}")
@@ -350,9 +391,12 @@ def submit_and_run_job_sync(
     id_token: str | None = None,
     execution_mode: str = "any",  # can be "cloud", "local", or "any"
     progress_bar=None,
+    status_box=None,
     log=None,
+    metadata_path: Path = None,
     poll_interval: int = 15,
-    do_s3_cli_transfer: bool = False # True will bypass FSX to use direct S3 file upload/download
+    do_s3_cli_transfer: bool = False, # True will bypass FSX to use direct S3 file upload/download
+    local_path_remapping: dict = {}, # Pass a container-host path remapping
 ) -> Dict[str, Any]:
     
     result = submit_job(
@@ -361,7 +405,8 @@ def submit_and_run_job_sync(
         user_mounts=user_mounts,
         id_token=id_token,
         execution_mode=execution_mode,
-        do_s3_cli_transfer=do_s3_cli_transfer
+        do_s3_cli_transfer=do_s3_cli_transfer,
+        local_path_remapping=local_path_remapping,
     )
 
     if not result["success"]:
@@ -385,6 +430,7 @@ def submit_and_run_job_sync(
 
     if progress_bar:
         progress_bar.set_description(f"Job {job_id} running...")
+    
 
     # === CLOUD MODE (AWS Batch) ===
     if mode == "cloud":
@@ -398,7 +444,8 @@ def submit_and_run_job_sync(
 
                 if progress_bar:
                     progress_bar.set_description(f"Cloud job status: {status}")
-
+                if status_box:
+                    status_box.update(label=f"Cloud job: {status}", state="running")
                 if log:
                     current_logs = handle.get_logs()
                     log.update_live(current_logs)
@@ -424,16 +471,24 @@ def submit_and_run_job_sync(
         if do_s3_cli_transfer:
             if log:
                 log.info(f"Performing post-job sync for job {job_id}.")
+            if status_box:
+                status_box.update(label=f"Post-sync for job {job_id}...", state="running")
             print("DEBUG: Syncing from S3 to mount paths via AWS CLI.")
-            for mount_path in user_mounts.values():
+            for key, mount_path in user_mounts.items():
                 #absolute_mount_path = Path(mount_path).resolve()
                 print(f"DEBUG: Syncing user-mount path {mount_path}")
                 cmd = f"aws s3 sync s3://cbica-nichart-io/{mount_path} {mount_path} --exact-timestamps"
                 returncode = os.system(cmd)
-                if returncode > 0:
-                    print(f"DEBUG: Post-job sync failed!")
-                    log.error(f"Post job sync failed for job {job_id}.")
-                    raise RuntimeError(f"Cloud job {job_id} completed successfully, but post-job sync failed. Please submit an issue report.")
+                if os.WEXITSTATUS(returncode) > 0:
+                    print(f"DEBUG: Post-job sync failed, retrying appropriately for single-file.")
+                    log.error(f"Post job sync failed for job {job_id}. Possibly due to single-file, retrying with applicable command.")
+                    sf_cmd = f"aws s3 cp s3://cbica-nichart-io/{mount_path} {mount_path}"
+                    sf_returncode = os.system(sf_cmd)
+                    if os.WEXITSTATUS(sf_returncode) > 0:
+                        log.error(f"Single-file sync also failed. Sync is uncompletable.")
+                        raise RuntimeError(f"Cloud job {job_id} completed successfully, but post-job sync (including backup single-file sync) failed with exit codes {os.WEXITSTATUS(returncode)}, {os.WEXITSTATUS(sf_returncode)}. Please submit an issue report.")
+                    else:
+                        log.info("Single-file sync succeeded, so this error can be ignored.")
             print("DEBUG: Done syncing from S3 after job completion.")  
             if log:
                 log.info(f"Done post-job sync for job {job_id}.")  
@@ -461,11 +516,14 @@ def submit_and_run_job_sync(
                 log.update_live(current_logs)
             if progress_bar:
                 progress_bar.set_description(f"Local container job status: {status}")
-
+            if status_box:
+                status_box.update(label=f"Local container job: {status}", state="running")
             if status in ["exited", "paused", "removing", "dead"]:
                 exitcode = handle.exitcode()
                 log.commit(current_logs)
                 log.clear_live()
+                if status_box:
+                    status_box.update(label='Local container job finished', state="complete")
                 break
             time.sleep(poll_interval)
 
@@ -476,6 +534,8 @@ def submit_and_run_job_sync(
                 "job_id": job_id
             }
         else: ## Job failed, fail loudly
+            if status_box:
+                status_box.update(label='Local container job FAILED, see error below.', state='error')
             raise RuntimeError(f"Docker container job {job_id} failed with exit code {exitcode}")
             
 
@@ -524,13 +584,421 @@ def parse_pipeline_steps(pipeline_yaml):
 
     return execution_order, step_map
 
+@st.cache_data
+def parse_pipeline_requirements(pipeline_id):
+    pipeline_path = DEFAULT_PIPELINE_DEFINITION_PATH / f"{pipeline_id}.yaml"
+    if not pipeline_path.exists():
+        raise FileNotFoundError(f"Pipeline definition '{pipeline_id}' not found at {pipeline_path}")
+
+    with open(pipeline_path, 'r') as f:
+        pipeline_yaml = yaml.safe_load(f)
+    items = pipeline_yaml.get('requires', []) or []
+    reqs_set, req_params, req_order = set(), {}, []
+
+    for entry in items:
+        if isinstance(entry, str):
+            name, params = entry, None
+        elif isinstance(entry, dict):
+            (name, params), = entry.items()
+        else:
+            raise ValueError(f"Bad requirement entry {entry!r} when parsing pipeline requirements for {pipeline_id}.")
+        
+        reqs_set.add(name)
+        if params is not None:
+            req_params[name] = params
+        req_order.append((name, params))
+
+    return reqs_set, req_params, req_order
+
+def check_requirements_met_nopanel(pipeline_name, harmonized):
+    label = get_pipeline_label_by_name(pipeline_name)
+    pipeline_id = get_pipeline_id_by_label(label, harmonized=harmonized)
+    if pd.isna(pipeline_id) or not pipeline_id:
+        pipeline_id = get_pipeline_id_by_label(label, harmonized=not harmonized)
+    print(f"DEBUG: Name {pipeline_name} Label {label} Id {pipeline_id}")
+    reqs_set, reqs_params, req_order = parse_pipeline_requirements(pipeline_id)
+
+    counts = utilio.compute_counts()
+    items = utilio.classify_cardinality(req_order, counts)
+    
+    # assume good unless reqs violated
+    result = True
+    blockers = []
+    for item in items:
+        if item.status == 'red':
+            #st.error(f"Item {item.name} error with status {item.status}") # Debug 
+            result = False # Not all checks met
+            if item.name == "needs_T1":
+                blockers.append(f"T1 scans appear to be missing. Please check that images were uploaded.")
+            elif item.name == "needs_FLAIR":
+                blockers.append(f"FLAIR scans appear to be missing. Please check that images were uploaded.")
+            elif item.name == "needs_demographics":
+                blockers.append(f"Participants CSV appears to be missing or malformed. Please check that this data was provided.")
+            elif item.name == "csv_has_columns":
+                required_cols = reqs_params.get("csv_has_columns", [])
+                csv_path = os.path.join(st.session_state.paths["project"], 'participants' ,'participants.csv')
+                csv_report = utilcsv.validate_csv(csv_path=csv_path, required_cols=required_cols, mrid_col="MRID")
+                severity = utilio._csv_severity(csv_report)
+                if csv_report.file_ok:
+                    if csv_report.missing_cols:
+                        blockers.append("Participants CSV missing required columns: " + ", ".join(csv_report.missing_cols))
+                else:
+                    blockers.append("Could not locate the participants CSV. Make sure it exists!")
+            else:
+                raise ValueError(f"Requirement {item.name} for pipeline {pipeline_id} has no associated rule. Please submit a bug report.")
+            blockers.append(item)
+        if item.status == 'yellow':
+            if item.name == "needs_T1":
+                blockers.append(f"T1 scan count does not match the number of subjects available in other modalities or the participants CSV {item.note}. Please check that all images were uploaded.")
+            elif item.name == "needs_FLAIR":
+                blockers.append(f"FLAIR scan count does not match the number of subjects available in other modalities or the participants CSV {item.note}. Please check that all images were uploaded.")
+            elif item.name == "needs_demographics":
+                blockers.append(f"Participants CSV row count does not match the number of subjects available in scans {item.note}. Please check that all desired participants have CSV entries.")
+            elif item.name == "csv_has_columns":
+                required_cols = reqs_params.get("csv_has_columns", [])
+                csv_path = os.path.join(st.session_state.paths["project"], 'participants' ,'participants.csv')
+                csv_report = utilcsv.validate_csv(csv_path=csv_path, required_cols=required_cols, mrid_col="MRID")
+                severity = utilio._csv_severity(csv_report)
+                if csv_report.file_ok:
+                    if csv_report.missing_cols:
+                        blockers.append("Participants CSV missing required columns: " + ", ".join(csv_report.missing_cols))
+                else:
+                    blockers.append("Could not locate the participants CSV. Make sure it exists!")
+            else:
+                raise ValueError(f"Requirement {item.name} for pipeline {pipeline_id} has no associated rule. Please submit a bug report.")
+    return result, blockers
+
+
+def check_requirements_met_panel(pipeline_name):
+    # That's right, emojis in the code. >:^)
+    STATUS_ICON = {"green": "✅", "yellow": "⚠️", "red": "❌"}
+    REQ_TO_HUMAN_READABLE = {
+        'needs_T1': 'T1 Scans',
+        'needs_FLAIR': 'FLAIR Scans',
+        'needs_demographics': 'Participants CSV', 
+    }
+    pipeline = st.session_state.sel_pipeline
+    pipeline_id = get_pipeline_id_by_label(pipeline, harmonized=st.session_state.do_harmonize)
+    reqs_set, reqs_params, req_order = parse_pipeline_requirements(pipeline_id)
+
+    # need to generate counts
+    counts = utilio.compute_counts()
+    
+    items = utilio.classify_cardinality(req_order, counts)
+    
+    count_max_key = max(counts, key=counts.get)
+    count_max_value = counts[count_max_key]
+    count_diffs = {key: abs(counts[key]-count_max_value) for key in counts.keys() if key != count_max_key}
+
+    for item in items:
+        icon = STATUS_ICON[item.status]
+        expanded = (item.status != "green")
+        
+        label = f"{icon} {REQ_TO_HUMAN_READABLE[item.name]} - {item.note}"
+        with st.expander(label, expanded=expanded):
+            if item.name == "needs_T1":
+                st.write("Please upload T1 images.")
+            elif item.name == "needs_FLAIR":
+                st.write("Please upload FLAIR images.")
+            elif item.name == "needs_demographics":
+                st.write("Please upload a participants CSV via the file uploader.")
+            elif item.name == "csv_has_columns":
+                pass # Handled in needs_demographics case
+            else:
+                raise ValueError(f"Requirement {item.name} for pipeline {pipeline_id} has no associated rule. Please submit a bug report.")
+    if "needs_demographics" in reqs_set:
+        required_cols = reqs_params.get("csv_has_columns", [])
+        csv_path = os.path.join(st.session_state.paths["project"], 'participants' ,'participants.csv')
+        csv_report = utilcsv.validate_csv(csv_path=csv_path, required_cols=required_cols, mrid_col="MRID")
+        severity = utilio._csv_severity(csv_report)
+        icon = STATUS_ICON[severity]
+        row_note = ""
+        # Build a concise label
+        if not csv_report.file_ok:
+            note = "CSV file not found."
+        elif not csv_report.columns_ok:
+            note = f"Missing columns: {', '.join(csv_report.missing_cols)}"
+        elif csv_report.issues:
+            note = f"{len(csv_report.issues)} issue(s) detected"
+        else:
+            note = "All required columns found and passed validation; no issues"
+        if severity == "green":
+            if count_max_key == "needs_demographics":
+                for key, val in count_diffs.items():
+                    if val < count_max_value:
+                        row_note += f"{REQ_TO_HUMAN_READABLE[key]}: {val} MRIDs are in participants CSV but not in available.\n"
+                        severity = "yellow"
+            else:
+                for key, val in count_diffs.items():
+                    if count_diffs["needs_demographics"] > val:
+                        row_note += f"{REQ_TO_HUMAN_READABLE[key]}: {val} CSV entries are present which have no associated scan.\n"
+                    elif count_diffs["needs_demographics"] < val:
+                        row_note += f"{REQ_TO_HUMAN_READABLE[key]}: {val} scans are present which have no participants CSV entry.\n"
+
+        csv_expanded = (severity != "green")
+        with st.expander(f"{icon} Participants CSV - {note}", expanded=csv_expanded):
+            if csv_report.file_ok:
+                if csv_report.missing_cols:
+                    st.error("Missing: " + ", ".join(csv_report.missing_cols))
+                if csv_report.present_cols:
+                    st.success("Present: " + ", ".join(csv_report.present_cols))
+                if csv_report.extra_cols:
+                    st.info("Extra (not used for this pipeline): " + ", ".join(csv_report.extra_cols))
+                st.caption(f"Rows in CSV: {csv_report.rows}")
+
+                if csv_report.issues:
+                    st.subheader("Issues")
+                    issues_df = utilio._issues_dataframe(csv_report.issues)
+                    group_by_col = st.selectbox(
+                        "Group issues by", ["(none)", "column", "reason"],
+                        index=1 if "column" in issues_df.columns else 0,      
+                    )
+                    if group_by_col != "(none)" and group_by_col in issues_df.columns:
+                        for key, sub in issues_df.groupby(group_by_col):
+                            st.markdown(f"**{group_by_col}: {key}** - {len(sub)} row(s)")
+                            st.dataframe(sub, use_container_width=True, height=220)
+                    else:
+                        st.dataframe(issues_df, use_container_width=True, height=320)
+                
+    ready = True
+    if any(s.status == "red" for s in items):
+        ready = False
+    
+    if "needs_demographics" in reqs_set:
+        ready = ready and (csv_report is not None) and utilio._csv_severity(csv_report) == "green"
+    if ready:
+        st.success("All requirements satisfied. You can proceed.")
+    else:
+        st.info("Resolve the issues above to proceed. Click to expand each requirement for more details.")
+
+@st.cache_data
+def parse_pipeline_categories(pipeline_id):
+    pipeline_path = DEFAULT_PIPELINE_DEFINITION_PATH / f"{pipeline_id}.yaml"
+    if not pipeline_path.exists():
+        raise FileNotFoundError(f"Pipeline definition '{pipeline_id}' not found at {pipeline_path}")
+
+    with open(pipeline_path, 'r') as f:
+        pipeline_yaml = yaml.safe_load(f)
+
+    return pipeline_yaml.get('categories', [])
+
+@st.cache_data
+def get_all_pipeline_ids():
+    directory = DEFAULT_PIPELINE_DEFINITION_PATH
+    yaml_files = glob.glob(os.path.join(directory, "*.yaml"))
+    basenames = [os.path.splitext(os.path.basename(f))[0] for f in yaml_files]
+    return basenames
+
+def pipeline_is_harmonizable(pipeline_label):
+    directory = DEFAULT_PIPELINE_DEFINITION_PATH
+    pipelines = pd.read_csv(os.path.join(directory, 'list_pipelines.csv'))
+    row = pipelines.loc[pipelines["Label"] == pipeline_label, "HarmonizedPipelineYaml"]
+    if row.empty:
+        return False
+    value = row.iloc[0]
+
+    if pd.isna(value) or str(value).strip() == "":
+        return False
+    
+    return True
+
+@st.cache_data
+def pipeline_is_enabled_by_name(pipeline_name):
+    directory = DEFAULT_PIPELINE_DEFINITION_PATH
+    pipelines = pd.read_csv(os.path.join(directory, 'list_pipelines.csv'))
+    row = pipelines.loc[pipelines["Name"] == pipeline_name, "EnabledInFrontEnd"]
+    val = row.iloc[0] if not row.empty else None
+    if str(val) == "True":
+        return True
+    return False
+
+@st.cache_data
+def get_pipeline_name_by_label(pipeline_label):
+    directory = DEFAULT_PIPELINE_DEFINITION_PATH
+    pipelines = pd.read_csv(os.path.join(directory, 'list_pipelines.csv'))
+    row = pipelines.loc[pipelines["Label"] == pipeline_label, "Name"]
+    return row.iloc[0] if not row.empty else None    
+
+@st.cache_data
+def get_pipeline_label_by_name(pipeline_name):
+    directory = DEFAULT_PIPELINE_DEFINITION_PATH
+    pipelines = pd.read_csv(os.path.join(directory, 'list_pipelines.csv'))
+    row = pipelines.loc[pipelines["Name"] == pipeline_name, "Label"]
+    return row.iloc[0] if not row.empty else None      
+
+@st.cache_data
+def get_pipeline_id_by_label(pipeline_label, harmonized=False):
+    if harmonized:
+        field_to_retrieve = "HarmonizedPipelineYaml"
+    else:
+        field_to_retrieve = "PipelineYaml"
+
+    directory = DEFAULT_PIPELINE_DEFINITION_PATH
+    pipelines = pd.read_csv(os.path.join(directory, 'list_pipelines.csv'))
+    row = pipelines.loc[pipelines["Label"] == pipeline_label, field_to_retrieve]
+    return row.iloc[0] if not row.empty else None
+
+@st.cache_data
+def overall_pipeline_category_listing():
+    # Returns a dictionary mapping a category to a list of associated pipelines.
+    # Useful for rendering a subset of pipelines
+    res_dict = {}
+    pipelines = get_all_pipeline_ids()
+    for pipeline_id in pipelines:
+        categories = parse_pipeline_categories(pipeline_id)
+        for category in categories:
+            if category in res_dict:
+                res_dict[category].append(pipeline_id)
+            else:
+                res_dict[category] = [pipeline_id]
+    return res_dict
+
+@st.cache_data
+def overall_pipeline_requirements_listing():
+    res_dict = {}
+    pipelines = get_all_pipeline_ids()
+    for pipeline_id in pipelines:
+        req_set, req_params, req_order = parse_pipeline_requirements(pipeline_id)
+        res_dict[pipeline_id] = req_set
+    return res_dict
+
+def load_metadata(metadata_path: Path) -> Dict:
+    if metadata_path is None:
+        return {}
+    if metadata_path.exists():
+        with open(metadata_path, 'r') as f:
+            return json.load(f)
+    else:
+        return {}
+
+def save_metadata(metadata_path: Path, metadata: Dict):
+    with open(metadata_path, 'w') as f:
+        json.dump(metadata, f, indent=2)
+
+def generate_metadata_key(tool_id: str,
+                          inputs: Dict,
+                          params: Dict):
+    def sorted_str(d: Dict) -> str:
+        return json.dumps(d, sort_keys=True)
+    return f"{tool_id}|{sorted_str(inputs)}|{sorted_str(params)}"
+
+def should_skip_step(metadata_path: Path,
+                     tool_id: str,
+                     inputs: Dict,
+                     outputs: Dict,
+                     params: Dict) -> bool:
+    metadata =  load_metadata(metadata_path)
+    key = generate_metadata_key(tool_id, inputs, params)
+    if key not in metadata:
+        return False
+    
+    record = metadata[key]
+    if record["status"] != "success":
+        return False
+    
+    finished_time = datetime.fromisoformat(record["finished_time"])
+
+    # Check mtime of all input files/dirs
+    input_mtime = 0
+    for path_str in inputs.values():
+        path = Path(path_str)
+        if path.is_file():
+            input_mtime = max(input_mtime, path.stat().st_mtime)
+        elif path.is_dir():
+            mtime = max((f.stat().st_mtime for f in path.rglob('*')), default=0)
+            input_mtime = max(input_mtime, mtime)
+
+    if finished_time.timestamp() > input_mtime:
+        # Copy outputs to new locations if output paths differ
+        for key_out, prev_output_path in record["outputs"].items():
+            new_output_path = outputs.get(key_out)
+            if new_output_path and new_output_path != prev_output_path:
+                src = Path(prev_output_path)
+                dst = Path(new_output_path)
+                try:
+                    if src.is_dir():
+                        shutil.copytree(src, dst, dirs_exist_ok=True)
+                    else:
+                        dst.parent.mkdir(parents=True, exist_ok=True)
+                        shutil.copy2(src, dst)
+                except Exception as e:
+                    return False
+        return True
+    return False
+
+def record_step_submission(metadata_path: Path,
+                           tool_id: str,
+                           inputs: Dict,
+                           outputs: Dict,
+                           params: Dict
+                           ):
+    metadata = load_metadata(metadata_path)
+    key = generate_metadata_key(tool_id, inputs, params)
+    metadata[key] = {
+        "tool": tool_id,
+        "inputs": inputs,
+        "params": params,
+        "outputs": outputs,
+        "submitted_time": datetime.utcnow().isoformat(),
+        "status": "pending"
+    }
+    save_metadata(metadata_path, metadata)
+
+def record_step_completion(metadata_path: Path,
+                           tool_id: str,
+                           inputs: Dict,
+                           outputs: Dict,
+                           params: Dict,
+                           status: str = "success"
+                           ):
+    metadata = load_metadata(metadata_path)
+    key = generate_metadata_key(tool_id, inputs, params)
+    
+    entry = metadata.get(key, {
+        "tool": tool_id,
+        "inputs": inputs,
+        "params": params,
+        "outputs": outputs or {},
+        "submitted_time": datetime.utcnow().isoformat()
+    })
+
+    entry["finished_time"] = datetime.utcnow().isoformat()
+    entry["status"] = status
+    if outputs:
+        entry["outputs"] = outputs
+    
+    metadata["key"] = entry
+    save_metadata(metadata_path, metadata)
+    
+
+def clear_all_metadata(metadata_path: Path):
+    if metadata_path.exists():
+        metadata_path.unlink()
+
+def clear_step_metadata(metadata_path: Path,
+                        tool_id: str,
+                        inputs: Dict,
+                        params: Dict):
+    metadata = load_metadata(metadata_path)
+    key = generate_metadata_key(tool_id, inputs, params)
+    if key in metadata:
+        del metadata[key]
+        save_metadata(metadata_path, metadata)
+
 def run_pipeline(pipeline_id: str,
                 global_vars: Dict[str, str],
                 pipeline_progress_bar=None,
                 process_progress_bar=None,
                 execution_mode='cloud',
-                log=None
+                process_status_box=None,
+                log=None,
+                metadata_location=None,
+                reuse_cached_steps=True,
+                local_path_remapping={},
                 ):
+    if metadata_location is not None:
+        metadata_location = Path(metadata_location)
+
     # Resolve pipeline file
     pipeline_path = DEFAULT_PIPELINE_DEFINITION_PATH / f"{pipeline_id}.yaml"
     if not pipeline_path.exists():
@@ -545,14 +1013,15 @@ def run_pipeline(pipeline_id: str,
     total_steps = len(order)
     current_step = 0
     if pipeline_progress_bar:
-        pipeline_progress_bar.reset(total=total_steps)
+        pipeline_progress_bar.reset(total=total_steps+1)
     for sid in order:
         if process_progress_bar:
-            process_progress_bar.reset(total=4)
+            process_progress_bar.reset(total=total_steps+1)
         if pipeline_progress_bar:
             pipeline_progress_bar.update(1)
         step = step_map[sid]
         tool_id = step["tool"]
+
         log.info(f"Starting execution of pipeline step {tool_id}.")
         tool_yaml = DEFAULT_TOOL_DEFINITION_PATH / f"{tool_id}.yaml"
         tool = load_tool_spec_from_yaml(tool_yaml)
@@ -564,26 +1033,87 @@ def run_pipeline(pipeline_id: str,
         resolved_params = step.get("params", {})
        
         print(f"Submitting job: {sid} ({tool.name})")
+        if pipeline_progress_bar:
+            pipeline_progress_bar.set_description(f"Submitting pipeline step {tool_id}...")
         if process_progress_bar:
-            process_progress_bar.set_description(f"Running tool {tool_id}...")
+            process_progress_bar.set_description(f"Submitting pipeline step {tool_id}...")
+        if process_status_box:
+            process_status_box.update(label=f"Submitting pipeline step: {tool_id}...")
 
+        ## Fill this in with deduplication logic
+        if metadata_location is not None:
+            # Can use metadata to deduplicate pipeline steps, check it
+            if not reuse_cached_steps:
+                clear_step_metadata(
+                    metadata_path=metadata_location,
+                    tool_id=tool_id,
+                    inputs=resolved_inputs,
+                    params=resolved_params
+                )
+            elif should_skip_step(
+                metadata_path=metadata_location,
+                tool_id=tool_id,
+                inputs=resolved_inputs,
+                params=resolved_params,
+                outputs=resolved_outputs
+            ):
+                log.info(f"[CACHE] Skipping step: {tool_id} because it was determined that a previous execution could be reused.")
+                continue # Skip to next pipeline step
+        if pipeline_progress_bar:
+            pipeline_progress_bar.set_description(f"Running {tool_id}...")
+        if process_progress_bar:
+            process_progress_bar.set_description(f"Running {tool_id}...")
+        if process_status_box:
+            process_status_box.update(label=f"Running {tool_id}...")
+
+        # If we reach here, the step must be executed.
+        record_step_submission(metadata_path=metadata_location,
+                           tool_id=tool_id,
+                           inputs=resolved_inputs,
+                           outputs=resolved_outputs,
+                           params=resolved_params)
+        
         result = submit_and_run_job_sync(
                     tool_name=tool_id,
                     user_params=resolved_params,
                     user_mounts=resolved_total_mounts,
                     execution_mode=execution_mode,
                     progress_bar=process_progress_bar,
+                    status_box=process_status_box,
                     log=log,
+                    metadata_path=metadata_location,
+                    do_s3_cli_transfer=False,
+                    local_path_remapping=local_path_remapping,
         )
 
         if result['status'] == 'success':
+            record_step_completion(metadata_path=metadata_location,
+                                   tool_id=tool_id,
+                                   inputs=resolved_inputs,
+                                   outputs=resolved_outputs,
+                                   params=resolved_params,
+                                   status="success")
             print(f"Step {sid}, {tool_id} finished succesfully.")
             log.info(f"Pipeline step {tool_id} finished successfully")
         else: # Step failed, loudly fail
-            log.error(f"Pipeline step {tool_id} failed.")
+            record_step_completion(metadata_path=metadata_location,
+                                   tool_id=tool_id,
+                                   inputs=resolved_inputs,
+                                   outputs=resolved_outputs,
+                                   params=resolved_params,
+                                   status="failure")
+            log.error(f"Pipeline step {tool_id} failed with status {result['status']}.")
             print(f"Step {sid}, {tool_id} failed with status {result["status"]}, see error log:")
             print(f"Error message: {result["error_message"]}")
+            if process_progress_bar:
+                process_progress_bar.set_description(f"Running {tool_id}...")
+            if process_status_box:
+                process_status_box.update(label=f"Pipeline failed", state="error")
             raise RuntimeError(result["error_message"])
         step_outputs[sid] = resolved_outputs  # Used for future interpolation
     log.info(f"Pipeline {pipeline_id} completed successfully.")
+    if process_progress_bar:
+        process_progress_bar.set_description(f"Pipeline finished")
+    if process_status_box:
+        process_status_box.update(label=f"Pipeline finished", state="complete")
     return step_outputs

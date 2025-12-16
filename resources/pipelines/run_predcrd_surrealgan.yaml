@@ -1,0 +1,30 @@
+pipeline_name: SurrealGAN R-Score Prediction
+description: |
+  Prediction of SurrealGAN R-Scores along 5 disease progression dimensions using T1-weighted MRI brain scans via DLMUSE.
+
+categories:
+  - inference
+  - regression
+  - surrealgan
+  - predcrd
+
+requires:
+  - needs_T1
+  - needs_demographics
+  - csv_has_columns: [MRID, Age, Sex]
+
+steps:
+  - id: run_nichart_dlmuse
+    tool: nichart_dlmuse # MUST CORRESPOND EXACTLY to a tool in resources/tools dir
+    inputs:
+      t1_img: ${STUDY}/t1
+    outputs:
+      dlmuse_seg: ${STUDY}/dlmuse_seg
+      dlmuse_vol: ${STUDY}/dlmuse_vol
+  - id: run_predcrd_surrealgan
+    tool: predcrd_surrealgan # MUST CORRESPOND EXACTLY to a tool in resources/tools dir
+    inputs:
+      demog_csv: ${STUDY}/participants/participants.csv
+      dlmuse_vol: ${STUDY}/dlmuse_vol/DLMUSE_Volumes.csv
+    outputs:
+      surrealgan_csv: ${STUDY}/ml_biomarkers/SurrealGAN_RScores.csv

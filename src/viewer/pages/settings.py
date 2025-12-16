@@ -1,9 +1,9 @@
 import streamlit as st
 import utils.utils_pages as utilpg
-#import utils.utils_doc as utildoc
-import utils.utils_io as utilio
 import utils.utils_session as utilses
 import utils.utils_cmaps as utilcmap
+import utils.utils_containers as utilcontainer
+import utils.utils_gpu as utilgpu
 import os
 
 from utils.utils_logger import setup_logger
@@ -18,6 +18,9 @@ utilpg.config_page()
 utilpg.show_menu()
 utilpg.set_global_style()
 
+if 'instantiated' not in st.session_state or not st.session_state.instantiated:
+    utilses.init_session_state()
+
 def panel_models_path():
     """
     Panel for selecting models
@@ -30,7 +33,7 @@ def panel_misc() -> None:
     Panel for setting various parameters
     """
     is_cloud_mode = st.session_state.app_type == "cloud"
-    if st.checkbox("Switch to cloud?", value=is_cloud_mode):
+    if st.checkbox("Switch to cloud? ", value=is_cloud_mode):
         st.session_state.app_type = "cloud"
     else:
         st.session_state.app_type = "desktop"
@@ -57,6 +60,13 @@ def panel_debug_options():
 def panel_plot_colors():
     utilcmap.panel_update_cmaps()
 
+def panel_container_management():
+    utilcontainer.panel_manage_containers()
+
+def panel_gpu_settings():
+    utilgpu.panel_select_gpu()
+
+
 #st.info(
 st.markdown(
     """
@@ -66,10 +76,10 @@ st.markdown(
 
 tab = sac.tabs(
     items=[
-        sac.TabsItem(label='Paths'),
         sac.TabsItem(label='Plot Colors'),
-        sac.TabsItem(label='Debug'),
         sac.TabsItem(label='Misc'),
+        sac.TabsItem(label='Manage Containers'),
+        sac.TabsItem(label='GPU'),
     ],
     size='lg',
     align='left'
@@ -79,16 +89,20 @@ if tab == 'Plot Colors':
     with st.container(border=True):
         panel_plot_colors()
 
-elif tab == 'Debug':
-    with st.container(border=True):
-        panel_debug_options()
-
 elif tab == 'Misc':
     with st.container(border=True):
         panel_misc()
 
+elif tab == 'Manage Containers':
+    with st.container(border=True):
+        panel_container_management()
+
+elif tab == 'GPU':
+    with st.container(border=True):
+        panel_gpu_settings()
+
 # Show selections
-utilses.disp_selections()
+#utilses.disp_selections()
 
 # Show session state vars
 if st.session_state.mode == 'debug':

@@ -1,7 +1,9 @@
-import streamlit as st
 import utils.utils_pages as utilpg
-import utils.utils_io as utilio
+utilpg.config_page()
+
+import streamlit as st
 import utils.utils_plots as utilpl
+import utils.utils_io as utilio
 import utils.utils_mriview as utilmri
 import utils.utils_data_view as utildv
 import utils.utils_session as utilses
@@ -16,75 +18,87 @@ logger = setup_logger()
 logger.debug('Page: View Results')
 
 # Page config should be called for each page
-utilpg.config_page()
 utilpg.show_menu()
 utilpg.set_global_style()
 
-def view_project_folder():
-    """
-    Panel for viewing files in a project folder
-    """
-    with st.container(border=True):
-        in_dir = st.session_state.paths['project']
-        utildv.data_overview(in_dir)
+if 'instantiated' not in st.session_state or not st.session_state.instantiated:
+    utilses.init_session_state()
 
 def select_data_files():
     """
     Panel for merging selected data files
-    """
-    with st.container(border=True):
-        in_dir = st.session_state.paths['project']
-        utildv.select_files(in_dir)
+    """    
+    tab = sac.tabs(
+        items=[
+            sac.TabsItem(label='Select'),
+            sac.TabsItem(label='View'),
+            sac.TabsItem(label='Reset'),
+        ],
+        size='lg',
+        align='left'
+    )
+    
+    out_dir = os.path.join(
+        st.session_state.paths['project'], 'data_merged'
+    )
 
-def panel_data_merge():
-    '''
-    Detect all csv files and merge them
-    '''
-    in_dir = st.session_state.paths['project']
-    utildv.data_merge(in_dir)
+    if tab == 'Select':
+        with st.container(border=True):
+            in_dir = st.session_state.paths['project']
+            utildv.select_files(in_dir)
+
+    elif tab == 'View':
+        try:
+            fname = os.path.join(
+                out_dir, 'data_merged.csv'
+            )
+            df_data = pd.read_csv(fname)
+            st.dataframe(df_data)
+        except:
+            st.warning('Could not read data file!')
+        
+    elif tab == 'Reset':
+        st.info(f'Out folder name: {out_dir}')
+        if st.button("Delete"):
+            utilio.remove_dir(out_dir)
 
 def plot_vars():
     """
     Panel for viewing dlmuse results
-    """    
-    st.session_state.plot_data['df_data'] = utilpl.read_data(st.session_state.paths['plot_data']) 
-    var_groups_data = ['demog', 'roi']
-    var_groups_hue = ['cat_vars']
+    """
+    csv_plot = os.path.join(
+        st.session_state.paths['project'], 'data_merged', 'data_merged.csv'
+    )
+    if os.path.exists(csv_plot):
+        st.session_state.plot_data['df_data'] = utilpl.read_data(
+            csv_plot
+        )
     pipeline = 'dlmuse'
-
-    # Set flag for hiding the settings
-    if '_flag_hide_settings' not in st.session_state:
-        st.session_state['_flag_hide_settings'] = st.session_state.plot_settings['flag_hide_settings']
-
-    def update_val():
-        st.session_state.plot_settings['flag_hide_settings'] = st.session_state['_flag_hide_settings']
+    list_vars = st.session_state.plot_data['df_data'].columns.tolist()
 
     with st.sidebar:
-        sac.divider(label='Plot Settings', align='center', color='gray')
-        st.checkbox(
-            'Hide Plot Settings',
-            key = '_flag_hide_settings',
-            on_change = update_val
+        sac.divider(label='Viewing Options', align='center', color='gray')
+        utilpl.user_add_plots(
+            st.session_state.plot_params
         )
+    utilpl.sidebar_flag_hide_setting()
+    utilpl.sidebar_flag_hide_legend()
+    utilpl.sidebar_flag_hide_mri()
 
-    utilpl.panel_set_params_plot(
-        st.session_state.plot_params,
-        var_groups_data,
-        var_groups_hue,
-        pipeline
-    )
+    utilpl.panel_set_params_plot(st.session_state.plot_params, pipeline, list_vars)
 
     utilpl.panel_show_plots()
 
 st.markdown(
     """
-    ### View Results 
+    ### Results Dashboard
+    
+    - Plot imaging variables and biomarkers derived from your dataset together with reference distributions
     """
 )
 
 tab = sac.tabs(
     items=[
-        sac.TabsItem(label='View Project Folder'),
         sac.TabsItem(label='Select Data Files'),
         sac.TabsItem(label='Plot Data'),
     ],
@@ -92,11 +106,7 @@ tab = sac.tabs(
     align='left'
 )
 
-
-if tab == 'View Project Folder':
-    view_project_folder()
-
-elif tab == 'Select Data Files':
+if tab == 'Select Data Files':
     select_data_files()
 
 elif tab == 'Plot Data':

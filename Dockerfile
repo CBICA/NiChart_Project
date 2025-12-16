@@ -47,19 +47,24 @@ USER root
 RUN apt-get update && apt-get install -y python3-tk git
 USER $MAMBA_USER
 RUN pip install --verbose -r /tmp/requirements2.txt
-RUN mkdir ~/dummyinput && mkdir ~/dummyoutput
-RUN git clone https://github.com/CBICA/PredCRD.git && cd PredCRD && pip install -e .
-RUN git clone https://github.com/CBICA/DLWMLS.git && cd DLWMLS && pip install -e . && DLWMLS -i ~/dummyinput -o ~/dummyoutput
-RUN pip uninstall -y torch && pip install --verbose torch==2.3.1 --index-url https://download.pytorch.org/whl/cu${CUDA_VERSION}
-RUN git clone https://github.com/CBICA/CCL_NMF_Prediction.git && cd CCL_NMF_Prediction && pip install -e .
+#RUN mkdir ~/dummyinput && mkdir ~/dummyoutput
+#RUN git clone https://github.com/CBICA/PredCRD.git && cd PredCRD && pip install -e .
+#RUN git clone https://github.com/CBICA/DLWMLS.git && cd DLWMLS && pip install -e . && DLWMLS -i ~/dummyinput -o ~/dummyoutput
+#RUN pip uninstall -y torch && pip install --verbose torch==2.3.1 --index-url https://download.pytorch.org/whl/cu${CUDA_VERSION}
+#RUN git clone https://github.com/CBICA/CCL_NMF_Prediction.git && cd CCL_NMF_Prediction && pip install -e .
+#COPY --chown=$MAMBA_USER:$MAMBA_USER NiChart_DLMUSE /NiChart_DLMUSE
+#COPY --chown=$MAMBA_USER:$MAMBA_USER CCL_NMF_Prediction /CCL_NMF_Prediction
+#RUN pip install -e /NiChart_DLMUSE
+#RUN pip install -e /CCL_NMF_Prediction
 ## Cache DLMUSE and DLICV models with an empty job so no download is needed later
-RUN DLMUSE -i ~/dummyinput -o ~/dummyoutput && DLICV -i ~/dummyinput -o ~/dummyoutput
+#RUN DLMUSE -i ~/dummyinput -o ~/dummyoutput && DLICV -i ~/dummyinput -o ~/dummyoutput
+RUN pip install streamlit==1.40.0 streamlit-image-select streamlit-antd-components pycountry
 USER root
-RUN apt-get install -y awscli
+RUN apt-get update && apt-get install -y awscli
 COPY . /app/
 RUN useradd -s /bin/bash streamlit && \
     chmod -R a+rw /app/output_folder && chmod a-rw / && chmod a-w /app && touch /app/src/viewer/pipeline.log && \
     chmod a+rw /app/src/viewer/pipeline.log
-USER streamlit
+USER root
 WORKDIR /app/src/viewer/
 ENTRYPOINT ["/usr/local/bin/_entrypoint.sh", "streamlit", "run", "./NiChartProject.py", "--server.headless", "true", "--server.fileWatcherType=none"]

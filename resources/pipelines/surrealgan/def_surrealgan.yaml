@@ -1,5 +1,5 @@
-pname: SPARE-AD
-description: Calculate SPARE-AD scores
+pname: SurrealGAN
+description: Calculate SurrealGAN scores
 
 dependencies:
   - demog_csv
@@ -16,6 +16,6 @@ inputs:
     type: directory
 
 outputs:
-  - name: spare-ad
+  - name: surrealgan_csv
     type: directory
 

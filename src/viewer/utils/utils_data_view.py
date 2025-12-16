@@ -1,6 +1,5 @@
 import streamlit as st
 import utils.utils_dicoms as utildcm
-import utils.utils_io as utilio
 import utils.utils_session as utilss
 import os
 import pandas as pd
@@ -81,7 +80,9 @@ def build_folder_tree(
             ext = os.path.splitext(name)[1].lower()
             tags = []
             if ext == '.csv':
-                tags.append(sac.Tag('CSV', color='red'))
+                tags.append(sac.Tag('CSV', color='purple'))
+            elif ext in ['.nii.gz', '.nii']:
+                tags.append(sac.Tag('NIfTI', color='blue'))
 
             tree_items.append(
                 sac.TreeItem(
@@ -110,39 +111,68 @@ def build_folder_tree(
 
     return tree_items, list_paths
 
+
+@st.dialog("File viewer", width='medium')
+def show_sel_item(fname):
+        if fname.endswith('.csv'):
+            try:
+                df_tmp = pd.read_csv(fname)
+                st.info(f'Data file: {fname}')
+                st.dataframe(df_tmp)
+            except:
+                st.warning(f'Could not read csv file: {fname}')
+
 def data_overview(in_dir):
     '''
     Show files in data folder
     '''
-    if os.path.exists(in_dir):
-        st.markdown(f"##### 📂 `{in_dir}`")
-        tree_items, list_paths = build_folder_tree(in_dir, st.session_state.out_dirs)
-        selected = sac.tree(
-            items=tree_items,
-            #label='Project Folder',
-            index=None,
-            align='left', size='xl', icon='table',
-            checkbox=False,
-            #checkbox_strict = True,
-            open_all = False,
-            return_index = True
-            #height=400
-        )
-        
-        if selected:
-            if isinstance(selected, list):
-                selected = selected[0]
-            fname = list_paths[selected]
-            if fname.endswith('.csv'):
-                try:
-                    df_tmp = pd.read_csv(fname)
-                    st.info(f'Data file: {fname}')
-                    st.dataframe(df_tmp)
-                except:
-                    st.warning(f'Could not read csv file: {fname}')
+    st.markdown("##### Project Folder:")
 
-    else:
-        st.error(f"Folder `{in_dir}` not found.")
+    sel_opt = st.radio(
+        label = 'Select',
+        options = ['View', 'Switch', 'Delete Files'],
+        horizontal = True,
+        label_visibility="collapsed"
+    )
+    
+    if sel_opt == 'View':
+
+        dname = os.path.basename(in_dir)
+        st.markdown(f"##### 📂 `{dname}`")
+
+        if os.path.exists(in_dir):
+            tree_items, list_paths = build_folder_tree(in_dir, st.session_state.out_dirs)
+            selected = sac.tree(
+                items=tree_items,
+                #label='Project Folder',
+                index=None,
+                align='left', size='xl', icon='table',
+                checkbox=False,
+                #checkbox_strict = True,
+                open_all = True,
+                return_index = True,
+                height=200
+            )
+        
+            #if selected:
+                #if isinstance(selected, list):
+                    #selected = selected[0]
+                #fname = list_paths[selected]
+                #show_sel_item(fname)
+
+        else:
+            st.error(f"Folder `{in_dir}` not found.")
+
+def view_subj_list(in_dir):
+    fname = 'demog.csv'
+    fpath = os.path.join(in_dir, fname)
+
+    st.markdown("##### Subject List:")
+    
+    st.markdown(f"##### 📂 `{fname}`")
+    if os.path.exists(fpath):
+        df = pd.load_csv(fpath)
+        st.dataframe(df)
 
 def select_files(in_dir):
     '''
@@ -157,7 +187,7 @@ def select_files(in_dir):
         st.session_state.out_dirs,
         ['.csv'],
         5,
-        ['plot_data'],
+        ['data_merged'],
         True
     )
     selected = sac.tree(
@@ -186,12 +216,21 @@ def select_files(in_dir):
         for dname in list_csv:
             try:
                 df = pd.read_csv(dname)
+                
+                ## FIXME: Custom editing in column names
+                df.columns = df.columns.str.replace('DL_MUSE_Volume_','')
+                df.columns = df.columns.str.replace('SurrealGAN_MRID','MRID')
+                df.columns = df.columns.str.replace('SurrealGAN_','')
+                df.columns = df.columns.str.replace('CCL-NMF','CCLNMF_')
+                df.columns = df.columns.str.replace('SPARE_RG','SPARE_BA')
+                df.columns = df.columns.str.replace('SPARE_CL_decision_function','SPARE_AD')
+                df.columns = df.columns.str.replace('Prediction','DL_BrainAge')
 
             except Exception as e:
                 st.error(f"Failed to read {dname}: {e}")
 
             # Rename columns if dict for data exists
-            if dname.endswith('dlmuse_vol.csv'):
+            if dname.endswith('DLMUSE_Volumes.csv'):
                 df = df.rename(
                     columns = st.session_state.dicts['muse']['ind_to_name']
                 )
@@ -202,14 +241,36 @@ def select_files(in_dir):
             primary_key = 'MRID'
             merged_df = df_all[0]
             for df in df_all[1:]:
-                merged_df = pd.merge(merged_df, df, on=primary_key, how="outer")
+                merged_df = pd.merge(
+                    merged_df,
+                    df,
+                    on=primary_key,
+                    how="outer",
+                    suffixes = ['', '_tmpduplicate']
+                )
+                sel_cols = merged_df.columns[merged_df.columns.str.contains('_tmpduplicate')==False]
+                merged_df = merged_df[sel_cols]
 
             st.success(f"✅ Merged DataFrame has {merged_df.shape[0]} rows and {merged_df.shape[1]} columns")
-            st.dataframe(merged_df.head(10))
 
             # Save merged data
+            out_dir = os.path.join(
+                st.session_state.paths['project'], 'data_merged'
+            )
+            if not os.path.exists(out_dir):
+                os.makedirs(out_dir)
+
+            out_csv = os.path.join(
+                out_dir, 'data_merged.csv'
+            )
+            
             try:
-                merged_df.to_csv(st.session_state.paths['plot_data'])
+                merged_df.to_csv(out_csv)
+                
+                # Reset plot data
+                utilss.init_plot_vars()
+                
+                
             except:
-                st.error(f'Could not write merged data: {st.session_state.paths['plot_data']}')
+                st.error(f'Could not write merged data: {out_csv}')
 

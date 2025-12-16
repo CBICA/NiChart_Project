@@ -20,8 +20,10 @@ logger.debug('Page: Run Pipelines')
 
 # Page config should be called for each page
 utilpg.config_page()
-utilpg.show_menu()
 utilpg.set_global_style()
+
+if 'instantiated' not in st.session_state or not st.session_state.instantiated:
+    utilses.init_session_state()
 
 def panel_conf_pipeline():
     with st.container(border=True):
@@ -102,16 +104,29 @@ def panel_run_pipeline():
     # For now, just hardcode the mapping from sel_pipeline to a pipeline in resources/pipelines.
     sel_method = st.session_state.sel_pipeline
     st.success(f'Selected pipeline: {sel_method}')
-
+    harmonize = False
+    harmonizable = ['spare-ad', 'spare-ba', 'dlmuse', 'dlmuse-dlwmls', 'spare-smoking', 'spare-hypertension', 'spare-obesity', 'spare-diabetes']
+    if sel_method in harmonizable:
+        harmonize = st.checkbox("Harmonize to reference data? (Requires >= 30 scans)")
     ## TODO: Retrieve dynamically/match between front end and toolloader code
-    sel_pipeline_to_id = {
-        'dlmuse': 'run_dlmuse',
-        ## Add additional lines here ({sel_pipeline value} : {name of pipeline yaml} )
-    }
+    ## This a nice and simple placeholder for now
+    
+    pipeline_to_run = tl.get_pipeline_id_by_label(sel_method, harmonized=harmonize)
 
-    pipeline_to_run = sel_pipeline_to_id[sel_method]
-
+    if pipeline_to_run is None:
+        st.error("The currently selected pipeline doesn't have an associated tool configuration. Please submit a bug report!")
+        return
+    skip_steps_when_possible = True
+    skip_steps_when_possible = st.checkbox("Accelerate pipeline via caching? (Uncheck to force re-runs)", value=True)
+    alert_placeholder = st.empty()
     if st.button("Run pipeline"):
+        alert_placeholder.info(f"The pipeline {pipeline_to_run} is running. Please do not navigate away from this page.")
+        pipeline_progress_bar = stqdm(total=2, desc="Submitting pipeline...", position=0)
+        #process_progress_bar = stqdm(total=2, desc="Waiting...", position=0)
+        process_progress_bar = None
+        process_status_box = st.status("Submitting pipeline step...", expanded=True)
+        #pipeline_progress_bar_slot = st.empty()
+        #process_progress_bar_slot = st.empty()
         with st.container():
             st.subheader("Pipeline Logs")
             with st.expander("View all pipeline logs"):
@@ -120,22 +135,31 @@ def panel_run_pipeline():
             with st.expander("View current step live logs"):
                 with st.container():
                     log_live_box = st.empty()
-        pipeline_progress_bar = stqdm(total=2, desc="Submitting pipeline...", position=0)
-        process_progress_bar = stqdm(total=2, desc="Waiting...", position=0)
-        #pipeline_progress_bar_slot = st.empty()
-        #process_progress_bar_slot = st.empty()
+
 
         log = stlogbox.StreamlitJobLogger(log_committed_box, log_live_box)
-
+        execution_mode = 'local'
+        if st.session_state.has_cloud_session:
+            execution_mode = 'cloud'
+        local_path_remapping = {}
+        data_dir_locally = st.session_state.paths["out_dir"]
+        data_dir_on_host = st.session_state.paths["host_out_dir"]
+        if data_dir_on_host is not None:
+            local_path_remapping[data_dir_locally] = data_dir_on_host
         result = tl.run_pipeline(
             pipeline_id=pipeline_to_run, ##TODO EDIT THIS
             global_vars={"STUDY": st.session_state.paths["project"]},
+            execution_mode=execution_mode,
             pipeline_progress_bar=pipeline_progress_bar,
             process_progress_bar=process_progress_bar,
-            log=log
+            process_status_box=process_status_box,
+            log=log,
+            metadata_location=os.path.join(st.session_state.paths["project"], "metadata.json"),
+            reuse_cached_steps=skip_steps_when_possible,
+            local_path_remapping=local_path_remapping
         )
 
-        st.success(f"Pipeline {pipeline_to_run} finished successfully.")
+        alert_placeholder.success(f"Pipeline {pipeline_to_run} finished successfully.")
 
 
 def panel_view_status():
@@ -147,6 +171,9 @@ def panel_view_status():
 st.markdown(
     """
     ### Run a pipeline
+    
+    - Apply the selected processing pipeline on your dataset
+    
     """
 )
 
@@ -154,7 +181,7 @@ tab = sac.tabs(
     items=[
         sac.TabsItem(label='Verify Input Data'),
         sac.TabsItem(label='Run Pipeline'),
-        sac.TabsItem(label='View Status')
+        #sac.TabsItem(label='View Status')
     ],
     size='lg',
     align='left'

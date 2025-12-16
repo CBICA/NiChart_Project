@@ -1,0 +1,11 @@
+pname: SPARE-BA-Image
+description: Calculate DL based SPARE-BA scores directly from raw MRI images
+
+inputs:
+  - name: t1
+    type: directory
+
+outputs:
+  - name: spare-ba-image
+    type: directory
+

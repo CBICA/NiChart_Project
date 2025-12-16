@@ -1,0 +1,28 @@
+pipeline_name: CCL-NMF Component Prediction
+description: |
+  Prediction of Coupled Cross Sectional Non-negative Matrix Factorization loading coefficients from T1-weighted MRI using DLMUSE brain volumes.
+
+categories:
+  - regression
+  - inference
+
+requires:
+  - needs_T1
+  - needs_demographics
+  - csv_has_columns: [MRID, Age, Sex]
+
+steps:
+  - id: run_nichart_dlmuse
+    tool: nichart_dlmuse # MUST CORRESPOND EXACTLY to a tool in resources/tools dir
+    inputs:
+      t1_img: ${STUDY}/t1
+    outputs:
+      dlmuse_seg: ${STUDY}/dlmuse_seg
+      dlmuse_vol: ${STUDY}/dlmuse_vol
+  - id: run_cclnmf
+    tool: cclnmf_prediction # MUST CORRESPOND EXACTLY to a tool in resources/tools dir
+    inputs:
+      demog_csv: ${STUDY}/participants/participants.csv
+      dlmuse_vol: ${STUDY}/dlmuse_vol/DLMUSE_Volumes.csv
+    outputs:
+      cclnmf_csv: ${STUDY}/ml_biomarkers/CCLNMF_prediction_loadings.csv
