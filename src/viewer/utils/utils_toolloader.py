@@ -677,7 +677,7 @@ def check_requirements_met_panel(pipeline_name):
         'needs_FLAIR': 'FLAIR Scans',
         'needs_demographics': 'Participants CSV', 
     }
-    pipeline = st.session_state.sel_pipeline
+    pipeline = get_pipeline_label_by_name(pipeline_name)
     pipeline_id = get_pipeline_id_by_label(pipeline, harmonized=st.session_state.do_harmonize)
     reqs_set, reqs_params, req_order = parse_pipeline_requirements(pipeline_id)
 
