@@ -34,6 +34,6 @@ steps:
     inputs:
       dlmuse_vol: ${STUDY}/dlmuse_vol/DLMUSE_Volumes.csv
       demog_csv: ${STUDY}/participants/participants.csv
-      spare_all_csv: ${STUDY}/ml_biomarkers/SPARE_ALL.csv
+      spare_csv: ${STUDY}/ml_biomarkers/SPARE_ALL.csv
     outputs:
       dkgp_out: ${STUDY}/dkgp_results
