@@ -163,7 +163,7 @@ def pipeline_runner_menu(enabled_pnames, sel=False):
         st.info("Your data doesn't meet the requirements for this pipeline. Correct the issues marked below to proceed.")
 
         return
-    utiltl.check_requirements_met_panel(sel_name)
+    ready = utiltl.check_requirements_met_panel(sel_name)
     pipeline_to_run = utiltl.get_pipeline_id_by_label(sel_method, harmonized=harmonize)
 
     if pipeline_to_run is None:
@@ -172,7 +172,7 @@ def pipeline_runner_menu(enabled_pnames, sel=False):
     skip_steps_when_possible = True
     skip_steps_when_possible = st.checkbox("Accelerate pipeline via caching? (Uncheck to force re-runs)", value=True)
     alert_placeholder = st.empty()
-    if sel_name in enabled_pnames:
+    if ready:
         if st.button("Run pipeline"):
             alert_placeholder.info(f"The pipeline {pipeline_to_run} is running. Please do not navigate away from this page.")
             pipeline_progress_bar = stqdm(total=2, desc="Submitting pipeline...", position=0)
