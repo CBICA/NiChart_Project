@@ -1,0 +1,39 @@
+pipeline_name: DKGP
+description: |
+  DKGP inference
+
+categories:
+  - image-to-biomarker
+  - regression
+  - inference
+
+requires:
+  - needs_T1
+  - needs_demographics
+  - csv_has_columns: [MRID, Age, Sex, AD_Diagnosis, ADAS_COG_13, MMSE] 
+  # Might want to let us hand-specify specific fields like these directly in YAML
+
+
+steps:
+  - id: run_nichart_dlmuse
+    tool: nichart_dlmuse # MUST CORRESPOND EXACTLY to a tool in resources/tools dir
+    inputs:
+      t1_img: ${STUDY}/t1
+    outputs:
+      dlmuse_seg: ${STUDY}/dlmuse_seg
+      dlmuse_vol: ${STUDY}/dlmuse_vol
+  - id: run_spare_all
+    tool: spare_all # MUST CORRESPOND EXACTLY to a tool in resources/tools dir
+    inputs:
+      dlmuse_vol: ${STUDY}/dlmuse_vol/DLMUSE_Volumes.csv
+      demog_csv: ${STUDY}/participants/participants.csv
+    outputs:
+      spare_all_csv: ${STUDY}/ml_biomarkers/SPARE_ALL.csv
+  - id: run_dkgp
+    tool: dkgp
+    inputs:
+      dlmuse_vol: ${STUDY}/dlmuse_vol/DLMUSE_Volumes.csv
+      demog_csv: ${STUDY}/participants/participants.csv
+      spare_all_csv: ${STUDY}/ml_biomarkers/SPARE_ALL.csv
+    outputs:
+      dkgp_out: ${STUDY}/dkgp_results
