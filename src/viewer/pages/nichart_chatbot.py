@@ -1,5 +1,6 @@
 import os
 import re
+import requests
 import streamlit as st
 import json
 
@@ -15,7 +16,6 @@ import utils.utils_pages as utilpg
 from utils.utils_styles import inject_global_css 
 import gui.utils_navig as utilnav
 
-import re
 from utils.utils_logger import setup_logger
 import utils.utils_session as utilses
 
@@ -34,6 +34,7 @@ utilpg.set_global_style()
 if 'instantiated' not in st.session_state or not st.session_state.instantiated:
     utilses.init_session_state()
 
+
 if boto3_available:
     try:
         runtime_client = boto3.client("bedrock-runtime", region_name="us-east-1")
@@ -46,10 +47,20 @@ else:
     chatbot_enabled = False
     error_message = "Boto3 is not installed."
 
+if not st.session_state.has_cloud_session:
+    chatbot_enabled = False
+    error_message = "Please use the cloud service (https://cloud.neuroimagingchart.com/) to use the NiChart chatbot."
+
 if not chatbot_enabled:
     st.markdown("# 🚫 Chatbot Service Disabled")
     st.error(f"The AI chatbot service is currently unavailable. Reason: {error_message}")
 else:
+    API_URL = "https://mdkcwovo4a.execute-api.us-east-1.amazonaws.com/invoke"
+    cloud_session_token = st.session_state.cloud_session_token
+    if not cloud_session_token:
+        st.error("Not authenticated.")
+        st.stop()
+
     knowledge_base_id = 'YOUR_KEY_HERE'
 
     if "chat_history" not in st.session_state:
@@ -59,6 +70,7 @@ else:
 
     st.markdown("# 🧠 NiChart AI Chatbot")
     st.markdown("### Ask any questions related to NiChart")
+    st.markdown("Your responses are not saved on our servers and will be inaccessible if you refresh.")
 
     st.sidebar.subheader("📜 Chat History")
     for index, entry in enumerate(st.session_state.chat_history):
@@ -72,12 +84,35 @@ else:
             if st.button("❌ Close"):
                 st.session_state.selected_question = None
 
-    user_input = st.text_area("Ask your question here (Include the word NiChart if you have a question related to the application):", height=100)
+    user_input = st.text_area("Ask your question here (Include the word NiChart if you have a question related to the application):", height=100, max_chars=4000)
 
     if st.button("Ask NiChart"):
         if user_input.strip():
             with st.spinner("Thinking..."):
                 try:
+                    resp = requests.post(
+                        API_URL,
+                        headers={
+                            "Authorization": f"Bearer {cloud_session_token}",
+                            "Content-Type": "application/json",
+                        },
+                        json={"prompt": user_input},
+                        timeout=30,
+                    )
+
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        st.markdown("### Response")
+                        st.write(data["result"])
+                        st.info(f"Remaining prompts: {data['remaining_prompts']}")
+                    else:
+                        data = resp.json()
+                        st.error(data.get("error", "Request failed"))
+                        if "remaining_prompts" in data:
+                            st.info(f"Remaining prompts: {data['remaining_prompts']}")
+
+                    raise ValueError("Placeholder, invocation worked")
+                    
                     if "nichart".lower() in user_input.lower():
                         retrieval_response = knowledge_client.retrieve(
                             knowledgeBaseId=knowledge_base_id,
