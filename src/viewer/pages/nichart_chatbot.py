@@ -36,8 +36,8 @@ if 'instantiated' not in st.session_state or not st.session_state.instantiated:
 
 if boto3_available:
     try:
-        runtime_client = boto3.client("bedrock-runtime", region="us-east-1")
-        knowledge_client = boto3.client("bedrock-agent-runtime", region="us-east-1")
+        runtime_client = boto3.client("bedrock-runtime", region_name="us-east-1")
+        knowledge_client = boto3.client("bedrock-agent-runtime", region_name="us-east-1")
         chatbot_enabled = True
     except Exception as e:
         chatbot_enabled = False
