@@ -12,10 +12,27 @@ except ImportError:
 import utils.utils_menu as utilmenu
 import utils.utils_pages as utilpg
 
-utilpg.config_page()
-utilpg.show_menu()
-utilpg.add_sidebar_options()
+from utils.utils_styles import inject_global_css 
+import gui.utils_navig as utilnav
+
+import re
+from utils.utils_logger import setup_logger
+import utils.utils_session as utilses
+
+
+logger = setup_logger()
+logger.debug('Page: Chatbot')
+
+inject_global_css()
+
+# Page config should be called for each page
+#utilpg.config_page()
 utilpg.set_global_style()
+
+###############################
+
+if 'instantiated' not in st.session_state or not st.session_state.instantiated:
+    utilses.init_session_state()
 
 if boto3_available:
     try:
@@ -112,3 +129,9 @@ else:
                     st.error(f"Error: {str(e)}")
         else:
             st.warning("Please enter a question.")
+
+utilnav.main_navig("Home", "pages/nichart_home.py", None, None)
+
+# Show session state vars
+if st.session_state.mode == 'debug':
+    utilses.disp_session_state()

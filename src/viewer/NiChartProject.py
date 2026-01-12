@@ -59,6 +59,7 @@ pages = {
         st.Page("pages/nichart_single_subject.py", title="Single Subject"),
         st.Page("pages/nichart_multi_subject.py", title="Multi Subject"),
         st.Page("pages/nichart_ref_data.py", title="Reference Data"),
+        st.Page("pages/nichart_chatbot.py", title="Ask NiChart Chatbot"),
     ],    
     "Actions": [
         st.Page("pages/nichart_data.py", title="Data"),
