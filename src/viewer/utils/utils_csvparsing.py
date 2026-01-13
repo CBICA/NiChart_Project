@@ -91,7 +91,7 @@ def _validate_mrid(df: pd.DataFrame, col: str, mrid_col: str) -> List[CSVIssue]:
 @register_csv_column("Age")
 def _validate_age(df: pd.DataFrame, col: str, mrid_col: str) -> List[CSVIssue]:
     out = []
-    out += v_int(df, col, ge=0, le=120)   # tweak bounds
+    out += v_float(df, col, ge=0, le=120)   # tweak bounds
     return out
 
 @register_csv_column("Sex")
