@@ -107,7 +107,8 @@ else:
                         st.info(f"Remaining prompts: {data['remaining_prompts']}")
                     else:
                         data = resp.json()
-                        st.error(data.get("error", "Request failed"))
+                        st.error(data.get("error", f"Request failed with status code {resp.status_code}"))
+                        st.code(data)
                         if "remaining_prompts" in data:
                             st.info(f"Remaining prompts: {data['remaining_prompts']}")
 
