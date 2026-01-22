@@ -61,7 +61,6 @@ else:
         st.error("Not authenticated.")
         st.stop()
 
-    knowledge_base_id = 'YOUR_KEY_HERE'
 
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
@@ -69,8 +68,12 @@ else:
         st.session_state.selected_question = None
 
     st.markdown("# 🧠 NiChart AI Chatbot")
-    st.markdown("### Ask any questions related to NiChart")
+    st.markdown("### Ask questions related to NiChart")
+    st.markdown("To enhance the quality of the response, please explicitly mention the pipeline you intend to use by name.")
+    st.markdown("Do not provide any private information to this chatbot. By using this service you confirm that you are authorized to share any provided information.")
+    st.markdown("Please be aware that responses may be inaccurate or harmful. Always double-check responses.")
     st.markdown("Your responses are not saved on our servers and will be inaccessible if you refresh.")
+
 
     st.sidebar.subheader("📜 Chat History")
     for index, entry in enumerate(st.session_state.chat_history):
@@ -84,7 +87,7 @@ else:
             if st.button("❌ Close"):
                 st.session_state.selected_question = None
 
-    user_input = st.text_area("Ask your question here (Include the word NiChart if you have a question related to the application):", height=100, max_chars=4000)
+    user_input = st.text_area("Ask your question here.:", height=100, max_chars=4000)
 
     if st.button("Ask NiChart"):
         if user_input.strip():
@@ -103,7 +106,9 @@ else:
                     if resp.status_code == 200:
                         data = resp.json()
                         st.markdown("### Response")
-                        st.write(data["result"])
+                        # Debug
+                        #st.write(data["result"])
+                        st.write(data["result"]["content"][0]["text"])
                         st.info(f"Remaining prompts: {data['remaining_prompts']}")
                     else:
                         data = resp.json()
