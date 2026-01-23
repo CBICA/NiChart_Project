@@ -67,27 +67,27 @@ else:
     if "selected_question" not in st.session_state:
         st.session_state.selected_question = None
 
-    st.markdown("# 🧠 NiChart AI Chatbot")
+    st.markdown("# 🧠 NiChart LLM Chatbot")
     st.markdown("### Ask questions related to NiChart")
-    st.markdown("To enhance the quality of the response, please explicitly mention the pipeline you intend to use by name.")
-    st.markdown("Do not provide any private information to this chatbot. By using this service you confirm that you are authorized to share any provided information.")
-    st.markdown("Please be aware that responses may be inaccurate or harmful. Always double-check responses.")
-    st.markdown("Your responses are not saved on our servers and will be inaccessible if you refresh.")
+    st.markdown("To enhance the quality of the response, please explicitly mention the pipeline you intend to use by name. This will help us retrieve the best information for you.")
+    st.markdown("Do not provide any private information to this chatbot. By using this service you confirm that you are authorized to share any information you choose to provide.")
+    st.markdown("Please be aware that [LLM responses may be inaccurate or harmful](https://medium.com/ai-for-absolute-beginners/what-is-hallucination-in-ai-b9b5d6eaae73). Always double-check responses.")
+    st.markdown("Your questions and responses are not saved on our servers and will be inaccessible if you refresh the page.")
 
 
-    st.sidebar.subheader("📜 Chat History")
-    for index, entry in enumerate(st.session_state.chat_history):
-        if st.sidebar.button(entry['question'], key=f"history_{index}"):
-            st.session_state.selected_question = index
+    #st.sidebar.subheader("📜 Chat History")
+    #for index, entry in enumerate(st.session_state.chat_history):
+    #    if st.sidebar.button(entry['question'], key=f"history_{index}"):
+    #        st.session_state.selected_question = index
 
-    if st.session_state.selected_question is not None:
-        selected_entry = st.session_state.chat_history[st.session_state.selected_question]
-        with st.expander(f"🗨️ Answer to: {selected_entry['question']}", expanded=True):
-            st.markdown(f"**AI:** {selected_entry['answer']}")
-            if st.button("❌ Close"):
-                st.session_state.selected_question = None
+    #if st.session_state.selected_question is not None:
+    #    selected_entry = st.session_state.chat_history[st.session_state.selected_question]
+    #    with st.expander(f"🗨️ Answer to: {selected_entry['question']}", expanded=True):
+    #        st.markdown(f"**AI:** {selected_entry['answer']}")
+    #        if st.button("❌ Close"):
+    #            st.session_state.selected_question = None
 
-    user_input = st.text_area("Ask your question here.:", height=100, max_chars=4000)
+    user_input = st.text_area("Ask your question here:", height=100, max_chars=4000)
 
     if st.button("Ask NiChart"):
         if user_input.strip():
@@ -117,55 +117,8 @@ else:
                         if "remaining_prompts" in data:
                             st.info(f"Remaining prompts: {data['remaining_prompts']}")
 
-                    raise ValueError("Placeholder, invocation worked")
                     
-                    if "nichart".lower() in user_input.lower():
-                        retrieval_response = knowledge_client.retrieve(
-                            knowledgeBaseId=knowledge_base_id,
-                            retrievalQuery={"text": user_input}
-                        )
-                        retrieved_docs = [doc["content"]["text"] for doc in retrieval_response["retrievalResults"]]
-                        context = "\n".join(retrieved_docs) if retrieved_docs else "No relevant information found."
-                    else:
-                        context = ""
 
-                    prompt = f"\n\nHuman: {('Answer the question concisely and confidently. Do not hedge your responses. NEVER USE PHRASES LIKE \"BASED ON THE INFORMATION PROVIDED.\" If the context does not answer the question, ignore it and respond with the best possible answer. Using the following information, ' + context + ' answer the question directly: ') if context else ''}{user_input}\n\nAssistant:"
-
-                    body = json.dumps({
-                        "prompt": prompt,
-                        "max_tokens_to_sample": 300,
-                        "temperature": 0.7,
-                        "top_p": 0.9,
-                    })
-
-                    response = runtime_client.invoke_model(
-                        modelId="anthropic.claude-v2:1",
-                        contentType="application/json",
-                        accept="application/json",
-                        body=body
-                    )
-
-                    response_body = json.loads(response["body"].read().decode("utf-8"))
-                    ai_response = response_body.get("completion", "No response generated.")
-
-                    banned_phrases = [
-                        r"\b[bB]ased on the information provided[,]?\b",
-                        r"\b[bB]ased on the information provided, [,]?\b",
-                        r"\b[aA]ppears to be\b",
-                        r"\b[sS]eems like\b",
-                        r"\b[fF]rom what I know\b",
-                        r"\b[iI]t is possible that\b"
-                    ]
-
-                    for phrase in banned_phrases:
-                        ai_response = re.sub(phrase, "", ai_response)
-
-                    ai_response = " ".join(ai_response.split())
-
-                    st.session_state.chat_history.append({"question": user_input, "answer": ai_response})
-
-                    st.success("Response:")
-                    st.markdown(f"**AI:** {ai_response}")
                 except Exception as e:
                     st.error(f"Error: {str(e)}")
         else:
