@@ -1,0 +1,11 @@
+url_path,views_total,views_unique
+/CBICA/NiChart_Project,5,5
+/CBICA/NiChart_Project/issues,3,2
+/CBICA/NiChart_Project/discussions,2,1
+/CBICA/NiChart_Project/actions/runs/12359081508/job/34491033408,1,1
+/CBICA/NiChart_Project/actions/runs/12359641066,1,1
+/CBICA/NiChart_Project/actions/runs/16867321191/workflow,1,1
+/CBICA/NiChart_Project/blob/9161d270d6330386a877ede9ccb120b428e6dd69/.github/workflows/github-repo-stats.yml,1,1
+/CBICA/NiChart_Project/blob/ag-dev/resources/pipelines/run_nichart_ravens.yaml,1,1
+/CBICA/NiChart_Project/blob/c73b8799177823cd77a5082d79ac02372331a2fc/.github/workflows/sphinx-docs.yml,1,1
+/CBICA/NiChart_Project/blob/main/LICENSE,1,1
