@@ -19,6 +19,7 @@ pyyaml
 humanize
 graphviz
 dicom2nifti
+pybids
 
 # streamlit
 streamlit==1.50.0

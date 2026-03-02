@@ -136,10 +136,26 @@ def upload_data():
     with cols[2]:
         if st.session_state.workflow == 'single_subject':
             utilup.panel_upload_single_subject()
-        if st.session_state.workflow == 'multi_subject':
-            utilup.panel_upload_multi_subject()
+        elif st.session_state.workflow == 'multi_subject':
+            mode = st.radio(
+                "Upload mode",
+                ["Upload files directly", "Upload BIDS dataset"],
+                horizontal=True
+            )
+            if mode == "Upload files directly":
+                utilup.panel_upload_multi_subject()
+            elif mode == "Upload BIDS dataset":
+                utilup.panel_upload_BIDS_dataset()
         else: # default to multi
-            utilup.panel_upload_multi_subject()
+            mode = st.radio(
+                "Upload mode",
+                ["Upload files directly", "Upload BIDS dataset"],
+                horizontal=True
+            )
+            if mode == "Upload files directly":
+                utilup.panel_upload_multi_subject()
+            elif mode == "Upload BIDS dataset":
+                utilup.panel_upload_BIDS_dataset()
 
     with cols[4]:
         utilup.panel_view_files()

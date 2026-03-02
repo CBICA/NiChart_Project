@@ -91,7 +91,7 @@ def _validate_mrid(df: pd.DataFrame, col: str, mrid_col: str) -> List[CSVIssue]:
 @register_csv_column("Age")
 def _validate_age(df: pd.DataFrame, col: str, mrid_col: str) -> List[CSVIssue]:
     out = []
-    out += v_int(df, col, ge=0, le=120)   # tweak bounds
+    out += v_float(df, col, ge=0, le=120)   # tweak bounds
     return out
 
 @register_csv_column("Sex")
@@ -105,6 +105,18 @@ def _validate_iscn(df: pd.DataFrame, col: str, mrid_col: str) -> List[CSVIssue]:
 @register_csv_column("Batch")
 def _validate_batch(df: pd.DataFrame, col: str, mrid_col: str) -> List[CSVIssue]:
     return v_nonempty(df, col)
+
+@register_csv_column("ADAS_COG_13")
+def _validate_adas_cog_13(df: pd.DataFrame, col: str, mrid_col: str) -> List[CSVIssue]:
+    return v_float(df, col)
+
+@register_csv_column("MMSE")
+def _validate_mmse(df: pd.DataFrame, col: str, mrid_col: str) -> List[CSVIssue]:
+    return v_float(df, col)
+
+@register_csv_column("AD_Diagnosis")
+def _validate_ad_diagnosis(df: pd.DataFrame, col: str, mrid_col: str) -> List[CSVIssue]:
+    return v_enum(df, col, values=["CN", "MCI", "AD"])
 
 from dataclasses import asdict
 

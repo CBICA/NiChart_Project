@@ -4,14 +4,18 @@ import utils.utils_session as utilss
 import utils.utils_data_view as utildv
 import utils.utils_io as utilio
 import utils.utils_mriview as utilmri
+from utils.utils_upload_single_subject import upload_file
 
 import os
 import pandas as pd
+from pathlib import Path
+from bids.layout import BIDSLayout
 import numpy as np
 import zipfile
 import streamlit_antd_components as sac
 from NiChart_common_utils.nifti_parser import NiftiMRIDParser
 import shutil
+import tempfile
 import time
 from typing import Any, BinaryIO, List, Optional
 
@@ -163,7 +167,7 @@ def consolidate_nifti():
         st.success('Updated participant info!')
 
         # Move scan to consolidated path
-        out_dir = os.path.join(st.session_state.paths['prj_dir'], mod)
+        out_dir = os.path.join(st.session_state.paths['prj_dir'], mod.lower())
         out_fpath = os.path.join(out_dir, mrid + '_' + mod + '.nii.gz')
         os.makedirs(out_dir, exist_ok=True)
         if os.path.exists(out_fpath):
@@ -566,9 +570,9 @@ def panel_upload_single_subject():
     logger.debug(f'**** sel files : {sel_files}')
     if flag_submit == True:
         if flag_multi == False:
-            upload_file(sel_files)
+            upload_file_single_subject(sel_files)
         else:
-            upload_files(sel_files)
+            upload_files_single_subject(sel_files)
 
 def generate_template_csv():
     mod_dirs = {mod: os.path.join(st.session_state.paths['project'], mod) for mod in ['t1', 't2', 'fl', 'dti', 'fmri']}
@@ -595,6 +599,93 @@ def generate_template_csv():
     
     return df
 
+def panel_upload_BIDS_dataset():
+    logger.debug('  Function: panel_upload_BIDS_dataset ')
+    sac.divider(key='_div_bids')
+    with st.container(horizontal=True, horizontal_alignment="left"):
+        with st.popover("❓", width='content'):
+            st.write("Upload your BIDS dataset in the box below, and we'll try to import the data automatically.")
+        st.markdown('##### Upload BIDS', width='content')
+        uploaded_files = st.file_uploader('Drag and drop BIDS folder here', accept_multiple_files='directory')
+        if uploaded_files:
+            try:
+                base_dir = Path(tempfile.mkdtemp(prefix="uploaded_bids_dir_"))
+                for uploaded_file in uploaded_files:
+                    relative_path = Path(uploaded_file.name)
+                    dest_path = base_dir / relative_path
+                    dest_path.parent.mkdir(parents=True, exist_ok=True)
+                    with open(dest_path, "wb") as f:
+                        f.write(uploaded_file.getbuffer())
+                proj_dir = st.session_state.paths['prj_dir']
+                st.toast(f"BIDS directory uploaded.")
+            except:
+                st.error(f"BIDS directory upload failed.")
+                return
+
+
+            try:
+                layout = BIDSLayout(
+                    base_dir,
+                    validate=False,
+                    index_metadata=True                
+                    )
+                t1_files = layout.get(
+                    datatype='anat',
+                    suffix='T1w',
+                    extension = ['.nii', '.nii.gz'],
+                    return_type='file',
+                    scope='raw',
+                )
+                flair_files = layout.get(
+                    datatype='anat',
+                    suffix='FLAIR',
+                    extension = ['.nii', '.nii.gz'],
+                    return_type='file',
+                    scope='raw',
+                )
+                t1_dir = Path(os.path.join(proj_dir, 't1'))
+                fl_dir = Path(os.path.join(proj_dir, 'fl'))
+                t1_dir.mkdir(parents=True, exist_ok=True)
+                fl_dir.mkdir(parents=True, exist_ok=True)
+
+                def bids_flat_name(layout, filepath):
+                    ent = layout.parse_file_entities(filepath)
+
+                    parts = [
+                        f"sub-{ent['subject']}",
+                        f"ses-{ent['session']}" if ent.get("session") else None,
+                        f"run-{ent['run']}" if ent.get("run") else None,
+                        ent["suffix"]
+                    ]
+                    parts = [p for p in parts if p is not None]
+                    ext = "".join(Path(filepath).suffixes)
+                    return "_".join(parts) + ext
+                def collect_files(files, layout, target_dir):
+                    for f in files:
+                        out_name = bids_flat_name(layout, f)
+                        out_path = target_dir / out_name
+                        shutil.copy2(f, out_path)
+                collect_files(t1_files, layout, t1_dir)
+                collect_files(flair_files, layout, fl_dir)
+            except:
+                st.error("BIDS image data import failed.")
+            try:
+                participants = layout.get(
+                    suffix="participants",
+                    extension="tsv",
+                    return_type="file"
+                )
+                participants_tsv = participants[0]
+                df = pd.read_csv(participants_tsv, sep='\t')
+                CSV_OUT = Path(os.path.join(proj_dir, 'participants', 'participants.csv'))
+                CSV_OUT.parent.mkdir(parents=True, exist_ok=True)
+                df.to_csv(CSV_OUT, index=False)
+            except:
+                st.error("BIDS participants data import failed.")
+                return
+            st.success("BIDS import successful.")
+
+
 def panel_upload_multi_subject():
     '''
     Upload user data to target folder
@@ -603,6 +694,7 @@ def panel_upload_multi_subject():
 
     sac.divider(key='_p2_div4')
     
+
     with st.container(horizontal=True, horizontal_alignment="left"):
         st.markdown("##### Upload File(s): ", width='content')
         with st.popover("❓", width='content'):

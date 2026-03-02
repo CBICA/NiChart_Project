@@ -677,7 +677,7 @@ def check_requirements_met_panel(pipeline_name):
         'needs_FLAIR': 'FLAIR Scans',
         'needs_demographics': 'Participants CSV', 
     }
-    pipeline = st.session_state.sel_pipeline
+    pipeline = get_pipeline_label_by_name(pipeline_name)
     pipeline_id = get_pipeline_id_by_label(pipeline, harmonized=st.session_state.do_harmonize)
     reqs_set, reqs_params, req_order = parse_pipeline_requirements(pipeline_id)
 
@@ -768,9 +768,10 @@ def check_requirements_met_panel(pipeline_name):
         ready = ready and (csv_report is not None) and utilio._csv_severity(csv_report) == "green"
     if ready:
         st.success("All requirements satisfied. You can proceed.")
+        return ready
     else:
         st.info("Resolve the issues above to proceed. Click to expand each requirement for more details.")
-
+        return ready
 @st.cache_data
 def parse_pipeline_categories(pipeline_id):
     pipeline_path = DEFAULT_PIPELINE_DEFINITION_PATH / f"{pipeline_id}.yaml"

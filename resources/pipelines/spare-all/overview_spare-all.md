@@ -1,15 +1,22 @@
-### All Spare Scores (non-CVM)
+### SPARE Scores (excluding CVM)
 
-#### Source:
+Comprehensive pipeline to generate all SPARE scores that could be calculated from just T1w head MRI images at once.
 
-https://github.com/CBICA/SPARE
+##### List of SPARE scores:
+- BA: Brain Age
+- AD: Alzhemier's disease
+- PSY: Psychosis
+- MDD: Major Depression Disorder
 
 #### Input
 
-- T1-weighted scans (Nifti)
+- T1-weighted head MRI scans (Nifti)
+- Entry or a CSV file containing:
+	- Demographics (Age, Sex)
+	- Cognitive Status (IsCN)
 
 
 #### Output
 
-- All available SPARE scores (CSV). Does not include CVM scores.
+- All available SPARE scores excluding the CVM (Cardiovascular and metabolic disease) scores (CSV)
 

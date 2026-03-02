@@ -19,6 +19,8 @@ import gui.utils_view as utilview
 import pandas as pd
 import gui.utils_widgets as utilwd
 
+from NiChart_common_utils.nifti_parser import NiftiMRIDParser
+
 import streamlit_antd_components as sac
 
 import streamlit as st
@@ -98,7 +100,7 @@ def set_plot_params():
 
         sel_hvar = utilwd.select_var_twolevels(
             'plot_params', 'hvargroup', 'hvar',
-            'Grouping Variable', ['demog']
+            'Grouping Variable', ['cat_vars']
         )
         
     #### Centiles
@@ -206,6 +208,23 @@ def view_segmentation(layout):
 
         #######################
         ## Set olay ulay images
+
+        # Use heuristic parser
+        # mod_dirs = {mod: os.path.join(st.session_state.paths['project'], mod) for mod in ['t1', 't2', 'fl', 'dti', 'fmri']}
+        # dir_dict = {'T1': mod_dirs['t1'],
+        #                         'T2': mod_dirs['t2'],
+        #                         'FLAIR': mod_dirs['fl'],
+        #                         'DTI': mod_dirs['dti'],
+        #                         'FMRI': mod_dirs['fmri'],
+        #                         'DLMUSE': os.path.join(st.session_state.paths['project'], 'dlmuse_seg')
+        #                         }
+        
+        #nifti_parser = NiftiMRIDParser()
+        #heuristic_df = nifti_parser.create_master_csv(dir_dict, os.path.join(st.session_state.paths['project'], 'inferred_data_paths.csv'))
+        
+        #heuristic_df = heuristic_df.sort_values(by='MRID')
+        #fname = nifti_parser.get_path(sel_mrid, modality='t1')
+
         fname = os.path.join(
             st.session_state.paths['curr_data'], 't1', f'{sel_mrid}_T1.nii.gz'
         )
@@ -215,6 +234,7 @@ def view_segmentation(layout):
         else:
             st.session_state.mriplot_params['ulay'] = fname
 
+        #fname = nifti_parser.get_path(sel_mrid, modality='DLMUSE')
         fname = os.path.join(
             st.session_state.paths['curr_data'], 'dlmuse_seg', f'{sel_mrid}_T1_DLMUSE.nii.gz'
         )
@@ -265,7 +285,8 @@ def view_segmentation(layout):
         )
         if not os.path.exists(fname):
             st.session_state.mriplot_params['ulay'] = None
-            st.write(fname)
+            st.warning('Could not detect underlay image!')
+            return
         else:
             st.session_state.mriplot_params['ulay'] = fname
 
@@ -276,7 +297,8 @@ def view_segmentation(layout):
         )
         if not os.path.exists(fname):
             st.session_state.mriplot_params['olay'] = None
-            st.write(fname)
+            st.warning('Could not detect overlay image!')
+            return
         else:
             st.session_state.mriplot_params['olay'] = fname
             
@@ -316,7 +338,8 @@ def view_segmentation(layout):
         )
         if not os.path.exists(fname):
             st.session_state.mriplot_params['ulay'] = None
-            st.write(fname)
+            st.warning('Could not detect underlay image!')
+            return
         else:
             st.session_state.mriplot_params['ulay'] = fname
 
@@ -326,7 +349,8 @@ def view_segmentation(layout):
         )
         if not os.path.exists(fname):
             st.session_state.mriplot_params['olay'] = None
-            st.write(fname)
+            st.warning('Could not detect overlay image!')
+            return
         else:
             st.session_state.mriplot_params['olay'] = fname
             
@@ -403,7 +427,16 @@ def prep_csv():
         return False
 
     return True
+
+def rename_columns(df, suffix):
+    tmp_cols = [c for c in df.columns if c.endswith(suffix)]
     
+    for c in tmp_cols:
+        base = c.replace(suffix, "")
+        df[base] = df[c]
+
+    df = df.drop(columns=tmp_cols)
+    return df
 
 def view_img_vars(layout):
     """
@@ -449,13 +482,11 @@ def view_img_vars(layout):
             #st.write(df)
             
         elif pipeline == 'spare':            
-            df = df.drop(['SPARE_AD', 'SPARE_MDD', 'SPARE_SCZ'], axis=1)
-            df.columns = df.columns.str.replace('_decision_function','')
+            df = rename_columns(df, '_decision_function')
             #st.write(df)
             
         elif pipeline == 'spare_cvm':            
-            df = df.drop(['SPARE_SMOKING','SPARE_HYPERTENSION','SPARE_OBESITY', 'SPARE_DIABETES'], axis=1)
-            df.columns = df.columns.str.replace('_decision_function','')
+            df = rename_columns(df, '_decision_function')
 
         elif pipeline == 'surreal_gan':         
             df.columns = df.columns.str.replace('SurrealGAN_','')

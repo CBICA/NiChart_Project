@@ -38,7 +38,7 @@ def show_description(pipeline) -> None:
     """
     Panel for viewing pipeline description
     """
-    with st.container(border=True, height=300):
+    with st.container(border=True):
         f_logo = os.path.join(
             st.session_state.paths['resources'], 'pipelines', pipeline, f'logo_{pipeline}.png'
         )
@@ -161,8 +161,9 @@ def pipeline_runner_menu(enabled_pnames, sel=False):
         #st.info(f"DEBUG: sel_name: {sel_name}")
         #st.info(f"DEBUG: sel_pipeline: {sel_method}")
         st.info("Your data doesn't meet the requirements for this pipeline. Correct the issues marked below to proceed.")
-        utiltl.check_requirements_met_panel(sel_name)
+
         return
+    ready = utiltl.check_requirements_met_panel(sel_name)
     pipeline_to_run = utiltl.get_pipeline_id_by_label(sel_method, harmonized=harmonize)
 
     if pipeline_to_run is None:
@@ -171,76 +172,77 @@ def pipeline_runner_menu(enabled_pnames, sel=False):
     skip_steps_when_possible = True
     skip_steps_when_possible = st.checkbox("Accelerate pipeline via caching? (Uncheck to force re-runs)", value=True)
     alert_placeholder = st.empty()
-    if st.button("Run pipeline"):
-        alert_placeholder.info(f"The pipeline {pipeline_to_run} is running. Please do not navigate away from this page.")
-        pipeline_progress_bar = stqdm(total=2, desc="Submitting pipeline...", position=0)
-        #process_progress_bar = stqdm(total=2, desc="Waiting...", position=0)
-        process_progress_bar = None
-        process_status_box = st.status("Submitting pipeline step...", expanded=True)
-        #pipeline_progress_bar_slot = st.empty()
-        #process_progress_bar_slot = st.empty()
-        with st.container():
-            st.subheader("Pipeline Logs")
-            errbox = st.expander("Error messages", expanded=False)
-            with st.expander("View all pipeline logs"):
-                with st.container():
-                    log_committed_box = st.empty()
-            with st.expander("View current step live logs"):
-                with st.container():
-                    log_live_box = st.empty()
+    if ready:
+        if st.button("Run pipeline"):
+            alert_placeholder.info(f"The pipeline {pipeline_to_run} is running. Please do not navigate away from this page.")
+            pipeline_progress_bar = stqdm(total=2, desc="Submitting pipeline...", position=0)
+            #process_progress_bar = stqdm(total=2, desc="Waiting...", position=0)
+            process_progress_bar = None
+            process_status_box = st.status("Submitting pipeline step...", expanded=True)
+            #pipeline_progress_bar_slot = st.empty()
+            #process_progress_bar_slot = st.empty()
+            with st.container():
+                st.subheader("Pipeline Logs")
+                errbox = st.expander("Error messages", expanded=False)
+                with st.expander("View all pipeline logs"):
+                    with st.container():
+                        log_committed_box = st.empty()
+                with st.expander("View current step live logs"):
+                    with st.container():
+                        log_live_box = st.empty()
 
 
-        log = stlogbox.StreamlitJobLogger(log_committed_box, log_live_box)
-        execution_mode = 'local'
-        if st.session_state.has_cloud_session:
-            execution_mode = 'cloud'
-        local_path_remapping = {}
-        data_dir_locally = st.session_state.paths["out_dir"]
-        data_dir_on_host = st.session_state.paths["host_out_dir"]
-        if data_dir_on_host is not None:
-            local_path_remapping[data_dir_locally] = data_dir_on_host
-        try:
+            log = stlogbox.StreamlitJobLogger(log_committed_box, log_live_box)
+            execution_mode = 'local'
+            if st.session_state.has_cloud_session:
+                execution_mode = 'cloud'
+            local_path_remapping = {}
+            data_dir_locally = st.session_state.paths["out_dir"]
+            data_dir_on_host = st.session_state.paths["host_out_dir"]
+            if data_dir_on_host is not None:
+                local_path_remapping[data_dir_locally] = data_dir_on_host
             try:
-                jobstats_lambda_url = "https://gpzw2o0kxd.execute-api.us-east-1.amazonaws.com/default/cbica-nichart-updatestats"
-                if st.session_state.has_cloud_session:
-                    user_id = st.session_state.cloud_user_id
-                else:
-                    user_id = 'LOCALUSER'
+                try:
+                    jobstats_lambda_url = "https://gpzw2o0kxd.execute-api.us-east-1.amazonaws.com/default/cbica-nichart-updatestats"
+                    if st.session_state.has_cloud_session:
+                        user_id = st.session_state.cloud_user_id
+                    else:
+                        user_id = 'LOCALUSER'
 
-                payload = {
-                    "user_id": user_id,
-                    "job_type": pipeline_to_run,
-                    "count": 1
-                }
-                response = requests.post(
-                    jobstats_lambda_url,
-                    json=payload,
-                    timeout=5
+                    payload = {
+                        "user_id": user_id,
+                        "job_type": pipeline_to_run,
+                        "count": 1
+                    }
+                    response = requests.post(
+                        jobstats_lambda_url,
+                        json=payload,
+                        timeout=5
+                    )
+                    print("Update job stats status:", response.status_code)
+                    print("Update job stats response body:", response.text)
+                except Exception as e:
+                    # If this fails for any reason (no internet etc) just continue.
+                    pass
+
+                result = utiltl.run_pipeline(
+                    pipeline_id=pipeline_to_run, ##TODO EDIT THIS
+                    global_vars={"STUDY": st.session_state.paths["project"]},
+                    execution_mode=execution_mode,
+                    pipeline_progress_bar=pipeline_progress_bar,
+                    process_progress_bar=process_progress_bar,
+                    process_status_box=process_status_box,
+                    log=log,
+                    metadata_location=os.path.join(st.session_state.paths["project"], "metadata.json"),
+                    reuse_cached_steps=skip_steps_when_possible,
+                    local_path_remapping=local_path_remapping
                 )
-                print("Update job stats status:", response.status_code)
-                print("Update job stats response body:", response.text)
-            except Exception as e:
-                # If this fails for any reason (no internet etc) just continue.
-                pass
 
-            result = utiltl.run_pipeline(
-                pipeline_id=pipeline_to_run, ##TODO EDIT THIS
-                global_vars={"STUDY": st.session_state.paths["project"]},
-                execution_mode=execution_mode,
-                pipeline_progress_bar=pipeline_progress_bar,
-                process_progress_bar=process_progress_bar,
-                process_status_box=process_status_box,
-                log=log,
-                metadata_location=os.path.join(st.session_state.paths["project"], "metadata.json"),
-                reuse_cached_steps=skip_steps_when_possible,
-                local_path_remapping=local_path_remapping
-            )
-
-            alert_placeholder.success(f"Pipeline {pipeline_to_run} finished successfully.")
-        except Exception as err: 
-            alert_placeholder.error(f"Pipeline {pipeline_to_run} failed with errors. Expand the log boxes for details.")
-            process_status_box.update(state="error", label="Pipeline run failed.", expanded=False)
-            errbox.error(traceback.format_exc())
+                alert_placeholder.success(f"Pipeline {pipeline_to_run} finished successfully.")
+            except Exception as err: 
+                alert_placeholder.error(f"Pipeline {pipeline_to_run} failed with errors. Expand the log boxes for details.")
+                process_status_box.update(state="error", label="Pipeline run failed.", expanded=False)
+                errbox.error(traceback.format_exc())
 
 
 

@@ -99,6 +99,7 @@ sel = sac.chip(
         sac.ChipItem(label='Analyze Single Subject MRI Data'),
         sac.ChipItem(label='Analyze a Group of Scans'),
         sac.ChipItem(label='Explore Results Only (No MRI Needed!)'),
+        sac.ChipItem(label='Ask NiChart (LLM Chatbot)')
     ], label='', align='center', size='lg', radius='lg', direction='vertical', color='cyan'
 ) 
     
@@ -113,6 +114,9 @@ if sel == 'Analyze a Group of Scans':
 
 if sel == 'Explore Results Only (No MRI Needed!)':
     sel_page = "pages/nichart_ref_data.py"
+
+if sel == 'Ask NiChart (LLM Chatbot)':
+    sel_page = "pages/nichart_chatbot.py"
 
 if sel is not None:
     utilnav.main_navig(None, None, 'Go!', sel_page)

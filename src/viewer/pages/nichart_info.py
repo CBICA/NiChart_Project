@@ -17,115 +17,182 @@ from streamlit_image_select import image_select
 import logging
 from stqdm import stqdm
 from utils.utils_logger import setup_logger
+import gui.utils_navig as utilnav
 
 import streamlit_antd_components as sac
+import streamlit as st
+from streamlit_card import card
 
 #utilpg.config_page()
 utilpg.set_global_style()
 
-def view_overview():
-    #with st.container(border=True):
-    st.markdown(
-        f'NiChart is a {utilmisc.styled_text('free, open-source framework')} built specifically for deriving {utilmisc.styled_text('machine learning biomarkers')} from {utilmisc.styled_text('MRI imaging data')}', unsafe_allow_html=True
-    )
-    st.image("../resources/nichart1.png", width=300)
-    st.markdown(
-        f'- NiChart platform offers tools for {utilmisc.styled_text('image processing')} and {utilmisc.styled_text('data analysis')}', unsafe_allow_html=True
-    )
-    st.markdown(
-        f'- Users can extract {utilmisc.styled_text('imaging phenotypes')} and {utilmisc.styled_text('machine learning (ML) indices')} of disease and aging', unsafe_allow_html=True
-    )
-    st.markdown(
-        f'- Pre-trained {utilmisc.styled_text('ML models')} allow users to quantify complex brain changes and compare results against {utilmisc.styled_text('normative and disease-specific reference ranges')}', unsafe_allow_html=True
-    )
+st.set_page_config(page_title="NiChart", layout="wide")
 
-def view_quick_start():
-    #with st.container(border=True):
+def imgfile_to_data(filepath):
+    import base64
 
-    st.markdown(
-        '''
-        You can begin using NiChart by choosing an option on the Home page and following the guided steps:
-        
-        - **Analyze Single-Subject MRI Data**:
-        
-        Create a neuroimaging chart for an individual subject. Process their MRI scans to compute imaging features, apply pre-trained machine learning models to derive biomarkers, and visualize results against reference population distributions.
-        
-        - **Process Multiple-Subject Dataset**: 
-        
-        Run the NiChart processing pipeline on a group or study dataset to generate imaging biomarkers and perform large-scale or comparative analyses.
-        
-        - **Explore NiChart**:
-        
-        Browse and visualize population-level distributions of precomputed imaging features and biomarkers from the NiChart reference dataset.
-        '''
-    )
-
-def view_links():
-    #with st.container(border=True):
-    st.markdown(
-        """
-        - Check out [NiChart Web page](https://neuroimagingchart.com)
-        - Visit [NiChart GitHub](https://github.com/CBICA/NiChart_Project)
-        - Jump into [our documentation](https://cbica.github.io/NiChart_Project)
-        - Ask a question in [our community discussions](https://github.com/CBICA/NiChart_Project/discussions)
-        """
-        , unsafe_allow_html=True
-    )
-    st.markdown("And fill out our 1-minute user demographics survey to gain **permanent, free** access to NiChart Cloud!")
-    take_survey = st.button("Take Survey")
-    if take_survey:
-        st.switch_page("pages/survey.py")
-
-def view_installation():
-    #with st.container(border=True):
-    #with st.expander(label='Installation'):
-    st.markdown(
-        """
-        - You can install NiChart Project desktop
-        ```
-        pip install NiChart_Project
-        ```
-
-        - Run the application
-        ```
-        cd src/viewer
-        streamlit run NiChartProject.py
-        ```
-
-        - Alternatively, the cloud app can be launched at
-        ```
-        https://cloud.neuroimagingchart.com
-        ```
-        """
-        , unsafe_allow_html=True
-    )
-
-st.markdown("<h5 style='text-align:center; color:#3a3a88;'>NiChart: Neuroimaging Chart\n\n</h1>", unsafe_allow_html=True)
-
-sel = sac.tabs([
-    sac.TabsItem(label='Overview'),
-    sac.TabsItem(label='Quick Start'),
-    sac.TabsItem(label='Links'),
-    sac.TabsItem(label='Installation'),
-    sac.TabsItem(label="Start Using NiChart"),
-], align='center',  size='xl', color='grape')
-
-if sel == 'Overview':
-    view_overview()
-    
-if sel == 'Quick Start':
-    view_quick_start()
-
-if sel == 'Links':
-    view_links()
-    
-if sel == 'Installation':
-    view_installation()
-
-if sel == 'Start Using NiChart':
-    st.switch_page("pages/nichart_home.py")
-    
+    with open(filepath, "rb") as f:
+        data = f.read()
+        encoded = base64.b64encode(data)
+    data = "data:image/png;base64," + encoded.decode("utf-8")    
+    return data
     
 
+imgdir =  os.path.join(st.session_state.paths['resources'], 'images', 'nichart_logo')
+
+def show_short_desc(title):
+    if title == "NiChart":
+        st.markdown("Neuroimaging Chart of **AI-based** imaging biomarkers")
+
+        pass
+    if title == "MRI Segmentation":
+        st.markdown("Fast **deep-learning** segmentation of **healthy** and **pathological** anatomy")
+        pass
+    if title == "AI Biomarkers":
+        st.markdown("AI-based **imaging biomarkers** quantifying **brain aging** and **neurodegeneration**")
+        pass
+    if title == "Brain Aging Dimensions":
+        st.markdown("**Data-driven** brain aging indices capturing **distinct patterns** of **aging-related atrophy**")
+        pass
+    if title == "Abnormality Maps":
+        st.markdown("Voxelwise CSF abnormality maps quantifying regional brain atrophy.")
+        pass
+
+def show_full_desc(title):
+    if title == "NiChart":
+        st.markdown(
+            """
+            **NeuroImaging Chart of AI-based Imaging Biomarkers**
+            
+            A framework to:
+            
+            - Process MRI images
+            - Harmonize scans to reference datasets
+            - Apply and contribute machine learning models
+            - Derive individualized neuroimaging biomarkers
+            """
+        )
+    if title == "MRI Segmentation":
+        st.markdown(
+            """
+            **Segmentation of Brain Anatomy**
+            
+            NiChart integrates DL-based models to calculate:
+            
+            - **DLICV:** Intra-cranial volume estimation 
+            - **DLMUSE:** Region of interest segmentation https://pubmed.ncbi.nlm.nih.gov/26679328
+            - **DLWMLS:** WM lesion segmentation https://pubmed.ncbi.nlm.nih.gov/26679328
+            """
+        )
+            
+    if title == "AI Biomarkers":
+        st.markdown(
+            """
+            **Supervised ML models of brain aging and disease**
+            
+            NiChart uses raw T1 images and/or derived features to compute a set of predictive biomarkers (SPARE scores - Spatial Patterns of Abnormalities reflect structural variability in the brain associated with a given task)
+            
+            - **SPARE-BA:** An individualized index reflecting the brain age
+            
+            - **DeepSPARE-BA:** An individualized index reflecting the brain age and derived directly from raw T1 scan
+
+            - **SPARE-AD:** An individualized index quantifying the presence and severity of Alzheimer’s disease (AD)-like patterns of atrophy in the brain (https://pubmed.ncbi.nlm.nih.gov/19416949/
+            
+            - **SPARE-CVMs:** The cardiometabolic risk models (smoking, obesity, hypertension, and diabetes) https://www.nature.com/articles/s41467-025-57867-7
+
+            - Other SPARE disease models reflect the specific conditions for depression (**SPARE-Depression**) and psychosis (**SPARE-Psychosis**)
+            """
+        )
+
+    if title == "Brain Aging Dimensions":
+        st.markdown(
+            """
+            **Semi-supervised ML models of brain aging heterogeneity**
+            
+            Brain aging dimensions reflect continuous latent representations of structural patterns associated with aging. 
+            
+            - **Surreal-GAN R-indices:** The R-index reflects the severity of individualized brain changes along multiple dimensions, potentially reflecting the stage of a mixture of underlying neuropathological and biological processes https://pubmed.ncbi.nlm.nih.gov/39147830/
+            
+                ***R1:*** subcortical atrophy, mainly concentrated in the caudate and putamen
+            
+                ***R2:*** focal medial temporal lobe (MTL) atrophy
+            
+                ***R3:*** parieto-temporal atrophy, including that in middle temporal gyrus, angular gyrus and middle occipital gyrus
+            
+                ***R4:*** diffuse cortical atrophy in medial and lateral frontal regions, as well as superior parietal and occipital regions
+            
+                ***R5:*** perisylvian atrophy centered around the insular cortex
+            
+            - **CCLNMF indices:** Coupled Cross-Sectional and Longitudinal Non-Negative Matrix Factorization identifies dominant patterns of brain aging by jointly modeling baseline (cross-sectional) and follow-up (longitudinal) MRI data.
+            
+                Cross-sectional maps capture cumulative aging differences across individuals, while longitudinal maps quantify subject-specific change rates. These maps are jointly decomposed via NMF into shared spatial components and individual loadings, providing continuous measures of distinct aging patterns.
+            
+            **Note:** Surreal-GAN and CCL-NMF indices in NiChart were obtained using a knowledge distillation method to train a tabular transformer with four encoder layers to predict the original indices
 
 
+            """
+        )
+
+        st.markdown('''
+
+''')
+    if title == "Abnormality Maps":
+        st.markdown(
+            """
+            **CSF Abnormalities** ***(work in progress)***
+            
+            Voxelwise abnormality maps quantify how much each brain region deviates from a normative aging model, highlighting localized tissue loss or expansion
+            
+            - Abnormality maps were derived using mass-preserving tissue density measures (**RAVENS maps**), enabling precise regional comparisons of gray matter, white matter, and CSF volumes.
+            
+            - Combining RAVENS with CSF-based abnormality maps yields a spatial fingerprint of structural vulnerability, showing where tissue density differs from healthy controls at the voxel level.
+            
+            - These maps allow subject-level interpretation, enabling visualization of individual neuroanatomical abnormalities, not just group averages.
+            """
+        )
+
+def card(title, image_path):
+    with st.container(border=True, horizontal_alignment = 'left'):
+        st.image(imgfile_to_data(image_path))
+        with st.container(border=False, height = 200, horizontal_alignment = 'center'):
+            st.markdown(f"#### {title}")
+            show_short_desc(title)
+        with st.popover("See More"):
+            show_full_desc(title)
+
+with st.container(horizontal_alignment="center"):
+    st.markdown("## What can I do with NiChart?")
+with st.container(horizontal=True, horizontal_alignment="center"):
+    cols = st.columns(5)
+
+    with cols[0]: # NiChart
+        card(title="NiChart",
+             image_path=os.path.join(imgdir, 'nichart_logo_v2_img1_v2.png')
+            )
+
+    with cols[1]: # Segmentation
+        card(title="MRI Segmentation",
+             image_path=os.path.join(imgdir, 'nichart_logo_v2_img4_v2.png')
+             )
+
+    with cols[2]: # AI Biomarkers
+        card(title="AI Biomarkers",
+             image_path=os.path.join(imgdir, 'nichart_logo_v2_img3_v2.png')
+             )
+
+    with cols[3]: # Brain Aging Subtypes
+        card(title="Brain Aging Dimensions",
+             image_path=os.path.join(imgdir, 'nichart_logo_v2_img5_v2.png')
+             )
+
+    with cols[4]: # Voxelwise Abnormality Maps
+        card(title="Abnormality Maps",
+             image_path=os.path.join(imgdir, 'nichart_logo_v2_img6_v2.png')
+             )
+
+    
+
+utilnav.main_navig(
+    None, None,
+    'Home', 'pages/nichart_home.py',
+)
