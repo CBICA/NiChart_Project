@@ -8,7 +8,6 @@ import numpy as np
 import nibabel as nib
 from nibabel.orientations import axcodes2ornt, ornt_transform
 from scipy import ndimage
-import utils.utils_plots as utilpl
 import utils.utils_misc as utilmisc
 import utils.utils_user_select as utiluser
 import gui.utils_widgets as utilwd

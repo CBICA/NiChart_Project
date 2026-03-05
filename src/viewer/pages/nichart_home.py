@@ -8,9 +8,9 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 import utils.utils_misc as utilmisc
-import utils.utils_plots as utilpl
+import gui.utils_plots as utilpl
 import utils.utils_session as utilses
-import utils.utils_mriview as utilmri
+import gui.utils_mriview as utilmri
 import utils.utils_alerts as utils_alerts
 import utils.utils_survey as utils_survey
 import gui.utils_navig as utilnav

@@ -9,8 +9,8 @@ import utils.utils_pages as utilpg
 import utils.utils_processes as utilprc
 import utils.utils_session as utilses
 import utils.utils_io as utilio
-import utils.utils_plots as utilpl
-import utils.utils_mriview as utilmri
+import gui.utils_plots as utilpl
+import gui.utils_mriview as utilmri
 import utils.utils_data_view as utildv
 import gui.utils_results as utilres
 from utils.utils_styles import inject_global_css 
