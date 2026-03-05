@@ -443,63 +443,43 @@ def panel_project_folder():
     Panel to select project folder
     '''
     logger.debug('    Function: panel_project_folder')
-    sac.divider(key='_p1_div1')
-    
-    with st.container(horizontal=True, horizontal_alignment="left"):
-        st.markdown("##### Project Folder: ", width='content')
+    st.markdown(f"##### 📁 Project: `{st.session_state.prj_name}`")
 
-    placeholder = st.empty()
-    placeholder.markdown(f"##### 📁 `{st.session_state.prj_name}`", width='content')
-
-    sel_opt = st.selectbox(
-        'Select an action',
-        ["I'm Good — Move On", 'Create new project folder', 'Switch to existing project', 'Reset project folder'],
-        label_visibility='collapsed',
-        index=None
-    )
-
-    if sel_opt == "I'm Good — Move On":
-        st.success('Great! Please upload your data!')
-
-    if sel_opt == 'Create new project folder':
-        sel_prj = st.text_input(
-            "Project name:",
-            None,
-            placeholder="user_new_study",
-            label_visibility = 'collapsed'
+    with st.expander("Change project folder"):
+        action = st.radio(
+            "Action",
+            ["Create new project", "Switch to existing project", "Reset project folder"],
+            label_visibility='collapsed',
+            index=None
         )
 
-        with st.container(horizontal=True, horizontal_alignment="center"):
-            if st.button("Select"):
+        if action == "Create new project":
+            sel_prj = st.text_input("Project name:", placeholder="my_study", label_visibility='collapsed')
+            if st.button("Create") and sel_prj:
                 utilss.update_project(sel_prj)
-                placeholder.markdown(f"##### 📃 `{st.session_state.prj_name}`", width='content')
+                st.rerun()
 
-    if sel_opt == 'Switch to existing project':
-        list_projects = utilio.get_subfolders(st.session_state.paths['out_dir'])
-        if len(list_projects) > 0:
-            sel_ind = list_projects.index(st.session_state.prj_name)
-            sel_prj = sac.chip(
-                list_projects,
-                label='', index=None, align='left', size='sm', radius='sm',
-                multiple=False, color='cyan', description='Projects in output folder'
-            )
-            
-            with st.container(horizontal=True, horizontal_alignment="center"):
-                utilss.update_project(sel_prj)
-                placeholder.markdown(f"##### 📃 `{st.session_state.prj_name}`", width='content')
+        elif action == "Switch to existing project":
+            list_projects = utilio.get_subfolders(st.session_state.paths['out_dir'])
+            if list_projects:
+                sel_prj = sac.chip(
+                    list_projects, label='', index=None, align='left', size='sm', radius='sm',
+                    multiple=False, color='cyan'
+                )
                 if sel_prj is not None:
                     utilss.update_project(sel_prj)
-                    placeholder.markdown(f"##### 📃 `{st.session_state.prj_name}`", width='content')
-    
-    if sel_opt == 'Reset project folder':
-        st.warning("⚠️Are you sure you want to delete all files in the project folder? This cannot be undone.")
-        flag_confirm = st.checkbox("I understand and want to delete all files in this folder")
+                    st.rerun()
+            else:
+                st.caption("No existing projects found.")
 
-        with st.container(horizontal=True, horizontal_alignment="center"):
-            if st.button("Delete") and flag_confirm:
+        elif action == "Reset project folder":
+            st.warning("⚠️ This will delete all files in the project folder. This cannot be undone.")
+            flag_confirm = st.checkbox("I understand and want to delete all files")
+            if st.button("Delete", disabled=not flag_confirm):
                 utilio.clear_folder(st.session_state.paths['prj_dir'])
-                st.toast(f"Files in project {st.session_state.prj_name} have been successfully deleted.")
+                st.toast(f"Files in '{st.session_state.prj_name}' deleted.")
                 utilss.update_project(st.session_state.prj_name)
+                st.rerun()
         
 def panel_upload_single_subject():
     '''
@@ -507,69 +487,25 @@ def panel_upload_single_subject():
     '''
     logger.debug('    Function: panel_upload_single_subject')
 
-    sac.divider(key='_p2_div1')
-    
-    with st.container(horizontal=True, horizontal_alignment="left"):
-        st.markdown("##### Upload File(s): ", width='content')
-        with st.popover("❓", width='content'):
-            st.write(
-                """
-                **Data Upload Guide**
-                - You may upload MRI scans in any of the following formats:
-                  - **NIfTI:** .nii or .nii.gz
-                  - **DICOM (compressed):** a single .zip file containing the DICOM series
-                  - **DICOM (individual files):** multiple .dcm files
-                  
-                    *(Note: uploading a folder directly is not currently supported)*
-                    
-                - If you have multiple imaging modalities (e.g., T1, FLAIR), upload them one at a time.
-                
-                - Once uploaded, NiChart will automatically:
-                  - Organize the files into the standard input structure
-                  - Create a subject list based on the uploaded MRI data
-                  
-                - You may open and edit the subject list (e.g., to add age, sex, or other metadata needed for analysis).
-                
-                - You can also upload non-imaging data (e.g., clinical or cognitive measures) as a CSV file.
-                
-                - The CSV must include an MRID column with values that match the subject IDs in the subject list, so the data can be merged correctly.
-                """
-            )
-            
-    # Upload data
-    sel_opt = sac.chip(
-        ['Single (.nii.gz, .nii, .zip, .csv)', 'Multiple (dicom files)'],
-        label='', index=0, align='left', size='sm', radius='sm', multiple=False, 
-        color='cyan', return_index = True
-    )
-    flag_multi=False
-    if sel_opt == 1:
-        flag_multi=True
-        
-    logger.debug(f'**** flag multi set to : {flag_multi}')
-        
-    with st.form(key='my_form', clear_on_submit=True, border=False):
-                
-        sel_files = st.file_uploader(
-            "Input files or folders",
-            key="_uploaded_input",
-            accept_multiple_files=flag_multi,
-            label_visibility="collapsed"
-        )
-        
-        flag_submit = False
-        with st.container(horizontal=True, horizontal_alignment="center"):
-            submitted = st.form_submit_button("Submit")
-            if submitted:
-                flag_submit = True
-        
-    logger.debug(f'**** flag submitted set to : {flag_submit}')
-    logger.debug(f'**** sel files : {sel_files}')
-    if flag_submit == True:
-        if flag_multi == False:
-            upload_file_single_subject(sel_files)
-        else:
-            upload_files_single_subject(sel_files)
+    tab1, tab2, tab3 = st.tabs(["NIfTI / DICOM (.zip)", "DICOM (individual files)", "CSV"])
+
+    with tab1:
+        with st.form(key='form_single_nifti', clear_on_submit=True, border=False):
+            f = st.file_uploader("Upload a .nii, .nii.gz, or .zip file", label_visibility='collapsed')
+            if st.form_submit_button("Upload", use_container_width=True):
+                upload_file_single_subject(f)
+
+    with tab2:
+        with st.form(key='form_single_dcm', clear_on_submit=True, border=False):
+            files = st.file_uploader("Upload .dcm files", accept_multiple_files=True, label_visibility='collapsed')
+            if st.form_submit_button("Upload", use_container_width=True):
+                upload_files_single_subject(files)
+
+    with tab3:
+        with st.form(key='form_single_csv', clear_on_submit=True, border=False):
+            f = st.file_uploader("Upload a .csv file", label_visibility='collapsed')
+            if st.form_submit_button("Upload", use_container_width=True):
+                upload_file_single_subject(f)
 
 def generate_template_csv():
     mod_dirs = {mod: os.path.join(st.session_state.paths['project'], mod) for mod in ['t1', 't2', 'fl', 'dti', 'fmri']}
@@ -602,130 +538,49 @@ def panel_upload_multi_subject():
     '''
     logger.debug('    Function: panel_upload_multi_subject')
 
-    sac.divider(key='_p2_div4')
-    
-    with st.container(horizontal=True, horizontal_alignment="left"):
-        st.markdown("##### Upload File(s): ", width='content')
-        with st.popover("❓", width='content'):
-           st.write(
-               """
-               **Data Upload Guide**
-               - Here, upload the data you have available. (In the next step we'll automatically determine which pipelines you can run based on this.)
-        
-               - You may upload MRI scans in any of the following formats:
-                 - **NIfTI:** one or multiple .nii or .nii.gz files 
-                   
-               - If you have multiple imaging modalities (e.g., T1, FLAIR), upload only one modality batch at a time. First click the modality on the list, then drag-and-drop your images onto the box.
-               
-               - You can also upload non-imaging data (e.g., clinical or cognitive measures) via the participants CSV file (required for harmonization and many analytical pipelines).
+    tab_t1, tab_fl, tab_csv = st.tabs(["T1 Scans", "FLAIR Scans", "Participants CSV"])
 
-               - If you upload your images first, we'll auto-generate a template for this CSV so that you can easily edit it.
-               
-               - The CSV must include an MRID column with values that match the subject IDs in the subject list, so the data can be merged correctly. The auto-generated template includes the MRIDs we detect from your imaging data -- please don't change it.
-        
-               - When you go to select a pipeline in the next step, if you select a pipeline which needs more fields, we'll tell you.
-               """
-           )
-            
-    # Upload data
-    #sel_opt = sac.chip(
-    #    ['Single (.nii.gz, .nii, .zip, .csv)', 'Multiple (dicom files)'],
-    #    label='', index=0, align='left', size='sm', radius='sm', multiple=False, 
-    #    color='cyan', return_index = True
-    #)
-    #sel_opt = sac.chip(
-    #    ['T1 scans (.nii.gz, .nii, .zip)', 'FLAIR scans (.nii.gz, .nii, .zip)',
-    #     'DICOM images (.dcm, .zip)', 'Participants CSV (.csv)'],
-    #     label='', index=0, align='left', size='sm', radius='sm', multiple=False,
-    #     color='cyan', return_index = True
-    #)
-
-    with st.popover("T1 Scans"):
+    with tab_t1:
         t1_out_dir = os.path.join(st.session_state.paths['prj_dir'], 't1')
         utilio.upload_multiple_files(out_dir=t1_out_dir)
-    with st.popover("FLAIR Scans"):
+
+    with tab_fl:
         fl_out_dir = os.path.join(st.session_state.paths['prj_dir'], 'fl')
         utilio.upload_multiple_files(out_dir=fl_out_dir)
-    #with st.popover("DICOM images"):
-    #    pass
-    with st.popover("Participants CSV"):
-        st.markdown("## Participants CSV Upload")
-        st.info("Most pipelines require some clinical or demographic information about participants. Below you can download a template CSV file to fill in. If you don't have information for a certain column, feel free to delete it. When ready, upload it with the file uploader and hit 'Submit'.")
-        ## TODO: explain all columns here (expandable)
-        with st.expander(label="Explanation of columns", expanded=False):
-            st.write("Age must be in years. Sex must be M or F.")
-            st.write("Batch is just used to identify particpants from a related source and is used for harmonization (not needed otherwise). We auto-generate a batch name assuming all scans are from a single population.")
-            st.write("IsCN is used to denote cognitively normal patients (1 for CN, 0 otherwise). This is used for filtering during harmonization and not needed otherwise.")
-        try:
-            autogenerated_csv = generate_template_csv()
-            autogenerated_csv_data = autogenerated_csv.to_csv(index=False).encode('utf-8')
-            st.download_button(
-                label="Download template CSV",
-                data=autogenerated_csv_data,
-                file_name='participants.csv',
-                mime="text/csv"
-            )
-        except Exception as e:
-            st.warning("We couldn't seem to generate your template CSV. Please go back and ensure you uploaded scans first. Or hit refresh to check again.")
-            with st.expander("Debug info", expanded=False):
-                st.error(f"Error message: {str(e)}")
-            if st.button("Refresh"):
-                try:
-                    autogenerated_csv = generate_template_csv()
-                    autogenerated_csv_data = autogenerated_csv.to_csv(index=False).encode('utf-8')
-                    st.download_button(
-                        label="Download template CSV",
-                        data=autogenerated_csv_data,
-                        file_name='participants.csv',
-                        mime="text/csv"
-                )
-                except Exception as e:
-                    pass
-        
-        csv_file = st.file_uploader(
-            "Input participants CSV",
-            key="_uploaded_csv_input",
-            accept_multiple_files=False,
-            label_visibility="collapsed"
-        )
-        flag_csv_submit = False
-        with st.container(horizontal=True, horizontal_alignment="center"):
-            csv_submitted = st.button("Submit")
-            if csv_submitted:
-                flag_csv_submit = True
-    
-        logger.debug(f'**** flag csv submitted set to : {flag_csv_submit}')
-        logger.debug(f'**** sel csv file : {csv_file}')
-        if flag_csv_submit == True:
-            try:
-                dest_path = os.path.join(st.session_state.paths['prj_dir'], 'participants', 'participants.csv')
-                os.makedirs(os.path.dirname(dest_path), exist_ok=True)
-                with open(dest_path, 'wb') as f:
-                    f.write(csv_file.getbuffer())
-                st.toast("Uploaded your CSV file successfully!")
-            except:
-                st.toast("Failed to upload CSV file.")
-            #upload_file(csv_file)
 
-    #flag_multi=True
-    #    
-    #logger.debug(f'**** flag multi set to : {flag_multi}')
+    with tab_csv:
+        try:
+            df = generate_template_csv()
+            st.download_button(
+                "⬇ Download template CSV",
+                df.to_csv(index=False).encode('utf-8'),
+                'participants.csv',
+                'text/csv',
+                use_container_width=True
+            )
+        except Exception:
+            st.caption("Upload MRI scans first to auto-generate a template.")
+
+        with st.form(key='form_participants_csv', clear_on_submit=True, border=False):
+            csv_file = st.file_uploader("Participants CSV", type=['csv'], label_visibility='collapsed')
+            if st.form_submit_button("Upload", use_container_width=True):
+                if csv_file:
+                    dest = os.path.join(st.session_state.paths['prj_dir'], 'participants', 'participants.csv')
+                    os.makedirs(os.path.dirname(dest), exist_ok=True)
+                    with open(dest, 'wb') as f:
+                        f.write(csv_file.getbuffer())
+                    st.toast("Participants CSV uploaded!")
+                else:
+                    st.warning("Please select a CSV file first.")
 
 def panel_view_files():
     '''
     Show files in data folder
     '''
     logger.debug('    Function: panel_view_files')
-    
-    sac.divider(key='_p3_div1')
-    
-    with st.container(horizontal=True, horizontal_alignment="left"):
-        st.markdown("##### Review File(s): ", width='content')
-            
-    placeholder = st.empty()
-    placeholder.markdown(f"##### 📁 `{st.session_state.prj_name}`", width='content')
+    st.markdown(f"📁 `{st.session_state.prj_name}`")
 
-    with st.container(border = None, height = 400):
+    with st.container(border=None, height=400):
         tree_items, list_paths = utildv.build_folder_tree(
             st.session_state.paths['prj_dir'],
             st.session_state.out_dirs,

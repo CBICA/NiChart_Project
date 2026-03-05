@@ -1,25 +1,11 @@
 import streamlit as st
-import os
-import yaml
-from pathlib import Path
-from graphviz import Digraph
-from collections import defaultdict
-import utils.utils_misc as utilmisc
 import utils.utils_pages as utilpg
-import utils.utils_processes as utilprc
 import utils.utils_session as utilses
 import utils.utils_upload as utilup
-import utils.utils_data_view as utildv
 import utils.utils_settings as utilset
-
 import gui.utils_navig as utilnav
 from utils.utils_styles import inject_global_css
-
-from streamlit_image_select import image_select
-import re
 from utils.utils_logger import setup_logger
-
-import streamlit_antd_components as sac
 
 logger = setup_logger()
 logger.debug("--- STARTING: Upload Data ---")
@@ -126,46 +112,38 @@ def my_help():
             """
         )
 
-def upload_data():
-
-    cols = st.columns([6,1,10,1,10])
-
-    with cols[0]:
-        utilup.panel_project_folder()
-
-    with cols[2]:
-        if st.session_state.workflow == 'single_subject':
-            utilup.panel_upload_single_subject()
-        elif st.session_state.workflow == 'multi_subject':
-            utilup.panel_upload_multi_subject()
-        else: # default to multi
-            utilup.panel_upload_multi_subject()
-
-    with cols[4]:
-        utilup.panel_view_files()
-
-
 #################################
 ## Main
 
 with st.container(horizontal=True, horizontal_alignment="center"):
-    st.markdown("<h4 style=color:#3a3a88;'>Upload Data\n\n</h1>", unsafe_allow_html=True, width='content')
+    st.markdown("<h4 style='color:#3a3a88;'>Upload Data</h4>", unsafe_allow_html=True, width='content')
 
 if st.session_state.workflow == 'ref_data':
     st.info('''
-        You’ve selected the **Reference Data** workflow. This option doesn’t require data upload.
+        You've selected the **Reference Data** workflow. This option doesn't require data upload.
         - If you meant to analyze your data, please go back and choose a different workflow.
         - Otherwise, continue to the next step to explore the reference values.
         '''
     )
-
     utilnav.main_navig(
         'Home', 'pages/nichart_home.py',
         'Results', 'pages/nichart_results.py',
     )
 
 else:
-    upload_data()
+    tab_prj, tab_upload, tab_review = st.tabs(["📁 Project", "📤 Upload", "📋 Review"])
+
+    with tab_prj:
+        utilup.panel_project_folder()
+
+    with tab_upload:
+        if st.session_state.workflow == 'single_subject':
+            utilup.panel_upload_single_subject()
+        else:
+            utilup.panel_upload_multi_subject()
+
+    with tab_review:
+        utilup.panel_view_files()
 
     utilnav.main_navig(
         'Info', f'pages/nichart_{st.session_state.workflow}.py',
