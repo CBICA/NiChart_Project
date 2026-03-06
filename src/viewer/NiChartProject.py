@@ -56,14 +56,15 @@ pages = {
         st.Page("pages/survey.py", title="Take Survey"),
     ],
     "Workflows": [
-        st.Page("pages/nichart_single_subject.py", title="Single Subject"),
-        st.Page("pages/nichart_multi_subject.py", title="Multi Subject"),
-        st.Page("pages/nichart_ref_data.py", title="Reference Data"),
+        st.Page("pages/nichart_ref_data.py", title="View Reference Charts"),
+        st.Page("pages/nichart_single_subject.py", title="Process Single Subject"),
+        st.Page("pages/nichart_multi_subject.py", title="Multiple Subjects"),
+        st.Page("pages/nichart_results.py", title="View Results"),
     ],    
     "Actions": [
         st.Page("pages/nichart_data.py", title="Data"),
         st.Page("pages/nichart_pipelines.py", title="Pipelines"),
-        st.Page("pages/nichart_results.py", title="Results"),
+        # st.Page("pages/nichart_results.py", title="Results"),
     ],
     #"Pipelines": [
         #st.Page("pages/sel_pipelines.py", title="Select Pipelines"),
