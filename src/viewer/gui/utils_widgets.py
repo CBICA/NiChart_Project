@@ -157,11 +157,11 @@ def select_var_twolevels(var_group, var_name1, var_name2, hdr, list_cat, list_va
     First level is the var category provided with data dict
     """
     df_vars = st.session_state.dicts['df_var_groups']
-    
+
     sel_cats = df_vars[df_vars.group.isin(list_cat)]
     if sel_cats.shape[0] == 0:
         sel_cats = df_vars[df_vars.category.isin(list_cat)]
-    
+
     # Select roi
     st.write(hdr)
     sel_var = selectbox_twolevels(
@@ -170,6 +170,73 @@ def select_var_twolevels(var_group, var_name1, var_name2, hdr, list_cat, list_va
         dicts_rename = {
             'muse': st.session_state.dicts['muse']['ind_to_name']
         }
+    )
+    return sel_var
+
+
+def select_var_with_tag_filter(var_group, var_name1, var_name2, hdr, list_vars=None):
+    """
+    Variable selection with tag-based pre-filtering.
+
+    Shows collapsible filters for pipeline and category tags derived from
+    df_var_groups, then renders the standard two-level group → variable
+    selectbox on the filtered subset.
+    """
+    df_vars = st.session_state.dicts['df_var_groups'].copy()
+
+    # --- collect available tag values ---
+    avail_pipelines = sorted(
+        {p for pipes in df_vars['pipeline'] for p in pipes if p}
+    )
+    avail_categories = sorted(df_vars['category'].dropna().unique().tolist())
+
+    # --- persistent filter state (keyed by var_name2 to allow multiple uses) ---
+    pipe_key = f'_tag_pipe_{var_name2}'
+    cat_key  = f'_tag_cat_{var_name2}'
+
+    if pipe_key not in st.session_state:
+        st.session_state[pipe_key] = avail_pipelines
+    if cat_key not in st.session_state:
+        st.session_state[cat_key] = avail_categories
+
+    # keep stored values in sync with whatever is actually available
+    stored_pipes = [p for p in st.session_state[pipe_key] if p in avail_pipelines]
+    stored_cats  = [c for c in st.session_state[cat_key]  if c in avail_categories]
+
+    with st.expander('Filter variables', expanded=False):
+        c1, c2 = st.columns(2)
+        with c1:
+            sel_pipes = st.multiselect(
+                'Pipeline', avail_pipelines,
+                default=stored_pipes,
+                key=f'_ms{pipe_key}'
+            )
+            st.session_state[pipe_key] = sel_pipes
+        with c2:
+            sel_cats = st.multiselect(
+                'Category', avail_categories,
+                default=stored_cats,
+                key=f'_ms{cat_key}'
+            )
+            st.session_state[cat_key] = sel_cats
+
+    # --- apply filters ---
+    # pipeline filter: keep rows whose pipeline list overlaps sel_pipes,
+    # OR has an empty pipeline list (= common to all pipelines)
+    if sel_pipes:
+        def _pipe_match(pipes):
+            return len(pipes) == 0 or bool(set(pipes) & set(sel_pipes))
+        df_vars = df_vars[df_vars['pipeline'].apply(_pipe_match)]
+
+    if sel_cats:
+        df_vars = df_vars[df_vars['category'].isin(sel_cats)]
+
+    # --- two-level variable selector ---
+    st.write(hdr)
+    sel_var = selectbox_twolevels(
+        var_group, var_name1, var_name2,
+        df_vars, list_vars,
+        dicts_rename={'muse': st.session_state.dicts['muse']['ind_to_name']}
     )
     return sel_var
 

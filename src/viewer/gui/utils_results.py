@@ -2,6 +2,7 @@ import os
 import shutil
 import time
 from typing import Any
+import plotly.graph_objs as go
 
 import pandas as pd
 import numpy as np
@@ -29,6 +30,48 @@ from stqdm import stqdm
 from utils.utils_logger import setup_logger
 logger = setup_logger()
 
+
+def _add_plots_for_group():
+    """
+    Add one plot for every variable in the currently visible tag-filtered group.
+    Uses the same plot_params but iterates over each variable in the group.
+    """
+    df_vars = st.session_state.dicts['df_var_groups']
+
+    # Respect the active tag filters stored by select_var_with_tag_filter
+    pipe_key = '_tag_pipe_yvar'
+    cat_key  = '_tag_cat_yvar'
+    sel_pipes = st.session_state.get(pipe_key, [])
+    sel_cats  = st.session_state.get(cat_key, [])
+
+    if sel_pipes:
+        def _pipe_match(pipes):
+            return len(pipes) == 0 or bool(set(pipes) & set(sel_pipes))
+        df_vars = df_vars[df_vars['pipeline'].apply(_pipe_match)]
+    if sel_cats:
+        df_vars = df_vars[df_vars['category'].isin(sel_cats)]
+
+    # Filter to the currently selected group (first level)
+    cur_group = st.session_state.plot_params.get('yvargroup')
+    if cur_group and cur_group != 'Select an option...' and cur_group in df_vars['group'].values:
+        df_vars = df_vars[df_vars['group'] == cur_group]
+
+    # Resolve variable names (handle atlas-indexed groups)
+    muse_dict = st.session_state.dicts['muse']['ind_to_name']
+    for _, row in df_vars.iterrows():
+        raw_vals = row['values']
+        if row['atlas'] == 'muse':
+            var_names = [muse_dict.get(v, v) for v in raw_vals]
+        else:
+            var_names = raw_vals
+
+        for vname in var_names:
+            params = st.session_state.plot_params.copy()
+            params['yvargroup'] = row['group']
+            params['yvar'] = vname
+            st.session_state.plots = utilpl.add_plot(st.session_state.plots, params)
+
+
 def set_plot_params():
     """
     Panel for selecting plotting parameters
@@ -42,32 +85,26 @@ def set_plot_params():
     st.session_state.plot_params['xvar'] = 'Age'
 
     if pipeline == 'dlmuse':
-        yvarlist = ['roi']
         st.session_state.plot_params['yvargroup'] = 'MUSE_ShortList'
         st.session_state.plot_params['yvar'] = 'GM'
 
     elif pipeline == 'dlwmls':
-        yvarlist = ['wmroi']
         st.session_state.plot_params['yvargroup'] = 'MUSE_WM'
         st.session_state.plot_params['yvar'] = 'Frontal_WM_R'
 
     elif pipeline == 'spare':
-        yvarlist = ['SPARE_Scores']
         st.session_state.plot_params['yvargroup'] = 'SPARE_Scores'
         st.session_state.plot_params['yvar'] = 'SPARE_BA'
 
     elif pipeline == 'spare_cvm':
-        yvarlist = ['SPARE_CVM_Scores']
         st.session_state.plot_params['yvargroup'] = 'SPARE_CVM_Scores'
         st.session_state.plot_params['yvar'] = 'SPARE_HYPERTENSION'
 
     elif pipeline == 'cclnmf':
-        yvarlist = ['CCLNMF_Aging_Dimensions']
         st.session_state.plot_params['yvargroup'] = 'CCLNMF_Aging_Dimensions'
         st.session_state.plot_params['yvar'] = 'CCL-NMF1'
 
     elif pipeline == 'surreal_gan':
-        yvarlist = ['SurrealGAN_Aging_Dimensions']
         st.session_state.plot_params['yvargroup'] = 'SurrealGAN_Aging_Dimensions'
         st.session_state.plot_params['yvar'] = 'R1'
 
@@ -92,16 +129,25 @@ def set_plot_params():
             'plot_params', 'xvargroup', 'xvar',
             'Variable X', ['age'],
         )
-        
-        sel_yvar = utilwd.select_var_twolevels(
+
+        sel_yvar = utilwd.select_var_with_tag_filter(
             'plot_params', 'yvargroup', 'yvar',
-            'Variable Y', yvarlist
+            'Variable Y',
         )
 
         sel_hvar = utilwd.select_var_twolevels(
             'plot_params', 'hvargroup', 'hvar',
             'Grouping Variable', ['cat_vars']
         )
+
+        st.divider()
+        with st.container(horizontal=True, horizontal_alignment='left'):
+            if st.button('Add Plot', key='_add_plot_vars'):
+                st.session_state.plots = utilpl.add_plot(
+                    st.session_state.plots, st.session_state.plot_params
+                )
+            if st.button('Add for All in Group', key='_add_all_vars'):
+                _add_plots_for_group()
         
     #### Centiles
     if tab == 'Centiles':
@@ -664,3 +710,77 @@ def panel_results():
             view_img_vars(layout)
 
 
+CENTILE_FILES = {
+    'All (CN)': 'dlmuse_centiles_CN.csv',
+    'Males (CN)': 'dlmuse_centiles_CN-Males.csv',
+    'Females (CN)': 'dlmuse_centiles_CN-Females.csv',
+    'ICV Normalized': 'dlmuse_centiles_CN-ICVNorm.csv',
+}
+
+def panel_centile_view():
+    """
+    Panel showing centile age trends for a selected variable.
+    Controls (reference group + variable) on the left; centile band chart on the right.
+    """
+    col_ctrl, col_plot = st.columns([1, 3])
+
+    with col_ctrl:
+        sel_group = st.selectbox('Reference group', list(CENTILE_FILES.keys()))
+
+        centile_path = os.path.join(
+            st.session_state.paths['centiles'], CENTILE_FILES[sel_group]
+        )
+        try:
+            df_cent = pd.read_csv(centile_path)
+        except Exception:
+            st.error('Could not load centile data.')
+            return
+
+        vars_list = sorted(df_cent['VarName'].unique().tolist())
+        default = 'TotalBrain' if 'TotalBrain' in vars_list else vars_list[0]
+        sel_var = st.selectbox('Variable', vars_list, index=vars_list.index(default))
+
+    with col_plot:
+        df_v = df_cent[df_cent['VarName'] == sel_var].sort_values('Age')
+        age = df_v['Age']
+
+        fig = go.Figure()
+
+        # 5–95 band
+        fig.add_trace(go.Scatter(
+            x=pd.concat([age, age.iloc[::-1]]),
+            y=pd.concat([df_v['centile_95'], df_v['centile_5'].iloc[::-1]]),
+            fill='toself',
+            fillcolor='rgba(80,100,200,0.12)',
+            line=dict(color='rgba(0,0,0,0)'),
+            name='5th–95th centile',
+        ))
+
+        # 25–75 band
+        fig.add_trace(go.Scatter(
+            x=pd.concat([age, age.iloc[::-1]]),
+            y=pd.concat([df_v['centile_75'], df_v['centile_25'].iloc[::-1]]),
+            fill='toself',
+            fillcolor='rgba(80,100,200,0.25)',
+            line=dict(color='rgba(0,0,0,0)'),
+            name='25th–75th centile',
+        ))
+
+        # Median line
+        fig.add_trace(go.Scatter(
+            x=age,
+            y=df_v['centile_50'],
+            mode='lines',
+            line=dict(color='rgb(60,80,180)', width=2),
+            name='Median (50th)',
+        ))
+
+        fig.update_layout(
+            xaxis_title='Age',
+            yaxis_title=sel_var,
+            height=500,
+            margin=dict(l=40, r=20, t=20, b=40),
+            legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1),
+        )
+
+        st.plotly_chart(fig, use_container_width=True)

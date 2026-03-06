@@ -489,9 +489,13 @@ def init_var_groups() -> None:
     for group_name, group_info in data.items():
         raw_values = group_info.get('values', [])
         str_values = [str(v) for v in raw_values]  # ensure uniform type
+        pipeline = group_info.get('pipeline', [])
+        if pipeline is None:
+            pipeline = []
         rows.append({
             'group': group_name,
             'category': group_info.get('category'),
+            'pipeline': pipeline,
             'vtype': group_info.get('vtype'),
             'atlas': group_info.get('atlas'),
             'values': str_values
