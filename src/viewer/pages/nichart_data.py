@@ -23,7 +23,7 @@ if 'instantiated' not in st.session_state or not st.session_state.instantiated:
 ## Function definitions
 @st.dialog("Help Information", width="medium")
 def my_help():
-    tab1, tab2, tab3 = st.tabs(["Project Folder", "Upload Files", "Review Files"])
+    tab1, tab2, tab3 = st.tabs(["Select Project Folder", "Upload Files", "Review Files"])
 
     with tab1:
         st.write(
@@ -116,40 +116,38 @@ def my_help():
 ## Main
 
 with st.container(horizontal=True, horizontal_alignment="center"):
-    st.markdown("<h4 style='color:#3a3a88;'>Upload Data</h4>", unsafe_allow_html=True, width='content')
+    st.markdown("<h4 style='color:#3a3a88;'>Data Upload</h4>", unsafe_allow_html=True, width='content')
 
-if st.session_state.workflow == 'ref_data':
-    st.info('''
-        You've selected the **Reference Data** workflow. This option doesn't require data upload.
-        - If you meant to analyze your data, please go back and choose a different workflow.
-        - Otherwise, continue to the next step to explore the reference values.
-        '''
-    )
-    utilnav.main_navig(
-        'Home', 'pages/nichart_home.py',
-        'Results', 'pages/nichart_results.py',
+with st.container(
+    horizontal=True, horizontal_alignment="center", width='stretch'
+):
+
+    tab_prj, tab_upload, tab_review = st.tabs(
+        ["📁 Select Project", "📤 Upload Data", "📋 Review Data"],
+        on_change='rerun',
+        width=600
     )
 
-else:
-    tab_prj, tab_upload, tab_review = st.tabs(["📁 Project", "📤 Upload", "📋 Review"])
-
+if tab_prj.open:
     with tab_prj:
         utilup.panel_project_folder()
 
+if tab_upload.open:
     with tab_upload:
         if st.session_state.workflow == 'single_subject':
             utilup.panel_upload_single_subject()
         else:
             utilup.panel_upload_multi_subject()
 
+if tab_review.open:
     with tab_review:
         utilup.panel_view_files()
 
-    utilnav.main_navig(
-        'Info', f'pages/nichart_{st.session_state.workflow}.py',
-        'Pipelines', 'pages/nichart_pipelines.py',
-        utilset.edit_settings, my_help
-    )
+utilnav.main_navig(
+    'Info', f'pages/nichart_{st.session_state.workflow}.py',
+    'Pipelines', 'pages/nichart_pipelines.py',
+    utilset.edit_settings, my_help
+)
 
 # Show session state vars
 if st.session_state.mode == 'debug':

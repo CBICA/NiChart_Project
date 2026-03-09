@@ -232,6 +232,7 @@ def show_img_slices(img, scroll_axis, sel_axis_bounds, orientation, wimg = None)
         sel_axis_bounds[1] - 1,
         value=sel_axis_bounds[2],
         key=f"slider_{orientation}",
+        width = wimg
     )
 
     # Extract the slice and display it

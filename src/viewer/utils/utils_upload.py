@@ -428,6 +428,7 @@ def view_mri(fname):
                 ind_view,
                 img_bounds[ind_view, :],
                 'axial',
+                500
             )
         except:
             st.warning(
@@ -442,21 +443,19 @@ def panel_project_folder():
     Panel to select project folder
     '''
     logger.debug('    Function: panel_project_folder')
-    st.markdown(f"##### 📁 Project: `{st.session_state.prj_name}`")
 
     with st.expander("Change project folder"):
         action = st.radio(
             "Action",
             ["Create new project", "Switch to existing project", "Reset project folder"],
             label_visibility='collapsed',
-            index=None
+            index=0,
         )
 
         if action == "Create new project":
             sel_prj = st.text_input("Project name:", placeholder="my_study", label_visibility='collapsed')
             if st.button("Create") and sel_prj:
                 utilss.update_project(sel_prj)
-                st.rerun()
 
         elif action == "Switch to existing project":
             list_projects = utilio.get_subfolders(st.session_state.paths['out_dir'])
@@ -467,7 +466,6 @@ def panel_project_folder():
                 )
                 if sel_prj is not None:
                     utilss.update_project(sel_prj)
-                    st.rerun()
             else:
                 st.caption("No existing projects found.")
 
@@ -479,14 +477,22 @@ def panel_project_folder():
                 st.toast(f"Files in '{st.session_state.prj_name}' deleted.")
                 utilss.update_project(st.session_state.prj_name)
                 st.rerun()
-        
+
+    with st.container(horizontal=True, horizontal_alignment="left"):
+        st.markdown(
+            f":violet-badge[Current Project] :green-badge[:material/folder: {st.session_state.prj_name}]"
+        )
+
+
 def panel_upload_single_subject():
     '''
     Upload user data to target folder
     '''
     logger.debug('    Function: panel_upload_single_subject')
 
-    tab1, tab2, tab3 = st.tabs(["NIfTI / DICOM (.zip)", "DICOM (individual files)", "CSV"])
+    tab1, tab2, tab3 = st.tabs(
+        ["NIfTI / DICOM (.zip)", "DICOM (individual files)", "CSV"]
+    )
 
     with tab1:
         with st.form(key='form_single_nifti', clear_on_submit=True, border=False):
@@ -536,6 +542,8 @@ def panel_upload_multi_subject():
     Upload user data to target folder
     '''
     logger.debug('    Function: panel_upload_multi_subject')
+    sac.divider(key='_p2_div4')
+    st.markdown("##### 📤 Upload Data")
 
     tab_t1, tab_fl, tab_csv = st.tabs(["T1 Scans", "FLAIR Scans", "Participants CSV"])
 
@@ -577,48 +585,78 @@ def panel_view_files():
     Show files in data folder
     '''
     logger.debug('    Function: panel_view_files')
-    st.markdown(f"📁 `{st.session_state.prj_name}`")
+    st.markdown(
+        f":violet-badge[Current Project] :green-badge[:material/folder: {st.session_state.prj_name}]"
+    )
 
-    with st.container(border=None, height=400):
-        tree_items, list_paths = utildv.build_folder_tree(
-            st.session_state.paths['prj_dir'],
-            st.session_state.out_dirs,
-            None,
-            3,
-            ['user_upload']
+    col1, col2 = st.columns([1, 1])
+
+    with col1:
+        with st.container(border=None, height=400):
+            tree_items, list_paths = utildv.build_folder_tree(
+                st.session_state.paths['prj_dir'],
+                st.session_state.out_dirs,
+                None,
+                3,
+                ['user_upload']
+            )
+            selected = sac.tree(
+                items=tree_items,
+                index=None,
+                align='left', size='xl', icon='table',
+                checkbox=False,
+                #checkbox_strict = True,
+                open_all = True,
+                return_index = True
+                #height=400
+            )
+
+    with col2:
+        if selected:
+            if isinstance(selected, list):
+                selected = selected[0]
+            fpath = list_paths[selected]
+            fname = os.path.basename(fpath)
+            if fpath.endswith('.csv'):
+                try:
+                    df_tmp = pd.read_csv(fpath)
+                    st.dataframe(df_tmp, hide_index=True)
+
+                    with st.container(horizontal=True, horizontal_alignment="center"):
+                        if st.button('Edit'):
+                            edit_participants(fpath)
+                except:
+                    st.warning(f'Could not read csv file: {fname}')
+
+            if fpath.endswith(('.nii.gz','.nii')):
+                view_mri(fpath)
+
+
+def panel_data():
+    with st.container(
+        horizontal=True, horizontal_alignment="center", width='stretch'
+    ):
+
+        tab_prj, tab_upload, tab_review = st.tabs(
+            ["📁 Select Project", "📤 Upload Data", "📋 Review Data"],
+            on_change='rerun',
         )
-        selected = sac.tree(
-            items=tree_items,
-            index=None,
-            align='left', size='xl', icon='table',
-            checkbox=False,
-            #checkbox_strict = True,
-            open_all = True,
-            return_index = True
-            #height=400
-        )
 
-    if selected:
-        if isinstance(selected, list):
-            selected = selected[0]
-        fpath = list_paths[selected]
-        fname = os.path.basename(fpath)
-        if fpath.endswith('.csv'):
-            try:
-                df_tmp = pd.read_csv(fpath)
-                st.info(f'Data file: {fname}')
-                st.dataframe(df_tmp, hide_index=True)
+        if tab_prj.open:
+            with tab_prj:
+                panel_project_folder()
 
-                with st.container(horizontal=True, horizontal_alignment="center"):
-                    if st.button('Edit'):
-                        edit_participants(fpath)
-            except:
-                st.warning(f'Could not read csv file: {fname}')
+        if tab_upload.open:
+            with tab_upload:
+                if st.session_state.workflow == 'single_subject':
+                    panel_upload_single_subject()
+                else:
+                    panel_upload_multi_subject()
 
-        if fpath.endswith(('.nii.gz','.nii')):
-            view_mri(fpath)
-            
-                              
+        if tab_review.open:
+            with tab_review:
+                panel_view_files()
+
         
 
 

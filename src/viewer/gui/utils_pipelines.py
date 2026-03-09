@@ -79,7 +79,7 @@ def show_description(pipeline) -> None:
     Panel for viewing pipeline description
     """
     pipeline_label = utiltl.get_pipeline_label_by_name(pipeline)
-    with st.container(border=True, height=300):
+    with st.expander('Pipeline description', expanded=False):
         if pipeline == '':
             st.markdown("No description exists for this pipeline.")
             return
@@ -104,7 +104,7 @@ def select_pipeline(enabled_pnames):
     Select a pipeline and show overview
     '''
     st.markdown("##### Select:")
-    show_enabled_only = st.checkbox("Show only pipelines which match my available data", value=True)
+    show_enabled_only = st.checkbox("Show only pipelines that can be run using available data", value=True)
     sac.divider(key='_p2_div1')
 
     pipelines = st.session_state.pipelines
@@ -141,14 +141,15 @@ def select_pipeline(enabled_pnames):
     return sel_label
 
 def pipeline_runner_menu(enabled_pnames, sel=False):
-    st.markdown("##### Run:")
-    sac.divider(key='_p2_div2')
     if not sel:
-        st.info("Select a pipeline on the left, then look here to run it.")
+        st.warning("Please select a pipeline!")
         return
     sel_method = st.session_state.sel_pipeline_label
     sel_name = utiltl.get_pipeline_name_by_label(sel_method)
-    st.success(f'Selected pipeline: {sel_name}')
+    st.markdown(
+        f":violet-badge[Current Pipeline] :green-badge[:material/conversion_path: {sel_name}]"
+    )
+
     harmonize = False
     if 'subject_type' not in st.session_state or st.session_state.subject_type == 'multi':
         if utiltl.pipeline_is_harmonizable(sel_method):
@@ -246,9 +247,7 @@ def pipeline_runner_menu(enabled_pnames, sel=False):
 
     pass
 
-def pipeline_menu():
-    #cols = st.columns([10,1,10])
-    cols = st.columns(2)
+def panel_pipelines():
     out_dir = os.path.join(
         st.session_state.paths['out_dir'], st.session_state['prj_name']
     )
@@ -268,30 +267,26 @@ def pipeline_menu():
         else:
             disabled_pnames.append(pname)
 
-    with cols[0]:
-        sel = select_pipeline(enabled_pnames=enabled_pnames)
-    with cols[1]:
-        pipeline_runner_menu(enabled_pnames=enabled_pnames, sel=sel)
-
-
-def panel_pipelines():
-
-    workflow = st.session_state.workflow
-
-    if workflow is None:
-        st.info('Please select a Workflow!')
-        return
-
-    with st.container(horizontal=True, horizontal_alignment="center"):
-        st.markdown("<h4 style=color:#3a3a88;'>Select and Run Pipeline\n\n</h1>", unsafe_allow_html=True, width='content')
-
-    if st.session_state.workflow == 'ref_data':
-        st.info('''
-            You’ve selected the **Reference Data** workflow. This option doesn’t require pipeline selection.
-            - If you meant to analyze your data, please go back and choose a different workflow.
-            - Otherwise, continue to the next step to explore the reference values.
-            '''
+    with st.container(
+        horizontal=True, horizontal_alignment="center", width='stretch'
+    ):
+        tab1, tab2 = st.tabs(
+            ["Select", "Run"],
+            on_change='rerun',
         )
-    else:
-        pipeline_menu()
+
+    ## Select
+    if tab1.open:
+        with tab1:
+            sel = select_pipeline(enabled_pnames=enabled_pnames)
+
+    ## Run
+    if tab2.open:
+        with tab2:
+            pipeline_runner_menu(
+                enabled_pnames,
+                st.session_state.sel_pipeline is None
+            )
+
+
 

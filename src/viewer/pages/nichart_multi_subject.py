@@ -9,6 +9,8 @@ import utils.utils_pages as utilpg
 import utils.utils_processes as utilprc
 import utils.utils_session as utilses
 import utils.utils_io as utilio
+import utils.utils_upload as utilup
+import gui.utils_pipelines as utilpipe
 import utils.utils_data_view as utildv
 from utils.utils_styles import inject_global_css 
 import gui.utils_navig as utilnav
@@ -40,26 +42,48 @@ st.session_state.paths['curr_data'] = st.session_state.paths['prj_dir']
 if 'instantiated' not in st.session_state or not st.session_state.instantiated:
     utilses.init_session_state()
 
-
-st.markdown("<h5 style='text-align:center; color:#3a3a88;'>Multi-Subject Dataset Analysis\n\n</h1>", unsafe_allow_html=True)
-
-cols = st.columns([1,6,1])
-with cols[1]:
-
-    st.markdown(
-        '''
-        Compute neuroimaging chart values for multi-subject MRI datasets with just a few steps:
-        
-        - **Data:** Upload image (NIfTI) and non-image (.csv) files required for analysis
-        
-        - **Pipelines:** Select processing/analysis pipeline to run on your data
-
-        - **Results:** View/download results of the pipeline
-        
-        ''', unsafe_allow_html=True
+with st.container(
+    horizontal=True, horizontal_alignment="center", width='stretch'
+):
+    tab1, tab2, tab3 = st.tabs(
+        ["Info", "Data", "Processing"],
+        on_change='rerun',
     )
 
-utilnav.main_navig(None, None, 'Data', 'pages/nichart_data.py')
+## Info
+if tab1.open:
+    with tab1:
+        st.markdown("<h5 style='text-align:center; color:#3a3a88;'>Multi-Subject Dataset Analysis\n\n</h1>", unsafe_allow_html=True)
+
+        cols = st.columns([1,6,1])
+        with cols[1]:
+            st.markdown(
+                '''
+                Compute neuroimaging chart values for multi-subject MRI datasets with just a few steps:
+                
+                - **Data:** Upload image (NIfTI) and non-image (.csv) files required for analysis
+                
+                - **Processing:** Select processing/analysis pipeline to run on your data
+
+                ''', unsafe_allow_html=True
+            )
+
+## Data Upload
+if tab2.open:
+    with tab2:
+
+        with st.container(horizontal=True, horizontal_alignment="center"):
+            st.markdown("<h5 style='color:#3a3a88;'>Data Upload</h5>", unsafe_allow_html=True, width='content')
+
+    utilup.panel_data()
+
+## Pipelines
+if tab3.open:
+    with tab3:
+        with st.container(horizontal=True, horizontal_alignment="center"):
+            st.markdown("<h5 style='color:#3a3a88;'>Select and Run a Pipeline</h5>", unsafe_allow_html=True, width='content')
+
+        utilpipe.panel_pipelines()
 
 # Show session state vars
 if st.session_state.mode == 'debug':
