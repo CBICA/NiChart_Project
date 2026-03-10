@@ -99,7 +99,7 @@ sel = sac.chip(
         sac.ChipItem(label='View Reference Charts (No MRI Data Needed!)'),
         sac.ChipItem(label='Analyze a Single Subject'),
         sac.ChipItem(label='Analyze a Dataset'),
-        sac.ChipItem(label='Download/View Results'),
+        sac.ChipItem(label='View Your NiChart'),
     ], label='', align='center', size='lg', radius='lg', direction='vertical', color='cyan'
 ) 
     
@@ -115,7 +115,7 @@ if sel == 'Analyze a Single Subject':
 if sel == 'Analyze a Dataset':
     sel_page = "pages/nichart_multi_subject.py"
 
-if sel == 'Download/View Results':
+if sel == 'View Your NiChart':
     sel_page = "pages/nichart_results.py"
 
 if sel is not None:

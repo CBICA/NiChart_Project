@@ -46,7 +46,7 @@ with st.container(
     horizontal=True, horizontal_alignment="center", width='stretch'
 ):
     tab1, tab2, tab3 = st.tabs(
-        ["Info", "Data", "Processing"],
+        ["Overview", "Data", "Processing"],
         on_change='rerun',
     )
 
@@ -65,7 +65,7 @@ if tab1.open:
                 
                 - **Processing:** Select processing/analysis pipeline to run on your data
 
-                ''', unsafe_allow_html=True
+                    ''', unsafe_allow_html=True
             )
 
 ## Data Upload

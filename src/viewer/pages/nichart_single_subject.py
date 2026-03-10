@@ -47,7 +47,7 @@ with st.container(
     horizontal=True, horizontal_alignment="center", width='stretch'
 ):
     tab1, tab2, tab3, tab4 = st.tabs(
-        ["Info", "Data", "Processing", "Results"],
+        ["Overview", "Data", "Processing", "Results"],
         on_change='rerun',
     )
 

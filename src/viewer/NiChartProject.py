@@ -59,17 +59,8 @@ pages = {
         st.Page("pages/nichart_ref_data.py", title="View Reference Charts"),
         st.Page("pages/nichart_single_subject.py", title="Process Single Subject"),
         st.Page("pages/nichart_multi_subject.py", title="Process Dataset"),
-        st.Page("pages/nichart_results.py", title="View User Charts"),
-    # ],    
-    # "Actions": [
-        st.Page("pages/nichart_data.py", title="Data", visibility='hidden'),
-        st.Page("pages/nichart_pipelines.py", title="Pipelines", visibility='hidden'),
-        # st.Page("pages/nichart_results.py", title="Results"),
+        st.Page("pages/nichart_results.py", title="View My Chart"),
     ],
-    #"Pipelines": [
-        #st.Page("pages/sel_pipelines.py", title="Select Pipelines"),
-        #st.Page("pages/run_pipelines.py", title="Run Pipelines"),
-    #],
 }
 
 pg = st.navigation(pages, position="top")

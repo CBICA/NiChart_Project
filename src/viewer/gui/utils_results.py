@@ -540,16 +540,6 @@ def view_img_vars(layout):
         df["grouping_var"] = "Data"
         st.session_state.plot_data['df_data'] = df
 
-    ## Pipeline specific steps
-    #if pipeline == 'dlmuse':
-
-    ##elif pipeline == 'spare':
-
-    ##else:
-    ###elif pipeline == 'dlwmls':
-        ##st.info('Not available yet ...')
-        ##return
-
     # Plot data
     plot_data(layout)
 
@@ -637,10 +627,6 @@ def panel_download():
 def panel_results():
     logger.debug('    Function: panel_results')
 
-    if st.session_state.workflow is None:
-        st.info('Please select a Workflow!')
-        return
-
     # Set plotting parameters layout
     if st.session_state.layout_plots == 'Main':
         layout = st.container(border=False)
@@ -651,61 +637,23 @@ def panel_results():
         sac.divider(label='General Options', align='center', color='indigo', size='lg')
 
     with layout:
-        if st.session_state.workflow == 'ref_data':
-            sel_task = utilwd.my_selectbox(
-                'general_params', 'sel_task', ['Info', 'View'], hdr='Task'
-            )
-        else:
-            sel_task = utilwd.my_selectbox(
-                'general_params', 'sel_task', ['Download', 'View'], hdr='Task'
-            )
+        old_pipe = st.session_state.general_params['sel_pipeline']
+        sel_pipe = utilwd.my_selectbox(
+            'general_params', 'sel_pipeline',
+            ['dlmuse', 'dlwmls', 'spare', 'spare_cvm', 'cclnmf', 'surreal_gan'],
+            'Pipeline'
+        )
 
-    if sel_task is None or str(sel_task) == 'Select an option...':
-        with st.container(horizontal=False, horizontal_alignment="center"):
-            st.markdown('Please select a viewing option from the sidebar!', width="content")
-
-    if sel_task == 'Info':
-        panel_info()
-
-    elif sel_task == 'Download':
-        panel_download()
-
-    elif sel_task == 'View':
-        with layout:
-            sel_rtype = utilwd.my_selectbox(
-                'general_params', 'sel_rtype',
-                ['Image', 'Numeric'], 'Data Type'
-            )
-
-        if sel_rtype == 'Image':
-            with layout:
-                sel_pipe = utilwd.my_selectbox(
-                    'general_params', 'sel_pipeline',
-                    ['dlmuse', 'dlwmls', 'csf_ravens'], 'Pipeline'
-                )
-            if sel_pipe is None or str(sel_pipe) == 'Select an option...':
-                return
-            view_segmentation(layout)
-
-        elif sel_rtype == 'Numeric':
-            with layout:
-                old_pipe = st.session_state.general_params['sel_pipeline']
-                sel_pipe = utilwd.my_selectbox(
-                    'general_params', 'sel_pipeline',
-                    ['dlmuse', 'dlwmls', 'spare', 'spare_cvm', 'cclnmf', 'surreal_gan'],
-                    'Pipeline'
-                )
-
-            if sel_pipe is None or str(sel_pipe) == 'Select an option...':
-                return
-            
-            # Reset plots if pipeline changed
-            if old_pipe != sel_pipe:
-                st.session_state.plots = pd.DataFrame(columns=['flag_sel', 'params'])
-                st.session_state.plot_curr = -1
-                st.session_state.plot_active = None
-                
-            view_img_vars(layout)
+    if sel_pipe is None or str(sel_pipe) == 'Select an option...':
+        return
+        
+    # Reset plots if pipeline changed
+    if old_pipe != sel_pipe:
+        st.session_state.plots = pd.DataFrame(columns=['flag_sel', 'params'])
+        st.session_state.plot_curr = -1
+        st.session_state.plot_active = None
+        
+    view_img_vars(layout)
 
 
 CENTILE_FILES = {
