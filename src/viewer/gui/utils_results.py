@@ -584,13 +584,11 @@ def panel_download():
     '''
     Panel to download results
     '''
-    if st.session_state.workflow == 'ref_data':
-        st.info('Reference data download is not available at this time.')
-        return
-    
     with st.container(horizontal=True, horizontal_alignment="center"):
 
-        st.markdown(f"###### 📁 Project Folder:   `{st.session_state.prj_name}`", width='content')
+        st.markdown(
+            f":violet-badge[Current Project] :green-badge[:material/folder: {st.session_state.prj_name}]"
+        )
     
         prj_dir = st.session_state.paths['prj_dir']
         list_dirs = utilio.get_subfolders(prj_dir)

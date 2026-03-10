@@ -9,6 +9,7 @@ import utils.utils_pages as utilpg
 import utils.utils_processes as utilprc
 import utils.utils_session as utilses
 import utils.utils_io as utilio
+import gui.utils_results as utilres
 import utils.utils_upload as utilup
 import gui.utils_pipelines as utilpipe
 import utils.utils_data_view as utildv
@@ -87,13 +88,13 @@ if tab3.open:
 
         utilpipe.panel_pipelines()
 
-## Results
+## Download Results
 if tab4.open:
     with tab4:
         with st.container(horizontal=True, horizontal_alignment="center"):
             st.markdown("<h5 style='color:#3a3a88;'>Results</h5>", unsafe_allow_html=True, width='content')
 
-        utilpipe.panel_results()
+        utilres.panel_download()
 
 # Show session state vars
 if st.session_state.mode == 'debug':
