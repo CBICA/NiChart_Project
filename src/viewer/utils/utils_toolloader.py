@@ -249,6 +249,47 @@ def stringify_mounts(mounts_dict: Dict[str, Union[str, Path]]) -> Dict[str, str]
     return {k: str(v) for k, v in mounts_dict.items()}
 
 
+def get_command_strings(pipeline_id, global_vars, local_path_remapping):
+    '''
+    This function returns a list of all commands that a pipeline would invoke if run locally as via run_pipeline.
+    '''
+    # TODO: Fill in with command extraction logic
+    execution_mode = "local"
+
+    results = []
+
+    # Resolve pipeline file
+    pipeline_path = DEFAULT_PIPELINE_DEFINITION_PATH / f"{pipeline_id}.yaml"
+    if not pipeline_path.exists():
+        raise FileNotFoundError(f"Pipeline definition '{pipeline_id}' not found at {pipeline_path}")
+
+    with open(pipeline_path, 'r') as f:
+        pipeline_yaml = yaml.safe_load(f)
+
+    order, step_map = parse_pipeline_steps(pipeline_yaml)
+    step_outputs = {}
+    total_steps = len(order)
+    for sid in order:
+        step = step_map[sid]
+        tool_id = step["tool"]
+
+        tool_yaml = DEFAULT_TOOL_DEFINITION_PATH / f"{tool_id}.yaml"
+        tool = load_tool_spec_from_yaml(tool_yaml)
+
+        # Resolve input/output paths with variable substitution
+        resolved_inputs = resolve_vars(step.get("inputs", {}), global_vars, step_outputs)
+        resolved_outputs = resolve_vars(step.get("outputs", {}), global_vars, step_outputs)
+        resolved_total_mounts = stringify_mounts({**resolved_inputs, **resolved_outputs})
+        resolved_params = step.get("params", {})
+
+        user_params = resolved_params
+        user_mounts = resolved_total_mounts
+        # Directly generate without verifying mounts etc
+        docker_command = tool.generate_docker_command(user_params, user_mounts, local_path_remapping)
+        results.append(docker_command)
+
+    return results
+
 def submit_job(
     tool_name: str,
     user_params: Dict,

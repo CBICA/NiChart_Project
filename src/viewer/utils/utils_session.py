@@ -592,6 +592,12 @@ def process_session_token() -> Any:
         return ""
     return headers["X-Amzn-Oidc-Data"]
 
+def process_session_access_token() -> Any:
+    headers = st.context.headers
+    if not headers or "X-Amzn-Oidc-Access-Token" not in headers:
+        return ""
+    return headers["X-Amzn-Oidc-Access-Token"]
+
 def process_session_user_id() -> Any:
     headers = st.context.headers
     if not headers or "X-Amzn-Oidc-Identity" not in headers:
