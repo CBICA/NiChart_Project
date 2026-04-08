@@ -57,6 +57,8 @@ def show_short_desc(title):
     if title == "Abnormality Maps":
         st.markdown("Voxelwise CSF abnormality maps quantifying regional brain atrophy.")
         pass
+    if title == "DKGP Biomarker Trajectories (Work in Progress)":
+        st.markdown("Predict evolution of biomarkers over time.")
 
 def show_full_desc(title):
     if title == "NiChart":
@@ -150,6 +152,16 @@ def show_full_desc(title):
             - These maps allow subject-level interpretation, enabling visualization of individual neuroanatomical abnormalities, not just group averages.
             """
         )
+    if title == "DKGP Biomarker Trajectories (Work in Progress)":
+        st.markdown(
+            """
+            Personalized biomarker trajectory forecasting uses Deep Kernel Gaussian Processes to predict how individual biomarkers will evolve over time.
+
+            - Trajectories are modeled using a deep kernel learning framework that combines neural feature extraction with Gaussian Process regression, capturing complex nonlinear patterns from cross-sectional neuroimaging data, demogrpahic and clinical variables.
+
+            - The population-level model (p-DKGP) is trained across large multi-cohort datasets, and delivers individualized forcasts from cross-sectional data alone.
+            """
+        )
 
 def card(title, image_path):
     with st.container(border=True, horizontal_alignment = 'left'):
@@ -189,6 +201,12 @@ with st.container(horizontal=True, horizontal_alignment="center"):
         card(title="Abnormality Maps",
              image_path=os.path.join(imgdir, 'nichart_logo_v2_img6_v2.png')
              )
+
+with st.container(horizontal=True, horizontal_alignment="center"):
+    secondary_cols = st.columns(1)
+    with secondary_cols[0]:
+        card(title="DKGP Biomarker Trajectories (Work in Progress)",
+             image_path=os.path.join(imgdir, 'nichart_logo_v2_img1_v2.png'))
 
     
 
