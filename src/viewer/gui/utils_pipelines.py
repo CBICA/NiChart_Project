@@ -172,6 +172,19 @@ def pipeline_runner_menu(enabled_pnames, sel=False):
     skip_steps_when_possible = True
     skip_steps_when_possible = st.checkbox("Accelerate pipeline via caching? (Uncheck to force re-runs)", value=True)
     alert_placeholder = st.empty()
+    with st.popover("Display commands"):
+        st.title(f"Direct execution commands for {sel_name}")
+        st.write("These commands reflect exactly what the NiChart application will run on your computer, via the Docker service. You can use these commands as a blueprint to replicate the pipeline exactly on a different dataset. Please note that paths will need to be changed to reflect those on your target system.")
+        local_path_remapping = {}
+        data_dir_locally = st.session_state.paths["out_dir"]
+        data_dir_on_host = st.session_state.paths["host_out_dir"]
+        if data_dir_on_host is not None:
+            local_path_remapping[data_dir_locally] = data_dir_on_host
+        result_commands = utiltl.get_command_strings(pipeline_id=pipeline_to_run,
+                global_vars={"STUDY": st.session_state.paths["project"]},
+                local_path_remapping=local_path_remapping)
+        command_text = "\n".join(result_commands)
+        st.code(command_text)
     if ready:
         if st.button("Run pipeline"):
             alert_placeholder.info(f"The pipeline {pipeline_to_run} is running. Please do not navigate away from this page.")
@@ -243,6 +256,7 @@ def pipeline_runner_menu(enabled_pnames, sel=False):
                 alert_placeholder.error(f"Pipeline {pipeline_to_run} failed with errors. Expand the log boxes for details.")
                 process_status_box.update(state="error", label="Pipeline run failed.", expanded=False)
                 errbox.error(traceback.format_exc())
+        
 
 
 
