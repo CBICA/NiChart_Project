@@ -857,8 +857,10 @@ def panel_view_files():
     placeholder.markdown(f"##### 📁 `{st.session_state.prj_name}`", width='content')
 
     # Generating CSV will also do some automatic renaming if needed, so we do that first
-    generate_template_csv()
-
+    try:
+        generate_template_csv()
+    except Exception as e:
+        print("Template CSV generation failure during file listing. Typically non-critical.")
     with st.container(border = None, height = 400):
         tree_items, list_paths = utildv.build_folder_tree(
             st.session_state.paths['prj_dir'],
