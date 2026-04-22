@@ -1,0 +1,11 @@
+url_path,views_total,views_unique
+/CBICA/NiChart_Project,14,11
+/CBICA/NiChart_Project/tree/main/resources/reference_data/centiles,5,1
+/CBICA/NiChart_Project/blob/main/resources/reference_data/centiles/dlmuse_centiles_CN-Females.csv,4,1
+/CBICA/NiChart_Project/tree/main/resources,3,1
+/CBICA/NiChart_Project/tree/main/resources/reference_data,3,1
+/CBICA/NiChart_Project/blob/03c20462a4172199348dce956baae6704a11f9f2/TestData/dicoms/example-dicom-structural/dicoms/N2D_0120.dcm,1,1
+/CBICA/NiChart_Project/blob/03c20462a4172199348dce956baae6704a11f9f2/TestData/dicoms/example-dicom-structural/dicoms/N2D_0149.dcm,1,1
+/CBICA/NiChart_Project/blob/7617dd18c07950cb5e7e16368232eab8daa18b3b/output_folder/NiChart_sMRI_Demo1/Dicoms/trio_b17/t1_MPRAGEcr_noGRAPPA_19/00059.dcm,1,1
+/CBICA/NiChart_Project/blob/main/Dockerfile,1,1
+/CBICA/NiChart_Project/blob/main/README.rst,1,1
