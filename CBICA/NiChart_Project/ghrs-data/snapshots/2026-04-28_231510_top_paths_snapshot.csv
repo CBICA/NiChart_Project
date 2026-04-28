@@ -1,0 +1,11 @@
+url_path,views_total,views_unique
+/CBICA/NiChart_Project,9,9
+/CBICA/NiChart_Project/blob/0170c54f6e7f7e3babe76964e01de997969865ab/.gitignore,1,1
+/CBICA/NiChart_Project/blob/0170c54f6e7f7e3babe76964e01de997969865ab/.pre-commit-config.yaml,1,1
+/CBICA/NiChart_Project/blob/main/Dockerfile,1,1
+/CBICA/NiChart_Project/blob/main/resources/pipelines/run_bascores.yaml,1,1
+/CBICA/NiChart_Project/blob/main/resources/tools/binarize_seg_to_mask.yaml,1,1
+/CBICA/NiChart_Project/blob/main/resources/tools/dlicv_to_mni.yaml,1,1
+/CBICA/NiChart_Project/blob/main/resources/tools/nichart_dlmuse.yaml,1,1
+/CBICA/NiChart_Project/commit/1a25320f3b59f1f6547e43d81bab9f63c73ec680,1,1
+/CBICA/NiChart_Project/commit/494c25e00cbd3fea601f5f27970f2e2de876a8ac,1,1
