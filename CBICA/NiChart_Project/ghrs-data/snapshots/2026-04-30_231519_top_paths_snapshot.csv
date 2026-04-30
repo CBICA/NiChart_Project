@@ -1,0 +1,11 @@
+url_path,views_total,views_unique
+/CBICA/NiChart_Project,11,8
+/CBICA/NiChart_Project/tree/ag-dev/resources,2,1
+/CBICA/NiChart_Project/tree/main/resources,2,1
+/CBICA/NiChart_Project/tree/main/resources/pipelines,2,1
+/CBICA/NiChart_Project/blob/0170c54f6e7f7e3babe76964e01de997969865ab/.gitignore,1,1
+/CBICA/NiChart_Project/blob/0170c54f6e7f7e3babe76964e01de997969865ab/.pre-commit-config.yaml,1,1
+/CBICA/NiChart_Project/blob/ag-dev/resources/pipelines/run_dkgp.yaml,1,1
+/CBICA/NiChart_Project/blob/main/resources/pipelines/run_bascores.yaml,1,1
+/CBICA/NiChart_Project/blob/main/resources/tools/binarize_seg_to_mask.yaml,1,1
+/CBICA/NiChart_Project/blob/main/resources/tools/dlicv_to_mni.yaml,1,1
