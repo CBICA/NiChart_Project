@@ -1,0 +1,11 @@
+url_path,views_total,views_unique
+/CBICA/NiChart_Project,12,8
+/CBICA/NiChart_Project/tree/main/src/viewer,4,1
+/CBICA/NiChart_Project/tree/main/src/viewer/gui,4,1
+/CBICA/NiChart_Project/blob/main/src/viewer/gui/utils_plots.py,3,1
+/CBICA/NiChart_Project/tree/ag-dev/resources,2,1
+/CBICA/NiChart_Project/tree/main/resources,2,1
+/CBICA/NiChart_Project/tree/main/resources/pipelines,2,1
+/CBICA/NiChart_Project/tree/main/src,2,1
+/CBICA/NiChart_Project/blob/0170c54f6e7f7e3babe76964e01de997969865ab/.gitignore,1,1
+/CBICA/NiChart_Project/blob/0170c54f6e7f7e3babe76964e01de997969865ab/.pre-commit-config.yaml,1,1
