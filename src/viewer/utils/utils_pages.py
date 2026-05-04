@@ -37,3 +37,13 @@ def config_page() -> None:
         },
     )
 
+def navig_home():
+    page = st.pills(
+        "Navigation",
+        [":material/home:"],
+        label_visibility = 'collapsed',
+        key="nav"
+    )
+    if page == ":material/home:":
+        st.switch_page('pages/nichart_home.py')
+

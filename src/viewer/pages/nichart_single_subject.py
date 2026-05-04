@@ -98,14 +98,8 @@ if tab4.open:
 
         utildownload.panel_download()
 
-page = st.pills(
-    "Navigation",
-    [":material/home:"],
-    label_visibility = 'collapsed',
-    key="nav"
-)
-if page == ":material/home:":
-    st.switch_page('pages/nichart_home.py')
+# Home button
+utilpg.navig_home()
 
 # Show session state vars
 if st.session_state.mode == 'debug':

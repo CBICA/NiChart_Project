@@ -89,6 +89,9 @@ if tab3.open:
 
         utilpipe.panel_pipelines()
 
+# Home button
+utilpg.navig_home()
+
 # Show session state vars
 if st.session_state.mode == 'debug':
     utilses.disp_session_state()

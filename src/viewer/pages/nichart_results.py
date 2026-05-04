@@ -71,5 +71,8 @@ if tab4.open:
 if tab5.open:
     st.write('Reporting coming soon ...')
 
+# Home button
+utilpg.navig_home()
+
 if ss.mode == 'debug':
     utilses.disp_session_state()
