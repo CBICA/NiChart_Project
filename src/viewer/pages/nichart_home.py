@@ -8,12 +8,12 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 import utils.utils_misc as utilmisc
-import gui.utils_plots as utilpl
 import utils.utils_session as utilses
-import gui.utils_mriview as utilmri
 import utils.utils_alerts as utils_alerts
 import utils.utils_survey as utils_survey
-import gui.utils_navig as utilnav
+import utils.utils_navig as utilnav
+import gui.utils_mriview as utilmri
+import gui.utils_plots as utilpl
 
 from streamlit_image_select import image_select
 import logging
@@ -96,8 +96,8 @@ st.markdown("<h5 style='text-align:center; color:#3a3a88;'>What would you like t
 sel = sac.chip(
     items=[
         sac.ChipItem(label='What is NiChart?'),
-        sac.ChipItem(label='Analyze a Single Subject'),
-        sac.ChipItem(label='Analyze a Dataset'),
+        sac.ChipItem(label='Process a Single Subject'),
+        sac.ChipItem(label='Process a Dataset'),
         sac.ChipItem(label='View NeuroImaging Charts'),
     ], label='', align='center', size='lg', radius='lg', direction='vertical', color='cyan'
 ) 
@@ -105,10 +105,10 @@ sel = sac.chip(
 if sel == 'What is NiChart?':
     sel_page = "pages/nichart_info.py"
 
-if sel == 'Analyze a Single Subject':
+if sel == 'Process a Single Subject':
     sel_page = "pages/nichart_single_subject.py"
 
-if sel == 'Analyze a Dataset':
+if sel == 'Process a Dataset':
     sel_page = "pages/nichart_multi_subject.py"
 
 if sel == 'View NeuroImaging Charts':

@@ -4,6 +4,7 @@ import os
 import streamlit as st
 import utils.utils_pages as utilpg
 import utils.utils_session as utilss
+import gui.utils_session as utilssplots
 
 from PIL import Image
 #from st_pages import add_page_title, get_nav_from_toml
@@ -12,6 +13,7 @@ nicon = Image.open("../resources/nichart1.png")
 
 # Init session state
 utilss.init_session_state()
+utilssplots.update_session_state()
 
 utilpg.config_page()
 
@@ -56,8 +58,8 @@ pages = {
         st.Page("pages/survey.py", title="Take Survey"),
     ],
     "Workflows": [
-        st.Page("pages/nichart_single_subject.py", title="Process Single Subject"),
-        st.Page("pages/nichart_multi_subject.py", title="Process Dataset"),
+        st.Page("pages/nichart_single_subject.py", title="Process a Single Subject"),
+        st.Page("pages/nichart_multi_subject.py", title="Process a Dataset"),
         st.Page("pages/nichart_results.py", title="View NeuroImaging Charts"),
     ],
 }

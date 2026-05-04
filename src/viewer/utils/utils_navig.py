@@ -15,7 +15,6 @@ import utils.utils_io as utilio
 import utils.utils_session as utilses
 import gui.utils_plots as utilpl
 import gui.utils_mriview as utilmri
-import gui.utils_view as utilview
 import pandas as pd
 import gui.utils_widgets as utilwd
 import utils.utils_settings as utilset

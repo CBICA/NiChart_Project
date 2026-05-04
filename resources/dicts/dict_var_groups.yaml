@@ -1,0 +1,67 @@
+# Variable group definitions for data visualization
+# Defines groups of variables that can be used together in visualizations, such as all SPARE scores or all MUSE ROIs.
+
+group_demog-all:
+  label: Demographics
+  category: demog
+  pipeline: []
+  vtype: name
+  values: [Age, Sex]
+
+group_demog-age:
+  label: Age
+  category: demog
+  pipeline: []
+  vtype: name
+  values: [Age]
+
+group_cat-vars:
+  label: Categorical Variables
+  category: demographic
+  pipeline: []
+  vtype: name
+  values: [Sex, DX, DX_AD]
+
+group_spare-scores:
+  label: SPARE Scores
+  desc: SPARE neuropsychiatric and brain age scores (AD, brain age, MDD, SCZ)
+  category: biomarker
+  pipeline: [spare]
+  vtype: name
+  values: [SPARE_AD, SPARE_BA, SPARE_MDD, SPARE_SCZ]
+
+group_spare-cvm-scores:
+  label: SPARE CVM Scores
+  desc: SPARE cardiovascular/metabolic risk scores
+  category: biomarker
+  pipeline: [spare_cvm]
+  vtype: name
+  values: [SPARE_DIABETES, SPARE_HYPERTENSION, SPARE_OBESITY, SPARE_SMOKING]
+
+group_surrealgan-scores:
+  label: SurrealGAN Scores
+  desc: SurrealGAN brain subtype scores (5 components)
+  category: biomarker
+  pipeline: [surreal_gan]
+  values: [SurrealGAN_R1, SurrealGAN_R2, SurrealGAN_R3, SurrealGAN_R4, SurrealGAN_R5]
+
+group_cclnmf-scores:
+  label: CCL-NMF Scores
+  desc: CCL-NMF brain subtypes scores (7 components)
+  category: biomarker
+  pipeline: [cclnmf]
+  values: [CCL-NMF1, CCL-NMF2, CCL-NMF3, CCL-NMF4, CCL-NMF5, CCL-NMF6, CCL-NMF7]
+
+group_dlmuse-vol:
+  label: DLMUSE Volumes
+  desc: Volumes of ROIs segmented using DLMUSE
+  category: roi
+  pipeline: [dlmuse]
+  prefix: dlmuse-vol_
+
+group_dlwmls-vol:
+  label: DLWMLS Volumes
+  desc: Volumes of WM lesions in DLMUSE ROIs segmented using DLWMLS
+  category: roi
+  pipeline: [dlwmls]
+  prefix: dlwmls-vol_

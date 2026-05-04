@@ -15,11 +15,7 @@ import utils.utils_toolloader as utiltl
 import utils.utils_stlogbox as stlogbox
 
 import utils.utils_session as utilses
-import gui.utils_plots as utilpl
-import gui.utils_mriview as utilmri
-import gui.utils_view as utilview
 import pandas as pd
-import gui.utils_widgets as utilwd
 
 import traceback
 import requests
@@ -79,7 +75,7 @@ def show_description(pipeline) -> None:
     Panel for viewing pipeline description
     """
     pipeline_label = utiltl.get_pipeline_label_by_name(pipeline)
-    with st.expander('Pipeline description', expanded=False):
+    with st.container(border=True, height=300):
         if pipeline == '':
             st.markdown("No description exists for this pipeline.")
             return
@@ -104,7 +100,7 @@ def select_pipeline(enabled_pnames):
     Select a pipeline and show overview
     '''
     st.markdown("##### Select:")
-    show_enabled_only = st.checkbox("Show only pipelines that can be run using available data", value=True)
+    show_enabled_only = st.checkbox("Show only pipelines which match my available data", value=True)
     sac.divider(key='_p2_div1')
 
     pipelines = st.session_state.pipelines
@@ -141,15 +137,14 @@ def select_pipeline(enabled_pnames):
     return sel_label
 
 def pipeline_runner_menu(enabled_pnames, sel=False):
+    st.markdown("##### Run:")
+    sac.divider(key='_p2_div2')
     if not sel:
-        st.warning("Please select a pipeline!")
+        st.info("Select a pipeline on the left, then look here to run it.")
         return
     sel_method = st.session_state.sel_pipeline_label
     sel_name = utiltl.get_pipeline_name_by_label(sel_method)
-    st.markdown(
-        f":violet-badge[Current Pipeline] :green-badge[:material/conversion_path: {sel_name}]"
-    )
-
+    st.success(f'Selected pipeline: {sel_name}')
     harmonize = False
     if 'subject_type' not in st.session_state or st.session_state.subject_type == 'multi':
         if utiltl.pipeline_is_harmonizable(sel_method):
@@ -162,8 +157,9 @@ def pipeline_runner_menu(enabled_pnames, sel=False):
         #st.info(f"DEBUG: sel_name: {sel_name}")
         #st.info(f"DEBUG: sel_pipeline: {sel_method}")
         st.info("Your data doesn't meet the requirements for this pipeline. Correct the issues marked below to proceed.")
-        utiltl.check_requirements_met_panel(sel_name)
+
         return
+    ready = utiltl.check_requirements_met_panel(sel_name)
     pipeline_to_run = utiltl.get_pipeline_id_by_label(sel_method, harmonized=harmonize)
 
     if pipeline_to_run is None:
@@ -172,82 +168,99 @@ def pipeline_runner_menu(enabled_pnames, sel=False):
     skip_steps_when_possible = True
     skip_steps_when_possible = st.checkbox("Accelerate pipeline via caching? (Uncheck to force re-runs)", value=True)
     alert_placeholder = st.empty()
-    if st.button("Run pipeline"):
-        alert_placeholder.info(f"The pipeline {pipeline_to_run} is running. Please do not navigate away from this page.")
-        pipeline_progress_bar = stqdm(total=2, desc="Submitting pipeline...", position=0)
-        #process_progress_bar = stqdm(total=2, desc="Waiting...", position=0)
-        process_progress_bar = None
-        process_status_box = st.status("Submitting pipeline step...", expanded=True)
-        #pipeline_progress_bar_slot = st.empty()
-        #process_progress_bar_slot = st.empty()
-        with st.container():
-            st.subheader("Pipeline Logs")
-            errbox = st.expander("Error messages", expanded=False)
-            with st.expander("View all pipeline logs"):
-                with st.container():
-                    log_committed_box = st.empty()
-            with st.expander("View current step live logs"):
-                with st.container():
-                    log_live_box = st.empty()
-
-
-        log = stlogbox.StreamlitJobLogger(log_committed_box, log_live_box)
-        execution_mode = 'local'
-        if st.session_state.has_cloud_session:
-            execution_mode = 'cloud'
+    with st.popover("Display commands"):
+        st.title(f"Direct execution commands for {sel_name}")
+        st.write("These commands reflect exactly what the NiChart application will run on your computer, via the Docker service. You can use these commands as a blueprint to replicate the pipeline exactly on a different dataset. Please note that paths will need to be changed to reflect those on your target system.")
         local_path_remapping = {}
         data_dir_locally = st.session_state.paths["out_dir"]
         data_dir_on_host = st.session_state.paths["host_out_dir"]
         if data_dir_on_host is not None:
             local_path_remapping[data_dir_locally] = data_dir_on_host
-        try:
-            try:
-                jobstats_lambda_url = "https://gpzw2o0kxd.execute-api.us-east-1.amazonaws.com/default/cbica-nichart-updatestats"
-                if st.session_state.has_cloud_session:
-                    user_id = st.session_state.cloud_user_id
-                else:
-                    user_id = 'LOCALUSER'
-
-                payload = {
-                    "user_id": user_id,
-                    "job_type": pipeline_to_run,
-                    "count": 1
-                }
-                response = requests.post(
-                    jobstats_lambda_url,
-                    json=payload,
-                    timeout=5
-                )
-                print("Update job stats status:", response.status_code)
-                print("Update job stats response body:", response.text)
-            except Exception as e:
-                # If this fails for any reason (no internet etc) just continue.
-                pass
-
-            result = utiltl.run_pipeline(
-                pipeline_id=pipeline_to_run, ##TODO EDIT THIS
+        result_commands = utiltl.get_command_strings(pipeline_id=pipeline_to_run,
                 global_vars={"STUDY": st.session_state.paths["project"]},
-                execution_mode=execution_mode,
-                pipeline_progress_bar=pipeline_progress_bar,
-                process_progress_bar=process_progress_bar,
-                process_status_box=process_status_box,
-                log=log,
-                metadata_location=os.path.join(st.session_state.paths["project"], "metadata.json"),
-                reuse_cached_steps=skip_steps_when_possible,
-                local_path_remapping=local_path_remapping
-            )
+                local_path_remapping=local_path_remapping)
+        command_text = "\n".join(result_commands)
+        st.code(command_text)
+    if ready:
+        if st.button("Run pipeline"):
+            alert_placeholder.info(f"The pipeline {pipeline_to_run} is running. Please do not navigate away from this page.")
+            pipeline_progress_bar = stqdm(total=2, desc="Submitting pipeline...", position=0)
+            #process_progress_bar = stqdm(total=2, desc="Waiting...", position=0)
+            process_progress_bar = None
+            process_status_box = st.status("Submitting pipeline step...", expanded=True)
+            #pipeline_progress_bar_slot = st.empty()
+            #process_progress_bar_slot = st.empty()
+            with st.container():
+                st.subheader("Pipeline Logs")
+                errbox = st.expander("Error messages", expanded=False)
+                with st.expander("View all pipeline logs"):
+                    with st.container():
+                        log_committed_box = st.empty()
+                with st.expander("View current step live logs"):
+                    with st.container():
+                        log_live_box = st.empty()
 
-            alert_placeholder.success(f"Pipeline {pipeline_to_run} finished successfully.")
-        except Exception as err: 
-            alert_placeholder.error(f"Pipeline {pipeline_to_run} failed with errors. Expand the log boxes for details.")
-            process_status_box.update(state="error", label="Pipeline run failed.", expanded=False)
-            errbox.error(traceback.format_exc())
+
+            log = stlogbox.StreamlitJobLogger(log_committed_box, log_live_box)
+            execution_mode = 'local'
+            if st.session_state.has_cloud_session:
+                execution_mode = 'cloud'
+            local_path_remapping = {}
+            data_dir_locally = st.session_state.paths["out_dir"]
+            data_dir_on_host = st.session_state.paths["host_out_dir"]
+            if data_dir_on_host is not None:
+                local_path_remapping[data_dir_locally] = data_dir_on_host
+            try:
+                try:
+                    jobstats_lambda_url = "https://gpzw2o0kxd.execute-api.us-east-1.amazonaws.com/default/cbica-nichart-updatestats"
+                    if st.session_state.has_cloud_session:
+                        user_id = st.session_state.cloud_user_id
+                    else:
+                        user_id = 'LOCALUSER'
+
+                    payload = {
+                        "user_id": user_id,
+                        "job_type": pipeline_to_run,
+                        "count": 1
+                    }
+                    response = requests.post(
+                        jobstats_lambda_url,
+                        json=payload,
+                        timeout=5
+                    )
+                    print("Update job stats status:", response.status_code)
+                    print("Update job stats response body:", response.text)
+                except Exception as e:
+                    # If this fails for any reason (no internet etc) just continue.
+                    pass
+
+                result = utiltl.run_pipeline(
+                    pipeline_id=pipeline_to_run, ##TODO EDIT THIS
+                    global_vars={"STUDY": st.session_state.paths["project"]},
+                    execution_mode=execution_mode,
+                    pipeline_progress_bar=pipeline_progress_bar,
+                    process_progress_bar=process_progress_bar,
+                    process_status_box=process_status_box,
+                    log=log,
+                    metadata_location=os.path.join(st.session_state.paths["project"], "metadata.json"),
+                    reuse_cached_steps=skip_steps_when_possible,
+                    local_path_remapping=local_path_remapping
+                )
+
+                alert_placeholder.success(f"Pipeline {pipeline_to_run} finished successfully.")
+            except Exception as err: 
+                alert_placeholder.error(f"Pipeline {pipeline_to_run} failed with errors. Expand the log boxes for details.")
+                process_status_box.update(state="error", label="Pipeline run failed.", expanded=False)
+                errbox.error(traceback.format_exc())
+        
 
 
 
     pass
 
-def panel_pipelines():
+def pipeline_menu():
+    #cols = st.columns([10,1,10])
+    cols = st.columns(2)
     out_dir = os.path.join(
         st.session_state.paths['out_dir'], st.session_state['prj_name']
     )
@@ -267,26 +280,29 @@ def panel_pipelines():
         else:
             disabled_pnames.append(pname)
 
-    with st.container(
-        horizontal=True, horizontal_alignment="center", width='stretch'
-    ):
-        tab1, tab2 = st.tabs(
-            ["Select", "Run"],
-            on_change='rerun',
+    with cols[0]:
+        sel = select_pipeline(enabled_pnames=enabled_pnames)
+    with cols[1]:
+        pipeline_runner_menu(enabled_pnames=enabled_pnames, sel=sel)
+
+
+def panel_pipelines():
+
+    workflow = st.session_state.workflow
+
+    if workflow is None:
+        st.info('Please select a Workflow!')
+        return
+
+    with st.container(horizontal=True, horizontal_alignment="center"):
+        st.markdown("<h4 style=color:#3a3a88;'>Select and Run Pipeline\n\n</h1>", unsafe_allow_html=True, width='content')
+
+    if st.session_state.workflow == 'ref_data':
+        st.info('''
+            You’ve selected the **Reference Data** workflow. This option doesn’t require pipeline selection.
+            - If you meant to analyze your data, please go back and choose a different workflow.
+            - Otherwise, continue to the next step to explore the reference values.
+            '''
         )
-
-    ## Select
-    if tab1.open:
-        with tab1:
-            sel = select_pipeline(enabled_pnames=enabled_pnames)
-
-    ## Run
-    if tab2.open:
-        with tab2:
-            pipeline_runner_menu(
-                enabled_pnames,
-                st.session_state.sel_pipeline is None
-            )
-
-
-
+    else:
+        pipeline_menu()

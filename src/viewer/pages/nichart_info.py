@@ -17,7 +17,7 @@ from streamlit_image_select import image_select
 import logging
 from stqdm import stqdm
 from utils.utils_logger import setup_logger
-import gui.utils_navig as utilnav
+import utils.utils_navig as utilnav
 
 import streamlit_antd_components as sac
 import streamlit as st

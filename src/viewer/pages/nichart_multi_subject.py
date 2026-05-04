@@ -10,10 +10,10 @@ import utils.utils_processes as utilprc
 import utils.utils_session as utilses
 import utils.utils_io as utilio
 import utils.utils_upload as utilup
-import gui.utils_pipelines as utilpipe
+import utils.utils_pipelines as utilpipe
 import utils.utils_data_view as utildv
 from utils.utils_styles import inject_global_css 
-import gui.utils_navig as utilnav
+import utils.utils_navig as utilnav
 
 from streamlit_image_select import image_select
 import re

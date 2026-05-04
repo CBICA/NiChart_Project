@@ -9,12 +9,12 @@ import utils.utils_pages as utilpg
 import utils.utils_processes as utilprc
 import utils.utils_session as utilses
 import utils.utils_io as utilio
-import gui.utils_results as utilres
+import utils.utils_download as utildownload
 import utils.utils_upload as utilup
-import gui.utils_pipelines as utilpipe
+import utils.utils_pipelines as utilpipe
 import utils.utils_data_view as utildv
 from utils.utils_styles import inject_global_css 
-import gui.utils_navig as utilnav
+import utils.utils_navig as utilnav
 
 from streamlit_image_select import image_select
 import re
@@ -94,7 +94,7 @@ if tab4.open:
         with st.container(horizontal=True, horizontal_alignment="center"):
             st.markdown("<h5 style='color:#3a3a88;'>Results</h5>", unsafe_allow_html=True, width='content')
 
-        utilres.panel_download()
+        utildownload.panel_download()
 
 # Show session state vars
 if st.session_state.mode == 'debug':

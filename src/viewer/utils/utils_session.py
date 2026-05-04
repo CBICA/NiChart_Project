@@ -1,6 +1,7 @@
 import os
 import shutil
 from typing import Any
+import re
 
 import jwt
 import time
@@ -65,6 +66,27 @@ def disp_session_state():
                 st.markdown('➤ ' + sel_var + ':')
                 st.write(st.session_state[sel_var])
     #print('FIXME: This is bypassed for now ...')
+
+def expand_values(raw_values: list, d_lists: dict) -> list:
+    '''
+    Expand a list with pattern [{listname}] or [prefix_{listname}].
+    Returns expanded values.
+    '''
+    values = []
+    for item in raw_values:
+        s = str(item)
+        m = re.fullmatch(r'(.*?)\{([^}]+)\}(.*)', s)
+        if m:
+            prefix, list_name, suffix = m.group(1), m.group(2), m.group(3)
+            list_entry = d_lists.get(list_name, {})
+            list_vals = list_entry.get('values', [])
+            for v in list_vals:
+                sv = str(v)
+                values.append(f"{prefix}{sv}{suffix}")
+
+        else:
+            values.append(s)
+    return values
 
 def init_project_folders():
     '''
@@ -275,14 +297,6 @@ def init_paths():
     if not os.path.exists(p_prj):
         os.makedirs(p_prj)
 
-    st.session_state.dicts = {
-        "muse_derived": os.path.join(
-            p_resources, "MUSE", "list_MUSE_mapping_derived.csv"
-        ),
-        "muse_all": os.path.join(p_resources, "MUSE", "list_MUSE_all.csv"),
-        "muse_sel": os.path.join(p_resources, "MUSE", "list_MUSE_primary.csv"),
-    }
-
     st.session_state.paths = {
         "root": p_root,
         "init": p_init,
@@ -296,7 +310,7 @@ def init_paths():
         "prj_dir": p_prj,
         "project": p_prj,
         'target': None,
-        "curr_data": None
+        "curr_data": p_prj
     }
 
     # Host-container dir mapping which can be useful for local nested containers
@@ -333,125 +347,6 @@ def reset_dicoms() -> None:
         'num_dicom_scans': 0,
         'df_dicoms': None
     }
-
-def init_plot_vars() -> None:
-    '''
-    Set plotting variables
-    '''
-    ######################
-    # General params
-    st.session_state.general_params = {
-        'sel_task': None,
-        'sel_rtype': None,
-        'sel_pipeline': None
-    }
-    
-    ######################
-    # General params
-    img_views = ["axial", "coronal", "sagittal"]
-    st.session_state.mriplot_params = {
-        'ulay': None,
-        'olay': None,
-        'sel_mrid': None,
-        'sel_roi': None,
-        'sel_orient': img_views,
-        'flag_overlay': True,
-        'flag_crop': False,
-        'map_minmax': [2.0, 5.0]
-    }
-
-    ######################
-    # Params for data plots
-    
-    # Dataframe that keeps parameters for all plots
-    st.session_state.plots = pd.DataFrame(columns=['flag_sel', 'params'])
-    st.session_state.plot_curr = -1
-
-    st.session_state.plot_active = None
-
-    # Plot data
-    st.session_state.plot_data = {
-        'csv_data': None,
-        'csv_cent': None,
-        'df_data': None,
-        'df_cent': None
-    }
-
-    # Plot settings
-    st.session_state.plot_settings = {
-        "res_type": None,       # Quantitative or Image
-        "pipeline": None,
-        "flag_hide_legend": False,
-        "flag_hide_mri": True,
-        "trend_types": ["Linear", "Smooth LOWESS Curve"],
-        #"centile_types": ["CN", "CN_Males", "CN_Females", "CN_ICV_Corrected"],
-        "centile_types": ["CN", "CN_Males", "CN_Females"],
-        "linfit_trace_types": [
-            "lin_fit", "conf_95%"
-        ],
-        "centile_trace_types": [
-            "centile_5", "centile_25", "centile_50", "centile_75", "centile_95",
-        ],
-        "distplot_trace_types": [
-            "histogram", "density", "rug"
-        ],
-        'flag_auto': True,
-        "min_per_row": 1,
-        "max_per_row": 5,
-        "num_per_row": 2,
-        "margin": 20,
-        "h_init": 500,
-        "h_coeff": 1.0,
-        "h_coeff_max": 2.0,
-        "h_coeff_min": 0.6,
-        "h_coeff_step": 0.2,
-        "distplot_binnum": 100,
-        "cmaps": utilcmap.cmaps_init,
-        "alphas": utilcmap.alphas_init,
-        "w_centile": 6,
-        "w_fit": 6,
-        "min_age": 20,
-        "max_age": 100,
-        #"cmaps2": utilcmap.cmaps2,
-        #"cmaps3": utilcmap.cmaps3,
-    }
-
-    # Plot parameters specific to each plot
-    st.session_state.plot_params = {
-        'sel_mrid': None,
-        "plot_type": "scatter",
-        "xvargroup": 'demog',
-        "xvar": 'Age',
-        "xmin": None,
-        "xmax": None,
-        "yvargroup": 'MUSE_ShortList',
-        "yvar": 'GM',
-        "ymin": None,
-        "ymax": None,
-        "hvargroup": 'cat_vars',
-        "hvar": None,
-        "hvals": None,
-        "fvargroup": 'cat_vars',
-        "fvar": None,
-        "fvals": None,
-        "corr_icv": False,
-        "plot_cent_normalized": False,
-        "trend": None,
-        "show_conf": False,
-        "traces": ['data'],
-        "lowess_s": 0.7,
-        "centile_type": 'CN',
-        "centile_values": ['centile_25', 'centile_50', 'centile_75'],
-        "flag_norm_centiles": False,
-        "list_roi_indices": [81, 82],
-        "list_orient": ["axial", "coronal", "sagittal"],
-        "is_show_overlay": True,
-        "crop_to_mask": False,
-        'filter_sex': ['F', 'M'],
-        'filter_age': [40, 95],
-    }
-
-    ###################################
     
 def init_pipeline_definitions() -> None:
     plist = os.path.join(
@@ -508,46 +403,93 @@ def init_dicts() -> None:
     '''
     Initialize all data dictionaries (atlas roi def.s etc.)
     '''
-    # MUSE dictionaries
-    muse = utilroi.read_muse_dicts()
-    st.session_state.dicts = {
-        'muse': muse
-    }
+    st.session_state.dicts = {}
 
-def init_muse_roi_def() -> None:
-    # Paths to roi lists
-    muse = {
-        'path': os.path.join(st.session_state.paths['resources'], 'lists', 'MUSE'),
-        'list_rois' : 'MUSE_listROIs.csv',
-        'list_derived' : 'MUSE_mapping_derivedROIs.csv',
-        'list_groups' : 'MUSE_ROI_Groups_v1.csv'
-    }
+    # Read MUSE dictionaries
+    utilroi.muse_read_dicts()    
+
+    # Read roi lists info
+    f_in = os.path.join(
+        st.session_state.paths['resources'], 'dicts', 'dict_roi_lists.yaml'
+    )
+    with open(f_in, 'r') as file:
+        data = yaml.safe_load(file)
+    st.session_state.dicts['roi_lists'] = data
+
+    # Read project files info
+    f_in = os.path.join(
+        st.session_state.paths['resources'], 'dicts', 'dict_project_files.yaml'
+    )
+    with open(f_in, 'r') as file:
+        data = yaml.safe_load(file)
+    st.session_state.dicts['project_files'] = data
+
+    # Read project vars info
+    f_in = os.path.join(
+        st.session_state.paths['resources'], 'dicts', 'dict_project_vars.yaml'
+    )
+    with open(f_in, 'r') as file:
+        data = yaml.safe_load(file)
+
+    # Expand lists in project variable definitions
+    for vkey, vval in data.items():
+        raw_vars = vval.get('vars', [])
+        exp_vars = expand_values(raw_vars, st.session_state.dicts['roi_lists'])
+        data[vkey]['vars'] = exp_vars
+    st.session_state.dicts['project_vars'] = data
+
+    # Read var renaming info
+    f_in = os.path.join(
+        st.session_state.paths['resources'], 'dicts', 'dict_var_renaming.yaml'
+    )
+    with open(f_in, 'r') as file:
+        data = yaml.safe_load(file)
+    st.session_state.dicts['var_renaming'] = data
+
+
+    # Read var groups info
+    f_in = os.path.join(
+        st.session_state.paths['resources'], 'dicts', 'dict_var_groups.yaml'
+    )
+    with open(f_in, 'r') as file:
+        data = yaml.safe_load(file)
+    st.session_state.dicts['var_groups'] = data
+
+
+# def init_muse_roi_def() -> None:
+#     # Paths to roi lists
+#     muse = {
+#         'path': os.path.join(st.session_state.paths['resources'], 'lists', 'MUSE'),
+#         'list_rois' : 'MUSE_listROIs.csv',
+#         'list_derived' : 'MUSE_mapping_derivedROIs.csv',
+#         'list_groups' : 'MUSE_ROI_Groups_v1.csv'
+#     }
     
-    # Read roi lists to dictionaries
-    df_tmp = pd.read_csv(
-        os.path.join(muse['path'], muse['list_rois']),
-    )
-    dict1 = dict(zip(df_tmp["Index"].astype(str), df_tmp["Name"].astype(str)))
-    dict2 = dict(zip(df_tmp["Name"].astype(str), df_tmp["Index"].astype(str)))
-    dict3 = utilroi.muse_derived_to_dict(
-        os.path.join(muse['path'], muse['list_derived'])
-    )
-    df_derived = utilroi.muse_derived_to_df(
-        os.path.join(muse['path'], muse['list_derived'])
-    )
-    df_groups = utilroi.muse_roi_groups_to_df(
-        os.path.join(muse['path'], muse['list_groups'])
-    )
-    muse['dict_roi'] = dict1
-    muse['dict_roi_inv'] = dict2
-    muse['dict_derived'] = dict3
-    muse['df_derived'] = df_derived
-    muse['df_groups'] = df_groups
+#     # Read roi lists to dictionaries
+#     df_tmp = pd.read_csv(
+#         os.path.join(muse['path'], muse['list_rois']),
+#     )
+#     dict1 = dict(zip(df_tmp["Index"].astype(str), df_tmp["Name"].astype(str)))
+#     dict2 = dict(zip(df_tmp["Name"].astype(str), df_tmp["Index"].astype(str)))
+#     dict3 = utilroi.muse_derived_to_dict(
+#         os.path.join(muse['path'], muse['list_derived'])
+#     )
+#     df_derived = utilroi.muse_derived_to_df(
+#         os.path.join(muse['path'], muse['list_derived'])
+#     )
+#     df_groups = utilroi.muse_roi_groups_to_df(
+#         os.path.join(muse['path'], muse['list_groups'])
+#     )
+#     muse['dict_roi'] = dict1
+#     muse['dict_roi_inv'] = dict2
+#     muse['dict_derived'] = dict3
+#     muse['df_derived'] = df_derived
+#     muse['df_groups'] = df_groups
     
-    # Read MUSE ROI lists
-    st.session_state.rois = {
-        'muse' : muse
-    }
+#     # Read MUSE ROI lists
+#     st.session_state.rois = {
+#         'muse' : muse
+#     }
 
 def update_project(sel_project) -> None:
     """
@@ -678,10 +620,8 @@ def init_session_state() -> None:
         copy_test_folders
 
         # Init variables for different pages 
-        init_muse_roi_def()
         init_pipeline_definitions()
         init_reference_data()
-        init_plot_vars()
         reset_dicoms()
         
         # Set flag
