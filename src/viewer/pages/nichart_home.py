@@ -96,18 +96,14 @@ st.markdown("<h5 style='text-align:center; color:#3a3a88;'>What would you like t
 sel = sac.chip(
     items=[
         sac.ChipItem(label='What is NiChart?'),
-        sac.ChipItem(label='View Reference Charts (No MRI Data Needed!)'),
         sac.ChipItem(label='Analyze a Single Subject'),
         sac.ChipItem(label='Analyze a Dataset'),
-        sac.ChipItem(label='View Your NiChart'),
+        sac.ChipItem(label='View NeuroImaging Charts'),
     ], label='', align='center', size='lg', radius='lg', direction='vertical', color='cyan'
 ) 
     
 if sel == 'What is NiChart?':
     sel_page = "pages/nichart_info.py"
-
-if sel == 'View Reference Charts (No MRI Data Needed!)':
-    sel_page = "pages/nichart_ref_data.py"
 
 if sel == 'Analyze a Single Subject':
     sel_page = "pages/nichart_single_subject.py"
@@ -115,7 +111,7 @@ if sel == 'Analyze a Single Subject':
 if sel == 'Analyze a Dataset':
     sel_page = "pages/nichart_multi_subject.py"
 
-if sel == 'View Your NiChart':
+if sel == 'View NeuroImaging Charts':
     sel_page = "pages/nichart_results.py"
 
 if sel is not None:

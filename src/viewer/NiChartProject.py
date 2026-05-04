@@ -56,10 +56,9 @@ pages = {
         st.Page("pages/survey.py", title="Take Survey"),
     ],
     "Workflows": [
-        st.Page("pages/nichart_ref_data.py", title="View Reference Charts"),
         st.Page("pages/nichart_single_subject.py", title="Process Single Subject"),
         st.Page("pages/nichart_multi_subject.py", title="Process Dataset"),
-        st.Page("pages/nichart_results.py", title="View My Chart"),
+        st.Page("pages/nichart_results.py", title="View NeuroImaging Charts"),
     ],
 }
 
