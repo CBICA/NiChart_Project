@@ -38,7 +38,7 @@ def panel_download():
         st.info('Reference data download is not available at this time.')
         return
     
-    with st.container(horizontal=True, horizontal_alignment="center"):
+    with st.container(horizontal=True):
 
         st.markdown(f"###### 📁 Project Folder:   `{st.session_state.prj_name}`", width='content')
     
@@ -53,12 +53,12 @@ def panel_download():
         
         sel_opt = sac.checkbox(
             list_dirs,
-            label='Folder(s) to download:', align='center', 
+            label='Folder(s) to download:', 
             color='#aaeeaa', size='xl',
             check_all='Select all'
         )
 
-        with st.container(horizontal=True, horizontal_alignment="center"):
+        with st.container(horizontal=True):
             flag_disabled1 = True
             flag_disabled2 = True
             data_zip = ''

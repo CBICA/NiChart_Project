@@ -259,9 +259,8 @@ def pipeline_runner_menu(enabled_pnames, sel=False):
 
     pass
 
-def pipeline_menu():
-    #cols = st.columns([10,1,10])
-    cols = st.columns(2)
+def panel_pipelines():
+
     out_dir = os.path.join(
         st.session_state.paths['out_dir'], st.session_state['prj_name']
     )
@@ -271,6 +270,7 @@ def pipeline_menu():
 
     enabled_pnames = []
     disabled_pnames = []
+
     # Evaluate suitability for current data, filter accordingly
     for pname in pnames:
         if not utiltl.pipeline_is_enabled_by_name(pname):
@@ -281,31 +281,17 @@ def pipeline_menu():
         else:
             disabled_pnames.append(pname)
 
-    with cols[0]:
-        sel = select_pipeline(enabled_pnames=enabled_pnames)
-        
-    with cols[1]:
-        pipeline_runner_menu(enabled_pnames=enabled_pnames, sel=sel)
+    tab1, tab2 = st.tabs(
+        ["Select", "Run"],
+        on_change='rerun',
+    )
 
+    sel = None
+    if tab1.open:   
+        with tab1:
+            sel = select_pipeline(enabled_pnames=enabled_pnames)
 
-def panel_pipelines():
-
-    workflow = st.session_state.workflow
-
-    if workflow is None:
-        st.info('Please select a Workflow!')
-        return
-
-    with st.container(horizontal=True, horizontal_alignment="center"):
-        st.markdown("<h4 style=color:#3a3a88;'>Select and Run Pipeline\n\n</h1>", unsafe_allow_html=True, width='content')
-
-    if st.session_state.workflow == 'ref_data':
-        st.info('''
-            You’ve selected the **Reference Data** workflow. This option doesn’t require pipeline selection.
-            - If you meant to analyze your data, please go back and choose a different workflow.
-            - Otherwise, continue to the next step to explore the reference values.
-            '''
-        )
-    else:
-        pipeline_menu()
+    if tab2.open:   
+        with tab2:
+            pipeline_runner_menu(enabled_pnames=enabled_pnames, sel=sel)
 

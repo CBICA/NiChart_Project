@@ -4,6 +4,7 @@ import os
 import streamlit as st
 from utils.utils_styles import inject_global_css
 from utils.utils_logger import setup_logger
+import utils.utils_session as utilses
 
 logger = setup_logger()
 logger.debug("--- STARTING: Info ---")
@@ -23,8 +24,8 @@ def imgfile_to_data(filepath):
         encoded = base64.b64encode(data)
     return "data:image/png;base64," + encoded.decode("utf-8")
 
-tabA, tabB, tabC = st.tabs(
-    ["Methods", "Data", "Quick Start"],
+tabA, tabB, tabC, tabD = st.tabs(
+    ["Methods", "Data", "Quick Start", "Links"],
     on_change='rerun',
 )
 
@@ -133,5 +134,23 @@ if tabA.open:
                         """
                     )
 
+## FIXME: Add info for the tabs below
+if tabB.open:
+    with tabB:
+        st.info('Data documentation will be here soon ...')
+
+if tabC.open:
+    with tabC:
+        st.info('Quick Start info will be here soon ...')
+
+if tabD.open:
+    with tabD:
+        st.info('Links to Project Page and GitHub will be here soon ...')
+
+
 # Home button
 utilpg.navig_home()
+
+# Show session state vars
+if st.session_state.mode == 'debug':
+    utilses.disp_session_state()

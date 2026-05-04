@@ -57,18 +57,16 @@ if tab1.open:
 
         st.markdown("<h5 style=color:#3a3a88;'>Multi-Subject Dataset Analysis\n\n</h1>", unsafe_allow_html=True)
 
-        cols = st.columns([1,6,1])
-        with cols[1]:
-            st.markdown(
-                '''
-                Compute neuroimaging chart values for multi-subject MRI datasets with just a few steps:
-                
-                - **Data:** Upload image (NIfTI) and non-image (.csv) files required for analysis
-                
-                - **Processing:** Select processing/analysis pipeline to run on your data
+        st.markdown(
+            '''
+            Compute neuroimaging chart values for multi-subject MRI datasets with just a few steps:
+            
+            - **Data:** Upload image (NIfTI) and non-image (.csv) files required for analysis
+            
+            - **Processing:** Select processing/analysis pipeline to run on your data
 
-                    ''', unsafe_allow_html=True
-            )
+                ''', unsafe_allow_html=True
+        )
 
 ## Data Upload
 if tab2.open:

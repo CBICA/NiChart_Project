@@ -1,5 +1,6 @@
 import streamlit as st
 from PIL import Image
+import streamlit_antd_components as sac
 
 def set_global_style():
     #st.markdown("""
@@ -38,6 +39,8 @@ def config_page() -> None:
     )
 
 def navig_home():
+    sac.divider(label='Go Back Home!', icon = 'house-door',  align='center', color='gray')
+
     page = st.pills(
         "Navigation",
         [":material/home:"],
