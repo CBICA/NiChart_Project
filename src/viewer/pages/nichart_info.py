@@ -160,9 +160,10 @@ def card(title, image_path):
         with st.popover("See More"):
             show_full_desc(title)
 
-with st.container(horizontal_alignment="center"):
-    st.markdown("## What can I do with NiChart?")
-with st.container(horizontal=True, horizontal_alignment="center"):
+# with st.container(horizontal_alignment="center"):
+with st.container(horizontal_alignment="left"):
+    st.markdown("## NiChart Overview")
+
     cols = st.columns(5)
 
     with cols[0]: # NiChart
@@ -190,9 +191,12 @@ with st.container(horizontal=True, horizontal_alignment="center"):
              image_path=os.path.join(imgdir, 'nichart_logo_v2_img6_v2.png')
              )
 
-    
+    page = st.pills(
+        "Navigation",
+        [":material/home:"],
+        label_visibility = 'collapsed',
+        key="nav"
+    )
+    if page == ":material/home:":
+        st.switch_page('pages/nichart_home.py')
 
-utilnav.main_navig(
-    None, None,
-    'Home', 'pages/nichart_home.py',
-)

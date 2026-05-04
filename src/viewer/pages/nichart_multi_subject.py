@@ -53,7 +53,9 @@ with st.container(
 ## Info
 if tab1.open:
     with tab1:
-        st.markdown("<h5 style='text-align:center; color:#3a3a88;'>Multi-Subject Dataset Analysis\n\n</h1>", unsafe_allow_html=True)
+        # st.markdown("<h5 style='text-align:center; color:#3a3a88;'>Multi-Subject Dataset Analysis\n\n</h1>", unsafe_allow_html=True)
+
+        st.markdown("<h5 style=color:#3a3a88;'>Multi-Subject Dataset Analysis\n\n</h1>", unsafe_allow_html=True)
 
         cols = st.columns([1,6,1])
         with cols[1]:
@@ -72,7 +74,8 @@ if tab1.open:
 if tab2.open:
     with tab2:
 
-        with st.container(horizontal=True, horizontal_alignment="center"):
+        # with st.container(horizontal=True, horizontal_alignment="center"):
+        with st.container(horizontal=True):
             st.markdown("<h5 style='color:#3a3a88;'>Data Upload</h5>", unsafe_allow_html=True, width='content')
 
     utilup.panel_data()
@@ -80,7 +83,8 @@ if tab2.open:
 ## Pipelines
 if tab3.open:
     with tab3:
-        with st.container(horizontal=True, horizontal_alignment="center"):
+        # with st.container(horizontal=True, horizontal_alignment="center"):
+        with st.container(horizontal=True):
             st.markdown("<h5 style='color:#3a3a88;'>Select and Run a Pipeline</h5>", unsafe_allow_html=True, width='content')
 
         utilpipe.panel_pipelines()

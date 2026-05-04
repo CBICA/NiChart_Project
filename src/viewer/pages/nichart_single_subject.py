@@ -54,28 +54,28 @@ with st.container(
 ## Info
 if tab1.open:
     with tab1:
-        st.markdown("<h5 style='text-align:center; color:#3a3a88;'>Single-Subject Analysis\n\n</h1>", unsafe_allow_html=True)
+        # st.markdown("<h5 style='text-align:center; color:#3a3a88;'>Single-Subject Analysis\n\n</h1>", unsafe_allow_html=True)
+        st.markdown("<h5 style='color:#3a3a88;'>Single-Subject Analysis\n\n</h1>", unsafe_allow_html=True)
 
-        cols = st.columns([1,6,1])
-        with cols[1]:
-            st.markdown(
-                '''
-                Welcome! This is where you can calculate neuroimaging chart values from a single subject's MRI scan(s) in a few simple actions:
-                
-                - **Data:** Upload image (Nifti, Dicom) and non-image (.csv) files required for analysis
-                
-                - **Processing:** Select processing/analysis pipeline to run on your data
+        st.markdown(
+            '''
+            Welcome! This is where you can calculate neuroimaging chart values from a single subject's MRI scan(s) in a few simple actions:
+            
+            - **Data:** Upload image (Nifti, Dicom) and non-image (.csv) files required for analysis
+            
+            - **Processing:** Select processing/analysis pipeline to run on your data
 
-                - **Results:** Download results of the selected pipelines
-                                
-                ''', unsafe_allow_html=True
-            )
+            - **Results:** Download results of the selected pipelines
+                            
+            ''', unsafe_allow_html=True
+        )
 
 ## Data Upload
 if tab2.open:
     with tab2:
 
-        with st.container(horizontal=True, horizontal_alignment="center"):
+        # with st.container(horizontal=True, horizontal_alignment="center"):
+        with st.container(horizontal=True):
             st.markdown("<h5 style='color:#3a3a88;'>Data Upload</h5>", unsafe_allow_html=True, width='content')
 
         utilup.panel_data()
@@ -83,7 +83,8 @@ if tab2.open:
 ## Pipelines
 if tab3.open:
     with tab3:
-        with st.container(horizontal=True, horizontal_alignment="center"):
+        # with st.container(horizontal=True, horizontal_alignment="center"):
+        with st.container(horizontal=True):
             st.markdown("<h5 style='color:#3a3a88;'>Select and Run a Pipeline</h5>", unsafe_allow_html=True, width='content')
 
         utilpipe.panel_pipelines()
@@ -91,10 +92,20 @@ if tab3.open:
 ## Download Results
 if tab4.open:
     with tab4:
-        with st.container(horizontal=True, horizontal_alignment="center"):
+        # with st.container(horizontal=True, horizontal_alignment="center"):
+        with st.container(horizontal=True):
             st.markdown("<h5 style='color:#3a3a88;'>Results</h5>", unsafe_allow_html=True, width='content')
 
         utildownload.panel_download()
+
+page = st.pills(
+    "Navigation",
+    [":material/home:"],
+    label_visibility = 'collapsed',
+    key="nav"
+)
+if page == ":material/home:":
+    st.switch_page('pages/nichart_home.py')
 
 # Show session state vars
 if st.session_state.mode == 'debug':

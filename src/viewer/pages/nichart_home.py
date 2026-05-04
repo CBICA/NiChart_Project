@@ -14,6 +14,7 @@ import utils.utils_survey as utils_survey
 import utils.utils_navig as utilnav
 import gui.utils_mriview as utilmri
 import gui.utils_plots as utilpl
+import time
 
 from streamlit_image_select import image_select
 import logging
@@ -88,33 +89,66 @@ else:
     print("Skipping survey, it's already completed.")
 utils_alerts.render_alert()
 
-#st.markdown('<h1 class="centered-text">Welcome to NiChart Project</p>', unsafe_allow_html=True)
-st.markdown("<h2 style='text-align:center; color:#5e5fad;'>Welcome to NiChart Project\n\n</h1>", unsafe_allow_html=True)
-st.markdown("<br>", unsafe_allow_html=True)
-st.markdown("<h5 style='text-align:center; color:#3a3a88;'>What would you like to explore today?\n\n</h1>", unsafe_allow_html=True)
+with st.container(horizontal_alignment="center"):
+    st.markdown("<h2 style='color:#5e5fad;'>Welcome to NiChart Project\n\n</h1>", unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<h5 style='color:#3a3a88;'>What would you like to explore today?\n\n</h1>", unsafe_allow_html=True)
 
-sel = sac.chip(
-    items=[
-        sac.ChipItem(label='What is NiChart?'),
-        sac.ChipItem(label='Process a Single Subject'),
-        sac.ChipItem(label='Process a Dataset'),
-        sac.ChipItem(label='View NeuroImaging Charts'),
-    ], label='', align='center', size='lg', radius='lg', direction='vertical', color='cyan'
-) 
+    sel = sac.chip(
+        items=[
+            sac.ChipItem(label='A Quick Introduction'),
+            sac.ChipItem(label='Process a Single Subject'),
+            sac.ChipItem(label='Process a Dataset'),
+            sac.ChipItem(label='View NeuroImaging Charts'),
+        ], label='', size='lg', radius='lg', direction='vertical', color='cyan'
+    ) 
+        
+    if sel == 'A Quick Introduction':
+        time.sleep(0.4)
+        st.switch_page("pages/nichart_info.py")
+
+    if sel == 'Process a Single Subject':
+        time.sleep(0.4)
+        st.switch_page("pages/nichart_single_subject.py")
+
+    if sel == 'Process a Dataset':
+        time.sleep(0.4)
+        st.switch_page("pages/nichart_multi_subject.py")
+
+    if sel == 'View NeuroImaging Charts':
+        time.sleep(0.4)
+        st.switch_page("pages/nichart_results.py")
+
+
+
+# #st.markdown('<h1 class="centered-text">Welcome to NiChart Project</p>', unsafe_allow_html=True)
+# st.markdown("<h2 style='text-align:center; color:#5e5fad;'>Welcome to NiChart Project\n\n</h1>", unsafe_allow_html=True)
+# st.markdown("<br>", unsafe_allow_html=True)
+# st.markdown("<h5 style='text-align:center; color:#3a3a88;'>What would you like to explore today?\n\n</h1>", unsafe_allow_html=True)
+
+# sel = sac.chip(
+#     items=[
+#         sac.ChipItem(label='What is NiChart?'),
+#         sac.ChipItem(label='Process a Single Subject'),
+#         sac.ChipItem(label='Process a Dataset'),
+#         sac.ChipItem(label='View NeuroImaging Charts'),
+#     ], label='', align='center', size='lg', radius='lg', direction='vertical', color='cyan'
+# ) 
     
-if sel == 'What is NiChart?':
-    sel_page = "pages/nichart_info.py"
+# if sel == 'What is NiChart?':
+#     time.sleep(0.6)
+#     st.switch_page("pages/nichart_info.py")
 
-if sel == 'Process a Single Subject':
-    sel_page = "pages/nichart_single_subject.py"
+# if sel == 'Process a Single Subject':
+#     time.sleep(0.6)
+#     st.switch_page("pages/nichart_single_subject.py")
 
-if sel == 'Process a Dataset':
-    sel_page = "pages/nichart_multi_subject.py"
+# if sel == 'Process a Dataset':
+#     time.sleep(0.6)
+#     st.switch_page("pages/nichart_multi_subject.py")
 
-if sel == 'View NeuroImaging Charts':
-    sel_page = "pages/nichart_results.py"
-
-if sel is not None:
-    utilnav.main_navig(None, None, 'Go!', sel_page)
+# if sel == 'View NeuroImaging Charts':
+#     time.sleep(0.6)
+#     st.switch_page("pages/nichart_results.py")
 
 
