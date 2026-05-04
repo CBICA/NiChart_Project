@@ -16,6 +16,7 @@ import utils.utils_stlogbox as stlogbox
 
 import utils.utils_session as utilses
 import pandas as pd
+import gui.utils_widgets as utilwd
 
 import traceback
 import requests
@@ -282,6 +283,9 @@ def pipeline_menu():
 
     with cols[0]:
         sel = select_pipeline(enabled_pnames=enabled_pnames)
+
+        st.toast(sel)
+        st.toast(enabled_pnames)
     with cols[1]:
         pipeline_runner_menu(enabled_pnames=enabled_pnames, sel=sel)
 
@@ -306,3 +310,4 @@ def panel_pipelines():
         )
     else:
         pipeline_menu()
+

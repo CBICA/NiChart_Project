@@ -9,9 +9,9 @@ import utils.utils_pages as utilpg
 import utils.utils_processes as utilprc
 import utils.utils_session as utilses
 import utils.utils_data_view as utildv
-import gui.utils_pipelines as utilpipe
+import utils.utils_pipelines as utilpipe
 from utils.utils_styles import inject_global_css
-import gui.utils_navig as utilnav
+import utils.utils_navig as utilnav
 import utils.utils_settings as utilset
 
 from streamlit_image_select import image_select
