@@ -283,9 +283,7 @@ def pipeline_menu():
 
     with cols[0]:
         sel = select_pipeline(enabled_pnames=enabled_pnames)
-
-        st.toast(sel)
-        st.toast(enabled_pnames)
+        
     with cols[1]:
         pipeline_runner_menu(enabled_pnames=enabled_pnames, sel=sel)
 
