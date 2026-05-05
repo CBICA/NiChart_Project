@@ -11,7 +11,6 @@ import utils.utils_misc as utilmisc
 import utils.utils_session as utilses
 import utils.utils_alerts as utils_alerts
 import utils.utils_survey as utils_survey
-import utils.utils_navig as utilnav
 import gui.utils_mriview as utilmri
 import gui.utils_plots as utilpl
 import time

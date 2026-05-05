@@ -14,7 +14,6 @@ import utils.utils_upload as utilup
 import utils.utils_pipelines as utilpipe
 import utils.utils_data_view as utildv
 from utils.utils_styles import inject_global_css 
-import utils.utils_navig as utilnav
 
 from streamlit_image_select import image_select
 import re

@@ -1,26 +1,13 @@
 import streamlit as st
-import os
-import yaml
-from pathlib import Path
-from graphviz import Digraph
-from collections import defaultdict
-import utils.utils_misc as utilmisc
 import utils.utils_pages as utilpg
-import utils.utils_processes as utilprc
 import utils.utils_session as utilses
-import utils.utils_io as utilio
 import utils.utils_upload as utilup
 import utils.utils_pipelines as utilpipe
-import utils.utils_data_view as utildv
 from utils.utils_styles import inject_global_css 
-import utils.utils_navig as utilnav
 import utils.utils_download as utildownload
 
-from streamlit_image_select import image_select
-import re
 from utils.utils_logger import setup_logger
 
-import streamlit_antd_components as sac
 
 logger = setup_logger()
 logger.debug('Page: Select Pipelines')
