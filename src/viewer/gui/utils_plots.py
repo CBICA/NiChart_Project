@@ -10,6 +10,7 @@ import gui.utils_traces as utiltr
 import gui.utils_mriview as utilmri
 import gui.utils_widgets as utilwd
 import gui.utils_dataprep as utildataprep
+import gui.utils_reports as utilrep
 
 from utils.utils_logger import setup_logger
 logger = setup_logger()
@@ -582,6 +583,9 @@ def show_plots(ptype):
                 st.warning(f"Plot type {plot_params.get('plot_type')} not supported!")
                 new_plot = None
 
+            if new_plot is not None:
+                pdict.setdefault('_figs', {})[plot_id] = new_plot
+
 def panel_show_plots(ptype):
     '''
     Panel to show plots
@@ -777,22 +781,22 @@ def set_plot_params(ptype, plot_id):
     data_vars = pdict['data'].get('vars', None)
 
     if ptype == 'ref_plots':
-        sel_tabs = ['tab1', 'tab2', 'tab3', 'tab4', 'tab7']
-        tab1, tab2, tab3, tab4, tab7 = st.tabs(
+        sel_tabs = ['tab0', 'tab1', 'tab2', 'tab3', 'tab6']
+        tab0, tab1, tab2, tab3, tab6 = st.tabs(
             [":material/visibility_off:", "Variables", "Values", "Layers", "Select"],
             on_change='rerun',
             key = f"_tabs_plot_params_{plot_id}"
         )
     else:
-        sel_tabs = ['tab1', 'tab2', 'tab3', 'tab4', 'tab5', 'tab6', 'tab7']
-        tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(
+        sel_tabs = ['tab0', 'tab1', 'tab2', 'tab3', 'tab4', 'tab5', 'tab6']
+        tab0, tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
             [":material/visibility_off:", "Variables", "Values", "Layers", "Filters", "Subjects", "Select"],
             on_change='rerun',
             key = f"_tabs_plot_params_{plot_id}"
         )
 
-    if 'tab2' in sel_tabs and tab2.open:
-        with tab2:
+    if 'tab1' in sel_tabs and tab1.open:
+        with tab1:
             with st.container(border=True):
                 
                 col_dict = pdict['data']['col_dict']
@@ -816,30 +820,30 @@ def set_plot_params(ptype, plot_id):
     #             utilwd.my_checkbox(f'{plot_id}_flag_centval', 'Show Centile Values')
 
 
+    if 'tab2' in sel_tabs and tab2.open:
+        with tab2:
+            with st.container(border=True):
+                select_min_max(ptype, plot_id)
+
+
     if 'tab3' in sel_tabs and tab3.open:
         with tab3:
             with st.container(border=True):
-                select_min_max(ptype, plot_id)
+                select_layers(ptype, plot_id)
 
 
     if 'tab4' in sel_tabs and tab4.open:
         with tab4:
             with st.container(border=True):
-                select_layers(ptype, plot_id)
-
+                select_filters(ptype, plot_id)
 
     if 'tab5' in sel_tabs and tab5.open:
         with tab5:
             with st.container(border=True):
-                select_filters(ptype, plot_id)
+                select_mrid(ptype, plot_id)
 
     if 'tab6' in sel_tabs and tab6.open:
         with tab6:
-            with st.container(border=True):
-                select_mrid(ptype, plot_id)
-
-    if 'tab7' in sel_tabs and tab7.open:
-        with tab7:
             with st.container(border=True):
                 vname = f"{ptype}.plots.{plot_id}.flag_sel"
                 utilwd.my_checkbox(vname, 'Select')
@@ -988,20 +992,26 @@ def plot_set_controls(ptype):
     '''
     Show controls to add plot and select settings
     '''
-    tab1, tab2, tab3 = st.tabs(
-        [':material/visibility_off:', 'Plots', 'Settings'],
+    _titles = {'ref_plots': 'NiChart Reference Charts', 'user_plots': 'NiChart My Charts'}
+
+    tab0, tab1, tab2, tab3 = st.tabs(
+        [':material/visibility_off:', 'Plots', 'Settings', 'Save Report'],
         on_change='rerun',
     )
 
-    if tab2.open:
-        with tab2:
+    if tab1.open:
+        with tab1:
             with st.container(border=True, horizontal=True, horizontal_alignment="center", width='stretch'):
                 plot_add_delete(ptype)
 
-    if tab3.open:
-        with tab3:
+    if tab2.open:
+        with tab2:
             with st.container(border=True):
                 plot_select_settings(ptype)
+
+    if tab3.open:
+        with tab3:
+            utilrep.panel_save_plots(ptype, _titles.get(ptype, 'NiChart Charts'))
 
 def panel_view_vars():
     """

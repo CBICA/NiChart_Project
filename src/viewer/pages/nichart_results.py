@@ -3,6 +3,7 @@ import utils.utils_pages as utilpg
 import utils.utils_session as utilses
 import gui.utils_plots as utilpl
 import gui.utils_dataprep as utildataprep
+import gui.utils_reports as utilrep
 from utils.utils_styles import inject_global_css
 from utils.utils_logger import setup_logger
 import os
@@ -39,17 +40,16 @@ if tab1.open:
             ''', icon=':material/info:'
         )
 
-## Data selection
+## Reference Charts
 if tab2.open:
     with tab2:
-        # Set viewer to user data
+        # Set viewer to reference data
         ss.flag_user_data = False
 
         # Load centile data if not already loaded
         if ss.ref_plots['data']['df_cent'] is None:
             utildataprep.load_centile_data('ref_plots')
 
-        # View data
         utilpl.panel_view_vars()
 
 ## Data selection
@@ -67,9 +67,10 @@ if tab4.open:
         # View data
         utilpl.panel_view_vars()
 
-## Data selection
+## Reports
 if tab5.open:
-    st.write('Reporting coming soon ...')
+    with tab5:
+        utilrep.panel_reports()
 
 # Home button
 utilpg.navig_home()
