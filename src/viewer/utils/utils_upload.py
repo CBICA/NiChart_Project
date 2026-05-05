@@ -594,20 +594,30 @@ def panel_upload_single_subject():
 
     with tab1:
         with st.form(key='form_single_nifti', clear_on_submit=True, border=False):
-            f = st.file_uploader("Upload a .nii, .nii.gz, or .zip file", label_visibility='collapsed')
-            if st.form_submit_button("Upload", use_container_width=True):
+            f = st.file_uploader(
+                "Upload a .nii, .nii.gz, or .zip file",
+                label_visibility='collapsed'
+            )
+            if st.form_submit_button("Upload", use_container_width=False):
                 upload_file_single_subject(f)
 
     with tab2:
         with st.form(key='form_single_dcm', clear_on_submit=True, border=False):
-            files = st.file_uploader("Upload .dcm files", accept_multiple_files=True, label_visibility='collapsed')
-            if st.form_submit_button("Upload", use_container_width=True):
+            files = st.file_uploader(
+                "Upload .dcm files",
+                accept_multiple_files=True,
+                label_visibility='collapsed'
+            )
+            if st.form_submit_button("Upload", use_container_width=False):
                 upload_files_single_subject(files)
 
     with tab3:
         with st.form(key='form_single_csv', clear_on_submit=True, border=False):
-            f = st.file_uploader("Upload a .csv file", label_visibility='collapsed')
-            if st.form_submit_button("Upload", use_container_width=True):
+            f = st.file_uploader(
+                "Upload a .csv file",
+                label_visibility='collapsed'
+            )
+            if st.form_submit_button("Upload", use_container_width=False):
                 upload_file_single_subject(f)
 
 def generate_template_csv():
@@ -731,36 +741,32 @@ def panel_view_files():
 
 
 def panel_data():
-    with st.container(
-        horizontal=True, horizontal_alignment="center", width='stretch'
-    ):
+    tab_prj, tab_upload, tab_review, tab_help = st.tabs(
+        [":material/folder: Select Project",
+            ":material/upload: Upload Data",
+            ":material/fact_check: Review",
+            ":material/help: Help"],
+        on_change='rerun',
+    )
 
-        tab_prj, tab_upload, tab_review, tab_help = st.tabs(
-            [":material/folder: Select Project",
-             ":material/upload: Upload Data",
-             ":material/fact_check: Review",
-             ":material/help: Help"],
-            on_change='rerun',
-        )
+    if tab_prj.open:
+        with tab_prj:
+            panel_project_folder()
 
-        if tab_prj.open:
-            with tab_prj:
-                panel_project_folder()
+    if tab_upload.open:
+        with tab_upload:
+            if st.session_state.workflow == 'single_subject':
+                panel_upload_single_subject()
+            else:
+                panel_upload_multi_subject()
 
-        if tab_upload.open:
-            with tab_upload:
-                if st.session_state.workflow == 'single_subject':
-                    panel_upload_single_subject()
-                else:
-                    panel_upload_multi_subject()
+    if tab_review.open:
+        with tab_review:
+            panel_view_files()
 
-        if tab_review.open:
-            with tab_review:
-                panel_view_files()
-
-        if tab_help.open:
-            with tab_help:
-                my_help()
-        
+    if tab_help.open:
+        with tab_help:
+            my_help()
+    
 
 
