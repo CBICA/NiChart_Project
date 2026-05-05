@@ -3,25 +3,6 @@ import utils.utils_io as utilio
 import streamlit_antd_components as sac
 import os
 
-def panel_info():
-    with st.container(border=True):
-        st.markdown(
-            '''
-            - NiChart Reference Dataset is a large and diverse collection from multiple MRI studies, created as part of the ISTAGING project to develop a system for identifying imaging biomarkers of aging and neurodegenerative diseases.
-
-            - The dataset includes multi-modal MRI data, as well as carefully curated demographic, clinical, and cognitive variables from participants with a variety of health conditions.
-
-            - The reference dataset is used for training machine learning models and for creating reference distributions of imaging measures and signatures
-
-            - Users can compare their values to normative or disease-related reference distributions.            '''
-        )
-        st.image(
-            os.path.join(
-                st.session_state.paths['resources'], 'images', 'nichart_data.png'
-            ),
-            width=1200
-        )
-
 def prepare_data_for_download(prj_dir, sel_opt, out_zip):
     utilio.zip_folders(prj_dir, sel_opt, out_zip)
     with open(out_zip, "rb") as f:
@@ -34,13 +15,11 @@ def panel_download():
     '''
     Panel to download results
     '''
-    if st.session_state.workflow == 'ref_data':
-        st.info('Reference data download is not available at this time.')
-        return
-    
-    with st.container(horizontal=True):
+    with st.container(horizontal=True, horizontal_alignment="left"):
 
-        st.markdown(f"###### 📁 Project Folder:   `{st.session_state.prj_name}`", width='content')
+        st.markdown(
+            f":violet-badge[Current Project] :green-badge[:material/folder: {st.session_state.prj_name}]"
+        )
     
         prj_dir = st.session_state.paths['prj_dir']
         list_dirs = utilio.get_subfolders(prj_dir)

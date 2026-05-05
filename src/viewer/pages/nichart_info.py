@@ -137,7 +137,22 @@ if tabA.open:
 ## FIXME: Add info for the tabs below
 if tabB.open:
     with tabB:
-        st.info('Data documentation will be here soon ...')
+        st.markdown(
+            '''
+            - NiChart Reference Dataset is a large and diverse collection from multiple MRI studies, created as part of the ISTAGING project to develop a system for identifying imaging biomarkers of aging and neurodegenerative diseases.
+
+            - The dataset includes multi-modal MRI data, as well as carefully curated demographic, clinical, and cognitive variables from participants with a variety of health conditions.
+
+            - The reference dataset is used for training machine learning models and for creating reference distributions of imaging measures and signatures
+
+            - Users can compare their values to normative or disease-related reference distributions.            '''
+        )
+        st.image(
+            os.path.join(
+                st.session_state.paths['resources'], 'images', 'nichart_data.png'
+            ),
+            width=1200
+        )
 
 if tabC.open:
     with tabC:

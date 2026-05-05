@@ -14,6 +14,7 @@ import utils.utils_pipelines as utilpipe
 import utils.utils_data_view as utildv
 from utils.utils_styles import inject_global_css 
 import utils.utils_navig as utilnav
+import utils.utils_download as utildownload
 
 from streamlit_image_select import image_select
 import re
@@ -45,8 +46,8 @@ if 'instantiated' not in st.session_state or not st.session_state.instantiated:
 with st.container(
     horizontal=True, horizontal_alignment="center", width='stretch'
 ):
-    tab1, tab2, tab3 = st.tabs(
-        ["Overview", "Data", "Processing"],
+    tab1, tab2, tab3, tab4 = st.tabs(
+        ["Overview", "Data", "Processing", "Results"],
         on_change='rerun',
     )
 
@@ -86,6 +87,15 @@ if tab3.open:
             st.markdown("<h5 style='color:#3a3a88;'>Select and Run a Pipeline</h5>", unsafe_allow_html=True, width='content')
 
         utilpipe.panel_pipelines()
+
+## Download Results
+if tab4.open:
+    with tab4:
+        # with st.container(horizontal=True, horizontal_alignment="center"):
+        with st.container(horizontal=True):
+            st.markdown("<h5 style='color:#3a3a88;'>Results</h5>", unsafe_allow_html=True, width='content')
+
+        utildownload.panel_download()
 
 # Home button
 utilpg.navig_home()

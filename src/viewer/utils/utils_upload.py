@@ -22,24 +22,29 @@ logger = setup_logger()
 ## Functions to consolidate data
 
 def my_help():
-    tab1, tab2, tab3 = st.tabs(["Project Folder", "Upload Files", "Review Files"])
 
-    with st.expander('Project Folder'):
-        st.write(
-            """
-            - All processing steps are performed inside a project folder.
-            - By default, NiChart will create and use a current project folder for you.
-            - You may also create a new project folder using any name you choose.
-            - If needed, you can reset the current project folder (this will remove all files inside it, but keep the folder itself), allowing you to start fresh.
-            - You may also switch to an existing project folder.
+    tab1, tab2, tab3 = st.tabs(
+        ["Overview", "Upload Files", "Review Files"],
+        on_change = 'rerun'
+    )
 
-            **Note:** If you are using the cloud version, stored files will be removed periodically, so previously used project folders might not remain available.
-            """
-        )
+    if tab1.open:
+        with tab1:
+            st.write(
+                """
+                - All processing steps are performed inside a project folder.
+                - By default, NiChart will create and use a current project folder for you.
+                - You may also create a new project folder using any name you choose.
+                - If needed, you can reset the current project folder (this will remove all files inside it, but keep the folder itself), allowing you to start fresh.
+                - You may also switch to an existing project folder.
 
-    with st.expander('Data Upload'):
-        if st.session_state.workflow == 'single_subject':
-            with tab2:
+                **Note:** If you are using the cloud version, stored files will be removed periodically, so previously used project folders might not remain available.
+                """
+            )
+
+    if tab2.open:
+        with tab2:
+            if st.session_state.workflow == 'single_subject':
                 st.write(
                     """
                     - You may upload MRI scans in any of the following formats:
@@ -64,7 +69,6 @@ def my_help():
                 )
 
         if st.session_state.workflow == 'multi_subject':
-            with tab2:
                 st.write(
                     """
                     - MRI Scans (NIfTI format):
@@ -99,18 +103,19 @@ def my_help():
                     """
                 )
 
-    with st.expander('Data Review'):
-        st.write(
-            """
-            - View files stored in the project folder.
+    if tab3.open:
+        with tab3:
+            st.write(
+                """
+                - View files stored in the project folder.
 
-            - Click on a file name to:
+                - Click on a file name to:
 
-                - View a scan (.nii.gz, .nii)
+                    - View a scan (.nii.gz, .nii)
 
-                - View/edit a list (.csv)
-            """
-        )
+                    - View/edit a list (.csv)
+                """
+            )
 
 
 @st.dialog("Participant Information", width='medium')
@@ -536,39 +541,40 @@ def panel_project_folder():
     '''
     logger.debug('    Function: panel_project_folder')
 
-    with st.expander("Change project folder"):
-        action = st.radio(
-            "Action",
-            ["Create new project", "Switch to existing project", "Reset project folder"],
-            label_visibility='collapsed',
-            index=0,
-        )
+    if st.checkbox("Change project folder"):
+        with st.container(border=True):
+            action = st.radio(
+                "Action",
+                ["Create new project", "Switch to existing project", "Reset project folder"],
+                label_visibility='collapsed',
+                index=0,
+            )
 
-        if action == "Create new project":
-            sel_prj = st.text_input("Project name:", placeholder="my_study", label_visibility='collapsed')
-            if st.button("Create") and sel_prj:
-                utilss.update_project(sel_prj)
-
-        elif action == "Switch to existing project":
-            list_projects = utilio.get_subfolders(st.session_state.paths['out_dir'])
-            if list_projects:
-                sel_prj = sac.chip(
-                    list_projects, label='', index=None, align='left', size='sm', radius='sm',
-                    multiple=False, color='cyan'
-                )
-                if sel_prj is not None:
+            if action == "Create new project":
+                sel_prj = st.text_input("Project name:", placeholder="my_study", label_visibility='collapsed')
+                if st.button("Create") and sel_prj:
                     utilss.update_project(sel_prj)
-            else:
-                st.caption("No existing projects found.")
 
-        elif action == "Reset project folder":
-            st.warning("⚠️ This will delete all files in the project folder. This cannot be undone.")
-            flag_confirm = st.checkbox("I understand and want to delete all files")
-            if st.button("Delete", disabled=not flag_confirm):
-                utilio.clear_folder(st.session_state.paths['prj_dir'])
-                st.toast(f"Files in '{st.session_state.prj_name}' deleted.")
-                utilss.update_project(st.session_state.prj_name)
-                st.rerun()
+            elif action == "Switch to existing project":
+                list_projects = utilio.get_subfolders(st.session_state.paths['out_dir'])
+                if list_projects:
+                    sel_prj = sac.chip(
+                        list_projects, label='', index=None, align='left', size='sm', radius='sm',
+                        multiple=False, color='cyan'
+                    )
+                    if sel_prj is not None:
+                        utilss.update_project(sel_prj)
+                else:
+                    st.caption("No existing projects found.")
+
+            elif action == "Reset project folder":
+                st.warning(":material/warning: This will delete all files in the project folder. This cannot be undone.")
+                flag_confirm = st.checkbox("I understand and want to delete all files")
+                if st.button("Delete", disabled=not flag_confirm):
+                    utilio.clear_folder(st.session_state.paths['prj_dir'])
+                    st.toast(f"Files in '{st.session_state.prj_name}' deleted.")
+                    utilss.update_project(st.session_state.prj_name)
+                    st.rerun()
 
     with st.container(horizontal=True, horizontal_alignment="left"):
         st.markdown(
@@ -730,8 +736,10 @@ def panel_data():
     ):
 
         tab_prj, tab_upload, tab_review, tab_help = st.tabs(
-            ["📁 Select Project", "📤 Upload Data",
-             "📋 Review Data", "ℹ️ Help"],
+            [":material/folder: Select Project",
+             ":material/upload: Upload Data",
+             ":material/fact_check: Review",
+             ":material/help: Help"],
             on_change='rerun',
         )
 

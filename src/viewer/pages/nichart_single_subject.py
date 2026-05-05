@@ -59,7 +59,7 @@ if tab1.open:
 
         st.markdown(
             '''
-            Welcome! This is where you can calculate neuroimaging chart values from a single subject's MRI scan(s) in a few simple actions:
+            This is where you can calculate neuroimaging chart values from a single subject's MRI scan(s) in a few simple actions:
             
             - **Data:** Upload image (Nifti, Dicom) and non-image (.csv) files required for analysis
             
@@ -94,7 +94,7 @@ if tab4.open:
     with tab4:
         # with st.container(horizontal=True, horizontal_alignment="center"):
         with st.container(horizontal=True):
-            st.markdown("<h5 style='color:#3a3a88;'>Results</h5>", unsafe_allow_html=True, width='content')
+            st.markdown("<h5 style='color:#3a3a88;'>Download Results</h5>", unsafe_allow_html=True, width='content')
 
         utildownload.panel_download()
 
