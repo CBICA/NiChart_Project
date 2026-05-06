@@ -61,7 +61,7 @@ def select_pipeline(enabled_pnames):
     
     if show_enabled_only:
         if not enabled_pnames:
-            st.error(f"Your data doesn't match any available pipelines. Use the checkbox above to review pipeline requirements, then upload the required files via the Data tab to continue..")
+            st.warning(f":material/warning: Your data doesn't match any available pipelines. Use the checkbox above to review pipeline requirements, then upload the required files via the Data tab to continue..")
             return
         sel_opt = sac.chip(
             enabled_pnames,
@@ -108,7 +108,7 @@ def pipeline_runner_menu(enabled_pnames, sel=False):
         #st.info(f"DEBUG: Enabled pnames: {enabled_pnames}")
         #st.info(f"DEBUG: sel_name: {sel_name}")
         #st.info(f"DEBUG: sel_pipeline: {sel_method}")
-        st.info("Your data doesn't meet the requirements for this pipeline. Correct the issues marked below to proceed.")
+        st.warning("Your data doesn't meet the requirements for this pipeline. Correct the issues marked below to proceed.")
 
         return
     ready = utiltl.check_requirements_met_panel(sel_name)

@@ -21,6 +21,12 @@ logger = setup_logger()
 ##############################################################
 ## Functions to consolidate data
 
+def _show_curr_prj():
+    with st.container(horizontal=True, horizontal_alignment="left"):
+        st.markdown(
+            f"# :violet-badge[Current Project] :green-badge[:material/folder: {st.session_state.prj_name}]"
+        )
+
 def my_help():
 
     tab1, tab2, tab3 = st.tabs(
@@ -540,6 +546,8 @@ def panel_project_folder():
     Panel to select project folder
     '''
     logger.debug('    Function: panel_project_folder')
+    
+    _show_curr_prj()
 
     if st.checkbox("Change project folder"):
         with st.container(border=True):
@@ -563,7 +571,9 @@ def panel_project_folder():
                         multiple=False, color='cyan'
                     )
                     if sel_prj is not None:
-                        utilss.update_project(sel_prj)
+                        if st.button('Select'):
+                            utilss.update_project(sel_prj)
+                            st.rerun()
                 else:
                     st.caption("No existing projects found.")
 
@@ -576,17 +586,13 @@ def panel_project_folder():
                     utilss.update_project(st.session_state.prj_name)
                     st.rerun()
 
-    with st.container(horizontal=True, horizontal_alignment="left"):
-        st.markdown(
-            f":violet-badge[Current Project] :green-badge[:material/folder: {st.session_state.prj_name}]"
-        )
-
-
 def panel_upload_single_subject():
     '''
     Upload user data to target folder
     '''
     logger.debug('    Function: panel_upload_single_subject')
+
+    _show_curr_prj()
 
     tab1, tab2, tab3 = st.tabs(
         ["NIfTI / DICOM (.zip)", "DICOM (individual files)", "CSV"]
@@ -693,9 +699,7 @@ def panel_view_files():
     Show files in data folder
     '''
     logger.debug('    Function: panel_view_files')
-    st.markdown(
-        f":violet-badge[Current Project] :green-badge[:material/folder: {st.session_state.prj_name}]"
-    )
+    _show_curr_prj()
 
     col1, col2 = st.columns([1, 1])
 
