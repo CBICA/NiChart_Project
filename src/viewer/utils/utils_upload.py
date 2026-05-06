@@ -389,14 +389,13 @@ def dialog_extract_dicoms(in_dir, out_dir):
     if consolidate_nifti():
         st.rerun()    
 
+
 def upload_file_single_subject(in_file):
     '''
     Copy file to output folder
     '''
     logger.debug(f'    Function: upload_file({in_file})')
     if in_file is None:
-        st.warning('Please select input file')
-        time.sleep(3)
         return
     
     tmp_dir = os.path.join(st.session_state.paths['prj_dir'], 'user_upload')
@@ -481,6 +480,32 @@ def upload_files_single_subject(in_files):
     st.toast(f'Uploaded files ...')
 
     dialog_extract_dicoms(d_out, tmp_dir)
+
+def upload_nifti(in_file):
+    '''
+    Copy input nifti image to output folder
+    '''
+    logger.debug('    Function: Upload_nifti')
+
+    if in_file is None:
+        return
+    
+    tmp_dir = os.path.join(st.session_state.paths['prj_dir'], 'user_upload')
+    os.makedirs(tmp_dir, exist_ok=True)
+
+    fname = in_file.name
+
+    if not fname.endswith(('.nii.gz', '.nii')):
+        return
+
+    f_out = os.path.join(tmp_dir, fname)
+    if not os.path.exists(f_out):
+        with open(f_out, "wb") as f:
+            f.write(in_file.getbuffer())
+    st.toast(f'Uploaded file')
+
+    st.session_state.curr_scan = fname
+    dialog_consolidate_nifti()
 
 def upload_files_multi_subject(in_files):
     '''
@@ -582,7 +607,7 @@ def panel_project_folder():
                     utilss.update_project(st.session_state.prj_name)
                     st.rerun()
 
-def panel_upload_single_subject():
+def panel_upload_single_subject_v2():
     '''
     Upload user data to target folder
     '''
@@ -590,14 +615,14 @@ def panel_upload_single_subject():
 
     utilmisc._show_curr_prj()
 
-    tab1, tab2, tab3 = st.tabs(
-        ["NIfTI / DICOM (.zip)", "DICOM (individual files)", "CSV"]
+    tab1, tab2, tab3, tab4 = st.tabs(
+        ["NIfTI", "DICOM (single .zip)", "DICOM (multiple files)", "CSV"]
     )
 
     with tab1:
         with st.form(key='form_single_nifti', clear_on_submit=True, border=False):
             f = st.file_uploader(
-                "Upload a .nii, .nii.gz, or .zip file",
+                "Upload a .nii or .nii.gz file",
                 label_visibility='collapsed'
             )
             if st.form_submit_button("Upload", use_container_width=False):
@@ -621,6 +646,51 @@ def panel_upload_single_subject():
             )
             if st.form_submit_button("Upload", use_container_width=False):
                 upload_file_single_subject(f)
+
+def panel_upload_single_subject():
+    '''
+    Upload user data to target folder
+    '''
+    logger.debug('    Function: panel_upload_single_subject')
+
+    utilmisc._show_curr_prj()
+
+    dtype = st.radio(
+        'Input data type:',
+        ['Nifti', 'Dicom (single .zip)', 'Dicom (folder)', '.csv'],
+        horizontal=True
+    )
+
+    ftype = None
+    flag_dcm = False
+    flag_zip = False
+    flag_folder = False
+    accept_multiple_files = False
+    if dtype == 'Nifti':
+        ftype = ['.nii', '.nii.gz']
+    elif dtype == 'Dicom (single .zip)':
+        ftype = ['.zip']
+        flag_dcm = True
+    elif dtype == 'Dicom (folder)':
+        flag_folder = True
+        flag_dcm = True
+        accept_multiple_files = 'directory'
+    elif dtype == '.csv':
+        ftype = ['.csv']
+
+    with st.form(
+        key='_form_upload_single_subj', clear_on_submit=True, border=False
+    ):
+        f = st.file_uploader(
+            label = "Upload a file",
+            type = ftype,
+            accept_multiple_files = accept_multiple_files,
+            label_visibility = 'collapsed'
+        )
+        if st.form_submit_button("Upload", use_container_width=False):
+            if dtype == 'Nifti':
+                upload_nifti(f)
+
 
 def generate_template_csv():
     mod_dirs = {mod: os.path.join(st.session_state.paths['project'], mod) for mod in ['t1', 't2', 'fl', 'dti', 'fmri']}
