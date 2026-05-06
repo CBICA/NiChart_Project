@@ -52,39 +52,48 @@ def select_pipeline(enabled_pnames):
     '''
     Select a pipeline and show overview
     '''
-    show_enabled_only = st.checkbox("Filter by input data availability", value=True)
 
-    pipelines = st.session_state.pipelines
-    pnames = pipelines.Name.tolist()
-    
-    if show_enabled_only:
-        if not enabled_pnames:
-            st.warning(f":material/warning: Your data doesn't match any available pipelines. Use the checkbox above to review pipeline requirements, then upload the required files via the Data tab to continue..")
-            return
-        sel_opt = sac.chip(
-            enabled_pnames,
-            label='', index=None, align='left',
-            size='md', radius='md', multiple=False, color='cyan',
-            description='Select a pipeline'
-        )
-    else:
-        sel_opt = sac.chip(
-            pnames,
-            label='', index=None, align='left',
-            size='md', radius='md', multiple=False, color='cyan',
-            description='Select a pipeline'
-        )
+    sel_pipeline = st.session_state.get('sel_pipeline_label', None)
+    tmp_sel = True
+    if sel_pipeline is not None:
+        utilmisc._show_curr_pipeline()
+        tmp_sel = st.checkbox("Change pipeline", value=False)
+
+    if tmp_sel:
+        show_enabled_only = st.checkbox("Filter by input data availability", value=True)
+
+        pipelines = st.session_state.pipelines
+        pnames = pipelines.Name.tolist()
         
-    if sel_opt is None:
-        return
+        if show_enabled_only:
+            if not enabled_pnames:
+                st.warning(f":material/warning: Your data doesn't match any available pipelines. Use the checkbox above to review pipeline requirements, then upload the required files via the Data tab to continue..")
+                return
+            sel_opt = sac.chip(
+                enabled_pnames,
+                label='', index=None, align='left',
+                size='md', radius='md', multiple=False, color='cyan',
+                description='Select a pipeline'
+            )
+        else:
+            sel_opt = sac.chip(
+                pnames,
+                label='', index=None, align='left',
+                size='md', radius='md', multiple=False, color='cyan',
+                description='Select a pipeline'
+            )
+            
+        if sel_opt is None:
+            return
 
-    row = pipelines.loc[pipelines["Name"] == sel_opt, "Label"]
-    sel_label = row.iloc[0] if not row.empty else ''
-    show_description(sel_opt)
+        row = pipelines.loc[pipelines["Name"] == sel_opt, "Label"]
+        sel_label = row.iloc[0] if not row.empty else ''
+        show_description(sel_opt)
 
-    if st.button('Select'):
-        st.session_state.sel_pipeline_name = sel_opt
-        st.session_state.sel_pipeline_label = sel_label
+        if st.button('Select'):
+            st.session_state.sel_pipeline_name = sel_opt
+            st.session_state.sel_pipeline_label = sel_label
+            st.rerun()
 
 def pipeline_runner_menu(enabled_pnames):
 
@@ -229,7 +238,7 @@ def panel_pipelines():
             disabled_pnames.append(pname)
 
     tab1, tab2 = st.tabs(
-        ["Select", "Run"],
+        [":material/auto_awesome_motion: Select", ":material/motion_play: Run"],
         on_change='rerun',
     )
 
