@@ -3,6 +3,7 @@ from typing import Any
 
 import utils.utils_toolloader as utiltl
 import utils.utils_stlogbox as stlogbox
+import utils.utils_misc as utilmisc
 
 import pandas as pd
 
@@ -51,13 +52,10 @@ def select_pipeline(enabled_pnames):
     '''
     Select a pipeline and show overview
     '''
-    st.markdown("##### Select:")
     show_enabled_only = st.checkbox("Filter by input data availability", value=True)
-    sac.divider(key='_p2_div1')
 
     pipelines = st.session_state.pipelines
     pnames = pipelines.Name.tolist()
-
     
     if show_enabled_only:
         if not enabled_pnames:
@@ -72,31 +70,35 @@ def select_pipeline(enabled_pnames):
     else:
         sel_opt = sac.chip(
             pnames,
-            label='', index=0, align='left',
+            label='', index=None, align='left',
             size='md', radius='md', multiple=False, color='cyan',
             description='Select a pipeline'
         )
         
-    
+    if sel_opt is None:
+        return
+
     row = pipelines.loc[pipelines["Name"] == sel_opt, "Label"]
     sel_label = row.iloc[0] if not row.empty else ''
     show_description(sel_opt)
-    st.session_state.sel_pipeline_name = sel_opt
-    st.session_state.sel_pipeline_label = sel_label
-    #st.info(f"DEBUG: sel_opt {sel_opt}")
-    #st.info(f"DEBUG: sel_label {sel_label}")
 
-    return sel_label
+    if st.button('Select'):
+        st.session_state.sel_pipeline_name = sel_opt
+        st.session_state.sel_pipeline_label = sel_label
 
-def pipeline_runner_menu(enabled_pnames, sel=False):
-    st.markdown("##### Run:")
-    sac.divider(key='_p2_div2')
-    if not sel:
-        st.info("Select a pipeline on the left, then look here to run it.")
+def pipeline_runner_menu(enabled_pnames):
+
+    sel_pipeline = st.session_state.get('sel_pipeline_label', None)
+
+    if sel_pipeline is None:
+        st.warning(':material/warning: Please select a pipeline first.')
         return
-    sel_method = st.session_state.sel_pipeline_label
+    
+    sel_method = sel_pipeline
     sel_name = utiltl.get_pipeline_name_by_label(sel_method)
-    st.success(f'Selected pipeline: {sel_name}')
+    
+    utilmisc._show_curr_pipeline()
+
     harmonize = False
     if 'subject_type' not in st.session_state or st.session_state.subject_type == 'multi':
         if utiltl.pipeline_is_harmonizable(sel_method):
@@ -234,9 +236,9 @@ def panel_pipelines():
     sel = None
     if tab1.open:   
         with tab1:
-            sel = select_pipeline(enabled_pnames=enabled_pnames)
+            select_pipeline(enabled_pnames=enabled_pnames)
 
     if tab2.open:   
         with tab2:
-            pipeline_runner_menu(enabled_pnames=enabled_pnames, sel=sel)
+            pipeline_runner_menu(enabled_pnames=enabled_pnames)
 

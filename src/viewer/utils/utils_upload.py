@@ -2,6 +2,7 @@ import streamlit as st
 import utils.utils_dicoms as utildcm
 import utils.utils_session as utilss
 import utils.utils_data_view as utildv
+import utils.utils_misc as utilmisc
 import utils.utils_io as utilio
 import gui.utils_mriview as utilmri
 
@@ -21,11 +22,6 @@ logger = setup_logger()
 ##############################################################
 ## Functions to consolidate data
 
-def _show_curr_prj():
-    with st.container(horizontal=True, horizontal_alignment="left"):
-        st.markdown(
-            f"# :violet-badge[Current Project] :green-badge[:material/folder: {st.session_state.prj_name}]"
-        )
 
 def my_help():
 
@@ -547,7 +543,7 @@ def panel_project_folder():
     '''
     logger.debug('    Function: panel_project_folder')
     
-    _show_curr_prj()
+    utilmisc._show_curr_prj()
 
     if st.checkbox("Change project folder"):
         with st.container(border=True):
@@ -592,7 +588,7 @@ def panel_upload_single_subject():
     '''
     logger.debug('    Function: panel_upload_single_subject')
 
-    _show_curr_prj()
+    utilmisc._show_curr_prj()
 
     tab1, tab2, tab3 = st.tabs(
         ["NIfTI / DICOM (.zip)", "DICOM (individual files)", "CSV"]
@@ -699,7 +695,7 @@ def panel_view_files():
     Show files in data folder
     '''
     logger.debug('    Function: panel_view_files')
-    _show_curr_prj()
+    utilmisc._show_curr_prj()
 
     col1, col2 = st.columns([1, 1])
 

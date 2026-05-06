@@ -7,6 +7,25 @@ import streamlit as st
 ###################################################################
 # Misc utils
 
+def _show_curr_prj():
+    prj_name = st.session_state.get('prj_name', None)
+    if prj_name is None:
+        return
+    with st.container(horizontal=True, horizontal_alignment="left"):
+        st.markdown(
+            f"# :blue-badge[:material/folder: Current Project] :orange-badge[{prj_name}]"
+        )
+
+def _show_curr_pipeline():
+    pipeline_name = st.session_state.get('sel_pipeline_label', None)
+    if pipeline_name is None:
+        return
+    with st.container(horizontal=True, horizontal_alignment="left"):
+        st.markdown(
+            f"# :violet-badge[:material/folder: Current Pipeline] :yellow-badge[{pipeline_name}]"
+        )
+
+
 def styled_text(text):
     return f'<span style="color:teal; font-weight:600; background-color: #f5f5fa; padding: 4px 4px; border-radius: 3px;">{text}</span>'
 
