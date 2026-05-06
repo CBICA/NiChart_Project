@@ -6,6 +6,7 @@ import streamlit as st
 import os
 import pandas as pd
 import gui.utils_varnames as utilvars
+import utils.utils_upload as utilup
 
 from utils.utils_logger import setup_logger
 logger = setup_logger()
@@ -506,6 +507,7 @@ def _panel_prepare_data():
             # with st.container(border=True, height=400):
             st.dataframe(df, use_container_width=True)
 
+
 # ---------------------------------------------------------------------------
 # Public entry point (called from nichart_results.py)
 # ---------------------------------------------------------------------------
@@ -525,10 +527,17 @@ def panel_prepare_data():
         st.warning('No project data dictionary or data directory configured.')
         return
 
-    tab_run, tab_set = st.tabs(
-        ['Quick Run', 'Data & Settings'],
+    tab_prj, tab_run, tab_set = st.tabs(
+        [":material/folder: Select Project",
+         ":material/folder: Quick Run",
+         ":material/folder: Data & Settings"
+        ],
         on_change='rerun',
     )
+
+    if tab_prj.open:
+        with tab_prj:
+            utilup.panel_project_folder()
 
     if tab_run.open:
         with tab_run:
