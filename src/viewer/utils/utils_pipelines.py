@@ -19,28 +19,6 @@ logger = setup_logger()
 
 #################################
 ## Function definitions
-def select_pipeline():
-    '''
-    Select a pipeline and show overview
-    '''
-    st.markdown("##### Select:")
-
-    sac.divider(key='_p2_div1')
-
-    pipelines = st.session_state.pipelines
-    pnames = pipelines.Name.tolist()
-
-    sel_opt = sac.chip(
-        pnames,
-        label='', index=0, align='left',
-        size='md', radius='md', multiple=False, color='cyan',
-        description='Select a pipeline'
-    )
-
-    st.session_state.sel_pipeline = sel_opt
-
-    show_description(sel_opt.lower())
-
 def show_description(pipeline) -> None:
     """
     Panel for viewing pipeline description
@@ -87,7 +65,7 @@ def select_pipeline(enabled_pnames):
             return
         sel_opt = sac.chip(
             enabled_pnames,
-            label='', index=0, align='left',
+            label='', index=None, align='left',
             size='md', radius='md', multiple=False, color='cyan',
             description='Select a pipeline'
         )

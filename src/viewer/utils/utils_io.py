@@ -292,7 +292,6 @@ def upload_single_file(out_dir, out_name, label) -> None:
                 return False
         return False
 
-
 def create_img_list(dtype: str, show_warning=False) -> None:
     '''
     Create a list of input images
@@ -352,7 +351,6 @@ def create_scan_csv() -> None:
     #df[['IsCN']] = 1
     
     #return df
-
 
 def normalize_demographics_df(
     df_raw: pd.DataFrame,
@@ -596,7 +594,6 @@ def load_nifti(default_modality='t1', forced_modality=None):
             f" No nifti image files detected yet. Try uploading some!", icon=":material/thumb_down:"
         )  
     
-    
 def load_subj_list():
     '''
     Panel for uploading subject list with variables required for processing
@@ -692,7 +689,6 @@ def load_subj_list():
         #if st.button('Delete demog file'):
             #remove_dir(out_dir)
 
-
 def load_user_csv():
     '''
     Panel for uploading data file
@@ -785,7 +781,7 @@ def preview_project_folder(project):
     Panel for viewing files in a project folder
     """
     with st.container(border=True):
-        in_dir = get_path_for_project(project)
+        in_dir = st.session_state.paths.get('prj_dir', None)
         utildv.data_overview(in_dir)
 
 def panel_select_existing_with_preview(out_dir):
@@ -915,7 +911,7 @@ def panel_select_project(out_dir, curr_project):
 class RequirementStatus:
     name: str
     status: str # 'green' | 'yellow' | 'red'
-    count: int # how many items available/satsified
+    count: int # how many items available/satisfied
     target: int # reference count for 'green'
     note: str = '' # short human message
 
@@ -931,7 +927,6 @@ def _issues_dataframe(issues) -> pd.DataFrame:
     df = pd.DataFrame([asdict(i) for i in issues])
     cols = [c for c in ["mrid", "row", "column", "value", "reason"] if c in df.columns]
     return df[cols]
-
 
 def count_csv_rows(csv_path: str) -> int:
     try:
