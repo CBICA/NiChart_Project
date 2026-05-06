@@ -1,27 +1,22 @@
-### DLMUSE: Robust Brain Segmentation in Seconds using Deep Learning
+### DLMUSE: Automated Brain Anatomy Segmentation
 
-A complete brain parcellation pipeline from T1 structural head MRI images into 145 [MUSE](https://pmc.ncbi.nlm.nih.gov/articles/PMC4806537/) ROIs.
+Automatically segment T1 structural head MRI scans into 145 MUSE ROIs [1] using a fully automated pipeline that combines DLICV and DLMUSE. 
 
-The pipeline offers easy ICV (Intra-Cranial Volume) mask extraction, and brain segmentation into ROIs by combining DLICV and [DLMUSE](https://pubmed.ncbi.nlm.nih.gov/40960397/) methods. Intermediate step results are saved for easy access to the user.
-
-Given an input MRI scan (T1 structural), NiChart_DLMUSE extracts the following:
-
-        1. ICV mask
-        2. Brain MUSE ROI segmentation
-        3. ROI volumes in a .csv format
-        4. Individual ROI mask (optionally).
+The pipeline first extracts the intra-cranial volume (ICV), and then segments it into regions of interest [2]. ROI volumes are computed both for individual ROIs derived directly from the segmentation mask, and for composite ROIs aggregated across multiple resolution levels.
 
 #### Input
 
 - T1-weighted scan (Nifti)
 
-
 #### Output
 
-- Segmentation labels (Nifti)
-- Volumes of ROIs (csv file)
+- ICV mask (Nifti)
+- ROI segmentation mask (Nifti)
+- ROI volumes (csv file)
 
+#### References
 
-#### Reference
+[1] Doshi J, et al. [MUSE: MUlti-atlas region Segmentation utilizing Ensembles of registration algorithms and parameters, and locally optimal atlas selection](https://pmc.ncbi.nlm.nih.gov/articles/PMC4806537). Neuroimage. 2016. 
 
-Bashyam VM et al., Alzheimer’s Disease Neuroimaging Initiative; iSTAGING Consortium. DLMUSE: Robust Brain Segmentation in Seconds Using Deep Learning. Radiol Artif Intell. 2025 Nov;7(6):e240299. doi: 10.1148/ryai.240299. PMID: 40960397.
+[2] Bashyam VM et al. [DLMUSE: Robust Brain Segmentation in Seconds Using Deep Learning](https://pubs.rsna.org/doi/10.1148/ryai.240299). Radiol Artif Intell. 2025.
+

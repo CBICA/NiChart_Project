@@ -19,24 +19,6 @@ logger = setup_logger()
 
 #################################
 ## Function definitions
-def show_description(pipeline) -> None:
-    """
-    Panel for viewing pipeline description
-    """
-    with st.container(border=True):
-        f_logo = os.path.join(
-            st.session_state.paths['resources'], 'pipelines', pipeline, f'logo_{pipeline}.png'
-        )
-        fdoc = os.path.join(
-            st.session_state.paths['resources'], 'pipelines', pipeline, f'overview_{pipeline}.md'
-        )
-        cols = st.columns([6, 1])
-        with cols[0]:
-            with open(fdoc, 'r') as f:
-                st.markdown(f.read())
-        with cols[1]:
-            st.image(f_logo)
-
 def select_pipeline():
     '''
     Select a pipeline and show overview
@@ -64,7 +46,7 @@ def show_description(pipeline) -> None:
     Panel for viewing pipeline description
     """
     pipeline_label = utiltl.get_pipeline_label_by_name(pipeline)
-    with st.container(border=True, height=300):
+    with st.container(border=True, height=500):
         if pipeline == '':
             st.markdown("No description exists for this pipeline.")
             return
@@ -77,19 +59,22 @@ def show_description(pipeline) -> None:
         fdoc = os.path.join(
             st.session_state.paths['resources'], 'pipelines', pipeline_label, f'overview_{pipeline_label}.md'
         )
-        cols = st.columns([6, 1])
-        with cols[0]:
-            with open(fdoc, 'r') as f:
-                st.markdown(f.read())
-        with cols[1]:
-            st.image(f_logo)
+        with open(fdoc, 'r') as f:
+            st.markdown(f.read())
+
+        # cols = st.columns([6, 1])
+        # with cols[0]:
+        #     with open(fdoc, 'r') as f:
+        #         st.markdown(f.read())
+        # with cols[1]:
+        #     st.image(f_logo)
 
 def select_pipeline(enabled_pnames):
     '''
     Select a pipeline and show overview
     '''
     st.markdown("##### Select:")
-    show_enabled_only = st.checkbox("Show only pipelines which match my available data", value=True)
+    show_enabled_only = st.checkbox("Filter by input data availability", value=True)
     sac.divider(key='_p2_div1')
 
     pipelines = st.session_state.pipelines
@@ -98,7 +83,7 @@ def select_pipeline(enabled_pnames):
     
     if show_enabled_only:
         if not enabled_pnames:
-            st.error(f"It looks like your data doesn't meet the requirements for any pipelines. Please browse the pipeline listing using the checkbox above, then go back and upload some data!")
+            st.error(f"Your data doesn't match any available pipelines. Use the checkbox above to review pipeline requirements, then upload the required files via the Data tab to continue..")
             return
         sel_opt = sac.chip(
             enabled_pnames,
@@ -241,17 +226,9 @@ def pipeline_runner_menu(enabled_pnames, sel=False):
                 alert_placeholder.error(f"Pipeline {pipeline_to_run} failed with errors. Expand the log boxes for details.")
                 process_status_box.update(state="error", label="Pipeline run failed.", expanded=False)
                 errbox.error(traceback.format_exc())
-        
-
-
-
     pass
 
 def panel_pipelines():
-
-    out_dir = os.path.join(
-        st.session_state.paths['out_dir'], st.session_state['prj_name']
-    )
 
     pipelines = st.session_state.pipelines
     pnames = pipelines.Name.tolist()
@@ -263,7 +240,9 @@ def panel_pipelines():
     for pname in pnames:
         if not utiltl.pipeline_is_enabled_by_name(pname):
             continue # Skip pipelines which are not enabled in frontend ("True") (list_pipelines.csv)
-        result, blockers = utiltl.check_requirements_met_nopanel(pname, st.session_state.do_harmonize)
+        result, blockers = utiltl.check_requirements_met_nopanel(
+            pname, st.session_state.do_harmonize
+        )
         if result:
             enabled_pnames.append(pname)
         else:
