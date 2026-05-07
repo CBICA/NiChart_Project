@@ -507,6 +507,85 @@ def upload_nifti(in_file):
     st.session_state.curr_scan = fname
     dialog_consolidate_nifti()
 
+def upload_csv(in_file):
+    '''
+    Copy zipped dicms to output folder
+    '''
+    logger.debug('    Function: Upload_dicom_zipped')
+
+    if in_file is None:
+        return
+    
+    tmp_dir = os.path.join(st.session_state.paths['prj_dir'], 'user_upload')
+    os.makedirs(tmp_dir, exist_ok=True)
+
+    fname = in_file.name
+
+    if not fname.endswith(('.csv')):
+        return
+
+    f_out = os.path.join(tmp_dir, fname)
+    if not os.path.exists(f_out):
+        with open(f_out, "wb") as f:
+            f.write(in_file.getbuffer())
+    st.toast(f'Uploaded file')
+
+    consolidate_user_csv(fname)
+
+def upload_dicom_zipped(in_file):
+    '''
+    Copy zipped dicms to output folder
+    '''
+    logger.debug('    Function: Upload_dicom_zipped')
+
+    if in_file is None:
+        return
+    
+    tmp_dir = os.path.join(st.session_state.paths['prj_dir'], 'user_upload')
+    os.makedirs(tmp_dir, exist_ok=True)
+
+    fname = in_file.name
+
+    if not fname.endswith(('.zip')):
+        return
+
+    f_out = os.path.join(tmp_dir, fname)
+    if not os.path.exists(f_out):
+        with open(f_out, "wb") as f:
+            f.write(in_file.getbuffer())
+    st.toast(f'Uploaded file')
+
+    d_out = os.path.join(tmp_dir, 'unzipped')
+    utilio.unzip_zip_file(f_out, d_out)
+    dialog_extract_dicoms(d_out, tmp_dir)
+    
+def upload_dicom_folder(in_files):
+    '''
+    Copy zipped dicms to output folder
+    '''
+    logger.debug('    Function: Upload_dicom_zipped')
+
+    if in_files is None or len(in_files)==0:
+        return
+    
+    tmp_dir = os.path.join(st.session_state.paths['prj_dir'], 'user_upload')
+    os.makedirs(tmp_dir, exist_ok=True)
+
+    for in_file in in_files:
+        fname = os.path.basename(in_file.name.replace("\\", "/"))
+        f_out = os.path.join(tmp_dir, fname)
+        if not os.path.exists(f_out):
+            with open(f_out, "wb") as f:
+                f.write(in_file.getbuffer())
+
+    st.toast(f'Uploaded files ...')
+
+    d_out = os.path.join(tmp_dir, 'extract')
+
+    dialog_extract_dicoms(tmp_dir, d_out)
+
+
+
 def upload_files_multi_subject(in_files):
     '''
     Copy files to output folder
@@ -522,7 +601,8 @@ def upload_files_multi_subject(in_files):
     os.makedirs(d_out, exist_ok=True)
 
     for in_file in in_files:
-        f_out = os.path.join(d_out, in_file.name)
+        fname = os.path.basename(in_file.name.replace("\\", "/"))
+        f_out = os.path.join(d_out, fname)
         if not os.path.exists(f_out):
             with open(f_out, "wb") as f:
                 f.write(in_file.getbuffer())
@@ -662,18 +742,12 @@ def panel_upload_single_subject():
     )
 
     ftype = None
-    flag_dcm = False
-    flag_zip = False
-    flag_folder = False
     accept_multiple_files = False
     if dtype == 'Nifti':
         ftype = ['.nii', '.nii.gz']
     elif dtype == 'Dicom (single .zip)':
         ftype = ['.zip']
-        flag_dcm = True
     elif dtype == 'Dicom (folder)':
-        flag_folder = True
-        flag_dcm = True
         accept_multiple_files = 'directory'
     elif dtype == '.csv':
         ftype = ['.csv']
@@ -690,6 +764,12 @@ def panel_upload_single_subject():
         if st.form_submit_button("Upload", use_container_width=False):
             if dtype == 'Nifti':
                 upload_nifti(f)
+            elif dtype == 'Dicom (single .zip)':
+                upload_dicom_zipped(f)
+            elif dtype == 'Dicom (folder)':
+                upload_dicom_folder(f)
+            elif dtype == '.csv':
+                upload_csv(f)
 
 
 def generate_template_csv():

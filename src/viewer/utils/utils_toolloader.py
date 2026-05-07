@@ -1145,8 +1145,8 @@ def run_pipeline(pipeline_id: str,
                                    params=resolved_params,
                                    status="failure")
             log.error(f"Pipeline step {tool_id} failed with status {result['status']}.")
-            print(f"Step {sid}, {tool_id} failed with status {result["status"]}, see error log:")
-            print(f"Error message: {result["error_message"]}")
+            print(f"Step {sid}, {tool_id} failed with status {result['status']}, see error log:")
+            print(f"Error message: {result['error_message']}")
             if process_progress_bar:
                 process_progress_bar.set_description(f"Running {tool_id}...")
             if process_status_box:
