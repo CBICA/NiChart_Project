@@ -319,11 +319,12 @@ def dialog_extract_dicoms(in_dir, out_dir):
         st.rerun()   
 
 def upload_files(in_files, out_dir):
+    '''
+    Copy uploaded files to target folder
+    '''
     logger.debug('    Function: Upload_files')
-
     if in_files is None or len(in_files)==0:
         return False
-    
     try:
         os.makedirs(out_dir, exist_ok=True)
         for in_file in in_files:
@@ -333,7 +334,6 @@ def upload_files(in_files, out_dir):
                 with open(f_out, "wb") as f:
                     f.write(in_file.getbuffer())
         return True    
-
     except:
         return False
 
@@ -393,7 +393,7 @@ def upload_dicom_zipped(in_file):
     dcm_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload', 'dicoms')
     stat_upload = upload_files([in_file], dcm_dir)
 
-    # Consolidate file
+    # Unzip file
     if stat_upload:
         # Unzip file
         utilio.unzip_zip_files(dcm_dir)
@@ -405,27 +405,113 @@ def upload_dicom_zipped(in_file):
     
 def upload_dicom_folder(in_files):
     '''
-    Copy zipped dicms to output folder
+    Copy dicoms folder to output folder
     '''
-    logger.debug('    Function: Upload_dicom_zipped')
+    logger.debug('    Function: Upload_dicom_folder')
 
-    if in_files is None or len(in_files)==0:
-        return
-    
-    up_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload', 'dicoms')
-    ni_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload')
+    # Upload files
+    dcm_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload', 'dicoms')
+    stat_upload = upload_files(in_files, dcm_dir)
 
-    os.makedirs(up_dir, exist_ok=True)
-
-    for in_file in in_files:
-        fname = os.path.basename(in_file.name.replace("\\", "/"))
-        f_out = os.path.join(up_dir, fname)
-        if not os.path.exists(f_out):
-            with open(f_out, "wb") as f:
-                f.write(in_file.getbuffer())
+    # Extract dicoms
+    if stat_upload:
+        nii_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload', 'nifti')
+        os.makedirs(nii_dir, exist_ok=True)
+        dialog_extract_dicoms(dcm_dir, nii_dir)
 
     dialog_extract_dicoms(up_dir, ni_dir)
-      
+
+def extract_bids(bids_dir):
+    '''
+    Function to move image data in BIDS format to NiChart input format
+    - T1 scans will be moved to os.path.join(st.session_state.paths['prj_dir'], 't1')
+    - FL scans will be moved to os.path.join(st.session_state.paths['prj_dir'], 'fl')
+    - image names will be {MRID}_{mod}.nii.gz
+    - participants list in BIDS folder will be used to create the file participants/participants.csv with columns MRID, Age, Sex
+    '''
+    prj_dir = st.session_state.paths['prj_dir']
+
+    # BIDS suffix → (output subdir, NiChart modality label)
+    MOD_MAP = {
+        'T1w':     ('t1', 'T1'),
+        'FLAIR':   ('fl', 'FL'),
+        'T2FLAIR': ('fl', 'FL'),
+    }
+
+    # ── 1. participants.tsv → participants/participants.csv ──────────────
+    parts_tsv = os.path.join(bids_dir, 'participants.tsv')
+    if os.path.isfile(parts_tsv):
+        df_tsv = pd.read_csv(parts_tsv, sep='\t')
+        col_map = {}
+        for col in df_tsv.columns:
+            lc = col.lower()
+            if lc == 'participant_id':
+                col_map[col] = 'MRID'
+            elif lc == 'age':
+                col_map[col] = 'Age'
+            elif lc in ('sex', 'gender'):
+                col_map[col] = 'Sex'
+        df_parts = df_tsv.rename(columns=col_map)
+        for req in ('MRID', 'Age', 'Sex'):
+            if req not in df_parts.columns:
+                df_parts[req] = None
+        out_parts_dir = os.path.join(prj_dir, 'participants')
+        os.makedirs(out_parts_dir, exist_ok=True)
+        df_parts[['MRID', 'Age', 'Sex']].to_csv(
+            os.path.join(out_parts_dir, 'participants.csv'), index=False
+        )
+        st.toast(f'Participants file created ({len(df_parts)} subjects)')
+    else:
+        st.toast('No participants.tsv found — participants.csv not created', icon='⚠️')
+
+    # ── 2. Walk sub- dirs and copy images ────────────────────────────────
+    n_copied = 0
+    for entry in sorted(os.scandir(bids_dir), key=lambda e: e.name):
+        if not entry.is_dir() or not entry.name.startswith('sub-'):
+            continue
+        mrid = entry.name  # e.g. 'sub-001'
+
+        # collect anat dirs — handle optional ses- layer
+        anat_dirs = []
+        for sub in os.scandir(entry.path):
+            if sub.is_dir():
+                if sub.name == 'anat':
+                    anat_dirs.append(sub.path)
+                elif sub.name.startswith('ses-'):
+                    ses_anat = os.path.join(sub.path, 'anat')
+                    if os.path.isdir(ses_anat):
+                        anat_dirs.append(ses_anat)
+
+        for anat_dir in anat_dirs:
+            for fname in sorted(os.listdir(anat_dir)):
+                if not (fname.endswith('.nii.gz') or fname.endswith('.nii')):
+                    continue
+                for bids_suffix, (mod_dir, mod_label) in MOD_MAP.items():
+                    if f'_{bids_suffix}.' in fname:
+                        src = os.path.join(anat_dir, fname)
+                        dst_dir = os.path.join(prj_dir, mod_dir)
+                        os.makedirs(dst_dir, exist_ok=True)
+                        dst = os.path.join(dst_dir, f'{mrid}_{mod_label}.nii.gz')
+                        shutil.copy2(src, dst)
+                        n_copied += 1
+                        break
+
+    st.toast(f'BIDS extraction complete — {n_copied} image(s) copied')
+
+def upload_bids_folder(in_files):
+    '''
+    Copy bids folder to output folder
+    '''
+    logger.debug('    Function: Upload_bids_folder')
+
+    # Upload files
+    bids_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload', 'bids')
+    stat_upload = upload_files(in_files, bids_dir)
+
+    # Extract BIDS
+    if stat_upload:
+        extract_bids(bids_dir)
+
 ##############################################################
 ## Main panels
 
@@ -494,7 +580,7 @@ def panel_upload_single_subject():
     # Select input file type
     dtype = st.radio(
         'Input data type:',
-        ['Nifti', 'Dicom (single .zip)', 'Dicom (folder)', '.csv'],
+        ['Nifti', 'Dicom (single .zip)', 'Dicom (folder)', '.csv', 'BIDS (folder)'],
         horizontal=True
     )
     ftype = None
@@ -507,6 +593,8 @@ def panel_upload_single_subject():
         accept_multiple_files = 'directory'
     elif dtype == '.csv':
         ftype = ['.csv']
+    elif dtype == 'BIDS (folder)':
+        accept_multiple_files = 'directory'
 
     # Upload file(s)
     with st.form(
@@ -527,6 +615,8 @@ def panel_upload_single_subject():
                 upload_dicom_folder(f)
             elif dtype == '.csv':
                 upload_csv(f)
+            elif dtype == 'BIDS (folder)':
+                upload_bids_folder(f)
 
 def generate_template_csv():
     mod_dirs = {mod: os.path.join(st.session_state.paths['project'], mod) for mod in ['t1', 't2', 'fl', 'dti', 'fmri']}
