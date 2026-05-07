@@ -946,7 +946,7 @@ def compute_counts(ctx: dict = {}) -> dict:
     """
     ctx can contain other contextual info, use as needed to pass things from ui
     """
-    sel_project = st.session_state.project
+    sel_project = st.session_state.prj_name
     project_path = get_path_for_project(sel_project)
     t1_path = os.path.join(project_path, "t1")
     flair_path = os.path.join(project_path, "fl")

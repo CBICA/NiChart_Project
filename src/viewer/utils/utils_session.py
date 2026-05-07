@@ -12,23 +12,12 @@ import utils.utils_rois as utilroi
 import utils.utils_processes as utilproc
 import utils.utils_cmaps as utilcmap
 import utils.utils_toolloader as utiltl
+import utils.utils_upload as utilup
 import os
 from PIL import Image
 import streamlit_antd_components as sac
 
 # from streamlit.web.server.websocket_headers import _get_websocket_headers
-
-def disp_selections():
-    '''
-    Show user selections
-    '''
-    #with st.sidebar:
-        #sac.divider(label='Selections', icon = 'person', align='center', color='gray')
-        #if st.session_state.prj_name is not None:
-            #st.markdown(f'`Project Name: {st.session_state.prj_name}`')
-        #if st.session_state.sel_pipeline is not None:
-            #st.markdown(f'`Pipeline: {st.session_state.sel_pipeline}`')
-    print('FIXME: This is bypassed for now ...')
     
 def disp_session_state():
     '''
@@ -88,7 +77,7 @@ def expand_values(raw_values: list, d_lists: dict) -> list:
             values.append(s)
     return values
 
-def init_project_folders():
+def init_folders():
     '''
     Set initial values for project folders
     '''
@@ -102,7 +91,6 @@ def init_project_folders():
         {"dname": dnames, "dtype": dtypes}
     )
     
-
 def init_scan():
     '''
     Set scan info
@@ -119,164 +107,121 @@ def init_participant():
         'sex' : None,
     }
 
-def init_session_vars():
+def init_user():
     '''
-    Set initial values for session variables
+    Set user info
     '''
-    
-    init_participant()
-    init_scan()
-    
-    ## Misc variables
-    st.session_state.mode = 'release'
-    st.session_state.mode = 'debug'
-
-    st.session_state.show_settings = False
-
-    st.session_state.layout_plots = 'Main'
-    st.session_state.layout_plots = 'Sidebar'
-
-    # Survey-checking code has fallbacks, don't set it.
-    st.session_state.skip_survey = True
-
-    st.session_state.workflow = None
-
-    st.session_state.sel_add_button = None
-
-    #st.session_state.prj_name = 'nichart_project'
-    st.session_state.prj_name = 'user_default'
-    st.session_state.project = 'user_default'
-    #st.session_state.project = 'nichart_project'
-
-    st.session_state.project_selected_explicitly = False
-    
-    st.session_state.sel_pipeline = None
-    st.session_state.pipeline_selected_explicitly = True
-
-    st.session_state.sel_mrid = None
-    st.session_state.sel_roi = None
-
-    st.session_state.pipeline_colors = [
-        'red', 'pink', 'grape', 'violet', 'indigo', 'blue',
-        'cyan', 'teal', 'green', 'lime', 'yellow', 'orange',
-    ]
-    st.session_state.pipeline_categories = utiltl.overall_pipeline_category_listing()
-    st.session_state.pipeline_requirements = utiltl.overall_pipeline_requirements_listing()
-    st.session_state.harmonizable_pipelines = st.session_state.pipeline_categories['harmonized']
-    st.session_state.do_harmonize = False
-    st.session_state.nifti_dicom_upload_mode = None
-
-    st.session_state.list_mods = ["T1", "T2", "FL", "DTI", "fMRI"]
-    st.session_state.params = {
-        'mean_icv': 1430000,  # Average ICV estimated from a large sample
-        'harm_min_samples': 30,
-    }
-    st.session_state.misc = {
-        'icon_thumb': {         # Icons for panels
-            False: ":material/thumb_down:",
-            True: ":material/thumb_up:",
-        }
-    }
-
-    ## Debug vars
-    st.session_state['debug'] = {
-        'flag_show': False,
-        'sel_vars': []
-    }
-
-    ## Page settings
-
-    # App icon image
-    st.session_state.nicon = Image.open("../resources/nichart1.png")
-
-    # Menu navigation
-    st.session_state.sel_menu = 'Home'
-
-    # User info
     st.session_state.user = {
         'setup_sel_item': None,
         'setup_project_update': False,
         'setup_project_mode': 0,
     }
 
-    ####################################
-    ### Settings specific to desktop/cloud
-    
-    # App type ('desktop' or 'cloud')
-    if os.getenv("NICHART_FORCE_CLOUD", "0") == "1":
-        st.session_state.forced_cloud = True
-        st.session_state.app_type = "cloud"
-    else:
-        st.session_state.forced_cloud = False
-        st.session_state.app_type = "desktop"
+def init_cloud():
+    '''
+    Set cloud vars
+    '''
+    app_type = "desktop"
+    has_cloud_session = False
+    forced_cloud = False
+    cloud_session_token = None    
+    cloud_user_id = None
+    cloud_user_email = None
 
-    st.session_state.app_config = {
+    if os.getenv("NICHART_FORCE_CLOUD", "0") == "1":
+        forced_cloud = True
+        app_type = "cloud"
+        cloud_session_token = process_session_token()
+        if cloud_session_token:
+            has_cloud_session = True
+            cloud_user_id = process_session_user_id()
+            cloud_user_email = process_session_user_email()    
+    
+    app_config = {
         "cloud": {"msg_infile": "Upload"},
         "desktop": {"msg_infile": "Select"},
     }
 
-    # Store user session info for later retrieval
-    if st.session_state.app_type == "cloud":
-        st.session_state.cloud_session_token = process_session_token()
-        if st.session_state.cloud_session_token:
-            st.session_state.has_cloud_session = True
-            st.session_state.cloud_user_id = process_session_user_id()
-        else:
-            st.session_state.has_cloud_session = False
-    else:
-        st.session_state.has_cloud_session = False
+    tdict = {
+        'app_type': app_type,
+        'has_cloud_session': has_cloud_session,
+        'forced_cloud': forced_cloud,
+        'cloud_session_token': cloud_session_token,
+        'cloud_user_id': cloud_user_id,
+        'cloud_user_email': cloud_user_email,
+        'app_config': app_config
+    }
+    st.session_state.update(tdict)
 
-def copy_test_folders():
+def init_pipelines():
     '''
-    Copy demo folders into user folders as needed
+    Set pipeline info
     '''
-    if st.session_state.has_cloud_session:
-        # Copy demo dirs to user folder (TODO: make this less hardcoded)
-        demo_dir_paths = [
-            os.path.join(
-                st.session_state.paths["root"],
-                "output_folder",
-                "NiChart_Demo1",
-            ),
-            os.path.join(
-                st.session_state.paths["root"],
-                "output_folder",
-                "NiChart_Demo2",
-            ),
-        ]
-        for demo in demo_dir_paths:
-            demo_name = os.path.basename(demo)
-            destination_path = os.path.join(
-                st.session_state.paths["out_dir"], demo_name
-            )
-            if os.path.exists(destination_path):
-                shutil.rmtree(destination_path)
-            shutil.copytree(demo, destination_path, dirs_exist_ok=True)
+    pipeline_cat = utiltl.overall_pipeline_category_listing()
+    pipeline_req = utiltl.overall_pipeline_requirements_listing()
+    pipeline_colors = [
+        'red', 'pink', 'grape', 'violet', 'indigo', 'blue',
+        'cyan', 'teal', 'green', 'lime', 'yellow', 'orange',
+    ]
+
+    tdict = {
+        'pipeline_categories': pipeline_cat,
+        'pipeline_requirements': pipeline_req,
+        'harmonizable_pipelines': pipeline_cat['harmonized'],
+        'pipeline_colors': pipeline_colors,
+        'sel_pipeline': None
+    }
+    st.session_state.update(tdict)
+
+def init_misc():
+    '''
+    Set initial values for session variables
+    '''
+    tdict = {
+        'mode': 'debug',
+        'show_settings': False,
+        'layout_plots': 'Sidebar',
+        'skip_survey': True,
+        'workflow': None,
+        'sel_add_button': None,
+        'sel_mrid': None,
+        'sel_roi': None,
+        'do_harmonize': False,
+        'nifti_dicom_upload_mode': None,
+        'list_mods': ["T1", "T2", "FL", "DTI", "fMRI"],
+        'params': {
+            'mean_icv': 1430000,  # Average ICV estimated from a large sample
+            'harm_min_samples': 30,
+        },
+        'misc': {
+            'icon_thumb': {         # Icons for panels
+                False: ":material/thumb_down:",
+                True: ":material/thumb_up:",
+            },
+        },
+        'debug': {
+            'flag_show': False,
+            'sel_vars': [],
+        },
+        'nicon': Image.open("../resources/nichart1.png"),
+        'sel_menu': 'Home',
+
+    }
+    st.session_state.update(tdict)
 
 def init_paths():
     '''
     Set paths to pre-defined folders
     '''
-    # Resources
+    # Set paths for resources
     p_root = os.path.dirname(os.path.dirname(os.getcwd()))
+    p_resources = os.path.join(p_root, "resources")
+    p_centiles = os.path.join(p_resources, "reference_data", "centiles")
+    p_sample = os.path.join(p_root, "sample_datasets", "demo_dataset")    
+    p_proc_def = os.path.join(p_resources, "process_definitions")
     p_init = p_root
-    p_resources = os.path.join(
-        p_root, "resources"
-    )
-    p_centiles = os.path.join(
-        p_resources, "reference_data", "centiles"
-    )
-    #p_sample = os.path.join(
-        #p_root, "sample_datasets", "demo_dataset_IXI"
-    #)    
-    p_sample = os.path.join(
-        p_root, "sample_datasets", "demo_dataset"
-    )    
-    p_proc_def = os.path.join(
-        p_resources, "process_definitions"
-    )
     
-    # Output
+    # Set path for user output folder
     user_id = ''
     if st.session_state.has_cloud_session:
         user_id = st.session_state.cloud_user_id
@@ -284,19 +229,9 @@ def init_paths():
             "/fsx/fsx/", user_id
         )
     else:
-        p_out = os.path.join(
-            p_root, 'output_folder', user_id
-        )
-    if not os.path.exists(p_out):
-        os.makedirs(p_out)
+        p_out = os.path.join(p_root, 'output_folder', user_id)
+    os.makedirs(p_out, exist_ok=True)
     
-    # Paths specific to project
-    p_prj = os.path.join(
-        p_out, st.session_state.prj_name
-    )
-    if not os.path.exists(p_prj):
-        os.makedirs(p_prj)
-
     st.session_state.paths = {
         "root": p_root,
         "init": p_init,
@@ -307,10 +242,6 @@ def init_paths():
         "file_search_dir": "",
         "out_dir": p_out,
         "host_out_dir": None,
-        "prj_dir": p_prj,
-        "project": p_prj,
-        'target': None,
-        "curr_data": p_prj
     }
 
     # Host-container dir mapping which can be useful for local nested containers
@@ -337,9 +268,9 @@ def init_paths():
     st.session_state.paths["file_search_dir"] = st.session_state.paths["init"]
     ############    
 
-def reset_dicoms() -> None:
+def init_dicoms() -> None:
     '''
-    Reset dicom variables
+    Init dicom variables
     '''
     st.session_state.dicoms = {
         'list_series': None,
@@ -455,80 +386,31 @@ def init_dicts() -> None:
         data = yaml.safe_load(file)
     st.session_state.dicts['var_groups'] = data
 
-
-# def init_muse_roi_def() -> None:
-#     # Paths to roi lists
-#     muse = {
-#         'path': os.path.join(st.session_state.paths['resources'], 'lists', 'MUSE'),
-#         'list_rois' : 'MUSE_listROIs.csv',
-#         'list_derived' : 'MUSE_mapping_derivedROIs.csv',
-#         'list_groups' : 'MUSE_ROI_Groups_v1.csv'
-#     }
-    
-#     # Read roi lists to dictionaries
-#     df_tmp = pd.read_csv(
-#         os.path.join(muse['path'], muse['list_rois']),
-#     )
-#     dict1 = dict(zip(df_tmp["Index"].astype(str), df_tmp["Name"].astype(str)))
-#     dict2 = dict(zip(df_tmp["Name"].astype(str), df_tmp["Index"].astype(str)))
-#     dict3 = utilroi.muse_derived_to_dict(
-#         os.path.join(muse['path'], muse['list_derived'])
-#     )
-#     df_derived = utilroi.muse_derived_to_df(
-#         os.path.join(muse['path'], muse['list_derived'])
-#     )
-#     df_groups = utilroi.muse_roi_groups_to_df(
-#         os.path.join(muse['path'], muse['list_groups'])
-#     )
-#     muse['dict_roi'] = dict1
-#     muse['dict_roi_inv'] = dict2
-#     muse['dict_derived'] = dict3
-#     muse['df_derived'] = df_derived
-#     muse['df_groups'] = df_groups
-    
-#     # Read MUSE ROI lists
-#     st.session_state.rois = {
-#         'muse' : muse
-#     }
-
-def update_project(sel_project) -> None:
+def init_project(sel_project) -> None:
     """
-    Updates when project changes
+    Updates when project folder changes
     """
     if sel_project is None:
         return
 
-    if sel_project == st.session_state.prj_name:
+    # Update project folder only if user selects a new one
+    if sel_project == st.session_state.get('prj_name', None):
         return
 
-    # Create project dir
-    p_prj = os.path.join(
-        st.session_state.paths['out_dir'], sel_project
-    )
+    # Create project folder
+    utilup.create_project_folder(sel_project)
 
-    try:
-        if not os.path.exists(p_prj):
-            os.makedirs(p_prj)
-            st.toast(f'Created folder {sel_project}')
-            time.sleep(1)
-    except:
-        st.error(f'Could not create project folder: {p_prj}')
-        return
-
-    # Set project name
+    # Set session state variables
+    p_prj = os.path.join(st.session_state.paths['out_dir'], sel_project)
     st.session_state.prj_name = sel_project
     st.session_state.paths['prj_dir'] = p_prj
+    st.session_state.paths['curr_data'] = p_prj
     
-    reset_dicoms()
+    init_dicoms()
     init_scan()
     init_participant()
     
-    st.toast(f'Updated project folder {sel_project}')
-    st.session_state.project = sel_project
-    st.session_state.project_selected_explicitly = True
-    st.session_state.paths['project'] = p_prj
-
-    st.session_state.paths['curr_data'] = st.session_state.paths['prj_dir']
+    st.toast(f'Project folder ready: {sel_project}')
 
 # Function to parse AWS login (if available)
 def process_session_token() -> Any:
@@ -559,71 +441,26 @@ def process_session_user_email() -> Any:
     return decoded_token['email']
 
 def init_session_state() -> None:
-    # Initiate Session State Values
+    '''
+    Initiate Session State Values
+    '''
     if "instantiated" not in st.session_state:
         
-        # Set initial session variables
-        init_session_vars()
-
-        # Set output files
-        init_project_folders()
-
-        ####################################
-        # Settings specific to desktop/cloud
-        
-        # App type ('desktop' or 'cloud')
-        if os.getenv("NICHART_FORCE_CLOUD", "0") == "1":
-            st.session_state.forced_cloud = True
-            st.session_state.app_type = "cloud"
-        else:
-            st.session_state.forced_cloud = False
-            st.session_state.app_type = "desktop"
-
-        st.session_state.app_config = {
-            "cloud": {"msg_infile": "Upload"},
-            "desktop": {"msg_infile": "Select"},
-        }
-
-        # Store user session info for later retrieval
-        if st.session_state.app_type == "cloud":
-            st.session_state.cloud_session_token = process_session_token()
-            if st.session_state.cloud_session_token:
-                st.session_state.has_cloud_session = True
-                st.session_state.cloud_user_id = process_session_user_id()
-                st.session_state.cloud_user_email = process_session_user_email()
-            else:
-                st.session_state.has_cloud_session = False
-        else:
-            st.session_state.has_cloud_session = False
-
-        ####################################
-
-        # Initialize paths
+        init_cloud()
         init_paths()
-
-        # Initialize dicts
+        init_project('user_default')
+        init_pipelines()
+        init_misc()
+        init_folders()
+        init_participant()
+        init_scan()
+        init_user()
         init_dicts()
-
-        # Initialize variable groups
         init_var_groups()
-
-        # FIXME : set init folder to test folder outside repo
-        st.session_state.paths["init"] = os.path.join(
-            st.session_state.paths["root"], "test_data"
-        )
-        st.session_state.paths["file_search_dir"] = st.session_state.paths["init"]
-
-        # Update project variables
-        update_project(st.session_state.prj_name)
-
-        # Copy test data to user folder
-        copy_test_folders
-
-        # Init variables for different pages 
         init_pipeline_definitions()
         init_reference_data()
-        reset_dicoms()
-        
+        init_dicoms()
+
         # Set flag
         st.session_state.instantiated = True
 

@@ -119,7 +119,57 @@ def my_help():
                 """
             )
 
+def copy_test_folders():
+    '''
+    Copy demo folders into user folders as needed
+    '''
+    if st.session_state.has_cloud_session:
+        # Copy demo dirs to user folder (TODO: make this less hardcoded)
+        demo_dir_paths = [
+            os.path.join(
+                st.session_state.paths["root"],
+                "output_folder",
+                "NiChart_Demo1",
+            ),
+            os.path.join(
+                st.session_state.paths["root"],
+                "output_folder",
+                "NiChart_Demo2",
+            ),
+        ]
+        for demo in demo_dir_paths:
+            demo_name = os.path.basename(demo)
+            destination_path = os.path.join(
+                st.session_state.paths["out_dir"], demo_name
+            )
+            if os.path.exists(destination_path):
+                shutil.rmtree(destination_path)
+            shutil.copytree(demo, destination_path, dirs_exist_ok=True)
 
+def create_project_folder(sel_project) -> None:
+    '''
+    Creates a new project folder
+    '''
+    if sel_project is None:
+        return False
+
+    try:
+        p_prj = os.path.join(st.session_state.paths['out_dir'], sel_project)
+        os.makedirs(p_prj, exist_ok=True)
+        p_tmp = os.path.join(p_prj, '_staging')
+        os.makedirs(p_tmp, exist_ok=True)
+        p_tmp = os.path.join(p_prj, '_upload')
+        os.makedirs(p_tmp, exist_ok=True)
+        p_tmp = os.path.join(p_prj, 'plots')
+        os.makedirs(p_tmp, exist_ok=True)
+        p_tmp = os.path.join(p_prj, 'reports')
+        os.makedirs(p_tmp, exist_ok=True)
+        return True
+
+    except:
+        st.error(f'Could not create project folder: {p_prj}')
+        return False
+    
 @st.dialog("Participant Information", width='medium')
 def edit_participants(in_file):
     if not os.path.exists(in_file):
@@ -662,7 +712,7 @@ def panel_project_folder():
             if action == "Create new project":
                 sel_prj = st.text_input("Project name:", placeholder="my_study", label_visibility='collapsed')
                 if st.button("Create") and sel_prj:
-                    utilss.update_project(sel_prj)
+                    utilss.init_project(sel_prj)
 
             elif action == "Switch to existing project":
                 list_projects = utilio.get_subfolders(st.session_state.paths['out_dir'])
@@ -673,7 +723,7 @@ def panel_project_folder():
                     )
                     if sel_prj is not None:
                         if st.button('Select'):
-                            utilss.update_project(sel_prj)
+                            utilss.init_project(sel_prj)
                             st.rerun()
                 else:
                     st.caption("No existing projects found.")
@@ -684,7 +734,9 @@ def panel_project_folder():
                 if st.button("Delete", disabled=not flag_confirm):
                     utilio.clear_folder(st.session_state.paths['prj_dir'])
                     st.toast(f"Files in '{st.session_state.prj_name}' deleted.")
-                    utilss.update_project(st.session_state.prj_name)
+                    prj_name = st.session_state.prj_name
+                    st.session_state.prj_name = None
+                    utilss.init_project(prj_name)
                     st.rerun()
 
 def panel_upload_single_subject_v2():
