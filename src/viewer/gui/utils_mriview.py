@@ -425,3 +425,18 @@ def panel_view_map():
                         show_img_slices(
                             img_masked, ind_view, img_bounds[ind_view, :], tmp_orient
                         )
+
+def panel_view_mri_simple(fname):
+    '''
+    Panel for viewing a nifti scan
+    '''
+    try:
+        # Prepare and show axial slice of the image
+        img = prep_image(fname)
+        img_bounds = detect_img_bounds(img)
+        ind_view = img_views.index('axial')
+        size_auto = True
+        show_img_slices(img, ind_view, img_bounds[ind_view, :], 'axial', 500)
+    except:
+        st.warning(":material/thumb_down: Could not open image")
+
