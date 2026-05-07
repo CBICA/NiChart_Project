@@ -622,36 +622,35 @@ def panel_project_folder():
                         utilmisc.show_temp_message(
                             f'Project folder ready: {sel_prj}', 'success', 2
                         )
+                        st.rerun()
 
             elif action == "Switch to existing project":
                 list_projects = utilio.get_subfolders(st.session_state.paths['out_dir'])
-                if list_projects:
-                    sel_prj = sac.chip(
-                        list_projects, label='', index=None, align='left', size='sm', radius='sm',
-                        multiple=False, color='cyan'
-                    )
-                    if sel_prj is not None:
-                        if st.button('Select'):
-                            if utilss.init_project(sel_prj):
-                                utilmisc.show_temp_message(
-                                    f'Project folder ready: {sel_prj}', 'success', 2
-                                )
-                                st.rerun()
-
-                else:
-                    st.caption("No existing projects found.")
+                if not list_projects:
+                    return
+                sel_prj = sac.chip(
+                    list_projects, label='', index=None, align='left', size='sm', radius='sm',
+                    multiple=False, color='cyan'
+                )
+                if sel_prj is not None:
+                    if st.button('Select'):
+                        if utilss.init_project(sel_prj):
+                            utilmisc.show_temp_message(
+                                f'Project folder ready: {sel_prj}', 'success', 2
+                            )
+                            st.rerun()
 
             elif action == "Reset project folder":
                 st.warning(":material/warning: This will delete all files in the project folder. This cannot be undone.")
                 flag_confirm = st.checkbox("I understand and want to delete all files")
                 if st.button("Delete", disabled=not flag_confirm):
                     utilio.clear_folder(st.session_state.paths['prj_dir'])
-                    st.toast(f"Files in '{st.session_state.prj_name}' deleted.")
                     prj_name = st.session_state.prj_name
                     st.session_state.prj_name = None
                     utilss.init_project(prj_name)
-                    st.success('The project folder has been reset')
-                    time.sleep(0.6)
+                    utilmisc.show_temp_message(
+                        'The project folder has been reset', 'success', 2
+                    )
                     st.rerun()
 
 def panel_upload_single_subject():
