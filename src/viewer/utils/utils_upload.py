@@ -7,6 +7,7 @@ import utils.utils_io as utilio
 import gui.utils_mriview as utilmri
 
 import os
+import time
 import pandas as pd
 import numpy as np
 import zipfile
@@ -218,6 +219,7 @@ def edit_participants(in_file):
         if st.button('Save'):
             df_user.to_csv(in_file, index=False)
             st.success(f'Updated participants file: {fname}')
+            time.sleep(0.4)
             st.rerun()
 
 def update_participant_csv():
@@ -237,7 +239,7 @@ def consolidate_user_csv(fname):
     
     if fname is None:
         return False
-    in_dir = os.path.join(st.session_state.paths['prj_dir'], 'user_upload')
+    in_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload')
     in_fpath = os.path.join(in_dir, fname)
 
     with st.form(key='_form_csv_info'):
@@ -272,6 +274,9 @@ def consolidate_user_csv(fname):
         st.rerun()   
 
 def consolidate_nifti():
+    '''
+    Set meta data for uploaded image
+    '''
     logger.debug(f'    Function: consolidate_nifti')
     
     # Get full name for the current file
@@ -279,7 +284,8 @@ def consolidate_nifti():
     in_fname = st.session_state.curr_scan
     if in_fname is None:
         return False
-    in_dir = os.path.join(st.session_state.paths['prj_dir'], 'user_upload')
+    
+    in_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload')
     in_fpath = os.path.join(in_dir, in_fname)
 
     logger.debug(f'      Input: {in_fpath}')
@@ -309,7 +315,6 @@ def consolidate_nifti():
         # Update participant info
         st.session_state.participant = {'mrid': mrid, 'age': age, 'sex': sex}
         update_participant_csv()
-        st.success('Updated participant info!')
 
         # Move scan to consolidated path
         out_dir = os.path.join(st.session_state.paths['prj_dir'], mod.lower())
@@ -326,9 +331,14 @@ def consolidate_nifti():
 
 @st.dialog("Scan/Participant Info", width='medium')
 def dialog_consolidate_nifti():
+    '''
+    Dialog to save uploaded file as a single nifti image file
+    '''
     logger.debug('    Function: dialog_consolidate_nifti')
+    
     # Detect mrid
     mrid = st.session_state.participant['mrid']
+
     if mrid is None:
         mrid = st.session_state.curr_scan
         for suffix in ['.nii.gz', '.nii', '_T1', '_t1', '_FL', '_fl']:
@@ -336,7 +346,8 @@ def dialog_consolidate_nifti():
         st.session_state.participant['mrid'] = mrid
     
     if consolidate_nifti():
-        st.toast(f'Nifti file consolidated ...')
+        st.success(f'Nifti file uploaded ...')
+        time.sleep(0.6)
         st.rerun()   
 
 def detect_common_suffix(files):
@@ -348,7 +359,7 @@ def consolidate_nifti_multi():
     logger.debug(f'    Function: consolidate_nifti')
     
     # Detect common suffix
-    in_dir = os.path.join(st.session_state.paths['prj_dir'], 'user_upload', 'nifti')
+    in_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload', 'nifti')
     nifti_files = [
         f for f in os.listdir(in_dir) if f.endswith('.nii') or f.endswith('.nii.gz')
     ]
@@ -448,7 +459,7 @@ def upload_file_single_subject(in_file):
     if in_file is None:
         return
     
-    tmp_dir = os.path.join(st.session_state.paths['prj_dir'], 'user_upload')
+    tmp_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload')
     os.makedirs(tmp_dir, exist_ok=True)
 
     fname = in_file.name
@@ -484,7 +495,7 @@ def upload_file_multi_subject(in_file):
         time.sleep(3)
         return
     
-    tmp_dir = os.path.join(st.session_state.paths['prj_dir'], 'user_upload')
+    tmp_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload')
     os.makedirs(tmp_dir, exist_ok=True)
 
     fname = in_file.name
@@ -516,7 +527,7 @@ def upload_files_single_subject(in_files):
     if len(in_files) == 0:
         return
     
-    tmp_dir = os.path.join(st.session_state.paths['prj_dir'], 'user_upload')
+    tmp_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload')
     d_out = os.path.join(tmp_dir, 'dicoms')
     
     os.makedirs(d_out, exist_ok=True)
@@ -538,21 +549,19 @@ def upload_nifti(in_file):
     logger.debug('    Function: Upload_nifti')
 
     if in_file is None:
-        return
+        return False
     
-    tmp_dir = os.path.join(st.session_state.paths['prj_dir'], 'user_upload')
-    os.makedirs(tmp_dir, exist_ok=True)
+    up_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload')
+    os.makedirs(up_dir, exist_ok=True)
 
     fname = in_file.name
-
     if not fname.endswith(('.nii.gz', '.nii')):
-        return
+        return False
 
-    f_out = os.path.join(tmp_dir, fname)
+    f_out = os.path.join(up_dir, fname)
     if not os.path.exists(f_out):
         with open(f_out, "wb") as f:
             f.write(in_file.getbuffer())
-    st.toast(f'Uploaded file')
 
     st.session_state.curr_scan = fname
     dialog_consolidate_nifti()
@@ -566,7 +575,7 @@ def upload_csv(in_file):
     if in_file is None:
         return
     
-    tmp_dir = os.path.join(st.session_state.paths['prj_dir'], 'user_upload')
+    tmp_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload')
     os.makedirs(tmp_dir, exist_ok=True)
 
     fname = in_file.name
@@ -591,7 +600,7 @@ def upload_dicom_zipped(in_file):
     if in_file is None:
         return
     
-    tmp_dir = os.path.join(st.session_state.paths['prj_dir'], 'user_upload')
+    tmp_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload')
     os.makedirs(tmp_dir, exist_ok=True)
 
     fname = in_file.name
@@ -618,7 +627,7 @@ def upload_dicom_folder(in_files):
     if in_files is None or len(in_files)==0:
         return
     
-    tmp_dir = os.path.join(st.session_state.paths['prj_dir'], 'user_upload')
+    tmp_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload')
     os.makedirs(tmp_dir, exist_ok=True)
 
     for in_file in in_files:
@@ -645,7 +654,7 @@ def upload_files_multi_subject(in_files):
     if len(in_files) == 0:
         return
     
-    tmp_dir = os.path.join(st.session_state.paths['prj_dir'], 'user_upload')
+    tmp_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload')
     d_out = os.path.join(tmp_dir, 'nifti')
     
     os.makedirs(d_out, exist_ok=True)
@@ -737,47 +746,9 @@ def panel_project_folder():
                     prj_name = st.session_state.prj_name
                     st.session_state.prj_name = None
                     utilss.init_project(prj_name)
+                    st.success('The project folder has been reset')
+                    time.sleep(0.4)
                     st.rerun()
-
-def panel_upload_single_subject_v2():
-    '''
-    Upload user data to target folder
-    '''
-    logger.debug('    Function: panel_upload_single_subject')
-
-    utilmisc._show_curr_prj()
-
-    tab1, tab2, tab3, tab4 = st.tabs(
-        ["NIfTI", "DICOM (single .zip)", "DICOM (multiple files)", "CSV"]
-    )
-
-    with tab1:
-        with st.form(key='form_single_nifti', clear_on_submit=True, border=False):
-            f = st.file_uploader(
-                "Upload a .nii or .nii.gz file",
-                label_visibility='collapsed'
-            )
-            if st.form_submit_button("Upload", use_container_width=False):
-                upload_file_single_subject(f)
-
-    with tab2:
-        with st.form(key='form_single_dcm', clear_on_submit=True, border=False):
-            files = st.file_uploader(
-                "Upload .dcm files",
-                accept_multiple_files=True,
-                label_visibility='collapsed'
-            )
-            if st.form_submit_button("Upload", use_container_width=False):
-                upload_files_single_subject(files)
-
-    with tab3:
-        with st.form(key='form_single_csv', clear_on_submit=True, border=False):
-            f = st.file_uploader(
-                "Upload a .csv file",
-                label_visibility='collapsed'
-            )
-            if st.form_submit_button("Upload", use_container_width=False):
-                upload_file_single_subject(f)
 
 def panel_upload_single_subject():
     '''
@@ -908,7 +879,7 @@ def panel_view_files():
                 st.session_state.out_dirs,
                 None,
                 3,
-                ['user_upload']
+                ['_upload']
             )
             selected = sac.tree(
                 items=tree_items,
