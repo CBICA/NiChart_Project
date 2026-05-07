@@ -3,9 +3,22 @@ from typing import Any, Optional
 import pandas as pd
 import numpy as np
 import streamlit as st
+import time
 
 ###################################################################
 # Misc utils
+
+def show_temp_message(message, type="success", duration=2):
+    placeholder = st.empty()
+    
+    match type:
+        case "success": placeholder.success(message)
+        case "error": placeholder.error(message)
+        case "warning": placeholder.warning(message)
+        case "info": placeholder.info(message)
+    
+    time.sleep(duration)
+    placeholder.empty()
 
 def _show_curr_prj():
     prj_name = st.session_state.get('prj_name', None)

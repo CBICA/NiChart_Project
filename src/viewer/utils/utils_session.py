@@ -254,10 +254,11 @@ def init_paths():
     # List of output folders
     st.session_state.out_dirs = [
         'participants',
-        'dicoms',
         't1', 't2', 'fl', 'fmri', 'dti',
-        'dlmuse_seg', 'dlmuse_vol',
-        'dlwmls', 'spare',
+        'dlmuse-seg', 'dlmuse-vol',
+        'dlwmls-seg', 'dlwmls-vol',
+        'ml-biomarkers', 'ravens', 'opnmf',
+        'plot_data', 'reports'
     ]
     
     ############
@@ -391,26 +392,30 @@ def init_project(sel_project) -> None:
     Updates when project folder changes
     """
     if sel_project is None:
-        return
+        return False
 
     # Update project folder only if user selects a new one
     if sel_project == st.session_state.get('prj_name', None):
-        return
+        return False
 
-    # Create project folder
-    utilup.create_project_folder(sel_project)
+    try:
+        # Create project folder
+        utilup.create_project_folder(sel_project)
 
-    # Set session state variables
-    p_prj = os.path.join(st.session_state.paths['out_dir'], sel_project)
-    st.session_state.prj_name = sel_project
-    st.session_state.paths['prj_dir'] = p_prj
-    st.session_state.paths['curr_data'] = p_prj
-    
-    init_dicoms()
-    init_scan()
-    init_participant()
-    
-    st.toast(f'Project folder ready: {sel_project}')
+        # Set session state variables
+        p_prj = os.path.join(st.session_state.paths['out_dir'], sel_project)
+        st.session_state.prj_name = sel_project
+        st.session_state.paths['prj_dir'] = p_prj
+        st.session_state.paths['curr_data'] = p_prj
+        
+        init_dicoms()
+        init_scan()
+        init_participant()
+
+        return True
+
+    except:
+        return False
 
 # Function to parse AWS login (if available)
 def process_session_token() -> Any:

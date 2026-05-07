@@ -406,9 +406,9 @@ def _run_data_preparation(available, data_dir):
         # ---- Step 6: Save plot data ----
         st.write(':material/merge: Saving plot data...')
         try:
-            out_dir = os.path.join(data_dir, 'plots')
+            out_dir = os.path.join(data_dir, 'plot_data')
             os.makedirs(out_dir, exist_ok=True)
-            df.to_csv(os.path.join(out_dir, 'plot_data.csv'), index=False)
+            df.to_csv(os.path.join(out_dir, 'nichart_results.csv'), index=False)
             pdict['data']['df_user'] = df
             st.write(f'  → Plot data saved with {len(df):,} rows · {len(df.columns)} columns.')
             time.sleep(step_sleep_short)

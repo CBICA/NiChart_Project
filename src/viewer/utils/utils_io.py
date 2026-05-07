@@ -631,7 +631,10 @@ def load_subj_list():
                             #'FMRI': mod_dirs['fmri'],
                             #}
             #nifti_parser = NiftiMRIDParser()
-            #heuristic_df = nifti_parser.create_master_csv(dir_dict, os.path.join(st.session_state.paths['project'], 'inferred_data_paths.csv'))
+            # heuristic_df = nifti_parser.create_master_csv(
+            #     dir_dict, 
+            #     os.path.join(st.session_state.paths['project'], '_working', 'inferred_data_paths.csv')
+            # )
             #heuristic_df = heuristic_df.drop(df.filter(regex='_path$').columns, axis=1)
             #corrected_df, issues = normalize_demographics_df(df_user, heuristic_df)
             #corrected_df = corrected_df.sort_values(by='MRID')

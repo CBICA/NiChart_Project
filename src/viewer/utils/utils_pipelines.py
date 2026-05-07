@@ -205,7 +205,9 @@ def pipeline_runner_menu(enabled_pnames):
                     process_progress_bar=process_progress_bar,
                     process_status_box=process_status_box,
                     log=log,
-                    metadata_location=os.path.join(st.session_state.paths["project"], "metadata.json"),
+                    metadata_location = os.path.join(
+                        st.session_state.paths["project"], '_working', "metadata.json"
+                    ),
                     reuse_cached_steps=skip_steps_when_possible,
                     local_path_remapping=local_path_remapping
                 )

@@ -5,13 +5,13 @@ import utils.utils_data_view as utildv
 import utils.utils_misc as utilmisc
 import utils.utils_io as utilio
 import gui.utils_mriview as utilmri
+import streamlit_antd_components as sac
 
 import os
 import time
 import pandas as pd
 import numpy as np
 import zipfile
-import streamlit_antd_components as sac
 from NiChart_common_utils.nifti_parser import NiftiMRIDParser
 import shutil
 import time
@@ -120,6 +120,35 @@ def my_help():
                 """
             )
 
+def view_mri(fname):
+    """
+    FIXME : move to mri utils
+    Panel for viewing a nifti scan
+    """
+    with st.spinner("Wait for it..."):
+        try:
+            # Prepare final 3d matrix to display
+            img = utilmri.prep_image(fname)
+
+            # Detect mask bounds and center in each view
+            img_bounds = utilmri.detect_img_bounds(img)
+
+            # Show images
+            ind_view = utilmri.img_views.index('axial')
+            size_auto = True
+            utilmri.show_img_slices(
+                img,
+                ind_view,
+                img_bounds[ind_view, :],
+                'axial',
+                500
+            )
+        except:
+            st.warning(
+                ":material/thumb_down: Image parsing failed. Please confirm that the image file represents a 3D volume using an external tool."
+            )
+
+
 def copy_test_folders():
     '''
     Copy demo folders into user folders as needed
@@ -157,11 +186,9 @@ def create_project_folder(sel_project) -> None:
     try:
         p_prj = os.path.join(st.session_state.paths['out_dir'], sel_project)
         os.makedirs(p_prj, exist_ok=True)
-        p_tmp = os.path.join(p_prj, '_staging')
-        os.makedirs(p_tmp, exist_ok=True)
         p_tmp = os.path.join(p_prj, '_upload')
         os.makedirs(p_tmp, exist_ok=True)
-        p_tmp = os.path.join(p_prj, 'plots')
+        p_tmp = os.path.join(p_prj, 'plot_data')
         os.makedirs(p_tmp, exist_ok=True)
         p_tmp = os.path.join(p_prj, 'reports')
         os.makedirs(p_tmp, exist_ok=True)
@@ -219,7 +246,7 @@ def edit_participants(in_file):
         if st.button('Save'):
             df_user.to_csv(in_file, index=False)
             st.success(f'Updated participants file: {fname}')
-            time.sleep(0.4)
+            time.sleep(0.6)
             st.rerun()
 
 def update_participant_csv():
@@ -242,36 +269,19 @@ def consolidate_user_csv(fname):
     in_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload')
     in_fpath = os.path.join(in_dir, fname)
 
-    with st.form(key='_form_csv_info'):
-        sel_opt = st.selectbox('Use the file as participants file:', ['Yes', 'No'])
-
-        submitted = st.form_submit_button("Submit")
-        flag_submit = False
-        if submitted:
-            flag_submit = True
+    # Move csv to consolidated path
+    out_dir = os.path.join(st.session_state.paths['prj_dir'], 'participants')
+    out_fpath = os.path.join(out_dir, 'participants.csv')
+    os.makedirs(out_dir, exist_ok=True)
+    if os.path.exists(out_fpath):
+        st.warning('CSV file exists, will be overwritten!')
+    shutil.move(in_fpath, out_fpath)        
         
-    if flag_submit:
-        if sel_opt == 'Yes':
-            # Move csv to consolidated path
-            out_dir = os.path.join(st.session_state.paths['prj_dir'], 'participants')
-            out_fpath = os.path.join(out_dir, 'participants.csv')
-            os.makedirs(out_dir, exist_ok=True)
-            if os.path.exists(out_fpath):
-                st.warning('CSV file exists, will be overwritten!')
-            shutil.move(in_fpath, out_fpath)        
-            
-        else:
-            # Move csv to consolidated path
-            out_dir = os.path.join(st.session_state.paths['prj_dir'], 'user_data')
-            out_fpath = os.path.join(out_dir, fname)
-            os.makedirs(out_dir, exist_ok=True)
-            if os.path.exists(out_fpath):
-                st.warning('CSV file exists, will be overwritten!')
-            shutil.move(in_fpath, out_fpath)
-        utilio.clear_folder(in_dir)
+    utilio.clear_folder(in_dir)
 
-        st.toast(f'CSV file consolidated ...')
-        st.rerun()   
+    st.success(f'CSV file uploaded ...')
+    time.sleep(0.6)
+    st.rerun()   
 
 def consolidate_nifti():
     '''
@@ -415,7 +425,8 @@ def dialog_consolidate_nifti_multiple():
     logger.debug('    Function: dialog_consolidate_nifti_multiple')
    
     if consolidate_nifti_multi():
-        st.toast(f'Nifti files consolidated ...')
+        st.success(f'Nifti files uploaded ...')
+        time.sleep(0.6)
         st.rerun()   
                    
 @st.dialog("Dicom extraction", width='medium')
@@ -445,45 +456,12 @@ def dialog_extract_dicoms(in_dir, out_dir):
             time.sleep(3)
 
         st.session_state.curr_scan = st.session_state.participant['mrid'] + '.nii.gz'
-        utilss.reset_dicoms()
+        utilss.init_dicoms()
     
     if consolidate_nifti():
-        st.rerun()    
-
-
-def upload_file_single_subject(in_file):
-    '''
-    Copy file to output folder
-    '''
-    logger.debug(f'    Function: upload_file({in_file})')
-    if in_file is None:
-        return
-    
-    tmp_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload')
-    os.makedirs(tmp_dir, exist_ok=True)
-
-    fname = in_file.name
-    f_out = os.path.join(tmp_dir, fname)
-    if not os.path.exists(f_out):
-        with open(f_out, "wb") as f:
-            f.write(in_file.getbuffer())
-
-    st.toast(f'Uploaded file ...')
-
-    if fname.endswith(('.nii.gz', '.nii')):
-        st.session_state.curr_scan = fname
-        dialog_consolidate_nifti()
-        
-    elif fname.endswith('.csv'):
-        consolidate_user_csv(fname)
-
-    elif fname.endswith('.zip'):
-        d_out = os.path.join(tmp_dir, 'unzipped')
-        utilio.unzip_zip_file(f_out, d_out)
-        dialog_extract_dicoms(d_out, tmp_dir)
-        
-    else:
-        st.warning('Input file type mismatch: should be one of .nii.gz, .nii, .csv or .zip')
+        st.success(f'Nifti file uploaded ...')
+        time.sleep(0.6)
+        st.rerun()   
 
 def upload_file_multi_subject(in_file):
     '''
@@ -518,30 +496,6 @@ def upload_file_multi_subject(in_file):
     else:
         st.warning('Input file type mismatch: should be .zip or .csv')
 
-def upload_files_single_subject(in_files):
-    '''
-    Copy files to output folder
-    '''
-    logger.debug('    Function: Upload_files')
-
-    if len(in_files) == 0:
-        return
-    
-    tmp_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload')
-    d_out = os.path.join(tmp_dir, 'dicoms')
-    
-    os.makedirs(d_out, exist_ok=True)
-
-    for in_file in in_files:
-        f_out = os.path.join(d_out, in_file.name)
-        if not os.path.exists(f_out):
-            with open(f_out, "wb") as f:
-                f.write(in_file.getbuffer())
-
-    st.toast(f'Uploaded files ...')
-
-    dialog_extract_dicoms(d_out, tmp_dir)
-
 def upload_nifti(in_file):
     '''
     Copy input nifti image to output folder
@@ -568,26 +522,23 @@ def upload_nifti(in_file):
 
 def upload_csv(in_file):
     '''
-    Copy zipped dicms to output folder
+    Upload csv file
     '''
-    logger.debug('    Function: Upload_dicom_zipped')
+    logger.debug('    Function: Upload_csv')
 
     if in_file is None:
         return
     
-    tmp_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload')
-    os.makedirs(tmp_dir, exist_ok=True)
+    up_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload')
+    os.makedirs(up_dir, exist_ok=True)
 
     fname = in_file.name
-
     if not fname.endswith(('.csv')):
         return
-
-    f_out = os.path.join(tmp_dir, fname)
+    f_out = os.path.join(up_dir, fname)
     if not os.path.exists(f_out):
         with open(f_out, "wb") as f:
             f.write(in_file.getbuffer())
-    st.toast(f'Uploaded file')
 
     consolidate_user_csv(fname)
 
@@ -600,23 +551,26 @@ def upload_dicom_zipped(in_file):
     if in_file is None:
         return
     
-    tmp_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload')
-    os.makedirs(tmp_dir, exist_ok=True)
+    ni_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload')
+    up_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload', 'dicoms')
 
+    os.makedirs(up_dir, exist_ok=True)
     fname = in_file.name
-
     if not fname.endswith(('.zip')):
         return
 
-    f_out = os.path.join(tmp_dir, fname)
+    f_out = os.path.join(up_dir, fname)
     if not os.path.exists(f_out):
         with open(f_out, "wb") as f:
             f.write(in_file.getbuffer())
     st.toast(f'Uploaded file')
 
-    d_out = os.path.join(tmp_dir, 'unzipped')
-    utilio.unzip_zip_file(f_out, d_out)
-    dialog_extract_dicoms(d_out, tmp_dir)
+    # Unzip file
+    utilio.unzip_zip_files(up_dir)
+
+    # Extract dicoms
+    tmp_dir = os.path.join(st.session_state.paths['prj_dir'], '_staging')
+    dialog_extract_dicoms(up_dir, ni_dir)
     
 def upload_dicom_folder(in_files):
     '''
@@ -627,77 +581,20 @@ def upload_dicom_folder(in_files):
     if in_files is None or len(in_files)==0:
         return
     
-    tmp_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload')
-    os.makedirs(tmp_dir, exist_ok=True)
+    up_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload', 'dicoms')
+    ni_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload')
+
+    os.makedirs(up_dir, exist_ok=True)
 
     for in_file in in_files:
         fname = os.path.basename(in_file.name.replace("\\", "/"))
-        f_out = os.path.join(tmp_dir, fname)
+        f_out = os.path.join(up_dir, fname)
         if not os.path.exists(f_out):
             with open(f_out, "wb") as f:
                 f.write(in_file.getbuffer())
 
-    st.toast(f'Uploaded files ...')
-
-    d_out = os.path.join(tmp_dir, 'extract')
-
-    dialog_extract_dicoms(tmp_dir, d_out)
-
-
-
-def upload_files_multi_subject(in_files):
-    '''
-    Copy files to output folder
-    '''
-    logger.debug('    Function: upload_files_multi_subject')
-
-    if len(in_files) == 0:
-        return
-    
-    tmp_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload')
-    d_out = os.path.join(tmp_dir, 'nifti')
-    
-    os.makedirs(d_out, exist_ok=True)
-
-    for in_file in in_files:
-        fname = os.path.basename(in_file.name.replace("\\", "/"))
-        f_out = os.path.join(d_out, fname)
-        if not os.path.exists(f_out):
-            with open(f_out, "wb") as f:
-                f.write(in_file.getbuffer())
-
-    st.toast(f'Uploaded files ...')
-
-    ## Multiple nifti images
-    dialog_consolidate_nifti_multiple()
-       
-def view_mri(fname):
-    """
-    Panel for viewing a nifti scan
-    """
-    with st.spinner("Wait for it..."):
-        try:
-            # Prepare final 3d matrix to display
-            img = utilmri.prep_image(fname)
-
-            # Detect mask bounds and center in each view
-            img_bounds = utilmri.detect_img_bounds(img)
-
-            # Show images
-            ind_view = utilmri.img_views.index('axial')
-            size_auto = True
-            utilmri.show_img_slices(
-                img,
-                ind_view,
-                img_bounds[ind_view, :],
-                'axial',
-                500
-            )
-        except:
-            st.warning(
-                ":material/thumb_down: Image parsing failed. Please confirm that the image file represents a 3D volume using an external tool."
-            )
-
+    dialog_extract_dicoms(up_dir, ni_dir)
+      
 ##############################################################
 ## Main panels
 
@@ -721,7 +618,10 @@ def panel_project_folder():
             if action == "Create new project":
                 sel_prj = st.text_input("Project name:", placeholder="my_study", label_visibility='collapsed')
                 if st.button("Create") and sel_prj:
-                    utilss.init_project(sel_prj)
+                    if utilss.init_project(sel_prj):
+                        utilmisc.show_temp_message(
+                            f'Project folder ready: {sel_prj}', 'success', 2
+                        )
 
             elif action == "Switch to existing project":
                 list_projects = utilio.get_subfolders(st.session_state.paths['out_dir'])
@@ -732,8 +632,12 @@ def panel_project_folder():
                     )
                     if sel_prj is not None:
                         if st.button('Select'):
-                            utilss.init_project(sel_prj)
-                            st.rerun()
+                            if utilss.init_project(sel_prj):
+                                utilmisc.show_temp_message(
+                                    f'Project folder ready: {sel_prj}', 'success', 2
+                                )
+                                st.rerun()
+
                 else:
                     st.caption("No existing projects found.")
 
@@ -747,7 +651,7 @@ def panel_project_folder():
                     st.session_state.prj_name = None
                     utilss.init_project(prj_name)
                     st.success('The project folder has been reset')
-                    time.sleep(0.4)
+                    time.sleep(0.6)
                     st.rerun()
 
 def panel_upload_single_subject():
@@ -755,15 +659,14 @@ def panel_upload_single_subject():
     Upload user data to target folder
     '''
     logger.debug('    Function: panel_upload_single_subject')
-
     utilmisc._show_curr_prj()
 
+    # Select input file type
     dtype = st.radio(
         'Input data type:',
         ['Nifti', 'Dicom (single .zip)', 'Dicom (folder)', '.csv'],
         horizontal=True
     )
-
     ftype = None
     accept_multiple_files = False
     if dtype == 'Nifti':
@@ -775,6 +678,7 @@ def panel_upload_single_subject():
     elif dtype == '.csv':
         ftype = ['.csv']
 
+    # Upload file(s)
     with st.form(
         key='_form_upload_single_subj', clear_on_submit=True, border=False
     ):
@@ -794,7 +698,6 @@ def panel_upload_single_subject():
             elif dtype == '.csv':
                 upload_csv(f)
 
-
 def generate_template_csv():
     mod_dirs = {mod: os.path.join(st.session_state.paths['project'], mod) for mod in ['t1', 't2', 'fl', 'dti', 'fmri']}
     dir_dict = {'T1': mod_dirs['t1'],
@@ -804,7 +707,10 @@ def generate_template_csv():
                             'FMRI': mod_dirs['fmri'],
                             }
     nifti_parser = NiftiMRIDParser()
-    heuristic_df = nifti_parser.create_master_csv(dir_dict, os.path.join(st.session_state.paths['project'], 'inferred_data_paths.csv'))
+    heuristic_df = nifti_parser.create_master_csv(
+        dir_dict,
+        os.path.join(st.session_state.paths['project'], '_working' 'inferred_data_paths.csv')
+    )
     
     
     df = heuristic_df.sort_values(by='MRID')
@@ -879,7 +785,7 @@ def panel_view_files():
                 st.session_state.out_dirs,
                 None,
                 3,
-                ['_upload']
+                ['_upload', '_working']
             )
             selected = sac.tree(
                 items=tree_items,
@@ -911,7 +817,6 @@ def panel_view_files():
 
             if fpath.endswith(('.nii.gz','.nii')):
                 view_mri(fpath)
-
 
 def panel_data():
     tab_prj, tab_upload, tab_review, tab_help = st.tabs(

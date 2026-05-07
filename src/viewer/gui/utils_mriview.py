@@ -307,7 +307,7 @@ def panel_view_seg(ptype):
         return
     
     ## FIXME
-    in_dir = st.session_state.paths['project']
+    in_dir = st.session_state.paths['prj_dir']
     ulay = os.path.join(
         in_dir, 't1', f'{mrid}_T1.nii.gz'
     )
