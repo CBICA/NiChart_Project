@@ -23,25 +23,14 @@ logger = setup_logger()
 def help_single_subject():
     st.write(
     """
-    - You may upload data in any of the following formats:
-        - **NIfTI:** Single .nii or .nii.gz image
-        - **DICOM (compressed):** a single .zip file containing the DICOM series
-        - **DICOM (individual files):** A folder with all dicom files
-        - **BIDS:** A BIDS folder with data
-        - **csv:** A csv file with participant info
+    ### How it works
 
-    - If you have multiple imaging modalities (e.g., T1, FLAIR), upload them one at a time.
-
-    - Participants CSV must include an MRID column with values that match the subject IDs in the subject list, so the data can be merged correctly.
-
-    - Additional Age and Sex columns are optional, but required for most downstream tasks
-
-    - Once uploaded, NiChart will automatically 
-        - Organize the files into the standard input structure
-        - Create a subject list based on the uploaded MRI data
-
-    - You may open and edit the subject list (e.g., to add age, sex, or other metadata needed for analysis).
-
+    - Upload one **NIfTI** scan at a time. If you have multiple imaging modalities (e.g., T1w, FLAIR), upload them separately.
+    - Uploaded data is automatically saved to your project folder using a standardized naming and folder structure, and a `participants.csv` file will be created.
+    - `participants.csv` includes the following fields: **MRID** (required), **Age** and **Sex** (optional, but needed for most downstream tasks).
+    - Participant info can be edited during or after upload, or by providing a new .csv file with the required columns.
+    - **DICOM** data is also supported — upload as a single .zip file or folder, and it will be automatically converted to NIfTI.
+    - Alternatively, upload a **BIDS** folder and the data will be reorganized into the required project format.        
     """
     )
 
@@ -602,16 +591,32 @@ def panel_upload_single_subject():
     logger.debug('    Function: panel_upload_single_subject')
     utilmisc._show_curr_prj()
 
+    # _, _help_col = st.columns([10, 1])
+    # with _help_col:
+    #     with st.popover(':material/help:', use_container_width=True):
+            
+
+    with st.container(horizontal=True, horizontal_alignment="left"):
+        sel_help = st.pills(
+            "Help",
+            [':material/info:'],
+            label_visibility = 'collapsed',
+            key="_help_single_sel",
+            help='See instructions'
+        )
+
+        st.markdown('##### Select input data type:')
+
+    if sel_help == ':material/info:':
+        help_single_subject()
+
     # Select input file type
     dtype = st.radio(
         'Input data type:',
-        ['Nifti', 'Dicom (single .zip)', 'Dicom (folder)', '.csv', 'BIDS (folder)', ':material/help: Help'],
-        horizontal=True
+        ['Nifti', 'Dicom (single .zip)', 'Dicom (folder)', '.csv', 'BIDS (folder)'],
+        horizontal=True,
+        label_visibility = 'collapsed'
     )
-
-    if dtype == ':material/help: Help':
-        help_single_subject()
-        return
 
     ftype = None
     accept_multiple_files = False
@@ -625,7 +630,6 @@ def panel_upload_single_subject():
         ftype = ['.csv']
     elif dtype == 'BIDS (folder)':
         accept_multiple_files = 'directory'
-
 
     # Upload file(s)
     with st.form(

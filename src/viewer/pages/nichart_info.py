@@ -25,12 +25,44 @@ def imgfile_to_data(filepath):
     return "data:image/png;base64," + encoded.decode("utf-8")
 
 tabA, tabB, tabC, tabD = st.tabs(
-    ["Methods", "Data", "Quick Start", "Links"],
+    ["Quick Start", "Methods", "Data", "Links"],
     on_change='rerun',
 )
 
 if tabA.open:
     with tabA:
+        st.markdown(
+            '''
+            #### Getting Started with NiChart
+            
+            **NiChart** provides normative brain aging charts derived from large lifespan datasets. Here is how to get the most out of it:
+            
+            ###### :material/show_chart:  :blue[**Explore reference charts**]
+            
+            No data required. Go to `View Charts → Reference Charts` to browse age-related centile curves for all brain regions and biomarkers.
+            
+            ###### :material/play_circle: :blue[**Process your data**]
+            
+            Use `Process a Single Subject` or `Process a Dataset` workflow. Both workflows cover the same pipelines; choose based on your scale and needs.
+                       
+            Upload your images, select a pipeline, validate the expected inputs, then run. Results are saved to your project folder. Output files can be downloaded as a ZIP archive.
+            
+            ###### :material/person: :blue[**View personalized charts**]
+            
+            Once processing is complete, go to **View Charts → My Charts** to overlay your data on the normative centile curves.
+            
+            ###### :material/summarize: :blue[**Generate reports**]
+             
+            Use **View Charts → My Reports** to create subject-level PDF reports showing  scores for key brain regions.
+
+            ###### :material/upload_file: :blue[**Skip processing**]
+             
+            If you already have NiChart-format CSV results, upload them directly under **My Data**. Column names and primary keys must match the expected format (see the data validation panel for details)
+
+            '''
+        )
+if tabB.open:
+    with tabB:
 
         tab1, tab2, tab3, tab4, tab5 = st.tabs(
             ["NiChart", "MRI Segmentation", "AI Biomarkers", "Brain Aging Dimensions", "Abnormality Maps"],
@@ -134,9 +166,8 @@ if tabA.open:
                         """
                     )
 
-## FIXME: Add info for the tabs below
-if tabB.open:
-    with tabB:
+if tabC.open:
+    with tabC:
         st.markdown(
             '''
             - NiChart Reference Dataset is a large and diverse collection from multiple MRI studies, created as part of the ISTAGING project to develop a system for identifying imaging biomarkers of aging and neurodegenerative diseases.
@@ -154,9 +185,6 @@ if tabB.open:
             width=1200
         )
 
-if tabC.open:
-    with tabC:
-        st.info('Quick Start info will be here soon ...')
 
 if tabD.open:
     with tabD:

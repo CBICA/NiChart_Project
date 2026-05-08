@@ -140,7 +140,7 @@ def pipeline_runner_menu(enabled_pnames):
         if data_dir_on_host is not None:
             local_path_remapping[data_dir_locally] = data_dir_on_host
         result_commands = utiltl.get_command_strings(pipeline_id=pipeline_to_run,
-                global_vars={"STUDY": st.session_state.paths["project"]},
+                global_vars={"STUDY": st.session_state.paths["prj_dir"]},
                 local_path_remapping=local_path_remapping)
         command_text = "\n".join(result_commands)
         st.code(command_text)
