@@ -20,6 +20,33 @@ from typing import Any, BinaryIO, List, Optional
 from utils.utils_logger import setup_logger
 logger = setup_logger()
 
+def help_single_subject():
+    st.write(
+    """
+    - You may upload data in any of the following formats:
+        - **NIfTI:** Single .nii or .nii.gz image
+        - **DICOM (compressed):** a single .zip file containing the DICOM series
+        - **DICOM (individual files):** A folder with all dicom files
+        - **BIDS:** A BIDS folder with data
+        - **csv:** A csv file with participant info
+
+    - If you have multiple imaging modalities (e.g., T1, FLAIR), upload them one at a time.
+
+    - Participants CSV must include an MRID column with values that match the subject IDs in the subject list, so the data can be merged correctly.
+
+    - Additional Age and Sex columns are optional, but required for most downstream tasks
+
+    - Once uploaded, NiChart will automatically 
+        - Organize the files into the standard input structure
+        - Create a subject list based on the uploaded MRI data
+
+    - You may open and edit the subject list (e.g., to add age, sex, or other metadata needed for analysis).
+
+    """
+    )
+
+
+
 def create_project_folder(sel_project) -> None:
     '''
     Creates a new project folder
@@ -424,10 +451,6 @@ def upload_dicom_folder(in_files):
 def extract_bids(bids_dir):
     '''
     Function to move image data in BIDS format to NiChart input format
-    - T1 scans will be moved to os.path.join(st.session_state.paths['prj_dir'], 't1')
-    - FL scans will be moved to os.path.join(st.session_state.paths['prj_dir'], 'fl')
-    - image names will be {MRID}_{mod}.nii.gz
-    - participants list in BIDS folder will be used to create the file participants/participants.csv with columns MRID, Age, Sex
     '''
     prj_dir = st.session_state.paths['prj_dir']
 
@@ -462,41 +485,35 @@ def extract_bids(bids_dir):
         )
         st.toast(f'Participants file created ({len(df_parts)} subjects)')
     else:
-        st.toast('No participants.tsv found — participants.csv not created', icon='⚠️')
+        return False
 
-    # ── 2. Walk sub- dirs and copy images ────────────────────────────────
+    # ── 2. Scan flat bids_dir for NIfTI files and copy by modality ───────
+    # Files are uploaded flat (no subfolders). BIDS filenames encode the
+    # subject as the first 'sub-' entity, e.g. sub-001_T1w.nii.gz
     n_copied = 0
-    for entry in sorted(os.scandir(bids_dir), key=lambda e: e.name):
-        if not entry.is_dir() or not entry.name.startswith('sub-'):
+    for fname in sorted(os.listdir(bids_dir)):
+        if not (fname.endswith('.nii.gz') or fname.endswith('.nii')):
             continue
-        mrid = entry.name  # e.g. 'sub-001'
 
-        # collect anat dirs — handle optional ses- layer
-        anat_dirs = []
-        for sub in os.scandir(entry.path):
-            if sub.is_dir():
-                if sub.name == 'anat':
-                    anat_dirs.append(sub.path)
-                elif sub.name.startswith('ses-'):
-                    ses_anat = os.path.join(sub.path, 'anat')
-                    if os.path.isdir(ses_anat):
-                        anat_dirs.append(ses_anat)
+        # Extract MRID from leading sub-* entity
+        parts = fname.split('_')
+        if not parts[0].startswith('sub-'):
+            continue
+        mrid = parts[0]  # e.g. 'sub-001'
 
-        for anat_dir in anat_dirs:
-            for fname in sorted(os.listdir(anat_dir)):
-                if not (fname.endswith('.nii.gz') or fname.endswith('.nii')):
-                    continue
-                for bids_suffix, (mod_dir, mod_label) in MOD_MAP.items():
-                    if f'_{bids_suffix}.' in fname:
-                        src = os.path.join(anat_dir, fname)
-                        dst_dir = os.path.join(prj_dir, mod_dir)
-                        os.makedirs(dst_dir, exist_ok=True)
-                        dst = os.path.join(dst_dir, f'{mrid}_{mod_label}.nii.gz')
-                        shutil.copy2(src, dst)
-                        n_copied += 1
-                        break
+        for bids_suffix, (mod_dir, mod_label) in MOD_MAP.items():
+            if f'_{bids_suffix}.' in fname:
+                src = os.path.join(bids_dir, fname)
+                dst_dir = os.path.join(prj_dir, mod_dir)
+                os.makedirs(dst_dir, exist_ok=True)
+                dst = os.path.join(dst_dir, f'{mrid}_{mod_label}.nii.gz')
+                shutil.copy2(src, dst)
+                n_copied += 1
+                break
 
     st.toast(f'BIDS extraction complete — {n_copied} image(s) copied')
+    return True
+
 
 def upload_bids_folder(in_files):
     '''
@@ -510,7 +527,15 @@ def upload_bids_folder(in_files):
 
     # Extract BIDS
     if stat_upload:
-        extract_bids(bids_dir)
+        stat_convert = extract_bids(bids_dir)
+
+        utilio.clear_folder(bids_dir)
+
+        if stat_convert:
+            utilmisc.show_temp_message(
+                'BIDS data uploaded', 'success', 2
+            )
+            st.rerun()           
 
 ##############################################################
 ## Main panels
@@ -580,9 +605,14 @@ def panel_upload_single_subject():
     # Select input file type
     dtype = st.radio(
         'Input data type:',
-        ['Nifti', 'Dicom (single .zip)', 'Dicom (folder)', '.csv', 'BIDS (folder)'],
+        ['Nifti', 'Dicom (single .zip)', 'Dicom (folder)', '.csv', 'BIDS (folder)', ':material/help: Help'],
         horizontal=True
     )
+
+    if dtype == ':material/help: Help':
+        help_single_subject()
+        return
+
     ftype = None
     accept_multiple_files = False
     if dtype == 'Nifti':
@@ -595,6 +625,7 @@ def panel_upload_single_subject():
         ftype = ['.csv']
     elif dtype == 'BIDS (folder)':
         accept_multiple_files = 'directory'
+
 
     # Upload file(s)
     with st.form(
@@ -780,11 +811,11 @@ def panel_view_files():
                 utilmri.panel_view_mri_simple(fpath)
 
 def panel_data():
-    tab_prj, tab_upload, tab_review, tab_help = st.tabs(
+    tab_prj, tab_upload, tab_review = st.tabs(
         [":material/folder: Select Project",
             ":material/upload: Upload Data",
-            ":material/fact_check: Review",
-            ":material/help: Help"],
+            ":material/fact_check: Review"
+        ],
         on_change='rerun',
     )
 
@@ -802,10 +833,6 @@ def panel_data():
     if tab_review.open:
         with tab_review:
             panel_view_files()
-
-    if tab_help.open:
-        with tab_help:
-            my_help()
     
 
 
