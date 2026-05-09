@@ -23,7 +23,7 @@ logger = setup_logger()
 def help_single_subject():
     st.write(
     """
-    ### How it works
+    ##### How it works
 
     - Upload one **NIfTI** scan at a time. If you have multiple imaging modalities (e.g., T1w, FLAIR), upload them separately.
     - Uploaded data is automatically saved to your project folder using a standardized naming and folder structure, and a `participants.csv` file will be created.
@@ -34,6 +34,19 @@ def help_single_subject():
     """
     )
 
+def help_multi_subject():
+    st.write(
+    """
+    ##### How it works
+
+    - Upload **NIfTI** scans for your dataset. If you have multiple imaging modalities (e.g., T1w, FLAIR), upload them separately.
+    - Uploaded data is automatically saved to your project folder using a standardized naming and folder structure, and a `participants.csv` file will be created.
+    - `participants.csv` includes the following fields: **MRID** (required), **Age** and **Sex** (optional, but needed for most downstream tasks).
+    - Participant info can be edited during or after upload, or by providing a new .csv file with the required columns.
+    - **DICOM** data is also supported — upload as a single .zip file or folder, and it will be automatically converted to NIfTI.
+    - Alternatively, upload a **BIDS** folder and the data will be reorganized into the required project format.        
+    """
+    )
 
 
 def create_project_folder(sel_project) -> None:
@@ -591,11 +604,6 @@ def panel_upload_single_subject():
     logger.debug('    Function: panel_upload_single_subject')
     utilmisc._show_curr_prj()
 
-    # _, _help_col = st.columns([10, 1])
-    # with _help_col:
-    #     with st.popover(':material/help:', use_container_width=True):
-            
-
     with st.container(horizontal=True, horizontal_alignment="left"):
         sel_help = st.pills(
             "Help",
@@ -688,10 +696,24 @@ def panel_upload_multi_subject():
     logger.debug('    Function: panel_upload_multi_subject')
     utilmisc._show_curr_prj()
 
+    with st.container(horizontal=True, horizontal_alignment="left"):
+        sel_help = st.pills(
+            "Help",
+            [':material/info:'],
+            label_visibility = 'collapsed',
+            key="_help_single_sel",
+            help='See instructions'
+        )
+
+        st.markdown('##### Select input data type:')
+
+        if sel_help == ':material/info:':
+            help_multi_subject()
+
     # Select input file type
     dtype = st.radio(
         'Input data type:',
-        ['Nifti (folder)', 'Nifti (files)', 'Dicom (single .zip)', 'Dicom (folder)', '.csv'],
+        ['Nifti (folder)', 'Nifti (files)', 'Dicom (single .zip)', 'Dicom (folder)', '.csv', 'BIDS (folder)'],
         horizontal=True
     )
     ftype = None
@@ -708,6 +730,8 @@ def panel_upload_multi_subject():
         accept_multiple_files = 'directory'
     elif dtype == '.csv':
         ftype = ['.csv']
+    elif dtype == 'BIDS (folder)':
+        accept_multiple_files = 'directory'
 
     # Upload file(s)
     with st.form(
@@ -730,40 +754,8 @@ def panel_upload_multi_subject():
                 upload_dicom_folder(f)
             elif dtype == '.csv':
                 upload_csv(f)
-
-def panel_upload_multi_subject_v2():
-    with tab_t1:
-        t1_out_dir = os.path.join(st.session_state.paths['prj_dir'], 't1')
-        utilio.upload_multiple_files(out_dir=t1_out_dir)
-
-    with tab_fl:
-        fl_out_dir = os.path.join(st.session_state.paths['prj_dir'], 'fl')
-        utilio.upload_multiple_files(out_dir=fl_out_dir)
-
-    with tab_csv:
-        try:
-            df = generate_template_csv()
-            st.download_button(
-                "⬇ Download template CSV",
-                df.to_csv(index=False).encode('utf-8'),
-                'participants.csv',
-                'text/csv',
-                use_container_width=True
-            )
-        except Exception:
-            st.caption("Upload MRI scans first to auto-generate a template.")
-
-        with st.form(key='form_participants_csv', clear_on_submit=True, border=False):
-            csv_file = st.file_uploader("Participants CSV", type=['csv'], label_visibility='collapsed')
-            if st.form_submit_button("Upload", use_container_width=True):
-                if csv_file:
-                    dest = os.path.join(st.session_state.paths['prj_dir'], 'participants', 'participants.csv')
-                    os.makedirs(os.path.dirname(dest), exist_ok=True)
-                    with open(dest, 'wb') as f:
-                        f.write(csv_file.getbuffer())
-                    st.toast("Participants CSV uploaded!")
-                else:
-                    st.warning("Please select a CSV file first.")
+            elif dtype == 'BIDS (folder)':
+                upload_bids_folder(f)
 
 def panel_view_files():
     '''
