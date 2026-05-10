@@ -23,13 +23,18 @@ def panel_download():
 
         st.markdown('**Folder(s) to download:**')
 
+        # Get list of folders in project dir
         prj_dir = st.session_state.paths['prj_dir']
         list_dirs = utilio.get_subfolders(prj_dir)
-        for folder_name in ['download', 'downloads', 'user_upload']:
-            if folder_name in list_dirs:
-                list_dirs.remove(folder_name)
-        
+
+        # Remove intermediate result folders
+        list_dirs = [x for x in list_dirs if not x.startswith('_')]
+
+        # Remove empty folders
+        list_dirs = [d for d in list_dirs if any(os.scandir(os.path.join(prj_dir, d)))]
+
         if len(list_dirs) == 0:
+            st.warning(':material/warning: Nothing to download yet!')
             return
         
         select_all = st.checkbox('Select all')
