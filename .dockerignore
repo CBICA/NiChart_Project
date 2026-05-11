@@ -6,6 +6,8 @@ output_folder/**
 !output_folder/NiChart_sMRI_Demo1
 !output_folder/NiChart_sMRI_Demo2
 **/*.nii.gz
+!sample_datasets/**/*.nii.gz
+!resources/reference_data/**/*.nii.gz
 build
 **/build
 src/NiChart_Website
