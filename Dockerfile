@@ -36,6 +36,7 @@ FROM mambaorg/micromamba:1.5.10
 
 #RUN apt-get update && apt-get install build-essential -y
 COPY --chown=$MAMBA_USER:$MAMBA_USER docker_mamba_env.yaml /tmp/env.yaml
+ARG MAMBA_USER=root
 RUN micromamba install -y -n base -f /tmp/env.yaml && \
     micromamba clean --all --yes
 ARG MAMBA_DOCKERFILE_ACTIVATE=1
@@ -58,7 +59,7 @@ RUN pip install --verbose -r /tmp/requirements2.txt
 #RUN pip install -e /CCL_NMF_Prediction
 ## Cache DLMUSE and DLICV models with an empty job so no download is needed later
 #RUN DLMUSE -i ~/dummyinput -o ~/dummyoutput && DLICV -i ~/dummyinput -o ~/dummyoutput
-RUN pip install streamlit==1.40.0 streamlit-image-select streamlit-antd-components pycountry
+RUN pip install streamlit-image-select streamlit-antd-components pycountry streamlit-card
 USER root
 RUN apt-get update && apt-get install -y awscli
 COPY . /app/
@@ -67,4 +68,4 @@ RUN useradd -s /bin/bash streamlit && \
     chmod a+rw /app/src/viewer/pipeline.log
 USER root
 WORKDIR /app/src/viewer/
-ENTRYPOINT ["/usr/local/bin/_entrypoint.sh", "streamlit", "run", "./NiChartProject.py", "--server.headless", "true", "--server.fileWatcherType=none"]
+ENTRYPOINT ["/usr/local/bin/_entrypoint.sh", "streamlit", "run", "./NiChartProject.py", "--server.headless", "true", "--server.fileWatcherType=poll"]
