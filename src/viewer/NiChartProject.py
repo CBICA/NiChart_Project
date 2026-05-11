@@ -12,7 +12,7 @@ nicon = Image.open("../resources/nichart1.png")
 
 # Init session state
 utilss.init_session_state()
-utilssplots.update_session_state()
+utilss.update_session_state()
 utilpg.config_page()
 
 from utils.utils_logger import setup_logger
