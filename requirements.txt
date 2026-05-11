@@ -38,6 +38,8 @@ plotly-express
 stqdm
 pyjwt
 docker
+streamlit-card
+reportlab
 
 # chatbot 
 boto3
