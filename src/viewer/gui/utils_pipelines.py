@@ -162,7 +162,6 @@ def pipeline_runner_menu(enabled_pnames, sel=False):
         #st.info(f"DEBUG: sel_pipeline: {sel_method}")
         st.info("Your data doesn't meet the requirements for this pipeline. Correct the issues marked below to proceed.")
 
-        return
     ready = utiltl.check_requirements_met_panel(sel_name)
     pipeline_to_run = utiltl.get_pipeline_id_by_label(sel_method, harmonized=harmonize)
 
