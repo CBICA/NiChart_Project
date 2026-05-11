@@ -665,7 +665,7 @@ def panel_upload_single_subject():
                 upload_bids_folder(f)
 
 def generate_template_csv(rename=True):
-    mod_dirs = {mod: os.path.join(st.session_state.paths['project'], mod) for mod in ['t1', 't2', 'fl', 'dti', 'fmri']}
+    mod_dirs = {mod: os.path.join(st.session_state.paths['prj_dir'], mod) for mod in ['t1', 't2', 'fl', 'dti', 'fmri']}
     dir_dict = {'T1': mod_dirs['t1'],
                             'T2': mod_dirs['t2'],
                             'FLAIR': mod_dirs['fl'],
@@ -675,7 +675,7 @@ def generate_template_csv(rename=True):
     nifti_parser = NiftiMRIDParser()
     heuristic_df = nifti_parser.create_master_csv(
         dir_dict,
-        os.path.join(st.session_state.paths['project'], '_working' 'inferred_data_paths.csv')
+        os.path.join(st.session_state.paths['prj_dir'], '_working' 'inferred_data_paths.csv')
     )
     
     if rename:
@@ -712,10 +712,10 @@ def generate_template_csv(rename=True):
         if rename_map:
             # Create full renaming csv
             df_map = pd.DataFrame([(str(src), str(dst)) for dst, src in rename_map_full.items()], columns=["original_file", "renamed_file"])
-            df_map.to_csv(os.path.join(st.session_state.paths['project'], 'renamed_files.csv'))
+            df_map.to_csv(os.path.join(st.session_state.paths['prj_dir'], 'renamed_files.csv'))
 
         # Now rerun the inference
-        heuristic_df = nifti_parser.create_master_csv(dir_dict, os.path.join(st.session_state.paths['project'], 'inferred_data_paths.csv'))
+        heuristic_df = nifti_parser.create_master_csv(dir_dict, os.path.join(st.session_state.paths['prj_dir'], 'inferred_data_paths.csv'))
         
     df = heuristic_df.sort_values(by='MRID')
     df = df.drop_duplicates().reset_index().drop('index', axis=1)

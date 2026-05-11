@@ -685,7 +685,7 @@ def panel_upload_single_subject():
                 upload_csv(f)
 
 def generate_template_csv():
-    mod_dirs = {mod: os.path.join(st.session_state.paths['project'], mod) for mod in ['t1', 't2', 'fl', 'dti', 'fmri']}
+    mod_dirs = {mod: os.path.join(st.session_state.paths['prj_dir'], mod) for mod in ['t1', 't2', 'fl', 'dti', 'fmri']}
     dir_dict = {'T1': mod_dirs['t1'],
                             'T2': mod_dirs['t2'],
                             'FLAIR': mod_dirs['fl'],
@@ -695,7 +695,7 @@ def generate_template_csv():
     nifti_parser = NiftiMRIDParser()
     heuristic_df = nifti_parser.create_master_csv(
         dir_dict,
-        os.path.join(st.session_state.paths['project'], '_working' 'inferred_data_paths.csv')
+        os.path.join(st.session_state.paths['prj_dir'], '_working' 'inferred_data_paths.csv')
     )
     
     

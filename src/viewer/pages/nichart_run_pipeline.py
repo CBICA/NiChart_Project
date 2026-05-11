@@ -151,7 +151,7 @@ def pipeline_runner_menu(enabled_pnames, sel=False):
         if data_dir_on_host is not None:
             local_path_remapping[data_dir_locally] = data_dir_on_host
         result_commands = utiltl.get_command_strings(pipeline_id=pipeline_to_run,
-                global_vars={"STUDY": st.session_state.paths["project"]},
+                global_vars={"STUDY": st.session_state.paths['prj_dir']},
                 local_path_remapping=local_path_remapping)
         command_text = "\n".join(result_commands)
         st.code(command_text)
@@ -186,13 +186,13 @@ def pipeline_runner_menu(enabled_pnames, sel=False):
         try:
             result = utiltl.run_pipeline(
                 pipeline_id=pipeline_to_run, ##TODO EDIT THIS
-                global_vars={"STUDY": st.session_state.paths["project"]},
+                global_vars={"STUDY": st.session_state.paths['prj_dir']},
                 execution_mode=execution_mode,
                 pipeline_progress_bar=pipeline_progress_bar,
                 process_progress_bar=process_progress_bar,
                 process_status_box=process_status_box,
                 log=log,
-                metadata_location=os.path.join(st.session_state.paths["project"], "metadata.json"),
+                metadata_location=os.path.join(st.session_state.paths['prj_dir'], "metadata.json"),
                 reuse_cached_steps=skip_steps_when_possible,
                 local_path_remapping=local_path_remapping
             )

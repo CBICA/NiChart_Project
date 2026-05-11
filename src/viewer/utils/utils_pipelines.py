@@ -198,14 +198,14 @@ def pipeline_runner_menu(enabled_pnames):
 
                 result = utiltl.run_pipeline(
                     pipeline_id=pipeline_to_run, ##TODO EDIT THIS
-                    global_vars={"STUDY": st.session_state.paths["project"]},
+                    global_vars={"STUDY": st.session_state.paths['prj_dir']},
                     execution_mode=execution_mode,
                     pipeline_progress_bar=pipeline_progress_bar,
                     process_progress_bar=process_progress_bar,
                     process_status_box=process_status_box,
                     log=log,
                     metadata_location = os.path.join(
-                        st.session_state.paths["project"], '_working', "metadata.json"
+                        st.session_state.paths['prj_dir'], '_working', "metadata.json"
                     ),
                     reuse_cached_steps=skip_steps_when_possible,
                     local_path_remapping=local_path_remapping

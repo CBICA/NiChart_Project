@@ -677,7 +677,7 @@ def check_requirements_met_nopanel(pipeline_name, harmonized):
                 blockers.append(f"Participants CSV appears to be missing or malformed. Please check that this data was provided.")
             elif item.name == "csv_has_columns":
                 required_cols = reqs_params.get("csv_has_columns", [])
-                csv_path = os.path.join(st.session_state.paths["project"], 'participants' ,'participants.csv')
+                csv_path = os.path.join(st.session_state.paths['prj_dir'], 'participants' ,'participants.csv')
                 csv_report = utilcsv.validate_csv(csv_path=csv_path, required_cols=required_cols, mrid_col="MRID")
                 severity = utilio._csv_severity(csv_report)
                 if csv_report.file_ok:
@@ -697,7 +697,7 @@ def check_requirements_met_nopanel(pipeline_name, harmonized):
                 blockers.append(f"Participants CSV row count does not match the number of subjects available in scans {item.note}. Please check that all desired participants have CSV entries.")
             elif item.name == "csv_has_columns":
                 required_cols = reqs_params.get("csv_has_columns", [])
-                csv_path = os.path.join(st.session_state.paths["project"], 'participants' ,'participants.csv')
+                csv_path = os.path.join(st.session_state.paths['prj_dir'], 'participants' ,'participants.csv')
                 csv_report = utilcsv.validate_csv(csv_path=csv_path, required_cols=required_cols, mrid_col="MRID")
                 severity = utilio._csv_severity(csv_report)
                 if csv_report.file_ok:
@@ -753,7 +753,7 @@ def check_requirements_met_panel(pipeline_name):
     if "needs_demographics" in reqs_set:
         print(f"DEBUG: check_requirements_met_panel: checking needs_demographics")
         required_cols = reqs_params.get("csv_has_columns", [])
-        csv_path = os.path.join(st.session_state.paths["project"], 'participants' ,'participants.csv')
+        csv_path = os.path.join(st.session_state.paths['prj_dir'], 'participants' ,'participants.csv')
         csv_report = utilcsv.validate_csv(csv_path=csv_path, required_cols=required_cols, mrid_col="MRID")
         severity = utilio._csv_severity(csv_report)
         icon = STATUS_ICON[severity]

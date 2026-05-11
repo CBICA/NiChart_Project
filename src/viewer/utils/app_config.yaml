@@ -6,7 +6,7 @@
 # and perform the correct value substitutions. 
 sample_app: # Do not actually invoke this one, it's just an example. 
   container: "my-docker-image:latest"
-  entrypoint: "/bin/bash"
+  entrypoint_override: "/bin/bash"
   cmd_base: "app_cmd"
   description: "Example app that takes input dir, input file, and output dir"
   cpu: 2
@@ -19,7 +19,7 @@ sample_app: # Do not actually invoke this one, it's just an example.
       mount_to: "/mnt/data/input"
     input_file:
       role: "input"
-      arg_flag: "-f"
+      arg_flag: "--file"
       type: "file"
       mount_to: "/mnt/data/file.csv"
     output_dir:
@@ -27,9 +27,13 @@ sample_app: # Do not actually invoke this one, it's just an example.
       arg_flag: "-o"
       mount_to: "/mnt/data/output"
     sample_fixed_flag:
-      role: "fixed"
+      role: "flag"
+      arg_flag: "-f"
+    sample_overridable_param:
+      role: "param"
       arg_flag: "-p"
-      default: "placeholder"
+      default: "1.0"
+      type: "number"
 nichart_dlmuse:
   container: "cbica/nichart_dlmuse:1.0.8"
   cmd_base: "-d cuda"

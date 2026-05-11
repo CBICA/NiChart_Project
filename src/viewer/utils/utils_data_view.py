@@ -259,7 +259,7 @@ def select_files(in_dir):
 
             # Save merged data
             out_dir = os.path.join(
-                st.session_state.paths['project'], 'data_merged'
+                st.session_state.paths['prj_dir'], 'data_merged'
             )
             if not os.path.exists(out_dir):
                 os.makedirs(out_dir)
