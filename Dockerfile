@@ -59,7 +59,8 @@ RUN pip install --verbose -r /tmp/requirements2.txt
 #RUN pip install -e /CCL_NMF_Prediction
 ## Cache DLMUSE and DLICV models with an empty job so no download is needed later
 #RUN DLMUSE -i ~/dummyinput -o ~/dummyoutput && DLICV -i ~/dummyinput -o ~/dummyoutput
-RUN pip install streamlit-image-select streamlit-antd-components pycountry streamlit-card reportlab
+## Would add additional reqs not in requirements.txt here, e.g.:
+#RUN pip install streamlit-image-select streamlit-antd-components pycountry streamlit-card reportlab
 USER root
 RUN apt-get update && apt-get install -y awscli
 COPY . /app/
