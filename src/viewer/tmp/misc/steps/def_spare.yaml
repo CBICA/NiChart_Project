@@ -1,4 +1,0 @@
-pname: spare
-input: [demog_csv, dlmuse_harm_csv]
-output: [spare_csv]
-

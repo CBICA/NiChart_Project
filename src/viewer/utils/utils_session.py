@@ -1,6 +1,7 @@
 import os
 import shutil
 from typing import Any
+import re
 
 import jwt
 import time
@@ -11,23 +12,12 @@ import utils.utils_rois as utilroi
 import utils.utils_processes as utilproc
 import utils.utils_cmaps as utilcmap
 import utils.utils_toolloader as utiltl
+import utils.utils_upload as utilup
 import os
 from PIL import Image
 import streamlit_antd_components as sac
 
 # from streamlit.web.server.websocket_headers import _get_websocket_headers
-
-def disp_selections():
-    '''
-    Show user selections
-    '''
-    #with st.sidebar:
-        #sac.divider(label='Selections', icon = 'person', align='center', color='gray')
-        #if st.session_state.prj_name is not None:
-            #st.markdown(f'`Project Name: {st.session_state.prj_name}`')
-        #if st.session_state.sel_pipeline is not None:
-            #st.markdown(f'`Pipeline: {st.session_state.sel_pipeline}`')
-    print('FIXME: This is bypassed for now ...')
     
 def disp_session_state():
     '''
@@ -66,7 +56,28 @@ def disp_session_state():
                 st.write(st.session_state[sel_var])
     #print('FIXME: This is bypassed for now ...')
 
-def init_project_folders():
+def expand_values(raw_values: list, d_lists: dict) -> list:
+    '''
+    Expand a list with pattern [{listname}] or [prefix_{listname}].
+    Returns expanded values.
+    '''
+    values = []
+    for item in raw_values:
+        s = str(item)
+        m = re.fullmatch(r'(.*?)\{([^}]+)\}(.*)', s)
+        if m:
+            prefix, list_name, suffix = m.group(1), m.group(2), m.group(3)
+            list_entry = d_lists.get(list_name, {})
+            list_vals = list_entry.get('values', [])
+            for v in list_vals:
+                sv = str(v)
+                values.append(f"{prefix}{sv}{suffix}")
+
+        else:
+            values.append(s)
+    return values
+
+def init_folders():
     '''
     Set initial values for project folders
     '''
@@ -80,7 +91,6 @@ def init_project_folders():
         {"dname": dnames, "dtype": dtypes}
     )
     
-
 def init_scan():
     '''
     Set scan info
@@ -97,164 +107,121 @@ def init_participant():
         'sex' : None,
     }
 
-def init_session_vars():
+def init_user():
     '''
-    Set initial values for session variables
+    Set user info
     '''
-    
-    init_participant()
-    init_scan()
-    
-    ## Misc variables
-    st.session_state.mode = 'release'
-    st.session_state.mode = 'debug'
-
-    st.session_state.show_settings = False
-
-    st.session_state.layout_plots = 'Main'
-    st.session_state.layout_plots = 'Sidebar'
-
-    # Survey-checking code has fallbacks, don't set it.
-    #st.session_state.skip_survey = True
-
-    st.session_state.workflow = None
-
-    st.session_state.sel_add_button = None
-
-    #st.session_state.prj_name = 'nichart_project'
-    st.session_state.prj_name = 'user_default'
-    st.session_state.project = 'user_default'
-    #st.session_state.project = 'nichart_project'
-
-    st.session_state.project_selected_explicitly = False
-    
-    st.session_state.sel_pipeline = None
-    st.session_state.pipeline_selected_explicitly = True
-
-    st.session_state.sel_mrid = None
-    st.session_state.sel_roi = None
-
-    st.session_state.pipeline_colors = [
-        'red', 'pink', 'grape', 'violet', 'indigo', 'blue',
-        'cyan', 'teal', 'green', 'lime', 'yellow', 'orange',
-    ]
-    st.session_state.pipeline_categories = utiltl.overall_pipeline_category_listing()
-    st.session_state.pipeline_requirements = utiltl.overall_pipeline_requirements_listing()
-    st.session_state.harmonizable_pipelines = st.session_state.pipeline_categories['harmonized']
-    st.session_state.do_harmonize = False
-    st.session_state.nifti_dicom_upload_mode = None
-
-    st.session_state.list_mods = ["T1", "T2", "FL", "DTI", "fMRI"]
-    st.session_state.params = {
-        'mean_icv': 1430000,  # Average ICV estimated from a large sample
-        'harm_min_samples': 30,
-    }
-    st.session_state.misc = {
-        'icon_thumb': {         # Icons for panels
-            False: ":material/thumb_down:",
-            True: ":material/thumb_up:",
-        }
-    }
-
-    ## Debug vars
-    st.session_state['debug'] = {
-        'flag_show': False,
-        'sel_vars': []
-    }
-
-    ## Page settings
-
-    # App icon image
-    st.session_state.nicon = Image.open("../resources/nichart1.png")
-
-    # Menu navigation
-    st.session_state.sel_menu = 'Home'
-
-    # User info
     st.session_state.user = {
         'setup_sel_item': None,
         'setup_project_update': False,
         'setup_project_mode': 0,
     }
 
-    ####################################
-    ### Settings specific to desktop/cloud
-    
-    # App type ('desktop' or 'cloud')
-    if os.getenv("NICHART_FORCE_CLOUD", "0") == "1":
-        st.session_state.forced_cloud = True
-        st.session_state.app_type = "cloud"
-    else:
-        st.session_state.forced_cloud = False
-        st.session_state.app_type = "desktop"
+def init_cloud():
+    '''
+    Set cloud vars
+    '''
+    app_type = "desktop"
+    has_cloud_session = False
+    forced_cloud = False
+    cloud_session_token = None    
+    cloud_user_id = None
+    cloud_user_email = None
 
-    st.session_state.app_config = {
+    if os.getenv("NICHART_FORCE_CLOUD", "0") == "1":
+        forced_cloud = True
+        app_type = "cloud"
+        cloud_session_token = process_session_token()
+        if cloud_session_token:
+            has_cloud_session = True
+            cloud_user_id = process_session_user_id()
+            cloud_user_email = process_session_user_email()    
+    
+    app_config = {
         "cloud": {"msg_infile": "Upload"},
         "desktop": {"msg_infile": "Select"},
     }
 
-    # Store user session info for later retrieval
-    if st.session_state.app_type == "cloud":
-        st.session_state.cloud_session_token = process_session_token()
-        if st.session_state.cloud_session_token:
-            st.session_state.has_cloud_session = True
-            st.session_state.cloud_user_id = process_session_user_id()
-        else:
-            st.session_state.has_cloud_session = False
-    else:
-        st.session_state.has_cloud_session = False
+    tdict = {
+        'app_type': app_type,
+        'has_cloud_session': has_cloud_session,
+        'forced_cloud': forced_cloud,
+        'cloud_session_token': cloud_session_token,
+        'cloud_user_id': cloud_user_id,
+        'cloud_user_email': cloud_user_email,
+        'app_config': app_config
+    }
+    st.session_state.update(tdict)
 
-def copy_test_folders():
+def init_pipelines():
     '''
-    Copy demo folders into user folders as needed
+    Set pipeline info
     '''
-    if st.session_state.has_cloud_session:
-        # Copy demo dirs to user folder (TODO: make this less hardcoded)
-        demo_dir_paths = [
-            os.path.join(
-                st.session_state.paths["root"],
-                "output_folder",
-                "NiChart_Demo1",
-            ),
-            os.path.join(
-                st.session_state.paths["root"],
-                "output_folder",
-                "NiChart_Demo2",
-            ),
-        ]
-        for demo in demo_dir_paths:
-            demo_name = os.path.basename(demo)
-            destination_path = os.path.join(
-                st.session_state.paths["out_dir"], demo_name
-            )
-            if os.path.exists(destination_path):
-                shutil.rmtree(destination_path)
-            shutil.copytree(demo, destination_path, dirs_exist_ok=True)
+    pipeline_cat = utiltl.overall_pipeline_category_listing()
+    pipeline_req = utiltl.overall_pipeline_requirements_listing()
+    pipeline_colors = [
+        'red', 'pink', 'grape', 'violet', 'indigo', 'blue',
+        'cyan', 'teal', 'green', 'lime', 'yellow', 'orange',
+    ]
+
+    tdict = {
+        'pipeline_categories': pipeline_cat,
+        'pipeline_requirements': pipeline_req,
+        'harmonizable_pipelines': pipeline_cat['harmonized'],
+        'pipeline_colors': pipeline_colors,
+        'sel_pipeline': None
+    }
+    st.session_state.update(tdict)
+
+def init_misc():
+    '''
+    Set initial values for session variables
+    '''
+    tdict = {
+        'mode': 'debug',
+        'show_settings': False,
+        'layout_plots': 'Sidebar',
+        'skip_survey': True,
+        'workflow': None,
+        'sel_add_button': None,
+        'sel_mrid': None,
+        'sel_roi': None,
+        'do_harmonize': False,
+        'nifti_dicom_upload_mode': None,
+        'list_mods': ["T1", "T2", "FL", "DTI", "fMRI"],
+        'params': {
+            'mean_icv': 1430000,  # Average ICV estimated from a large sample
+            'harm_min_samples': 30,
+        },
+        'misc': {
+            'icon_thumb': {         # Icons for panels
+                False: ":material/thumb_down:",
+                True: ":material/thumb_up:",
+            },
+        },
+        'debug': {
+            'flag_show': False,
+            'sel_vars': [],
+        },
+        'nicon': Image.open("../resources/nichart1.png"),
+        'sel_menu': 'Home',
+
+    }
+    st.session_state.update(tdict)
 
 def init_paths():
     '''
     Set paths to pre-defined folders
     '''
-    # Resources
+    # Set paths for resources
     p_root = os.path.dirname(os.path.dirname(os.getcwd()))
+    p_resources = os.path.join(p_root, "resources")
+    p_centiles = os.path.join(p_resources, "reference_data", "centiles")
+    p_sample = os.path.join(p_root, "sample_datasets", "demo_dataset")    
+    p_proc_def = os.path.join(p_resources, "process_definitions")
     p_init = p_root
-    p_resources = os.path.join(
-        p_root, "resources"
-    )
-    p_centiles = os.path.join(
-        p_resources, "reference_data", "centiles"
-    )
-    #p_sample = os.path.join(
-        #p_root, "sample_datasets", "demo_dataset_IXI"
-    #)    
-    p_sample = os.path.join(
-        p_root, "sample_datasets", "demo_dataset"
-    )    
-    p_proc_def = os.path.join(
-        p_resources, "process_definitions"
-    )
     
-    # Output
+    # Set path for user output folder
     user_id = ''
     if st.session_state.has_cloud_session:
         user_id = st.session_state.cloud_user_id
@@ -262,27 +229,9 @@ def init_paths():
             "/fsx/fsx/", user_id
         )
     else:
-        p_out = os.path.join(
-            p_root, 'output_folder', user_id
-        )
-    if not os.path.exists(p_out):
-        os.makedirs(p_out)
+        p_out = os.path.join(p_root, 'output_folder', user_id)
+    os.makedirs(p_out, exist_ok=True)
     
-    # Paths specific to project
-    p_prj = os.path.join(
-        p_out, st.session_state.prj_name
-    )
-    if not os.path.exists(p_prj):
-        os.makedirs(p_prj)
-
-    st.session_state.dicts = {
-        "muse_derived": os.path.join(
-            p_resources, "MUSE", "list_MUSE_mapping_derived.csv"
-        ),
-        "muse_all": os.path.join(p_resources, "MUSE", "list_MUSE_all.csv"),
-        "muse_sel": os.path.join(p_resources, "MUSE", "list_MUSE_primary.csv"),
-    }
-
     st.session_state.paths = {
         "root": p_root,
         "init": p_init,
@@ -293,10 +242,6 @@ def init_paths():
         "file_search_dir": "",
         "out_dir": p_out,
         "host_out_dir": None,
-        "prj_dir": p_prj,
-        "project": p_prj,
-        'target': None,
-        "curr_data": None
     }
 
     # Host-container dir mapping which can be useful for local nested containers
@@ -309,10 +254,11 @@ def init_paths():
     # List of output folders
     st.session_state.out_dirs = [
         'participants',
-        'dicoms',
         't1', 't2', 'fl', 'fmri', 'dti',
-        'dlmuse_seg', 'dlmuse_vol',
-        'dlwmls', 'spare',
+        'dlmuse-seg', 'dlmuse-vol',
+        'dlwmls-seg', 'dlwmls-vol',
+        'ml-biomarkers', 'ravens', 'opnmf',
+        'plot_data', 'reports'
     ]
     
     ############
@@ -323,9 +269,9 @@ def init_paths():
     st.session_state.paths["file_search_dir"] = st.session_state.paths["init"]
     ############    
 
-def reset_dicoms() -> None:
+def init_dicoms() -> None:
     '''
-    Reset dicom variables
+    Init dicom variables
     '''
     st.session_state.dicoms = {
         'list_series': None,
@@ -333,125 +279,6 @@ def reset_dicoms() -> None:
         'num_dicom_scans': 0,
         'df_dicoms': None
     }
-
-def init_plot_vars() -> None:
-    '''
-    Set plotting variables
-    '''
-    ######################
-    # General params
-    st.session_state.general_params = {
-        'sel_task': None,
-        'sel_rtype': None,
-        'sel_pipeline': None
-    }
-    
-    ######################
-    # General params
-    img_views = ["axial", "coronal", "sagittal"]
-    st.session_state.mriplot_params = {
-        'ulay': None,
-        'olay': None,
-        'sel_mrid': None,
-        'sel_roi': None,
-        'sel_orient': img_views,
-        'flag_overlay': True,
-        'flag_crop': False,
-        'map_minmax': [2.0, 5.0]
-    }
-
-    ######################
-    # Params for data plots
-    
-    # Dataframe that keeps parameters for all plots
-    st.session_state.plots = pd.DataFrame(columns=['flag_sel', 'params'])
-    st.session_state.plot_curr = -1
-
-    st.session_state.plot_active = None
-
-    # Plot data
-    st.session_state.plot_data = {
-        'csv_data': None,
-        'csv_cent': None,
-        'df_data': None,
-        'df_cent': None
-    }
-
-    # Plot settings
-    st.session_state.plot_settings = {
-        "res_type": None,       # Quantitative or Image
-        "pipeline": None,
-        "flag_hide_legend": False,
-        "flag_hide_mri": True,
-        "trend_types": ["Linear", "Smooth LOWESS Curve"],
-        #"centile_types": ["CN", "CN_Males", "CN_Females", "CN_ICV_Corrected"],
-        "centile_types": ["CN", "CN_Males", "CN_Females"],
-        "linfit_trace_types": [
-            "lin_fit", "conf_95%"
-        ],
-        "centile_trace_types": [
-            "centile_5", "centile_25", "centile_50", "centile_75", "centile_95",
-        ],
-        "distplot_trace_types": [
-            "histogram", "density", "rug"
-        ],
-        'flag_auto': True,
-        "min_per_row": 1,
-        "max_per_row": 5,
-        "num_per_row": 2,
-        "margin": 20,
-        "h_init": 500,
-        "h_coeff": 1.0,
-        "h_coeff_max": 2.0,
-        "h_coeff_min": 0.6,
-        "h_coeff_step": 0.2,
-        "distplot_binnum": 100,
-        "cmaps": utilcmap.cmaps_init,
-        "alphas": utilcmap.alphas_init,
-        "w_centile": 6,
-        "w_fit": 6,
-        "min_age": 20,
-        "max_age": 100,
-        #"cmaps2": utilcmap.cmaps2,
-        #"cmaps3": utilcmap.cmaps3,
-    }
-
-    # Plot parameters specific to each plot
-    st.session_state.plot_params = {
-        'sel_mrid': None,
-        "plot_type": "scatter",
-        "xvargroup": 'demog',
-        "xvar": 'Age',
-        "xmin": None,
-        "xmax": None,
-        "yvargroup": 'MUSE_ShortList',
-        "yvar": 'GM',
-        "ymin": None,
-        "ymax": None,
-        "hvargroup": 'cat_vars',
-        "hvar": None,
-        "hvals": None,
-        "fvargroup": 'cat_vars',
-        "fvar": None,
-        "fvals": None,
-        "corr_icv": False,
-        "plot_cent_normalized": False,
-        "trend": None,
-        "show_conf": False,
-        "traces": ['data'],
-        "lowess_s": 0.7,
-        "centile_type": 'CN',
-        "centile_values": ['centile_25', 'centile_50', 'centile_75'],
-        "flag_norm_centiles": False,
-        "list_roi_indices": [81, 82],
-        "list_orient": ["axial", "coronal", "sagittal"],
-        "is_show_overlay": True,
-        "crop_to_mask": False,
-        'filter_sex': ['F', 'M'],
-        'filter_age': [40, 95],
-    }
-
-    ###################################
     
 def init_pipeline_definitions() -> None:
     plist = os.path.join(
@@ -489,9 +316,13 @@ def init_var_groups() -> None:
     for group_name, group_info in data.items():
         raw_values = group_info.get('values', [])
         str_values = [str(v) for v in raw_values]  # ensure uniform type
+        pipeline = group_info.get('pipeline', [])
+        if pipeline is None:
+            pipeline = []
         rows.append({
             'group': group_name,
             'category': group_info.get('category'),
+            'pipeline': pipeline,
             'vtype': group_info.get('vtype'),
             'atlas': group_info.get('atlas'),
             'values': str_values
@@ -504,85 +335,87 @@ def init_dicts() -> None:
     '''
     Initialize all data dictionaries (atlas roi def.s etc.)
     '''
-    # MUSE dictionaries
-    muse = utilroi.read_muse_dicts()
-    st.session_state.dicts = {
-        'muse': muse
-    }
+    st.session_state.dicts = {}
 
-def init_muse_roi_def() -> None:
-    # Paths to roi lists
-    muse = {
-        'path': os.path.join(st.session_state.paths['resources'], 'lists', 'MUSE'),
-        'list_rois' : 'MUSE_listROIs.csv',
-        'list_derived' : 'MUSE_mapping_derivedROIs.csv',
-        'list_groups' : 'MUSE_ROI_Groups_v1.csv'
-    }
-    
-    # Read roi lists to dictionaries
-    df_tmp = pd.read_csv(
-        os.path.join(muse['path'], muse['list_rois']),
-    )
-    dict1 = dict(zip(df_tmp["Index"].astype(str), df_tmp["Name"].astype(str)))
-    dict2 = dict(zip(df_tmp["Name"].astype(str), df_tmp["Index"].astype(str)))
-    dict3 = utilroi.muse_derived_to_dict(
-        os.path.join(muse['path'], muse['list_derived'])
-    )
-    df_derived = utilroi.muse_derived_to_df(
-        os.path.join(muse['path'], muse['list_derived'])
-    )
-    df_groups = utilroi.muse_roi_groups_to_df(
-        os.path.join(muse['path'], muse['list_groups'])
-    )
-    muse['dict_roi'] = dict1
-    muse['dict_roi_inv'] = dict2
-    muse['dict_derived'] = dict3
-    muse['df_derived'] = df_derived
-    muse['df_groups'] = df_groups
-    
-    # Read MUSE ROI lists
-    st.session_state.rois = {
-        'muse' : muse
-    }
+    # Read MUSE dictionaries
+    utilroi.muse_read_dicts()    
 
-def update_project(sel_project) -> None:
+    # Read roi lists info
+    f_in = os.path.join(
+        st.session_state.paths['resources'], 'dicts', 'dict_roi_lists.yaml'
+    )
+    with open(f_in, 'r') as file:
+        data = yaml.safe_load(file)
+    st.session_state.dicts['roi_lists'] = data
+
+    # Read project files info
+    f_in = os.path.join(
+        st.session_state.paths['resources'], 'dicts', 'dict_project_files.yaml'
+    )
+    with open(f_in, 'r') as file:
+        data = yaml.safe_load(file)
+    st.session_state.dicts['project_files'] = data
+
+    # Read project vars info
+    f_in = os.path.join(
+        st.session_state.paths['resources'], 'dicts', 'dict_project_vars.yaml'
+    )
+    with open(f_in, 'r') as file:
+        data = yaml.safe_load(file)
+
+    # Expand lists in project variable definitions
+    for vkey, vval in data.items():
+        raw_vars = vval.get('vars', [])
+        exp_vars = expand_values(raw_vars, st.session_state.dicts['roi_lists'])
+        data[vkey]['vars'] = exp_vars
+    st.session_state.dicts['project_vars'] = data
+
+    # Read var renaming info
+    f_in = os.path.join(
+        st.session_state.paths['resources'], 'dicts', 'dict_var_renaming.yaml'
+    )
+    with open(f_in, 'r') as file:
+        data = yaml.safe_load(file)
+    st.session_state.dicts['var_renaming'] = data
+
+
+    # Read var groups info
+    f_in = os.path.join(
+        st.session_state.paths['resources'], 'dicts', 'dict_var_groups.yaml'
+    )
+    with open(f_in, 'r') as file:
+        data = yaml.safe_load(file)
+    st.session_state.dicts['var_groups'] = data
+
+def init_project(sel_project) -> None:
     """
-    Updates when project changes
+    Updates when project folder changes
     """
     if sel_project is None:
-        return
+        return False
 
-    if sel_project == st.session_state.prj_name:
-        return
-
-    # Create project dir
-    p_prj = os.path.join(
-        st.session_state.paths['out_dir'], sel_project
-    )
+    # Update project folder only if user selects a new one
+    if sel_project == st.session_state.get('prj_name', None):
+        return False
 
     try:
-        if not os.path.exists(p_prj):
-            os.makedirs(p_prj)
-            st.toast(f'Created folder {sel_project}')
-            time.sleep(1)
+        # Create project folder
+        utilup.create_project_folder(sel_project)
+
+        # Set session state variables
+        p_prj = os.path.join(st.session_state.paths['out_dir'], sel_project)
+        st.session_state.prj_name = sel_project
+        st.session_state.paths['prj_dir'] = p_prj
+        st.session_state.paths['curr_data'] = p_prj
+        
+        init_dicoms()
+        init_scan()
+        init_participant()
+
+        return True
+
     except:
-        st.error(f'Could not create project folder: {p_prj}')
-        return
-
-    # Set project name
-    st.session_state.prj_name = sel_project
-    st.session_state.paths['prj_dir'] = p_prj
-    
-    reset_dicoms()
-    init_scan()
-    init_participant()
-    
-    st.toast(f'Updated project folder {sel_project}')
-    st.session_state.project = sel_project
-    st.session_state.project_selected_explicitly = True
-    st.session_state.paths['project'] = p_prj
-
-    st.session_state.paths['curr_data'] = st.session_state.paths['prj_dir']
+        return False
 
 # Function to parse AWS login (if available)
 def process_session_token() -> Any:
@@ -619,73 +452,26 @@ def process_session_user_email() -> Any:
     return decoded_token['email']
 
 def init_session_state() -> None:
-    # Initiate Session State Values
+    '''
+    Initiate Session State Values
+    '''
     if "instantiated" not in st.session_state:
         
-        # Set initial session variables
-        init_session_vars()
-
-        # Set output files
-        init_project_folders()
-
-        ####################################
-        # Settings specific to desktop/cloud
-        
-        # App type ('desktop' or 'cloud')
-        if os.getenv("NICHART_FORCE_CLOUD", "0") == "1":
-            st.session_state.forced_cloud = True
-            st.session_state.app_type = "cloud"
-        else:
-            st.session_state.forced_cloud = False
-            st.session_state.app_type = "desktop"
-
-        st.session_state.app_config = {
-            "cloud": {"msg_infile": "Upload"},
-            "desktop": {"msg_infile": "Select"},
-        }
-
-        # Store user session info for later retrieval
-        if st.session_state.app_type == "cloud":
-            st.session_state.cloud_session_token = process_session_token()
-            if st.session_state.cloud_session_token:
-                st.session_state.has_cloud_session = True
-                st.session_state.cloud_user_id = process_session_user_id()
-                st.session_state.cloud_user_email = process_session_user_email()
-            else:
-                st.session_state.has_cloud_session = False
-        else:
-            st.session_state.has_cloud_session = False
-
-        ####################################
-
-        # Initialize paths
+        init_cloud()
         init_paths()
-
-        # Initialize dicts
+        init_project('user_default')
+        init_pipelines()
+        init_misc()
+        init_folders()
+        init_participant()
+        init_scan()
+        init_user()
         init_dicts()
-
-        # Initialize variable groups
         init_var_groups()
-
-        # FIXME : set init folder to test folder outside repo
-        st.session_state.paths["init"] = os.path.join(
-            st.session_state.paths["root"], "test_data"
-        )
-        st.session_state.paths["file_search_dir"] = st.session_state.paths["init"]
-
-        # Update project variables
-        update_project(st.session_state.prj_name)
-
-        # Copy test data to user folder
-        copy_test_folders
-
-        # Init variables for different pages 
-        init_muse_roi_def()
         init_pipeline_definitions()
         init_reference_data()
-        init_plot_vars()
-        reset_dicoms()
-        
+        init_dicoms()
+
         # Set flag
         st.session_state.instantiated = True
 

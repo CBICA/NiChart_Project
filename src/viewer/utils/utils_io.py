@@ -292,13 +292,12 @@ def upload_single_file(out_dir, out_name, label) -> None:
                 return False
         return False
 
-
 def create_img_list(dtype: str, show_warning=False) -> None:
     '''
     Create a list of input images
     '''
     out_dir = os.path.join(
-        st.session_state.paths['project'], dtype
+        st.session_state.paths['prj_dir'], dtype
     )
 
     # Get all NIfTI files
@@ -331,9 +330,9 @@ def create_scan_csv() -> None:
     Create a csv with MRID (and other required fields if available)
     '''
     out_dir = os.path.join(
-        st.session_state.paths['project'], 'lists'
+        st.session_state.paths['prj_dir'], 'lists'
     )
-    #mod_dirs = {mod: os.path.join(st.session_state.paths['project'], mod) for mod in ['t1', 't2', 'fl', 'dti', 'fmri']}
+    #mod_dirs = {mod: os.path.join(st.session_state.paths['prj_dir'], mod) for mod in ['t1', 't2', 'fl', 'dti', 'fmri']}
     #dir_dict = {'T1': mod_dirs['t1'],
                             #'T2': mod_dirs['t2'],
                             #'FLAIR': mod_dirs['fl'],
@@ -341,7 +340,7 @@ def create_scan_csv() -> None:
                             #'FMRI': mod_dirs['fmri'],
                             #}
     #nifti_parser = NiftiMRIDParser()
-    #heuristic_df = nifti_parser.create_master_csv(dir_dict, os.path.join(st.session_state.paths['project'], 'inferred_data_paths.csv'))
+    #heuristic_df = nifti_parser.create_master_csv(dir_dict, os.path.join(st.session_state.paths['prj_dir'], 'inferred_data_paths.csv'))
     
     
     #df = heuristic_df.sort_values(by='MRID')
@@ -352,7 +351,6 @@ def create_scan_csv() -> None:
     #df[['IsCN']] = 1
     
     #return df
-
 
 def normalize_demographics_df(
     df_raw: pd.DataFrame,
@@ -541,7 +539,7 @@ def load_dicoms(default_modality='t1'):
     )
 
     out_dir = os.path.join(
-        st.session_state.paths['project'], 'dicoms'
+        st.session_state.paths['prj_dir'], 'dicoms'
     )
     
     upload_multiple_files(out_dir)
@@ -552,7 +550,7 @@ def load_dicoms(default_modality='t1'):
         
     utildcm.panel_detect_dicom_series(out_dir)
         
-    utildcm.panel_extract_nifti(st.session_state.paths['project'])
+    utildcm.panel_extract_nifti(st.session_state.paths['prj_dir'])
         
     # Create list of scans
     sel_mod='T1'
@@ -579,7 +577,7 @@ def load_nifti(default_modality='t1', forced_modality=None):
         return
 
     out_dir = os.path.join(
-        st.session_state.paths['project'], sel_mod.lower()
+        st.session_state.paths['prj_dir'], sel_mod.lower()
     )
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
@@ -596,7 +594,6 @@ def load_nifti(default_modality='t1', forced_modality=None):
             f" No nifti image files detected yet. Try uploading some!", icon=":material/thumb_down:"
         )  
     
-    
 def load_subj_list():
     '''
     Panel for uploading subject list with variables required for processing
@@ -612,7 +609,7 @@ def load_subj_list():
         align='left'
     )
 
-    #out_dir = os.path.join(st.session_state.paths['project'], 'participants')
+    #out_dir = os.path.join(st.session_state.paths['prj_dir'], 'participants')
     #if not os.path.exists(out_dir):
         #os.makedirs(out_dir)
         
@@ -626,7 +623,7 @@ def load_subj_list():
         #if os.path.exists(fname_tmp):
             #st.success("We received your demographics file! Converting it to our format...")
             #df_user = pd.read_csv(fname_tmp)
-            #mod_dirs = {mod: os.path.join(st.session_state.paths['project'], mod) for mod in ['t1', 't2', 'fl', 'dti', 'fmri']}
+            #mod_dirs = {mod: os.path.join(st.session_state.paths['prj_dir'], mod) for mod in ['t1', 't2', 'fl', 'dti', 'fmri']}
             #dir_dict = {'T1': mod_dirs['t1'],
                             #'T2': mod_dirs['t2'],
                             #'FLAIR': mod_dirs['fl'],
@@ -634,7 +631,10 @@ def load_subj_list():
                             #'FMRI': mod_dirs['fmri'],
                             #}
             #nifti_parser = NiftiMRIDParser()
-            #heuristic_df = nifti_parser.create_master_csv(dir_dict, os.path.join(st.session_state.paths['project'], 'inferred_data_paths.csv'))
+            # heuristic_df = nifti_parser.create_master_csv(
+            #     dir_dict, 
+            #     os.path.join(st.session_state.paths['prj_dir'], '_working', 'inferred_data_paths.csv')
+            # )
             #heuristic_df = heuristic_df.drop(df.filter(regex='_path$').columns, axis=1)
             #corrected_df, issues = normalize_demographics_df(df_user, heuristic_df)
             #corrected_df = corrected_df.sort_values(by='MRID')
@@ -692,7 +692,6 @@ def load_subj_list():
         #if st.button('Delete demog file'):
             #remove_dir(out_dir)
 
-
 def load_user_csv():
     '''
     Panel for uploading data file
@@ -707,7 +706,7 @@ def load_user_csv():
         align='left'
     )
 
-    out_dir = os.path.join(st.session_state.paths['project'], 'user_data')
+    out_dir = os.path.join(st.session_state.paths['prj_dir'], 'user_data')
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
 
@@ -785,7 +784,7 @@ def preview_project_folder(project):
     Panel for viewing files in a project folder
     """
     with st.container(border=True):
-        in_dir = get_path_for_project(project)
+        in_dir = st.session_state.paths.get('prj_dir', None)
         utildv.data_overview(in_dir)
 
 def panel_select_existing_with_preview(out_dir):
@@ -915,7 +914,7 @@ def panel_select_project(out_dir, curr_project):
 class RequirementStatus:
     name: str
     status: str # 'green' | 'yellow' | 'red'
-    count: int # how many items available/satsified
+    count: int # how many items available/satisfied
     target: int # reference count for 'green'
     note: str = '' # short human message
 
@@ -931,7 +930,6 @@ def _issues_dataframe(issues) -> pd.DataFrame:
     df = pd.DataFrame([asdict(i) for i in issues])
     cols = [c for c in ["mrid", "row", "column", "value", "reason"] if c in df.columns]
     return df[cols]
-
 
 def count_csv_rows(csv_path: str) -> int:
     try:
@@ -951,7 +949,7 @@ def compute_counts(ctx: dict = {}) -> dict:
     """
     ctx can contain other contextual info, use as needed to pass things from ui
     """
-    sel_project = st.session_state.project
+    sel_project = st.session_state.prj_name
     project_path = get_path_for_project(sel_project)
     t1_path = os.path.join(project_path, "t1")
     flair_path = os.path.join(project_path, "fl")
@@ -1056,7 +1054,7 @@ def panel_guided_upload_data():
                 raise ValueError(f"Requirement {item.name} for pipeline {pipeline_id} has no associated rule. Please submit a bug report.")
     if "needs_demographics" in reqs_set:
         required_cols = reqs_params.get("csv_has_columns", [])
-        csv_path = os.path.join(st.session_state.paths["project"], 'participants' ,'participants.csv')
+        csv_path = os.path.join(st.session_state.paths['prj_dir'], 'participants' ,'participants.csv')
         csv_report = utilcsv.validate_csv(csv_path=csv_path, required_cols=required_cols, mrid_col="MRID")
         severity = _csv_severity(csv_report)
         icon = STATUS_ICON[severity]

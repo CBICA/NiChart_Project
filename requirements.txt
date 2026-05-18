@@ -22,7 +22,7 @@ dicom2nifti
 pybids
 
 # streamlit
-streamlit==1.50.0
+streamlit==1.57.0
 st_pages==1.0.1
 streamlit_plotly_events
 streamlit-base-extras
@@ -38,6 +38,9 @@ plotly-express
 stqdm
 pyjwt
 docker
+streamlit-card
+reportlab
+matplotlib
 
 # chatbot 
 boto3

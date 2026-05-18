@@ -9,9 +9,11 @@ import utils.utils_pages as utilpg
 import utils.utils_processes as utilprc
 import utils.utils_session as utilses
 import utils.utils_io as utilio
+import utils.utils_download as utildownload
+import utils.utils_upload as utilup
+import utils.utils_pipelines as utilpipe
 import utils.utils_data_view as utildv
 from utils.utils_styles import inject_global_css 
-import gui.utils_navig as utilnav
 
 from streamlit_image_select import image_select
 import re
@@ -40,25 +42,59 @@ st.session_state.paths['curr_data'] = st.session_state.paths['prj_dir']
 if 'instantiated' not in st.session_state or not st.session_state.instantiated:
     utilses.init_session_state()
 
-
-st.markdown("<h5 style='text-align:center; color:#3a3a88;'>Single-Subject Analysis\n\n</h1>", unsafe_allow_html=True)
-
-cols = st.columns([1,6,1])
-with cols[1]:
-    st.markdown(
-        '''
-        Welcome! This is where you can calculate neuroimaging chart values from a single subject's MRI scan(s) in a few simple actions:
-        
-        - **Data:** Upload image (Nifti, Dicom) and non-image (.csv) files required for analysis
-        
-        - **Pipelines:** Select processing/analysis pipeline to run on your data
-
-        - **Results:** View/download results of the pipeline
-        
-        ''', unsafe_allow_html=True
+with st.container(
+    horizontal=True, horizontal_alignment="center", width='stretch'
+):
+    tab1, tab2, tab3, tab4 = st.tabs(
+        ["Overview", "Data", "Processing", "Results"],
+        on_change='rerun',
     )
 
-utilnav.main_navig(None, None, 'Data', 'pages/nichart_data.py')
+## Info
+if tab1.open:
+    with tab1:
+        # st.markdown("<h5 style='text-align:center; color:#3a3a88;'>Single-Subject Analysis\n\n</h1>", unsafe_allow_html=True)
+        st.markdown("<h5 style='color:#3a3a88;'>Single-Subject Analysis\n\n</h1>", unsafe_allow_html=True)
+
+        st.info(
+            '''
+            This is where you can calculate neuroimaging chart values from a single subject's MRI scan(s) in a few simple actions:
+            - **Data:** Upload image (Nifti, Dicom, BIDS) and non-image (.csv) files required for analysis
+            - **Processing:** Select processing/analysis pipeline to run on your data
+            - **Results:** Download results of the selected pipelines
+            ''', icon=':material/info:'
+        )
+
+## Data Upload
+if tab2.open:
+    with tab2:
+
+        # with st.container(horizontal=True, horizontal_alignment="center"):
+        with st.container(horizontal=True):
+            st.markdown("<h5 style='color:#3a3a88;'>Data Upload</h5>", unsafe_allow_html=True, width='content')
+
+        utilup.panel_data()
+
+## Pipelines
+if tab3.open:
+    with tab3:
+        # with st.container(horizontal=True, horizontal_alignment="center"):
+        with st.container(horizontal=True):
+            st.markdown("<h5 style='color:#3a3a88;'>Select and Run a Pipeline</h5>", unsafe_allow_html=True, width='content')
+
+        utilpipe.panel_pipelines()
+
+## Download Results
+if tab4.open:
+    with tab4:
+        # with st.container(horizontal=True, horizontal_alignment="center"):
+        with st.container(horizontal=True):
+            st.markdown("<h5 style='color:#3a3a88;'>Download Results</h5>", unsafe_allow_html=True, width='content')
+
+        utildownload.panel_download()
+
+# Home button
+utilpg.navig_home()
 
 # Show session state vars
 if st.session_state.mode == 'debug':

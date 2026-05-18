@@ -26,6 +26,9 @@ def build_folder_tree(
     list_ignore = None,
     flag_dir_disabled = False,
 ):
+    '''
+    Create a tree structure to display files
+    '''
     tree_items = []
     list_paths = []
     try:
@@ -37,6 +40,7 @@ def build_folder_tree(
             e1 = [x for x in st.session_state.out_dirs if x in entries]
             e2 = [x for x in entries if x not in st.session_state.out_dirs]
             entries = e1 + e2
+            # entries = e1
 
         # Remove given items
         if list_ignore is not None:
@@ -255,7 +259,7 @@ def select_files(in_dir):
 
             # Save merged data
             out_dir = os.path.join(
-                st.session_state.paths['project'], 'data_merged'
+                st.session_state.paths['prj_dir'], 'data_merged'
             )
             if not os.path.exists(out_dir):
                 os.makedirs(out_dir)

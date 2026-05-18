@@ -1,0 +1,14 @@
+# Dictionaries for renaming variables in project data files, for use in the viewer GUI and other analyses.
+# This allows us to have more user-friendly variable names in the viewer, and mapping roi indeices to names, while keeping the original variable names in the data files and code.
+
+dlmuse-vol:
+  desc: DLMUSE brain region volumes (237 ROIs)
+  prefix: dlmuse-vol_
+  atlas: muse
+  prefix_renamed: DLMUSE Volume of
+
+dlwmls-vol_:
+  desc: DLWMLS volumes in MUSE ROIs
+  prefix: dlwmls-vol_
+  atlas: muse
+  prefix_renamed: DLWMLS Volume of

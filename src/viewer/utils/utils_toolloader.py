@@ -677,7 +677,7 @@ def check_requirements_met_nopanel(pipeline_name, harmonized):
                 blockers.append(f"Participants CSV appears to be missing or malformed. Please check that this data was provided.")
             elif item.name == "csv_has_columns":
                 required_cols = reqs_params.get("csv_has_columns", [])
-                csv_path = os.path.join(st.session_state.paths["project"], 'participants' ,'participants.csv')
+                csv_path = os.path.join(st.session_state.paths['prj_dir'], 'participants' ,'participants.csv')
                 csv_report = utilcsv.validate_csv(csv_path=csv_path, required_cols=required_cols, mrid_col="MRID")
                 severity = utilio._csv_severity(csv_report)
                 if csv_report.file_ok:
@@ -697,7 +697,7 @@ def check_requirements_met_nopanel(pipeline_name, harmonized):
                 blockers.append(f"Participants CSV row count does not match the number of subjects available in scans {item.note}. Please check that all desired participants have CSV entries.")
             elif item.name == "csv_has_columns":
                 required_cols = reqs_params.get("csv_has_columns", [])
-                csv_path = os.path.join(st.session_state.paths["project"], 'participants' ,'participants.csv')
+                csv_path = os.path.join(st.session_state.paths['prj_dir'], 'participants' ,'participants.csv')
                 csv_report = utilcsv.validate_csv(csv_path=csv_path, required_cols=required_cols, mrid_col="MRID")
                 severity = utilio._csv_severity(csv_report)
                 if csv_report.file_ok:
@@ -724,14 +724,17 @@ def check_requirements_met_panel(pipeline_name):
 
     # need to generate counts
     counts = utilio.compute_counts()
+    print(f"DEBUG: check_requirements_met_panel: counts = {counts}")
     
     items = utilio.classify_cardinality(req_order, counts)
+    print(f"DEBUG: check_requirements_met_panel: items = {counts}")
     
     count_max_key = max(counts, key=counts.get)
     count_max_value = counts[count_max_key]
     count_diffs = {key: abs(counts[key]-count_max_value) for key in counts.keys() if key != count_max_key}
 
     for item in items:
+        print(f"DEBUG: check_requirements_met_panel: checking item {item}")
         icon = STATUS_ICON[item.status]
         expanded = (item.status != "green")
         
@@ -748,8 +751,9 @@ def check_requirements_met_panel(pipeline_name):
             else:
                 raise ValueError(f"Requirement {item.name} for pipeline {pipeline_id} has no associated rule. Please submit a bug report.")
     if "needs_demographics" in reqs_set:
+        print(f"DEBUG: check_requirements_met_panel: checking needs_demographics")
         required_cols = reqs_params.get("csv_has_columns", [])
-        csv_path = os.path.join(st.session_state.paths["project"], 'participants' ,'participants.csv')
+        csv_path = os.path.join(st.session_state.paths['prj_dir'], 'participants' ,'participants.csv')
         csv_report = utilcsv.validate_csv(csv_path=csv_path, required_cols=required_cols, mrid_col="MRID")
         severity = utilio._csv_severity(csv_report)
         icon = STATUS_ICON[severity]
@@ -1145,8 +1149,8 @@ def run_pipeline(pipeline_id: str,
                                    params=resolved_params,
                                    status="failure")
             log.error(f"Pipeline step {tool_id} failed with status {result['status']}.")
-            print(f"Step {sid}, {tool_id} failed with status {result["status"]}, see error log:")
-            print(f"Error message: {result["error_message"]}")
+            print(f"Step {sid}, {tool_id} failed with status {result['status']}, see error log:")
+            print(f"Error message: {result['error_message']}")
             if process_progress_bar:
                 process_progress_bar.set_description(f"Running {tool_id}...")
             if process_status_box:

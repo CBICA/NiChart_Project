@@ -1,34 +1,27 @@
-import os
-import shutil
-import time
 from typing import Any
 
-import pandas as pd
 import numpy as np
 import nibabel as nib
 from nibabel.orientations import axcodes2ornt, ornt_transform
 from scipy import ndimage
-import utils.utils_plots as utilpl
-import utils.utils_misc as utilmisc
-import utils.utils_user_select as utiluser
 import gui.utils_widgets as utilwd
-
-import streamlit_antd_components as sac
+import os
 
 import streamlit as st
 from stqdm import stqdm
 
+from utils.utils_logger import setup_logger
+logger = setup_logger()
+
+## Constants
 img_views = ["axial", "coronal", "sagittal"]
 VIEW_AXES = [0, 1, 2]
 VIEW_OTHER_AXES = [(1, 2), (0, 2), (0, 1)]
-MASK_COLOR = (0, 255, 0)  # RGB format
 MASK_COLOR = np.array([0.0, 1.0, 0.0])  # RGB format
 OLAY_ALPHA = 0.2
 
-MAP_COLOR = (255, 0, 0)  # RGB format
 MAP_COLOR = np.array([1.0, 0.0, 0.0])  # RGB format
 MAP_ALPHA = 0.7
-
 
 def pad_image(img: np.ndarray) -> np.ndarray:
     """
@@ -119,7 +112,7 @@ def detect_mask_bounds(mask: Any) -> Any:
     Used later to set the slider in the image viewer
     """
     mask_bounds = np.zeros([3, 3]).astype(int)
-    for i, axis in enumerate(VIEW_AXES):
+    for i, _ in enumerate(VIEW_AXES):
         mask_bounds[i, 0] = 0
         mask_bounds[i, 1] = mask.shape[i]
         slices_nz = np.where(np.sum(mask, axis=VIEW_OTHER_AXES[i]) > 0)[0]
@@ -138,19 +131,47 @@ def detect_img_bounds(img: np.ndarray) -> np.ndarray:
     """
 
     img_bounds = np.zeros([3, 3]).astype(int)
-    for i, axis in enumerate(VIEW_AXES):
+    for i, _ in enumerate(VIEW_AXES):
         img_bounds[i, 0] = 0
         img_bounds[i, 1] = img.shape[i]
         img_bounds[i, 2] = img.shape[i] // 2
 
     return img_bounds
 
+def select_mriplot_settings(ptype):
+    '''
+    Panel to select mriplot settings
+    '''
+    ss = st.session_state
+    pdict = ss[ptype]
+
+    utilwd.my_multiselect(
+        f"{ptype}.settings.mri_orient", img_views, 'View Planes'
+    )
+
+    mri_orient = pdict['settings']['mri_orient']
+    if mri_orient is None or len(mri_orient) == 0:
+        return
+
+    utilwd.my_checkbox(
+        f'{ptype}.settings.mri_flag_olay', "Show olay"
+    )
+
+    utilwd.my_checkbox(
+        f'{ptype}.settings.mri_flag_crop', 'Crop to mask'
+    )
+
 @st.cache_data(max_entries=1)  # type:ignore
-def prep_image_and_olay(f_img: np.ndarray, f_mask: Any, list_rois: list, crop_to_mask: bool) -> Any:
+def prep_image_and_olay(
+    f_img,
+    f_mask,
+    list_rois = None,
+    minmax = [0,1],
+    crop_to_mask = False,
+) -> Any:
     """
     Read images from files and create 3D matrices for display
     """
-
     # Read nifti
     nii_img = nib.load(f_img)
     nii_mask = nib.load(f_mask)
@@ -178,8 +199,14 @@ def prep_image_and_olay(f_img: np.ndarray, f_mask: Any, list_rois: list, crop_to
     # Crop image to ROIs and reshape
     out_img, out_mask = crop_image(out_img, out_mask, crop_to_mask)
 
+    min_val, max_val = minmax[0], minmax[1]
+
     # Create mask with sel roi
-    out_mask = np.isin(out_mask, list_rois)
+    if list_rois is not None:
+        out_mask = np.isin(out_mask, list_rois)
+    else:
+        out_mask = ((out_mask >= min_val) & (out_mask <= max_val)).astype(int)
+        st.write(f'Masked voxels: {(out_mask>0).sum()}')
 
     # Merge image and out_mask
     out_img = np.stack((out_img,) * 3, axis=-1)
@@ -233,6 +260,7 @@ def show_img_slices(img, scroll_axis, sel_axis_bounds, orientation, wimg = None)
         sel_axis_bounds[1] - 1,
         value=sel_axis_bounds[2],
         key=f"slider_{orientation}",
+        # width = wimg
     )
 
     # Extract the slice and display it
@@ -251,208 +279,114 @@ def show_img_slices(img, scroll_axis, sel_axis_bounds, orientation, wimg = None)
         else:
             st.image(img[:, :, slice_index], width=wimg)
 
-def panel_select_var(sel_var_groups, plot_params, var_type, add_none = False):
-    '''
-    User panel to select a variable
-    Variables are grouped in categories
-    '''
-    df_groups = st.session_state.dicts['df_var_groups'].copy()
-    df_groups = df_groups[df_groups.category.isin(sel_var_groups)]
-
-    st.markdown(f'##### Variable: {var_type}')
-    cols = st.columns([1,3])
-    with cols[0]:
-
-        list_group = df_groups.group.unique().tolist()
-        try:
-            curr_value = plot_params[f'{var_type}_group']
-            curr_index = list_group.index(curr_value)
-        except ValueError:
-            curr_index = 0
-
-        st.selectbox(
-            "Variable Group",
-            list_group,
-            key = f'_{var_type}_group',
-            index = curr_index
-        )
-        plot_params[f'{var_type}_group'] = st.session_state[f'_{var_type}_group']
-
-    with cols[1]:
-
-        sel_group = plot_params[f'{var_type}_group']
-        if sel_group is None:
-            return
-
-        sel_atlas = df_groups[df_groups['group'] == sel_group]['atlas'].values[0]
-        list_vars = df_groups[df_groups['group'] == sel_group]['values'].values[0]
-
-        # Convert MUSE ROI variables from index to name
-        if sel_atlas == 'muse':
-            roi_dict = st.session_state.dicts['muse']['ind_to_name']
-            list_vars = [roi_dict[k] for k in list_vars]
-
-        if add_none:
-            list_vars = ['None'] + list_vars
-
-        try:
-            curr_value = plot_params[var_type]
-            curr_index = list_vars.index(curr_value)
-        except ValueError:
-            curr_index = 0
-
-        st.selectbox(
-            "Variable Name",
-            list_vars,
-            key = f'_{var_type}',
-            index = curr_index
-        )
-
-        plot_params[var_type] = st.session_state[f'_{var_type}']
-
-def panel_set_params(plot_params, var_groups_data, atlas, list_vars):
-    """
-    Panel to set mriview parameters
-    """
-    df_vars = st.session_state.dicts['df_var_groups']
-    
-    # Select roi
-    st.write('ROI Name')
-    sel_var = utilwd.selectbox_twolevel(
-        df_vars[df_vars.category.isin(['roi'])],
-        list_vars,
-        '_sel_roi_group',
-        '_sel_roi_name',
-        flag_add_none = False,
-        dicts_rename = {
-            'muse': st.session_state.dicts['muse']['ind_to_name']
-        }
-    )
-    st.session_state['sel_roi'] = sel_var
-
-def panel_view_seg():
+def panel_view_seg(ptype):
     '''
     Panel to display segmented image overlaid on underlay image
-    '''
-    params = st.session_state.mriplot_params
+    '''    
+    logger.debug('Panel: View Segmentation')
+
+    ss = st.session_state
+    pdict = ss[ptype]
+
+    mrid = pdict['selected']['mrid']
+    ylab = pdict['selected']['ylab']
+
+    if mrid is None:
+        return
+
+    if ylab is None:
+        return
+
+    # Find roi indices
+    col_dict = pdict['data']['col_dict']
+    roi = col_dict.renamed_to_roi_index(ylab)
+    if roi is None:
+        return
+    roi_indices = st.session_state.dicts['muse']['derived'].get(roi, [roi])
+    if roi_indices is None or len(roi_indices)<=0:
+        return
     
-    if params['ulay'] is None:
+    ## FIXME
+    in_dir = st.session_state.paths['prj_dir']
+    ulay = os.path.join(
+        in_dir, 't1', f'{mrid}_T1.nii.gz'
+    )
+    olay = os.path.join(
+        in_dir, 'dlmuse-seg', f'{mrid}_T1_DLMUSE.nii.gz'
+    )
+    if not os.path.exists(ulay):
+        return
+    if not os.path.exists(olay):
+        return
+    pdict['selected']['mri_ulay'] = ulay
+    pdict['selected']['mri_olay'] = olay
+    ##
+
+    tab1, tab2 = st.tabs(
+        [':material/visibility_off:', 'Options'],
+        on_change='rerun',
+        key='_tabs_mri_controls',
+    )
+
+    if tab2.open:
+        with tab2:
+            with st.container(border=True):
+                select_mriplot_settings(ptype)
+
+    if pdict['selected']['mri_ulay'] is None:
+        st.toast('Underlay image not found!')
         return
 
-    if params['olay'] is None:
-        return
-
-    if params['sel_roi'] is None:
-        #st.error('Please select the ROI!')
-        #return
-        roi_indices = [1]
-    else:
-        roi_indices = utilmisc.get_roi_indices(params['sel_roi'], 'muse')
-        if roi_indices is None:
-            return
+    if pdict['selected']['mri_olay'] is None:
+        st.toast('Overlay image not found!')
+        pdict['settings']['mri_flag_olay'] = False
+        st.rerun()
 
     # Show images
     with st.container(border=True):
-        with st.spinner("Wait for it..."):
-            # Process image (and mask) to prepare final 3d matrix to display
-            
-            try:
-                img, mask, img_masked = prep_image_and_olay(
-                    params['ulay'], params['olay'], roi_indices, params['flag_crop']
-                )
-            except:
-                st.warning('Could not read image files!')
-                return
-            
-            img_bounds = detect_mask_bounds(mask)
+        st.markdown(f'Subject: `{mrid}`')
+        try:
+            img, mask, img_masked = prep_image_and_olay(
+                pdict['selected']['mri_ulay'],
+                pdict['selected']['mri_olay'],
+                list_rois=roi_indices,
+                crop_to_mask=pdict['settings']['mri_flag_crop']
+            )
+        except Exception as exc:
+            st.warning(f'Could not read image files! {exc}')
+            st.write(pdict['selected']['mri_ulay'])
+            st.write(pdict['selected']['mri_olay'])
+            st.write(pdict['settings'])
+            return
+        
+        img_bounds = detect_mask_bounds(mask)
 
-            cols = st.columns(3)
-            for i, tmp_orient in stqdm(
-                enumerate(params['sel_orient']),
-                desc="Showing images ...",
-                total=len(params['sel_orient'])
-            ):
-                with cols[i]:
-                    ind_view = img_views.index(tmp_orient)
-                    size_auto = True
-                    if params['olay'] is None or params['flag_overlay'] is False:
-                        show_img_slices(
-                            img, ind_view, img_bounds[ind_view, :], tmp_orient
-                        )
-                    else:
-                        show_img_slices(
-                            img_masked, ind_view, img_bounds[ind_view, :], tmp_orient
-                        )
-
-def prep_image_and_olaymap(
-    f_img, f_map, minmax = [0,1], crop_to_mask = False
-):
-    """
-    Read ulay image and olay map from files and create 3D matrices for display
-    """
-
-    # Read nifti
-    nii_img = nib.load(f_img)
-    nii_map = nib.load(f_map)
-
-    # Reorient nifti
-    nii_img = reorient_nifti(nii_img, ref_orient="IPL")
-    nii_map = reorient_nifti(nii_map, ref_orient="IPL")
-
-    # Extract image to matrix
-    out_img = nii_img.get_fdata()
-    out_map = nii_map.get_fdata()
-
-    # Rescale image and out_mask to equal voxel size in all 3 dimensions
-    out_img = ndimage.zoom(out_img, nii_img.header.get_zooms(), order=0, mode="nearest")
-    out_map = ndimage.zoom(
-        out_map, nii_map.header.get_zooms(), order=0, mode="nearest"
-    )
-
-    # Shift values in out_img to remove negative values
-    out_img = out_img - np.min([0, out_img.min()])
-
-    # Convert image to uint
-    out_img = out_img.astype(float) / out_img.max()
-
-    out_map = np.asarray(out_map, dtype=float)
-    out_map = np.nan_to_num(out_map, nan=-9999)
-    min_val = float(minmax[0])
-    max_val = float(minmax[1])
-
-    #out_map = (out_map >= min_val & out_map <= max_val).astype(int)
-    out_map = ((out_map >= min_val) & (out_map <= max_val)).astype(int)
-    st.write(f'Masked voxels: {(out_map>0).sum()}')
-
-    # Crop image to ROIs and reshape
-    out_img, out_map = crop_image(out_img, out_map, crop_to_mask)
-    
-
-    # Merge image and out_mask
-    out_img = np.stack((out_img,) * 3, axis=-1)
-
-    out_img_out_masked = out_img.copy()
-    out_img_out_masked[out_map == 1] = (
-        # WARNING & FIXME:
-        # @spirosmaggioros: I don't think this should be like this, something is wrong here with MASK_COLOR * OLAY_ALPHA
-        out_img_out_masked[out_map == 1] * (1 - MAP_ALPHA)
-        + MAP_COLOR * MAP_ALPHA  # type:ignore
-    )
-
-    return out_img, out_map, out_img_out_masked
-
-
+        nviews = len(pdict['settings']['mri_orient'])
+        if nviews == 0:
+            return
+        cols = st.columns(nviews)
+        for i, sel_orient in enumerate(pdict['settings']['mri_orient']):
+            with cols[i]:
+                ind_view = img_views.index(sel_orient)
+                if pdict['selected']['mri_olay'] is None or pdict['settings']['mri_flag_olay'] is False:
+                    show_img_slices(
+                        img, ind_view, img_bounds[ind_view, :], sel_orient
+                    )
+                else:
+                    show_img_slices(
+                        img_masked, ind_view, img_bounds[ind_view, :], sel_orient
+                    )
 
 def panel_view_map():
     '''
     Panel to display a map with float values overlaid on underlay image
     '''
-    params = st.session_state.mriplot_params
+    ss = st.session_state
     
-    if params['ulay'] is None:
+    if ss.plots_mri_ulay is None:
         return
 
-    if params['olay'] is None:
+    if ss.plots_mri_olay is None:
         return
 
     # Show images
@@ -461,8 +395,11 @@ def panel_view_map():
             # Process image (and mask) to prepare final 3d matrix to display
             
             #try:
-            img, mask, img_masked = prep_image_and_olaymap(
-                params['ulay'], params['olay'], params['map_minmax'] 
+            img, mask, img_masked = prep_image_and_olay(
+                ss.plots_mri_ulay, 
+                ss.plots_mri_olay, 
+                minmax = ss.plots_mri_map_minmax, 
+                crop_to_mask = ss.plots_mri_flag_crop
             )
             #except Exception as e:
                 #st.warning(f'Could not read image files!')
@@ -474,14 +411,13 @@ def panel_view_map():
 
             cols = st.columns(3)
             for i, tmp_orient in stqdm(
-                enumerate(params['sel_orient']),
+                enumerate(ss.plots_mri_orient),
                 desc="Showing images ...",
-                total=len(params['sel_orient'])
+                total=len(ss.plots_mri_orient)
             ):
                 with cols[i]:
                     ind_view = img_views.index(tmp_orient)
-                    size_auto = True
-                    if params['olay'] is None or params['flag_overlay'] is False:
+                    if ss.plots_mri_olay is None or ss.plots_mri_flag_olay is False:
                         show_img_slices(
                             img, ind_view, img_bounds[ind_view, :], tmp_orient
                         )
@@ -489,3 +425,18 @@ def panel_view_map():
                         show_img_slices(
                             img_masked, ind_view, img_bounds[ind_view, :], tmp_orient
                         )
+
+def panel_view_mri_simple(fname):
+    '''
+    Panel for viewing a nifti scan
+    '''
+    try:
+        # Prepare and show axial slice of the image
+        img = prep_image(fname)
+        img_bounds = detect_img_bounds(img)
+        ind_view = img_views.index('axial')
+        size_auto = True
+        show_img_slices(img, ind_view, img_bounds[ind_view, :], 'axial', 500)
+    except:
+        st.warning(":material/thumb_down: Could not open image")
+
