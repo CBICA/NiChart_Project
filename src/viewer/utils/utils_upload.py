@@ -10,10 +10,13 @@ import streamlit_antd_components as sac
 import os
 import time
 import pandas as pd
+from pathlib import Path
+from bids.layout import BIDSLayout
 import numpy as np
 import zipfile
 from NiChart_common_utils.nifti_parser import NiftiMRIDParser
 import shutil
+import tempfile
 import time
 from typing import Any, BinaryIO, List, Optional
 
@@ -661,8 +664,8 @@ def panel_upload_single_subject():
             elif dtype == 'BIDS (folder)':
                 upload_bids_folder(f)
 
-def generate_template_csv():
-    mod_dirs = {mod: os.path.join(st.session_state.paths['project'], mod) for mod in ['t1', 't2', 'fl', 'dti', 'fmri']}
+def generate_template_csv(rename=True):
+    mod_dirs = {mod: os.path.join(st.session_state.paths['prj_dir'], mod) for mod in ['t1', 't2', 'fl', 'dti', 'fmri']}
     dir_dict = {'T1': mod_dirs['t1'],
                             'T2': mod_dirs['t2'],
                             'FLAIR': mod_dirs['fl'],
@@ -672,10 +675,48 @@ def generate_template_csv():
     nifti_parser = NiftiMRIDParser()
     heuristic_df = nifti_parser.create_master_csv(
         dir_dict,
-        os.path.join(st.session_state.paths['project'], '_working' 'inferred_data_paths.csv')
+        os.path.join(st.session_state.paths['prj_dir'], '_working' 'inferred_data_paths.csv')
     )
     
-    
+    if rename:
+        path_cols = [c for c in heuristic_df.columns if c.endswith("_path")]
+        if not path_cols:
+            print("CSV autogeneration/rename: no path_cols found")
+        
+        rename_map = {} # dst -> src
+        rename_map_full = {} # Used for tracking
+        for _, row in heuristic_df.iterrows():
+            mrid = str(row["MRID"]).strip()
+
+            for col in path_cols:
+                src_path = row[col]
+                if pd.isna(src_path):
+                    continue
+                src = Path(src_path)
+                if not src.exists():
+                    raise FileNotFoundError(f"Missing file: {src}")
+                
+                dst = src.with_name(f"{mrid}.nii.gz")
+                
+                rename_map_full[dst] = src
+
+                if src == dst:
+                    continue
+
+                rename_map[dst] = src
+            
+        for dst, src in rename_map.items():
+            src.rename(dst)
+
+        print(f"Renamed {len(rename_map)} items successfully.")
+        if rename_map:
+            # Create full renaming csv
+            df_map = pd.DataFrame([(str(src), str(dst)) for dst, src in rename_map_full.items()], columns=["original_file", "renamed_file"])
+            df_map.to_csv(os.path.join(st.session_state.paths['prj_dir'], 'renamed_files.csv'))
+
+        # Now rerun the inference
+        heuristic_df = nifti_parser.create_master_csv(dir_dict, os.path.join(st.session_state.paths['prj_dir'], 'inferred_data_paths.csv'))
+        
     df = heuristic_df.sort_values(by='MRID')
     df = df.drop_duplicates().reset_index().drop('index', axis=1)
     df = df.drop(columns=['T1_path', 'FLAIR_path', 'DTI_path', 'FMRI_path'], errors='ignore')
@@ -689,6 +730,94 @@ def generate_template_csv():
     
     return df
 
+def panel_upload_BIDS_dataset():
+    logger.debug('  Function: panel_upload_BIDS_dataset ')
+    sac.divider(key='_div_bids')
+    with st.container(horizontal=True, horizontal_alignment="left"):
+        st.markdown('##### Upload BIDS', width='content')
+        with st.popover("❓", width='content'):
+            st.write("Upload your BIDS dataset in the box below, and we'll try to import the data automatically.")
+    with st.container(horizontal=False, horizontal_alignment="left"):
+        uploaded_files = st.file_uploader('Drag and drop BIDS folder here', accept_multiple_files='directory')
+        if uploaded_files:
+            try:
+                base_dir = Path(tempfile.mkdtemp(prefix="uploaded_bids_dir_"))
+                for uploaded_file in uploaded_files:
+                    relative_path = Path(uploaded_file.name)
+                    dest_path = base_dir / relative_path
+                    dest_path.parent.mkdir(parents=True, exist_ok=True)
+                    with open(dest_path, "wb") as f:
+                        f.write(uploaded_file.getbuffer())
+                proj_dir = st.session_state.paths['prj_dir']
+                st.toast(f"BIDS directory uploaded.")
+            except:
+                st.error(f"BIDS directory upload failed.")
+                return
+
+
+            try:
+                layout = BIDSLayout(
+                    base_dir,
+                    validate=False,
+                    index_metadata=True                
+                    )
+                t1_files = layout.get(
+                    datatype='anat',
+                    suffix='T1w',
+                    extension = ['.nii', '.nii.gz'],
+                    return_type='file',
+                    scope='raw',
+                )
+                flair_files = layout.get(
+                    datatype='anat',
+                    suffix='FLAIR',
+                    extension = ['.nii', '.nii.gz'],
+                    return_type='file',
+                    scope='raw',
+                )
+                t1_dir = Path(os.path.join(proj_dir, 't1'))
+                fl_dir = Path(os.path.join(proj_dir, 'fl'))
+                t1_dir.mkdir(parents=True, exist_ok=True)
+                fl_dir.mkdir(parents=True, exist_ok=True)
+
+                def bids_flat_name(layout, filepath):
+                    ent = layout.parse_file_entities(filepath)
+
+                    parts = [
+                        f"sub-{ent['subject']}",
+                        f"ses-{ent['session']}" if ent.get("session") else None,
+                        f"run-{ent['run']}" if ent.get("run") else None,
+                        ent["suffix"]
+                    ]
+                    parts = [p for p in parts if p is not None]
+                    ext = "".join(Path(filepath).suffixes)
+                    return "_".join(parts) + ext
+                def collect_files(files, layout, target_dir):
+                    for f in files:
+                        out_name = bids_flat_name(layout, f)
+                        out_path = target_dir / out_name
+                        shutil.copy2(f, out_path)
+                collect_files(t1_files, layout, t1_dir)
+                collect_files(flair_files, layout, fl_dir)
+            except:
+                st.error("BIDS image data import failed.")
+            try:
+                participants = layout.get(
+                    suffix="participants",
+                    extension="tsv",
+                    return_type="file"
+                )
+                participants_tsv = participants[0]
+                df = pd.read_csv(participants_tsv, sep='\t')
+                CSV_OUT = Path(os.path.join(proj_dir, 'participants', 'participants.csv'))
+                CSV_OUT.parent.mkdir(parents=True, exist_ok=True)
+                df.to_csv(CSV_OUT, index=False)
+            except:
+                st.error("BIDS participants data import failed.")
+                return
+            st.success("BIDS import successful.")
+
+
 def panel_upload_multi_subject():
     '''
     Upload user data to target folder
@@ -696,13 +825,93 @@ def panel_upload_multi_subject():
     logger.debug('    Function: panel_upload_multi_subject')
     utilmisc._show_curr_prj()
 
+    sac.divider(key='_p2_div4')
+    
+
     with st.container(horizontal=True, horizontal_alignment="left"):
-        sel_help = st.pills(
-            "Help",
-            [':material/info:'],
-            label_visibility = 'collapsed',
-            key="_help_single_sel",
-            help='See instructions'
+        st.markdown("##### Upload File(s): ", width='content')
+        with st.popover("❓", width='content'):
+           st.write(
+               """
+               **Data Upload Guide**
+               - Here, upload the data you have available. (In the next step we'll automatically determine which pipelines you can run based on this.)
+        
+               - You may upload MRI scans in any of the following formats:
+                 - **NIfTI:** one or multiple .nii or .nii.gz files 
+                   
+               - If you have multiple imaging modalities (e.g., T1, FLAIR), upload only one modality batch at a time. First click the modality on the list, then drag-and-drop your images onto the box.
+               
+               - You can also upload non-imaging data (e.g., clinical or cognitive measures) via the participants CSV file (required for harmonization and many analytical pipelines).
+
+               - If you upload your images first, we'll auto-generate a template for this CSV so that you can easily edit it.
+               
+               - The CSV must include an MRID column with values that match the subject IDs in the subject list, so the data can be merged correctly. The auto-generated template includes the MRIDs we detect from your imaging data -- please don't change it.
+        
+               - When you go to select a pipeline in the next step, if you select a pipeline which needs more fields, we'll tell you.
+               """
+           )
+            
+    # Upload data
+    #sel_opt = sac.chip(
+    #    ['Single (.nii.gz, .nii, .zip, .csv)', 'Multiple (dicom files)'],
+    #    label='', index=0, align='left', size='sm', radius='sm', multiple=False, 
+    #    color='cyan', return_index = True
+    #)
+    #sel_opt = sac.chip(
+    #    ['T1 scans (.nii.gz, .nii, .zip)', 'FLAIR scans (.nii.gz, .nii, .zip)',
+    #     'DICOM images (.dcm, .zip)', 'Participants CSV (.csv)'],
+    #     label='', index=0, align='left', size='sm', radius='sm', multiple=False,
+    #     color='cyan', return_index = True
+    #)
+
+    with st.popover("T1 Scans"):
+        t1_out_dir = os.path.join(st.session_state.paths['prj_dir'], 't1')
+        utilio.upload_multiple_files(out_dir=t1_out_dir)
+    with st.popover("FLAIR Scans"):
+        fl_out_dir = os.path.join(st.session_state.paths['prj_dir'], 'fl')
+        utilio.upload_multiple_files(out_dir=fl_out_dir)
+    #with st.popover("DICOM images"):
+    #    pass
+    with st.popover("Participants CSV"):
+        st.markdown("## Participants CSV Upload")
+        st.info("Most pipelines require some clinical or demographic information about participants. Below you can download a template CSV file to fill in. If you don't have information for a certain column, feel free to delete it. When ready, upload it with the file uploader and hit 'Submit'.")
+        ## TODO: explain all columns here (expandable)
+        with st.expander(label="Explanation of columns", expanded=False):
+            st.write("Age must be in years. Sex must be M or F.")
+            st.write("Batch is just used to identify particpants from a related source and is used for harmonization (not needed otherwise). We auto-generate a batch name assuming all scans are from a single population.")
+            st.write("IsCN is used to denote cognitively normal patients (1 for CN, 0 otherwise). This is used for filtering during harmonization and not needed otherwise.")
+            st.write("NOTE: DKGP requires additional columns AD_Diagnosis, MMSE, ADAS_Cog_13. Please edit the CSV to include these.")
+        try:
+            autogenerated_csv = generate_template_csv()
+            autogenerated_csv_data = autogenerated_csv.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="Download template CSV",
+                data=autogenerated_csv_data,
+                file_name='participants.csv',
+                mime="text/csv"
+            )
+        except Exception as e:
+            st.warning("We couldn't seem to generate your template CSV. Please go back and ensure you uploaded scans first. Or hit refresh to check again.")
+            with st.expander("Debug info", expanded=False):
+                st.error(f"Error message: {str(e)}")
+            if st.button("Refresh"):
+                try:
+                    autogenerated_csv = generate_template_csv()
+                    autogenerated_csv_data = autogenerated_csv.to_csv(index=False).encode('utf-8')
+                    st.download_button(
+                        label="Download template CSV",
+                        data=autogenerated_csv_data,
+                        file_name='participants.csv',
+                        mime="text/csv"
+                )
+                except Exception as e:
+                    pass
+        
+        csv_file = st.file_uploader(
+            "Input participants CSV",
+            key="_uploaded_csv_input",
+            accept_multiple_files=False,
+            label_visibility="collapsed"
         )
 
         st.markdown('##### Select input data type:')
@@ -830,5 +1039,59 @@ def panel_data():
         with tab_review:
             panel_view_files()
     
+    sac.divider(key='_p3_div1')
+    
+    with st.container(horizontal=True, horizontal_alignment="left"):
+        st.markdown("##### Review File(s): ", width='content')
+            
+    placeholder = st.empty()
+    placeholder.markdown(f"##### 📁 `{st.session_state.prj_name}`", width='content')
+
+    # Generating CSV will also do some automatic renaming if needed, so we do that first
+    try:
+        generate_template_csv()
+    except Exception as e:
+        print("Template CSV generation failure during file listing. Typically non-critical.")
+    with st.container(border = None, height = 400):
+        tree_items, list_paths = utildv.build_folder_tree(
+            st.session_state.paths['prj_dir'],
+            st.session_state.out_dirs,
+            None,
+            3,
+            ['user_upload']
+        )
+        selected = sac.tree(
+            items=tree_items,
+            index=None,
+            align='left', size='xl', icon='table',
+            checkbox=False,
+            #checkbox_strict = True,
+            open_all = True,
+            return_index = True
+            #height=400
+        )
+
+    if selected:
+        if isinstance(selected, list):
+            selected = selected[0]
+        fpath = list_paths[selected]
+        fname = os.path.basename(fpath)
+        if fpath.endswith('.csv'):
+            try:
+                df_tmp = pd.read_csv(fpath)
+                st.info(f'Data file: {fname}')
+                st.dataframe(df_tmp, hide_index=True)
+
+                with st.container(horizontal=True, horizontal_alignment="center"):
+                    if st.button('Edit'):
+                        edit_participants(fpath)
+            except:
+                st.warning(f'Could not read csv file: {fname}')
+
+        if fpath.endswith(('.nii.gz','.nii')):
+            view_mri(fpath)
+            
+                              
+        
 
 

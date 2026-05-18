@@ -99,6 +99,7 @@ with st.container(horizontal_alignment="center"):
             sac.ChipItem(label='Process a Single Subject'),
             sac.ChipItem(label='Process a Dataset'),
             sac.ChipItem(label='View NeuroImaging Charts'),
+            sac.ChipItem(label='Ask NiChart Chatbot')
         ], label='', size='lg', radius='lg', direction='vertical', color='cyan'
     ) 
         
@@ -117,6 +118,10 @@ with st.container(horizontal_alignment="center"):
     if sel == 'View NeuroImaging Charts':
         time.sleep(0.4)
         st.switch_page("pages/nichart_results.py")
+
+    if sel == 'Ask NiChart Chatbot':
+        time.sleep(0.4)
+        st.switch_page("pages/nichart_chatbot.py")
 
 
 

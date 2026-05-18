@@ -1,11 +1,25 @@
 import os
+import shutil
+import time
 from typing import Any
 
+import pandas as pd
+import numpy as np
+import nibabel as nib
+from nibabel.orientations import axcodes2ornt, ornt_transform
+from scipy import ndimage
+import utils.utils_misc as utilmisc
+import utils.utils_user_select as utiluser
+import utils.utils_io as utilio
 import utils.utils_toolloader as utiltl
 import utils.utils_stlogbox as stlogbox
-import utils.utils_misc as utilmisc
 
+import utils.utils_session as utilses
+import gui.utils_plots as utilpl
+import gui.utils_mriview as utilmri
+import gui.utils_view as utilview
 import pandas as pd
+import gui.utils_widgets as utilwd
 
 import traceback
 import requests
@@ -24,8 +38,48 @@ def show_description(pipeline) -> None:
     """
     Panel for viewing pipeline description
     """
+    with st.container(border=True):
+        f_logo = os.path.join(
+            st.session_state.paths['resources'], 'pipelines', pipeline, f'logo_{pipeline}.png'
+        )
+        fdoc = os.path.join(
+            st.session_state.paths['resources'], 'pipelines', pipeline, f'overview_{pipeline}.md'
+        )
+        cols = st.columns([6, 1])
+        with cols[0]:
+            with open(fdoc, 'r') as f:
+                st.markdown(f.read())
+        with cols[1]:
+            st.image(f_logo)
+
+def select_pipeline():
+    '''
+    Select a pipeline and show overview
+    '''
+    st.markdown("##### Select:")
+
+    sac.divider(key='_p2_div1')
+
+    pipelines = st.session_state.pipelines
+    pnames = pipelines.Name.tolist()
+
+    sel_opt = sac.chip(
+        pnames,
+        label='', index=0, align='left',
+        size='md', radius='md', multiple=False, color='cyan',
+        description='Select a pipeline'
+    )
+
+    st.session_state.sel_pipeline = sel_opt
+
+    show_description(sel_opt.lower())
+
+def show_description(pipeline) -> None:
+    """
+    Panel for viewing pipeline description
+    """
     pipeline_label = utiltl.get_pipeline_label_by_name(pipeline)
-    with st.container(border=True, height=500):
+    with st.container(border=True, height=300):
         if pipeline == '':
             st.markdown("No description exists for this pipeline.")
             return
@@ -38,76 +92,63 @@ def show_description(pipeline) -> None:
         fdoc = os.path.join(
             st.session_state.paths['resources'], 'pipelines', pipeline_label, f'overview_{pipeline_label}.md'
         )
-        with open(fdoc, 'r') as f:
-            st.markdown(f.read())
-
-        # cols = st.columns([6, 1])
-        # with cols[0]:
-        #     with open(fdoc, 'r') as f:
-        #         st.markdown(f.read())
-        # with cols[1]:
-        #     st.image(f_logo)
+        cols = st.columns([6, 1])
+        with cols[0]:
+            with open(fdoc, 'r') as f:
+                st.markdown(f.read())
+        with cols[1]:
+            st.image(f_logo)
 
 def select_pipeline(enabled_pnames):
     '''
     Select a pipeline and show overview
     '''
+    st.markdown("##### Select:")
+    show_enabled_only = st.checkbox("Show only pipelines which match my available data", value=True)
+    sac.divider(key='_p2_div1')
 
-    sel_pipeline = st.session_state.get('sel_pipeline_label', None)
-    tmp_sel = True
-    if sel_pipeline is not None:
-        utilmisc._show_curr_pipeline()
-        tmp_sel = st.checkbox("Change pipeline", value=False)
+    pipelines = st.session_state.pipelines
+    pnames = pipelines.Name.tolist()
 
-    if tmp_sel:
-        show_enabled_only = st.checkbox("Filter by input data availability", value=True)
-
-        pipelines = st.session_state.pipelines
-        pnames = pipelines.Name.tolist()
-        
-        if show_enabled_only:
-            if not enabled_pnames:
-                st.warning(f":material/warning: Your data doesn't match any available pipelines. Use the checkbox above to review pipeline requirements, then upload the required files via the Data tab to continue..")
-                return
-            sel_opt = sac.chip(
-                enabled_pnames,
-                label='', index=None, align='left',
-                size='md', radius='md', multiple=False, color='cyan',
-                description='Select a pipeline'
-            )
-        else:
-            sel_opt = sac.chip(
-                pnames,
-                label='', index=None, align='left',
-                size='md', radius='md', multiple=False, color='cyan',
-                description='Select a pipeline'
-            )
-            
-        if sel_opt is None:
+    
+    if show_enabled_only:
+        if not enabled_pnames:
+            st.error(f"It looks like your data doesn't meet the requirements for any pipelines. Please browse the pipeline listing using the checkbox above, then go back and upload some data!")
             return
+        sel_opt = sac.chip(
+            enabled_pnames,
+            label='', index=0, align='left',
+            size='md', radius='md', multiple=False, color='cyan',
+            description='Select a pipeline'
+        )
+    else:
+        sel_opt = sac.chip(
+            pnames,
+            label='', index=0, align='left',
+            size='md', radius='md', multiple=False, color='cyan',
+            description='Select a pipeline'
+        )
+        
+    
+    row = pipelines.loc[pipelines["Name"] == sel_opt, "Label"]
+    sel_label = row.iloc[0] if not row.empty else ''
+    show_description(sel_opt)
+    st.session_state.sel_pipeline_name = sel_opt
+    st.session_state.sel_pipeline_label = sel_label
+    #st.info(f"DEBUG: sel_opt {sel_opt}")
+    #st.info(f"DEBUG: sel_label {sel_label}")
 
-        row = pipelines.loc[pipelines["Name"] == sel_opt, "Label"]
-        sel_label = row.iloc[0] if not row.empty else ''
-        show_description(sel_opt)
+    return sel_label
 
-        if st.button('Select'):
-            st.session_state.sel_pipeline_name = sel_opt
-            st.session_state.sel_pipeline_label = sel_label
-            st.rerun()
-
-def pipeline_runner_menu(enabled_pnames):
-
-    sel_pipeline = st.session_state.get('sel_pipeline_label', None)
-
-    if sel_pipeline is None:
-        st.warning(':material/warning: Please select a pipeline first.')
+def pipeline_runner_menu(enabled_pnames, sel=False):
+    st.markdown("##### Run:")
+    sac.divider(key='_p2_div2')
+    if not sel:
+        st.info("Select a pipeline on the left, then look here to run it.")
         return
-    
-    sel_method = sel_pipeline
+    sel_method = st.session_state.sel_pipeline_label
     sel_name = utiltl.get_pipeline_name_by_label(sel_method)
-    
-    utilmisc._show_curr_pipeline()
-
+    st.success(f'Selected pipeline: {sel_name}')
     harmonize = False
     if 'subject_type' not in st.session_state or st.session_state.subject_type == 'multi':
         if utiltl.pipeline_is_harmonizable(sel_method):
@@ -119,7 +160,7 @@ def pipeline_runner_menu(enabled_pnames):
         #st.info(f"DEBUG: Enabled pnames: {enabled_pnames}")
         #st.info(f"DEBUG: sel_name: {sel_name}")
         #st.info(f"DEBUG: sel_pipeline: {sel_method}")
-        st.warning("Your data doesn't meet the requirements for this pipeline. Correct the issues marked below to proceed.")
+        st.info("Your data doesn't meet the requirements for this pipeline. Correct the issues marked below to proceed.")
 
     ready = utiltl.check_requirements_met_panel(sel_name)
     pipeline_to_run = utiltl.get_pipeline_id_by_label(sel_method, harmonized=harmonize)
@@ -139,7 +180,7 @@ def pipeline_runner_menu(enabled_pnames):
         if data_dir_on_host is not None:
             local_path_remapping[data_dir_locally] = data_dir_on_host
         result_commands = utiltl.get_command_strings(pipeline_id=pipeline_to_run,
-                global_vars={"STUDY": st.session_state.paths["prj_dir"]},
+                global_vars={"STUDY": st.session_state.paths['prj_dir']},
                 local_path_remapping=local_path_remapping)
         command_text = "\n".join(result_commands)
         st.code(command_text)
@@ -204,9 +245,7 @@ def pipeline_runner_menu(enabled_pnames):
                     process_progress_bar=process_progress_bar,
                     process_status_box=process_status_box,
                     log=log,
-                    metadata_location = os.path.join(
-                        st.session_state.paths['prj_dir'], '_working', "metadata.json"
-                    ),
+                    metadata_location=os.path.join(st.session_state.paths['prj_dir'], "metadata.json"),
                     reuse_cached_steps=skip_steps_when_possible,
                     local_path_remapping=local_path_remapping
                 )
@@ -216,39 +255,58 @@ def pipeline_runner_menu(enabled_pnames):
                 alert_placeholder.error(f"Pipeline {pipeline_to_run} failed with errors. Expand the log boxes for details.")
                 process_status_box.update(state="error", label="Pipeline run failed.", expanded=False)
                 errbox.error(traceback.format_exc())
+        
+
+
+
     pass
 
-def panel_pipelines():
+def pipeline_menu():
+    #cols = st.columns([10,1,10])
+    cols = st.columns(2)
+    out_dir = os.path.join(
+        st.session_state.paths['out_dir'], st.session_state['prj_name']
+    )
 
     pipelines = st.session_state.pipelines
     pnames = pipelines.Name.tolist()
 
     enabled_pnames = []
     disabled_pnames = []
-
     # Evaluate suitability for current data, filter accordingly
     for pname in pnames:
         if not utiltl.pipeline_is_enabled_by_name(pname):
             continue # Skip pipelines which are not enabled in frontend ("True") (list_pipelines.csv)
-        result, blockers = utiltl.check_requirements_met_nopanel(
-            pname, st.session_state.do_harmonize
-        )
+        result, blockers = utiltl.check_requirements_met_nopanel(pname, st.session_state.do_harmonize)
         if result:
             enabled_pnames.append(pname)
         else:
             disabled_pnames.append(pname)
 
-    tab1, tab2 = st.tabs(
-        [":material/auto_awesome_motion: Select", ":material/motion_play: Run"],
-        on_change='rerun',
-    )
+    with cols[0]:
+        sel = select_pipeline(enabled_pnames=enabled_pnames)
+    with cols[1]:
+        pipeline_runner_menu(enabled_pnames=enabled_pnames, sel=sel)
 
-    sel = None
-    if tab1.open:   
-        with tab1:
-            select_pipeline(enabled_pnames=enabled_pnames)
 
-    if tab2.open:   
-        with tab2:
-            pipeline_runner_menu(enabled_pnames=enabled_pnames)
+def panel_pipelines():
+
+    workflow = st.session_state.workflow
+
+    if workflow is None:
+        st.info('Please select a Workflow!')
+        return
+
+    with st.container(horizontal=True, horizontal_alignment="center"):
+        st.markdown("<h4 style=color:#3a3a88;'>Select and Run Pipeline\n\n</h1>", unsafe_allow_html=True, width='content')
+
+    if st.session_state.workflow == 'ref_data':
+        st.info('''
+            You’ve selected the **Reference Data** workflow. This option doesn’t require pipeline selection.
+            - If you meant to analyze your data, please go back and choose a different workflow.
+            - Otherwise, continue to the next step to explore the reference values.
+            '''
+        )
+    else:
+        pipeline_menu()
 

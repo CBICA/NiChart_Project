@@ -14,7 +14,6 @@ nicon = Image.open("../resources/nichart1.png")
 # Init session state
 utilss.init_session_state()
 utilssplots.update_session_state()
-
 utilpg.config_page()
 
 from utils.utils_logger import setup_logger
@@ -58,9 +57,10 @@ pages = {
         st.Page("pages/survey.py", title="Take Survey"),
     ],
     "Workflows": [
-        st.Page("pages/nichart_single_subject.py", title="Process a Single Subject"),
-        st.Page("pages/nichart_multi_subject.py", title="Process a Dataset"),
-        st.Page("pages/nichart_results.py", title="View NeuroImaging Charts"),
+        st.Page("pages/nichart_single_subject.py", title="Single Subject"),
+        st.Page("pages/nichart_multi_subject.py", title="Multi Subject"),
+        st.Page("pages/nichart_results.py", title="Results"),
+        st.Page("pages/nichart_chatbot.py", title="Ask NiChart Chatbot"),
     ],
 }
 
