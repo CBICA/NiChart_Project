@@ -186,3 +186,6 @@ src/viewer/utils/tmp
 src/viewer/test
 
 sample_datasets
+
+# ignore folders named as tmp
+tmp/
