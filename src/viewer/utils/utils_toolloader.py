@@ -1044,6 +1044,7 @@ def run_pipeline(pipeline_id: str,
                 ):
     if metadata_location is not None:
         metadata_location = Path(metadata_location)
+        metadata_location.parent.mkdir(parents=True, exist_ok=True)
 
     # Resolve pipeline file
     pipeline_path = DEFAULT_PIPELINE_DEFINITION_PATH / f"{pipeline_id}.yaml"

@@ -618,8 +618,8 @@ def panel_upload_single_subject():
 
         st.markdown('##### Select input data type:')
 
-    if sel_help == ':material/info:':
-        help_single_subject()
+        if sel_help == ':material/info:':
+            help_single_subject()
 
     # Select input file type
     dtype = st.radio(
@@ -675,7 +675,7 @@ def generate_template_csv(rename=True):
     nifti_parser = NiftiMRIDParser()
     heuristic_df = nifti_parser.create_master_csv(
         dir_dict,
-        os.path.join(st.session_state.paths['prj_dir'], '_working' 'inferred_data_paths.csv')
+        os.path.join(st.session_state.paths['prj_dir'], '_working', 'inferred_data_paths.csv')
     )
     
     if rename:
@@ -715,7 +715,7 @@ def generate_template_csv(rename=True):
             df_map.to_csv(os.path.join(st.session_state.paths['prj_dir'], 'renamed_files.csv'))
 
         # Now rerun the inference
-        heuristic_df = nifti_parser.create_master_csv(dir_dict, os.path.join(st.session_state.paths['prj_dir'], 'inferred_data_paths.csv'))
+        heuristic_df = nifti_parser.create_master_csv(dir_dict, os.path.join(st.session_state.paths['prj_dir'], '_working', 'inferred_data_paths.csv'))
         
     df = heuristic_df.sort_values(by='MRID')
     df = df.drop_duplicates().reset_index().drop('index', axis=1)
@@ -724,7 +724,7 @@ def generate_template_csv(rename=True):
     # Add columns for batch and dx
     df[['Age']] = ''
     df[['Sex']] = ''
-    df[['Batch']] = f'{st.session_state.project}_Batch1'
+    df[['Batch']] = f'Batch1'
     df[['IsCN']] = 1
     
     
