@@ -61,7 +61,7 @@ NiChart_DLWMLS [`GitHub <https://github.com/CBICA/NiChart_DLWMLS>`_] [`Docker Hu
 
 SPARE scores  [`GitHub <https://github.com/CBICA/spare_score>`_] [`Docker Hub <https://hub.docker.com/repository/docker/cbica/nichart_spare_score>`_] - ML-based prediction/scoring for variables of clinical interest
 
-DeepSPARE-BA [`Github <https://github.com/CBICA/NiChart_BAScores>_`] - DL-based direct Image-to-Biomarker Brain Age scores
+DeepSPARE-BA [`Github <https://github.com/CBICA/NiChart_BAScores>`_] - DL-based direct Image-to-Biomarker Brain Age scores
 
 CCL-NMF prediction  [`GitHub <https://github.com/CBICA/CCL_NMF_Prediction>`_] [`Docker Hub <https://hub.docker.com/repository/docker/cbica/ccl_nmf_prediction_wrapped>`_]  - Lightweight estimation of CCL-NMF loading coefficients
 
