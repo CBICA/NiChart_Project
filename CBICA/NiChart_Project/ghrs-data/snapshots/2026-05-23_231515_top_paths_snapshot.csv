@@ -1,0 +1,11 @@
+url_path,views_total,views_unique
+/CBICA/NiChart_Project,13,6
+/CBICA/NiChart_Project/pull/133,4,1
+/CBICA/NiChart_Project/pulls,4,1
+/CBICA/NiChart_Project/blob/079a5e1057b2ca4c815d439bef9837f219fde9bc/.github/workflows/sphinx-docs.yml,1,1
+/CBICA/NiChart_Project/blob/08a90b1ea6289b3f1533d5e8fadf9c56cea5bacc/src/viewer/pages/process_sMRI_DLWMLS.py,1,1
+/CBICA/NiChart_Project/blob/16dfdcfd2ddfa5b86d99acf5d2ca2fb0d18a45cd/resources/pipelines/run_bascores.yaml,1,1
+/CBICA/NiChart_Project/blob/672c55b9303d36a47fa07076ede64e0098dd76c8/test_data/dicoms/example-dicom-structural/dicoms/N2D_0182.dcm,1,1
+/CBICA/NiChart_Project/blob/672c55b9303d36a47fa07076ede64e0098dd76c8/test_data/dicoms/example-dicom-structural/dicoms/N2D_0200.dcm,1,1
+/CBICA/NiChart_Project/blob/672c55b9303d36a47fa07076ede64e0098dd76c8/test_data/dicoms/example-dicom-structural/dicoms/N2D_0225.dcm,1,1
+/CBICA/NiChart_Project/blob/6b55cec0c3a9cfde5bfd5c7027e77d118c86f2ce/TestData/dicoms/example-dicom-structural/dicoms/N2D_0027.dcm,1,1
