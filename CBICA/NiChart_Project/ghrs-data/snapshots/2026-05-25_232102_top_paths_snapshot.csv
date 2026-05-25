@@ -1,0 +1,11 @@
+url_path,views_total,views_unique
+/CBICA/NiChart_Project,12,5
+/CBICA/NiChart_Project/pull/133,4,1
+/CBICA/NiChart_Project/pulls,4,1
+/CBICA/NiChart_Project/blob/079a5e1057b2ca4c815d439bef9837f219fde9bc/.github/workflows/sphinx-docs.yml,1,1
+/CBICA/NiChart_Project/blob/08a90b1ea6289b3f1533d5e8fadf9c56cea5bacc/src/viewer/pages/process_sMRI_DLWMLS.py,1,1
+/CBICA/NiChart_Project/blob/16dfdcfd2ddfa5b86d99acf5d2ca2fb0d18a45cd/resources/pipelines/run_bascores.yaml,1,1
+/CBICA/NiChart_Project/blob/672c55b9303d36a47fa07076ede64e0098dd76c8/test_data/dicoms/example-dicom-structural/dicoms/N2D_0261.dcm,1,1
+/CBICA/NiChart_Project/blob/7617dd18c07950cb5e7e16368232eab8daa18b3b/output_folder/NiChart_sMRI_Demo1/Dicoms/trio_b17/gre_field_mapping_2/00004.dcm,1,1
+/CBICA/NiChart_Project/blob/7617dd18c07950cb5e7e16368232eab8daa18b3b/output_folder/NiChart_sMRI_Demo1/Dicoms/trio_b17/gre_field_mapping_2/00036.dcm,1,1
+/CBICA/NiChart_Project/blob/7a3098d2213d60d7346b5e92512852beff13f89e/resources/tools/dlicv_to_mni_icbm152.yaml,1,1
