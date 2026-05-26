@@ -1036,7 +1036,7 @@ def panel_data():
         with tab_review:
             panel_view_files()
     
-## Below code commented out for now, to be reviewed later
+## Below code commented out for now as redundant, to be reviewed later
 """     sac.divider(key='_p3_div1')
     
     with st.container(horizontal=True, horizontal_alignment="left"):
