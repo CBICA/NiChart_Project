@@ -916,9 +916,6 @@ def panel_upload_multi_subject():
 
         st.markdown('##### Select input data type:')
 
-        if sel_help == ':material/info:':
-            help_multi_subject()
-
     # Select input file type
     dtype = st.radio(
         'Input data type:',
