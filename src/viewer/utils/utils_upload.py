@@ -1086,7 +1086,8 @@ def panel_data():
                 st.warning(f'Could not read csv file: {fname}')
 
         if fpath.endswith(('.nii.gz','.nii')):
-            view_mri(fpath)
+            pass
+            #view_mri(fpath) # Disabled for now
             
                               
         
