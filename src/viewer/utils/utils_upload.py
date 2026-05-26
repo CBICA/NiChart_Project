@@ -1036,7 +1036,8 @@ def panel_data():
         with tab_review:
             panel_view_files()
     
-    sac.divider(key='_p3_div1')
+## Below code commented out for now, to be reviewed later
+"""     sac.divider(key='_p3_div1')
     
     with st.container(horizontal=True, horizontal_alignment="left"):
         st.markdown("##### Review File(s): ", width='content')
@@ -1087,7 +1088,7 @@ def panel_data():
 
         if fpath.endswith(('.nii.gz','.nii')):
             pass
-            #view_mri(fpath) # Disabled for now
+            #view_mri(fpath) # Disabled for now """
             
                               
         
