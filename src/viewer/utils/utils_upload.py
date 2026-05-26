@@ -407,7 +407,7 @@ def upload_csv(in_file):
 
     # Upload file
     fname = in_file.name
-    out_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload', 'nifti')
+    out_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload')
     stat_upload = upload_files([in_file], out_dir)
 
     # Consolidate file
