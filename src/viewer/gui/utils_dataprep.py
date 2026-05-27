@@ -529,7 +529,7 @@ def panel_prepare_data():
 
     tab_prj, tab_run, tab_set = st.tabs(
         [":material/folder: Select Project",
-         ":material/folder: Quick Run",
+         ":material/folder: Prepare Data for Charting",
          ":material/folder: Data & Settings"
         ],
         on_change='rerun',
