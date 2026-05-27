@@ -10,11 +10,10 @@ try:
 except ImportError:
     boto3_available = False
 
-import utils.utils_menu as utilmenu
 import utils.utils_pages as utilpg
 
 from utils.utils_styles import inject_global_css 
-import gui.utils_navig as utilnav
+
 
 from utils.utils_logger import setup_logger
 import utils.utils_session as utilses
@@ -124,7 +123,7 @@ else:
         else:
             st.warning("Please enter a question.")
 
-utilnav.main_navig("Home", "pages/nichart_home.py", None, None)
+utilpg.navig_home()
 
 # Show session state vars
 if st.session_state.mode == 'debug':
