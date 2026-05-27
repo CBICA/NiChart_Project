@@ -111,7 +111,7 @@ def pipeline_runner_menu(enabled_pnames):
     harmonize = False
     if 'subject_type' not in st.session_state or st.session_state.subject_type == 'multi':
         if utiltl.pipeline_is_harmonizable(sel_method):
-            harmonize = st.checkbox("Harmonize to reference data? (30 or more scans recommended)")
+            harmonize = st.checkbox("Harmonize to reference data? (30 or more scans recommended, at least 3 required)")
             if harmonize:
                 st.info('When done, harmonization QC results will be present in the "harmonization_qc" directory under your harmonized DLMUSE results.')
     st.session_state.do_harmonize = harmonize
