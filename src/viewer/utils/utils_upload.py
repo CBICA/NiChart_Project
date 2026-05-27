@@ -864,7 +864,8 @@ def panel_upload_multi_subject():
     #     color='cyan', return_index = True
     #)
 
-    with st.popover("T1 Scans"):
+    # Commented out for redundancy, to be checked and possibly deleted later.
+    """ with st.popover("T1 Scans"):
         t1_out_dir = os.path.join(st.session_state.paths['prj_dir'], 't1')
         utilio.upload_multiple_files(out_dir=t1_out_dir)
     with st.popover("FLAIR Scans"):
@@ -915,7 +916,7 @@ def panel_upload_multi_subject():
         )
 
         st.markdown('##### Select input data type:')
-
+ """
     # Select input file type
     dtype = st.radio(
         'Input data type:',
