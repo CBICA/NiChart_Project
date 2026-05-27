@@ -111,7 +111,7 @@ def pipeline_runner_menu(enabled_pnames):
     harmonize = False
     if 'subject_type' not in st.session_state or st.session_state.subject_type == 'multi':
         if utiltl.pipeline_is_harmonizable(sel_method):
-            harmonize = st.checkbox("Harmonize to reference data? (Requires >= 30 scans)")
+            harmonize = st.checkbox("Harmonize to reference data? (30 or more scans recommended)")
     st.session_state.do_harmonize = harmonize
     ## TODO: Retrieve dynamically/match between front end and toolloader code
     ## This a nice and simple placeholder for now
