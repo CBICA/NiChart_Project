@@ -206,7 +206,8 @@ def consolidate_nifti():
 
         # Move scan to consolidated path
         out_dir = os.path.join(st.session_state.paths['prj_dir'], mod.lower())
-        out_fpath = os.path.join(out_dir, mrid + '_' + mod + '.nii.gz')
+        #out_fpath = os.path.join(out_dir, mrid + '_' + mod + '.nii.gz')
+        out_fpath = os.path.join(out_dir, mrid + '.nii.gz')
         os.makedirs(out_dir, exist_ok=True)
         if os.path.exists(out_fpath):
             st.warning('Scan exists, will be updated!')
@@ -267,7 +268,7 @@ def consolidate_nifti_multi():
     # Update values based on user iput
     with st.form(key='_form_scan_info'):
         mod = st.selectbox('Image Modality:', ['T1', 'FL'])
-        suffix = st.text_input('Common Image Suffix (used to infer MRIDs):', value = suff)
+        suffix = st.text_input('Common Image Suffix (used to infer unique MRIDs):', value = suff)
         
         submitted = st.form_submit_button("Submit")
         flag_submit = False
@@ -282,7 +283,8 @@ def consolidate_nifti_multi():
         for fname in nifti_files:
             mrid = fname.replace(suffix, '')
             in_fpath = os.path.join(in_dir, fname)
-            out_fpath = os.path.join(out_dir, mrid + '_' + mod + '.nii.gz')
+            #out_fpath = os.path.join(out_dir, mrid + '_' + mod + '.nii.gz')
+            out_fpath = os.path.join(out_dir, mrid + '.nii.gz')
             if os.path.exists(out_fpath):
                 st.warning('Scan exists, will be updated!')
             shutil.move(in_fpath, out_fpath)
