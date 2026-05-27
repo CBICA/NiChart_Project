@@ -3,12 +3,12 @@
 
 dlmuse-vol:
   desc: DLMUSE brain region volumes (237 ROIs)
-  prefix: dlmuse-vol_
+  prefix: DL_MUSE_Volume_
   atlas: muse
   prefix_renamed: DLMUSE Volume of
 
 dlwmls-vol_:
   desc: DLWMLS volumes in MUSE ROIs
-  prefix: dlwmls-vol_
+  prefix: DL_WMLS_Volume_
   atlas: muse
   prefix_renamed: DLWMLS Volume of

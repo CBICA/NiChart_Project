@@ -279,7 +279,7 @@ def _panel_config_dataprep():
 # Tab: Prepare Data
 # ---------------------------------------------------------------------------
 
-def corr_roi_icv(df, icv_col, mean_icv, roi_prefix='dlmuse-vol_', new_prefix='dlmuse-vol-icvcorr_'):
+def corr_roi_icv(df, icv_col, mean_icv, roi_prefix='DL_MUSE_Volume_', new_prefix='DL_MUSE_Volume_icvcorr_'):
     """
     Correct each ROI volume column in df for intracranial volume (ICV).
     Returns a new dataframe with corrected columns.
@@ -302,7 +302,7 @@ def create_var_table(cols):
     """
     ss = st.session_state
     var_table = utilvars.DataVarColumns(cols)
-    var_table.rename_roi_columns('muse', 'dlmuse-vol_', ss.dicts['muse']['map'])
+    var_table.rename_roi_columns('muse', 'DL_MUSE_Volume_', ss.dicts['muse']['map'])
     return var_table
 
 def _run_data_preparation(available, data_dir):
@@ -338,16 +338,16 @@ def _run_data_preparation(available, data_dir):
         # ---- Step 2: ICV correction ----
         st.write(':material/calculate: Correcting ROI volumes for ICV')
         df_sel = dfs.get('dlmuse-vol', None)
-        icv_col  = 'dlmuse-vol_702'
+        icv_col  = 'DL_MUSE_Volume_702'
         mean_icv = ss.params.get('mean_icv', 1430000)
 
-        df_corr = corr_roi_icv(df_sel, icv_col, mean_icv, 'dlmuse-vol_', 'dlmuse-vol-icvcorr_')
+        df_corr = corr_roi_icv(df_sel, icv_col, mean_icv, 'DL_MUSE_Volume_', 'DL_MUSE_Volume_icvcorr_')
         dfs['dlmuse-vol-icvcorr'] = df_corr
         st.write(f'  → ICV correction applied to {len(df_corr.columns)} columns.')
         time.sleep(step_sleep_short)
 
         try:
-            df_corr = corr_roi_icv(df_sel, icv_col, mean_icv, 'dlmuse-vol_', 'dlmuse-vol-icvcorr_')
+            df_corr = corr_roi_icv(df_sel, icv_col, mean_icv, 'DL_MUSE_Volume_', 'DL_MUSE_Volume_icvcorr_')
             dfs['dlmuse-vol-icvcorr'] = df_corr
             st.write(f'  → ICV correction applied to {len(df_corr.columns)} columns.')
             time.sleep(step_sleep_short)

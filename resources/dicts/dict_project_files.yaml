@@ -5,27 +5,27 @@
 t1:
   type: img
   desc: T1-weighted anatomical MRI scans
-  file: t1/{mrid}_T1.nii.gz
+  file: t1/{mrid}.nii.gz
 
 fl:
   type: img
   desc: FLAIR MRI scans
-  file: fl/{mrid}_FL.nii.gz
+  file: fl/{mrid}.nii.gz
 
 dlmuse-seg:
   type: img
   desc: DLMUSE segmentation images
-  file: dlmuse-seg/{mrid}_T1_DLMUSE.nii.gz
+  file: dlmuse_seg/{mrid}_DLMUSE.nii.gz
 
 dlwmls-seg:
   type: img
   desc: DLWMLS segmentation images
-  file: dlwmls-seg/{mrid}_FL_DLWMLS.nii.gz
+  file: nichart_dlwmls_out/DLWMLS_FLAIR/{mrid}_LPS_DLWMLS.nii.gz
 
 ravens:
   type: img
   desc: RAVENS maps (voxel-wise volumetric maps normalized by intracranial volume)
-  file: ravens/{mrid}_Label_CSF_RAVENS_ICVNorm_zScored_inSubj.nii.gz
+  file: nichart_ravens_out/{mrid}_Label_CSF_RAVENS_ICVNorm_zScored_inSubj.nii.gz
 
 participants:
   type: csv
@@ -40,29 +40,29 @@ participants-extended:
 dlmuse-vol:
   type: csv
   desc: DLMUSE brain region volumes (237 ROIs)
-  file: dlmuse-vol/dlmuse-vol.csv
+  file: dlmuse_vol/DLMUSE_Volumes.csv
 
 dlwmls-vol:
   type: csv
   desc: DLWMLS white matter lesion volumes per brain region (143 ROIs)
-  file: dlwmls-vol/dlwmls-vol.csv
+  file: nichart_dlwmls_out/DLWMLS_DLMUSE_Segmented_Volumes.csv
 
 spare-scores:
   type: csv
   desc: SPARE neuropsychiatric and brain age scores (AD, brain age, MDD, SCZ)
-  file: ml-biomarkers/spare-scores.csv
+  file: ml-biomarkers/SPARE_ALL.csv
 
 sparecvm-scores:
   type: csv
   desc: SPARE cardiovascular/metabolic risk scores
-  file: ml-biomarkers/sparecvm-scores.csv
+  file: ml-biomarkers/SPARE_CVM_ALL.csv
 
 cclnmf-scores:
   type: csv
   desc: CCL-NMF brain subtypes scores (7 components)
-  file: ml-biomarkers/cclnmf-scores.csv
+  file: ml-biomarkers/CCLNMF.csv
 
 surrealgan-scores:
   type: csv
   desc: SurrealGAN brain subtype scores (5 components)
-  file: ml-biomarkers/surrealgan-scores.csv
+  file: ml-biomarkers/SurrealGAN_RScores.csv

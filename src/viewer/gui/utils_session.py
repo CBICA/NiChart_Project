@@ -46,7 +46,7 @@ def init_plots():
 
     dtmp = {
         'num_per_row': 4,
-        'list_labels': ['dlmuse-vol_GM', 'dlmuse-vol_WM', 'dlmuse-vol_Ventricles', 'dlmuse-vol_Hippocampus_R'],
+        'list_labels': ['DL_MUSE_Volume_GM', 'DL_MUSE_Volume_WM', 'DL_MUSE_Volume_Ventricles', 'DL_MUSE_Volume_Hippocampus_R'],
     }
     plots['auto'].update(dtmp)
 
@@ -56,8 +56,8 @@ def init_plots():
         "xvar": 'Age',
         "xmin": None,
         "xmax": None,
-        "ylab": 'dlmuse-vol_GM',
-        "yvar": 'dlmuse-vol_601',
+        "ylab": 'DL_MUSE_Volume_GM',
+        "yvar": 'DL_MUSE_Volume_601',
         "ymin": None,
         "ymax": None,
         "hlab": None,

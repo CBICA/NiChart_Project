@@ -57,11 +57,11 @@ group_dlmuse-vol:
   desc: Volumes of ROIs segmented using DLMUSE
   category: roi
   pipeline: [dlmuse]
-  prefix: dlmuse-vol_
+  prefix: DL_MUSE_Volume_
 
 group_dlwmls-vol:
   label: DLWMLS Volumes
   desc: Volumes of WM lesions in DLMUSE ROIs segmented using DLWMLS
   category: roi
   pipeline: [dlwmls]
-  prefix: dlwmls-vol_
+  prefix: DL_WMLS_Volume_

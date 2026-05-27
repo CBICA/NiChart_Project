@@ -18,10 +18,10 @@ from utils.utils_logger import setup_logger
 logger = setup_logger()
 
 REPORT_ROIS = [
-    {'col': 'dlmuse-vol_601', 'label': 'Gray Matter'},
-    {'col': 'dlmuse-vol_47',  'label': 'Hippocampus (R)'},
-    {'col': 'dlmuse-vol_48',  'label': 'Hippocampus (L)'},
-    {'col': 'dlmuse-vol_509', 'label': 'Ventricles'},
+    {'col': 'DL_MUSE_Volume_601', 'label': 'Gray Matter'},
+    {'col': 'DL_MUSE_Volume_47',  'label': 'Hippocampus (R)'},
+    {'col': 'DL_MUSE_Volume_48',  'label': 'Hippocampus (L)'},
+    {'col': 'DL_MUSE_Volume_509', 'label': 'Ventricles'},
 ]
 
 

@@ -255,9 +255,9 @@ def init_paths():
     st.session_state.out_dirs = [
         'participants',
         't1', 't2', 'fl', 'fmri', 'dti',
-        'dlmuse-seg', 'dlmuse-vol',
-        'dlwmls-seg', 'dlwmls-vol',
-        'ml-biomarkers', 'ravens', 'opnmf',
+        'dlmuse_seg', 'dlmuse_vol',
+        'dlwmls_seg', 'dlwmls_vol',
+        'ml_biomarkers', 'ravens', 'opnmf',
         'plot_data', 'reports'
     ]
     

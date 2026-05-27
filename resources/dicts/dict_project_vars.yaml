@@ -16,36 +16,36 @@ participants-extended:
 dlmuse-vol:
   type: csv
   desc: DLMUSE brain region volumes (237 ROIs)
-  file: dlmuse-vol/dlmuse-vol.csv
-  vars: [MRID, "dlmuse-vol_{list_muse-all}"]
+  file: dlmuse_vol/DLMUSE_Volumes.csv
+  vars: [MRID, "DL_MUSE_Volume_{list_muse-all}"]
 
 dlwmls-vol:
   type: csv
   desc: DLWMLS white matter lesion volumes per brain region (143 ROIs)
-  file: dlwmls_vol/DLWMLS_Volumes.csv
+  file: nichart_dlwmls_out/DLWMLS_DLMUSE_Segmented_Volumes.csv
   key: MRID
-  vars: [MRID, "dlwmls-vol_{list_muse-icv}", "dlwmls-vol_{list_muse-single}"]
+  vars: [MRID, "DL_WMLS_Volume_{list_muse-icv}", "DL_WMLS_Volume_{list_muse-single}"]
 
 cclnmf-scores:
   type: csv
   desc: CCL-NMF brain subtypes scores (7 components)
-  file: ml-biomarkers/cclnmf-scores.csv
+  file: ml-biomarkers/CCLNMF.csv
   vars: [MRID, CCL-NMF1, CCL-NMF2, CCL-NMF3, CCL-NMF4, CCL-NMF5, CCL-NMF6, CCL-NMF7]
 
 sparecvm-scores:
   type: csv
   desc: SPARE cardiovascular/metabolic risk scores
-  file: ml-biomarkers/sparecvm-scores.csv
+  file: ml-biomarkers/SPARE_CVM_ALL.csv
   vars: [MRID, SPARE_DIABETES, SPARE_HYPERTENSION, SPARE_OBESITY, SPARE_SMOKING]
 
 spare-scores:
   type: csv
   desc: SPARE neuropsychiatric and brain age scores (AD, brain age, MDD, SCZ)
-  file: ml-biomarkers/spare-scores.csv
+  file: ml-biomarkers/SPARE_ALL.csv
   vars: [MRID, SPARE_AD, SPARE_BA, SPARE_MDD, SPARE_SCZ]
 
 surrealgan-scores:
   desc: SurrealGAN brain subtype scores (5 components)
   type: csv
-  file: ml-biomarkers/surrealgan-scores.csv
+  file: ml-biomarkers/SurrealGAN_RScores.csv
   vars: [MRID, SurrealGAN_R1, SurrealGAN_R2, SurrealGAN_R3, SurrealGAN_R4, SurrealGAN_R5]
