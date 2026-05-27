@@ -267,7 +267,7 @@ def consolidate_nifti_multi():
     # Update values based on user iput
     with st.form(key='_form_scan_info'):
         mod = st.selectbox('Image Modality:', ['T1', 'FL'])
-        suffix = st.text_input('Image Suffix:', value = suff)
+        suffix = st.text_input('Common Image Suffix (used to infer MRIDs):', value = suff)
         
         submitted = st.form_submit_button("Submit")
         flag_submit = False
@@ -276,6 +276,7 @@ def consolidate_nifti_multi():
         
     if flag_submit:
         # Move scans to consolidated path
+        mod = mod.lower() # standardize to our convention
         out_dir = os.path.join(st.session_state.paths['prj_dir'], mod)
         os.makedirs(out_dir, exist_ok=True)
         for fname in nifti_files:
@@ -295,7 +296,7 @@ def consolidate_nifti_multi():
         if not os.path.exists(ofile):
             df.to_csv(ofile, index=False)
         else:
-            st.info('Participants list already exists, will not overwrite!')
+            st.info('Participants list already exists. Avoiding overwrite to preserve your data -- please modify manually as needed.')
         
         return True
 
