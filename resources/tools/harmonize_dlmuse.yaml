@@ -35,5 +35,5 @@ resources: # Used to allocate jobs on the cloud. Please be diligent.
   gpus: 0
 
 container:
-  image: cbica/combatfam_harmonize_dlmuse:0.0.1
+  image: cbica/combatfam_harmonize_dlmuse:0.0.2
   command: -i {dlmuse_vol_unharmonized} -c {covariate_csv} -o {dlmuse_vol_harmonized} 
