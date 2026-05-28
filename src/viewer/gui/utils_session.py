@@ -21,8 +21,8 @@ def init_plots():
     }
 
     # Set plot data params
-    pref = os.path.join(st.session_state.paths['centiles'], 'nichart_centiles_dlmuse')
-    ctype = 'CN'
+    pref = os.path.join(st.session_state.paths['centiles'], 'nichart_centiles')
+    ctype = 'dlmuse_CN'
     dtmp = {
         "cent_type": ctype,
         "cent_path": pref,
@@ -68,8 +68,9 @@ def init_plots():
         "fvals": None,
         "cent_values": ['centile_25', 'centile_50', 'centile_75'],
         "list_roi_indices": None,
-        'filter_sex': ['F', 'M'],
-        'filter_age': [40, 95],
+        # 'filter_sex': ['F', 'M'],
+        'filter_sex': ['F'],
+        'filter_age': [0, 105],
         "trend": None,
         "flag_show_conf": False,
         "lowess_s": 0.7,
@@ -100,7 +101,9 @@ def init_plots():
         "trend_types": ["Linear", "Smooth LOWESS Curve"],
         "linfit_trace_types": ["lin_fit", "conf_95%"],
         "cent_trace_types": [
-            "centile_5", "centile_25", "centile_50", "centile_75", "centile_95",
+            "centile_2.5", "centile_5", "centile_25", 
+            "centile_50", "centile_75", "centile_95",
+            "centile_97.5"
         ],
         "distplot_trace_types": ["histogram", "density", "rug"],
         'flag_resize': False,
@@ -137,7 +140,10 @@ def init_ref_plots():
     plots = init_plots()
 
     # Set centile types
-    plots['settings']['cent_types'] = ["None", "CN", "CN-Males", "CN-Females"]
+    plots['settings']['cent_types'] = [
+        "None", "dlmuse_CN", "dlmuse_CN-Males", 
+        "dlmuse_CN-Females", "wm_CN"
+    ]
 
     # Save in session state
     st.session_state['ref_plots'] = plots.copy()
