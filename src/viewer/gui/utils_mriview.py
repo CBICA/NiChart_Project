@@ -296,7 +296,7 @@ def panel_view_seg(ptype):
         return
 
     if ylab is None:
-        logger.debug('No roi selected')
+        logger.debug('No ylab selected')
         return
 
     # Find roi indices
