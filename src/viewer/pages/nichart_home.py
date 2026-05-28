@@ -88,6 +88,7 @@ else:
     print("Skipping survey, it's already completed.")
 utils_alerts.render_alert()
 
+st.info("May 20, 2026: Pipeline versions, and exact reproducibility commands, are now viewable when you go to run a pipeline.")
 with st.container(horizontal_alignment="center"):
     st.markdown("<h2 style='color:#5e5fad;'>Welcome to NiChart Project\n\n</h1>", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)

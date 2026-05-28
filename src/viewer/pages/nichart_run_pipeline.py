@@ -142,9 +142,9 @@ def pipeline_runner_menu(enabled_pnames, sel=False):
     skip_steps_when_possible = True
     skip_steps_when_possible = st.checkbox("Accelerate pipeline via caching? (Uncheck to force re-runs)", value=True)
     alert_placeholder = st.empty()
-    with st.popover("Display commands"):
-        st.title(f"Direct execution commands for {sel_name}")
-        st.write("These commands reflect exactly what the NiChart application will run on your computer, via the Docker service. You can use these commands as a blueprint to replicate the pipeline exactly on a different dataset. Please note that paths will need to be changed to reflect those on your target system.")
+    with st.popover("Display reproducibility commands"):
+        st.title(f"Reproducibility commands for {sel_name}")
+        st.write("These commands reflect exactly how to run the current version of the pipeline anywhere that supports the softwrae containers. Please note that paths will need to be changed to reflect those on your target system.")
         local_path_remapping = {}
         data_dir_locally = st.session_state.paths["out_dir"]
         data_dir_on_host = st.session_state.paths["host_out_dir"]
