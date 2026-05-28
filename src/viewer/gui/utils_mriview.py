@@ -292,31 +292,37 @@ def panel_view_seg(ptype):
     ylab = pdict['selected']['ylab']
 
     if mrid is None:
+        logger.debug('No subject selected')
         return
 
     if ylab is None:
+        logger.debug('No ylab selected')
         return
 
     # Find roi indices
     col_dict = pdict['data']['col_dict']
     roi = col_dict.renamed_to_roi_index(ylab)
     if roi is None:
+        logger.debug('ROI not found')
         return
     roi_indices = st.session_state.dicts['muse']['derived'].get(roi, [roi])
     if roi_indices is None or len(roi_indices)<=0:
+        logger.debug('No ROI indices found')
         return
     
     ## FIXME
     in_dir = st.session_state.paths['prj_dir']
     ulay = os.path.join(
-        in_dir, 't1', f'{mrid}_T1.nii.gz'
+        in_dir, 't1', f'{mrid}.nii.gz'
     )
     olay = os.path.join(
-        in_dir, 'dlmuse-seg', f'{mrid}_T1_DLMUSE.nii.gz'
+        in_dir, 'dlmuse_seg', f'{mrid}_DLMUSE.nii.gz'
     )
     if not os.path.exists(ulay):
+        logger.debug(f'Underlay image not found: {ulay}')
         return
     if not os.path.exists(olay):
+        logger.debug(f'Overlay image not found: {olay}')
         return
     pdict['selected']['mri_ulay'] = ulay
     pdict['selected']['mri_olay'] = olay
