@@ -88,7 +88,59 @@ else:
     print("Skipping survey, it's already completed.")
 utils_alerts.render_alert()
 
-st.info("May 20, 2026: Pipeline versions, and exact reproducibility commands, are now viewable when you go to run a pipeline.")
+@st.dialog("What's New in NiChart", width="large")
+def _show_release_notes():
+    st.markdown("""
+    <div style='display:flex; align-items:center; gap:12px; margin-bottom:1.2rem;'>
+        <span style='background:#e8f4f8; color:#1a6b8a; padding:4px 14px; border-radius:20px;
+                     font-size:0.78em; font-weight:700; letter-spacing:0.05em;'>LATEST RELEASE</span>
+        <span style='color:#888; font-size:0.85em;'>v2.1.0 &nbsp;·&nbsp; May 20, 2026</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("#### Pipeline Versioning & Reproducibility")
+    st.markdown(
+        "NiChart now tracks the exact version of every pipeline component used in your analysis, "
+        "including a versioned manifest of all tools, models, and configuration files. "
+        "Users can re-run and reproduce their analysis in their environment with locked dependency versions. "
+        "Version info is also embedded in output metadata for full audit trail and downstream reporting."
+    )
+
+    st.markdown("#### Expanded User Guidance & QC Information")
+    st.markdown(
+        "Additional in-app guidance has been added throughout the workflow to help users better understand "
+        "their data, processing steps, and quality control outputs. This includes clearer documentation of "
+        "harmonization QC metrics, helping users assess the quality and consistency of harmonized data "
+        "across sites and scanners before proceeding with downstream analyses."
+    )
+
+    st.markdown("#### Updated Viewer with Enhanced Configuration")
+    st.markdown(
+        "The results viewer has been updated to offer greater flexibility in how data is displayed and explored. "
+        "Users can now configure plot parameters, groupings, and display options more intuitively, "
+        "making it easier to customize visualizations to their specific dataset and analysis needs."
+    )
+    st.divider()
+
+    st.markdown(
+        "<span style='color:#888; font-size:0.85em;'>v2.0.0 &nbsp;·&nbsp; March 2026</span>",
+        unsafe_allow_html=True,
+    )
+    st.markdown("#### Platform Redesign & Multi-Subject Support")
+    st.markdown(
+        "The NiChart interface was fully redesigned with a streamlined navigation model, support for "
+        "large multi-subject dataset processing, and integration of the NiChart Chatbot for guided "
+        "analysis workflows. Harmonization QC output was also enhanced with additional diagnostic plots."
+    )
+
+    st.divider()
+    st.caption("For the full changelog and release notes, visit the NiChart documentation.")
+
+_, _c2 = st.columns([9, 1])
+with _c2:
+    if st.button("📋 What's New", help="View recent updates and release notes", use_container_width=True):
+        _show_release_notes()
+
 with st.container(horizontal_alignment="center"):
     st.markdown("<h2 style='color:#5e5fad;'>Welcome to NiChart Project\n\n</h1>", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
