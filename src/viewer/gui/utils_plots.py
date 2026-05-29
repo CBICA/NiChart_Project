@@ -395,12 +395,18 @@ def display_scatter_plot(ptype, df, df_cent, plot_settings, plot_params, plot_id
 
         # Detect x and y coor of the selected point 
         sel_info = st.session_state[f"_bubble_{ptype}_{plot_id}"]
+
+        if ptype == 'ref_plots':
+            ylab = pdict['plots'][plot_id]['ylab']
+            pdict['selected']['ylab'] = ylab
+
         try:
             spoint = sel_info["selection"]["points"][0]
             pdict['selected']['xcoor'] = spoint['x']
             pdict['selected']['ycoor'] = spoint['y']
             st.toast(f"Selected point: {spoint['x']}, {spoint['y']}")
         except:
+            st.write(sel_info)
             return
  
         # Detect xvar and yvar info if a data point is selected
