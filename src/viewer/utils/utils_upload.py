@@ -1046,6 +1046,8 @@ def panel_data():
 
     if tab_upload.open:
         with tab_upload:
+            if st.session_state.has_cloud_session:
+                st.warning("You are using the NiChart cloud service, which temporarily stores data on private cloud servers. Please ensure all data is de-identified before upload. You are responsible for data uploaded via your account.")
             if st.session_state.workflow == 'single_subject':
                 panel_upload_single_subject()
             else:
