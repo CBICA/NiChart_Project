@@ -21,8 +21,9 @@ def init_plots():
     }
 
     # Set plot data params
-    pref = os.path.join(st.session_state.paths['centiles'], 'nichart_centiles_dlmuse')
-    ctype = 'CN'
+    pref = os.path.join(st.session_state.paths['centiles'], 'nichart_centiles')
+    # ctype = 'dlmuse_CN'
+    ctype = 'CN-All'
     dtmp = {
         "cent_type": ctype,
         "cent_path": pref,
@@ -137,7 +138,20 @@ def init_ref_plots():
     plots = init_plots()
 
     # Set centile types
-    plots['settings']['cent_types'] = ["None", "CN", "CN-Males", "CN-Females"]
+    # plots['settings']['cent_types'] = ["CN", "CN-Males", "CN-Females"]
+    plots['settings']['cent_types'] = [
+        "None",
+        "CN-All", "CN-Males", "CN-Females", 
+        "AD-All", "AD-Males", "AD-Females",
+    ]
+    plots['settings']['mri_ulay'] = os.path.join(
+        st.session_state.paths['resources'], 'atlases',
+        'muse', 'MNI152_1mm_LPS.nii.gz'
+    )
+    plots['settings']['mri_olay'] = os.path.join(
+        st.session_state.paths['resources'], 'atlases',
+        'muse', 'MNI152_1mm_LPS_DLMUSE.nii.gz'
+    )
 
     # Save in session state
     st.session_state['ref_plots'] = plots.copy()
@@ -154,7 +168,12 @@ def init_user_plots():
     plots = init_plots()
 
     # Set centile types
-    plots['settings']['cent_types'] = ["CN", "CN-Males", "CN-Females"]
+    # plots['settings']['cent_types'] = ["CN", "CN-Males", "CN-Females"]
+    plots['settings']['cent_types'] = [
+        "None",
+        "CN-All", "CN-Males", "CN-Females", 
+        "AD-All", "AD-Males", "AD-Females",
+    ]
 
     # Save in session state
     st.session_state['user_plots'] = plots.copy()

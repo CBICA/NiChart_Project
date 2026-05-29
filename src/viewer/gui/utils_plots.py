@@ -129,6 +129,10 @@ def select_centile_type(ptype):
     
     list_types = pdict['settings'].get('cent_types', [])
     vname = f"{ptype}.data.cent_type"
+
+    # st.write(pdict)
+    # st.write((f"Centile types: {list_types}")   )
+
     utilwd.my_selectbox(
         vname, list_types, 'Centile Type'
     )
