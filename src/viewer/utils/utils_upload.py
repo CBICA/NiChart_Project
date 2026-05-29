@@ -1046,12 +1046,18 @@ def panel_data():
 
     if tab_upload.open:
         with tab_upload:
+            check_ok = True
             if st.session_state.has_cloud_session:
-                st.warning("You are using the NiChart cloud service, which temporarily stores data on private cloud servers. Please ensure all data is de-identified before upload. You are responsible for data uploaded via your account.")
-            if st.session_state.workflow == 'single_subject':
-                panel_upload_single_subject()
-            else:
-                panel_upload_multi_subject()
+                check_ok = False
+                st.warning("You are using the NiChart cloud service, which temporarily stores data on private cloud servers. Please ensure all data is de-identified before uploading. You are responsible for data uploaded via your account.")
+                check_ok_deident = st.checkbox("I agree to only upload de-identified data")
+                check_ok_respons = st.checkbox("I agree that I am responsible for the data I upload, and that I have checked all relevant data sharing agreements/policies")
+                check_ok = check_ok_respons and check_ok_deident
+            if check_ok:
+                if st.session_state.workflow == 'single_subject':
+                    panel_upload_single_subject()
+                else:
+                    panel_upload_multi_subject()
 
     if tab_review.open:
         with tab_review:
