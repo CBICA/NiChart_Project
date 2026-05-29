@@ -1,0 +1,11 @@
+url_path,views_total,views_unique
+/CBICA/NiChart_Project,10,4
+/CBICA/NiChart_Project/pulls,5,2
+/CBICA/NiChart_Project/tree/fix-guray-branch,4,2
+/CBICA/NiChart_Project/branches,4,1
+/CBICA/NiChart_Project/pull/133,3,1
+/CBICA/NiChart_Project/actions/runs/23671220181/workflow,1,1
+/CBICA/NiChart_Project/actions/runs/23772081966,1,1
+/CBICA/NiChart_Project/blob/08a90b1ea6289b3f1533d5e8fadf9c56cea5bacc/src/viewer/pages/process_sMRI_DLWMLS.py,1,1
+/CBICA/NiChart_Project/blob/672c55b9303d36a47fa07076ede64e0098dd76c8/test_data/dicoms/example-dicom-structural/dicoms/N2D_0261.dcm,1,1
+/CBICA/NiChart_Project/blob/7617dd18c07950cb5e7e16368232eab8daa18b3b/output_folder/NiChart_sMRI_Demo1/Dicoms/trio_b17/gre_field_mapping_2/00004.dcm,1,1
