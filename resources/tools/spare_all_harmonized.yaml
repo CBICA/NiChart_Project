@@ -31,5 +31,5 @@ resources: # Used to allocate jobs on the cloud. Please be diligent.
   gpus: 0
 
 container:
-  image: cbica/nichart_spare_score_runall:0.0.3
+  image: cbica/nichart_spare_score_runall:0.0.4
   command: "-i {dlmuse_vol_harmonized} -demog {demog_csv} --category misc --harmonize -o {spare_all_csv}"
