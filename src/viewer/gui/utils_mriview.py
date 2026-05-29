@@ -279,14 +279,105 @@ def show_img_slices(img, scroll_axis, sel_axis_bounds, orientation, wimg = None)
         else:
             st.image(img[:, :, slice_index], width=wimg)
 
+def panel_view_seg_refplot(ptype):
+    '''
+    Panel to display segmented image overlaid on underlay image for the reference data
+    '''
+    logger.debug('Panel: View Segmentation for the Ref Plot')
+
+    ss = st.session_state
+    pdict = ss[ptype]
+
+    ylab = pdict['selected']['ylab']
+    # ylab = 'DL_MUSE_Volume_GM'
+
+
+    # Find roi indices
+    col_dict = pdict['data']['col_dict']
+    roi = col_dict.renamed_to_roi_index(ylab)
+
+    if roi is None:
+        logger.debug('ROI not found')
+        return
+    roi_indices = st.session_state.dicts['muse']['derived'].get(roi, [roi])
+    if roi_indices is None or len(roi_indices)<=0:
+        logger.debug('No ROI indices found')
+        return
+    
+    tab1, tab2 = st.tabs(
+        [':material/visibility_off:', 'Options'],
+        on_change='rerun',
+        key='_tabs_mri_controls',
+    )
+
+    if tab2.open:
+        with tab2:
+            with st.container(border=True):
+                select_mriplot_settings(ptype)
+
+    if pdict['settings']['mri_ulay'] is None:
+        st.toast('Underlay image not found!')
+        return
+
+    if pdict['settings']['mri_olay'] is None:
+        st.toast('Overlay image not found!')
+        pdict['settings']['mri_flag_olay'] = False
+        st.rerun()
+
+    # Show images
+    with st.container(border=True):
+        try:
+            img, mask, img_masked = prep_image_and_olay(
+                pdict['settings']['mri_ulay'],
+                pdict['settings']['mri_olay'],
+                list_rois=roi_indices,
+                crop_to_mask=pdict['settings']['mri_flag_crop']
+            )
+        except Exception as exc:
+            st.warning(f'Could not read image files! {exc}')
+            st.write(pdict['settings']['mri_ulay'])
+            st.write(pdict['settings']['mri_olay'])
+            st.write(pdict['settings'])
+            return
+        
+        img_bounds = detect_mask_bounds(mask)
+
+        pdict['settings']['mri_orient'] = ['axial']
+        nviews = len(pdict['settings']['mri_orient'])
+        if nviews == 0:
+            return
+        cols = st.columns(nviews)
+        for i, sel_orient in enumerate(pdict['settings']['mri_orient']):
+            with cols[i]:
+                ind_view = img_views.index(sel_orient)
+                if pdict['settings']['mri_olay'] is None or pdict['settings']['mri_flag_olay'] is False:
+                    show_img_slices(
+                        img, ind_view, img_bounds[ind_view, :], sel_orient
+                    )
+                else:
+                    show_img_slices(
+                        img_masked, ind_view, img_bounds[ind_view, :], sel_orient
+                    )
+
+
+
+
+
 def panel_view_seg(ptype):
     '''
     Panel to display segmented image overlaid on underlay image
     '''    
     logger.debug('Panel: VVVVView Segmentation')
 
+    if ptype == 'ref_plots':
+        panel_view_seg_refplot(ptype)
+        return
+    
     ss = st.session_state
     pdict = ss[ptype]
+
+    # logger.debug(pdict)
+    # st.write(pdict)
 
     mrid = pdict['selected']['mrid']
     ylab = pdict['selected']['ylab']
