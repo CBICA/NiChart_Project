@@ -643,6 +643,12 @@ def _group_vars_in_data(group_info, data_vars, roi_lists, sel_sublist=None):
 
     Groups with a 'values' key list variable names directly.
     """
+
+    # st.write(group_info)
+    # st.write(data_vars)
+    # st.write(roi_lists)
+    # st.write(sel_sublist)
+
     prefix = group_info.get('prefix')
     values = group_info.get('values', [])
 

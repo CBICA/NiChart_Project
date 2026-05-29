@@ -24,7 +24,7 @@ SPARE_Scores:
   category: biomarker
   pipeline: [spare]
   vtype: name
-  values: [SPARE_AD, SPARE_BA, SPARE_MDD, SPARE_SCZ]
+  values: [SPARE_AD_RAW, SPARE_AD_HARMONIZED, SPARE_BA_RAW, SPARE_BA_HARMONIZED]
 
 SPARE_CVM_Scores:
   category: biomarker
@@ -36,13 +36,13 @@ SurrealGAN_Aging_Dimensions:
   category: biomarker
   pipeline: [surreal_gan]
   vtype: name
-  values: [R1, R2, R3, R4, R5]
+  values: [SurrealGAN_r1, SurrealGAN_r2, SurrealGAN_r3, SurrealGAN_r4, SurrealGAN_r5]
 
 CCLNMF_Aging_Dimensions:
   category: biomarker
   pipeline: [cclnmf]
   vtype: name
-  values: [CCL-NMF1, CCL-NMF2, CCL-NMF3, CCL-NMF4, CCL-NMF5, CCL-NMF6, CCL-NMF7]
+  values: [CCL_NMF1, CCL_NMF2, CCL_NMF3, CCL_NMF4, CCL_NMF5, CCL_NMF6, CCL_NMF7]
 
 MUSE_All:
   category: roi

@@ -289,7 +289,10 @@ def panel_view_seg_refplot(ptype):
     pdict = ss[ptype]
 
     ylab = pdict['selected']['ylab']
-    # ylab = 'DL_MUSE_Volume_GM'
+
+    if not ylab.startswith('DL_MUSE_'):
+        st.warning('Image view not available for the selected variable!')
+        return
 
 
     # Find roi indices
@@ -381,6 +384,10 @@ def panel_view_seg(ptype):
 
     mrid = pdict['selected']['mrid']
     ylab = pdict['selected']['ylab']
+
+    if not ylab.startswith('DL_MUSE_'):
+        st.warning('Image view not available for the selected variable!')
+        return
 
     if mrid is None:
         logger.debug('No subject selected')
