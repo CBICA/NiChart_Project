@@ -42,7 +42,7 @@ spare-scores:
   type: csv
   desc: SPARE neuropsychiatric and brain age scores (AD, brain age, MDD, SCZ)
   file: ml-biomarkers/SPARE_ALL.csv
-  vars: [MRID, SPARE_AD, SPARE_BA, SPARE_MDD, SPARE_SCZ]
+  vars: [MRID, SPARE_AD_decision_function, SPARE_BA, SPARE_MDD, SPARE_SCZ]
 
 surrealgan-scores:
   desc: SurrealGAN brain subtype scores (5 components)

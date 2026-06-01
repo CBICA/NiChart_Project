@@ -28,7 +28,7 @@ group_spare-scores:
   category: biomarker
   pipeline: [spare]
   vtype: name
-  values: [SPARE_AD, SPARE_AD_Harmonized, SPARE_BA, SPARE_BA_Harmonized]
+  values: [SPARE_AD_decision_function, SPARE_AD_Harmonized, SPARE_BA, SPARE_BA_Harmonized]
 
 group_spare-cvm-scores:
   label: SPARE CVM Scores
