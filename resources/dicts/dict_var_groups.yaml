@@ -28,7 +28,7 @@ group_spare-scores:
   category: biomarker
   pipeline: [spare]
   vtype: name
-  values: [SPARE_AD_RAW, SPARE_AD_Harmonized, SPARE_BA_RAW, SPARE_BA_Harmonized]
+  values: [SPARE_AD, SPARE_AD_Harmonized, SPARE_BA, SPARE_BA_Harmonized]
 
 group_spare-cvm-scores:
   label: SPARE CVM Scores
@@ -43,14 +43,14 @@ group_surrealgan-scores:
   desc: SurrealGAN brain subtype scores (5 components)
   category: biomarker
   pipeline: [surreal_gan]
-  values: [SurrealGAN_r1, SurrealGAN_r2, SurrealGAN_r3, SurrealGAN_r4, SurrealGAN_r5]
+  values: [SurrealGAN_R1, SurrealGAN_R2, SurrealGAN_R3, SurrealGAN_R4, SurrealGAN_R5]
 
 group_cclnmf-scores:
   label: CCL-NMF Scores
   desc: CCL-NMF brain subtypes scores (7 components)
   category: biomarker
   pipeline: [cclnmf]
-  values: [CCL_NMF1, CCL_NMF2, CCL_NMF3, CCL_NMF4, CCL_NMF5, CCL_NMF6, CCL_NMF7]
+  values: [CCL-NMF1, CCL-NMF2, CCL-NMF3, CCL-NMF4, CCL-NMF5, CCL-NMF6, CCL-NMF7]
 
 group_dlmuse-vol:
   label: DLMUSE Volumes

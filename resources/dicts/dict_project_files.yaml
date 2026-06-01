@@ -50,19 +50,19 @@ dlwmls-vol:
 spare-scores:
   type: csv
   desc: SPARE neuropsychiatric and brain age scores (AD, brain age, MDD, SCZ)
-  file: ml-biomarkers/SPARE_ALL.csv
+  file: ml_biomarkers/SPARE_ALL.csv
 
 sparecvm-scores:
   type: csv
   desc: SPARE cardiovascular/metabolic risk scores
-  file: ml-biomarkers/SPARE_CVM_ALL.csv
+  file: ml_biomarkers/SPARE_CVM_ALL.csv
 
 cclnmf-scores:
   type: csv
   desc: CCL-NMF brain subtypes scores (7 components)
-  file: ml-biomarkers/CCLNMF.csv
+  file: ml_biomarkers/CCLNMF.csv
 
 surrealgan-scores:
   type: csv
   desc: SurrealGAN brain subtype scores (5 components)
-  file: ml-biomarkers/SurrealGAN_RScores.csv
+  file: ml_biomarkers/SurrealGAN_RScores.csv
