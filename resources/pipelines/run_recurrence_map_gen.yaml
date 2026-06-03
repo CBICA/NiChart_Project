@@ -1,0 +1,31 @@
+pipeline_name: Glioblastoma Recurrence Map Generation
+description: |
+  Generates glioblastoma recurrence infilitration maps from T1/T1CE/T2/FLAIR/ADC scan sets.
+
+categories:
+  - image-processing
+
+requires:
+  - needs_T1
+  - needs_T1CE
+  - needs_T2
+  - needs_FLAIR
+  - needs_ADC
+
+steps:
+  - id: run_map_gen_preprocessing
+    tool: recurrence_map_gen_preprocessing # MUST CORRESPOND EXACTLY to a tool in resources/tools dir
+    inputs:
+      t1_img: ${STUDY}/t1
+      t1ce_img: ${STUDY}/t1ce
+      t2_img: ${STUDY}/t2
+      fl_img: ${STUDY}/fl
+      adc_img: ${STUDY}/adc
+    outputs:
+      preprocessing_results: ${STUDY}/recurrence_map_preprocessing
+  - id: run_map_gen
+    tool: recurrence_map_gen
+    inputs:
+      preprocessing_results: ${STUDY}/recurrence_map_preprocessing
+    outputs: 
+      recurrence_map_out: ${STUDY}/recurrence_map_results
