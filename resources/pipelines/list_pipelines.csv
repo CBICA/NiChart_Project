@@ -10,3 +10,4 @@ RAVENS,True,ravens,run_nichart_ravens,
 GenFAR,True,genfar,run_genfar,
 DKGP,True,dkgp,run_dkgp,
 Glioblastoma Recurrence Mapping,True,recurrence-map-gen,run_recurrence_map_gen,
+ITHResolve-GBM,True,ithresolve-gbm,run_ithresolve_gbm
