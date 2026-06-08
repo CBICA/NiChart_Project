@@ -673,6 +673,14 @@ def check_requirements_met_nopanel(pipeline_name, harmonized):
                 blockers.append(f"T1 scans appear to be missing. Please check that images were uploaded.")
             elif item.name == "needs_FLAIR":
                 blockers.append(f"FLAIR scans appear to be missing. Please check that images were uploaded.")
+            elif item.name == "needs_T2":
+                blockers.append("T2 scans appear to be missing. Please check that images were uploaded.")
+            elif item.name == "needs_T1CE":
+                blockers.append("T1CE scans appear to be missing. Please check that images were uploaded.")
+            elif item.name == "needs_ADC":
+                blockers.append("ADC scans appear to be missing. Please check that images were uploaded.")
+            elif item.name == "needs_idat":
+                blockers.append("IDAT data appears to be missing. Please check that idat files were uploaded.")
             elif item.name == "needs_demographics":
                 blockers.append(f"Participants CSV appears to be missing or malformed. Please check that this data was provided.")
             elif item.name == "csv_has_columns":
@@ -705,6 +713,14 @@ def check_requirements_met_nopanel(pipeline_name, harmonized):
                         blockers.append("Participants CSV missing required columns: " + ", ".join(csv_report.missing_cols))
                 else:
                     blockers.append("Could not locate the participants CSV. Make sure it exists!")
+            elif item.name == "needs_T2":
+                blockers.append("T2 scan count does not match the number of subjects available in other modalities. Please check that all images were uploaded.")
+            elif item.name == "needs_T1CE":
+                blockers.append("T1CE scan count does not match the number of subjects available in other modalities. Please check that all images were uploaded.")
+            elif item.name == "needs_ADC":
+                blockers.append("ADC scan count does not match the number of subjects available in other modalities. Please check that all images were uploaded.")
+            elif item.name == "needs_idat":
+                blockers.append("We couldn't automatically verify if IDAT data matches subject count.")
             else:
                 raise ValueError(f"Requirement {item.name} for pipeline {pipeline_id} has no associated rule. Please submit a bug report.")
     return result, blockers
@@ -716,7 +732,11 @@ def check_requirements_met_panel(pipeline_name):
     REQ_TO_HUMAN_READABLE = {
         'needs_T1': 'T1 Scans',
         'needs_FLAIR': 'FLAIR Scans',
-        'needs_demographics': 'Participants CSV', 
+        'needs_demographics': 'Participants CSV',
+        'needs_T2': 'T2 Scans',
+        'needs_T1CE': 'T1CE Scans',
+        'needs_ADC': 'ADC Scans',
+        'needs_idat': 'IDAT Files'
     }
     pipeline = get_pipeline_label_by_name(pipeline_name)
     pipeline_id = get_pipeline_id_by_label(pipeline, harmonized=st.session_state.do_harmonize)
@@ -744,6 +764,14 @@ def check_requirements_met_panel(pipeline_name):
                 st.write("Please upload T1 images.")
             elif item.name == "needs_FLAIR":
                 st.write("Please upload FLAIR images.")
+            elif item.name == "needs_T2":
+                st.write("Please upload T2 images.")
+            elif item.name == "needs_T1CE":
+                st.write("Please upload T1CE images.")
+            elif item.name == "needs_ADC":
+                st.write("Please upload ADC images.")
+            elif item.name == "needs_idat":
+                st.write("Please upload IDAT data.")
             elif item.name == "needs_demographics":
                 st.write("Please upload a participants CSV via the file uploader.")
             elif item.name == "csv_has_columns":
