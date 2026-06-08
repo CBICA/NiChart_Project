@@ -189,7 +189,7 @@ def consolidate_nifti():
 
     # Update values based on user iput
     with st.form(key='_form_scan_info'):
-        mod = st.selectbox('Image Modality:', ['T1', 'FL'])
+        mod = st.selectbox('Image Modality:', ['T1', 'FL', 'T1CE', 'T2', 'ADC'])
         mrid = st.text_input('MRID:', value = mrid)
         sex = st.selectbox('Sex (optional):', ['M', 'F', 'Other'], index=ind_sex)
         age = st.number_input('Age (optional):', min_value=20.0, max_value=110.0, value=age)
@@ -229,7 +229,7 @@ def dialog_consolidate_nifti():
     mrid = st.session_state.participant['mrid']
     if mrid is None:
         mrid = st.session_state.curr_scan
-        for suffix in ['.nii.gz', '.nii', '_T1', '_t1', '_FL', '_fl']:
+        for suffix in ['.nii.gz', '.nii', '_T1CE', '_t1ce', '_T1', '_t1', '_FL', '_fl', '_ADC', '_adc', '_T2', '_t2' ]:
             mrid = mrid.replace(suffix, '')
         st.session_state.participant['mrid'] = mrid
     
@@ -267,7 +267,7 @@ def consolidate_nifti_multi():
 
     # Update values based on user iput
     with st.form(key='_form_scan_info'):
-        mod = st.selectbox('Image Modality:', ['T1', 'FL'])
+        mod = st.selectbox('Image Modality:', ['T1', 'FL', 'T2', 'T1CE', 'ADC'])
         suffix = st.text_input('Common Image Suffix (used to infer unique MRIDs):', value = suff)
         
         submitted = st.form_submit_button("Submit")
@@ -353,6 +353,26 @@ def dialog_extract_dicoms(in_dir, out_dir):
         )
         st.rerun()   
 
+def consolidate_idat_multi():
+    
+    # Detect common suffix
+    in_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload', 'idat')
+    idat_files = [
+        f for f in os.listdir(in_dir) if f.endswith('.idat')
+    ]
+    if not idat_files:
+        st.warning("No idat files found in the data folder.")
+        return False
+
+    out_dir = os.path.join(st.session_state.paths['prj_dir'], 'idat')
+    os.makedirs(out_dir, exist_ok=True)
+    for fname in idat_files:
+        in_fpath = os.path.join(in_dir, fname)
+        out_fpath = os.path.join(out_dir, fname)
+        shutil.move(in_fpath, out_fpath)
+    utilio.clear_folder(in_dir)
+    return True
+
 def upload_files(in_files, out_dir):
     '''
     Copy uploaded files to target folder
@@ -401,6 +421,19 @@ def upload_nifti_multi(in_files):
     # Consolidate file
     if stat_upload:
         dialog_consolidate_nifti_multiple()
+
+def upload_idat_folder(in_files):
+    '''
+    Copy idat files to output folder
+    '''
+    logger.debug('    Function: upload_idat_folder')
+
+    # Upload files
+    out_dir = os.path.join(st.session_state.paths['prj_dir'], '_upload', 'idat')
+    stat_upload = upload_files(in_files, out_dir)
+
+    if stat_upload:
+        consolidate_idat_multi()
 
 def upload_csv(in_file):
     '''
@@ -627,7 +660,7 @@ def panel_upload_single_subject():
     # Select input file type
     dtype = st.radio(
         'Input data type:',
-        ['Nifti', 'Dicom (single .zip)', 'Dicom (folder)', '.csv', 'BIDS (folder)'],
+        ['Nifti', 'Dicom (single .zip)', 'Dicom (folder)', '.csv', 'BIDS (folder)', 'IDAT (folder)'],
         horizontal=True,
         label_visibility = 'collapsed'
     )
@@ -643,6 +676,8 @@ def panel_upload_single_subject():
     elif dtype == '.csv':
         ftype = ['.csv']
     elif dtype == 'BIDS (folder)':
+        accept_multiple_files = 'directory'
+    elif dtype == 'IDAT (folder)':
         accept_multiple_files = 'directory'
 
     # Upload file(s)
@@ -666,12 +701,16 @@ def panel_upload_single_subject():
                 upload_csv(f)
             elif dtype == 'BIDS (folder)':
                 upload_bids_folder(f)
+            elif dtype == 'IDAT (folder)':
+                upload_idat_folder(f)
 
 def generate_template_csv(rename=True):
-    mod_dirs = {mod: os.path.join(st.session_state.paths['prj_dir'], mod) for mod in ['t1', 't2', 'fl', 'dti', 'fmri']}
+    mod_dirs = {mod: os.path.join(st.session_state.paths['prj_dir'], mod) for mod in ['t1', 't2', 't1ce', 'adc', 'fl', 'dti', 'fmri']}
     dir_dict = {'T1': mod_dirs['t1'],
+                            'T1CE': mod_dirs['t1ce'],
                             'T2': mod_dirs['t2'],
                             'FLAIR': mod_dirs['fl'],
+                            'ADC': mod_dirs['adc'],
                             'DTI': mod_dirs['dti'],
                             'FMRI': mod_dirs['fmri'],
                             }
@@ -722,7 +761,7 @@ def generate_template_csv(rename=True):
         
     df = heuristic_df.sort_values(by='MRID')
     df = df.drop_duplicates().reset_index().drop('index', axis=1)
-    df = df.drop(columns=['T1_path', 'FLAIR_path', 'DTI_path', 'FMRI_path'], errors='ignore')
+    df = df.drop(columns=['T1_path', 'FLAIR_path', 'DTI_path', 'FMRI_path', 'T2_path', 'T1CE_path', 'ADC_path'], errors='ignore')
     
     # Add columns for batch and dx
     df[['Age']] = ''
@@ -734,6 +773,7 @@ def generate_template_csv(rename=True):
     return df
 
 def panel_upload_BIDS_dataset():
+    # Only supports T1 and FLAIR for now
     logger.debug('  Function: panel_upload_BIDS_dataset ')
     sac.divider(key='_div_bids')
     with st.container(horizontal=True, horizontal_alignment="left"):
@@ -923,7 +963,7 @@ def panel_upload_multi_subject():
     # Select input file type
     dtype = st.radio(
         'Input data type:',
-        ['Nifti (folder)', 'Nifti (files)', 'Dicom (single .zip)', 'Dicom (folder)', '.csv', 'BIDS (folder)'],
+        ['Nifti (folder)', 'Nifti (files)', 'Dicom (single .zip)', 'Dicom (folder)', '.csv', 'BIDS (folder)', 'IDAT (folder)'],
         horizontal=True
     )
     ftype = None
@@ -937,6 +977,9 @@ def panel_upload_multi_subject():
     elif dtype == 'Dicom (single .zip)':
         ftype = ['.zip']
     elif dtype == 'Dicom (folder)':
+        accept_multiple_files = 'directory'
+    elif dtype == 'IDAT (folder)':
+        ftype = ['.idat']
         accept_multiple_files = 'directory'
     elif dtype == '.csv':
         ftype = ['.csv']
@@ -981,6 +1024,8 @@ def panel_upload_multi_subject():
                 upload_csv(f)
             elif dtype == 'BIDS (folder)':
                 upload_bids_folder(f)
+            elif dtype == 'IDAT (folder)':
+                upload_idat_folder(f)
 
 def panel_view_files():
     '''
