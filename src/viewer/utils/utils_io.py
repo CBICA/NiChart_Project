@@ -953,14 +953,26 @@ def compute_counts(ctx: dict = {}) -> dict:
     project_path = get_path_for_project(sel_project)
     t1_path = os.path.join(project_path, "t1")
     flair_path = os.path.join(project_path, "fl")
+    t1ce_path = os.path.join(project_path, 't1ce')
+    t2_path = os.path.join(project_path, 't2')
+    adc_path = os.path.join(project_path, 'adc')
+    idat_path = os.path.join(project_path, 'idat')
     demog_csv_path = os.path.join(project_path, "participants", "participants.csv")
 
     t1_count = get_file_count(t1_path, ['.nii', '.nii.gz'])
     flair_count = get_file_count(flair_path, ['.nii', '.nii.gz'])
+    t2_count = get_file_count(t2_path, ['.nii', '.nii.gz'])
+    t1ce_count = get_file_count(t1ce_path, ['.nii', '.nii.gz'])
+    adc_count = get_file_count(adc_path, ['.nii', '.nii.gz'])
+    idat_count = int(get_file_count(idat_path, ['.idat']) / 2)
     csv_rows = count_csv_rows(demog_csv_path)
     res = {
         "needs_T1": t1_count,
         "needs_FLAIR": flair_count,
+        "needs_T2": t2_count,
+        "needs_T1CE": t1ce_count,
+        "needs_ADC": adc_count,
+        "needs_idat": idat_count,
         "needs_demographics": csv_rows,
     }
     return res

@@ -433,7 +433,10 @@ def upload_idat_folder(in_files):
     stat_upload = upload_files(in_files, out_dir)
 
     if stat_upload:
-        consolidate_idat_multi()
+        if consolidate_idat_multi():
+            utilmisc.show_temp_message("IDAT files successfully uploaded.")
+        else:
+            utilmisc.show_temp_message("IDAT files failed to upload. Please submit a bug report.")
 
 def upload_csv(in_file):
     '''

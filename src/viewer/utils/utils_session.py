@@ -188,7 +188,7 @@ def init_misc():
         'sel_roi': None,
         'do_harmonize': False,
         'nifti_dicom_upload_mode': None,
-        'list_mods': ["T1", "T2", "FL", "DTI", "fMRI"],
+        'list_mods': ["T1", "T2", "FL", "DTI", "fMRI", "T1CE", "ADC"],
         'params': {
             'mean_icv': 1430000,  # Average ICV estimated from a large sample
             'harm_min_samples': 30,

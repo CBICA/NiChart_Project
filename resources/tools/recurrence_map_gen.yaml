@@ -27,4 +27,4 @@ resources: # Used to allocate jobs on the cloud. Please be diligent.
 
 container:
   image: cbica/recurrence_map_gen_pipeline:0.0.1
-  command: --input {input_dir} --output {recurrence_map_out}
+  command: --input {preprocessing_results} --output {recurrence_map_out}
