@@ -27,5 +27,5 @@ resources: # Used to allocate jobs on the cloud. Please be diligent.
   gpus: 0
 
 container:
-  image: sm3kon/gbm-deconv:0.1.0
+  image: sm3kon/gbm-deconv:0.2.0
   command: --input {idat_dir} --output {output_dir}
