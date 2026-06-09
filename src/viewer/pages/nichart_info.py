@@ -190,7 +190,7 @@ if tabB.open:
                 if tab7.open:
                     with tab7:
                         with st.container(horizontal=True, border=False):
-                            col1, col2 = st.columns(0.7, 0.3)
+                            col1, col2 = st.columns([0.7, 0.3])
                             with col2:
                                 st.image(imgfile_to_data(os.path.join(imgdir_base, 'ithresolvegbm_figure.png')))
                             with col1:
