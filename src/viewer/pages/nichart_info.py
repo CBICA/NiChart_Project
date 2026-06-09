@@ -176,34 +176,41 @@ if tabB.open:
                             )
                 if tab6.open:
                     with tab6:
-                        st.markdown("<h5 style='color:#3a3a88;'>DKGP Biomarker Trajectories (WIP)</h5>", unsafe_allow_html=True)
-                        st.markdown(
-                            """
-                            Personalized biomarker trajectory forecasting uses Deep Kernel Gaussian Processes to predict how individual biomarkers will evolve over time.
+                        with st.container(horizontal=True, border=False):
+                            st.markdown("<h5 style='color:#3a3a88;'>DKGP Biomarker Trajectories (WIP)</h5>", unsafe_allow_html=True)
+                            st.markdown(
+                                """
+                                Personalized biomarker trajectory forecasting uses Deep Kernel Gaussian Processes to predict how individual biomarkers will evolve over time.
 
-                            - Trajectories are modeled using a deep kernel learning framework that combines neural feature extraction with Gaussian Process regression, capturing complex nonlinear patterns from cross-sectional neuroimaging data, demogrpahic and clinical variables.
+                                - Trajectories are modeled using a deep kernel learning framework that combines neural feature extraction with Gaussian Process regression, capturing complex nonlinear patterns from cross-sectional neuroimaging data, demogrpahic and clinical variables.
 
-                            - The population-level model (p-DKGP) is trained across large multi-cohort datasets, and delivers individualized forcasts from cross-sectional data alone.
-                            """
-                        )
+                                - The population-level model (p-DKGP) is trained across large multi-cohort datasets, and delivers individualized forecasts from cross-sectional data alone.
+                                """
+                            )
                 if tab7.open:
                     with tab7:
-                        st.markdown("**Decode GBM heterogeneity from bulk DNA methylation data.**")
-                        st.markdown("ITHresolveGBM is a deconvolution framework that infers the cellular composition of glioblastoma samples from standard DNA methylation profiles. It estimates tumor purity, quantifies immune, glial, and neuronal microenvironmental components, as well as the malignant component and the ratio of stem-like and differentiated states within it. It is most helpful when you have bulk DNA methylation data but would like to infer the cellular composition within each sample.")
-                        st.markdown("**Please cite:**")
-                        st.markdown("Silverbush et al., *A cellular epigenetic classification system for glioblastoma, Neuro-Oncology*, 2026.")
-                        st.markdown("**Successful applications include:**")
-                        st.markdown("""
-                                    - In ongoing work, ITHresolveGBM outputs are used to compute cell state-informed methylation classes (MCcsi), enabling patient stratification by predominant cellular states in primary and recurrent glioblastoma. These classes inform molecular features, prognosis, and treatment-associated vulnerabilities in the context of standard of care, iVEGFA, iTOP2A, and iCDK4, establishing transcriptional cell state heterogeneity as a readily implementable tumor biomarker for glioblastoma treatment (Ito et al.).
-                                    - Applied to high-grade gliomas, ITHresolveGBM revealing a high-neural glioblastoma state enriched for malignant stem/progenitor-like programs and reduced immune infiltration. This high-neural state was associated with increased neuron-to-glioma interactions, greater tumor invasiveness, and worse patient outcomes (Drexler et al., *Nature Medicine*, 2024).
-                                    - Applied to multi-region GBM methylation profiles, it was used to show that the proportion of stem-like malignant cells is preserved across spatially distinct regions of the same tumor. A higher stem-like fraction was associated with worse survival, reduced benefit from MGMT promoter methylation, and radiomethylomic signatures detectable from preoperative MRI (Matsumoto et al., *Neuro-Oncology*, 2025).
-                                    """)
-                        st.markdown("Wrapper built by Jakob Ito.")
-                        st.image(imgfile_to_data(os.path.join(imgdir_base, 'ithresolvegbm_figure.png')))
+                        with st.container(horizontal=True, border=False):
+                            st.image(imgfile_to_data(os.path.join(imgdir_base, 'ithresolvegbm_figure.png')), width=480)
+                            st.markdown('''
+                                        **Decode GBM heterogeneity from bulk DNA methylation data.**
+
+                                        ITHresolveGBM is a deconvolution framework that infers the cellular composition of glioblastoma samples from standard DNA methylation profiles. It estimates tumor purity, quantifies immune, glial, and neuronal microenvironmental components, as well as the malignant component and the ratio of stem-like and differentiated states within it. It is most helpful when you have bulk DNA methylation data but would like to infer the cellular composition within each sample.
+                                        
+                                        **Please cite:**  
+                                        Silverbush et al., *A cellular epigenetic classification system for glioblastoma, Neuro-Oncology*, 2026.
+
+                                        **Successful applications include:**
+                                        - In ongoing work, ITHresolveGBM outputs are used to compute cell state-informed methylation classes (MCcsi), enabling patient stratification by predominant cellular states in primary and recurrent glioblastoma. These classes inform molecular features, prognosis, and treatment-associated vulnerabilities in the context of standard of care, iVEGFA, iTOP2A, and iCDK4, establishing transcriptional cell state heterogeneity as a readily implementable tumor biomarker for glioblastoma treatment (Ito et al.).
+                                        - Applied to high-grade gliomas, ITHresolveGBM revealing a high-neural glioblastoma state enriched for malignant stem/progenitor-like programs and reduced immune infiltration. This high-neural state was associated with increased neuron-to-glioma interactions, greater tumor invasiveness, and worse patient outcomes (Drexler et al., *Nature Medicine*, 2024).
+                                        - Applied to multi-region GBM methylation profiles, it was used to show that the proportion of stem-like malignant cells is preserved across spatially distinct regions of the same tumor. A higher stem-like fraction was associated with worse survival, reduced benefit from MGMT promoter methylation, and radiomethylomic signatures detectable from preoperative MRI (Matsumoto et al., *Neuro-Oncology*, 2025).
+                                        Wrapper built by Jakob Ito.
+                                        ''')
+                            
                 if tab8.open:
                     with tab8:
-                        st.markdown("Glioblastoma recurrence probability maps are generated by an ensemble of ML models trained and validated using multi-model MRI scans across the international ReSPOND consortium. The various  models capture imaging patterns associated with high tumor infiltration and increased likelihood of recurrence at different spatial scales to generate a 3D probability map of recurrence risk within the peritumoral edema. Large, connected regions predicted to be high risk are identified as potential treatment targets.")
-                        st.image(imgfile_to_data(os.path.join(imgdir_base, 'gbm_recurrence_maps_figure.png')))
+                        with st.container(horizontal=True, border=False):
+                            st.markdown("Glioblastoma recurrence probability maps are generated by an ensemble of ML models trained and validated using multi-model MRI scans across the international ReSPOND consortium. The various  models capture imaging patterns associated with high tumor infiltration and increased likelihood of recurrence at different spatial scales to generate a 3D probability map of recurrence risk within the peritumoral edema. Large, connected regions predicted to be high risk are identified as potential treatment targets.")
+                            st.image(imgfile_to_data(os.path.join(imgdir_base, 'gbm_recurrence_maps_figure.png')))
         if tabB2.open:
             with tabB2:
                 st.markdown(
