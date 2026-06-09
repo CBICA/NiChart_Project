@@ -190,21 +190,25 @@ if tabB.open:
                 if tab7.open:
                     with tab7:
                         with st.container(horizontal=True, border=False):
-                            st.image(imgfile_to_data(os.path.join(imgdir_base, 'ithresolvegbm_figure.png')), width=480)
-                            st.markdown('''
-                                        **Decode GBM heterogeneity from bulk DNA methylation data.**
+                            col1, col2 = st.columns(0.7, 0.3)
+                            with col2:
+                                st.image(imgfile_to_data(os.path.join(imgdir_base, 'ithresolvegbm_figure.png')))
+                            with col1:
+                                st.markdown('''
+                                            **Decode GBM heterogeneity from bulk DNA methylation data.**
 
-                                        ITHresolveGBM is a deconvolution framework that infers the cellular composition of glioblastoma samples from standard DNA methylation profiles. It estimates tumor purity, quantifies immune, glial, and neuronal microenvironmental components, as well as the malignant component and the ratio of stem-like and differentiated states within it. It is most helpful when you have bulk DNA methylation data but would like to infer the cellular composition within each sample.
-                                        
-                                        **Please cite:**  
-                                        Silverbush et al., *A cellular epigenetic classification system for glioblastoma, Neuro-Oncology*, 2026.
+                                            ITHresolveGBM is a deconvolution framework that infers the cellular composition of glioblastoma samples from standard DNA methylation profiles. It estimates tumor purity, quantifies immune, glial, and neuronal microenvironmental components, as well as the malignant component and the ratio of stem-like and differentiated states within it. It is most helpful when you have bulk DNA methylation data but would like to infer the cellular composition within each sample.
+                                            
+                                            **Please cite:**  
+                                            Silverbush et al., *A cellular epigenetic classification system for glioblastoma, Neuro-Oncology*, 2026.
 
-                                        **Successful applications include:**
-                                        - In ongoing work, ITHresolveGBM outputs are used to compute cell state-informed methylation classes (MCcsi), enabling patient stratification by predominant cellular states in primary and recurrent glioblastoma. These classes inform molecular features, prognosis, and treatment-associated vulnerabilities in the context of standard of care, iVEGFA, iTOP2A, and iCDK4, establishing transcriptional cell state heterogeneity as a readily implementable tumor biomarker for glioblastoma treatment (Ito et al.).
-                                        - Applied to high-grade gliomas, ITHresolveGBM revealing a high-neural glioblastoma state enriched for malignant stem/progenitor-like programs and reduced immune infiltration. This high-neural state was associated with increased neuron-to-glioma interactions, greater tumor invasiveness, and worse patient outcomes (Drexler et al., *Nature Medicine*, 2024).
-                                        - Applied to multi-region GBM methylation profiles, it was used to show that the proportion of stem-like malignant cells is preserved across spatially distinct regions of the same tumor. A higher stem-like fraction was associated with worse survival, reduced benefit from MGMT promoter methylation, and radiomethylomic signatures detectable from preoperative MRI (Matsumoto et al., *Neuro-Oncology*, 2025).
-                                        Wrapper built by Jakob Ito.
-                                        ''')
+                                            **Successful applications include:**
+                                            - In ongoing work, ITHresolveGBM outputs are used to compute cell state-informed methylation classes (MCcsi), enabling patient stratification by predominant cellular states in primary and recurrent glioblastoma. These classes inform molecular features, prognosis, and treatment-associated vulnerabilities in the context of standard of care, iVEGFA, iTOP2A, and iCDK4, establishing transcriptional cell state heterogeneity as a readily implementable tumor biomarker for glioblastoma treatment (Ito et al.).
+                                            - Applied to high-grade gliomas, ITHresolveGBM revealing a high-neural glioblastoma state enriched for malignant stem/progenitor-like programs and reduced immune infiltration. This high-neural state was associated with increased neuron-to-glioma interactions, greater tumor invasiveness, and worse patient outcomes (Drexler et al., *Nature Medicine*, 2024).
+                                            - Applied to multi-region GBM methylation profiles, it was used to show that the proportion of stem-like malignant cells is preserved across spatially distinct regions of the same tumor. A higher stem-like fraction was associated with worse survival, reduced benefit from MGMT promoter methylation, and radiomethylomic signatures detectable from preoperative MRI (Matsumoto et al., *Neuro-Oncology*, 2025).
+                                            
+                                            Wrapper built by Jakob Ito.
+                                            ''')
                             
                 if tab8.open:
                     with tab8:
