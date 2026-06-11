@@ -8,6 +8,7 @@ output_folder/**
 **/*.nii.gz
 !sample_datasets/**/*.nii.gz
 !resources/reference_data/**/*.nii.gz
+!resources/atlases/**/*.nii.gz
 build
 **/build
 src/NiChart_Website
