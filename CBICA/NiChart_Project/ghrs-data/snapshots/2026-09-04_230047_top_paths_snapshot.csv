@@ -1,0 +1,11 @@
+url_path,views_total,views_unique
+/CBICA/NiChart_Project,18,3
+/CBICA/NiChart_Project/issues,4,1
+/CBICA/NiChart_Project/blob/main/INSTALLATION.md,2,2
+/CBICA/NiChart_Project/issues/88,2,1
+/CBICA/NiChart_Project/blob/5e7463416380a346c59ce03da6934e5215ef8769/TestData/dicoms/example-dicom-structural/dicoms/N2D_0293.dcm,1,1
+/CBICA/NiChart_Project/blob/843e4797f6ac1379238de2a51f6c2048adfa0494/Dockerfile,1,1
+/CBICA/NiChart_Project/blob/843e4797f6ac1379238de2a51f6c2048adfa0494/docker_mamba_env.yaml,1,1
+/CBICA/NiChart_Project/blob/dbdf31d7cd29092f20209211412e576e8e1c14d0/src/NiChart_Viewer/src/pages/workflow_sMRI.py,1,1
+/CBICA/NiChart_Project/blob/fc8444c9123df4efbfd5163d8c7d055fbd17f889/.gitmodules,1,1
+/CBICA/NiChart_Project/blob/ge-dev/.gitignore,1,1
